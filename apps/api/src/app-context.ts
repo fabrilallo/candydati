@@ -36,6 +36,9 @@ import { createActorResolver } from './http/actor-resolver.js';
 import { createMessagingDeps } from './wiring/messaging-deps.js';
 import { createPhase2Deps } from './wiring/phase2-deps.js';
 import { createPhase4Deps } from './wiring/phase4-deps.js';
+import { configuredProviders } from './wiring/configured-providers.js';
+import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
+import { zipWriterFactory } from '@tt/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
 import type { Actor } from '@tt/core';
 
@@ -80,6 +83,9 @@ export interface AppContext {
   readonly taskDeps: TaskDeps;
   readonly automationDeps: AutomationRuleDeps;
   readonly webhookDeps: WebhookDeps;
+  readonly rightsDeps: Phase5Deps['rightsDeps'];
+  readonly exportDeps: Phase5Deps['exportDeps'];
+  readonly overviewDeps: Phase5Deps['overviewDeps'];
 }
 
 export interface AppContextDeps {
@@ -108,13 +114,16 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     },
     findRole: (userId, organizationId) => findMemberRole(db, userId, organizationId),
   });
+  const phase2 = createPhase2Deps({ db, auditLog, files, queue, receipts: messaging.receipts });
+  const phase5 = createPhase5Deps({ db, auditLog, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipWriterFactory });
   return {
     env,
     auth,
     auditLog,
     userNames: createUserNameLookup(db),
     resolveActor: (request) => resolveFromHeaders(fromNodeHeaders(request.headers)),
-    ...createPhase2Deps({ db, auditLog, files, queue, receipts: messaging.receipts }),
+    ...phase2,
+    ...phase5,
     ...createPhase4Deps({ db, auditLog, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     messagingDeps: messaging.messagingDeps,
     inboundDeps: messaging.inboundDeps,

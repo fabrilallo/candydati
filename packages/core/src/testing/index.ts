@@ -15,3 +15,6 @@ export * from './messaging-deps.js';
 export * from './in-memory-automation.js';
 export * from './automation-fixtures.js';
 export * from './automation-deps.js';
+export * from './in-memory-privacy-ops.js';
+export * from './privacy-deps.js';
+export * from './privacy-seed.js';

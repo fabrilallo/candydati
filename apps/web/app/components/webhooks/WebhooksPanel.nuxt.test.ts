@@ -1,3 +1,4 @@
+import type { WebhookEventType } from '@tt/domain'
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { readBody } from 'h3'
@@ -9,7 +10,7 @@ import WebhooksPanel from './WebhooksPanel.vue'
 const state = vi.hoisted(() => ({ created: [] as unknown[], puts: [] as unknown[], tests: 0, deletes: 0 }))
 registerEndpoint('/api/v1/webhooks', async (event) => {
   if (event.method !== 'POST') return ok([webhook('w1')])
-  const body = await readBody<{ url: string; events: string[] }>(event)
+  const body = await readBody<{ url: string; events: WebhookEventType[] }>(event)
   state.created.push(body)
   return ok({ ...webhook('w2', { url: body.url, events: body.events }), secret: 'whsec_once' })
 })

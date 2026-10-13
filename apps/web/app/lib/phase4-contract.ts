@@ -1,11 +1,11 @@
-import { automationActionSchema, RESPONSE_STATES } from '@tt/domain'
+import { automationRuleInputSchema, RESPONSE_STATES, webhookEndpointInputSchema } from '@tt/domain'
 import { z } from 'zod'
 
 /**
- * TEMPORARY mirror of the Phase 4 wire DTOs (phase 4 contract, "HTTP"). Constants, permissions and input schemas come
- * from `@tt/domain`; the response shapes are not exported anywhere yet, so they live here, in this one file, until the
- * api mappers land and the domain (or a shared DTO module) exports them. Where the contract leaves a field open, the
- * schema accepts both plausible spellings and normalises them.
+ * Web-only wire DTOs of Phase 4 (phase 4 contract, "HTTP"). Rules and webhook endpoints are the domain's input
+ * schemas extended with what the api adds; the rest (notifications, tasks, attention, deliveries, counts) has no
+ * shared DTO in `@tt/domain`, so it stays here. These are deliberately lenient where the web must keep working when
+ * the api grows: a notification `kind` or a delivery `eventType` the web does not know still shows, generically.
  */
 const isoDate = z.iso.datetime({ offset: true })
 
@@ -82,22 +82,22 @@ const taskObject = z.object({
 export const taskSchema = z.preprocess(flattenAssignee, taskObject)
 export type TaskDto = z.output<typeof taskObject>
 
-export const automationRuleSchema = z.object({
+/** The domain's rule input (stage, action, enabled) plus what the api adds. */
+export const automationRuleSchema = automationRuleInputSchema.extend({
   id: z.string(),
   jobId: z.string(),
-  stageId: z.string(),
-  action: automationActionSchema,
   enabled: z.boolean(),
   createdBy: personRef,
   createdAt: isoDate,
 })
-export type AutomationRuleDto = z.infer<typeof automationRuleSchema>
+export type AutomationRuleDto = z.output<typeof automationRuleSchema>
 
-export const webhookEndpointSchema = z.object({ id: z.string(), url: z.string(), events: z.array(z.string()), enabled: z.boolean(), createdAt: isoDate })
-export type WebhookEndpointDto = z.infer<typeof webhookEndpointSchema>
+/** The domain's endpoint input (url, known events, enabled) plus what the api adds. */
+export const webhookEndpointSchema = webhookEndpointInputSchema.extend({ id: z.string(), enabled: z.boolean(), createdAt: isoDate })
+export type WebhookEndpointDto = z.output<typeof webhookEndpointSchema>
 /** Only the create answer carries the secret, and only once. */
 export const webhookCreatedSchema = webhookEndpointSchema.extend({ secret: z.string().min(1) })
-export type WebhookCreatedDto = z.infer<typeof webhookCreatedSchema>
+export type WebhookCreatedDto = z.output<typeof webhookCreatedSchema>
 
 export const webhookDeliverySchema = z
   .object({

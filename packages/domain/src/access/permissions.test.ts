@@ -157,4 +157,18 @@ describe('canAssignRole', () => {
   it('refuses anyone who cannot manage members', () => {
     expect(canAssignRole('recruiter', 'interviewer')).toBe(false);
   });
+
+  it('lets owner, admin and recruiter export and erase candidates; only owner and admin export the organization', () => {
+    for (const role of ['owner', 'admin', 'recruiter'] as const) {
+      expect(roleHasPermission(role, 'candidate:export')).toBe(true);
+      expect(roleHasPermission(role, 'candidate:erase')).toBe(true);
+    }
+    for (const role of ['hiring_manager', 'interviewer'] as const) {
+      expect(roleHasPermission(role, 'candidate:export')).toBe(false);
+      expect(roleHasPermission(role, 'candidate:erase')).toBe(false);
+    }
+    expect(roleHasPermission('owner', 'data:export')).toBe(true);
+    expect(roleHasPermission('admin', 'data:export')).toBe(true);
+    for (const role of ['recruiter', 'hiring_manager', 'interviewer'] as const) expect(roleHasPermission(role, 'data:export')).toBe(false);
+  });
 });

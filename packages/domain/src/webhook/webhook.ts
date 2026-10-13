@@ -13,6 +13,7 @@ export const WEBHOOK_EVENT_TYPES = [
   'application.received',
   'application.moved',
   'application.decided',
+  'candidate.erased',
   'job.published',
   'job.closed',
 ] as const;

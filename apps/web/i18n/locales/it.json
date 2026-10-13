@@ -40,7 +40,8 @@
     "attention": "Da gestire",
     "tasks": "Le mie attività",
     "webhooks": "Webhook",
-    "attentionCount": "{count} da gestire"
+    "attentionCount": "{count} da gestire",
+    "data": "Dati"
   },
   "roles": {
     "owner": "Proprietario",
@@ -289,7 +290,8 @@
       "organization": {
         "created": "Ha creato l'organizzazione",
         "updated": "Ha modificato l'organizzazione",
-        "deleted": "Ha eliminato l'organizzazione"
+        "deleted": "Ha eliminato l'organizzazione",
+        "exported": "Ha esportato tutti i dati dell'organizzazione"
       },
       "invitation": {
         "created": "Ha invitato una persona",
@@ -326,7 +328,10 @@
       "candidate": {
         "viewed": "Ha aperto la scheda di un candidato",
         "updated": "Ha modificato un candidato",
-        "cv_downloaded": "Ha aperto o scaricato un CV"
+        "cv_downloaded": "Ha aperto o scaricato un CV",
+        "erased": "Ha cancellato i dati di un candidato",
+        "exported": "Ha esportato i dati di un candidato",
+        "corrected": "Ha corretto i dati di un candidato"
       },
       "candidate_note": {
         "created": "Ha scritto una nota su un candidato"
@@ -1070,7 +1075,8 @@
       "cv": "CV",
       "notes": "Note",
       "messages": "Messaggi",
-      "tasks": "Attività"
+      "tasks": "Attività",
+      "privacy": "Privacy e dati"
     },
     "header": {
       "stage": "Fase:",
@@ -1542,7 +1548,16 @@
       "task_due": "Un'attività è in scadenza",
       "job_close_blocked": "L'annuncio ha ancora candidature aperte",
       "automation_failed": "Un'automazione non è riuscita",
-      "generic": "Nuova notifica"
+      "generic": "Nuova notifica",
+      "retention_expiring": "Dati in scadenza"
+    },
+    "retention": {
+      "named": "I dati di {name} scadono tra 1 giorno | I dati di {name} scadono tra {count} giorni",
+      "namedToday": "I dati di {name} scadono oggi",
+      "namedSoon": "I dati di {name} stanno per scadere",
+      "anonymous": "I dati di un candidato scadono tra 1 giorno | I dati di un candidato scadono tra {count} giorni",
+      "anonymousToday": "I dati di un candidato scadono oggi",
+      "anonymousSoon": "I dati di un candidato stanno per scadere"
     }
   },
   "tasks": {
@@ -1649,7 +1664,8 @@
       "application_decided": "Esito registrato",
       "job_published": "Annuncio pubblicato",
       "job_closed": "Annuncio chiuso",
-      "ping": "Prova"
+      "ping": "Prova",
+      "candidate_erased": "Dati di un candidato cancellati"
     },
     "create": "Crea endpoint",
     "creating": "Creo",
@@ -1696,5 +1712,191 @@
       "credentials_not_allowed": "Niente utente e password nell'URL",
       "events": "Scegli almeno un evento"
     }
+  },
+  "gdpr": {
+    "intro": "Qui esegui le richieste della persona sui propri dati. Ogni azione resta nel registro delle azioni.",
+    "daysLeft": {
+      "in": "tra 1 giorno | tra {count} giorni",
+      "today": "scade oggi",
+      "expired": "scaduta da 1 giorno | scaduta da {count} giorni"
+    },
+    "consents": {
+      "title": "Consensi per candidatura",
+      "version": "Informativa versione {version}, accettata il {date}",
+      "retention": "Dati conservati fino al {date}",
+      "scopes": "Ambiti del consenso",
+      "withdraw": "Ritira",
+      "withdrawLabel": "Ritira il consenso \"{scope}\" per {job}",
+      "erase": "Cancella questa candidatura"
+    },
+    "rights": {
+      "title": "Diritti della persona",
+      "export": {
+        "title": "Esporta i dati",
+        "body": "Scarica un file ZIP con profilo, candidature, consensi, note, messaggi e CV originali, da consegnare alla persona.",
+        "action": "Scarica lo ZIP"
+      },
+      "correct": {
+        "title": "Correggi i dati",
+        "body": "Aggiorna nome, email, telefono o LinkedIn quando la persona ti segnala un errore.",
+        "action": "Correggi"
+      },
+      "withdraw": {
+        "title": "Ritira il consenso",
+        "body": "Registra che la persona ha ritirato un consenso: usa \"Ritira\" accanto alla candidatura e all'ambito giusti."
+      },
+      "erase": {
+        "title": "Cancella i dati",
+        "body": "Elimina per sempre i dati della persona, o di una sola candidatura. Non si può annullare.",
+        "action": "Cancella i dati"
+      }
+    },
+    "withdraw": {
+      "title": "Ritirare il consenso \"{scope}\"?",
+      "consequence": {
+        "talent_pool": "{name} esce dal database candidati: i dati restano solo per la selezione {job} e la conservazione si accorcia di conseguenza.",
+        "selection": "La candidatura per {job} viene cancellata subito, con CV, note e messaggi. Le altre candidature di {name} restano.",
+        "selectionLast": "La candidatura per {job} viene cancellata subito. Era l'unica: con lei se ne va tutto il profilo di {name}."
+      },
+      "confirm": "Ritira il consenso",
+      "done": "Consenso ritirato",
+      "doneErased": "Consenso ritirato, candidatura cancellata"
+    },
+    "correct": {
+      "title": "Correggi i dati di {name}",
+      "description": "Si salvano solo i campi cambiati. Nel registro delle azioni resta quali campi sono cambiati, non i valori.",
+      "fields": {
+        "firstName": "Nome",
+        "lastName": "Cognome",
+        "email": "Email",
+        "phone": "Telefono",
+        "linkedin": "Profilo LinkedIn"
+      },
+      "save": "Salva le correzioni",
+      "saving": "Salvataggio…",
+      "saved": "Dati corretti",
+      "nothing": "Non hai cambiato nessun campo.",
+      "errors": {
+        "required": "Campo obbligatorio",
+        "email": "Inserisci un indirizzo email valido",
+        "url": "Inserisci un indirizzo che inizia con https://",
+        "tooLong": "Il testo è troppo lungo",
+        "emailTaken": "Questa email appartiene già a un altro candidato",
+        "phone": "Usa solo cifre, spazi, + e parentesi (da 6 a 20 caratteri)"
+      }
+    },
+    "erase": {
+      "titleCandidate": "Cancellare tutti i dati di {name}?",
+      "titleApplication": "Cancellare la candidatura di {name} per {job}?",
+      "irreversible": "La cancellazione è definitiva: non c'è un cestino e non si può annullare.",
+      "deletedTitle": "Cosa viene cancellato",
+      "deleted": {
+        "profile": "Il profilo: nome, contatti, tag",
+        "applications": "Tutte le candidature, con i consensi",
+        "application": "La candidatura per {job}, con il consenso",
+        "cv": "I CV e i file caricati",
+        "notes": "Le note",
+        "messages": "I messaggi inviati e ricevuti",
+        "activity": "Le attività e i promemoria collegati"
+      },
+      "lastApplication": "È l'unica candidatura di {name}: anche il profilo viene cancellato.",
+      "keptTitle": "Cosa resta",
+      "kept": "Una riga nel registro delle azioni, senza dati personali: chi ha cancellato e quando.",
+      "typeLabel": "Per confermare, scrivi il nome completo: {name}",
+      "mismatch": "Il nome non corrisponde ancora.",
+      "confirm": "Cancella definitivamente",
+      "erasing": "Cancellazione…",
+      "doneCandidate": "Dati di {name} cancellati",
+      "doneApplication": "Candidatura cancellata"
+    }
+  },
+  "retention": {
+    "title": "Conservazione e cancellazione",
+    "explain": "Ogni candidatura ha una scadenza, contata dal giorno del consenso: {selection} per la sola selezione, {pool} se la persona entra nel database candidati. Ogni notte un controllo automatico avvisa owner e admin {days} giorni prima, poi cancella i dati scaduti, CV compresi. Nel registro delle azioni resta solo una riga senza dati personali.",
+    "explainNoNotice": "La scadenza si conta dal giorno del consenso, con le durate scritte nell'informativa. Ogni notte un controllo automatico avvisa owner e admin {days} giorni prima, poi cancella i dati scaduti, CV compresi. Pubblica l'informativa per fissare le durate.",
+    "upcomingTitle": "In scadenza nei prossimi {days} giorni",
+    "upcomingEmpty": "Nessuna scadenza nei prossimi {days} giorni.",
+    "columns": {
+      "candidate": "Candidato",
+      "job": "Annuncio",
+      "date": "Scadenza"
+    },
+    "unnamed": "Candidato",
+    "runsTitle": "Ultime cancellazioni automatiche",
+    "runsEmpty": "Il controllo automatico non è ancora partito: gira ogni notte alle 3.",
+    "warned": "nessun avviso | 1 avviso | {count} avvisi",
+    "erased": "nessuna cancellazione | 1 candidatura cancellata | {count} candidature cancellate"
+  },
+  "privacyDocs": {
+    "title": "Documenti",
+    "intro": "Il registro dei trattamenti compilato con i dati della tua organizzazione, e i modelli da far rivedere a un legale.",
+    "print": "Stampa il registro",
+    "register": {
+      "title": "Registro delle attività di trattamento",
+      "subtitle": "Art. 30 GDPR. Trattamento: selezione del personale.",
+      "controller": "Titolare",
+      "contact": "Contatto privacy",
+      "contactMissing": "Non indicato: si imposta nell'informativa",
+      "purposes": "Finalità",
+      "purposesText": "Ricevere e valutare le candidature, comunicare con chi si candida e, solo con consenso, tenere un database candidati per posizioni future.",
+      "legalBasis": "Base giuridica",
+      "legalBasisText": "Selezione: misure precontrattuali su richiesta della persona (art. 6.1.b). Database candidati: consenso distinto e revocabile (art. 6.1.a).",
+      "subjects": "Interessati",
+      "subjectsText": "Candidati e candidate; utenti interni per gli accessi e il registro delle azioni.",
+      "data": "Categorie di dati",
+      "dataText": "Dati anagrafici e di contatto, CV ed esperienze, note e messaggi della selezione, prova del consenso. Nessuna categoria particolare di dati.",
+      "retention": "Termini di cancellazione",
+      "retentionText": "{selection} per la sola selezione, {pool} per il database candidati, dal giorno del consenso. Cancellazione automatica, file compresi.",
+      "retentionMissing": "Da definire: pubblica l'informativa per fissare le durate.",
+      "recipients": "Fornitori configurati",
+      "providersEmpty": "Nessun fornitore indicato nella configurazione.",
+      "measures": "Misure di sicurezza",
+      "measuresText": "Dati separati per organizzazione, permessi per ruolo e per annuncio, registro delle azioni non modificabile, cancellazione automatica alla scadenza.",
+      "automated": "Decisioni automatizzate",
+      "automatedText": "Nessuna: il sistema non classifica e non scarta candidati.",
+      "notice": "Informativa in uso: versione {version}",
+      "generated": "Compilato il {date}"
+    },
+    "providers": {
+      "hosting": "Hosting",
+      "database": "Database",
+      "storage": "Archiviazione dei file",
+      "email": "Invio email",
+      "model": "Modello linguistico",
+      "monitoring": "Monitoraggio"
+    },
+    "templatesTitle": "Modelli da far rivedere a un legale",
+    "templatesNote": "Sono nel repository del progetto. Vanno completati e rivisti prima dell'uso: non sono consulenza legale.",
+    "noSource": "L'indirizzo del repository non è configurato: trovi i file a questi percorsi.",
+    "docs": {
+      "readme": "Ruoli e cosa fa il prodotto per ogni requisito",
+      "register": "Registro dei trattamenti (art. 30)",
+      "dpa": "Accordo sul trattamento dei dati (art. 28)",
+      "subprocessors": "Elenco dei sub-responsabili",
+      "notice": "Informativa per chi si candida"
+    }
+  },
+  "dataExport": {
+    "title": "Esporta i dati",
+    "description": "Tutti i dati dell'organizzazione in un formato aperto, quando vuoi. Nessun vincolo.",
+    "create": "Esporta tutti i dati",
+    "creating": "Avvio…",
+    "created": "Export in preparazione: la lista si aggiorna da sola",
+    "contentsTitle": "Cosa contiene",
+    "contents": "Un file ZIP con organization.json, gli annunci in jobs/, i candidati in candidates/ secondo lo schema pubblico, i file originali in files/ e un README.txt. Resta scaricabile per {days} giorni.",
+    "listTitle": "Export richiesti",
+    "empty": "Nessun export richiesto finora.",
+    "status": {
+      "preparing": "In preparazione",
+      "ready": "Pronto",
+      "expired": "Scaduto",
+      "failed": "Non riuscito"
+    },
+    "requested": "Richiesto il {date}",
+    "expires": "Scaricabile fino al {date}",
+    "expiredOn": "Scaduto il {date}",
+    "download": "Scarica",
+    "downloadLabel": "Scarica l'export del {date}",
+    "polling": "Si aggiorna da solo finché l'export è in preparazione."
   }
 }

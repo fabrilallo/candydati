@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createPgBossQueue, TASK_RETRY, WEBHOOK_RETRY, type BossSender } from './pg-boss-queue.js';
+import { createPgBossQueue, FILES_DELETE_RETRY, TASK_RETRY, WEBHOOK_RETRY, type BossSender } from './pg-boss-queue.js';
 
 const fakeBoss = (id: string | null = 'job-1'): BossSender & { send: ReturnType<typeof vi.fn>; createQueue: ReturnType<typeof vi.fn> } => ({
   send: vi.fn(async () => id),
@@ -24,6 +24,13 @@ describe('createPgBossQueue', () => {
     await createPgBossQueue(boss).enqueue('webhook.deliver', payload);
     expect(boss.send).toHaveBeenCalledWith('webhook.deliver', payload, WEBHOOK_RETRY);
     expect(WEBHOOK_RETRY.retryLimit).toBe(5);
+  });
+
+  it('retries file deletions eight times, so storage can be down for hours', async () => {
+    const boss = fakeBoss();
+    await createPgBossQueue(boss).enqueue('files.delete', { organizationId: 'org', key: 'organizations/org/x' });
+    expect(boss.send).toHaveBeenCalledWith('files.delete', { organizationId: 'org', key: 'organizations/org/x' }, FILES_DELETE_RETRY);
+    expect(FILES_DELETE_RETRY.retryLimit).toBe(8);
   });
 
   it('fails when pg-boss drops the job', async () => {

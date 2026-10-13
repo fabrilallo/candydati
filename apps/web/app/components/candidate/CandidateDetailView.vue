@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FileTextIcon, ListTodoIcon, MailIcon, MessageSquareTextIcon, UserRoundIcon } from '@lucide/vue'
+import { FileTextIcon, ListTodoIcon, MailIcon, MessageSquareTextIcon, ShieldCheckIcon, UserRoundIcon } from '@lucide/vue'
 import type { EmailTemplateKind, Outcome } from '@tt/domain'
 import type { ApplicationCardDto } from '@/lib/candidate-schemas'
 import { applicationStatus, currentApplication, fullName, stageOf } from '@/lib/candidate-view'
@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton'
  * header with stage and status and the actions on the current application, tags, then Profilo, CV and Note.
  */
 const props = withDefaults(defineProps<{ candidateId: string; applicationId?: string | null; heading?: 'h1' | 'h2' }>(), { applicationId: null, heading: 'h1' })
-const emit = defineEmits<{ card: [card: ApplicationCardDto]; noted: [applicationId: string | null] }>()
+const emit = defineEmits<{ card: [card: ApplicationCardDto]; noted: [applicationId: string | null]; erased: [candidateGone: boolean] }>()
 const { t } = useI18n()
 const { viewer } = useViewer()
 const role = computed(() => viewer.value?.role ?? null)
@@ -33,17 +33,24 @@ const status = computed(() => (current.value ? applicationStatus(current.value) 
 const nowMs = useState('candidate-now', () => Date.now())
 const now = computed(() => new Date(nowMs.value))
 
-type Tab = 'profile' | 'cv' | 'notes' | 'messages' | 'tasks'
+type Tab = 'profile' | 'cv' | 'notes' | 'messages' | 'tasks' | 'privacy'
 const tab = ref<Tab>('profile')
 const canRead = computed(() => can(role.value, 'message:read'))
 const canSend = computed(() => can(role.value, 'message:send'))
+const canPrivacy = computed(() => (['candidate:export', 'candidate:update', 'candidate:erase'] as const).some((permission) => can(role.value, permission)))
 const tabs = computed<readonly TabItem<Tab>[]>(() => [
   { value: 'profile', label: t('candidate.tabs.profile'), icon: UserRoundIcon, testId: 'tab-profile' },
   { value: 'cv', label: t('candidate.tabs.cv'), icon: FileTextIcon, testId: 'tab-cv' },
   { value: 'notes', label: t('candidate.tabs.notes'), icon: MessageSquareTextIcon, count: detail.value?.notes.length ?? null, testId: 'tab-notes' },
   ...(canRead.value ? [{ value: 'messages' as const, label: t('candidate.tabs.messages'), icon: MailIcon, count: messageTotal(detail.value?.applications ?? []), testId: 'tab-messages' }] : []),
   ...(can(role.value, 'task:read') && current.value ? [{ value: 'tasks' as const, label: t('candidate.tabs.tasks'), icon: ListTodoIcon, testId: 'tab-tasks' }] : []),
+  ...(canPrivacy.value ? [{ value: 'privacy' as const, label: t('candidate.tabs.privacy'), icon: ShieldCheckIcon, testId: 'tab-privacy' }] : []),
 ])
+/** One application erased while others stay: the profile is read again; the whole candidate gone: the parent leaves. */
+const erased = async (candidateGone: boolean): Promise<void> => {
+  if (!candidateGone) await c.refresh()
+  emit('erased', candidateGone)
+}
 /** After an outcome: the matching template, proposed in the Messaggi tab, sent only if a person confirms. */
 const proposal = ref<{ readonly kind: EmailTemplateKind; readonly applicationId: string } | null>(null)
 
@@ -145,6 +152,7 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
         @dismiss="proposal = null"
       />
       <ApplicationTasks v-else-if="tab === 'tasks' && current" :key="current.id" :application-id="current.id" :job-id="current.job.id" />
+      <CandidatePrivacyPanel v-else-if="tab === 'privacy'" :detail="detail" :name="name" :now="now" :role="role" @updated="c.replace" @erased="erased" />
     </template>
   </div>
 </template>

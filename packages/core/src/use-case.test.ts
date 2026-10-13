@@ -149,4 +149,17 @@ describe('defineUseCase', () => {
     await bare({ auditLog }, admin, {});
     expect(auditLog.events()[0]!.metadata).toEqual({});
   });
+
+  it('appends nothing when the action function returns null (the handler audited in its own transaction)', async () => {
+    const selfAudited = defineUseCase({
+      name: 'selfAudited',
+      input: z.object({}),
+      permission: 'audit:read',
+      audit: { action: () => null, target: () => ({ type: 'audit_log', id: 'o1' }) },
+      handler: async () => null,
+    });
+    const auditLog = createInMemoryAuditLog();
+    await selfAudited({ auditLog }, admin, {});
+    expect(auditLog.events()).toHaveLength(0);
+  });
 });

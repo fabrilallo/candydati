@@ -3,8 +3,7 @@ import { BellIcon, CheckCheckIcon } from '@lucide/vue'
 import { PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from 'reka-ui'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { listNotifications, markRead } from '@/lib/inbox-api'
-import { notificationKey, notificationLink, unreadLabel } from '@/lib/inbox-view'
-import { fullName } from '@/lib/candidate-view'
+import { notificationContext, notificationLink, notificationText, unreadLabel } from '@/lib/inbox-view'
 import { relativeTime } from '@/lib/job-list-view'
 import type { NotificationDto } from '@/lib/phase4-contract'
 import { Button } from '@/components/ui/button'
@@ -59,7 +58,10 @@ const follow = (item: NotificationDto): void => {
   unread.set(Math.max(0, (unread.count.value ?? 1) - 1))
   markRead(request, { ids: [item.id] }).catch((error: unknown) => console.error('[notifications] mark read failed', error instanceof Error ? error.message : error))
 }
-const context = (item: NotificationDto): string => [item.candidate ? fullName(item.candidate) : null, item.jobTitle].filter((part) => part).join(', ')
+const wording = (item: NotificationDto): string => {
+  const text = notificationText(item, now.value)
+  return t(text.key, text.params, text.count)
+}
 </script>
 
 <template>
@@ -113,9 +115,9 @@ const context = (item: NotificationDto): string => [item.candidate ? fullName(it
               <span class="grid min-w-0 flex-1 gap-0.5">
                 <span class="font-medium">
                   <span v-if="item.readAt === null" class="sr-only">{{ t('notifications.unread') }}:</span>
-                  {{ t(notificationKey(item.kind)) }}
+                  {{ wording(item) }}
                 </span>
-                <span v-if="context(item)" class="truncate text-muted-foreground">{{ context(item) }}</span>
+                <span v-if="notificationContext(item)" class="truncate text-muted-foreground">{{ notificationContext(item) }}</span>
                 <time class="text-xs text-muted-foreground" :datetime="item.createdAt">{{ relativeTime(item.createdAt, now, locale) }}</time>
               </span>
             </component>

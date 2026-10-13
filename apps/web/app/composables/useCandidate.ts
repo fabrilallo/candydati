@@ -90,6 +90,10 @@ export const useCandidate = (candidateId: MaybeRefOrGetter<string>) => {
     loading: computed(() => status.value === 'pending'),
     busy: computed(() => busy.value),
     refresh,
+    /** A fresh detail the api returned elsewhere (correction, consent withdrawal). */
+    replace: (fresh: CandidateDetailDto): void => {
+      detail.value = fresh
+    },
     move,
     decide,
     saveTags,

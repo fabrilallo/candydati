@@ -11,3 +11,4 @@ export { createCvExtractor, type CvExtractor, type CvExtractorOptions, type CvEx
 export { createMastraGenerator, GENERATOR_TEMPERATURE, GENERATOR_TIMEOUT_MS } from './ai/structured-generator.js';
 export * from './email/index.js';
 export * from './http/index.js';
+export { createZipWriter, assertZipPath, zipWriterFactory } from './zip/zip-writer.js';

@@ -7,6 +7,7 @@ export const NOTIFICATION_KINDS = [
   'task_due',
   'job_close_blocked',
   'automation_failed',
+  'retention_expiring',
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 export const notificationKindSchema = z.enum(NOTIFICATION_KINDS);

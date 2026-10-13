@@ -23,6 +23,15 @@ describe('can', () => {
     expect(can('recruiter', 'audit:read')).toBe(false)
     expect(can(null, 'audit:read')).toBe(false)
   })
+
+  it('knows the phase 5 rights: export and erase for recruiters, the organization export for owner and admin', () => {
+    expect(can('recruiter', 'candidate:erase')).toBe(true)
+    expect(can('recruiter', 'candidate:export')).toBe(true)
+    expect(can('hiring_manager', 'candidate:erase')).toBe(false)
+    expect(can('recruiter', 'data:export')).toBe(false)
+    expect(can('admin', 'data:export')).toBe(true)
+    expect(can(null, 'data:export')).toBe(false)
+  })
 })
 
 describe('assignableRoles', () => {
@@ -54,7 +63,7 @@ describe('defaultInviteRole', () => {
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
     expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'candidates', 'templates', 'members', 'emailTemplates'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'candidates', 'templates', 'members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'audit'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'candidates', 'templates', 'members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'data', 'audit'])
   })
 
   it('shows webhooks only with webhook:manage and the work queues to everyone who reads candidates', () => {
@@ -81,7 +90,7 @@ describe('navSections', () => {
   it('groups the visible items and drops nothing the role may see', () => {
     expect(navSections('owner').map((section) => [section.id, section.items.map((item) => item.id)])).toEqual([
       ['work', ['dashboard', 'attention', 'tasks', 'jobs', 'candidates', 'templates']],
-      ['organization', ['members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'audit']],
+      ['organization', ['members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'data', 'audit']],
     ])
     expect(navSections(null).map((section) => section.id)).toEqual(['work', 'organization'])
   })

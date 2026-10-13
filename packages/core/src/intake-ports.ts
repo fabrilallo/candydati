@@ -14,7 +14,16 @@ export interface FileStorage {
   delete(key: string): Promise<void>;
 }
 
-export const TASK_NAMES = ['cv.extract', 'email.send', 'automation.run', 'webhook.deliver', 'deadlines.scan'] as const;
+export const TASK_NAMES = [
+  'cv.extract',
+  'email.send',
+  'automation.run',
+  'webhook.deliver',
+  'deadlines.scan',
+  'files.delete',
+  'retention.run',
+  'organization.export',
+] as const;
 export type TaskName = (typeof TASK_NAMES)[number];
 
 export interface CvExtractPayload {
@@ -41,6 +50,18 @@ export interface WebhookDeliverPayload {
   readonly endpointId: string;
 }
 
+/** A stored file whose deletion failed after its row was erased: the worker retries until it is gone. */
+export interface FilesDeletePayload {
+  readonly organizationId: string;
+  readonly key: string;
+}
+
+/** Build the ZIP of a `data_export` request. */
+export interface OrganizationExportPayload {
+  readonly organizationId: string;
+  readonly exportId: string;
+}
+
 export interface TaskPayloads {
   readonly 'cv.extract': CvExtractPayload;
   readonly 'email.send': EmailSendPayload;
@@ -48,6 +69,10 @@ export interface TaskPayloads {
   readonly 'webhook.deliver': WebhookDeliverPayload;
   /** Scheduled hourly; no payload. */
   readonly 'deadlines.scan': Readonly<Record<string, never>>;
+  readonly 'files.delete': FilesDeletePayload;
+  /** Scheduled daily at 03:00; no payload. */
+  readonly 'retention.run': Readonly<Record<string, never>>;
+  readonly 'organization.export': OrganizationExportPayload;
 }
 
 /** A task as enqueued: the name decides the payload. */

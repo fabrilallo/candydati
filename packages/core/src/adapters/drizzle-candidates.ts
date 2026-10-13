@@ -30,13 +30,18 @@ export function createDrizzleCandidates(db: DbExecutor): CandidateRepository {
     },
     async save(input) {
       const { id, organizationId, ...values } = toValues(input);
-      const [row] = await db
-        .update(candidate)
-        .set(values)
-        .where(and(eq(candidate.organizationId, organizationId), eq(candidate.id, id)))
-        .returning();
-      if (!row) throw new Error('candidate not found for save');
-      return toCandidate(row);
+      try {
+        const [row] = await db
+          .update(candidate)
+          .set(values)
+          .where(and(eq(candidate.organizationId, organizationId), eq(candidate.id, id)))
+          .returning();
+        if (!row) throw new Error('candidate not found for save');
+        return toCandidate(row);
+      } catch (error) {
+        if (isUniqueViolation(error)) throw new ConflictError('A candidate with this email already exists.');
+        throw error;
+      }
     },
     findById: (organizationId, id) => one(and(eq(candidate.organizationId, organizationId), eq(candidate.id, id))),
     findByEmail: (organizationId, email) =>

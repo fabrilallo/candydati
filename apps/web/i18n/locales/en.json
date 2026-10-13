@@ -40,7 +40,8 @@
     "attention": "Needs attention",
     "tasks": "My tasks",
     "webhooks": "Webhooks",
-    "attentionCount": "{count} need attention"
+    "attentionCount": "{count} need attention",
+    "data": "Data"
   },
   "roles": {
     "owner": "Owner",
@@ -289,7 +290,8 @@
       "organization": {
         "created": "Created the organization",
         "updated": "Updated the organization",
-        "deleted": "Deleted the organization"
+        "deleted": "Deleted the organization",
+        "exported": "Exported all of the organization's data"
       },
       "invitation": {
         "created": "Invited a person",
@@ -326,7 +328,10 @@
       "candidate": {
         "viewed": "Opened a candidate profile",
         "updated": "Updated a candidate",
-        "cv_downloaded": "Opened or downloaded a CV"
+        "cv_downloaded": "Opened or downloaded a CV",
+        "erased": "Erased a candidate's data",
+        "exported": "Exported a candidate's data",
+        "corrected": "Corrected a candidate's data"
       },
       "candidate_note": {
         "created": "Wrote a note on a candidate"
@@ -1070,7 +1075,8 @@
       "cv": "CV",
       "notes": "Notes",
       "messages": "Messages",
-      "tasks": "Tasks"
+      "tasks": "Tasks",
+      "privacy": "Privacy and data"
     },
     "header": {
       "stage": "Stage:",
@@ -1542,7 +1548,16 @@
       "task_due": "A task is due soon",
       "job_close_blocked": "The job still has open applications",
       "automation_failed": "An automation did not succeed",
-      "generic": "New notification"
+      "generic": "New notification",
+      "retention_expiring": "Data about to expire"
+    },
+    "retention": {
+      "named": "{name}'s data expire in 1 day | {name}'s data expire in {count} days",
+      "namedToday": "{name}'s data expire today",
+      "namedSoon": "{name}'s data are about to expire",
+      "anonymous": "A candidate's data expire in 1 day | A candidate's data expire in {count} days",
+      "anonymousToday": "A candidate's data expire today",
+      "anonymousSoon": "A candidate's data are about to expire"
     }
   },
   "tasks": {
@@ -1649,7 +1664,8 @@
       "application_decided": "Outcome recorded",
       "job_published": "Job published",
       "job_closed": "Job closed",
-      "ping": "Test"
+      "ping": "Test",
+      "candidate_erased": "A candidate's data erased"
     },
     "create": "Create endpoint",
     "creating": "Creating",
@@ -1696,5 +1712,191 @@
       "credentials_not_allowed": "No user name or password in the URL",
       "events": "Choose at least one event"
     }
+  },
+  "gdpr": {
+    "intro": "Carry out the person's requests about their data here. Every action stays in the activity log.",
+    "daysLeft": {
+      "in": "in 1 day | in {count} days",
+      "today": "expires today",
+      "expired": "expired 1 day ago | expired {count} days ago"
+    },
+    "consents": {
+      "title": "Consent per application",
+      "version": "Privacy notice version {version}, accepted on {date}",
+      "retention": "Data kept until {date}",
+      "scopes": "Consent scopes",
+      "withdraw": "Withdraw",
+      "withdrawLabel": "Withdraw the \"{scope}\" consent for {job}",
+      "erase": "Erase this application"
+    },
+    "rights": {
+      "title": "The person's rights",
+      "export": {
+        "title": "Export the data",
+        "body": "Download a ZIP file with profile, applications, consents, notes, messages and original CVs, to hand to the person.",
+        "action": "Download the ZIP"
+      },
+      "correct": {
+        "title": "Correct the data",
+        "body": "Update name, email, phone or LinkedIn when the person reports a mistake.",
+        "action": "Correct"
+      },
+      "withdraw": {
+        "title": "Withdraw consent",
+        "body": "Record that the person withdrew a consent: use \"Withdraw\" next to the right application and scope."
+      },
+      "erase": {
+        "title": "Erase the data",
+        "body": "Delete the person's data for good, or the data of a single application. This cannot be undone.",
+        "action": "Erase the data"
+      }
+    },
+    "withdraw": {
+      "title": "Withdraw the \"{scope}\" consent?",
+      "consequence": {
+        "talent_pool": "{name} leaves the talent pool: the data stay only for the {job} selection and retention gets shorter accordingly.",
+        "selection": "The application for {job} is erased right away, with CV, notes and messages. {name}'s other applications stay.",
+        "selectionLast": "The application for {job} is erased right away. It was the only one: {name}'s whole profile goes with it."
+      },
+      "confirm": "Withdraw consent",
+      "done": "Consent withdrawn",
+      "doneErased": "Consent withdrawn, application erased"
+    },
+    "correct": {
+      "title": "Correct {name}'s data",
+      "description": "Only the changed fields are saved. The activity log keeps which fields changed, not the values.",
+      "fields": {
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "phone": "Phone",
+        "linkedin": "LinkedIn profile"
+      },
+      "save": "Save the corrections",
+      "saving": "Saving…",
+      "saved": "Data corrected",
+      "nothing": "You have not changed any field.",
+      "errors": {
+        "required": "Required field",
+        "email": "Enter a valid email address",
+        "url": "Enter an address starting with https://",
+        "tooLong": "The text is too long",
+        "emailTaken": "This email already belongs to another candidate",
+        "phone": "Use only digits, spaces, + and brackets (6 to 20 characters)"
+      }
+    },
+    "erase": {
+      "titleCandidate": "Erase all of {name}'s data?",
+      "titleApplication": "Erase {name}'s application for {job}?",
+      "irreversible": "Erasure is final: there is no bin and it cannot be undone.",
+      "deletedTitle": "What is erased",
+      "deleted": {
+        "profile": "The profile: name, contacts, tags",
+        "applications": "Every application, with its consent",
+        "application": "The application for {job}, with its consent",
+        "cv": "CVs and uploaded files",
+        "notes": "Notes",
+        "messages": "Messages sent and received",
+        "activity": "Linked tasks and reminders"
+      },
+      "lastApplication": "It is {name}'s only application: the profile is erased too.",
+      "keptTitle": "What remains",
+      "kept": "One row in the activity log, with no personal data: who erased and when.",
+      "typeLabel": "To confirm, type the full name: {name}",
+      "mismatch": "The name does not match yet.",
+      "confirm": "Erase for good",
+      "erasing": "Erasing…",
+      "doneCandidate": "{name}'s data erased",
+      "doneApplication": "Application erased"
+    }
+  },
+  "retention": {
+    "title": "Retention and erasure",
+    "explain": "Every application has an expiry, counted from the day of consent: {selection} for this selection only, {pool} when the person joins the talent pool. Every night an automatic check warns owners and admins {days} days before, then erases expired data, CVs included. The activity log keeps only one row with no personal data.",
+    "explainNoNotice": "The expiry is counted from the day of consent, with the periods set in the privacy notice. Every night an automatic check warns owners and admins {days} days before, then erases expired data, CVs included. Publish the notice to set the periods.",
+    "upcomingTitle": "Expiring in the next {days} days",
+    "upcomingEmpty": "Nothing expires in the next {days} days.",
+    "columns": {
+      "candidate": "Candidate",
+      "job": "Job",
+      "date": "Expiry"
+    },
+    "unnamed": "Candidate",
+    "runsTitle": "Latest automatic erasures",
+    "runsEmpty": "The automatic check has not run yet: it runs every night at 3.",
+    "warned": "no warnings | 1 warning | {count} warnings",
+    "erased": "nothing erased | 1 application erased | {count} applications erased"
+  },
+  "privacyDocs": {
+    "title": "Documents",
+    "intro": "The record of processing filled in with your organization's data, and the templates to have reviewed by a lawyer.",
+    "print": "Print the record",
+    "register": {
+      "title": "Record of processing activities",
+      "subtitle": "Art. 30 GDPR. Processing: recruitment.",
+      "controller": "Controller",
+      "contact": "Privacy contact",
+      "contactMissing": "Not set: it comes from the privacy notice",
+      "purposes": "Purposes",
+      "purposesText": "Receiving and assessing applications, communicating with applicants and, only with consent, keeping a talent pool for future positions.",
+      "legalBasis": "Legal basis",
+      "legalBasisText": "Selection: pre-contractual steps at the person's request (art. 6.1.b). Talent pool: separate, revocable consent (art. 6.1.a).",
+      "subjects": "Data subjects",
+      "subjectsText": "Candidates; internal users for access and the activity log.",
+      "data": "Categories of data",
+      "dataText": "Identity and contact data, CV and experience, notes and messages of the selection, proof of consent. No special categories of data.",
+      "retention": "Erasure periods",
+      "retentionText": "{selection} for this selection only, {pool} for the talent pool, from the day of consent. Automatic erasure, files included.",
+      "retentionMissing": "To be set: publish the privacy notice to set the periods.",
+      "recipients": "Configured providers",
+      "providersEmpty": "No provider named in the configuration.",
+      "measures": "Security measures",
+      "measuresText": "Data separated by organization, permissions by role and by job, append-only activity log, automatic erasure at expiry.",
+      "automated": "Automated decisions",
+      "automatedText": "None: the system does not rank or reject candidates.",
+      "notice": "Privacy notice in use: version {version}",
+      "generated": "Filled in on {date}"
+    },
+    "providers": {
+      "hosting": "Hosting",
+      "database": "Database",
+      "storage": "File storage",
+      "email": "Email delivery",
+      "model": "Language model",
+      "monitoring": "Monitoring"
+    },
+    "templatesTitle": "Templates to have reviewed by a lawyer",
+    "templatesNote": "They live in the project repository. Complete and review them before use: they are not legal advice.",
+    "noSource": "The repository address is not configured: you find the files at these paths.",
+    "docs": {
+      "readme": "Roles and what the product does for each requirement",
+      "register": "Record of processing (art. 30)",
+      "dpa": "Data processing agreement (art. 28)",
+      "subprocessors": "List of sub-processors",
+      "notice": "Privacy notice for applicants"
+    }
+  },
+  "dataExport": {
+    "title": "Export the data",
+    "description": "All of the organization's data in an open format, whenever you want. No lock-in.",
+    "create": "Export all data",
+    "creating": "Starting…",
+    "created": "Export being prepared: the list updates by itself",
+    "contentsTitle": "What it contains",
+    "contents": "A ZIP file with organization.json, jobs in jobs/, candidates in candidates/ following the public schema, original files in files/ and a README.txt. It stays downloadable for {days} days.",
+    "listTitle": "Requested exports",
+    "empty": "No export requested so far.",
+    "status": {
+      "preparing": "Being prepared",
+      "ready": "Ready",
+      "expired": "Expired",
+      "failed": "Failed"
+    },
+    "requested": "Requested on {date}",
+    "expires": "Downloadable until {date}",
+    "expiredOn": "Expired on {date}",
+    "download": "Download",
+    "downloadLabel": "Download the export of {date}",
+    "polling": "Updates by itself while the export is being prepared."
   }
 }

@@ -11,7 +11,7 @@ export const STATEMENTS = {
   job: ['read', 'create', 'update', 'publish', 'close'],
   job_template: ['read', 'create', 'delete'],
   /** Candidates and their applications. `read` opens the profile and the CV, and is audited (PLAN §7). */
-  candidate: ['read', 'update', 'move', 'decide'],
+  candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
   /** Notes on candidates: interviewers can write them too. */
   candidate_note: ['create'],
   /** Privacy notice, consent texts and retention periods: the data controller's settings. */
@@ -26,6 +26,8 @@ export const STATEMENTS = {
   /** Per-stage rules. They can send a template or create a task, never move or decide. */
   automation: ['manage'],
   webhook: ['manage'],
+  /** Export of the whole organization's data (PLAN §7). */
+  data: ['export'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -51,7 +53,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     audit: ['read'],
     job: ['read', 'create', 'update', 'publish', 'close'],
     job_template: ['read', 'create', 'delete'],
-    candidate: ['read', 'update', 'move', 'decide'],
+    candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
     candidate_note: ['create'],
     privacy: ['manage'],
     message: ['read', 'send'],
@@ -60,11 +62,12 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     task: ['read', 'manage'],
     automation: ['manage'],
     webhook: ['manage'],
+    data: ['export'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],
     job_template: ['read', 'create', 'delete'],
-    candidate: ['read', 'update', 'move', 'decide'],
+    candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
     candidate_note: ['create'],
     message: ['read', 'send'],
     email_template: ['manage'],

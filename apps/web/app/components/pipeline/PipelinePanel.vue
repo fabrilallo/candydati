@@ -78,6 +78,11 @@ const sent = (): void => {
   composing.value = null
 }
 const opened = ref<{ readonly candidateId: string; readonly applicationId: string } | null>(null)
+/** The candidate (or the opened application) was erased from the sheet: close it and read the board again. */
+const erasedFromSheet = async (candidateGone: boolean): Promise<void> => {
+  if (candidateGone) opened.value = null
+  await pl.refresh()
+}
 const openCard = (card: ApplicationCardDto): void => {
   opened.value = { candidateId: card.candidate.id, applicationId: card.id }
 }
@@ -145,6 +150,6 @@ const openCard = (card: ApplicationCardDto): void => {
       @confirm="confirmDecide"
     />
     <BulkComposerSheet :cards="composing?.cards ?? []" :kind="composing?.kind ?? null" @close="composing = null" @sent="sent" />
-    <CandidateSheet :candidate-id="opened?.candidateId ?? null" :application-id="opened?.applicationId ?? null" @close="opened = null" @card="pl.accept" @noted="(id) => id && pl.noted(id)" />
+    <CandidateSheet :candidate-id="opened?.candidateId ?? null" :application-id="opened?.applicationId ?? null" @close="opened = null" @card="pl.accept" @noted="(id) => id && pl.noted(id)" @erased="erasedFromSheet" />
   </div>
 </template>

@@ -11,8 +11,11 @@ export interface Skip {
 }
 
 export interface AuditSpec<I, O> {
-  /** Fixed, or derived when one use case can produce several kinds of event. */
-  readonly action: AuditAction | ((input: I, result: O) => AuditAction);
+  /**
+   * Fixed, or derived when one use case can produce several kinds of event. A function may return `null` for results
+   * the handler already audited itself inside its own transaction (erasure): nothing is appended then.
+   */
+  readonly action: AuditAction | ((input: I, result: O) => AuditAction | null);
   readonly target: (input: I, result: O, actor: Actor) => AuditTarget;
   readonly metadata?: (input: I, result: O, actor: Actor) => Record<string, unknown>;
 }
@@ -61,11 +64,13 @@ async function appendAudit<D extends CoreDeps, I, O>(
   input: I,
   result: O,
 ): Promise<void> {
+  const action = typeof spec.action === 'function' ? spec.action(input, result) : spec.action;
+  if (action === null) return;
   try {
     await deps.auditLog.append({
       organizationId,
       actor: toAuditActor(actor),
-      action: typeof spec.action === 'function' ? spec.action(input, result) : spec.action,
+      action,
       target: spec.target(input, result, actor),
       metadata: spec.metadata?.(input, result, actor) ?? {},
     });

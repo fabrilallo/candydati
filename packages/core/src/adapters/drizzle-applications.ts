@@ -68,6 +68,8 @@ export function createDrizzleApplications(db: DbExecutor): ApplicationRepository
   const awaitingFilter = (dueBefore: Date) => [isNull(application.outcome), isNull(application.respondedAt), isNotNull(application.responseDueAt), lte(application.responseDueAt, dueBefore)];
   const awaiting = async (where: ReturnType<typeof and>) =>
     (await db.select().from(application).where(where).orderBy(asc(application.responseDueAt), asc(application.id))).map(toApplication);
+  const expiring = async (where: ReturnType<typeof and>) =>
+    (await db.select().from(application).where(where).orderBy(asc(application.retentionExpiresAt), asc(application.id))).map(toApplication);
   return {
     async create(input) {
       try {
@@ -104,5 +106,7 @@ export function createDrizzleApplications(db: DbExecutor): ApplicationRepository
       list(and(eq(application.organizationId, organizationId), eq(application.candidateId, candidateId))),
     listAwaitingResponse: (organizationId, dueBefore) => awaiting(and(eq(application.organizationId, organizationId), ...awaitingFilter(dueBefore))),
     listAwaitingResponseAcrossOrganizations: (dueBefore) => awaiting(and(...awaitingFilter(dueBefore))),
+    listRetentionExpiringBefore: (organizationId, before) => expiring(and(eq(application.organizationId, organizationId), lte(application.retentionExpiresAt, before))),
+    listRetentionExpiringAcrossOrganizations: (before) => expiring(lte(application.retentionExpiresAt, before)),
   };
 }

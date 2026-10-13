@@ -28,6 +28,7 @@
     "@tt/ad-quality": "workspace:*",
     "@tt/core": "workspace:*",
     "@tt/domain": "workspace:*",
+    "fflate": "0.8.3",
     "mailparser": "3.9.38",
     "mammoth": "1.13.0",
     "nodemailer": "10.1.0",

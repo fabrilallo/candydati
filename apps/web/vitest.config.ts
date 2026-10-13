@@ -22,6 +22,10 @@ export default defineConfig({
           include: ['app/**/*.nuxt.test.ts'],
           environmentOptions: { nuxt: { domEnvironment: 'happy-dom' } },
           setupFiles: ['./test/setup.ts'],
+          // Booting the Nuxt environment is slow when the whole monorepo tests in parallel (turbo runs every package
+          // at once); the default 10 s made whole files fail to load intermittently.
+          hookTimeout: 60_000,
+          testTimeout: 20_000,
         },
       }),
     ],

@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
  * `server/routes/api/[...path].ts`, which reads `NUXT_API_INTERNAL_URL` at runtime, so cookies stay first-party.
  * This build-time value is just the local default.
  */
-const API_ORIGIN = (process.env.NUXT_API_INTERNAL_URL ?? 'http://localhost:4000').replace(/\/$/, '')
+const API_ORIGIN = (process.env.NUXT_API_INTERNAL_URL ?? 'http://localhost:4100').replace(/\/$/, '')
 const SUPPORTED = ['it', 'en'] as const
 const envLocale = process.env.NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE
 const DEFAULT_LOCALE = SUPPORTED.find((code) => code === envLocale) ?? 'it'
@@ -50,6 +50,8 @@ export default defineNuxtConfig({
       siteUrl: 'http://localhost:3000',
       platformName: '',
       platformDefaultLocale: DEFAULT_LOCALE,
+      /** Where the repository files can be browsed (`NUXT_PUBLIC_SOURCE_URL`, e.g. `https://…/blob/main`); empty = paths as text. */
+      sourceUrl: '',
     },
   },
 })

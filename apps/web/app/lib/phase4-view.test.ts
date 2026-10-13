@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { notification, rule, task, taskAction } from '~~/test/fixtures/phase4-fixtures'
 import { deliveryTone, describeRule, EMPTY_RULE_FORM, ruleToForm, rulesByStage, toggleEvent, validateRuleForm, validateWebhookForm } from './automation-view'
-import { dueDateToIso, groupTasks, notificationKey, notificationLink, replaceTask, taskGroup, unreadLabel, validateTaskForm } from './inbox-view'
+import { dueDateToIso, groupTasks, notificationContext, notificationKey, notificationLink, notificationText, replaceTask, taskGroup, unreadLabel, validateTaskForm } from './inbox-view'
 
 const TZ = 'Europe/Rome'
 const NOW = new Date('2026-10-13T10:00:00.000Z')
@@ -20,6 +20,16 @@ describe('notifications view', () => {
     expect(notificationLink(notification('n1', { kind: 'automation_failed', applicationId: null, taskId: 't1', jobId: null, payload: {} }))).toBe('/app/tasks')
     expect(notificationLink(notification('n1', { applicationId: null, jobId: null, payload: { jobId: 'j9' } }))).toBe('/app/jobs/j9/candidates')
     expect(notificationLink(notification('n1', { applicationId: null, jobId: null, candidate: null }))).toBeNull()
+  })
+
+  it('words a retention warning with the name and the days left, and keeps only the job as context', () => {
+    const item = notification('n1', { kind: 'retention_expiring', payload: { retentionExpiresAt: '2026-10-25T08:00:00.000Z' }, candidate: { id: 'c1', firstName: 'Marta', lastName: 'Verdi' } })
+    expect(notificationText(item, NOW, TZ)).toEqual({ key: 'notifications.retention.named', params: { name: 'Marta Verdi', count: 12 }, count: 12 })
+    expect(notificationText({ ...item, payload: { expiresAt: '2026-10-13T20:00:00.000Z' } }, NOW, TZ).key).toBe('notifications.retention.namedToday')
+    expect(notificationText({ ...item, candidate: null, payload: {} }, NOW, TZ).key).toBe('notifications.retention.anonymousSoon')
+    expect(notificationContext(item)).toBe('Backend developer')
+    expect(notificationText(notification('n2'), NOW, TZ)).toEqual({ key: 'notifications.kinds.response_overdue', params: {}, count: 0 })
+    expect(notificationContext(notification('n2'))).toBe('Giulia Rossi, Backend developer')
   })
 
   it('caps the badge at 99+ and hides it at zero', () => {

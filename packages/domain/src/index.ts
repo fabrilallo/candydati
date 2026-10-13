@@ -23,3 +23,6 @@ export * from './notification/notification.js';
 export * from './task/task.js';
 export * from './automation/automation.js';
 export * from './webhook/webhook.js';
+export * from './candidate/export.js';
+export * from './candidate/correction.js';
+export * from './candidate/retention.js';

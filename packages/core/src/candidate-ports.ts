@@ -24,7 +24,10 @@ export interface PrivacyNoticeRepository {
 export interface CandidateRepository {
   /** @throws ConflictError when the email (case-insensitive) already exists in the organization. */
   create(candidate: Candidate): Promise<Candidate>;
-  /** Full replace by (organizationId, id). */
+  /**
+   * Full replace by (organizationId, id).
+   * @throws ConflictError when the new email (case-insensitive) belongs to another candidate of the organization.
+   */
   save(candidate: Candidate): Promise<Candidate>;
   findById(organizationId: string, id: string): Promise<Candidate | null>;
   /** Case-insensitive. */
@@ -48,6 +51,10 @@ export interface ApplicationRepository {
   listAwaitingResponse(organizationId: string, dueBefore: Date): Promise<readonly Application[]>;
   /** Same, across every organization. Only for the system scan: it groups the result by organization itself. */
   listAwaitingResponseAcrossOrganizations(dueBefore: Date): Promise<readonly Application[]>;
+  /** Applications (open or decided) whose retention expires at or before `before`, earliest first. */
+  listRetentionExpiringBefore(organizationId: string, before: Date): Promise<readonly Application[]>;
+  /** Same, across every organization. Only for the retention job. */
+  listRetentionExpiringAcrossOrganizations(before: Date): Promise<readonly Application[]>;
 }
 
 export interface CandidateNoteRepository {

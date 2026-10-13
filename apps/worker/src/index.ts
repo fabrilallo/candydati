@@ -12,6 +12,10 @@ import { createAutomationRunQueue } from './queues/automation-run.js';
 import { createDeadlinesScanQueue } from './queues/deadlines-scan.js';
 import { createWebhookDeliverQueue } from './queues/webhook-deliver.js';
 import { createWebhookPublishQueue } from './queues/webhook-publish.js';
+import { createPrivacyWorkerDeps } from './privacy/deps.js';
+import { createFilesDeleteQueue } from './queues/files-delete.js';
+import { createOrganizationExportQueue } from './queues/organization-export.js';
+import { createRetentionRunQueue } from './queues/retention-run.js';
 import { createCvExtractionDeps } from './cv-extraction/deps.js';
 import { createCvExtractQueue } from './queues/cv-extract.js';
 import { createEmailSendQueue } from './queues/email-send.js';
@@ -68,6 +72,13 @@ const main = async (): Promise<void> => {
     allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE,
   });
   const messaging = toMessagingConfig(env.platform, env.email);
+  const privacy = createPrivacyWorkerDeps({ db: database.db, files, queue: createPgBossQueue(boss) });
+  const digest = {
+    sender,
+    from: formatDigestFrom(env.platform.name, `${messaging.emailFromLocal}@${messaging.emailDomain}`),
+    platformUrl: env.platform.url,
+    locale: env.platform.defaultLocale,
+  };
   const queues = [
     ...QUEUE_DEFINITIONS,
     createCvExtractQueue(cvDeps),
@@ -77,14 +88,12 @@ const main = async (): Promise<void> => {
     createWebhookPublishQueue(phase4.publish),
     createDeadlinesScanQueue({
       scan: phase4.scan,
-      digest: {
-        sender,
-        from: formatDigestFrom(env.platform.name, `${messaging.emailFromLocal}@${messaging.emailDomain}`),
-        platformUrl: env.platform.url,
-        locale: env.platform.defaultLocale,
-      },
+      digest,
       now: () => new Date(),
     }),
+    createFilesDeleteQueue(files),
+    createOrganizationExportQueue(privacy.organizationExport),
+    createRetentionRunQueue({ retention: privacy.retention, digest, now: () => new Date() }),
   ];
   const worker = await startWorker({ boss, logger, queues });
   for (const signal of SHUTDOWN_SIGNALS) {

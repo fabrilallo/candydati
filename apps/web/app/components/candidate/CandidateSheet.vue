@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/
 
 /** The candidate profile as a wide side panel over the board, with the way to the full page. */
 defineProps<{ candidateId: string | null; applicationId?: string | null }>()
-const emit = defineEmits<{ close: []; card: [card: ApplicationCardDto]; noted: [applicationId: string | null] }>()
+const emit = defineEmits<{ close: []; card: [card: ApplicationCardDto]; noted: [applicationId: string | null]; erased: [candidateGone: boolean] }>()
 const { t } = useI18n()
 </script>
 
@@ -21,7 +21,7 @@ const { t } = useI18n()
         </Button>
       </div>
       <div class="px-5 py-6 sm:px-6">
-        <CandidateDetailView v-if="candidateId" :key="candidateId" :candidate-id="candidateId" :application-id="applicationId ?? null" heading="h2" @card="emit('card', $event)" @noted="emit('noted', $event)" />
+        <CandidateDetailView v-if="candidateId" :key="candidateId" :candidate-id="candidateId" :application-id="applicationId ?? null" heading="h2" @card="emit('card', $event)" @noted="emit('noted', $event)" @erased="emit('erased', $event)" />
       </div>
     </SheetContent>
   </Sheet>

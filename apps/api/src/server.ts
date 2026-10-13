@@ -33,6 +33,10 @@ import { registerPipelineRoutes } from './routes/pipeline.js';
 import { registerPrivacyNoticeRoutes } from './routes/privacy-notice.js';
 import { registerPublicApplicationRoute } from './routes/public-applications.js';
 import { registerPublicJobRoutes } from './routes/public-jobs.js';
+import { registerApplicationRightsRoutes } from './routes/application-rights.js';
+import { registerCandidateRightsRoutes } from './routes/candidate-rights.js';
+import { registerExportRoutes } from './routes/exports.js';
+import { registerPrivacyOverviewRoutes } from './routes/privacy-overview.js';
 import { registerStatsRoutes } from './routes/stats.js';
 
 export interface ServerDeps {
@@ -100,6 +104,10 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerWebhookRoutes(app, ctx);
   registerCandidateRoutes(app, ctx);
   registerApplicationCvRoute(app, ctx);
+  registerCandidateRightsRoutes(app, ctx);
+  registerApplicationRightsRoutes(app, ctx);
+  registerPrivacyOverviewRoutes(app, ctx);
+  registerExportRoutes(app, ctx);
   await registerPublicApplicationRoute(app, ctx);
   registerStatsRoutes(app, ctx);
   registerEmailSettingsRoutes(app, ctx);

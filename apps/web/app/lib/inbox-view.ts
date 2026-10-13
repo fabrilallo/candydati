@@ -1,12 +1,29 @@
 import { NOTIFICATION_KINDS, TASK_TITLE_MAX } from '@tt/domain'
+import { fullName } from './candidate-view'
+import { retentionNotice } from './gdpr-view'
 import type { NotificationDto, TaskDto } from './phase4-contract'
 import { calendarDays } from './response-countdown'
 
 /** Pure: translation key of a notification's wording; kinds the web does not know read as a generic one. */
 export const notificationKey = (kind: string): string => ((NOTIFICATION_KINDS as readonly string[]).includes(kind) ? `notifications.kinds.${kind}` : 'notifications.kinds.generic')
 
-const TASK_KINDS: ReadonlySet<string> = new Set(['task_assigned', 'task_due'])
 const stringOf = (value: unknown): string | null => (typeof value === 'string' && value !== '' ? value : null)
+
+/** Phase 5: the retention job warns owners and admins before the data of an application are erased. */
+export const RETENTION_KIND = 'retention_expiring'
+
+/** Pure: the wording of a notification. A retention warning names the person and the days left. */
+export const notificationText = (notification: NotificationDto, now: Date, timeZone?: string): { readonly key: string; readonly params: Readonly<Record<string, string | number>>; readonly count: number } => {
+  if (notification.kind !== RETENTION_KIND) return { key: notificationKey(notification.kind), params: {}, count: 0 }
+  const expiresAt = stringOf(notification.payload.retentionExpiresAt) ?? stringOf(notification.payload.expiresAt)
+  return retentionNotice({ candidateName: notification.candidate ? fullName(notification.candidate) : null, expiresAt }, now, timeZone)
+}
+
+/** Pure: the second line: who and which job; a retention warning already names the person. */
+export const notificationContext = (notification: NotificationDto): string =>
+  [notification.kind !== RETENTION_KIND && notification.candidate ? fullName(notification.candidate) : null, notification.jobTitle].filter((part) => part).join(', ')
+
+const TASK_KINDS: ReadonlySet<string> = new Set(['task_assigned', 'task_due'])
 
 /**
  * Pure: where a notification leads. Tasks go to "Le mie attività"; an application to its candidate when the api names

@@ -53,6 +53,9 @@ export function createInMemoryCandidateRepository(store: CandidateStore): Candid
       return candidate;
     },
     async save(candidate) {
+      if (inOrg(candidate.organizationId).some((c) => c.id !== candidate.id && c.email.toLowerCase() === candidate.email.toLowerCase())) {
+        throw new ConflictError('A candidate with this email already exists.');
+      }
       store.write({ candidates: store.read().candidates.map((c) => (sameKey(c, candidate) ? candidate : c)) });
       return candidate;
     },
@@ -102,8 +105,17 @@ export function createInMemoryApplicationRepository(store: CandidateStore): Appl
     async listAwaitingResponseAcrossOrganizations(dueBefore) {
       return awaiting(store.read().applications, dueBefore);
     },
+    async listRetentionExpiringBefore(organizationId, before) {
+      return expiring(inOrg(organizationId), before);
+    },
+    async listRetentionExpiringAcrossOrganizations(before) {
+      return expiring(store.read().applications, before);
+    },
   };
 }
+
+const expiring = (applications: readonly Application[], before: Date): readonly Application[] =>
+  applications.filter((a) => a.retentionExpiresAt <= before).toSorted((a, b) => a.retentionExpiresAt.getTime() - b.retentionExpiresAt.getTime());
 
 const awaiting = (applications: readonly Application[], dueBefore: Date): readonly Application[] =>
   applications

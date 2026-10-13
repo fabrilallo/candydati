@@ -24,6 +24,8 @@ const newestFirst = <T extends { createdAt: Date }>(items: readonly T[]): readon
 
 export interface InMemoryNotifications extends NotificationRepository {
   snapshot(): readonly Notification[];
+  /** Test double of the erasure: drops the rows `doomed` accepts. */
+  purge(doomed: (notification: Notification) => boolean): void;
 }
 
 export function createInMemoryNotifications(initial: readonly Notification[] = []): InMemoryNotifications {
@@ -53,11 +55,15 @@ export function createInMemoryNotifications(initial: readonly Notification[] = [
       return own(organizationId, userId).filter((n) => n.readAt === null).length;
     },
     snapshot: () => rows,
+    purge(doomed) {
+      rows = rows.filter((n) => !doomed(n));
+    },
   };
 }
 
 export interface InMemoryTasks extends TaskRepository {
   snapshot(): readonly Task[];
+  purge(doomed: (task: Task) => boolean): void;
 }
 
 const taskOrder = (a: Task, b: Task): number =>
@@ -94,6 +100,9 @@ export function createInMemoryTasks(initial: readonly Task[] = []): InMemoryTask
       return rows.filter((t) => t.completedAt === null && t.dueAt !== null && t.dueAt <= dueBefore);
     },
     snapshot: () => rows,
+    purge(doomed) {
+      rows = rows.filter((t) => !doomed(t));
+    },
   };
 }
 
@@ -145,6 +154,7 @@ export const createInMemoryMemberDirectory = (membersByOrganization: Readonly<Re
 
 export interface InMemoryOutbox extends OutboxRepository {
   snapshot(): readonly OutboxEvent[];
+  purge(doomed: (event: OutboxEvent) => boolean): void;
 }
 
 export function createInMemoryOutbox(initial: readonly OutboxEvent[] = []): InMemoryOutbox {
@@ -165,6 +175,9 @@ export function createInMemoryOutbox(initial: readonly OutboxEvent[] = []): InMe
       rows = rows.map((e) => (e.organizationId === organizationId && e.id === id ? { ...e, publishedAt: at } : e));
     },
     snapshot: () => rows,
+    purge(doomed) {
+      rows = rows.filter((e) => !doomed(e));
+    },
   };
 }
 
@@ -204,6 +217,7 @@ export function createInMemoryWebhookEndpoints(initial: readonly WebhookEndpoint
 
 export interface InMemoryWebhookDeliveries extends WebhookDeliveryRepository {
   snapshot(): readonly WebhookDelivery[];
+  purge(doomed: (delivery: WebhookDelivery) => boolean): void;
 }
 
 export function createInMemoryWebhookDeliveries(): InMemoryWebhookDeliveries {
@@ -217,6 +231,9 @@ export function createInMemoryWebhookDeliveries(): InMemoryWebhookDeliveries {
       return newestFirst(rows.filter((d) => d.organizationId === organizationId && d.endpointId === endpointId)).slice(0, limit);
     },
     snapshot: () => rows,
+    purge(doomed) {
+      rows = rows.filter((d) => !doomed(d));
+    },
   };
 }
 

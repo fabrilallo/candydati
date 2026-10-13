@@ -4,3 +4,4 @@ export * from './job.js';
 export * from './candidate.js';
 export * from './messaging.js';
 export * from './automation.js';
+export * from './privacy.js';

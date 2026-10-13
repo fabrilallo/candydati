@@ -30,12 +30,12 @@ export interface DeadlineScanResult {
 
 const ESCALATION_ROLES = ['owner', 'admin'];
 
-class OrganizationContext {
+export class OrganizationContext {
   private members: Promise<readonly Member[]> | null = null;
   private readonly jobs = new Map<string, Promise<Job | null>>();
 
   constructor(
-    private readonly deps: ScanDeps,
+    private readonly deps: Pick<ScanDeps, 'members' | 'jobs'>,
     readonly organizationId: string,
   ) {}
 
@@ -143,7 +143,7 @@ export const scanDeadlines = defineSystemJob<ScanDeps, z.ZodObject<{ now: z.ZodD
   },
 });
 
-async function buildDigests(
+export async function buildDigests(
   context: (organizationId: string) => OrganizationContext,
   created: readonly Notification[],
 ): Promise<readonly DigestEntry[]> {

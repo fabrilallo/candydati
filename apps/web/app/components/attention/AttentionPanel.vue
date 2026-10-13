@@ -109,6 +109,6 @@ const closeSheet = async (): Promise<void> => {
       <PaginationBar v-if="list.page.value && pages > 1" v-model:page="page" :pages="pages" :total="list.page.value.meta.total" :disabled="list.loading.value" />
     </template>
     <BulkComposerSheet :cards="writing ? [{ id: writing.applicationId, candidate: writing.candidate }] : []" @close="writing = null" @sent="written" />
-    <CandidateSheet :candidate-id="opened?.candidate.id ?? null" :application-id="opened?.applicationId ?? null" @close="closeSheet" />
+    <CandidateSheet :candidate-id="opened?.candidate.id ?? null" :application-id="opened?.applicationId ?? null" @close="closeSheet" @erased="(gone: boolean) => (gone ? closeSheet() : reload())" />
   </div>
 </template>
