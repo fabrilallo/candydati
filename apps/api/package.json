@@ -17,6 +17,8 @@
     "@fastify/helmet": "13.1.1",
     "@fastify/rate-limit": "11.2.0",
     "@fastify/sensible": "6.0.5",
+    "@mastra/core": "1.64.0",
+    "@tt/ad-quality": "workspace:*",
     "@tt/core": "workspace:*",
     "@tt/db": "workspace:*",
     "@tt/domain": "workspace:*",

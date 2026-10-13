@@ -47,7 +47,7 @@ export type UseCase<D extends CoreDeps, O> = ((deps: D, actor: Actor, rawInput: 
 
 const isSkip = (value: unknown): value is Skip => typeof value === 'object' && value !== null && 'skip' in value;
 
-function parseInput<S extends z.ZodType>(schema: S, raw: unknown): z.output<S> {
+export function parseInput<S extends z.ZodType>(schema: S, raw: unknown): z.output<S> {
   const parsed = schema.safeParse(raw);
   if (parsed.success) return parsed.data;
   throw new ValidationError(parsed.error.issues.map((issue) => ({ path: issue.path.join('.'), message: issue.message })));
@@ -99,4 +99,26 @@ export function defineUseCase<D extends CoreDeps, S extends z.ZodType, O>(
     permission: isSkip(definition.permission) ? null : definition.permission,
   };
   return Object.assign(run, { meta });
+}
+
+export interface PublicQueryDefinition<D, S extends z.ZodType, O> {
+  readonly name: string;
+  readonly input: S;
+  readonly handler: (context: { readonly deps: D; readonly input: z.output<S> }) => Promise<O>;
+}
+
+export type PublicQuery<D, O> = ((deps: D, rawInput: unknown) => Promise<O>) & { readonly name: string };
+
+/**
+ * A read for visitors who are not signed in: validates the input (ValidationError), then runs the handler.
+ * No actor, no permission check, no audit event.
+ *
+ * It must ONLY ever expose published data (public careers page, public job page, feeds). Never return drafts,
+ * closed ads, internal ids, quality reports or anything else an organization has not chosen to publish, and
+ * always scope the lookup to the organization named in the input.
+ */
+export function definePublicQuery<D, S extends z.ZodType, O>(definition: PublicQueryDefinition<D, S, O>): PublicQuery<D, O> {
+  const run = async (deps: D, rawInput: unknown): Promise<O> =>
+    definition.handler({ deps, input: parseInput(definition.input, rawInput) });
+  return Object.defineProperty(run, 'name', { value: definition.name });
 }

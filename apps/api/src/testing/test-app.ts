@@ -1,9 +1,11 @@
 import { randomUUID } from 'node:crypto';
+import type { AdQualityAnalyzer } from '@tt/domain';
 import { createDb, type DbHandle } from '@tt/db';
 import type { FastifyInstance } from 'fastify';
 import type { InvitationEmail, EmailSender } from '../auth/email-sender.js';
 import type { RateLimitSettings } from '../app-context.js';
 import { parseEnv, type Env } from '../config/env.js';
+import { fakeAdQualityAnalyzer } from '@tt/core/testing';
 import { buildServer } from '../server.js';
 import { apiTestDatabaseUrl } from './test-database.js';
 
@@ -29,13 +31,13 @@ export interface TestApp {
   close(): Promise<void>;
 }
 
-const HIGH_LIMITS: RateLimitSettings = { max: 100_000, authMax: 100_000 };
+const HIGH_LIMITS: RateLimitSettings = { max: 100_000, authMax: 100_000, publicMax: 100_000, qualityMax: 100_000 };
 
-export async function createTestApp(options: { rateLimit?: RateLimitSettings; emailSender?: EmailSender } = {}): Promise<TestApp> {
+export async function createTestApp(options: { rateLimit?: RateLimitSettings; emailSender?: EmailSender; adQuality?: AdQualityAnalyzer } = {}): Promise<TestApp> {
   const handle = createDb(apiTestDatabaseUrl(), 4);
   const sent: InvitationEmail[] = [];
   const emailSender: EmailSender = options.emailSender ?? { sendInvitation: async (email) => void sent.push(email) };
-  const app = await buildServer({ env: testEnv(), db: handle.db, emailSender, rateLimit: options.rateLimit ?? HIGH_LIMITS });
+  const app = await buildServer({ env: testEnv(), db: handle.db, emailSender, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer() });
   await app.ready();
   return {
     app,

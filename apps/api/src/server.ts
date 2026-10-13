@@ -1,14 +1,21 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import type { Db } from '@tt/db';
+import type { AdQualityAnalyzer } from '@tt/domain';
+import { createConfiguredAnalyzer } from './ai/ad-quality.js';
 import { createAppContext, type RateLimitSettings } from './app-context.js';
 import { registerAuthRoutes } from './auth/fastify-auth.js';
 import { createLogEmailSender, type EmailSender } from './auth/email-sender.js';
 import type { Env } from './config/env.js';
 import { registerErrorHandler } from './http/error-handler.js';
-import { registerSecurity } from './plugins/security.js';
+import { registerCsrfProtection } from './plugins/csrf.js';
+import { registerSecurity, trustedOrigins } from './plugins/security.js';
 import { registerAuditLogRoutes } from './routes/audit-log.js';
 import { registerHealthRoutes } from './routes/health.js';
+import { registerJobRoutes } from './routes/jobs.js';
+import { registerJobQualityRoute } from './routes/job-quality.js';
+import { registerJobTemplateRoutes } from './routes/job-templates.js';
+import { registerPublicJobRoutes } from './routes/public-jobs.js';
 
 export interface ServerDeps {
   readonly env: Env;
@@ -16,6 +23,8 @@ export interface ServerDeps {
   /** Defaults to the log implementation. */
   readonly emailSender?: EmailSender | undefined;
   readonly rateLimit?: RateLimitSettings | undefined;
+  /** Defaults to rules, or the model named by FAST_MODEL. */
+  readonly adQuality?: AdQualityAnalyzer | undefined;
 }
 
 const loggerOptions = (env: Env) =>
@@ -38,13 +47,19 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
     db: deps.db,
     emailSender: deps.emailSender ?? createLogEmailSender(app.log),
     rateLimit: deps.rateLimit,
+    adQuality: deps.adQuality ?? createConfiguredAnalyzer(deps.env.FAST_MODEL, app.log),
   });
 
   registerErrorHandler(app);
   await registerSecurity(app, deps.env, ctx.rateLimit);
 
+  registerCsrfProtection(app, trustedOrigins(deps.env));
   registerHealthRoutes(app, ctx);
   registerAuthRoutes(app, ctx.auth, ctx.rateLimit.authMax);
   registerAuditLogRoutes(app, ctx);
+  registerJobQualityRoute(app, ctx);
+  registerJobRoutes(app, ctx);
+  registerJobTemplateRoutes(app, ctx);
+  registerPublicJobRoutes(app, ctx);
   return app;
 }

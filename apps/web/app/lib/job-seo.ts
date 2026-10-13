@@ -1,0 +1,53 @@
+import { buildJobPostingJsonLd, serializeJsonLd, type JobPostingHeadings, type PublicJobPageDto } from '@tt/domain'
+import type { Translate } from './ad-text'
+import { absoluteUrl, publicJobPath, salaryLine } from './job-view'
+
+const DESCRIPTION_MAX = 155
+
+export const adHeadings = (tr: Translate): JobPostingHeadings => ({
+  responsibilities: tr('public.headings.responsibilities'),
+  mustHave: tr('public.headings.mustHave'),
+  niceToHave: tr('public.headings.niceToHave'),
+  technologies: tr('public.headings.technologies'),
+  benefits: tr('public.headings.benefits'),
+  growth: tr('public.headings.growth'),
+  workLifeBalance: tr('public.headings.workLifeBalance'),
+  culture: tr('public.headings.culture'),
+})
+
+const clip = (text: string, max: number): string => {
+  const flat = text.replace(/\s+/g, ' ').trim()
+  return flat.length <= max ? flat : `${flat.slice(0, max - 1).trimEnd()}…`
+}
+
+export interface JobSeo {
+  readonly title: string
+  readonly description: string
+  readonly canonical: string
+  readonly locale: string
+  readonly image: string | null
+  readonly jsonLd: string
+}
+
+/** Pure: head data of a public ad. Texts are in the language of the ad, never of the visitor. */
+export const buildJobSeo = (page: PublicJobPageDto, siteUrl: string, tr: Translate): JobSeo => {
+  const { organization, job } = page
+  const { content } = job
+  const language = content.language
+  const canonical = absoluteUrl(siteUrl, publicJobPath(organization.slug, job.slug))
+  const fallback = tr('public.metaDescription', {
+    title: content.title,
+    role: tr(`taxonomy.roles.${content.role}`),
+    seniority: tr(`taxonomy.seniority.${content.seniority}`),
+    contract: tr(`taxonomy.contractTypes.${content.contractType}`),
+    salary: salaryLine(content.salary, language, tr),
+  })
+  return {
+    title: `${content.title} | ${organization.name}`,
+    description: clip(content.summary === '' ? fallback : content.summary, DESCRIPTION_MAX),
+    canonical,
+    locale: language,
+    image: organization.logo,
+    jsonLd: serializeJsonLd(buildJobPostingJsonLd({ job, organization, url: canonical, headings: adHeadings(tr) })),
+  }
+}

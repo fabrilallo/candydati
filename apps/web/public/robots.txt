@@ -1,4 +1,6 @@
 User-agent: *
+Allow: /careers/
+Disallow: /careers/*?
 Disallow: /app/
 Disallow: /api/
 Disallow: /onboarding

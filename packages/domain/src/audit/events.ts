@@ -13,6 +13,12 @@ export const AUDIT_ACTIONS = [
   'member.role_changed',
   'member.removed',
   'audit.read',
+  'job.created',
+  'job.updated',
+  'job.published',
+  'job.closed',
+  'job_template.created',
+  'job_template.deleted',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

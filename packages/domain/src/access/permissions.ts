@@ -8,6 +8,8 @@ export const STATEMENTS = {
   member: ['create', 'update', 'delete'],
   invitation: ['create', 'cancel'],
   audit: ['read'],
+  job: ['read', 'create', 'update', 'publish', 'close'],
+  job_template: ['read', 'create', 'delete'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -31,10 +33,16 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     member: ['create', 'update', 'delete'],
     invitation: ['create', 'cancel'],
     audit: ['read'],
+    job: ['read', 'create', 'update', 'publish', 'close'],
+    job_template: ['read', 'create', 'delete'],
   },
-  recruiter: {},
-  hiring_manager: {},
-  interviewer: {},
+  recruiter: {
+    job: ['read', 'create', 'update', 'publish', 'close'],
+    job_template: ['read', 'create', 'delete'],
+  },
+  /** Writes and edits ads; putting them online or taking them down stays with recruiters and admins. */
+  hiring_manager: { job: ['read', 'create', 'update'], job_template: ['read'] },
+  interviewer: { job: ['read'] },
 };
 
 export const PERMISSIONS: readonly Permission[] = (Object.keys(STATEMENTS) as Resource[]).flatMap((resource) =>

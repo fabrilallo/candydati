@@ -1,0 +1,56 @@
+<script setup lang="ts">
+import { PlusIcon } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { fieldIdOf } from '@/lib/job-issues'
+import { appendItem, emptyStage, moveItem, removeItem, replaceItem, type FieldErrors, type JobForm, type StageForm } from '@/lib/job-form'
+
+const props = defineProps<{ form: JobForm; disabled: boolean; errors: FieldErrors }>()
+const emit = defineEmits<{ patch: [changes: Partial<JobForm>] }>()
+const { t } = useI18n()
+
+const processId = fieldIdOf('process')
+const setProcess = (process: readonly StageForm[]): void => emit('patch', { process })
+const add = async (): Promise<void> => {
+  setProcess(appendItem(props.form.process, emptyStage()))
+  await nextTick()
+  document.getElementById(`${processId}-${props.form.process.length - 1}-type`)?.focus()
+}
+</script>
+
+<template>
+  <JobSection id="job-process" :title="t('job.editor.sections.process')" :description="t('job.editor.hints.process')">
+    <fieldset :id="processId" tabindex="-1" class="grid gap-3 outline-none" :aria-describedby="errors.process ? `${processId}-error` : undefined" :aria-invalid="Boolean(errors.process) || undefined">
+      <legend class="sr-only">{{ t('job.editor.sections.process') }}</legend>
+      <p v-if="errors.process" :id="`${processId}-error`" role="alert" class="text-xs font-medium text-destructive">{{ t(errors.process) }}</p>
+      <ol v-if="form.process.length" class="grid gap-3">
+        <StageRow
+          v-for="(stage, index) in form.process"
+          :id="`${processId}-${index}`"
+          :key="index"
+          :stage="stage"
+          :index="index"
+          :count="form.process.length"
+          :disabled="disabled"
+          @change="(next) => setProcess(replaceItem(form.process, index, next))"
+          @remove="setProcess(removeItem(form.process, index))"
+          @move="(delta) => setProcess(moveItem(form.process, index, delta))"
+        />
+      </ol>
+      <p v-else class="rounded-lg border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">{{ t('job.editor.process.empty') }}</p>
+      <div v-if="!disabled">
+        <Button type="button" variant="outline" size="sm" @click="add">
+          <PlusIcon aria-hidden="true" />
+          {{ t('job.editor.process.add') }}
+        </Button>
+      </div>
+    </fieldset>
+    <div class="max-w-xs">
+      <FormField :id="fieldIdOf('responseDays')" :label="t('job.editor.fields.responseDays')" :hint="t('job.editor.hints.responseDays')" :error="errors.responseDays">
+        <template #default="{ invalid, describedBy }">
+          <Input :id="fieldIdOf('responseDays')" type="number" inputmode="numeric" min="1" max="60" step="1" :model-value="form.responseDays" :disabled="disabled" :aria-invalid="invalid" :aria-describedby="describedBy" @update:model-value="emit('patch', { responseDays: String($event) })" />
+        </template>
+      </FormField>
+    </div>
+  </JobSection>
+</template>

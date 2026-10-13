@@ -53,7 +53,12 @@ describe('defaultInviteRole', () => {
 
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
-    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'members'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'members', 'audit'])
+    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'members'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'members', 'audit'])
+  })
+
+  it('shows the jobs entry to anyone with job:read and to nobody without a role', () => {
+    expect(visibleNav('interviewer').map((item) => item.id)).toContain('jobs')
+    expect(visibleNav(null).map((item) => item.id)).not.toContain('jobs')
   })
 })

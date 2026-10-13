@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { LayoutDashboardIcon, ScrollTextIcon, UsersIcon } from '@lucide/vue'
+import { BriefcaseBusinessIcon, LayoutDashboardIcon, ScrollTextIcon, UsersIcon } from '@lucide/vue'
 import type { Role } from '@tt/domain'
 import { visibleNav } from '@/lib/permissions-ui'
 
 const props = defineProps<{ role: Role | null }>()
 const { t } = useI18n()
 const route = useRoute()
-const icons = { dashboard: LayoutDashboardIcon, members: UsersIcon, audit: ScrollTextIcon } as const
+const icons = { dashboard: LayoutDashboardIcon, jobs: BriefcaseBusinessIcon, members: UsersIcon, audit: ScrollTextIcon } as const
 const items = computed(() => visibleNav(props.role))
 const isActive = (to: string): boolean => (to === '/app' ? route.path === '/app' : route.path.startsWith(to))
 </script>

@@ -25,6 +25,8 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.url(),
   WEB_ORIGIN: z.url(),
   /** Extra browser origins allowed by CORS and Better Auth (comma-separated URLs). */
+  /** Mastra `provider/model` for the ad quality score. Empty = rules only. The provider's API key is set separately. */
+  FAST_MODEL: z.string().regex(/^[^/\s]+\/\S+$/, 'must look like provider/model').optional(),
   TRUSTED_ORIGINS: z.string().optional().transform(splitList).pipe(z.array(z.url())),
 });
 

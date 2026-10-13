@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "schema": "pnpm build && node scripts/write-schema.mjs",
     "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

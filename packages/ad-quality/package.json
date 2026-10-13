@@ -1,0 +1,20 @@
+{
+  "name": "@tt/ad-quality",
+  "version": "0.1.0",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint .",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": { "@tt/domain": "workspace:*", "zod": "4.5.4" },
+  "devDependencies": { "@vitest/coverage-v8": "5.0.0", "typescript": "5.9.3", "vitest": "5.0.0" }
+}

@@ -3,6 +3,7 @@ import {
   canAssignRole,
   isPermission,
   isRole,
+  type Permission,
   PERMISSIONS,
   permissionsOf,
   roleHasPermission,
@@ -10,6 +11,10 @@ import {
   ROLES,
   STATEMENTS,
 } from './permissions.js';
+
+const JOB_PERMISSIONS: readonly Permission[] = PERMISSIONS.filter(
+  (permission) => permission.startsWith('job:') || permission.startsWith('job_template:'),
+);
 
 describe('permissions', () => {
   it('lists every resource:action pair once', () => {
@@ -28,8 +33,25 @@ describe('permissions', () => {
     expect(roleHasPermission('admin', 'organization:delete')).toBe(false);
   });
 
-  it.each(['recruiter', 'hiring_manager', 'interviewer'] as const)('gives %s no administrative permission', (role) => {
-    expect(permissionsOf(role)).toEqual([]);
+  it('gives the owner, admin and recruiter every job and job template permission', () => {
+    expect(JOB_PERMISSIONS).toHaveLength(8);
+    for (const role of ['owner', 'admin', 'recruiter'] as const) {
+      expect(permissionsOf(role)).toEqual(expect.arrayContaining([...JOB_PERMISSIONS]));
+    }
+  });
+
+  it('lets a hiring manager write and edit ads but not publish or close them', () => {
+    expect(permissionsOf('hiring_manager')).toEqual(['job:read', 'job:create', 'job:update', 'job_template:read']);
+    expect(roleHasPermission('hiring_manager', 'job:publish')).toBe(false);
+    expect(roleHasPermission('hiring_manager', 'job:close')).toBe(false);
+  });
+
+  it('gives an interviewer read access to ads and nothing else', () => {
+    expect(permissionsOf('interviewer')).toEqual(['job:read']);
+  });
+
+  it('gives recruiters no administrative permission', () => {
+    expect(permissionsOf('recruiter').some((permission) => permission.startsWith('member:'))).toBe(false);
   });
 
   it('never grants an action that the statements do not declare', () => {

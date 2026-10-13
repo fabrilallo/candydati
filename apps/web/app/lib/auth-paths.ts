@@ -16,6 +16,8 @@ export const loginLocation = (fullPath: string): string => (fullPath === HOME ||
 
 const isInvitationPath = (path: string): boolean => path.startsWith('/accept-invitation/')
 const isAppPath = (path: string): boolean => path === HOME || path.startsWith(`${HOME}/`)
+/** Public careers pages: indexable, server-rendered, open to anyone whatever their session. */
+export const isPublicPath = (path: string): boolean => path === '/careers' || path.startsWith('/careers/')
 const isGuestPath = (path: string): boolean => path === LOGIN || path === SIGNUP
 
 const afterSignIn = (viewer: Viewer, redirect: unknown): string => safeRedirect(redirect) ?? (viewer.organization ? HOME : ONBOARDING)
@@ -25,6 +27,7 @@ const afterSignIn = (viewer: Viewer, redirect: unknown): string => safeRedirect(
  * Anonymous -> login; signed in without organization -> onboarding; signed in with one -> never back to login/onboarding.
  */
 export const resolveGuard = (path: string, viewer: Viewer | null, redirect?: unknown): string | null => {
+  if (isPublicPath(path)) return null
   if (path === '/') return viewer ? (viewer.organization ? HOME : ONBOARDING) : LOGIN
   if (!viewer) return isGuestPath(path) ? null : loginLocation(path)
   if (isGuestPath(path)) return afterSignIn(viewer, redirect)

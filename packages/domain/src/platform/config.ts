@@ -12,6 +12,8 @@ const platformEnvSchema = z.object({
   PLATFORM_URL: z.url().default('http://localhost:3000'),
   PLATFORM_SUPPORT_EMAIL: z.email().optional(),
   PLATFORM_DEFAULT_LOCALE: z.enum(SUPPORTED_LOCALES).default(DEFAULT_LOCALE),
+  /** 0-10. Below it an ad is flagged before publication, never blocked (PLAN §5.2). */
+  PLATFORM_AD_QUALITY_THRESHOLD: z.coerce.number().min(0).max(10).default(6),
 });
 
 export interface PlatformConfig {
@@ -19,6 +21,7 @@ export interface PlatformConfig {
   readonly url: string;
   readonly supportEmail: string | null;
   readonly defaultLocale: Locale;
+  readonly adQualityThreshold: number;
 }
 
 type Env = Readonly<Record<string, string | undefined>>;
@@ -38,6 +41,7 @@ export function loadPlatformConfig(env: Env): PlatformConfig {
     url: data.PLATFORM_URL.replace(/\/$/, ''),
     supportEmail: data.PLATFORM_SUPPORT_EMAIL ?? null,
     defaultLocale: data.PLATFORM_DEFAULT_LOCALE,
+    adQualityThreshold: data.PLATFORM_AD_QUALITY_THRESHOLD,
   };
 }
 

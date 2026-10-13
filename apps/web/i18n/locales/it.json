@@ -5,11 +5,27 @@
     "cancel": "Annulla",
     "you": "tu",
     "language": "Lingua",
-    "skipToContent": "Vai al contenuto"
+    "skipToContent": "Vai al contenuto",
+    "close": "Chiudi"
   },
-  "locales": { "it": "Italiano", "en": "English" },
-  "theme": { "label": "Tema", "light": "Chiaro", "dark": "Scuro", "system": "Sistema" },
-  "nav": { "main": "Navigazione principale", "dashboard": "Panoramica", "members": "Membri", "audit": "Registro delle azioni", "settings": "Impostazioni" },
+  "locales": {
+    "it": "Italiano",
+    "en": "English"
+  },
+  "theme": {
+    "label": "Tema",
+    "light": "Chiaro",
+    "dark": "Scuro",
+    "system": "Sistema"
+  },
+  "nav": {
+    "main": "Navigazione principale",
+    "dashboard": "Panoramica",
+    "members": "Membri",
+    "jobs": "Annunci",
+    "audit": "Registro delle azioni",
+    "settings": "Impostazioni"
+  },
   "roles": {
     "owner": "Proprietario",
     "admin": "Amministratore",
@@ -67,7 +83,11 @@
     "title": "Membri",
     "subtitle": "Chi fa parte di {organization} e con quale ruolo.",
     "listTitle": "Membri dell'organizzazione",
-    "columns": { "name": "Nome", "email": "Email", "role": "Ruolo" },
+    "columns": {
+      "name": "Nome",
+      "email": "Email",
+      "role": "Ruolo"
+    },
     "pendingTitle": "Inviti in sospeso",
     "pendingEmpty": "Nessun invito in sospeso.",
     "expires": "Scade il {date}",
@@ -87,7 +107,13 @@
   "audit": {
     "title": "Registro delle azioni",
     "subtitle": "Tutto ciò che è successo in {organization}, dal più recente. Il registro non si modifica.",
-    "columns": { "when": "Quando", "who": "Chi", "action": "Azione", "target": "Oggetto", "details": "Dettagli" },
+    "columns": {
+      "when": "Quando",
+      "who": "Chi",
+      "action": "Azione",
+      "target": "Oggetto",
+      "details": "Dettagli"
+    },
     "actor": {
       "user": "Persona",
       "agent": "Agente",
@@ -96,23 +122,47 @@
       "unknown": "Sconosciuto",
       "onBehalf": "per conto di un utente"
     },
-    "detail": { "email": "Email", "role": "Ruolo", "previousRole": "Ruolo precedente", "name": "Nome" },
-    "targetTypes": { "organization": "Organizzazione", "invitation": "Invito", "member": "Membro" },
+    "detail": {
+      "email": "Email",
+      "role": "Ruolo",
+      "previousRole": "Ruolo precedente",
+      "name": "Nome"
+    },
+    "targetTypes": {
+      "organization": "Organizzazione",
+      "invitation": "Invito",
+      "member": "Membro"
+    },
     "empty": "Ancora nessuna azione registrata.",
     "loadFailed": "Non siamo riusciti a caricare il registro.",
     "forbidden": "Non hai il permesso di leggere il registro delle azioni.",
-    "pagination": { "label": "Paginazione", "previous": "Pagina precedente", "next": "Pagina successiva", "status": "Pagina {page} di {pages} · {total} azioni" },
+    "pagination": {
+      "label": "Paginazione",
+      "previous": "Pagina precedente",
+      "next": "Pagina successiva",
+      "status": "Pagina {page} di {pages} · {total} azioni"
+    },
     "actions": {
       "unknown": "Azione non riconosciuta",
-      "organization": { "created": "Ha creato l'organizzazione", "updated": "Ha modificato l'organizzazione", "deleted": "Ha eliminato l'organizzazione" },
+      "organization": {
+        "created": "Ha creato l'organizzazione",
+        "updated": "Ha modificato l'organizzazione",
+        "deleted": "Ha eliminato l'organizzazione"
+      },
       "invitation": {
         "created": "Ha invitato una persona",
         "accepted": "Ha accettato un invito",
         "rejected": "Ha rifiutato un invito",
         "cancelled": "Ha annullato un invito"
       },
-      "member": { "added": "Ha aggiunto un membro", "role_changed": "Ha cambiato il ruolo di un membro", "removed": "Ha rimosso un membro" },
-      "audit": { "read": "Ha letto il registro delle azioni" }
+      "member": {
+        "added": "Ha aggiunto un membro",
+        "role_changed": "Ha cambiato il ruolo di un membro",
+        "removed": "Ha rimosso un membro"
+      },
+      "audit": {
+        "read": "Ha letto il registro delle azioni"
+      }
     }
   },
   "invitation": {
@@ -153,5 +203,440 @@
     "notFound": "Non trovato",
     "tooManyRequests": "Troppe richieste, riprova tra poco",
     "unreachable": "Il servizio non è raggiungibile in questo momento"
+  },
+  "taxonomy": {
+    "roleFamilies": {
+      "engineering": "Ingegneria software",
+      "data": "Dati e AI",
+      "product": "Prodotto e progetto",
+      "design": "Design",
+      "marketing": "Marketing",
+      "sales": "Vendite",
+      "customer": "Clienti",
+      "operations": "Operations",
+      "finance": "Finanza",
+      "people": "Persone e HR",
+      "legal": "Legale e compliance",
+      "leadership": "Direzione"
+    },
+    "roles": {
+      "backend_developer": "Backend developer",
+      "frontend_developer": "Frontend developer",
+      "fullstack_developer": "Full-stack developer",
+      "mobile_developer": "Mobile developer",
+      "devops_engineer": "DevOps engineer",
+      "site_reliability_engineer": "Site reliability engineer (SRE)",
+      "cloud_engineer": "Cloud engineer",
+      "embedded_engineer": "Embedded engineer",
+      "qa_engineer": "QA engineer",
+      "security_engineer": "Security engineer",
+      "software_architect": "Software architect",
+      "engineering_manager": "Engineering manager",
+      "tech_lead": "Tech lead",
+      "data_analyst": "Data analyst",
+      "data_engineer": "Data engineer",
+      "data_scientist": "Data scientist",
+      "machine_learning_engineer": "Machine learning engineer",
+      "bi_developer": "BI developer",
+      "product_manager": "Product manager",
+      "product_owner": "Product owner",
+      "project_manager": "Project manager",
+      "business_analyst": "Business analyst",
+      "scrum_master": "Scrum master",
+      "product_designer": "Product designer",
+      "ux_researcher": "UX researcher",
+      "ui_designer": "UI designer",
+      "graphic_designer": "Graphic designer",
+      "content_designer": "Content designer",
+      "marketing_manager": "Marketing manager",
+      "growth_marketer": "Growth marketer",
+      "content_marketer": "Content marketer",
+      "seo_specialist": "Specialista SEO",
+      "social_media_manager": "Social media manager",
+      "sales_representative": "Sales representative",
+      "account_executive": "Account executive",
+      "account_manager": "Account manager",
+      "business_developer": "Business developer",
+      "sales_manager": "Responsabile vendite",
+      "customer_success_manager": "Customer success manager",
+      "customer_support_specialist": "Addetto al supporto clienti",
+      "solutions_engineer": "Solutions engineer",
+      "operations_manager": "Responsabile operations",
+      "office_manager": "Office manager",
+      "supply_chain_specialist": "Specialista supply chain",
+      "it_support_specialist": "Tecnico supporto IT",
+      "accountant": "Contabile",
+      "financial_analyst": "Analista finanziario",
+      "controller": "Controller",
+      "finance_manager": "Responsabile finanza",
+      "hr_generalist": "HR generalist",
+      "recruiter": "Recruiter",
+      "hr_business_partner": "HR business partner",
+      "people_operations_specialist": "Specialista people operations",
+      "legal_counsel": "Consulente legale",
+      "compliance_specialist": "Specialista compliance",
+      "general_manager": "Direttore generale",
+      "chief_executive": "Amministratore delegato (CEO)",
+      "chief_technology_officer": "Chief technology officer (CTO)",
+      "chief_operating_officer": "Chief operating officer (COO)"
+    },
+    "seniority": {
+      "intern": "Stagista",
+      "junior": "Junior",
+      "mid": "Intermedio",
+      "senior": "Senior",
+      "lead": "Lead",
+      "principal": "Principal",
+      "manager": "Manager",
+      "director": "Direttore",
+      "executive": "Dirigente"
+    },
+    "contractTypes": {
+      "permanent": "Tempo indeterminato",
+      "fixed_term": "Tempo determinato",
+      "apprenticeship": "Apprendistato",
+      "internship": "Tirocinio",
+      "freelance": "Collaborazione / partita IVA",
+      "part_time_permanent": "Part-time a tempo indeterminato"
+    },
+    "workModes": {
+      "remote": "Da remoto",
+      "hybrid": "Ibrido",
+      "onsite": "In sede"
+    },
+    "salaryPeriods": {
+      "year": "Annuale (RAL)",
+      "month": "Mensile",
+      "day": "Giornaliero",
+      "hour": "Orario"
+    },
+    "salaryPeriodsGross": {
+      "year": "lordi all'anno (RAL)",
+      "month": "lordi al mese",
+      "day": "lordi al giorno",
+      "hour": "lordi all'ora"
+    },
+    "stageTypes": {
+      "screening_call": "Chiamata conoscitiva",
+      "hr_interview": "Colloquio HR",
+      "technical_interview": "Colloquio tecnico",
+      "take_home_assignment": "Esercizio da svolgere a casa",
+      "live_exercise": "Esercizio dal vivo",
+      "case_study": "Caso di studio",
+      "team_interview": "Colloquio con il team",
+      "manager_interview": "Colloquio con il responsabile",
+      "final_interview": "Colloquio finale",
+      "offer": "Offerta"
+    },
+    "stageConductors": {
+      "recruiter": "Recruiter",
+      "hiring_manager": "Responsabile di selezione",
+      "team_member": "Una persona del team",
+      "technical_lead": "Responsabile tecnico",
+      "founder": "Fondatore o fondatrice",
+      "external_partner": "Partner esterno"
+    }
+  },
+  "quality": {
+    "categories": {
+      "selection_process": "Processo di selezione",
+      "role_requirements": "Requisiti del ruolo",
+      "work_mode": "Modalità di lavoro",
+      "salary_transparency": "Trasparenza salariale",
+      "benefits": "Benefit e welfare",
+      "growth": "Crescita e formazione",
+      "work_life_balance": "Equilibrio vita-lavoro",
+      "responsibilities_clarity": "Chiarezza delle responsabilità",
+      "culture": "Cultura e valori",
+      "technologies": "Tecnologie e strumenti"
+    }
+  },
+  "job": {
+    "status": {
+      "draft": "Bozza",
+      "published": "Pubblicato",
+      "closed": "Chiuso"
+    },
+    "fields": {
+      "title": "Titolo",
+      "role": "Ruolo",
+      "seniority": "Livello di esperienza",
+      "contractType": "Tipo di contratto",
+      "salary": {
+        "min": "RAL minima",
+        "max": "RAL massima"
+      },
+      "workMode": "Modalità di lavoro",
+      "location": {
+        "country": "Paese",
+        "city": "Città",
+        "onsiteDaysPerWeek": "Giorni in sede a settimana"
+      },
+      "responseDays": "Tempo di risposta",
+      "process": "Processo di selezione",
+      "responsibilities": "Responsabilità",
+      "requirements": {
+        "mustHave": "Requisiti obbligatori"
+      }
+    },
+    "rules": {
+      "required": "Campo obbligatorio per pubblicare",
+      "salary_max_below_min": "Il massimo non può essere inferiore al minimo",
+      "city_required": "Indica la città: il lavoro non è del tutto da remoto",
+      "onsite_days_required": "Indica quanti giorni a settimana si lavora in sede",
+      "too_few_stages": "Aggiungi almeno una fase al processo di selezione",
+      "too_few_responsibilities": "Servono almeno tre responsabilità",
+      "too_few_requirements": "Indica almeno un requisito obbligatorio"
+    },
+    "validation": {
+      "invalidChoice": "Scegli uno dei valori proposti",
+      "invalidValue": "Valore non valido",
+      "stageIncomplete": "Ogni fase ha bisogno di tipo, durata e di chi la conduce"
+    },
+    "errors": {
+      "conflict": "L'annuncio è chiuso: non si può più modificare",
+      "validationFailed": "L'annuncio non rispetta i requisiti di pubblicazione",
+      "loadFailed": "Non riusciamo a caricare l'annuncio."
+    },
+    "list": {
+      "title": "Annunci",
+      "subtitle": "Gli annunci di {organization}: bozze, pubblicati e chiusi.",
+      "new": "Nuovo annuncio",
+      "newBlank": "Annuncio vuoto",
+      "newFromTemplate": "Da un template",
+      "templates": "Template",
+      "filterLabel": "Filtra per stato",
+      "all": "Tutti",
+      "columns": {
+        "title": "Titolo",
+        "role": "Ruolo",
+        "status": "Stato",
+        "publishable": "Pubblicabile",
+        "quality": "Qualità",
+        "updated": "Aggiornato"
+      },
+      "publishableYes": "Sì",
+      "publishableNo": "No",
+      "publishableYesLong": "Pronto per la pubblicazione",
+      "publishableNoLong": "Mancano dei dati obbligatori",
+      "noRole": "Ruolo non scelto",
+      "noScore": "Non analizzato",
+      "untitled": "Senza titolo",
+      "emptyTitle": "Ancora nessun annuncio",
+      "emptyBody": "Crea il primo annuncio: parte come bozza e si pubblica quando ha tutto quello che serve.",
+      "emptyFiltered": "Nessun annuncio in questo stato.",
+      "forbidden": "Non hai il permesso di vedere gli annunci.",
+      "pagination": {
+        "status": "Pagina {page} di {pages} · {total} annunci"
+      }
+    },
+    "editor": {
+      "newTitle": "Nuovo annuncio",
+      "untitled": "Annuncio senza titolo",
+      "back": "Tutti gli annunci",
+      "readOnly": "Sola lettura: il tuo ruolo non permette di modificare gli annunci.",
+      "closedNote": "Annuncio chiuso: non si può più modificare. Per riproporlo, creane uno nuovo da un template.",
+      "unsaved": "Modifiche non salvate",
+      "leave": "Hai modifiche non salvate. Uscire comunque?",
+      "fromTemplate": "Creato dal template “{name}”.",
+      "templateMissing": "Il template richiesto non esiste più: si parte da un annuncio vuoto.",
+      "publishedNote": "L'annuncio è pubblicato e si può ancora modificare, purché continui a rispettare i requisiti di pubblicazione.",
+      "sections": {
+        "basics": "Informazioni di base",
+        "salary": "Retribuzione",
+        "work": "Modalità di lavoro e sede",
+        "process": "Processo di selezione",
+        "description": "Il ruolo",
+        "extras": "Il resto"
+      },
+      "fields": {
+        "title": "Titolo dell'annuncio",
+        "language": "Lingua dell'annuncio",
+        "role": "Ruolo",
+        "rolePlaceholder": "Scegli un ruolo",
+        "seniority": "Livello di esperienza",
+        "contractType": "Tipo di contratto",
+        "choose": "Scegli…",
+        "salaryMin": "Minimo (lordo)",
+        "salaryMax": "Massimo (lordo)",
+        "currency": "Valuta",
+        "period": "Periodo",
+        "workMode": "Modalità di lavoro",
+        "country": "Paese",
+        "city": "Città",
+        "onsiteDaysPerWeek": "Giorni in sede a settimana",
+        "responseDays": "Tempo di risposta (giorni)",
+        "stageType": "Tipo di fase",
+        "stageDuration": "Durata (minuti)",
+        "stageConductedBy": "Chi la conduce",
+        "stageNote": "Nota per il candidato (facoltativa)",
+        "summary": "Presentazione del ruolo",
+        "responsibilities": "Responsabilità",
+        "mustHave": "Requisiti obbligatori",
+        "niceToHave": "Requisiti preferenziali",
+        "technologies": "Tecnologie e strumenti",
+        "benefits": "Benefit",
+        "growth": "Crescita e formazione",
+        "workLifeBalance": "Equilibrio vita-lavoro",
+        "culture": "Cultura e valori"
+      },
+      "hints": {
+        "salary": "Importi lordi, in unità intere. Con periodo annuale è la RAL (Retribuzione annua lorda).",
+        "responseDays": "Giorni entro cui il candidato riceve un riscontro dopo ogni fase.",
+        "process": "L'ordine è quello che il candidato leggerà e che diventerà la pipeline.",
+        "responsibilities": "Almeno tre voci, una per riga.",
+        "mustHave": "Cosa serve davvero per iniziare. Una voce per riga.",
+        "niceToHave": "Cosa sarebbe un plus, ma non è necessario.",
+        "technologies": "Linguaggi, strumenti, piattaforme.",
+        "benefits": "Welfare, strumenti, orari, ferie, formazione.",
+        "growth": "Percorsi di crescita, budget per la formazione, mentoring.",
+        "workLifeBalance": "Orari, flessibilità, reperibilità.",
+        "culture": "Come si lavora e quali valori contano."
+      },
+      "list": {
+        "add": "Aggiungi voce",
+        "remove": "Rimuovi",
+        "moveUp": "Sposta su",
+        "moveDown": "Sposta giù",
+        "item": "{label}, voce {n}"
+      },
+      "process": {
+        "add": "Aggiungi fase",
+        "empty": "Nessuna fase ancora. Aggiungi almeno la prima.",
+        "stage": "Fase {n}",
+        "remove": "Rimuovi la fase {n}",
+        "moveUp": "Sposta su la fase {n}",
+        "moveDown": "Sposta giù la fase {n}"
+      }
+    },
+    "checklist": {
+      "title": "Cosa manca per pubblicare",
+      "ready": "Tutti i requisiti sono soddisfatti: l'annuncio si può pubblicare.",
+      "missing": "Manca 1 elemento | Mancano {count} elementi",
+      "go": "Vai al campo"
+    },
+    "quality": {
+      "title": "Qualità dell'annuncio",
+      "analyze": "Analizza annuncio",
+      "analyzing": "Analisi in corso…",
+      "reanalyze": "Analizza di nuovo",
+      "hint": "L'analisi parte solo quando la chiedi (o quando pubblichi): un modello ha un costo, quindi non gira a ogni tasto.",
+      "needsTitle": "Per analizzare serve almeno il titolo.",
+      "total": "Punteggio",
+      "outOf": "su {max}",
+      "threshold": "Soglia consigliata: {threshold}",
+      "below": "Sotto la soglia consigliata. Non blocca la pubblicazione, ma conviene migliorare.",
+      "above": "In linea con la soglia consigliata.",
+      "categories": "Le dieci categorie",
+      "vague": "Frasi vaghe",
+      "vagueEmpty": "Nessuna frase vaga individuata.",
+      "suggestion": "Riscrittura proposta",
+      "improvements": "Cosa migliorare",
+      "improvementsEmpty": "Nessun suggerimento: ottimo lavoro.",
+      "sourceRules": "Analisi a regole, senza modello.",
+      "sourceModel": "Analisi con un modello linguistico.",
+      "stale": "L'annuncio è cambiato dopo questa analisi."
+    },
+    "publish": {
+      "action": "Pubblica",
+      "publishing": "Pubblicazione…",
+      "disabledHint": "Completa gli elementi mancanti per pubblicare.",
+      "belowTitle": "L'annuncio è sotto la soglia consigliata",
+      "belowBody": "Punteggio {total} su {max}; la soglia consigliata è {threshold}. Il punteggio segnala, non blocca: puoi pubblicare comunque.",
+      "belowImprovements": "Cosa migliorare",
+      "back": "Torna a modificare",
+      "anyway": "Pubblica comunque",
+      "doneTitle": "Annuncio pubblicato",
+      "doneBody": "Ora è visibile a tutti all'indirizzo:",
+      "urlLabel": "Indirizzo pubblico",
+      "open": "Apri la pagina pubblica",
+      "copy": "Copia indirizzo",
+      "copied": "Indirizzo copiato",
+      "published": "Annuncio pubblicato",
+      "noAnalysis": "L'analisi di qualità non è riuscita, ma l'annuncio è stato pubblicato."
+    },
+    "actions": {
+      "save": "Salva",
+      "saveDraft": "Salva bozza",
+      "saving": "Salvataggio…",
+      "created": "Annuncio creato",
+      "saved": "Annuncio salvato",
+      "cannotSave": "Correggi i campi segnalati prima di salvare.",
+      "close": "Chiudi annuncio",
+      "closing": "Chiusura…",
+      "closeTitle": "Chiudere l'annuncio?",
+      "closeBody": "L'annuncio sparirà dalla pagina carriere e non potrà essere modificato né riaperto.",
+      "closeConfirm": "Chiudi annuncio",
+      "closed": "Annuncio chiuso",
+      "cancel": "Annulla",
+      "saveAsTemplate": "Salva come template",
+      "templateName": "Nome del template",
+      "templateNameHint": "Un nome che ti aiuti a ritrovarlo, ad esempio “Backend senior”.",
+      "templateSave": "Salva template",
+      "templateSaved": "Template salvato"
+    },
+    "templates": {
+      "title": "Template",
+      "subtitle": "Modelli di annuncio da cui partire.",
+      "columns": {
+        "name": "Nome",
+        "role": "Ruolo",
+        "updated": "Aggiornato",
+        "actions": "Azioni"
+      },
+      "empty": "Nessun template ancora. Salva un annuncio come template dall'editor.",
+      "use": "Crea annuncio",
+      "useFor": "Crea un annuncio dal template {name}",
+      "delete": "Elimina",
+      "deleteFor": "Elimina il template {name}",
+      "deleteTitle": "Eliminare il template?",
+      "deleteBody": "Il template “{name}” verrà eliminato. Gli annunci già creati non cambiano.",
+      "deleteConfirm": "Elimina template",
+      "deleted": "Template eliminato",
+      "loadFailed": "Non riusciamo a caricare i template.",
+      "forbidden": "Non hai il permesso di vedere i template."
+    }
+  },
+  "public": {
+    "salary": "Retribuzione",
+    "contract": "Contratto",
+    "workMode": "Modalità di lavoro",
+    "location": "Sede",
+    "seniority": "Livello",
+    "onsiteDays": "1 giorno a settimana in sede | {count} giorni a settimana in sede",
+    "process": "Processo di selezione",
+    "processIntro": "Ecco le fasi, nell'ordine in cui le affronterai.",
+    "stageMeta": "{duration}, a cura di: {who}",
+    "responseTime": "Tempo di risposta",
+    "responseValue": "Riceverai un riscontro entro 1 giorno dopo ogni fase. | Riceverai un riscontro entro {count} giorni dopo ogni fase.",
+    "published": "Pubblicato il {date}",
+    "backToJobs": "Tutte le posizioni aperte",
+    "headings": {
+      "responsibilities": "Cosa farai",
+      "mustHave": "Cosa serve",
+      "niceToHave": "Cosa è un plus",
+      "technologies": "Tecnologie e strumenti",
+      "benefits": "Benefit",
+      "growth": "Crescita e formazione",
+      "workLifeBalance": "Equilibrio vita-lavoro",
+      "culture": "Cultura e valori"
+    },
+    "duration": {
+      "minutes": "{n} min",
+      "hours": "{n} h",
+      "days": "{n} g",
+      "hoursMinutes": "{h} h {m} min"
+    },
+    "metaDescription": "{title}: {role}, {seniority}, {contract}. {salary}."
+  },
+  "careers": {
+    "title": "Posizioni aperte in {organization}",
+    "subtitle": "Ogni annuncio indica retribuzione, processo di selezione e tempi di risposta.",
+    "metaDescription": "Le posizioni aperte in {organization}: retribuzione, modalità di lavoro e processo di selezione sempre dichiarati.",
+    "empty": "Al momento non ci sono posizioni aperte.",
+    "emptyBody": "Torna a trovarci presto.",
+    "count": "Nessuna posizione aperta | 1 posizione aperta | {count} posizioni aperte",
+    "notFound": "Questa pagina carriere non esiste.",
+    "logo": "Logo di {organization}"
   }
 }

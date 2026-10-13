@@ -22,6 +22,8 @@ const cookieFrom = (setCookie: string | string[] | undefined): string | null => 
 /** A browser-like client: keeps one session cookie and sends the web Origin as the web app's proxy does. */
 export class TestUser {
   private cookie: string | null = null;
+  /** Set by `createOrganization`: the public slug of the organization this user created. */
+  organizationSlug = '';
 
   constructor(
     private readonly app: FastifyInstance,
@@ -29,7 +31,7 @@ export class TestUser {
     readonly name: string,
   ) {}
 
-  async request<T = unknown>(method: 'GET' | 'POST', url: string, body?: unknown): Promise<Reply<T>> {
+  async request<T = unknown>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, body?: unknown): Promise<Reply<T>> {
     const response = await this.app.inject({
       method,
       url,
@@ -49,6 +51,8 @@ export class TestUser {
 
   get = <T = unknown>(url: string) => this.request<T>('GET', url);
   post = <T = unknown>(url: string, body: unknown = {}) => this.request<T>('POST', url, body);
+  put = <T = unknown>(url: string, body: unknown = {}) => this.request<T>('PUT', url, body);
+  delete = <T = unknown>(url: string) => this.request<T>('DELETE', url);
 
   async signUp(): Promise<this> {
     const reply = await this.post('/api/auth/sign-up/email', { email: this.email, password: PASSWORD, name: this.name });
@@ -56,8 +60,18 @@ export class TestUser {
     return this;
   }
 
+  /** Joins `organization` with `role` through an invitation sent by `inviter`. */
+  async joinAs(inviter: TestUser, role: string): Promise<this> {
+    const invite = await inviter.post('/api/auth/organization/invite-member', { email: this.email, role });
+    const invitationId = (invite.body as unknown as { id: string }).id;
+    const accepted = await this.post('/api/auth/organization/accept-invitation', { invitationId });
+    if (accepted.status !== 200) throw new Error(`accept failed: ${accepted.status}`);
+    return this;
+  }
+
   async createOrganization(name: string): Promise<string> {
     const slug = `${name.toLowerCase().replace(/\W+/g, '-')}-${Math.random().toString(36).slice(2, 8)}`;
+    this.organizationSlug = slug;
     const reply = await this.post<{ id: string }>('/api/auth/organization/create', { name, slug });
     if (reply.status !== 200) throw new Error(`create organization failed: ${reply.status} ${JSON.stringify(reply.body)}`);
     return (reply.body as unknown as { id: string }).id;

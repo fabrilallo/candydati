@@ -8,6 +8,15 @@ const valid = {
   WEB_ORIGIN: 'http://localhost:3000',
 };
 
+describe('parseEnv FAST_MODEL', () => {
+  it('is optional, empty counts as unset, and must be provider/model', () => {
+    expect(parseEnv(valid).FAST_MODEL).toBeUndefined();
+    expect(parseEnv({ ...valid, FAST_MODEL: '' }).FAST_MODEL).toBeUndefined();
+    expect(parseEnv({ ...valid, FAST_MODEL: 'openai/some-model' }).FAST_MODEL).toBe('openai/some-model');
+    expect(() => parseEnv({ ...valid, FAST_MODEL: 'just-a-name' })).toThrow(/FAST_MODEL/);
+  });
+});
+
 describe('parseEnv', () => {
   it('applies defaults', () => {
     const env = parseEnv(valid);

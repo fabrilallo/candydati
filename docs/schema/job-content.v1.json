@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "language": {
+      "default": "it",
+      "type": "string",
+      "enum": [
+        "it",
+        "en"
+      ]
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "backend_developer",
+        "frontend_developer",
+        "fullstack_developer",
+        "mobile_developer",
+        "devops_engineer",
+        "site_reliability_engineer",
+        "cloud_engineer",
+        "embedded_engineer",
+        "qa_engineer",
+        "security_engineer",
+        "software_architect",
+        "engineering_manager",
+        "tech_lead",
+        "data_analyst",
+        "data_engineer",
+        "data_scientist",
+        "machine_learning_engineer",
+        "bi_developer",
+        "product_manager",
+        "product_owner",
+        "project_manager",
+        "business_analyst",
+        "scrum_master",
+        "product_designer",
+        "ux_researcher",
+        "ui_designer",
+        "graphic_designer",
+        "content_designer",
+        "marketing_manager",
+        "growth_marketer",
+        "content_marketer",
+        "seo_specialist",
+        "social_media_manager",
+        "sales_representative",
+        "account_executive",
+        "account_manager",
+        "business_developer",
+        "sales_manager",
+        "customer_success_manager",
+        "customer_support_specialist",
+        "solutions_engineer",
+        "operations_manager",
+        "office_manager",
+        "supply_chain_specialist",
+        "it_support_specialist",
+        "accountant",
+        "financial_analyst",
+        "controller",
+        "finance_manager",
+        "hr_generalist",
+        "recruiter",
+        "hr_business_partner",
+        "people_operations_specialist",
+        "legal_counsel",
+        "compliance_specialist",
+        "general_manager",
+        "chief_executive",
+        "chief_technology_officer",
+        "chief_operating_officer"
+      ]
+    },
+    "seniority": {
+      "type": "string",
+      "enum": [
+        "intern",
+        "junior",
+        "mid",
+        "senior",
+        "lead",
+        "principal",
+        "manager",
+        "director",
+        "executive"
+      ]
+    },
+    "contractType": {
+      "type": "string",
+      "enum": [
+        "permanent",
+        "fixed_term",
+        "apprenticeship",
+        "internship",
+        "freelance",
+        "part_time_permanent"
+      ]
+    },
+    "salary": {
+      "default": {
+        "currency": "EUR",
+        "period": "year"
+      },
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "max": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "currency": {
+          "default": "EUR",
+          "type": "string",
+          "enum": [
+            "EUR",
+            "CHF",
+            "GBP",
+            "USD"
+          ]
+        },
+        "period": {
+          "default": "year",
+          "type": "string",
+          "enum": [
+            "year",
+            "month",
+            "day",
+            "hour"
+          ]
+        }
+      }
+    },
+    "workMode": {
+      "type": "string",
+      "enum": [
+        "remote",
+        "hybrid",
+        "onsite"
+      ]
+    },
+    "location": {
+      "default": {},
+      "type": "object",
+      "properties": {
+        "country": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "city": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "onsiteDaysPerWeek": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 7
+        }
+      }
+    },
+    "process": {
+      "default": [],
+      "maxItems": 10,
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "screening_call",
+              "hr_interview",
+              "technical_interview",
+              "take_home_assignment",
+              "live_exercise",
+              "case_study",
+              "team_interview",
+              "manager_interview",
+              "final_interview",
+              "offer"
+            ]
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 7200
+          },
+          "conductedBy": {
+            "type": "string",
+            "enum": [
+              "recruiter",
+              "hiring_manager",
+              "team_member",
+              "technical_lead",
+              "founder",
+              "external_partner"
+            ]
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "type",
+          "durationMinutes",
+          "conductedBy"
+        ]
+      }
+    },
+    "responseDays": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 60
+    },
+    "summary": {
+      "default": "",
+      "type": "string",
+      "maxLength": 4000
+    },
+    "responsibilities": {
+      "default": [],
+      "maxItems": 30,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300
+      }
+    },
+    "requirements": {
+      "default": {
+        "mustHave": [],
+        "niceToHave": []
+      },
+      "type": "object",
+      "properties": {
+        "mustHave": {
+          "default": [],
+          "maxItems": 30,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        },
+        "niceToHave": {
+          "default": [],
+          "maxItems": 30,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          }
+        }
+      }
+    },
+    "technologies": {
+      "default": [],
+      "maxItems": 30,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300
+      }
+    },
+    "benefits": {
+      "default": [],
+      "maxItems": 30,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 300
+      }
+    },
+    "growth": {
+      "default": "",
+      "type": "string",
+      "maxLength": 4000
+    },
+    "workLifeBalance": {
+      "default": "",
+      "type": "string",
+      "maxLength": 4000
+    },
+    "culture": {
+      "default": "",
+      "type": "string",
+      "maxLength": 4000
+    }
+  },
+  "required": [
+    "title"
+  ],
+  "$id": "job-content.v1",
+  "title": "Job ad content (v1)"
+}

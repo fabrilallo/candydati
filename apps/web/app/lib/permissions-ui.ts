@@ -19,13 +19,14 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
 }
 
 export interface NavItem {
-  readonly id: 'dashboard' | 'members' | 'audit'
+  readonly id: 'dashboard' | 'jobs' | 'members' | 'audit'
   readonly to: string
   readonly permission?: Permission
 }
 
 const NAV: readonly NavItem[] = [
   { id: 'dashboard', to: '/app' },
+  { id: 'jobs', to: '/app/jobs', permission: 'job:read' },
   { id: 'members', to: '/app/settings/members' },
   { id: 'audit', to: '/app/settings/audit-log', permission: 'audit:read' },
 ]

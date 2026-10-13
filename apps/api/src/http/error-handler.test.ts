@@ -16,7 +16,11 @@ describe('error handler', () => {
   it('answers a core error in the envelope with its mapped status', async () => {
     const response = await appThrowing(new ValidationError([{ path: 'limit', message: 'Too big' }])).inject({ url: '/boom' });
     expect(response.statusCode).toBe(422);
-    expect(response.json()).toEqual({ success: false, data: null, error: { code: 'validation_failed', message: 'limit: Too big' } });
+    expect(response.json()).toEqual({
+      success: false,
+      data: null,
+      error: { code: 'validation_failed', message: 'limit: Too big', issues: [{ path: 'limit', message: 'Too big' }] },
+    });
   });
 
   it('answers audit_failed as a 500 without the cause', async () => {

@@ -1,11 +1,13 @@
-import { resolveGuard } from '@/lib/auth-paths'
+import { isPublicPath, resolveGuard } from '@/lib/auth-paths'
 import { hasSessionCookie } from '@/lib/session-cookie'
 
 /**
  * Unauthenticated -> /login; signed in without organization -> /onboarding (rules in `resolveGuard`).
- * If the api cannot be reached the navigation fails loudly (error page) instead of bouncing to login.
+ * `/careers/**` is public and skipped entirely. If the api cannot be reached the navigation fails loudly (error page) instead of bouncing to login.
  */
 export default defineNuxtRouteMiddleware(async (to) => {
+  // Public careers pages never need the session: no api call for anonymous visitors, no redirect for signed-in ones.
+  if (isPublicPath(to.path)) return
   const { ensure, clear } = useViewer()
   let viewer
   try {

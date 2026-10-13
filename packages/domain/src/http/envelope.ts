@@ -10,6 +10,14 @@ export interface ApiError {
   readonly code: string;
   /** Safe to show to the user: no stack traces, no internals. */
   readonly message: string;
+  /** Present only for `validation_failed`: one entry per field, so clients can attach errors to inputs. */
+  readonly issues?: readonly ApiErrorIssue[];
+}
+
+export interface ApiErrorIssue {
+  /** Dot path inside the request, e.g. `content.salary.max`. */
+  readonly path: string;
+  readonly message: string;
 }
 
 export type ApiResponse<T> =

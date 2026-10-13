@@ -8,7 +8,19 @@ describe('loadPlatformConfig', () => {
       url: 'http://localhost:3000',
       supportEmail: null,
       defaultLocale: 'it',
+      adQualityThreshold: 6,
     });
+  });
+
+  it('reads the ad quality threshold from the environment', () => {
+    expect(loadPlatformConfig({ PLATFORM_AD_QUALITY_THRESHOLD: '7.5' }).adQualityThreshold).toBe(7.5);
+    expect(loadPlatformConfig({ PLATFORM_AD_QUALITY_THRESHOLD: '0' }).adQualityThreshold).toBe(0);
+  });
+
+  it('rejects a quality threshold outside 0-10 or not a number', () => {
+    expect(() => loadPlatformConfig({ PLATFORM_AD_QUALITY_THRESHOLD: 'abc' })).toThrow(/Invalid platform configuration/);
+    expect(() => loadPlatformConfig({ PLATFORM_AD_QUALITY_THRESHOLD: '11' })).toThrow(/Invalid platform configuration/);
+    expect(() => loadPlatformConfig({ PLATFORM_AD_QUALITY_THRESHOLD: '-1' })).toThrow(/Invalid platform configuration/);
   });
 
   it('reads the product name and locale from the environment', () => {
@@ -23,6 +35,7 @@ describe('loadPlatformConfig', () => {
       url: 'https://hire.example.com',
       supportEmail: 'help@example.com',
       defaultLocale: 'en',
+      adQualityThreshold: 6,
     });
   });
 

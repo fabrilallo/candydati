@@ -8,7 +8,11 @@ import { defineEventHandler, getRequestURL, setHeader } from 'h3'
 export const NOINDEX = 'noindex, nofollow'
 
 /** `/api/**` is proxied to the api (its own headers) and `/_nuxt/**` is immutable static: neither is ours to label. */
-export const wantsRobotsHeader = (pathname: string): boolean => !pathname.startsWith('/api/') && !pathname.startsWith('/_nuxt/') && !pathname.startsWith('/_fonts/')
+export const wantsRobotsHeader = (pathname: string): boolean =>
+  !pathname.startsWith('/api/') && !pathname.startsWith('/_nuxt/') && !pathname.startsWith('/_fonts/') && !isIndexable(pathname)
+
+/** Public careers pages are meant to be found: the page itself sets `index, follow`, so no header may contradict it. */
+const isIndexable = (pathname: string): boolean => pathname === '/careers' || pathname.startsWith('/careers/')
 
 export default defineEventHandler((event) => {
   if (wantsRobotsHeader(getRequestURL(event).pathname)) setHeader(event, 'x-robots-tag', NOINDEX)

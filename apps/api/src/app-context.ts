@@ -1,4 +1,13 @@
-import { createDrizzleAuditLog, type AuditLogRepository } from '@tt/core';
+import { randomUUID } from 'node:crypto';
+import {
+  createDrizzleAuditLog,
+  createDrizzleJobTemplates,
+  createDrizzleJobs,
+  createDrizzleOrganizationDirectory,
+  type AuditLogRepository,
+  type JobDeps,
+} from '@tt/core';
+import type { AdQualityAnalyzer } from '@tt/domain';
 import { sql, type Db } from '@tt/db';
 import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyRequest } from 'fastify';
@@ -15,9 +24,15 @@ export interface RateLimitSettings {
   readonly max: number;
   /** Requests per minute per client on /api/auth/*. */
   readonly authMax: number;
+  /** Requests per minute per client on the public careers routes. */
+  readonly publicMax?: number | undefined;
+  /** Requests per minute per client on the ad quality analysis. */
+  readonly qualityMax?: number | undefined;
 }
 
-export const DEFAULT_RATE_LIMIT: RateLimitSettings = { max: 300, authMax: 20 };
+export const DEFAULT_PUBLIC_MAX = 120;
+export const DEFAULT_QUALITY_MAX = 20;
+export const DEFAULT_RATE_LIMIT: RateLimitSettings = { max: 300, authMax: 20, publicMax: DEFAULT_PUBLIC_MAX, qualityMax: DEFAULT_QUALITY_MAX };
 
 export interface AppContext {
   readonly env: Env;
@@ -27,6 +42,7 @@ export interface AppContext {
   readonly resolveActor: (request: FastifyRequest) => Promise<Actor>;
   readonly checkDatabase: () => Promise<void>;
   readonly rateLimit: RateLimitSettings;
+  readonly jobDeps: JobDeps;
 }
 
 export interface AppContextDeps {
@@ -34,9 +50,10 @@ export interface AppContextDeps {
   readonly db: Db;
   readonly emailSender: EmailSender;
   readonly rateLimit?: RateLimitSettings | undefined;
+  readonly adQuality: AdQualityAnalyzer;
 }
 
-export function createAppContext({ env, db, emailSender, rateLimit }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, emailSender, rateLimit, adQuality }: AppContextDeps): AppContext {
   const auditLog = createDrizzleAuditLog(db);
   const auth = createAuth({ env, db, auditLog, emailSender });
   const resolveFromHeaders = createActorResolver({
@@ -56,5 +73,15 @@ export function createAppContext({ env, db, emailSender, rateLimit }: AppContext
     resolveActor: (request) => resolveFromHeaders(fromNodeHeaders(request.headers)),
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
     rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
+    jobDeps: {
+      auditLog,
+      jobs: createDrizzleJobs(db),
+      jobTemplates: createDrizzleJobTemplates(db),
+      organizations: createDrizzleOrganizationDirectory(db),
+      adQuality,
+      adQualityThreshold: env.platform.adQualityThreshold,
+      newId: randomUUID,
+      now: () => new Date(),
+    },
   };
 }

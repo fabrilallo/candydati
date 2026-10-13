@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { loginLocation, resolveGuard, safeRedirect } from './auth-paths'
+import { isPublicPath, loginLocation, resolveGuard, safeRedirect } from './auth-paths'
 
 const org = { id: 'o1', name: 'Acme', slug: 'acme' }
 const withOrg = { user: { id: 'u', name: 'Ada', email: 'a@b.co' }, organization: org, role: 'owner' as const }
@@ -62,5 +62,23 @@ describe('resolveGuard', () => {
   it('honours a safe redirect when a signed-in user lands on login', () => {
     expect(resolveGuard('/login', withoutOrg, '/accept-invitation/i1')).toBe('/accept-invitation/i1')
     expect(resolveGuard('/login', withoutOrg, '//evil.example')).toBe('/onboarding')
+  })
+})
+
+describe('public careers pages', () => {
+  it('recognises them', () => {
+    expect(isPublicPath('/careers/acme')).toBe(true)
+    expect(isPublicPath('/careers/acme/backend-1')).toBe(true)
+    expect(isPublicPath('/careersx')).toBe(false)
+    expect(isPublicPath('/app/careers/acme')).toBe(false)
+  })
+
+  it('lets anonymous visitors through', () => {
+    expect(resolveGuard('/careers/acme', null)).toBeNull()
+  })
+
+  it('does not redirect signed-in users, with or without organization', () => {
+    expect(resolveGuard('/careers/acme/job-1', withOrg)).toBeNull()
+    expect(resolveGuard('/careers/acme', withoutOrg)).toBeNull()
   })
 })

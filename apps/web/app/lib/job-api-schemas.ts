@@ -1,0 +1,59 @@
+import {
+  adQualityReportSchema,
+  CONTRACT_TYPES,
+  isPublishedContent,
+  JOB_ROLES,
+  JOB_STATUSES,
+  jobContentSchema,
+  jobDtoSchema,
+  SENIORITY_LEVELS,
+  WORK_MODES,
+  type PublicCareersDto,
+  type PublicJobPageDto,
+  type PublishedJobContent,
+} from '@tt/domain'
+import { z } from 'zod'
+
+const isoDate = z.iso.datetime()
+
+export const jobSchema = jobDtoSchema
+export const jobSummarySchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  status: z.enum(JOB_STATUSES),
+  title: z.string(),
+  role: z.enum(JOB_ROLES).nullable(),
+  publishable: z.boolean(),
+  qualityTotal: z.number().nullable(),
+  updatedAt: isoDate,
+  publishedAt: isoDate.nullable(),
+})
+export const templateSchema = z.object({ id: z.string(), name: z.string(), content: jobContentSchema, updatedAt: isoDate })
+export const assessmentSchema = z.object({ report: adQualityReportSchema, threshold: z.number(), belowThreshold: z.boolean() })
+export const publishIssueSchema = z.object({ path: z.string(), rule: z.string() })
+export const publishResultSchema = z.object({ job: jobSchema, quality: assessmentSchema.nullable() })
+export const qualityResultSchema = z.object({ assessment: assessmentSchema, publishIssues: z.array(publishIssueSchema) })
+export const deletedSchema = z.object({ id: z.string() })
+
+const publishedContentSchema = z
+  .custom<PublishedJobContent>((value) => jobContentSchema.safeParse(value).success && isPublishedContent(jobContentSchema.parse(value)))
+  .transform((value) => jobContentSchema.parse(value) as PublishedJobContent)
+const organizationSchema = z.object({ name: z.string(), slug: z.string(), logo: z.string().nullable() })
+
+const publicSummarySchema = z.object({
+  slug: z.string(),
+  title: z.string(),
+  role: z.enum(JOB_ROLES),
+  seniority: z.enum(SENIORITY_LEVELS),
+  contractType: z.enum(CONTRACT_TYPES),
+  workMode: z.enum(WORK_MODES),
+  location: jobContentSchema.shape.location,
+  salary: jobContentSchema.shape.salary,
+  publishedAt: isoDate,
+})
+
+export const publicCareersSchema = z.object({ organization: organizationSchema, jobs: z.array(publicSummarySchema) }) as unknown as z.ZodType<PublicCareersDto>
+export const publicJobPageSchema = z.object({
+  organization: organizationSchema,
+  job: z.object({ slug: z.string(), content: publishedContentSchema, publishedAt: isoDate }),
+}) as unknown as z.ZodType<PublicJobPageDto>

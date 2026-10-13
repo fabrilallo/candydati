@@ -1,0 +1,128 @@
+import { z } from 'zod';
+import { jobContentSchema, type JobContent, type PublishIssue, type PublishedJobContent } from './content.js';
+import { adQualityReportSchema, type AdQualityAssessment, type AdQualityReport } from './quality.js';
+
+/** draft -> published -> closed. A closed ad is never reopened: a new one is created from it. */
+export const JOB_STATUSES = ['draft', 'published', 'closed'] as const;
+export type JobStatus = (typeof JOB_STATUSES)[number];
+
+export interface Job {
+  readonly id: string;
+  readonly organizationId: string;
+  /** Unique inside the organization, assigned at creation, never changes: it is the public URL. */
+  readonly slug: string;
+  readonly status: JobStatus;
+  readonly content: JobContent;
+  /** Report computed at the last publication; null for drafts never published. */
+  readonly quality: AdQualityReport | null;
+  readonly createdBy: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+  readonly publishedAt: Date | null;
+  readonly closedAt: Date | null;
+}
+
+export interface JobTemplate {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly name: string;
+  readonly content: JobContent;
+  readonly createdBy: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+export const TEMPLATE_NAME_MAX = 80;
+export const SLUG_MAX = 80;
+
+/** `Backend Developer (Milano)` + `a1b2c3` -> `backend-developer-milano-a1b2c3`. */
+export function jobSlug(title: string, suffix: string): string {
+  const base = title
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, SLUG_MAX - suffix.length - 1)
+    .replace(/-+$/g, '');
+  return base.length > 0 ? `${base}-${suffix}` : suffix;
+}
+
+// --- HTTP shapes (dates as ISO strings). The same shapes are used by REST, agent tools and MCP tools. ---
+
+const isoDate = z.iso.datetime();
+
+export const jobDtoSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  status: z.enum(JOB_STATUSES),
+  content: jobContentSchema,
+  quality: adQualityReportSchema.nullable(),
+  /** Empty when the ad satisfies PLAN §5.1 and may be published. */
+  publishIssues: z.array(z.object({ path: z.string(), rule: z.string() })),
+  createdAt: isoDate,
+  updatedAt: isoDate,
+  publishedAt: isoDate.nullable(),
+  closedAt: isoDate.nullable(),
+});
+export type JobDto = Omit<z.infer<typeof jobDtoSchema>, 'publishIssues'> & { readonly publishIssues: readonly PublishIssue[] };
+
+export interface JobSummaryDto {
+  readonly id: string;
+  readonly slug: string;
+  readonly status: JobStatus;
+  readonly title: string;
+  readonly role: JobContent['role'] | null;
+  readonly publishable: boolean;
+  readonly qualityTotal: number | null;
+  readonly updatedAt: string;
+  readonly publishedAt: string | null;
+}
+
+export interface JobTemplateDto {
+  readonly id: string;
+  readonly name: string;
+  readonly content: JobContent;
+  readonly updatedAt: string;
+}
+
+export interface PublishJobResultDto {
+  readonly job: JobDto;
+  /** Null only when the analysis could not run: publication never waits on the score. */
+  readonly quality: AdQualityAssessment | null;
+}
+
+/** What anyone can read without signing in. Never carries internal ids of people or the quality report. */
+export interface PublicOrganizationDto {
+  readonly name: string;
+  readonly slug: string;
+  readonly logo: string | null;
+}
+
+export interface PublicJobDto {
+  readonly slug: string;
+  readonly content: PublishedJobContent;
+  readonly publishedAt: string;
+}
+
+export interface PublicJobSummaryDto {
+  readonly slug: string;
+  readonly title: string;
+  readonly role: PublishedJobContent['role'];
+  readonly seniority: PublishedJobContent['seniority'];
+  readonly contractType: PublishedJobContent['contractType'];
+  readonly workMode: PublishedJobContent['workMode'];
+  readonly location: PublishedJobContent['location'];
+  readonly salary: PublishedJobContent['salary'];
+  readonly publishedAt: string;
+}
+
+export interface PublicCareersDto {
+  readonly organization: PublicOrganizationDto;
+  readonly jobs: readonly PublicJobSummaryDto[];
+}
+
+export interface PublicJobPageDto {
+  readonly organization: PublicOrganizationDto;
+  readonly job: PublicJobDto;
+}

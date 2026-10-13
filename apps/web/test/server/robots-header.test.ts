@@ -9,6 +9,13 @@ describe('robots header middleware', () => {
     expect(wantsRobotsHeader('/robots.txt')).toBe(true)
   })
 
+  it('lets the public careers pages be indexed', () => {
+    expect(wantsRobotsHeader('/careers/acme')).toBe(false)
+    expect(wantsRobotsHeader('/careers/acme/backend-1')).toBe(false)
+    expect(wantsRobotsHeader('/careersx')).toBe(true)
+    expect(wantsRobotsHeader('/app/careers/x')).toBe(true)
+  })
+
   it('leaves the api proxy and the immutable assets alone', () => {
     expect(wantsRobotsHeader('/api/me')).toBe(false)
     expect(wantsRobotsHeader('/_nuxt/entry.js')).toBe(false)

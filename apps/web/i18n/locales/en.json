@@ -5,11 +5,27 @@
     "cancel": "Cancel",
     "you": "you",
     "language": "Language",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "close": "Close"
   },
-  "locales": { "it": "Italiano", "en": "English" },
-  "theme": { "label": "Theme", "light": "Light", "dark": "Dark", "system": "System" },
-  "nav": { "main": "Main navigation", "dashboard": "Overview", "members": "Members", "audit": "Audit log", "settings": "Settings" },
+  "locales": {
+    "it": "Italiano",
+    "en": "English"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "nav": {
+    "main": "Main navigation",
+    "dashboard": "Overview",
+    "members": "Members",
+    "jobs": "Jobs",
+    "audit": "Audit log",
+    "settings": "Settings"
+  },
   "roles": {
     "owner": "Owner",
     "admin": "Admin",
@@ -67,7 +83,11 @@
     "title": "Members",
     "subtitle": "Who is part of {organization} and with which role.",
     "listTitle": "Organization members",
-    "columns": { "name": "Name", "email": "Email", "role": "Role" },
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role"
+    },
     "pendingTitle": "Pending invitations",
     "pendingEmpty": "No pending invitations.",
     "expires": "Expires {date}",
@@ -87,7 +107,13 @@
   "audit": {
     "title": "Audit log",
     "subtitle": "Everything that happened in {organization}, most recent first. The log cannot be edited.",
-    "columns": { "when": "When", "who": "Who", "action": "Action", "target": "Target", "details": "Details" },
+    "columns": {
+      "when": "When",
+      "who": "Who",
+      "action": "Action",
+      "target": "Target",
+      "details": "Details"
+    },
     "actor": {
       "user": "Person",
       "agent": "Agent",
@@ -96,23 +122,47 @@
       "unknown": "Unknown",
       "onBehalf": "on behalf of a user"
     },
-    "detail": { "email": "Email", "role": "Role", "previousRole": "Previous role", "name": "Name" },
-    "targetTypes": { "organization": "Organization", "invitation": "Invitation", "member": "Member" },
+    "detail": {
+      "email": "Email",
+      "role": "Role",
+      "previousRole": "Previous role",
+      "name": "Name"
+    },
+    "targetTypes": {
+      "organization": "Organization",
+      "invitation": "Invitation",
+      "member": "Member"
+    },
     "empty": "No actions recorded yet.",
     "loadFailed": "We could not load the audit log.",
     "forbidden": "You do not have permission to read the audit log.",
-    "pagination": { "label": "Pagination", "previous": "Previous page", "next": "Next page", "status": "Page {page} of {pages} · {total} actions" },
+    "pagination": {
+      "label": "Pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "status": "Page {page} of {pages} · {total} actions"
+    },
     "actions": {
       "unknown": "Unrecognised action",
-      "organization": { "created": "Created the organization", "updated": "Updated the organization", "deleted": "Deleted the organization" },
+      "organization": {
+        "created": "Created the organization",
+        "updated": "Updated the organization",
+        "deleted": "Deleted the organization"
+      },
       "invitation": {
         "created": "Invited a person",
         "accepted": "Accepted an invitation",
         "rejected": "Declined an invitation",
         "cancelled": "Cancelled an invitation"
       },
-      "member": { "added": "Added a member", "role_changed": "Changed a member's role", "removed": "Removed a member" },
-      "audit": { "read": "Read the audit log" }
+      "member": {
+        "added": "Added a member",
+        "role_changed": "Changed a member's role",
+        "removed": "Removed a member"
+      },
+      "audit": {
+        "read": "Read the audit log"
+      }
     }
   },
   "invitation": {
@@ -153,5 +203,440 @@
     "notFound": "Not found",
     "tooManyRequests": "Too many requests, try again shortly",
     "unreachable": "The service is not reachable right now"
+  },
+  "taxonomy": {
+    "roleFamilies": {
+      "engineering": "Software engineering",
+      "data": "Data and AI",
+      "product": "Product and project",
+      "design": "Design",
+      "marketing": "Marketing",
+      "sales": "Sales",
+      "customer": "Customers",
+      "operations": "Operations",
+      "finance": "Finance",
+      "people": "People and HR",
+      "legal": "Legal and compliance",
+      "leadership": "Leadership"
+    },
+    "roles": {
+      "backend_developer": "Backend developer",
+      "frontend_developer": "Frontend developer",
+      "fullstack_developer": "Full-stack developer",
+      "mobile_developer": "Mobile developer",
+      "devops_engineer": "DevOps engineer",
+      "site_reliability_engineer": "Site reliability engineer (SRE)",
+      "cloud_engineer": "Cloud engineer",
+      "embedded_engineer": "Embedded engineer",
+      "qa_engineer": "QA engineer",
+      "security_engineer": "Security engineer",
+      "software_architect": "Software architect",
+      "engineering_manager": "Engineering manager",
+      "tech_lead": "Tech lead",
+      "data_analyst": "Data analyst",
+      "data_engineer": "Data engineer",
+      "data_scientist": "Data scientist",
+      "machine_learning_engineer": "Machine learning engineer",
+      "bi_developer": "BI developer",
+      "product_manager": "Product manager",
+      "product_owner": "Product owner",
+      "project_manager": "Project manager",
+      "business_analyst": "Business analyst",
+      "scrum_master": "Scrum master",
+      "product_designer": "Product designer",
+      "ux_researcher": "UX researcher",
+      "ui_designer": "UI designer",
+      "graphic_designer": "Graphic designer",
+      "content_designer": "Content designer",
+      "marketing_manager": "Marketing manager",
+      "growth_marketer": "Growth marketer",
+      "content_marketer": "Content marketer",
+      "seo_specialist": "SEO specialist",
+      "social_media_manager": "Social media manager",
+      "sales_representative": "Sales representative",
+      "account_executive": "Account executive",
+      "account_manager": "Account manager",
+      "business_developer": "Business developer",
+      "sales_manager": "Sales manager",
+      "customer_success_manager": "Customer success manager",
+      "customer_support_specialist": "Customer support specialist",
+      "solutions_engineer": "Solutions engineer",
+      "operations_manager": "Operations manager",
+      "office_manager": "Office manager",
+      "supply_chain_specialist": "Supply chain specialist",
+      "it_support_specialist": "IT support specialist",
+      "accountant": "Accountant",
+      "financial_analyst": "Financial analyst",
+      "controller": "Controller",
+      "finance_manager": "Finance manager",
+      "hr_generalist": "HR generalist",
+      "recruiter": "Recruiter",
+      "hr_business_partner": "HR business partner",
+      "people_operations_specialist": "People operations specialist",
+      "legal_counsel": "Legal counsel",
+      "compliance_specialist": "Compliance specialist",
+      "general_manager": "General manager",
+      "chief_executive": "Chief executive officer (CEO)",
+      "chief_technology_officer": "Chief technology officer (CTO)",
+      "chief_operating_officer": "Chief operating officer (COO)"
+    },
+    "seniority": {
+      "intern": "Intern",
+      "junior": "Junior",
+      "mid": "Mid-level",
+      "senior": "Senior",
+      "lead": "Lead",
+      "principal": "Principal",
+      "manager": "Manager",
+      "director": "Director",
+      "executive": "Executive"
+    },
+    "contractTypes": {
+      "permanent": "Permanent",
+      "fixed_term": "Fixed-term",
+      "apprenticeship": "Apprenticeship",
+      "internship": "Internship",
+      "freelance": "Freelance / contractor",
+      "part_time_permanent": "Permanent part-time"
+    },
+    "workModes": {
+      "remote": "Remote",
+      "hybrid": "Hybrid",
+      "onsite": "On-site"
+    },
+    "salaryPeriods": {
+      "year": "Yearly (gross annual salary)",
+      "month": "Monthly",
+      "day": "Daily",
+      "hour": "Hourly"
+    },
+    "salaryPeriodsGross": {
+      "year": "gross per year",
+      "month": "gross per month",
+      "day": "gross per day",
+      "hour": "gross per hour"
+    },
+    "stageTypes": {
+      "screening_call": "Screening call",
+      "hr_interview": "HR interview",
+      "technical_interview": "Technical interview",
+      "take_home_assignment": "Take-home assignment",
+      "live_exercise": "Live exercise",
+      "case_study": "Case study",
+      "team_interview": "Team interview",
+      "manager_interview": "Manager interview",
+      "final_interview": "Final interview",
+      "offer": "Offer"
+    },
+    "stageConductors": {
+      "recruiter": "Recruiter",
+      "hiring_manager": "Hiring manager",
+      "team_member": "A team member",
+      "technical_lead": "Technical lead",
+      "founder": "A founder",
+      "external_partner": "External partner"
+    }
+  },
+  "quality": {
+    "categories": {
+      "selection_process": "Selection process",
+      "role_requirements": "Role requirements",
+      "work_mode": "Work mode",
+      "salary_transparency": "Salary transparency",
+      "benefits": "Benefits and welfare",
+      "growth": "Growth and training",
+      "work_life_balance": "Work-life balance",
+      "responsibilities_clarity": "Clarity of responsibilities",
+      "culture": "Culture and values",
+      "technologies": "Technologies and tools"
+    }
+  },
+  "job": {
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "closed": "Closed"
+    },
+    "fields": {
+      "title": "Title",
+      "role": "Role",
+      "seniority": "Seniority",
+      "contractType": "Contract type",
+      "salary": {
+        "min": "Minimum salary",
+        "max": "Maximum salary"
+      },
+      "workMode": "Work mode",
+      "location": {
+        "country": "Country",
+        "city": "City",
+        "onsiteDaysPerWeek": "On-site days per week"
+      },
+      "responseDays": "Response time",
+      "process": "Selection process",
+      "responsibilities": "Responsibilities",
+      "requirements": {
+        "mustHave": "Must-have requirements"
+      }
+    },
+    "rules": {
+      "required": "Required to publish",
+      "salary_max_below_min": "The maximum cannot be lower than the minimum",
+      "city_required": "Add the city: the job is not fully remote",
+      "onsite_days_required": "Add how many days per week are spent on site",
+      "too_few_stages": "Add at least one stage to the selection process",
+      "too_few_responsibilities": "At least three responsibilities are needed",
+      "too_few_requirements": "Add at least one must-have requirement"
+    },
+    "validation": {
+      "invalidChoice": "Pick one of the listed values",
+      "invalidValue": "Invalid value",
+      "stageIncomplete": "Every stage needs a type, a duration and who conducts it"
+    },
+    "errors": {
+      "conflict": "The ad is closed and can no longer be edited",
+      "validationFailed": "The ad does not meet the publishing requirements",
+      "loadFailed": "We could not load the ad."
+    },
+    "list": {
+      "title": "Jobs",
+      "subtitle": "The job ads of {organization}: drafts, published and closed.",
+      "new": "New job ad",
+      "newBlank": "Blank ad",
+      "newFromTemplate": "From a template",
+      "templates": "Templates",
+      "filterLabel": "Filter by status",
+      "all": "All",
+      "columns": {
+        "title": "Title",
+        "role": "Role",
+        "status": "Status",
+        "publishable": "Publishable",
+        "quality": "Quality",
+        "updated": "Updated"
+      },
+      "publishableYes": "Yes",
+      "publishableNo": "No",
+      "publishableYesLong": "Ready to publish",
+      "publishableNoLong": "Required details are missing",
+      "noRole": "No role chosen",
+      "noScore": "Not analysed",
+      "untitled": "Untitled",
+      "emptyTitle": "No job ads yet",
+      "emptyBody": "Create the first one: it starts as a draft and is published once it has everything it needs.",
+      "emptyFiltered": "No job ads with this status.",
+      "forbidden": "You do not have permission to see job ads.",
+      "pagination": {
+        "status": "Page {page} of {pages} · {total} job ads"
+      }
+    },
+    "editor": {
+      "newTitle": "New job ad",
+      "untitled": "Untitled job ad",
+      "back": "All job ads",
+      "readOnly": "Read-only: your role cannot edit job ads.",
+      "closedNote": "This ad is closed and can no longer be edited. To post it again, create a new one from a template.",
+      "unsaved": "Unsaved changes",
+      "leave": "You have unsaved changes. Leave anyway?",
+      "fromTemplate": "Created from the template “{name}”.",
+      "templateMissing": "The requested template no longer exists: starting from a blank ad.",
+      "publishedNote": "This ad is published and can still be edited, as long as it keeps meeting the publishing requirements.",
+      "sections": {
+        "basics": "Basics",
+        "salary": "Salary",
+        "work": "Work mode and location",
+        "process": "Selection process",
+        "description": "The role",
+        "extras": "The rest"
+      },
+      "fields": {
+        "title": "Ad title",
+        "language": "Ad language",
+        "role": "Role",
+        "rolePlaceholder": "Choose a role",
+        "seniority": "Seniority",
+        "contractType": "Contract type",
+        "choose": "Choose…",
+        "salaryMin": "Minimum (gross)",
+        "salaryMax": "Maximum (gross)",
+        "currency": "Currency",
+        "period": "Period",
+        "workMode": "Work mode",
+        "country": "Country",
+        "city": "City",
+        "onsiteDaysPerWeek": "On-site days per week",
+        "responseDays": "Response time (days)",
+        "stageType": "Stage type",
+        "stageDuration": "Duration (minutes)",
+        "stageConductedBy": "Conducted by",
+        "stageNote": "Note for the candidate (optional)",
+        "summary": "Role overview",
+        "responsibilities": "Responsibilities",
+        "mustHave": "Must-have requirements",
+        "niceToHave": "Nice-to-have requirements",
+        "technologies": "Technologies and tools",
+        "benefits": "Benefits",
+        "growth": "Growth and training",
+        "workLifeBalance": "Work-life balance",
+        "culture": "Culture and values"
+      },
+      "hints": {
+        "salary": "Gross amounts, in whole units. With a yearly period this is the gross annual salary.",
+        "responseDays": "Days within which the candidate hears back after each stage.",
+        "process": "The order is what candidates will read and what becomes the pipeline.",
+        "responsibilities": "At least three, one per line.",
+        "mustHave": "What is really needed to start. One per line.",
+        "niceToHave": "What would be a plus but is not required.",
+        "technologies": "Languages, tools, platforms.",
+        "benefits": "Welfare, equipment, hours, holidays, training.",
+        "growth": "Career paths, training budget, mentoring.",
+        "workLifeBalance": "Working hours, flexibility, on-call duties.",
+        "culture": "How the team works and which values matter."
+      },
+      "list": {
+        "add": "Add item",
+        "remove": "Remove",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "item": "{label}, item {n}"
+      },
+      "process": {
+        "add": "Add stage",
+        "empty": "No stages yet. Add at least the first one.",
+        "stage": "Stage {n}",
+        "remove": "Remove stage {n}",
+        "moveUp": "Move stage {n} up",
+        "moveDown": "Move stage {n} down"
+      }
+    },
+    "checklist": {
+      "title": "What is missing to publish",
+      "ready": "All requirements are met: the ad can be published.",
+      "missing": "1 item missing | {count} items missing",
+      "go": "Go to field"
+    },
+    "quality": {
+      "title": "Ad quality",
+      "analyze": "Analyse ad",
+      "analyzing": "Analysing…",
+      "reanalyze": "Analyse again",
+      "hint": "The analysis runs only when you ask (or when you publish): a model call costs money, so it does not run on every keystroke.",
+      "needsTitle": "At least a title is needed to analyse.",
+      "total": "Score",
+      "outOf": "out of {max}",
+      "threshold": "Recommended threshold: {threshold}",
+      "below": "Below the recommended threshold. It does not block publishing, but improving it is worthwhile.",
+      "above": "In line with the recommended threshold.",
+      "categories": "The ten categories",
+      "vague": "Vague phrases",
+      "vagueEmpty": "No vague phrases found.",
+      "suggestion": "Suggested rewrite",
+      "improvements": "What to improve",
+      "improvementsEmpty": "No suggestions: great work.",
+      "sourceRules": "Rule-based analysis, no model.",
+      "sourceModel": "Analysis by a language model.",
+      "stale": "The ad changed after this analysis."
+    },
+    "publish": {
+      "action": "Publish",
+      "publishing": "Publishing…",
+      "disabledHint": "Complete the missing items to publish.",
+      "belowTitle": "The ad is below the recommended threshold",
+      "belowBody": "Score {total} out of {max}; the recommended threshold is {threshold}. The score flags, it never blocks: you can publish anyway.",
+      "belowImprovements": "What to improve",
+      "back": "Go back and edit",
+      "anyway": "Publish anyway",
+      "doneTitle": "Ad published",
+      "doneBody": "It is now visible to everyone at:",
+      "urlLabel": "Public address",
+      "open": "Open the public page",
+      "copy": "Copy address",
+      "copied": "Address copied",
+      "published": "Ad published",
+      "noAnalysis": "The quality analysis could not run, but the ad was published."
+    },
+    "actions": {
+      "save": "Save",
+      "saveDraft": "Save draft",
+      "saving": "Saving…",
+      "created": "Job ad created",
+      "saved": "Job ad saved",
+      "cannotSave": "Fix the flagged fields before saving.",
+      "close": "Close ad",
+      "closing": "Closing…",
+      "closeTitle": "Close this ad?",
+      "closeBody": "The ad will disappear from the careers page and can neither be edited nor reopened.",
+      "closeConfirm": "Close ad",
+      "closed": "Ad closed",
+      "cancel": "Cancel",
+      "saveAsTemplate": "Save as template",
+      "templateName": "Template name",
+      "templateNameHint": "A name that helps you find it later, for example “Senior backend”.",
+      "templateSave": "Save template",
+      "templateSaved": "Template saved"
+    },
+    "templates": {
+      "title": "Templates",
+      "subtitle": "Ad models to start from.",
+      "columns": {
+        "name": "Name",
+        "role": "Role",
+        "updated": "Updated",
+        "actions": "Actions"
+      },
+      "empty": "No templates yet. Save an ad as a template from the editor.",
+      "use": "Create ad",
+      "useFor": "Create an ad from the template {name}",
+      "delete": "Delete",
+      "deleteFor": "Delete the template {name}",
+      "deleteTitle": "Delete this template?",
+      "deleteBody": "The template “{name}” will be deleted. Ads already created do not change.",
+      "deleteConfirm": "Delete template",
+      "deleted": "Template deleted",
+      "loadFailed": "We could not load the templates.",
+      "forbidden": "You do not have permission to see templates."
+    }
+  },
+  "public": {
+    "salary": "Salary",
+    "contract": "Contract",
+    "workMode": "Work mode",
+    "location": "Location",
+    "seniority": "Level",
+    "onsiteDays": "1 day a week on site | {count} days a week on site",
+    "process": "Selection process",
+    "processIntro": "These are the stages, in the order you will go through them.",
+    "stageMeta": "{duration}, conducted by: {who}",
+    "responseTime": "Response time",
+    "responseValue": "You will hear back within 1 day after each stage. | You will hear back within {count} days after each stage.",
+    "published": "Published on {date}",
+    "backToJobs": "All open positions",
+    "headings": {
+      "responsibilities": "What you will do",
+      "mustHave": "What you need",
+      "niceToHave": "Nice to have",
+      "technologies": "Technologies and tools",
+      "benefits": "Benefits",
+      "growth": "Growth and training",
+      "workLifeBalance": "Work-life balance",
+      "culture": "Culture and values"
+    },
+    "duration": {
+      "minutes": "{n} min",
+      "hours": "{n} h",
+      "days": "{n} d",
+      "hoursMinutes": "{h} h {m} min"
+    },
+    "metaDescription": "{title}: {role}, {seniority}, {contract}. {salary}."
+  },
+  "careers": {
+    "title": "Open positions at {organization}",
+    "subtitle": "Every ad states the salary, the selection process and the response times.",
+    "metaDescription": "Open positions at {organization}: salary, work mode and selection process always stated.",
+    "empty": "There are no open positions right now.",
+    "emptyBody": "Check back soon.",
+    "count": "No open positions | 1 open position | {count} open positions",
+    "notFound": "This careers page does not exist.",
+    "logo": "{organization} logo"
   }
 }
