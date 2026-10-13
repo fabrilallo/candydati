@@ -16,6 +16,7 @@ import { registerJobRoutes } from './routes/jobs.js';
 import { registerJobQualityRoute } from './routes/job-quality.js';
 import { registerJobTemplateRoutes } from './routes/job-templates.js';
 import { registerPublicJobRoutes } from './routes/public-jobs.js';
+import { registerStatsRoutes } from './routes/stats.js';
 
 export interface ServerDeps {
   readonly env: Env;
@@ -61,5 +62,6 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerJobRoutes(app, ctx);
   registerJobTemplateRoutes(app, ctx);
   registerPublicJobRoutes(app, ctx);
+  registerStatsRoutes(app, ctx);
   return app;
 }

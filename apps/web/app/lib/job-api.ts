@@ -2,6 +2,7 @@ import type {
   AdQualityAssessment,
   JobContent,
   JobDto,
+  JobStatsDto,
   JobStatus,
   JobSummaryDto,
   JobTemplateDto,
@@ -11,6 +12,7 @@ import type {
   PublishIssue,
   PublishJobResultDto,
 } from '@tt/domain'
+import { jobStatsDtoSchema } from '@tt/domain'
 import { z } from 'zod'
 import { AppError, authErrorKey, errorKeyOf } from './auth-errors'
 import {
@@ -135,6 +137,9 @@ export const createTemplate = async (request: JobApiRequest, name: string, conte
 export const deleteTemplate = async (request: JobApiRequest, id: string): Promise<void> => {
   await call(request, `/api/v1/job-templates/${encodeURIComponent(id)}`, deletedSchema, { method: 'DELETE' })
 }
+
+/** Aggregates of the organization's ads for the overview, validated against the shared schema. */
+export const getJobStats = async (request: JobApiRequest): Promise<JobStatsDto> => (await call(request, '/api/v1/stats/jobs', jobStatsDtoSchema)).data
 
 const publicBase = (org: string): string => `/api/v1/public/organizations/${encodeURIComponent(org)}/jobs`
 export const fetchCareers = async (request: JobApiRequest, org: string): Promise<PublicCareersDto> =>

@@ -12,6 +12,7 @@ export * from './use-cases/jobs/create-job.js';
 export * from './use-cases/jobs/update-job.js';
 export * from './use-cases/jobs/get-job.js';
 export * from './use-cases/jobs/list-jobs.js';
+export * from './use-cases/jobs/get-job-stats.js';
 export * from './use-cases/jobs/publish-job.js';
 export * from './use-cases/jobs/close-job.js';
 export * from './use-cases/jobs/analyze-job-ad.js';

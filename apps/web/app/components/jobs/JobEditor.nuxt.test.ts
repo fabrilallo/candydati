@@ -128,7 +128,7 @@ describe('JobEditor live preview', () => {
   it('switches between form and preview below xl', async () => {
     const wrapper = await mountEditor()
     expect(wrapper.find('[data-testid="editor-form-pane"]').classes()).not.toContain('hidden')
-    await wrapper.findAll('#editor-mode [role="radio"]').find((radio) => radio.text() === 'Anteprima')?.trigger('click')
+    await wrapper.find('[data-testid="mode-preview"]').trigger('click')
     expect(wrapper.find('[data-testid="editor-form-pane"]').classes()).toContain('hidden')
     expect(wrapper.find('[data-testid="editor-preview-pane"]').classes()).not.toContain('hidden')
   })

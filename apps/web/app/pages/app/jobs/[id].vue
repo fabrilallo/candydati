@@ -18,8 +18,10 @@ useSeoMeta({ title: () => job.value?.content.title || t('job.editor.untitled') }
 
 <template>
   <JobEditor v-if="allowed && job" :key="job.id" :job="job" :template="null" />
-  <div v-else class="grid gap-3">
-    <FormAlert :message-key="allowed ? (errorKey ?? 'job.errors.loadFailed') : 'errors.forbidden'" />
-    <div><NuxtLink to="/app/jobs" class="text-sm font-medium underline underline-offset-4">{{ t('job.editor.back') }}</NuxtLink></div>
-  </div>
+  <AppPage v-else :crumbs="[{ label: t('nav.jobs'), to: '/app/jobs' }, { label: t('job.editor.untitled') }]">
+    <div class="grid gap-3">
+      <FormAlert :message-key="allowed ? (errorKey ?? 'job.errors.loadFailed') : 'errors.forbidden'" />
+      <div><NuxtLink to="/app/jobs" class="text-sm font-medium underline underline-offset-4">{{ t('job.editor.back') }}</NuxtLink></div>
+    </div>
+  </AppPage>
 </template>

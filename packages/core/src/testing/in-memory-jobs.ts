@@ -1,5 +1,6 @@
-import type { Job, JobTemplate } from '@tt/domain';
+import { JOB_STATUSES, type Job, type JobStatus, type JobTemplate } from '@tt/domain';
 import { ConflictError } from '../errors.js';
+import { bucketByWeek } from '../use-cases/jobs/job-stats-weeks.js';
 import type {
   JobRepository,
   JobTemplateRepository,
@@ -44,6 +45,23 @@ export function createInMemoryJobRepository(initial: readonly Job[] = []): InMem
     },
     async findPublishedBySlug(organizationId, slug) {
       return inOrg(organizationId).find((j) => j.slug === slug && j.status === 'published') ?? null;
+    },
+    async countByStatus(organizationId) {
+      const jobs = inOrg(organizationId);
+      const countOf = (status: JobStatus) => jobs.filter((j) => j.status === status).length;
+      return Object.fromEntries(JOB_STATUSES.map((status) => [status, countOf(status)])) as Record<JobStatus, number>;
+    },
+    async weeklyActivity(organizationId, since) {
+      const jobs = inOrg(organizationId);
+      return {
+        created: bucketByWeek(jobs.map((j) => j.createdAt), since),
+        published: bucketByWeek(jobs.map((j) => j.publishedAt), since),
+      };
+    },
+    async listByStatus(organizationId, status) {
+      return inOrg(organizationId)
+        .filter((j) => j.status === status)
+        .toSorted(byDateDesc('updatedAt'));
     },
     snapshot: () => [...rows],
   };

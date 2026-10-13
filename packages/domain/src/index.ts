@@ -9,3 +9,4 @@ export * from './job/quality.js';
 export * from './job/job.js';
 export * from './job/job-posting.js';
 export * from './job/json-schema.js';
+export * from './job/stats.js';

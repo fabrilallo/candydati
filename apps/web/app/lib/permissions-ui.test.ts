@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { assignableRoles, can, defaultInviteRole, parseMemberRole, visibleNav } from './permissions-ui'
+import { activeNavId, assignableRoles, can, defaultInviteRole, navSections, parseMemberRole, visibleNav } from './permissions-ui'
 
 describe('parseMemberRole', () => {
   it('reads a single role', () => {
@@ -53,12 +53,34 @@ describe('defaultInviteRole', () => {
 
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
-    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'members'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'members', 'audit'])
+    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'templates', 'members'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'templates', 'members', 'audit'])
   })
 
   it('shows the jobs entry to anyone with job:read and to nobody without a role', () => {
     expect(visibleNav('interviewer').map((item) => item.id)).toContain('jobs')
     expect(visibleNav(null).map((item) => item.id)).not.toContain('jobs')
+  })
+})
+
+describe('navSections', () => {
+  it('groups the visible items and drops nothing the role may see', () => {
+    expect(navSections('owner').map((section) => [section.id, section.items.map((item) => item.id)])).toEqual([
+      ['work', ['dashboard', 'jobs', 'templates']],
+      ['organization', ['members', 'audit']],
+    ])
+    expect(navSections(null).map((section) => section.id)).toEqual(['work', 'organization'])
+  })
+})
+
+describe('activeNavId', () => {
+  const items = visibleNav('owner')
+  it('picks the most specific entry', () => {
+    expect(activeNavId('/app', items)).toBe('dashboard')
+    expect(activeNavId('/app/jobs', items)).toBe('jobs')
+    expect(activeNavId('/app/jobs/abc', items)).toBe('jobs')
+    expect(activeNavId('/app/jobs/templates', items)).toBe('templates')
+    expect(activeNavId('/app/settings/audit-log', items)).toBe('audit')
+    expect(activeNavId('/elsewhere', items)).toBeNull()
   })
 })

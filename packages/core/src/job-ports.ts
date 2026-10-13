@@ -9,6 +9,20 @@ export interface JobListQuery {
   readonly limit: number;
 }
 
+/** Jobs in one week: `week` is the Monday (UTC) that opens it, `YYYY-MM-DD`. */
+export interface WeeklyCount {
+  readonly week: string;
+  readonly count: number;
+}
+
+/** Weeks with no activity are absent; the caller fills them. */
+export interface WeeklyActivity {
+  /** Bucketed by `createdAt`. */
+  readonly created: readonly WeeklyCount[];
+  /** Bucketed by `publishedAt`, closed ads included: they were published once. */
+  readonly published: readonly WeeklyCount[];
+}
+
 /** Every method takes the organization id and filters by it: there is no query without it. */
 export interface JobRepository {
   /** @throws ConflictError when the slug is already used in the organization. */
@@ -22,6 +36,15 @@ export interface JobRepository {
   listPublished(organizationId: string): Promise<readonly Job[]>;
   /** Published only: drafts and closed jobs are never found. */
   findPublishedBySlug(organizationId: string, slug: string): Promise<Job | null>;
+  /** Number of jobs per status in the organization; statuses with no job are 0. */
+  countByStatus(organizationId: string): Promise<Record<JobStatus, number>>;
+  /**
+   * Created and published counts per UTC week (weeks start Monday 00:00 UTC), only for timestamps `>= since`,
+   * oldest week first.
+   */
+  weeklyActivity(organizationId: string, since: Date): Promise<WeeklyActivity>;
+  /** Every job of the organization with `status`, newest `updatedAt` first. */
+  listByStatus(organizationId: string, status: JobStatus): Promise<readonly Job[]>;
 }
 
 export interface JobTemplateRepository {

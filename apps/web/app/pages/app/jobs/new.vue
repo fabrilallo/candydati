@@ -21,9 +21,8 @@ const missing = computed(() => templateId !== null && template.value === null)
 </script>
 
 <template>
-  <div v-if="allowed" class="grid gap-4">
-    <FormAlert v-if="missing" message-key="job.editor.templateMissing" />
-    <JobEditor :job="null" :template="template" />
-  </div>
-  <FormAlert v-else message-key="errors.forbidden" />
+  <JobEditor v-if="allowed" :job="null" :template="template" :notice-key="missing ? 'job.editor.templateMissing' : null" />
+  <AppPage v-else :crumbs="[{ label: t('nav.jobs'), to: '/app/jobs' }, { label: t('job.editor.newTitle') }]">
+    <FormAlert message-key="errors.forbidden" />
+  </AppPage>
 </template>

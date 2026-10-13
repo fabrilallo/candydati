@@ -24,7 +24,15 @@
     "members": "Membri",
     "jobs": "Annunci",
     "audit": "Registro delle azioni",
-    "settings": "Impostazioni"
+    "settings": "Impostazioni",
+    "shortcuts": "Scorciatoie",
+    "sidebar": "Barra laterale",
+    "templates": "Template",
+    "publishedCount": "{count} pubblicati",
+    "sections": {
+      "work": "Selezione",
+      "organization": "Organizzazione"
+    }
   },
   "roles": {
     "owner": "Proprietario",
@@ -76,29 +84,23 @@
     "switchOrganization": "Cambia organizzazione",
     "organizations": "Le tue organizzazioni",
     "current": "Organizzazione attiva",
-    "switched": "Ora lavori in {organization}"
+    "switched": "Ora lavori in {organization}",
+    "collapseNav": "Chiudi il pannello di navigazione",
+    "expandNav": "Apri il pannello di navigazione",
+    "careersPage": "Pagina carriere",
+    "breadcrumbs": "Percorso"
   },
   "dashboard": {
     "title": "Panoramica",
     "welcome": "Ciao, {name}",
     "subtitle": "Gli annunci di {organization} a colpo d'occhio.",
-    "countsLabel": "Annunci per stato",
     "counts": {
       "draft": "Bozze",
       "published": "Pubblicati",
       "closed": "Chiusi"
     },
-    "countsHint": {
-      "draft": "Da completare e pubblicare",
-      "published": "Visibili sulla pagina carriere",
-      "closed": "Non ricevono più candidature"
-    },
-    "viewAll": "Vedi tutti gli annunci",
     "newJob": "Nuovo annuncio",
     "invite": "Invita un collega",
-    "careersTitle": "Pagina carriere",
-    "careersBody": "Gli annunci pubblicati compaiono qui, con RAL e processo di selezione visibili a tutti.",
-    "careersOpen": "Apri la pagina carriere",
     "startTitle": "Primi passi",
     "startIntro": "Tre passi per mettere online il primo annuncio trasparente.",
     "start": {
@@ -119,7 +121,93 @@
       }
     },
     "teamTitle": "Il tuo team",
-    "teamBody": "Invita colleghi e scegli il loro ruolo. Ogni azione resta nel registro."
+    "teamBody": "Invita colleghi e scegli il loro ruolo. Ogni azione resta nel registro.",
+    "stats": {
+      "ad": "Annuncio",
+      "status": {
+        "title": "Annunci per stato",
+        "unit": "annuncio | annunci",
+        "all": "Vedi tutti"
+      },
+      "activity": {
+        "title": "Attività",
+        "hint": "Annunci creati e pubblicati per settimana, ultime 12 settimane",
+        "created": "Creati",
+        "published": "Pubblicati",
+        "weekOf": "Settimana del {date}",
+        "week": "Settimana",
+        "emptyTitle": "Nessuna attività nelle ultime 12 settimane",
+        "emptyBody": "Qui compaiono gli annunci creati e pubblicati, settimana per settimana."
+      },
+      "quality": {
+        "title": "Qualità degli annunci pubblicati",
+        "hint": "Punteggio su 10, soglia consigliata {threshold}",
+        "average": "media su 10",
+        "below": "{n} sotto soglia | {n} sotto soglia",
+        "allAbove": "Tutti sopra soglia",
+        "score": "Punteggio",
+        "status": "Esito",
+        "above": "Sopra soglia",
+        "thresholdLabel": "Soglia {threshold}",
+        "emptyTitle": "Nessun punteggio ancora",
+        "emptyBody": "Il punteggio si calcola alla pubblicazione: misura l'annuncio, mai i candidati."
+      },
+      "salary": {
+        "title": "Trasparenza retributiva",
+        "hint": {
+          "year": "RAL lorda annua dichiarata da ogni annuncio pubblicato, per ruolo",
+          "month": "Retribuzione lorda mensile dichiarata da ogni annuncio pubblicato, per ruolo",
+          "day": "Retribuzione lorda giornaliera dichiarata da ogni annuncio pubblicato, per ruolo",
+          "hour": "Retribuzione lorda oraria dichiarata da ogni annuncio pubblicato, per ruolo"
+        },
+        "medianMin": "Mediana dei minimi",
+        "medianMax": "Mediana dei massimi",
+        "legendRange": "Range dichiarato",
+        "legendMedian": "Mediane",
+        "other": "{n} annuncio in un'altra valuta o periodo non è nel grafico | {n} annunci in altre valute o periodi non sono nel grafico",
+        "emptyTitle": "Nessuna retribuzione pubblicata",
+        "emptyBody": "Ogni annuncio pubblicato dichiara minimo e massimo: qui li confronti tutti."
+      },
+      "process": {
+        "title": "Impegni verso i candidati",
+        "hint": "Medie su {n} annuncio pubblicato | Medie su {n} annunci pubblicati",
+        "stages": "fasi di selezione",
+        "time": "di colloqui e prove in tutto",
+        "response": "per ricevere una risposta dopo ogni fase",
+        "days": "{n} giorni",
+        "emptyTitle": "Nessun processo dichiarato ancora",
+        "emptyBody": "Fasi, durata e tempi di risposta degli annunci pubblicati compaiono qui."
+      },
+      "readiness": {
+        "title": "Cosa blocca le bozze",
+        "hint": "{ready} pronte su {total}",
+        "missing": "Manca: {field}",
+        "rules": {
+          "required": "Campo obbligatorio mancante",
+          "salary_max_below_min": "RAL massima sotto la minima",
+          "city_required": "Città mancante",
+          "onsite_days_required": "Giorni in sede mancanti",
+          "too_few_stages": "Nessuna fase di selezione",
+          "too_few_responsibilities": "Meno di tre responsabilità",
+          "too_few_requirements": "Nessun requisito obbligatorio"
+        },
+        "drafts": "{n} bozza | {n} bozze",
+        "allReadyTitle": "Tutte le bozze sono pronte",
+        "allReadyBody": "Ogni bozza rispetta lo standard: si può pubblicare.",
+        "emptyTitle": "Nessuna bozza",
+        "emptyBody": "Quando una bozza non si può ancora pubblicare, qui vedi cosa manca più spesso.",
+        "open": "Vai agli annunci"
+      },
+      "candidates": {
+        "title": "Le metriche sui candidati arrivano con le candidature",
+        "body": "Per ora il prodotto gestisce solo gli annunci. Quando arriveranno le candidature, qui vedrai i numeri veri, mai stime.",
+        "items": {
+          "funnel": "Conversione per fase",
+          "timeToHire": "Tempo di assunzione",
+          "responseKept": "Tempi di risposta rispettati"
+        }
+      }
+    }
   },
   "members": {
     "title": "Membri",
@@ -603,6 +691,13 @@
         "remove": "Rimuovi la fase {n}",
         "moveUp": "Sposta su la fase {n}",
         "moveDown": "Sposta giù la fase {n}"
+      },
+      "history": "Storico",
+      "openPublic": "Apri la pagina pubblica",
+      "meta": {
+        "updated": "Aggiornato il {date}",
+        "published": "Pubblicato il {date}",
+        "unsaved": "Non ancora salvato"
       }
     },
     "checklist": {

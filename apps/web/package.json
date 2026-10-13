@@ -21,6 +21,8 @@
     "@nuxtjs/i18n": "10.6.0",
     "@tailwindcss/vite": "4.3.3",
     "@tt/domain": "workspace:*",
+    "@unovis/ts": "1.7.1",
+    "@unovis/vue": "1.7.1",
     "@vueuse/core": "14.4.0",
     "@vueuse/nuxt": "14.4.0",
     "better-auth": "1.7.2",

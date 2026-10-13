@@ -18,17 +18,41 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   return allowed[0] ?? null
 }
 
+export type NavId = 'dashboard' | 'jobs' | 'templates' | 'members' | 'audit'
+export type NavSectionId = 'work' | 'organization'
+
 export interface NavItem {
-  readonly id: 'dashboard' | 'jobs' | 'members' | 'audit'
+  readonly id: NavId
   readonly to: string
+  readonly section: NavSectionId
   readonly permission?: Permission
 }
 
 const NAV: readonly NavItem[] = [
-  { id: 'dashboard', to: '/app' },
-  { id: 'jobs', to: '/app/jobs', permission: 'job:read' },
-  { id: 'members', to: '/app/settings/members' },
-  { id: 'audit', to: '/app/settings/audit-log', permission: 'audit:read' },
+  { id: 'dashboard', to: '/app', section: 'work' },
+  { id: 'jobs', to: '/app/jobs', section: 'work', permission: 'job:read' },
+  { id: 'templates', to: '/app/jobs/templates', section: 'work', permission: 'job_template:read' },
+  { id: 'members', to: '/app/settings/members', section: 'organization' },
+  { id: 'audit', to: '/app/settings/audit-log', section: 'organization', permission: 'audit:read' },
 ]
 
 export const visibleNav = (role: Role | null): readonly NavItem[] => NAV.filter((item) => item.permission === undefined || can(role, item.permission))
+
+export interface NavSection {
+  readonly id: NavSectionId
+  readonly items: readonly NavItem[]
+}
+
+/** The visible items grouped by section, in order; empty sections are left out. */
+export const navSections = (role: Role | null): readonly NavSection[] => {
+  const items = visibleNav(role)
+  return (['work', 'organization'] as const)
+    .map((id) => ({ id, items: items.filter((item) => item.section === id) }))
+    .filter((section) => section.items.length > 0)
+}
+
+/** Most specific match wins: `/app/jobs/templates` is the templates entry, not the jobs one. */
+export const activeNavId = (path: string, items: readonly NavItem[]): NavId | null => {
+  const matching = items.filter((item) => (item.to === '/app' ? path === '/app' : path === item.to || path.startsWith(`${item.to}/`)))
+  return matching.toSorted((a, b) => b.to.length - a.to.length)[0]?.id ?? null
+}

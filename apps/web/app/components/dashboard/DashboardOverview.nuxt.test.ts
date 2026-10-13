@@ -1,0 +1,94 @@
+import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
+import type { JobStatsDto } from '@tt/domain'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { emptyJobStats, jobStatsFixture } from '~~/test/fixtures/job-stats'
+import DashboardOverview from './DashboardOverview.vue'
+
+// The charts draw with d3 into real layout, which happy-dom does not have; they are checked in the browser.
+// Here every chart is a slot-forwarding stub, so the cards, figures and text alternatives are what is tested.
+vi.mock('@unovis/vue', async () => {
+  const { defineComponent, h } = await import('vue')
+  const stub = (name: string) => defineComponent({ name, inheritAttrs: false, setup: (_, { slots }) => () => h('div', { 'data-chart': name }, slots.default?.()) })
+  const names = ['VisSingleContainer', 'VisXYContainer', 'VisDonut', 'VisTooltip', 'VisGroupedBar', 'VisStackedBar', 'VisAxis', 'VisCrosshair', 'VisPlotline']
+  return Object.fromEntries(names.map((name) => [name, stub(name)]))
+})
+vi.mock('@unovis/ts', () => ({ Donut: { selectors: { segment: 'segment' } }, StackedBar: { selectors: { bar: 'bar' } } }))
+
+const state = vi.hoisted(() => ({ stats: null as JobStatsDto | null, failing: false }))
+registerEndpoint('/api/v1/stats/jobs', (event) => {
+  if (state.failing) {
+    event.node.res.statusCode = 403
+    return { success: false, data: null, error: { code: 'forbidden', message: 'x' } }
+  }
+  return { success: true, data: state.stats, error: null }
+})
+
+/** Intl puts a no-break space before the euro sign. */
+const plain = (text: string): string => text.replace(/\s/g, ' ')
+const mounted: { unmount: () => void }[] = []
+const mountOverview = async (props = { careersPath: '/careers/acme', canCreate: true, canInvite: true }) => {
+  clearNuxtData('job-stats')
+  const wrapper = await mountSuspended(DashboardOverview, { props })
+  mounted.push(wrapper)
+  await vi.waitFor(() => expect(wrapper.find('[data-testid="stats-loading"]').exists()).toBe(false))
+  return wrapper
+}
+
+beforeEach(() => {
+  state.stats = jobStatsFixture()
+  state.failing = false
+})
+afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
+
+describe('DashboardOverview', () => {
+  it('shows the real counts per status and every statistic card', async () => {
+    const wrapper = await mountOverview()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="stat-status"]').exists()).toBe(true))
+    const value = (status: string) => wrapper.find(`[data-testid="count-${status}"] [data-testid="count-value"]`).text()
+    expect([value('draft'), value('published'), value('closed')]).toEqual(['2', '3', '1'])
+    for (const id of ['stat-activity', 'stat-quality', 'stat-process', 'stat-salary', 'stat-readiness', 'candidate-metrics-note']) {
+      expect(wrapper.find(`[data-testid="${id}"]`).exists(), id).toBe(true)
+    }
+    expect(wrapper.find('[data-testid="first-steps"]').exists()).toBe(false)
+  })
+
+  it('states the figures as text: medians, process averages, quality and blockers', async () => {
+    const wrapper = await mountOverview()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="stat-salary"]').exists()).toBe(true))
+    expect(plain(wrapper.find('[data-testid="stat-salary"]').text())).toContain('42.500 €')
+    expect(wrapper.find('[data-testid="stat-salary"]').text()).toContain('1 annuncio in un\'altra valuta')
+    expect(wrapper.find('[data-testid="process-stages"]').text()).toContain('2,7')
+    expect(wrapper.find('[data-testid="process-time"]').text()).toContain('2 h 30 min')
+    expect(wrapper.find('[data-testid="process-response"]').text()).toContain('4,3 giorni')
+    expect(wrapper.find('[data-testid="stat-quality"]').text()).toContain('1 sotto soglia')
+    const blockers = wrapper.findAll('[data-testid="blocker"]').map((row) => row.text())
+    expect(blockers[0]).toContain('Manca: RAL minima')
+    expect(blockers[0]).toContain('2 bozze')
+    expect(blockers[1]).toContain('Nessuna fase di selezione')
+  })
+
+  it('keeps a text alternative for each chart', async () => {
+    const wrapper = await mountOverview()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="stat-quality"] table').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="stat-quality"] table').text()).toContain('Data Engineer')
+    expect(plain(wrapper.find('[data-testid="stat-salary"] table').text())).toContain('52.000 €')
+    expect(wrapper.findAll('[data-testid="stat-activity"] table tbody tr')).toHaveLength(12)
+  })
+
+  it('guides the first steps and shows honest empty states when there is no ad', async () => {
+    state.stats = emptyJobStats()
+    const wrapper = await mountOverview({ careersPath: '/careers/acme', canCreate: true, canInvite: false })
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="first-steps"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="stat-status"]').exists()).toBe(false)
+    expect(wrapper.findAll('[data-testid="chart-empty"]').length).toBeGreaterThanOrEqual(5)
+    expect(wrapper.find('[data-testid="candidate-metrics-note"]').exists()).toBe(true)
+  })
+
+  it('shows the error with a retry instead of made-up numbers', async () => {
+    state.failing = true
+    const wrapper = await mountOverview()
+    await vi.waitFor(() => expect(wrapper.find('[role="alert"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="stat-status"]').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Riprova')
+  })
+})

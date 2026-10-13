@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UsersIcon } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { errorKeyOf } from '@/lib/auth-errors'
@@ -33,8 +34,9 @@ const cancelInvitation = async (id: string): Promise<void> => {
 </script>
 
 <template>
+  <AppPage :crumbs="[{ label: t('nav.sections.organization') }, { label: t('members.title') }]">
   <div class="grid gap-8">
-    <PageHeader :title="t('members.title')" :description="t('members.subtitle', { organization: viewer?.organization?.name ?? '' })" />
+    <PageHeader :title="t('members.title')" :description="t('members.subtitle', { organization: viewer?.organization?.name ?? '' })" :icon="UsersIcon" />
 
     <div v-if="loadErrorKey" class="grid gap-3">
       <FormAlert :message-key="loadErrorKey" />
@@ -60,9 +62,10 @@ const cancelInvitation = async (id: string): Promise<void> => {
         </section>
       </div>
 
-      <div class="lg:sticky lg:top-6 lg:order-none">
+      <div class="lg:sticky lg:top-20 lg:order-none">
         <InviteForm :actor-role="role" @invited="() => refresh()" />
       </div>
     </div>
   </div>
+  </AppPage>
 </template>

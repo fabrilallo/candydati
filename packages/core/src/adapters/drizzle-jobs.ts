@@ -2,6 +2,7 @@ import { and, count, desc, eq, schema, type Db } from '@tt/db';
 import { adQualityReportSchema, jobContentSchema, type Job } from '@tt/domain';
 import { ConflictError } from '../errors.js';
 import type { JobListQuery, JobRepository } from '../job-ports.js';
+import { countJobsByStatus, jobWeeklyActivity } from './drizzle-job-stats.js';
 
 type Row = typeof schema.job.$inferSelect;
 
@@ -102,5 +103,18 @@ export function createDrizzleJobs(db: Db): JobRepository {
 
     findPublishedBySlug: (organizationId, slug) =>
       one(and(eq(job.organizationId, organizationId), eq(job.slug, slug), eq(job.status, 'published'))),
+
+    countByStatus: (organizationId) => countJobsByStatus(db, organizationId),
+
+    weeklyActivity: (organizationId, since) => jobWeeklyActivity(db, organizationId, since),
+
+    async listByStatus(organizationId, status) {
+      const rows = await db
+        .select()
+        .from(job)
+        .where(and(eq(job.organizationId, organizationId), eq(job.status, status)))
+        .orderBy(desc(job.updatedAt), desc(job.id));
+      return rows.map(toJob);
+    },
   };
 }

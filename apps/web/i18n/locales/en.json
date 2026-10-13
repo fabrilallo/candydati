@@ -24,7 +24,15 @@
     "members": "Members",
     "jobs": "Jobs",
     "audit": "Audit log",
-    "settings": "Settings"
+    "settings": "Settings",
+    "shortcuts": "Shortcuts",
+    "sidebar": "Sidebar",
+    "templates": "Templates",
+    "publishedCount": "{count} published",
+    "sections": {
+      "work": "Hiring",
+      "organization": "Organization"
+    }
   },
   "roles": {
     "owner": "Owner",
@@ -76,29 +84,23 @@
     "switchOrganization": "Switch organization",
     "organizations": "Your organizations",
     "current": "Active organization",
-    "switched": "You are now working in {organization}"
+    "switched": "You are now working in {organization}",
+    "collapseNav": "Collapse the navigation panel",
+    "expandNav": "Expand the navigation panel",
+    "careersPage": "Careers page",
+    "breadcrumbs": "Breadcrumbs"
   },
   "dashboard": {
     "title": "Overview",
     "welcome": "Hi, {name}",
     "subtitle": "The job ads of {organization} at a glance.",
-    "countsLabel": "Job ads by status",
     "counts": {
       "draft": "Drafts",
       "published": "Published",
       "closed": "Closed"
     },
-    "countsHint": {
-      "draft": "To complete and publish",
-      "published": "Visible on the careers page",
-      "closed": "No longer taking applications"
-    },
-    "viewAll": "See all job ads",
     "newJob": "New job ad",
     "invite": "Invite a colleague",
-    "careersTitle": "Careers page",
-    "careersBody": "Published job ads appear here, with salary and selection process visible to everyone.",
-    "careersOpen": "Open the careers page",
     "startTitle": "First steps",
     "startIntro": "Three steps to put your first transparent job ad online.",
     "start": {
@@ -119,7 +121,93 @@
       }
     },
     "teamTitle": "Your team",
-    "teamBody": "Invite colleagues and choose their role. Every action is kept in the log."
+    "teamBody": "Invite colleagues and choose their role. Every action is kept in the log.",
+    "stats": {
+      "ad": "Job ad",
+      "status": {
+        "title": "Ads by status",
+        "unit": "ad | ads",
+        "all": "View all"
+      },
+      "activity": {
+        "title": "Activity",
+        "hint": "Ads created and published per week, last 12 weeks",
+        "created": "Created",
+        "published": "Published",
+        "weekOf": "Week of {date}",
+        "week": "Week",
+        "emptyTitle": "No activity in the last 12 weeks",
+        "emptyBody": "Ads created and published show up here, week by week."
+      },
+      "quality": {
+        "title": "Quality of published ads",
+        "hint": "Score out of 10, recommended threshold {threshold}",
+        "average": "average out of 10",
+        "below": "{n} below threshold | {n} below threshold",
+        "allAbove": "All above threshold",
+        "score": "Score",
+        "status": "Result",
+        "above": "Above threshold",
+        "thresholdLabel": "Threshold {threshold}",
+        "emptyTitle": "No scores yet",
+        "emptyBody": "The score is computed on publication: it rates the ad, never the candidates."
+      },
+      "salary": {
+        "title": "Salary transparency",
+        "hint": {
+          "year": "Gross yearly salary declared by each published ad, by role",
+          "month": "Gross monthly salary declared by each published ad, by role",
+          "day": "Gross daily rate declared by each published ad, by role",
+          "hour": "Gross hourly rate declared by each published ad, by role"
+        },
+        "medianMin": "Median of minimums",
+        "medianMax": "Median of maximums",
+        "legendRange": "Declared range",
+        "legendMedian": "Medians",
+        "other": "{n} ad in another currency or period is not charted | {n} ads in other currencies or periods are not charted",
+        "emptyTitle": "No published salaries",
+        "emptyBody": "Every published ad declares a minimum and a maximum: compare them all here."
+      },
+      "process": {
+        "title": "Commitments to candidates",
+        "hint": "Averages over {n} published ad | Averages over {n} published ads",
+        "stages": "selection stages",
+        "time": "of interviews and tasks in total",
+        "response": "to hear back after each stage",
+        "days": "{n} days",
+        "emptyTitle": "No declared process yet",
+        "emptyBody": "Stages, duration and response times of published ads show up here."
+      },
+      "readiness": {
+        "title": "What blocks drafts",
+        "hint": "{ready} of {total} ready",
+        "missing": "Missing: {field}",
+        "rules": {
+          "required": "Required field missing",
+          "salary_max_below_min": "Maximum salary below minimum",
+          "city_required": "City missing",
+          "onsite_days_required": "On-site days missing",
+          "too_few_stages": "No selection stage",
+          "too_few_responsibilities": "Fewer than three responsibilities",
+          "too_few_requirements": "No required skill"
+        },
+        "drafts": "{n} draft | {n} drafts",
+        "allReadyTitle": "Every draft is ready",
+        "allReadyBody": "Each draft meets the standard: it can be published.",
+        "emptyTitle": "No drafts",
+        "emptyBody": "When a draft cannot be published yet, this shows what is missing most often.",
+        "open": "Go to job ads"
+      },
+      "candidates": {
+        "title": "Candidate metrics arrive with applications",
+        "body": "For now the product handles job ads only. Once applications arrive, real numbers show up here, never estimates.",
+        "items": {
+          "funnel": "Conversion by stage",
+          "timeToHire": "Time to hire",
+          "responseKept": "Response times kept"
+        }
+      }
+    }
   },
   "members": {
     "title": "Members",
@@ -603,6 +691,13 @@
         "remove": "Remove stage {n}",
         "moveUp": "Move stage {n} up",
         "moveDown": "Move stage {n} down"
+      },
+      "history": "History",
+      "openPublic": "Open the public page",
+      "meta": {
+        "updated": "Updated {date}",
+        "published": "Published {date}",
+        "unsaved": "Not saved yet"
       }
     },
     "checklist": {

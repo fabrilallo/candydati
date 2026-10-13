@@ -181,6 +181,77 @@
   }
 }
 
+/*
+ * Charts (@unovis): themed through its CSS variables, mapped to our tokens so both themes follow automatically.
+ * Series colours are passed per chart: cobalt for the main series, neutrals for the rest, state colours for state.
+ */
+:root {
+  --chart-neutral: color-mix(in srgb, var(--muted-foreground) 38%, var(--card));
+  --chart-track: var(--muted);
+}
+/* Scoped on the chart wrapper: @unovis injects its own `:root` defaults, which would win over ours. */
+.tt-chart {
+  --vis-font-family: var(--font-sans);
+  --vis-axis-font-family: var(--font-sans);
+  --vis-axis-tick-label-color: var(--muted-foreground);
+  --vis-axis-tick-label-font-size: 11px;
+  --vis-axis-label-color: var(--muted-foreground);
+  --vis-axis-grid-color: var(--border);
+  --vis-axis-domain-color: var(--border);
+  --vis-axis-tick-color: var(--border);
+  --vis-axis-grid-line-dasharray: 2 3;
+  --vis-crosshair-line-stroke-color: var(--input);
+  --vis-crosshair-circle-stroke-color: var(--card);
+  --vis-tooltip-background-color: var(--popover);
+  --vis-tooltip-border-color: var(--border);
+  --vis-tooltip-text-color: var(--popover-foreground);
+  --vis-tooltip-border-radius: 10px;
+  --vis-tooltip-padding: 8px 10px;
+  --vis-tooltip-box-shadow: var(--shadow-md);
+  --vis-donut-background-color: var(--chart-track);
+  --vis-donut-central-label-text-color: var(--foreground);
+  --vis-donut-central-label-font-size: 28px;
+  --vis-donut-central-label-font-weight: 600;
+  --vis-donut-central-sub-label-text-color: var(--muted-foreground);
+  --vis-donut-central-sub-label-font-size: 12px;
+  --vis-donut-segment-stroke-color: var(--card);
+  --vis-plotline-color: var(--foreground);
+  --vis-plotline-label-color: var(--muted-foreground);
+  --vis-plotline-label-font-size: 11px;
+  --vis-grouped-bar-stroke-color: transparent;
+  --vis-stacked-bar-stroke-color: transparent;
+}
+.tt-chart text {
+  font-variant-numeric: tabular-nums;
+}
+.tt-tip {
+  display: grid;
+  gap: 2px;
+  font-size: 12px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.tt-tip p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tt-tip b {
+  margin-left: auto;
+  padding-left: 12px;
+  font-weight: 600;
+}
+.tt-tip-title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.tt-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
 /* Toasts (vue-sonner): same font, tinted shadow, quiet type. */
 [data-sonner-toaster] [data-sonner-toast].tt-toast {
   font-family: var(--font-sans);

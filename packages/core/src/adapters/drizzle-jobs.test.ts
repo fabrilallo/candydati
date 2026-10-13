@@ -118,6 +118,60 @@ describe('createDrizzleJobs', () => {
   });
 });
 
+describe('createDrizzleJobs aggregates', () => {
+  const ts = (iso: string) => new Date(iso);
+
+  it('counts per status, zero for missing statuses, isolated per organization', async () => {
+    const jobs = createDrizzleJobs(handle.db);
+    const org = (await insertOrg()).id;
+    const other = (await insertOrg()).id;
+    await jobs.create(newJob(org));
+    await jobs.create(newJob(org));
+    await jobs.create(newJob(org, { status: 'published', publishedAt: new Date() }));
+    await jobs.create(newJob(other, { status: 'closed', publishedAt: new Date(), closedAt: new Date() }));
+    expect(await jobs.countByStatus(org)).toEqual({ draft: 2, published: 1, closed: 0 });
+    expect(await jobs.countByStatus(other)).toEqual({ draft: 0, published: 0, closed: 1 });
+    expect(await jobs.countByStatus((await insertOrg()).id)).toEqual({ draft: 0, published: 0, closed: 0 });
+  });
+
+  it('buckets created and published per UTC week starting Monday, from since on, isolated', async () => {
+    const jobs = createDrizzleJobs(handle.db);
+    const org = (await insertOrg()).id;
+    const other = (await insertOrg()).id;
+    await jobs.create(newJob(org, { createdAt: ts('2026-05-31T23:59:59.999Z') })); // Sunday
+    await jobs.create(newJob(org, { createdAt: ts('2026-06-01T00:00:00.000Z') })); // Monday
+    await jobs.create(newJob(org, { createdAt: ts('2026-05-17T12:00:00.000Z') })); // before since
+    await jobs.create(newJob(org, { createdAt: ts('2026-05-26T00:00:00Z'), status: 'published', publishedAt: ts('2026-06-02T08:00:00Z') }));
+    await jobs.create(
+      newJob(org, { createdAt: ts('2026-05-26T00:00:00Z'), status: 'closed', publishedAt: ts('2026-06-07T23:00:00Z'), closedAt: ts('2026-06-08T00:00:00Z') }),
+    );
+    await jobs.create(newJob(other, { createdAt: ts('2026-06-01T10:00:00Z'), status: 'published', publishedAt: ts('2026-06-01T10:00:00Z') }));
+    expect(await jobs.weeklyActivity(org, ts('2026-05-25T00:00:00Z'))).toEqual({
+      created: [
+        { week: '2026-05-25', count: 3 },
+        { week: '2026-06-01', count: 1 },
+      ],
+      published: [{ week: '2026-06-01', count: 2 }],
+    });
+  });
+
+  it('lists every job of one status, newest updatedAt first, isolated', async () => {
+    const jobs = createDrizzleJobs(handle.db);
+    const org = (await insertOrg()).id;
+    const other = (await insertOrg()).id;
+    const day = (n: number) => new Date(Date.UTC(2026, 0, n));
+    await jobs.create(newJob(org, { id: randomUUID(), updatedAt: day(1) }));
+    const newest = await jobs.create(newJob(org, { updatedAt: day(4) }));
+    const oldest = (await jobs.listByStatus(org, 'draft')).at(-1)!;
+    await jobs.create(newJob(org, { status: 'published', publishedAt: day(2) }));
+    await jobs.create(newJob(other));
+    const drafts = await jobs.listByStatus(org, 'draft');
+    expect(drafts.map((j) => j.id)).toEqual([newest.id, oldest.id]);
+    expect(drafts[0]).toEqual(newest);
+    expect(await jobs.listByStatus(org, 'closed')).toEqual([]);
+  });
+});
+
 describe('createDrizzleJobTemplates', () => {
   it('creates, lists, finds and deletes within the organization only', async () => {
     const templates = createDrizzleJobTemplates(handle.db);
