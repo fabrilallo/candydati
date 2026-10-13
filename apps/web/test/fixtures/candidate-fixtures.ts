@@ -82,6 +82,7 @@ export const detail = (overrides: Partial<CandidateDetailDto> = {}): CandidateDe
       consent: { privacyNoticeVersion: 3, scopes: ['selection', 'talent_pool'], givenAt: T0 },
       retentionExpiresAt: '2028-10-13T10:00:00.000Z',
       cv: { fileName: 'giulia-rossi.pdf', mediaType: 'application/pdf', sizeBytes: 1_572_864 },
+      messageCount: 2,
       extraction: {
         status: 'done',
         source: 'model',

@@ -8,8 +8,12 @@ import {
   createDrizzlePrivacyNotices,
   type AuditLogRepository,
   type CandidateDeps,
+  type EmailIdentity,
+  type EmailSender as MessageSender,
   type FileStorage,
+  type InboundDeps,
   type JobDeps,
+  type MessagingDeps,
   type PrivacyDeps,
   type SubmitApplicationDeps,
   type TaskQueue,
@@ -23,6 +27,7 @@ import type { EmailSender } from './auth/email-sender.js';
 import { findMemberRole } from './auth/member-role.js';
 import type { Env } from './config/env.js';
 import { createActorResolver } from './http/actor-resolver.js';
+import { createMessagingDeps } from './wiring/messaging-deps.js';
 import { createPhase2Deps } from './wiring/phase2-deps.js';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
 import type { Actor } from '@tt/core';
@@ -36,6 +41,8 @@ export interface RateLimitSettings {
   readonly publicMax?: number | undefined;
   /** Requests per minute per client on the ad quality analysis. */
   readonly qualityMax?: number | undefined;
+  /** Requests per minute per client on the inbound email webhooks. */
+  readonly inboundMax?: number | undefined;
   /** Public applications allowed per client in `applyWindowMinutes`. */
   readonly applyMax?: number | undefined;
   readonly applyWindowMinutes?: number | undefined;
@@ -43,6 +50,7 @@ export interface RateLimitSettings {
 
 export const DEFAULT_PUBLIC_MAX = 120;
 export const DEFAULT_QUALITY_MAX = 20;
+export const DEFAULT_INBOUND_MAX = 120;
 export const DEFAULT_APPLY_MAX = 5;
 export const DEFAULT_APPLY_WINDOW_MINUTES = 10;
 export const DEFAULT_RATE_LIMIT: RateLimitSettings = { max: 300, authMax: 20, publicMax: DEFAULT_PUBLIC_MAX, qualityMax: DEFAULT_QUALITY_MAX };
@@ -59,6 +67,8 @@ export interface AppContext {
   readonly candidateDeps: CandidateDeps;
   readonly privacyDeps: PrivacyDeps;
   readonly submitDeps: SubmitApplicationDeps;
+  readonly messagingDeps: MessagingDeps;
+  readonly inboundDeps: InboundDeps;
 }
 
 export interface AppContextDeps {
@@ -69,11 +79,15 @@ export interface AppContextDeps {
   readonly adQuality: AdQualityAnalyzer;
   readonly files: FileStorage;
   readonly queue: TaskQueue;
+  readonly sender: MessageSender;
+  readonly identity: EmailIdentity;
+  readonly onReceiptError: (error: unknown) => void;
 }
 
-export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files, queue }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files, queue, sender, identity, onReceiptError }: AppContextDeps): AppContext {
   const auditLog = createDrizzleAuditLog(db);
   const auth = createAuth({ env, db, auditLog, emailSender });
+  const messaging = createMessagingDeps({ env, db, auditLog, queue, sender, identity, onReceiptError });
   const resolveFromHeaders = createActorResolver({
     getSession: async (headers) => {
       const result = await auth.api.getSession({ headers });
@@ -89,7 +103,9 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     auditLog,
     userNames: createUserNameLookup(db),
     resolveActor: (request) => resolveFromHeaders(fromNodeHeaders(request.headers)),
-    ...createPhase2Deps({ db, auditLog, files, queue }),
+    ...createPhase2Deps({ db, auditLog, files, queue, receipts: messaging.receipts }),
+    messagingDeps: messaging.messagingDeps,
+    inboundDeps: messaging.inboundDeps,
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
     rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
     jobDeps: {

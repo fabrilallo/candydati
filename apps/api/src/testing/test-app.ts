@@ -5,11 +5,12 @@ import type { FastifyInstance } from 'fastify';
 import type { InvitationEmail, EmailSender } from '../auth/email-sender.js';
 import type { RateLimitSettings } from '../app-context.js';
 import { parseEnv, type Env } from '../config/env.js';
-import { createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer, type InMemoryFileStorage, type InMemoryTaskQueue } from '@tt/core/testing';
+import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer, type FakeEmailSender, type InMemoryFileStorage, type InMemoryTaskQueue } from '@tt/core/testing';
 import { buildServer } from '../server.js';
 import { apiTestDatabaseUrl } from './test-database.js';
 
 export const WEB_ORIGIN = 'http://localhost:3000';
+export const WEBHOOK_SECRET = 'test-webhook-secret-test-webhook-secret';
 export const PASSWORD = 'correct-horse-battery';
 
 export const testEnv = (overrides: Record<string, string> = {}): Env =>
@@ -25,6 +26,10 @@ export const testEnv = (overrides: Record<string, string> = {}): Env =>
     S3_BUCKET: 'team-tracker-test',
     S3_ACCESS_KEY: 'test',
     S3_SECRET_KEY: 'test-secret',
+    EMAIL_DOMAIN: 'mail.test.example',
+    EMAIL_FROM_LOCAL: 'jobs',
+    EMAIL_INBOUND_DOMAIN: 'in.test.example',
+    INBOUND_WEBHOOK_SECRET: WEBHOOK_SECRET,
     ...overrides,
   });
 
@@ -34,6 +39,7 @@ export interface TestApp {
   readonly sentInvitations: readonly InvitationEmail[];
   readonly files: InMemoryFileStorage;
   readonly queue: InMemoryTaskQueue;
+  readonly emailSender: FakeEmailSender;
   close(): Promise<void>;
 }
 
@@ -44,8 +50,9 @@ export async function createTestApp(options: { rateLimit?: RateLimitSettings; em
   const sent: InvitationEmail[] = [];
   const files = createInMemoryFileStorage();
   const queue = createInMemoryTaskQueue();
+  const fakeSender = createFakeEmailSender();
   const emailSender: EmailSender = options.emailSender ?? { sendInvitation: async (email) => void sent.push(email) };
-  const app = await buildServer({ env: testEnv(), db: handle.db, emailSender, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), files, queue });
+  const app = await buildServer({ env: testEnv(), db: handle.db, emailSender, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() } });
   await app.ready();
   return {
     app,
@@ -53,6 +60,7 @@ export async function createTestApp(options: { rateLimit?: RateLimitSettings; em
     sentInvitations: sent,
     files,
     queue,
+    emailSender: fakeSender,
     close: async () => {
       await app.close();
       await handle.close();

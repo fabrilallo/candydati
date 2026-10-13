@@ -34,7 +34,9 @@
     },
     "candidates": "Candidates",
     "privacy": "Privacy",
-    "candidateCount": "{count} candidates"
+    "candidateCount": "{count} candidates",
+    "email": "Email",
+    "emailTemplates": "Email templates"
   },
   "roles": {
     "owner": "Owner",
@@ -324,6 +326,18 @@
       },
       "candidate_note": {
         "created": "Wrote a note on a candidate"
+      },
+      "message": {
+        "sent": "Sent a message to a candidate",
+        "received": "Received a reply from a candidate",
+        "failed": "A message was not delivered"
+      },
+      "email_template": {
+        "saved": "Saved an email template",
+        "deleted": "Deleted or restored an email template"
+      },
+      "email_settings": {
+        "updated": "Changed the email settings"
       }
     }
   },
@@ -1000,6 +1014,17 @@
       "title": "Outcomes",
       "hint": "Closed applications: they no longer move",
       "empty": "No outcome recorded yet."
+    },
+    "selection": {
+      "start": "Select",
+      "done": "Done selecting",
+      "select": "Select {name}",
+      "all": "All",
+      "allIn": "Select every application in {stage}",
+      "bar": "Selected applications",
+      "count": "1 selected | {count} selected",
+      "message": "Send message",
+      "clear": "Clear selection"
     }
   },
   "candidate": {
@@ -1015,7 +1040,8 @@
       "label": "Profile sections",
       "profile": "Profile",
       "cv": "CV",
-      "notes": "Notes"
+      "notes": "Notes",
+      "messages": "Messages"
     },
     "header": {
       "stage": "Stage:",
@@ -1258,6 +1284,181 @@
       "received": "We received your application for {title} at {organization}.",
       "commitment": "You will hear back within 1 day after each stage. | You will hear back within {count} days after each stage.",
       "email": "We will write to you at {email}."
+    }
+  },
+  "messages": {
+    "system": "Sent automatically",
+    "status": {
+      "queued": "Queued",
+      "sent": "Sent",
+      "failed": "Not delivered",
+      "received": "Received"
+    },
+    "unverified": {
+      "title": "Unverified sender.",
+      "body": "It comes from an address other than the one on the application: be wary of links and requests."
+    },
+    "empty": "No messages for this application yet.",
+    "threadLabel": "Messages about {job}",
+    "proposal": "Outcome recorded. We prepared the message for {name} with the outcome template: read it and send it, or skip. Nothing goes out on its own.",
+    "variables": {
+      "insert": "Variable",
+      "hint": "Inserted where the cursor is",
+      "candidate": {
+        "firstName": "First name",
+        "lastName": "Last name"
+      },
+      "job": {
+        "title": "Job title",
+        "responseDays": "Days to respond",
+        "url": "Link to the job"
+      },
+      "organization": {
+        "name": "Organization name"
+      },
+      "stage": {
+        "name": "Current stage"
+      }
+    },
+    "composer": {
+      "title": "New message",
+      "application": "Application",
+      "template": "Template",
+      "noTemplate": "No template",
+      "templatesUnavailable": "We could not load the templates: you can write the message from scratch.",
+      "subject": "Subject",
+      "body": "Message",
+      "unknownTitle": "1 unknown variable: fix it or remove it before sending | {count} unknown variables: fix them or remove them before sending",
+      "unknownHint": "The valid variables are in the Variable menu.",
+      "tooMany": "You can write to at most {max} people at a time.",
+      "replyHint": "Replies come back here, in the candidate's profile.",
+      "skip": "Skip",
+      "send": "Send",
+      "queued": "Message queued for sending | {count} messages queued for sending"
+    },
+    "preview": {
+      "for": "Preview for {name}",
+      "updating": "Updating…",
+      "empty": "Write a subject and a message: this is where you see what the person will get."
+    },
+    "confirm": {
+      "title": "Send the message?",
+      "singleBody": "The message goes to {recipient}. Once sent it cannot be taken back.",
+      "bulkBody": "The message goes to 1 person. Once sent it cannot be taken back. | The message goes to {count} people, one email each with their own details. Once sent it cannot be taken back.",
+      "action": "Send",
+      "bulkAction": "Send to 1 person | Send to {count} people"
+    },
+    "bulk": {
+      "title": "Message to the selected applications",
+      "outcomeTitle": "Outcome message",
+      "description": "Write a message, check the preview and confirm before sending it.",
+      "recipients": "1 recipient | {count} recipients",
+      "oneEach": "Each person gets their own email: nobody sees the other addresses."
+    },
+    "errors": {
+      "unknownVariable": "The message has unknown variables: fix them and try again."
+    },
+    "deliveryErrors": {
+      "unknown": "Not delivered.",
+      "delivery_failed": "Not delivered: the mail server did not answer. You can try again later.",
+      "delivery_rejected": "Not delivered: the person's mail server refused the message.",
+      "recipient_missing": "Not delivered: there is no valid email address.",
+      "queue_unavailable": "Not delivered: the sending service was not available."
+    }
+  },
+  "emailSettings": {
+    "title": "Email",
+    "subtitle": "The name and address candidates see on your emails.",
+    "saved": "Settings saved",
+    "checked": "Domain checked again",
+    "status": {
+      "default": "Instance address",
+      "verified": "Verified",
+      "pending": "Pending",
+      "failed": "Failed",
+      "unsupported": "Managed by the instance"
+    },
+    "effective": {
+      "title": "Current sender",
+      "from": "This is how candidates see the sender:",
+      "replies": "Replies always come back here, to the candidate's profile, whatever the sender."
+    },
+    "form": {
+      "title": "Sender",
+      "senderName": "Sender name",
+      "senderNameHint": "The name people see, for example the company's.",
+      "fromAddress": "Address on your domain (optional)",
+      "fromAddressHint": "Leave it empty to use the instance address. Your own address is used only once the domain is verified.",
+      "fromAddressPlaceholder": "jobs{'@'}company.com",
+      "save": "Save",
+      "saving": "Saving…"
+    },
+    "errors": {
+      "senderName": "Enter a name of at most 80 characters",
+      "fromAddress": "Enter a valid email address"
+    },
+    "domain": {
+      "title": "Domain {domain}",
+      "verify": "Check again",
+      "explain": {
+        "verified": "The domain is verified: emails go out from your address.",
+        "pending": "Publish these DNS records where your domain is managed, then check again. Until then emails go out from the instance address.",
+        "failed": "Verification failed: make sure the DNS records are published exactly like this, then check again. Meanwhile emails go out from the instance address.",
+        "unsupported": "On this installation emails go through the instance operator's server: the sender is the instance's and the domain is not verified here."
+      }
+    },
+    "records": {
+      "type": "Type",
+      "name": "Name",
+      "value": "Value",
+      "copy": "Copy {field}",
+      "copyFailed": "We could not copy it: select the text by hand."
+    }
+  },
+  "emailTemplates": {
+    "title": "Email templates",
+    "subtitle": "The texts messages to candidates start from. Variables are filled in for each person.",
+    "listLabel": "Templates",
+    "default": "Default text",
+    "defaultShort": "default",
+    "new": "New template",
+    "name": "Template name",
+    "save": "Save template",
+    "saving": "Saving…",
+    "saved": "Template saved",
+    "deleted": "Template deleted",
+    "restored": "Default text restored",
+    "restore": "Restore the default",
+    "delete": "Delete",
+    "kinds": {
+      "receipt": "Application received",
+      "outcome_not_selected": "Not selected",
+      "outcome_hired": "Hired",
+      "stage_update": "Stage change",
+      "custom": "Custom"
+    },
+    "kindHints": {
+      "receipt": "Goes out on its own when an application arrives: the only automatic message.",
+      "outcome_not_selected": "Proposed after a negative outcome. A person always sends it.",
+      "outcome_hired": "Proposed after a hire. A person always sends it.",
+      "stage_update": "For when an application changes stage.",
+      "custom": "Your own template, to pick when you write."
+    },
+    "confirmDelete": {
+      "title": "Delete the template?",
+      "body": "{name} will no longer be among the templates. Messages already sent stay."
+    },
+    "confirmRestore": {
+      "title": "Restore the default text?",
+      "body": "Your changes to this template will be lost."
+    },
+    "sample": {
+      "title": "Preview with sample data",
+      "empty": "Write a subject and a message to see the preview.",
+      "firstName": "Giulia",
+      "lastName": "Rossi",
+      "jobTitle": "Backend developer",
+      "stage": "Technical interview"
     }
   }
 }

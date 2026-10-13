@@ -13,3 +13,8 @@ export * from './job/json-schema.js';
 export * from './job/stats.js';
 export * from './candidate/privacy.js';
 export * from './candidate/application.js';
+export * from './messaging/variables.js';
+export * from './messaging/html.js';
+export * from './messaging/template.js';
+export * from './messaging/defaults.js';
+export * from './messaging/message.js';

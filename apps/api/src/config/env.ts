@@ -1,4 +1,4 @@
-import { loadS3Config, type S3Config } from '@tt/providers';
+import { loadEmailConfig, loadS3Config, type EmailConfig, type S3Config } from '@tt/providers';
 import { loadPlatformConfig, type PlatformConfig } from '@tt/domain';
 import { z } from 'zod';
 
@@ -31,7 +31,7 @@ const envSchema = z.object({
   TRUSTED_ORIGINS: z.string().optional().transform(splitList).pipe(z.array(z.url())),
 });
 
-export type Env = Readonly<z.infer<typeof envSchema>> & { readonly platform: PlatformConfig; readonly s3: S3Config };
+export type Env = Readonly<z.infer<typeof envSchema>> & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig };
 
 type Source = Readonly<Record<string, string | undefined>>;
 
@@ -51,11 +51,24 @@ function parseS3(clean: Source): S3Config {
   }
 }
 
+/** The webhook secret is mandatory in production, where the inbound routes are exposed. Names variables, never values. */
+function parseEmail(clean: Source, production: boolean): EmailConfig {
+  try {
+    return loadEmailConfig(clean, { requireWebhookSecret: production });
+  } catch (error) {
+    throw new Error(`Invalid environment: ${error instanceof Error ? error.message : 'email configuration'}`, { cause: error });
+  }
+}
+
 export function parseEnv(source: Source): Env {
   const clean = withoutEmptyStrings(source);
   const parsed = envSchema.safeParse(clean);
   if (!parsed.success) throw new Error(`Invalid environment: ${describeIssues(parsed.error)}`);
-  return Object.freeze({ ...parsed.data, platform: loadPlatformConfig(clean), s3: parseS3(clean) });
+  return Object.freeze({
+    ...parsed.data,
+    platform: loadPlatformConfig(clean), s3: parseS3(clean),
+    email: parseEmail(clean, parsed.data.NODE_ENV === 'production'),
+  });
 }
 
 export const loadEnv = (): Env => parseEnv(process.env);

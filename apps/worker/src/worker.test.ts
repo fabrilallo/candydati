@@ -15,7 +15,7 @@ const createFakeBoss = () => {
     createQueue: vi.fn(async (name: string) => {
       created.push(name);
     }),
-    work: vi.fn(async (name: string, handler: WorkHandler) => {
+    work: vi.fn(async (name: string, _options: unknown, handler: WorkHandler) => {
       handlers.set(name, handler);
       return `${name}-worker`;
     }),
@@ -129,5 +129,27 @@ describe('startWorker stop()', () => {
     await worker.stop();
 
     expect(boss.stop).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('retry metadata', () => {
+  it('tells the handler whether the job is on its last attempt', async () => {
+    const { boss, handlers } = createFakeBoss();
+    const seen: boolean[] = [];
+    const queue = defineQueue({
+      name: 'test.queue',
+      payload: z.object({ value: z.number().int() }),
+      handle: async ({ lastAttempt }) => void seen.push(lastAttempt),
+    });
+    await startWorker({ boss, logger: silentLogger, queues: [queue] });
+
+    await handlers.get('test.queue')!([
+      { ...job('a', { value: 1 }), retryCount: 0, retryLimit: 3 },
+      { ...job('b', { value: 1 }), retryCount: 3, retryLimit: 3 },
+      job('c', { value: 1 }),
+    ]);
+
+    expect(seen).toEqual([false, true, true]);
+    expect(boss.work).toHaveBeenCalledWith('test.queue', { includeMetadata: true }, expect.any(Function));
   });
 });

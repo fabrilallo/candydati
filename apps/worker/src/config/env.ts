@@ -1,4 +1,5 @@
-import { loadS3Config, type S3Config } from '@tt/providers';
+import { loadPlatformConfig, type PlatformConfig } from '@tt/domain';
+import { loadEmailConfig, loadS3Config, type EmailConfig, type S3Config } from '@tt/providers';
 import { z } from 'zod';
 
 const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
@@ -11,7 +12,7 @@ const envSchema = z.object({
   FAST_MODEL: z.string().regex(/^[^/\s]+\/\S+$/, 'must look like provider/model').optional(),
 });
 
-export type WorkerEnv = Readonly<z.infer<typeof envSchema>> & { readonly s3: S3Config };
+export type WorkerEnv = Readonly<z.infer<typeof envSchema>> & { readonly s3: S3Config; readonly email: EmailConfig; readonly platform: PlatformConfig };
 
 /** `.env` files often contain `KEY=` for unset values: treat empty strings as absent. */
 const withoutEmptyStrings = (
@@ -38,6 +39,15 @@ const parseS3 = (source: Readonly<Record<string, string | undefined>>): S3Config
   }
 };
 
+/** The error names the EMAIL_* / SMTP_* variables, never their values. The worker serves no webhook: no secret needed. */
+const parseEmail = (source: Readonly<Record<string, string | undefined>>): EmailConfig => {
+  try {
+    return loadEmailConfig(source);
+  } catch (error) {
+    throw new Error(`Invalid worker environment: ${error instanceof Error ? error.message : 'email configuration'}`, { cause: error });
+  }
+};
+
 /** Validates the process environment once at boot. Throws listing every missing or invalid variable. */
 export const loadEnv = (source: Readonly<Record<string, string | undefined>>): WorkerEnv => {
   const normalized = withoutEmptyStrings(source);
@@ -45,5 +55,10 @@ export const loadEnv = (source: Readonly<Record<string, string | undefined>>): W
   if (!result.success) {
     throw new Error(`Invalid worker environment: ${describeIssues(result.error.issues, normalized)}`);
   }
-  return Object.freeze({ ...result.data, s3: parseS3(normalized) });
+  return Object.freeze({
+    ...result.data,
+    s3: parseS3(normalized),
+    email: parseEmail(normalized),
+    platform: loadPlatformConfig(normalized),
+  });
 };

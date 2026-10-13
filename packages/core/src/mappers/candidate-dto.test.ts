@@ -74,13 +74,16 @@ describe('candidate DTO mappers', () => {
     const detail = toCandidateDetailDto({
       candidate,
       applications: [
-        { application: buildApplication({ stageId: 'gone' }), job, stages, extraction: null },
-        { application: buildApplication({ stageId: 'stage-0' }), job, stages, extraction: null },
-        { application: buildApplication({ stageId: 'received' }), job, stages, extraction: null },
+        { application: buildApplication({ stageId: 'gone' }), job, stages, extraction: null, messageCount: 0 },
+        { application: buildApplication({ stageId: 'stage-0' }), job, stages, extraction: null, messageCount: 0 },
+        { application: buildApplication({ stageId: 'received' }), job, stages, extraction: null, messageCount: 0 },
       ],
       notes: [],
     });
     expect(detail.applications.map((a) => a.stageRemoved)).toEqual([true, false, false]);
+    expect(detail.applications.map((a) => a.messageCount)).toEqual([0, 0, 0]);
+    const counted = toCandidateDetailDto({ candidate, applications: [{ application, job, stages, extraction: null, messageCount: 4 }], notes: [] });
+    expect(counted.applications[0]?.messageCount).toBe(4);
   });
 
   it('maps summaries', () => {
@@ -114,7 +117,7 @@ describe('candidate DTO mappers', () => {
     const stages = pipelineStagesOf(job.content.process);
     const dto = toCandidateDetailDto({
       candidate,
-      applications: [{ application, job, stages, extraction: null }],
+      applications: [{ application, job, stages, extraction: null, messageCount: 0 }],
       notes: [{ note: buildNote(), authorName: 'Rita' }],
     });
     expect(dto.candidate).toEqual({

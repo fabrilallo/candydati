@@ -4,8 +4,12 @@ import type { ApplicationCardDto, StageRef } from '@/lib/candidate-schemas'
 import type { OutcomeGroup } from '@/lib/pipeline-board'
 
 /** Decided applications, out of the columns: collapsed by default, grouped by outcome, read-only. */
-defineProps<{ groups: readonly OutcomeGroup[]; total: number; stages: readonly StageRef[]; now: Date }>()
-const emit = defineEmits<{ open: [card: ApplicationCardDto] }>()
+const props = withDefaults(defineProps<{ groups: readonly OutcomeGroup[]; total: number; stages: readonly StageRef[]; now: Date; selectable?: boolean; selecting?: boolean; selectedIds?: ReadonlySet<string> }>(), {
+  selectable: false,
+  selecting: false,
+  selectedIds: () => new Set<string>(),
+})
+const emit = defineEmits<{ open: [card: ApplicationCardDto]; select: [id: string, shift: boolean] }>()
 const { t } = useI18n()
 const open = ref(false)
 </script>
@@ -27,7 +31,18 @@ const open = ref(false)
           <h3 class="text-sm font-medium">{{ t(`candidate.outcomes.${group.outcome}`) }} <span class="figure text-muted-foreground">{{ group.cards.length }}</span></h3>
           <ul class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             <li v-for="card in group.cards" :key="card.id">
-              <CandidateCard :card="card" :stages="stages" :now="now" :can-move="false" :can-decide="false" @open="emit('open', card)" />
+              <CandidateCard
+                :card="card"
+                :stages="stages"
+                :now="now"
+                :can-move="false"
+                :can-decide="false"
+                :selectable="selectable"
+                :selecting="selecting"
+                :selected="props.selectedIds.has(card.id)"
+                @open="emit('open', card)"
+                @select="emit('select', card.id, $event)"
+              />
             </li>
           </ul>
         </div>

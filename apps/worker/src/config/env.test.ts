@@ -70,3 +70,18 @@ describe('loadEnv storage and model', () => {
     expect(() => loadEnv({ ...S3, S3_SECRET_KEY: '', DATABASE_URL: VALID_DATABASE_URL })).toThrow(/S3_SECRET_KEY/);
   });
 });
+
+describe('loadEnv email', () => {
+  const base = { ...S3, DATABASE_URL: VALID_DATABASE_URL };
+
+  it('defaults to the log provider and reads the sender settings', () => {
+    expect(loadEnv(base).email.transport.kind).toBe('log');
+    const env = loadEnv({ ...base, EMAIL_PROVIDER: 'smtp', SMTP_HOST: 'localhost', SMTP_PORT: '1025', EMAIL_DOMAIN: 'mail.example', PLATFORM_NAME: 'P' });
+    expect(env.email).toMatchObject({ transport: { kind: 'smtp', port: 1025 }, domain: 'mail.example' });
+    expect(env.platform.name).toBe('P');
+  });
+
+  it('names the missing variable, not its value', () => {
+    expect(() => loadEnv({ ...base, EMAIL_PROVIDER: 'resend' })).toThrow(/RESEND_API_KEY/);
+  });
+});

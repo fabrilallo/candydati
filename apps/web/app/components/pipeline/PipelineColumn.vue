@@ -4,7 +4,8 @@ import { stageName, stageTone } from '@/lib/pipeline-board'
 import { formatDuration } from '@/lib/job-view'
 
 /** One stage of the board: dot, name, count, who runs it, the cards, and the drop line while something hovers. */
-const props = defineProps<{ column: BoardColumn; filtered: boolean; over: boolean; indicator: boolean }>()
+const props = defineProps<{ column: BoardColumn; filtered: boolean; over: boolean; indicator: boolean; selecting?: boolean; allSelected?: boolean }>()
+const emit = defineEmits<{ selectAll: [] }>()
 const { t } = useI18n()
 const tr = useVisitorTranslate()
 const titleId = computed(() => `stage-${props.column.id}`)
@@ -30,6 +31,11 @@ const detail = computed(() => {
           <span class="sr-only">{{ t('pipeline.columnCount', { count: column.cards.length }, column.cards.length) }}</span>
           <span aria-hidden="true">{{ column.cards.length }}</span>
         </span>
+        <label v-if="selecting && column.cards.length > 0" class="ml-auto flex cursor-pointer items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
+          <input type="checkbox" class="size-4 cursor-pointer accent-primary" :checked="allSelected" data-testid="column-select-all" @change="emit('selectAll')">
+          {{ t('pipeline.selection.all') }}
+          <span class="sr-only">{{ t('pipeline.selection.allIn', { stage: stageName(column, t) }) }}</span>
+        </label>
       </div>
       <p class="truncate pl-4 text-xs text-muted-foreground">{{ detail }}</p>
     </header>

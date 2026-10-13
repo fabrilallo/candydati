@@ -4,6 +4,7 @@ import {
   buildApplication,
   buildCandidate,
   buildExtraction,
+  buildMessage,
   buildNote,
   createInMemoryUserDirectory,
   fakePdfBytes,
@@ -85,6 +86,21 @@ describe('searchCandidates', () => {
   });
 });
 
+describe('getCandidate messageCount', () => {
+  it('counts the messages of each application of the candidate in the organization only', async () => {
+    const d = world();
+    d.messagingStore.write({
+      messages: [
+        buildMessage({ id: 'm1', organizationId: ORG_A, applicationId: 'app_1' }),
+        buildMessage({ id: 'm2', organizationId: ORG_A, applicationId: 'app_1', direction: 'inbound', status: 'received' }),
+        buildMessage({ id: 'm3', organizationId: ORG_B, applicationId: 'app_1' }),
+      ],
+    });
+    const view = await getCandidate(d, recruiter, { candidateId: 'cand_1' });
+    expect(view.applications[0]?.messageCount).toBe(2);
+  });
+});
+
 describe('getCandidate', () => {
   it('returns the profile with applications, stages, extraction and notes with author names, and audits the view', async () => {
     const d = world();
@@ -94,6 +110,7 @@ describe('getCandidate', () => {
     expect(view.applications[0]?.stages.map((s) => s.id)).toEqual(['received', 'stage-0', 'stage-1']);
     expect(view.applications[0]?.job).toMatchObject({ id: 'job_1', slug: 'backend' });
     expect(view.applications[0]?.extraction?.status).toBe('done');
+    expect(view.applications[0]?.messageCount).toBe(0);
     expect(view.notes).toEqual([{ note: expect.objectContaining({ id: 'note_1' }), authorName: 'Rita Recruiter' }]);
     expect(d.auditLog.events()).toHaveLength(1);
     expect(d.auditLog.events()[0]).toMatchObject({ action: 'candidate.viewed', target: { type: 'candidate', id: 'cand_1' }, metadata: {} });

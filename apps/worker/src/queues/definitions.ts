@@ -5,6 +5,8 @@ export interface JobContext<Payload> {
   readonly jobId: string;
   readonly payload: Payload;
   readonly logger: Logger;
+  /** True when pg-boss will not retry this job after a failure. */
+  readonly lastAttempt: boolean;
 }
 
 /**

@@ -1,10 +1,13 @@
 import { createDb } from '@tt/db';
-import { createS3FileStorage } from '@tt/providers';
+import { createEmailProvider, createS3FileStorage } from '@tt/providers';
 import { PgBoss } from 'pg-boss';
 import pino from 'pino';
 import { loadEnv } from './config/env.js';
+import { createDeliverDeps } from './email/deps.js';
+import { toEmailSender } from '@tt/providers';
 import { createCvExtractionDeps } from './cv-extraction/deps.js';
 import { createCvExtractQueue } from './queues/cv-extract.js';
+import { createEmailSendQueue } from './queues/email-send.js';
 import { QUEUE_DEFINITIONS } from './queues/definitions.js';
 import { startWorker, type WorkerHandle } from './worker.js';
 
@@ -44,7 +47,10 @@ const main = async (): Promise<void> => {
     fastModel: env.FAST_MODEL,
     onModelError: (reason) => logger.warn({ reason }, 'cv model failed, keeping the plain text'),
   });
-  const worker = await startWorker({ boss, logger, queues: [...QUEUE_DEFINITIONS, createCvExtractQueue(cvDeps)] });
+  const sender = toEmailSender(createEmailProvider(env.email, (line) => logger.info(line)));
+  const deliverDeps = createDeliverDeps({ db: database.db, sender, platform: env.platform, email: env.email });
+  const queues = [...QUEUE_DEFINITIONS, createCvExtractQueue(cvDeps), createEmailSendQueue(deliverDeps)];
+  const worker = await startWorker({ boss, logger, queues });
   for (const signal of SHUTDOWN_SIGNALS) {
     process.on(signal, () => void shutdown(signal, worker, database.close, logger));
   }

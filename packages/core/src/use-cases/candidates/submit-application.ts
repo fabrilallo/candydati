@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import type { IntakeRepositories, SniffedCv, SubmitApplicationDeps } from '../../intake-ports.js';
 import { definePublicQuery, parseInput } from '../../use-case.js';
+import { queueReceipt } from '../messaging/receipt.js';
 
 export const CAREERS_PAGE_ACTOR_ID = 'careers_page';
 
@@ -87,7 +88,7 @@ function mergeCandidate(existing: Candidate | null, intake: Intake, consent: Con
   };
 }
 
-async function storeApplication(repositories: IntakeRepositories, intake: Intake): Promise<void> {
+async function storeApplication(repositories: IntakeRepositories, intake: Intake): Promise<string> {
   const { form, notice, now, organizationId } = intake;
   const consent: ConsentRecord = {
     privacyNoticeId: notice.id,
@@ -136,13 +137,14 @@ async function storeApplication(repositories: IntakeRepositories, intake: Intake
     target: { type: 'application', id: application.id },
     metadata: { jobId: intake.jobId, applicationId: application.id },
   });
+  return candidate.id;
 }
 
 /** The CV goes to storage first; if the transaction fails the file is removed, so no orphan stays behind. */
-async function storeAtomically(deps: SubmitApplicationDeps, intake: Intake, bytes: Uint8Array): Promise<void> {
+async function storeAtomically(deps: SubmitApplicationDeps, intake: Intake, bytes: Uint8Array): Promise<string> {
   await deps.files.put(intake.cvKey, bytes, intake.cv.mediaType);
   try {
-    await deps.intake.run((repositories) => storeApplication(repositories, intake));
+    return await deps.intake.run((repositories) => storeApplication(repositories, intake));
   } catch (error) {
     // The original failure is what matters; a failed cleanup must not hide it.
     await deps.files.delete(intake.cvKey).catch(() => undefined);
@@ -194,8 +196,12 @@ export const submitApplication = definePublicQuery<SubmitApplicationDeps, typeof
       now: deps.now(),
       candidateId: deps.newId(),
     };
-    await storeAtomically(deps, intake, input.cv.bytes);
+    const candidateId = await storeAtomically(deps, intake, input.cv.bytes);
     await enqueueExtraction(deps, intake);
+    if (deps.receipts) {
+      const candidate = { id: candidateId, firstName: form.firstName, lastName: form.lastName };
+      await queueReceipt({ ...deps, receipts: deps.receipts }, { organization, job, applicationId, candidate });
+    }
     return RECEIPT;
   },
 });

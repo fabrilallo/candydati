@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { FileTextIcon, MessageSquareTextIcon, UserRoundIcon } from '@lucide/vue'
-import type { Outcome } from '@tt/domain'
+import { FileTextIcon, MailIcon, MessageSquareTextIcon, UserRoundIcon } from '@lucide/vue'
+import type { EmailTemplateKind, Outcome } from '@tt/domain'
 import type { ApplicationCardDto } from '@/lib/candidate-schemas'
 import { applicationStatus, currentApplication, fullName, stageOf } from '@/lib/candidate-view'
+import { messageTotal, outcomeTemplateKind } from '@/lib/message-view'
 import { can } from '@/lib/permissions-ui'
 import { stageName } from '@/lib/pipeline-board'
 import type { TabItem } from '@/lib/tabs'
@@ -32,13 +33,18 @@ const status = computed(() => (current.value ? applicationStatus(current.value) 
 const nowMs = useState('candidate-now', () => Date.now())
 const now = computed(() => new Date(nowMs.value))
 
-type Tab = 'profile' | 'cv' | 'notes'
+type Tab = 'profile' | 'cv' | 'notes' | 'messages'
 const tab = ref<Tab>('profile')
+const canRead = computed(() => can(role.value, 'message:read'))
+const canSend = computed(() => can(role.value, 'message:send'))
 const tabs = computed<readonly TabItem<Tab>[]>(() => [
   { value: 'profile', label: t('candidate.tabs.profile'), icon: UserRoundIcon, testId: 'tab-profile' },
   { value: 'cv', label: t('candidate.tabs.cv'), icon: FileTextIcon, testId: 'tab-cv' },
   { value: 'notes', label: t('candidate.tabs.notes'), icon: MessageSquareTextIcon, count: detail.value?.notes.length ?? null, testId: 'tab-notes' },
+  ...(canRead.value ? [{ value: 'messages' as const, label: t('candidate.tabs.messages'), icon: MailIcon, count: messageTotal(detail.value?.applications ?? []), testId: 'tab-messages' }] : []),
 ])
+/** After an outcome: the matching template, proposed in the Messaggi tab, sent only if a person confirms. */
+const proposal = ref<{ readonly kind: EmailTemplateKind; readonly applicationId: string } | null>(null)
 
 const move = async (stageId: string): Promise<void> => {
   const card = current.value ? await c.move(current.value.id, stageId) : null
@@ -46,7 +52,13 @@ const move = async (stageId: string): Promise<void> => {
 }
 const decide = async (outcome: Outcome): Promise<void> => {
   const card = current.value ? await c.decide(current.value.id, outcome) : null
-  if (card) emit('card', card)
+  if (!card) return
+  emit('card', card)
+  const kind = outcomeTemplateKind(outcome)
+  if (kind && canSend.value) {
+    proposal.value = { kind, applicationId: card.id }
+    tab.value = 'messages'
+  }
 }
 const addNote = async (body: string, applicationId: string | null, done: (ok: boolean) => void): Promise<void> => {
   const ok = await c.note(body, applicationId)
@@ -118,6 +130,17 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
         :busy="c.busy.value === 'note'"
         :author-name="viewer?.user.name ?? ''"
         @submit="addNote"
+      />
+      <MessagesPanel
+        v-else-if="tab === 'messages'"
+        :applications="detail.applications"
+        :current-id="current?.id ?? null"
+        :candidate-name="name"
+        :candidate-email="detail.candidate.email"
+        :can-send="canSend"
+        :proposal="proposal"
+        @sent="c.messaged"
+        @dismiss="proposal = null"
       />
     </template>
   </div>

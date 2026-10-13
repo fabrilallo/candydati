@@ -9,3 +9,6 @@ export * from './in-memory-candidates.js';
 export * from './in-memory-files.js';
 export * from './in-memory-privacy.js';
 export * from './candidate-seed.js';
+export * from './in-memory-messaging.js';
+export * from './messaging-fixtures.js';
+export * from './messaging-deps.js';

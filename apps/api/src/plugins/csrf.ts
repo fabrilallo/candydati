@@ -1,6 +1,8 @@
 import { fail } from '@tt/domain';
 import type { FastifyInstance } from 'fastify';
 
+/** Provider webhooks are server-to-server: they carry a signature, not a session. */
+const WEBHOOK_PREFIX = '/api/v1/inbound/';
 const STATE_CHANGING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 /**
@@ -10,7 +12,7 @@ const STATE_CHANGING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 export function registerCsrfProtection(app: FastifyInstance, trusted: readonly string[]): void {
   const allowed = new Set(trusted);
   app.addHook('onRequest', async (request, reply) => {
-    if (!STATE_CHANGING.has(request.method) || !request.url.startsWith('/api/v1/')) return;
+    if (!STATE_CHANGING.has(request.method) || !request.url.startsWith('/api/v1/') || request.url.startsWith(WEBHOOK_PREFIX)) return;
     const origin = request.headers.origin;
     if (origin === undefined || allowed.has(origin)) return;
     return reply.status(403).send(fail('forbidden', 'Origin not allowed.'));

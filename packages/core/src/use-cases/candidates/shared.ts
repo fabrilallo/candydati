@@ -41,6 +41,7 @@ export async function loadCandidateDetail(deps: CandidateDeps, candidate: Candid
   const { organizationId } = candidate;
   const applications = await deps.applications.listByCandidate(organizationId, candidate.id);
   const extractions = await deps.extractions.findByApplications(organizationId, applications.map((a) => a.id));
+  const messageCounts = await deps.messages.countByApplication(organizationId, applications.map((a) => a.id));
   const jobIds = [...new Set(applications.map((a) => a.jobId))];
   const jobs = await Promise.all(jobIds.map((id) => requireJob(deps, organizationId, id)));
   return {
@@ -53,6 +54,7 @@ export async function loadCandidateDetail(deps: CandidateDeps, candidate: Candid
         job,
         stages: pipelineStagesOf(job.content.process),
         extraction: extractions.find((e) => e.applicationId === application.id) ?? null,
+        messageCount: messageCounts[application.id] ?? 0,
       };
     }),
     notes: await loadNotes(deps, candidate),

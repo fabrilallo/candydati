@@ -16,6 +16,11 @@ export const STATEMENTS = {
   candidate_note: ['create'],
   /** Privacy notice, consent texts and retention periods: the data controller's settings. */
   privacy: ['manage'],
+  /** Conversation with candidates. `send` is always a person's decision: the agent never sends. */
+  message: ['read', 'send'],
+  email_template: ['manage'],
+  /** Sender name and own domain. */
+  email_settings: ['manage'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -44,12 +49,17 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     candidate: ['read', 'update', 'move', 'decide'],
     candidate_note: ['create'],
     privacy: ['manage'],
+    message: ['read', 'send'],
+    email_template: ['manage'],
+    email_settings: ['manage'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],
     job_template: ['read', 'create', 'delete'],
     candidate: ['read', 'update', 'move', 'decide'],
     candidate_note: ['create'],
+    message: ['read', 'send'],
+    email_template: ['manage'],
   },
   /**
    * Writes and edits ads and moves candidates through the stages. Putting ads online, taking them down and deciding
@@ -60,8 +70,9 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     job_template: ['read'],
     candidate: ['read', 'update', 'move'],
     candidate_note: ['create'],
+    message: ['read'],
   },
-  interviewer: { job: ['read'], candidate: ['read'], candidate_note: ['create'] },
+  interviewer: { job: ['read'], candidate: ['read'], candidate_note: ['create'], message: ['read'] },
 };
 
 export const PERMISSIONS: readonly Permission[] = (Object.keys(STATEMENTS) as Resource[]).flatMap((resource) =>

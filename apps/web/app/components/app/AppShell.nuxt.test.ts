@@ -60,7 +60,7 @@ describe('single sidebar', () => {
     useViewer().viewer.value = viewerWith('owner')
     const wrapper = track(await mountSuspended(AppNavPanel))
     const labels = wrapper.findAll('nav a').map((link) => link.text().replace(/\d+$/, '').trim())
-    expect(labels).toEqual(['Panoramica', 'Annunci', 'Candidati', 'Template', 'Membri', 'Privacy', 'Registro delle azioni'])
+    expect(labels).toEqual(['Panoramica', 'Annunci', 'Candidati', 'Template', 'Membri', 'Privacy', 'Email', 'Modelli email', 'Registro delle azioni'])
     expect(wrapper.find('a[target="_blank"]').text()).toBe('Pagina carriere')
     expect(wrapper.find('[aria-label="Lingua"]').exists()).toBe(false)
   })

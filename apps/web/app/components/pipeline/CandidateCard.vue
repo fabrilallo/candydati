@@ -21,8 +21,13 @@ const props = defineProps<{
   grabbed?: boolean
   pending?: boolean
   hintId?: string
+  /** Can be picked for a bulk message (`message:send`). */
+  selectable?: boolean
+  /** Selection mode is on: the checkbox stays visible. */
+  selecting?: boolean
+  selected?: boolean
 }>()
-const emit = defineEmits<{ open: []; move: [stageId: string]; decide: [outcome: Outcome]; key: [event: KeyboardEvent]; dragstart: [event: DragEvent]; dragend: [] }>()
+const emit = defineEmits<{ open: []; move: [stageId: string]; decide: [outcome: Outcome]; key: [event: KeyboardEvent]; dragstart: [event: DragEvent]; dragend: []; select: [shift: boolean] }>()
 const { t, locale } = useI18n()
 const name = computed(() => fullName(props.card.candidate))
 const decided = computed(() => props.card.outcome !== null)
@@ -39,6 +44,7 @@ const moreTags = computed(() => Math.max(0, props.card.candidate.tags.length - T
     :class="[
       placeholder ? 'border-dashed border-input bg-transparent opacity-50 shadow-none' : 'hover:border-input hover:shadow-sm',
       grabbed ? 'border-primary shadow-lg ring-2 ring-primary/30' : '',
+      selected ? 'border-primary/60 bg-accent/40' : '',
       pending ? 'opacity-70' : '',
       draggable ? 'cursor-grab active:cursor-grabbing' : '',
     ]"
@@ -50,7 +56,19 @@ const moreTags = computed(() => Math.max(0, props.card.candidate.tags.length - T
     @dragend="emit('dragend')"
   >
     <div class="flex items-start gap-3">
-      <PersonAvatar :name="name" />
+      <div class="relative size-9 shrink-0">
+        <PersonAvatar :name="name" :class="selectable && (selecting || selected) ? 'invisible' : selectable ? 'group-hover:invisible group-focus-within:invisible' : ''" />
+        <input
+          v-if="selectable"
+          type="checkbox"
+          :checked="selected"
+          class="absolute inset-0 z-10 m-auto size-4.5 cursor-pointer accent-primary"
+          :class="selecting || selected ? '' : 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 group-focus-within:opacity-100'"
+          :aria-label="t('pipeline.selection.select', { name })"
+          data-testid="card-select"
+          @click="emit('select', ($event as MouseEvent).shiftKey)"
+        >
+      </div>
       <div class="grid min-w-0 flex-1 gap-0.5">
         <h3 class="text-[0.9375rem] font-medium leading-snug">
           <button

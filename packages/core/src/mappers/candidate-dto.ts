@@ -111,6 +111,8 @@ export interface CandidateDetailDto {
     readonly retentionExpiresAt: string;
     readonly cv: { readonly fileName: string; readonly mediaType: string; readonly sizeBytes: number };
     readonly extraction: { readonly status: ExtractionStatus; readonly data: CvExtraction | null; readonly source: 'model' | 'text' | null };
+    /** Messages in the conversation of this application (sent, received and failed). */
+    readonly messageCount: number;
   }[];
   readonly notes: readonly NoteDto[];
 }
@@ -202,7 +204,7 @@ const toCandidateDto = (candidate: Candidate): CandidateDetailDto['candidate'] =
 
 export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetailDto => ({
   candidate: toCandidateDto(view.candidate),
-  applications: view.applications.map(({ application, job, stages, extraction }) => ({
+  applications: view.applications.map(({ application, job, stages, extraction, messageCount }) => ({
     id: application.id,
     job: { id: job.id, title: job.content.title, slug: job.slug },
     stageId: application.stageId,
@@ -221,6 +223,7 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
     retentionExpiresAt: iso(application.retentionExpiresAt),
     cv: { fileName: application.cv.fileName, mediaType: application.cv.mediaType, sizeBytes: application.cv.sizeBytes },
     extraction: { status: extraction?.status ?? 'pending', data: extraction?.data ?? null, source: extraction?.source ?? null },
+    messageCount,
   })),
   notes: view.notes.map(toNoteDto),
 });

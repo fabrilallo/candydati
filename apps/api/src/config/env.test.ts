@@ -94,3 +94,13 @@ describe('parseEnv S3', () => {
     expect(() => parseEnv({ ...valid, S3_ENDPOINT: 'nope', S3_SECRET_KEY: 'topsecret' })).not.toThrow(/topsecret/);
   });
 });
+
+describe('parseEnv email', () => {
+  it('reads the email settings and requires the webhook secret only in production', () => {
+    expect(parseEnv(valid).email.transport.kind).toBe('log');
+    expect(parseEnv({ ...valid, EMAIL_PROVIDER: 'smtp', SMTP_HOST: 'localhost', SMTP_PORT: '1025' }).email.transport).toMatchObject({ kind: 'smtp', port: 1025 });
+    expect(() => parseEnv({ ...valid, NODE_ENV: 'production' })).toThrow(/INBOUND_WEBHOOK_SECRET/);
+    expect(parseEnv({ ...valid, NODE_ENV: 'production', INBOUND_WEBHOOK_SECRET: 'x'.repeat(32) }).email.webhookSecret).toHaveLength(32);
+    expect(() => parseEnv({ ...valid, INBOUND_WEBHOOK_SECRET: 'short' })).toThrow(/INBOUND_WEBHOOK_SECRET/);
+  });
+});

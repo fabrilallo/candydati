@@ -23,7 +23,7 @@ async function world(overrides: Parameters<typeof createTestCandidateDeps>[0] = 
 }
 
 const run = (deps: Awaited<ReturnType<typeof world>>, data: unknown = payload) =>
-  createCvExtractQueue(deps).handle({ jobId: 'job-1', payload: cvExtractPayload.parse(data), logger });
+  createCvExtractQueue(deps).handle({ jobId: 'job-1', payload: cvExtractPayload.parse(data), logger, lastAttempt: true });
 
 describe('cv.extract queue', () => {
   it('validates the payload: ids only, both required', () => {
@@ -61,8 +61,8 @@ describe('cv.extract queue', () => {
   });
 
   it('is served by the worker under the name cv.extract', async () => {
-    const handlers = new Map<string, Parameters<WorkerBoss['work']>[1]>();
-    const boss: WorkerBoss = { createQueue: vi.fn(async () => undefined), work: vi.fn(async (name, handler) => (handlers.set(name, handler), name)), stop: vi.fn(async () => undefined) };
+    const handlers = new Map<string, Parameters<WorkerBoss['work']>[2]>();
+    const boss: WorkerBoss = { createQueue: vi.fn(async () => undefined), work: vi.fn(async (name, _options, handler) => (handlers.set(name, handler), name)), stop: vi.fn(async () => undefined) };
     const deps = await world();
     await startWorker({ boss, logger, queues: [createCvExtractQueue(deps)] });
     await handlers.get('cv.extract')!([{ id: 'j1', name: 'cv.extract', data: payload }]);

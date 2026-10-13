@@ -1,5 +1,5 @@
 import type { AppContext } from '../app-context.js';
-import { DEFAULT_APPLY_MAX, DEFAULT_APPLY_WINDOW_MINUTES, DEFAULT_PUBLIC_MAX, DEFAULT_QUALITY_MAX } from '../app-context.js';
+import { DEFAULT_APPLY_MAX, DEFAULT_APPLY_WINDOW_MINUTES, DEFAULT_INBOUND_MAX, DEFAULT_PUBLIC_MAX, DEFAULT_QUALITY_MAX } from '../app-context.js';
 
 /** An ad is long text, but never megabytes. */
 export const AD_BODY_LIMIT = 256 * 1024;
@@ -16,3 +16,6 @@ export const applyRouteConfig = (ctx: AppContext) => ({
     timeWindow: `${ctx.rateLimit.applyWindowMinutes ?? DEFAULT_APPLY_WINDOW_MINUTES} minutes`,
   },
 });
+
+/** Provider webhooks: signed, server-to-server, and their own budget apart from the public pages. */
+export const inboundRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.inboundMax ?? DEFAULT_INBOUND_MAX);

@@ -1,0 +1,83 @@
+import {
+  EmailSendError,
+  fetchResendReceivedContent,
+  InboundParseError,
+  parseRawMime,
+  parseResendInbound,
+  verifyHmacSignature,
+  verifyResendSignature,
+} from '@tt/providers';
+import { fail } from '@tt/domain';
+import { receiveInboundEmail, type InboundEmail } from '@tt/core';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
+import { z } from 'zod';
+import type { AppContext } from '../app-context.js';
+import { INBOUND_BODY_LIMIT, resendApiKey, toCoreInbound } from '../http/inbound-email.js';
+import { inboundRouteConfig } from './limits.js';
+
+const resendEvent = z.object({ type: z.string(), data: z.object({ email_id: z.string().min(1) }).loose() }).loose();
+
+const rawBody = (request: FastifyRequest): Buffer => (Buffer.isBuffer(request.body) ? request.body : Buffer.alloc(0));
+
+/**
+ * Provider webhooks: server-to-server, no session, signature required (401 otherwise). A well-signed request always
+ * gets 202, even when the email is dropped, so a provider never learns which tokens exist. Only counts and reasons are
+ * logged, never addresses or bodies. The signature covers the raw bytes, so these routes live in their own scope with
+ * a parser that hands the body over unparsed.
+ */
+export async function registerInboundEmailRoutes(app: FastifyInstance, ctx: AppContext): Promise<void> {
+  const secret = ctx.env.email.webhookSecret;
+  const log = app.log;
+
+  const store = async (email: InboundEmail): Promise<void> => {
+    const result = await receiveInboundEmail(ctx.inboundDeps, email);
+    log.info({ stored: result.stored, reason: result.reason }, 'inbound email processed');
+  };
+
+  await app.register(async (scope) => {
+    scope.removeAllContentTypeParsers();
+    scope.addContentTypeParser('*', { parseAs: 'buffer', bodyLimit: INBOUND_BODY_LIMIT }, (_request, body, done) => done(null, body));
+    const options = { bodyLimit: INBOUND_BODY_LIMIT, config: inboundRouteConfig(ctx) };
+
+    scope.post('/api/v1/inbound/email/raw', options, async (request, reply) => {
+      const body = rawBody(request);
+      const header = request.headers['x-tt-signature'];
+      if (!secret || !verifyHmacSignature(body, typeof header === 'string' ? header : undefined, secret)) {
+        return reply.status(401).send(fail('unauthorized', 'Invalid signature.'));
+      }
+      try {
+        await store(toCoreInbound(await parseRawMime(body)));
+      } catch (error) {
+        if (!(error instanceof InboundParseError)) throw error;
+        log.warn({ reason: error.message }, 'inbound email dropped');
+      }
+      return reply.status(202).send({ received: true });
+    });
+
+    scope.post('/api/v1/inbound/email/resend', options, async (request, reply) => {
+      const body = rawBody(request);
+      if (!secret || !verifyResendSignature(body, request.headers, secret)) {
+        return reply.status(401).send(fail('unauthorized', 'Invalid signature.'));
+      }
+      try {
+        const payload: unknown = JSON.parse(body.toString('utf8'));
+        const event = resendEvent.safeParse(payload);
+        if (!event.success || event.data.type !== 'email.received') {
+          log.info('inbound webhook event ignored');
+          return reply.status(202).send({ received: true });
+        }
+        const apiKey = resendApiKey(ctx.env.email);
+        const received = apiKey ? await fetchResendReceivedContent(event.data.data.email_id, { apiKey }) : undefined;
+        await store(toCoreInbound(parseResendInbound(payload, received)));
+      } catch (error) {
+        if (error instanceof EmailSendError && error.transient) {
+          log.warn('inbound content not available yet, asking the provider to retry');
+          return reply.status(503).send(fail('unavailable', 'Try again later.'));
+        }
+        if (!(error instanceof InboundParseError || error instanceof EmailSendError || error instanceof SyntaxError)) throw error;
+        log.warn({ reason: error.message }, 'inbound email dropped');
+      }
+      return reply.status(202).send({ received: true });
+    });
+  });
+}

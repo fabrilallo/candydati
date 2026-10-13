@@ -7,6 +7,7 @@ import type {
   PrivacyNotice,
 } from '@tt/domain';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
+import type { MessageRepository } from './messaging-ports.js';
 import type { CoreDeps } from './ports.js';
 
 /** Privacy notices are immutable: there is no update and no delete. */
@@ -101,6 +102,7 @@ export interface CandidateDeps extends CoreDeps {
   readonly applications: ApplicationRepository;
   readonly notes: CandidateNoteRepository;
   readonly extractions: CvExtractionRepository;
+  readonly messages: MessageRepository;
   readonly candidateSearch: CandidateSearch;
   readonly users: UserDirectory;
   readonly files: FileStorage;

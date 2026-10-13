@@ -23,6 +23,7 @@ import {
 } from './in-memory-files.js';
 import { createInMemoryJobRepository, createInMemoryOrganizationDirectory } from './in-memory-jobs.js';
 import { createInMemoryPrivacyNoticeRepository } from './in-memory-privacy.js';
+import { createInMemoryMessageRepository, createMessagingStore, type MessagingStore } from './in-memory-messaging.js';
 
 /** Everything the Phase 2 use cases may ask for, fully in memory, with a counter-based id generator and a fixed clock. */
 export type TestCandidateDeps = CandidateDeps &
@@ -34,15 +35,19 @@ export type TestCandidateDeps = CandidateDeps &
     readonly files: InMemoryFileStorage;
     readonly queue: InMemoryTaskQueue;
     readonly store: CandidateStore;
+    readonly messagingStore: MessagingStore;
   };
 
 export function createTestCandidateDeps(overrides: Partial<TestCandidateDeps> = {}): TestCandidateDeps {
   let counter = 0;
   const store = overrides.store ?? createCandidateStore();
   const auditLog = overrides.auditLog ?? createInMemoryAuditLog();
+  const messagingStore = overrides.messagingStore ?? createMessagingStore();
   return {
     auditLog,
     store,
+    messagingStore,
+    messages: createInMemoryMessageRepository(messagingStore),
     jobs: createInMemoryJobRepository(),
     organizations: createInMemoryOrganizationDirectory(),
     privacyNotices: createInMemoryPrivacyNoticeRepository(),

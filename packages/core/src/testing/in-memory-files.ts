@@ -1,5 +1,5 @@
 import type { CvMediaType } from '@tt/domain';
-import type { CvExtractPayload, CvModelExtractor, CvSniffer, CvTextExtractor, FileStorage, TaskQueue } from '../intake-ports.js';
+import type { CvModelExtractor, CvSniffer, CvTextExtractor, FileStorage, QueuedTask, TaskQueue } from '../intake-ports.js';
 
 export interface InMemoryFileStorage extends FileStorage {
   keys(): readonly string[];
@@ -24,7 +24,7 @@ export function createInMemoryFileStorage(initial: Readonly<Record<string, Uint8
 }
 
 export interface InMemoryTaskQueue extends TaskQueue {
-  jobs(): readonly { readonly name: 'cv.extract'; readonly payload: CvExtractPayload }[];
+  jobs(): readonly QueuedTask[];
 }
 
 export function createInMemoryTaskQueue(failWith?: Error): InMemoryTaskQueue {
@@ -32,7 +32,7 @@ export function createInMemoryTaskQueue(failWith?: Error): InMemoryTaskQueue {
   return {
     async enqueue(name, payload) {
       if (failWith) throw failWith;
-      queued = [...queued, { name, payload }];
+      queued = [...queued, { name, payload } as QueuedTask];
     },
     jobs: () => queued,
   };

@@ -106,6 +106,8 @@ export const candidateApplicationSchema = z.object({
   cv: z.object({ fileName: z.string(), mediaType: z.string(), sizeBytes: z.number().int().nonnegative() }),
   /** Absent while the extraction job has not written its record yet. */
   extraction: extractionSchema.nullable().default(null),
+  /** Messages in the conversation (phase 3 contract). Unknown (null) when the api does not send it. */
+  messageCount: z.number().int().nonnegative().nullable().default(null),
 })
 export type CandidateApplicationDto = z.infer<typeof candidateApplicationSchema>
 

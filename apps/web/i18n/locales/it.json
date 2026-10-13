@@ -34,7 +34,9 @@
     },
     "candidates": "Candidati",
     "privacy": "Privacy",
-    "candidateCount": "{count} candidati"
+    "candidateCount": "{count} candidati",
+    "email": "Email",
+    "emailTemplates": "Modelli email"
   },
   "roles": {
     "owner": "Proprietario",
@@ -324,6 +326,18 @@
       },
       "candidate_note": {
         "created": "Ha scritto una nota su un candidato"
+      },
+      "message": {
+        "sent": "Ha inviato un messaggio a una persona candidata",
+        "received": "Ha ricevuto una risposta da una persona candidata",
+        "failed": "Un messaggio non è stato consegnato"
+      },
+      "email_template": {
+        "saved": "Ha salvato un modello email",
+        "deleted": "Ha eliminato o ripristinato un modello email"
+      },
+      "email_settings": {
+        "updated": "Ha modificato le impostazioni email"
       }
     }
   },
@@ -1000,6 +1014,17 @@
       "title": "Esiti",
       "hint": "Candidature chiuse: non si spostano più",
       "empty": "Ancora nessun esito registrato."
+    },
+    "selection": {
+      "start": "Seleziona",
+      "done": "Fine selezione",
+      "select": "Seleziona {name}",
+      "all": "Tutte",
+      "allIn": "Seleziona tutte le candidature in {stage}",
+      "bar": "Candidature selezionate",
+      "count": "1 selezionata | {count} selezionate",
+      "message": "Invia messaggio",
+      "clear": "Annulla selezione"
     }
   },
   "candidate": {
@@ -1015,7 +1040,8 @@
       "label": "Sezioni della scheda",
       "profile": "Profilo",
       "cv": "CV",
-      "notes": "Note"
+      "notes": "Note",
+      "messages": "Messaggi"
     },
     "header": {
       "stage": "Fase:",
@@ -1258,6 +1284,181 @@
       "received": "Abbiamo ricevuto la tua candidatura per {title} in {organization}.",
       "commitment": "Riceverai una risposta entro 1 giorno dopo ogni fase. | Riceverai una risposta entro {count} giorni dopo ogni fase.",
       "email": "Ti scriveremo a {email}."
+    }
+  },
+  "messages": {
+    "system": "Inviato in automatico",
+    "status": {
+      "queued": "In coda",
+      "sent": "Inviato",
+      "failed": "Non consegnato",
+      "received": "Ricevuto"
+    },
+    "unverified": {
+      "title": "Mittente non verificato.",
+      "body": "L'indirizzo da cui arriva non è quello della candidatura: diffida di link e richieste."
+    },
+    "empty": "Ancora nessun messaggio per questa candidatura.",
+    "threadLabel": "Messaggi per {job}",
+    "proposal": "Esito registrato. Abbiamo preparato il messaggio per {name} con il modello dell'esito: rileggilo e invialo, oppure salta. Non parte nulla da solo.",
+    "variables": {
+      "insert": "Variabile",
+      "hint": "Si inserisce dove si trova il cursore",
+      "candidate": {
+        "firstName": "Nome",
+        "lastName": "Cognome"
+      },
+      "job": {
+        "title": "Titolo dell'annuncio",
+        "responseDays": "Giorni per la risposta",
+        "url": "Link all'annuncio"
+      },
+      "organization": {
+        "name": "Nome dell'organizzazione"
+      },
+      "stage": {
+        "name": "Fase attuale"
+      }
+    },
+    "composer": {
+      "title": "Nuovo messaggio",
+      "application": "Candidatura",
+      "template": "Modello",
+      "noTemplate": "Nessun modello",
+      "templatesUnavailable": "Non riusciamo a caricare i modelli: puoi scrivere il messaggio da zero.",
+      "subject": "Oggetto",
+      "body": "Testo",
+      "unknownTitle": "1 variabile sconosciuta: correggila o toglila prima di inviare | {count} variabili sconosciute: correggile o toglile prima di inviare",
+      "unknownHint": "Le variabili valide sono nel menu Variabile.",
+      "tooMany": "Puoi scrivere al massimo a {max} persone alla volta.",
+      "replyHint": "Le risposte arrivano qui, nella scheda della persona candidata.",
+      "skip": "Salta",
+      "send": "Invia",
+      "queued": "Messaggio in coda per l'invio | {count} messaggi in coda per l'invio"
+    },
+    "preview": {
+      "for": "Anteprima per {name}",
+      "updating": "Aggiornamento…",
+      "empty": "Scrivi oggetto e testo: qui vedi cosa riceverà la persona."
+    },
+    "confirm": {
+      "title": "Inviare il messaggio?",
+      "singleBody": "Il messaggio va a {recipient}. Una volta inviato non si può ritirare.",
+      "bulkBody": "Il messaggio va a 1 persona. Una volta inviato non si può ritirare. | Il messaggio va a {count} persone, una email per ciascuna con i suoi dati. Una volta inviato non si può ritirare.",
+      "action": "Invia",
+      "bulkAction": "Invia a 1 persona | Invia a {count} persone"
+    },
+    "bulk": {
+      "title": "Messaggio alle candidature selezionate",
+      "outcomeTitle": "Messaggio per l'esito",
+      "description": "Scrivi un messaggio, controlla l'anteprima e conferma prima di inviarlo.",
+      "recipients": "1 destinatario | {count} destinatari",
+      "oneEach": "Ognuno riceve la sua email: nessuno vede gli altri indirizzi."
+    },
+    "errors": {
+      "unknownVariable": "Il messaggio contiene variabili sconosciute: correggile e riprova."
+    },
+    "deliveryErrors": {
+      "unknown": "Non consegnato.",
+      "delivery_failed": "Non consegnato: il server di posta non ha risposto. Puoi riprovare più tardi.",
+      "delivery_rejected": "Non consegnato: il server di posta della persona ha rifiutato il messaggio.",
+      "recipient_missing": "Non consegnato: manca un indirizzo email valido.",
+      "queue_unavailable": "Non consegnato: il servizio di invio non era disponibile."
+    }
+  },
+  "emailSettings": {
+    "title": "Email",
+    "subtitle": "Con quale nome e da quale indirizzo arrivano le email alle persone candidate.",
+    "saved": "Impostazioni salvate",
+    "checked": "Controllo del dominio ripetuto",
+    "status": {
+      "default": "Indirizzo dell'istanza",
+      "verified": "Verificato",
+      "pending": "In attesa",
+      "failed": "Non riuscito",
+      "unsupported": "Gestito dall'istanza"
+    },
+    "effective": {
+      "title": "Mittente attuale",
+      "from": "Così le persone candidate vedono il mittente:",
+      "replies": "Le risposte tornano sempre qui, nella scheda della persona candidata, qualunque sia il mittente."
+    },
+    "form": {
+      "title": "Mittente",
+      "senderName": "Nome del mittente",
+      "senderNameHint": "Il nome che le persone vedono, per esempio quello dell'azienda.",
+      "fromAddress": "Indirizzo del vostro dominio (facoltativo)",
+      "fromAddressHint": "Lascia vuoto per usare l'indirizzo dell'istanza. Un indirizzo vostro si usa solo dopo la verifica del dominio.",
+      "fromAddressPlaceholder": "lavora{'@'}azienda.it",
+      "save": "Salva",
+      "saving": "Salvataggio…"
+    },
+    "errors": {
+      "senderName": "Scrivi un nome di massimo 80 caratteri",
+      "fromAddress": "Scrivi un indirizzo email valido"
+    },
+    "domain": {
+      "title": "Dominio {domain}",
+      "verify": "Verifica di nuovo",
+      "explain": {
+        "verified": "Il dominio è verificato: le email partono dal vostro indirizzo.",
+        "pending": "Pubblica questi record DNS presso chi gestisce il dominio, poi verifica di nuovo. Fino ad allora le email partono dall'indirizzo dell'istanza.",
+        "failed": "La verifica non è riuscita: controlla che i record DNS siano pubblicati esattamente così, poi verifica di nuovo. Intanto le email partono dall'indirizzo dell'istanza.",
+        "unsupported": "Su questa installazione le email passano dal server di chi gestisce l'istanza: il mittente è quello dell'istanza e il dominio non va verificato qui."
+      }
+    },
+    "records": {
+      "type": "Tipo",
+      "name": "Nome",
+      "value": "Valore",
+      "copy": "Copia {field}",
+      "copyFailed": "Non siamo riusciti a copiare: seleziona il testo a mano."
+    }
+  },
+  "emailTemplates": {
+    "title": "Modelli email",
+    "subtitle": "I testi da cui partono i messaggi alle persone candidate. Le variabili si compilano per ciascuna.",
+    "listLabel": "Modelli",
+    "default": "Testo predefinito",
+    "defaultShort": "predefinito",
+    "new": "Nuovo modello",
+    "name": "Nome del modello",
+    "save": "Salva modello",
+    "saving": "Salvataggio…",
+    "saved": "Modello salvato",
+    "deleted": "Modello eliminato",
+    "restored": "Testo predefinito ripristinato",
+    "restore": "Ripristina il predefinito",
+    "delete": "Elimina",
+    "kinds": {
+      "receipt": "Conferma di ricezione",
+      "outcome_not_selected": "Esito negativo",
+      "outcome_hired": "Assunzione",
+      "stage_update": "Cambio di fase",
+      "custom": "Personalizzato"
+    },
+    "kindHints": {
+      "receipt": "Parte da solo quando arriva una candidatura: è l'unico messaggio automatico.",
+      "outcome_not_selected": "Proposto dopo un esito negativo. Lo invia sempre una persona.",
+      "outcome_hired": "Proposto dopo un'assunzione. Lo invia sempre una persona.",
+      "stage_update": "Da usare quando una candidatura cambia fase.",
+      "custom": "Un modello vostro, da scegliere quando scrivete."
+    },
+    "confirmDelete": {
+      "title": "Eliminare il modello?",
+      "body": "{name} non sarà più tra i modelli. I messaggi già inviati restano."
+    },
+    "confirmRestore": {
+      "title": "Ripristinare il testo predefinito?",
+      "body": "Le modifiche a questo modello andranno perse."
+    },
+    "sample": {
+      "title": "Anteprima con dati di esempio",
+      "empty": "Scrivi oggetto e testo per vedere l'anteprima.",
+      "firstName": "Giulia",
+      "lastName": "Rossi",
+      "jobTitle": "Sviluppatrice backend",
+      "stage": "Colloquio tecnico"
     }
   }
 }

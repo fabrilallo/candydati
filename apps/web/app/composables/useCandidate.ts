@@ -64,6 +64,15 @@ export const useCandidate = (candidateId: MaybeRefOrGetter<string>) => {
     return created !== null
   }
 
+  /** A message was queued on an application: its count follows, when the api gave one. */
+  const messaged = (applicationId: string): void => {
+    if (!detail.value) return
+    detail.value = {
+      ...detail.value,
+      applications: detail.value.applications.map((app) => (app.id === applicationId && app.messageCount !== null ? { ...app, messageCount: app.messageCount + 1 } : app)),
+    }
+  }
+
   return {
     detail: computed(() => detail.value),
     errorKey: computed(() => data.value?.errorKey ?? null),
@@ -74,5 +83,6 @@ export const useCandidate = (candidateId: MaybeRefOrGetter<string>) => {
     decide,
     saveTags,
     note,
+    messaged,
   }
 }

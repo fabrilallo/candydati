@@ -7,6 +7,7 @@ import {
   createDrizzleCandidates,
   createDrizzleCvExtractions,
   createDrizzleJobs,
+  createDrizzleMessages,
   createDrizzleOrganizationDirectory,
   createDrizzlePrivacyNotices,
   createDrizzleUserDirectory,
@@ -14,6 +15,7 @@ import {
   type CandidateDeps,
   type FileStorage,
   type PrivacyDeps,
+  type ReceiptDeps,
   type SubmitApplicationDeps,
   type TaskQueue,
 } from '@tt/core';
@@ -31,10 +33,11 @@ export interface Phase2Inputs {
   readonly auditLog: AuditLogRepository;
   readonly files: FileStorage;
   readonly queue: TaskQueue;
+  readonly receipts: ReceiptDeps;
 }
 
 /** Candidates, privacy notices and the public application: Drizzle repositories, injected storage and queue. */
-export function createPhase2Deps({ db, auditLog, files, queue }: Phase2Inputs): Phase2Deps {
+export function createPhase2Deps({ db, auditLog, files, queue, receipts }: Phase2Inputs): Phase2Deps {
   const jobs = createDrizzleJobs(db);
   const organizations = createDrizzleOrganizationDirectory(db);
   const privacyNotices = createDrizzlePrivacyNotices(db);
@@ -50,6 +53,7 @@ export function createPhase2Deps({ db, auditLog, files, queue }: Phase2Inputs): 
       candidateSearch: createDrizzleCandidateSearch(db),
       users: createDrizzleUserDirectory(db),
       files,
+      messages: createDrizzleMessages(db),
       ...clock,
     },
     privacyDeps: { auditLog, privacyNotices, organizations, ...clock },
@@ -60,6 +64,7 @@ export function createPhase2Deps({ db, auditLog, files, queue }: Phase2Inputs): 
       intake: createDrizzleApplicationIntake(db),
       files,
       queue,
+      receipts,
       cvSniffer: sniffCv,
       ...clock,
     },

@@ -1,6 +1,7 @@
 import type { CvMediaType } from '@tt/domain';
 import type { ApplicationRepository, CandidateRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
+import type { ReceiptDeps } from './messaging-ports.js';
 import type { AuditLogRepository } from './ports.js';
 
 /** Binary storage for CVs. Keys are chosen by core; `@tt/providers` implements it (local disk, S3/MinIO). */
@@ -12,7 +13,7 @@ export interface FileStorage {
   delete(key: string): Promise<void>;
 }
 
-export const TASK_NAMES = ['cv.extract'] as const;
+export const TASK_NAMES = ['cv.extract', 'email.send'] as const;
 export type TaskName = (typeof TASK_NAMES)[number];
 
 export interface CvExtractPayload {
@@ -20,9 +21,22 @@ export interface CvExtractPayload {
   readonly applicationId: string;
 }
 
+export interface EmailSendPayload {
+  readonly organizationId: string;
+  readonly messageId: string;
+}
+
+export interface TaskPayloads {
+  readonly 'cv.extract': CvExtractPayload;
+  readonly 'email.send': EmailSendPayload;
+}
+
+/** A task as enqueued: the name decides the payload. */
+export type QueuedTask = { readonly [N in TaskName]: { readonly name: N; readonly payload: TaskPayloads[N] } }[TaskName];
+
 /** Background jobs (pg-boss in production). The payload carries ids only, never personal data. */
 export interface TaskQueue {
-  enqueue(name: 'cv.extract', payload: CvExtractPayload): Promise<void>;
+  enqueue<N extends TaskName>(name: N, payload: TaskPayloads[N]): Promise<void>;
 }
 
 export interface SniffedCv {
@@ -64,6 +78,8 @@ export interface SubmitApplicationDeps {
   readonly intake: ApplicationIntake;
   readonly files: FileStorage;
   readonly queue: TaskQueue;
+  /** Phase 3: when present, a receipt email is queued after the application is stored. Its failure never fails the application. */
+  readonly receipts?: ReceiptDeps;
   readonly cvSniffer: CvSniffer;
   readonly newId: () => string;
   readonly now: () => Date;

@@ -9,8 +9,18 @@ import { NativeSelect } from '@/components/ui/native-select'
  * The columns of the pipeline. Cards move by drag and drop or from their menu; on a phone one stage shows at a
  * time, picked from a switcher. Who cannot move sees the same board, read-only.
  */
-const props = defineProps<{ board: Board; stages: readonly StageRef[]; now: Date; canMove: boolean; canDecide: boolean; pending: ReadonlySet<string> }>()
-const emit = defineEmits<{ open: [card: ApplicationCardDto]; move: [id: string, stageId: string]; decide: [card: ApplicationCardDto, outcome: Outcome] }>()
+const props = withDefaults(
+  defineProps<{ board: Board; stages: readonly StageRef[]; now: Date; canMove: boolean; canDecide: boolean; pending: ReadonlySet<string>; selectable?: boolean; selecting?: boolean; selectedIds?: ReadonlySet<string> }>(),
+  { selectable: false, selecting: false, selectedIds: () => new Set<string>() },
+)
+const emit = defineEmits<{
+  open: [card: ApplicationCardDto]
+  move: [id: string, stageId: string]
+  decide: [card: ApplicationCardDto, outcome: Outcome]
+  select: [id: string, shift: boolean]
+  selectColumn: [ids: readonly string[]]
+}>()
+const allSelected = (cards: readonly ApplicationCardDto[]): boolean => cards.length > 0 && cards.every((card) => props.selectedIds.has(card.id))
 const { t } = useI18n()
 const root = ref<HTMLElement | null>(null)
 const stageName = (stageId: string): string => {
@@ -48,6 +58,9 @@ const hintId = 'pipeline-card-hint'
         :over="dnd.indicatorStage.value === column.id"
         :indicator="dnd.indicatorStage.value === column.id"
         :class="column.id === selected ? 'flex' : 'max-md:hidden'"
+        :selecting="selectable && selecting"
+        :all-selected="allSelected(column.cards)"
+        @select-all="emit('selectColumn', column.cards.map((card) => card.id))"
         @dragover="dnd.dragOver(column.id, $event)"
         @dragenter="dnd.dragOver(column.id, $event)"
         @dragleave="dnd.dragLeave(column.id, $event)"
@@ -64,6 +77,10 @@ const hintId = 'pipeline-card-hint'
             :grabbed="dnd.grab.value?.id === card.id"
             :pending="pending.has(card.id)"
             :hint-id="hintId"
+            :selectable="selectable"
+            :selecting="selecting"
+            :selected="props.selectedIds.has(card.id)"
+            @select="emit('select', card.id, $event)"
             @open="emit('open', card)"
             @move="emit('move', card.id, $event)"
             @decide="emit('decide', card, $event)"

@@ -53,14 +53,16 @@ describe('defaultInviteRole', () => {
 
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
-    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'candidates', 'templates', 'members'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'candidates', 'templates', 'members', 'privacy', 'audit'])
+    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'candidates', 'templates', 'members', 'emailTemplates'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'candidates', 'templates', 'members', 'privacy', 'email', 'emailTemplates', 'audit'])
   })
 
   it('shows candidates to every role that reads them and the privacy settings only with privacy:manage', () => {
     expect(visibleNav('interviewer').map((item) => item.id)).toContain('candidates')
     expect(visibleNav('admin').map((item) => item.id)).toContain('privacy')
     expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('privacy')
+    expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('email')
+    expect(visibleNav('interviewer').map((item) => item.id)).not.toContain('emailTemplates')
   })
 
   it('shows the jobs entry to anyone with job:read and to nobody without a role', () => {
@@ -73,7 +75,7 @@ describe('navSections', () => {
   it('groups the visible items and drops nothing the role may see', () => {
     expect(navSections('owner').map((section) => [section.id, section.items.map((item) => item.id)])).toEqual([
       ['work', ['dashboard', 'jobs', 'candidates', 'templates']],
-      ['organization', ['members', 'privacy', 'audit']],
+      ['organization', ['members', 'privacy', 'email', 'emailTemplates', 'audit']],
     ])
     expect(navSections(null).map((section) => section.id)).toEqual(['work', 'organization'])
   })
@@ -89,6 +91,8 @@ describe('activeNavId', () => {
     expect(activeNavId('/app/settings/audit-log', items)).toBe('audit')
     expect(activeNavId('/app/candidates/c1', items)).toBe('candidates')
     expect(activeNavId('/app/settings/privacy', items)).toBe('privacy')
+    expect(activeNavId('/app/settings/email', items)).toBe('email')
+    expect(activeNavId('/app/settings/email-templates', items)).toBe('emailTemplates')
     expect(activeNavId('/elsewhere', items)).toBeNull()
   })
 })

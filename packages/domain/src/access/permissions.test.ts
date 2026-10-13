@@ -65,7 +65,9 @@ describe('permissions', () => {
       'candidate:update',
       'candidate:move',
       'candidate_note:create',
+      'message:read',
     ]);
+    expect(roleHasPermission('hiring_manager', 'message:send')).toBe(false);
     expect(roleHasPermission('hiring_manager', 'job:publish')).toBe(false);
     expect(roleHasPermission('hiring_manager', 'job:close')).toBe(false);
     expect(roleHasPermission('hiring_manager', 'candidate:decide')).toBe(false);
@@ -73,7 +75,24 @@ describe('permissions', () => {
   });
 
   it('gives an interviewer read access to ads and candidates and note writing, and nothing else', () => {
-    expect(permissionsOf('interviewer')).toEqual(['job:read', 'candidate:read', 'candidate_note:create']);
+    expect(permissionsOf('interviewer')).toEqual(['job:read', 'candidate:read', 'candidate_note:create', 'message:read']);
+  });
+
+  it('lets owner, admin and recruiter send messages and manage templates; only owner and admin manage email settings', () => {
+    for (const role of ['owner', 'admin', 'recruiter'] as const) {
+      expect(roleHasPermission(role, 'message:read')).toBe(true);
+      expect(roleHasPermission(role, 'message:send')).toBe(true);
+      expect(roleHasPermission(role, 'email_template:manage')).toBe(true);
+    }
+    expect(roleHasPermission('owner', 'email_settings:manage')).toBe(true);
+    expect(roleHasPermission('admin', 'email_settings:manage')).toBe(true);
+    expect(roleHasPermission('recruiter', 'email_settings:manage')).toBe(false);
+  });
+
+  it('gives hiring managers and interviewers message:read only', () => {
+    for (const role of ['hiring_manager', 'interviewer'] as const) {
+      expect(permissionsOf(role).filter((p) => /^(message|email_template|email_settings):/.test(p))).toEqual(['message:read']);
+    }
   });
 
   it('gives recruiters no administrative permission', () => {

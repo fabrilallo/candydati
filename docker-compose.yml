@@ -30,6 +30,14 @@ services:
     volumes:
       - tt-minio:/data
 
+  mailpit:
+    # SMTP di sviluppo: accetta tutto e mostra i messaggi nella UI su :8025 (nessuna consegna reale).
+    image: axllent/mailpit:v1.31.5
+    container_name: team-tracker-mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
 volumes:
   tt-pgdata:
   tt-minio:

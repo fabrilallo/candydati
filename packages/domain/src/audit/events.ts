@@ -27,6 +27,12 @@ export const AUDIT_ACTIONS = [
   'candidate.updated',
   'candidate.cv_downloaded',
   'candidate_note.created',
+  'message.sent',
+  'message.received',
+  'message.failed',
+  'email_template.saved',
+  'email_template.deleted',
+  'email_settings.updated',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

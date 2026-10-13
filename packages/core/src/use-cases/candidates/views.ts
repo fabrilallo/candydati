@@ -28,6 +28,7 @@ export interface CandidateApplicationView {
   readonly job: Job;
   readonly stages: readonly PipelineStage[];
   readonly extraction: CvExtractionRecord | null;
+  readonly messageCount: number;
 }
 
 export interface NoteView {
