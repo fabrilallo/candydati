@@ -18,6 +18,7 @@ import {
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { submitApplication } from '../use-cases/candidates/submit-application.js';
 import { createDrizzleApplicationIntake } from './drizzle-application-intake.js';
+import { createDrizzleApplicationCounts } from './drizzle-application-counts.js';
 import { createDrizzleApplications } from './drizzle-applications.js';
 import { createDrizzleCandidateNotes } from './drizzle-candidate-notes.js';
 import { createDrizzleCandidateSearch, escapeLike } from './drizzle-candidate-search.js';
@@ -153,6 +154,22 @@ describe('createDrizzleApplications', () => {
     expect(await repo.listByJob(orgB, jobA)).toEqual([]);
     expect(await repo.listByCandidate(orgB, c.id)).toEqual([]);
     await expect(repo.save({ ...a, organizationId: orgB })).rejects.toThrow();
+  });
+});
+
+describe('createDrizzleApplicationCounts', () => {
+  it('counts open applications per stage of one job, in one organization', async () => {
+    const candidates = createDrizzleCandidates(handle.db);
+    const repo = createDrizzleApplications(handle.db);
+    const job = (await insertJob(orgA)).id;
+    const [c1, c2, c3] = await Promise.all([1, 2, 3].map(() => candidates.create(newCandidate(orgA))));
+    await repo.create(newApplication(orgA, job, c1!.id, { stageId: 'stg-a' }));
+    await repo.create(newApplication(orgA, job, c2!.id, { stageId: 'stg-a' }));
+    await repo.create(newApplication(orgA, job, c3!.id, { stageId: 'stg-b', outcome: 'hired', closedAt: new Date() }));
+    const counts = createDrizzleApplicationCounts(handle.db);
+    expect(await counts.openByStage(orgA, job)).toEqual({ 'stg-a': 2 });
+    expect(await counts.openByStage(orgB, job)).toEqual({});
+    expect(await counts.openByStage(orgA, 'other-job')).toEqual({});
   });
 });
 

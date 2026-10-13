@@ -67,6 +67,24 @@ describe('CandidateDetailView', () => {
     expect(wrapper.find('[data-testid="decide-menu"]').exists()).toBe(true)
   })
 
+  it('shows the title of the stage when it has one', async () => {
+    const base = detail()
+    state.value = detail({
+      applications: base.applications.map((app) => ({ ...app, stages: app.stages.map((stage) => (stage.id === 'stage-0' ? { ...stage, declared: { ...stage.declared!, title: 'Chiacchierata' } } : stage)) })),
+    })
+    const wrapper = await mountDetail()
+    expect(wrapper.find('[data-testid="candidate-stage"]').text()).toContain('Fase: Chiacchierata')
+  })
+
+  it('says "Fase rimossa" for a decided application whose stage no longer exists, without failing', async () => {
+    const base = detail()
+    state.value = detail({
+      applications: base.applications.map((app) => ({ ...app, stageId: 'stg-gone', stageRemoved: true, outcome: 'not_selected' as const, closedAt: '2026-10-14T10:00:00.000Z' })),
+    })
+    const wrapper = await mountDetail()
+    expect(wrapper.find('[data-testid="stage-removed"]').text()).toBe('Fase rimossa')
+  })
+
   it('lists contacts, applications, consent and the retention expiry plainly', async () => {
     const wrapper = await mountDetail()
     const profile = wrapper.find('[data-testid="candidate-profile"]')

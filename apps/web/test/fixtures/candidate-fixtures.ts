@@ -28,6 +28,7 @@ export const card = (id: string, stageId = 'received', overrides: Partial<Applic
   stageChangedAt: T0,
   closedAt: null,
   noteCount: 0,
+  stageRemoved: false,
   candidate: { id: `c-${id}`, firstName: 'Giulia', lastName: `Rossi ${id}`, tags: [], headline: 'Backend engineer', location: 'Milano', yearsOfExperience: 6 },
   ...overrides,
 })
@@ -71,6 +72,7 @@ export const detail = (overrides: Partial<CandidateDetailDto> = {}): CandidateDe
       id: 'a1',
       job: { id: 'j1', title: 'Backend developer', slug: 'backend-developer' },
       stageId: 'stage-0',
+      stageRemoved: false,
       stages: pipeline().stages.map(({ id, declared }) => ({ id, declared })),
       outcome: null,
       message: 'Mi piacerebbe lavorare con voi.',

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { fieldIdOf } from '@/lib/job-issues'
 import { appendItem, emptyStage, moveItem, removeItem, replaceItem, type FieldErrors, type JobForm, type StageForm } from '@/lib/job-form'
 
-const props = defineProps<{ form: JobForm; disabled: boolean; errors: FieldErrors }>()
+const props = defineProps<{ form: JobForm; disabled: boolean; errors: FieldErrors; openCounts?: Readonly<Record<string, number>>; blockedStages?: ReadonlySet<string> }>()
 const emit = defineEmits<{ patch: [changes: Partial<JobForm>] }>()
 const { t } = useI18n()
 
@@ -43,6 +43,8 @@ const move = async (index: number, delta: -1 | 1): Promise<void> => {
           :count="form.process.length"
           :disabled="disabled"
           :language="form.language"
+          :open-count="stage.id === '' ? 0 : (openCounts?.[stage.id] ?? 0)"
+          :blocked="stage.id !== '' && Boolean(blockedStages?.has(stage.id))"
           @change="(next) => setProcess(replaceItem(form.process, index, next))"
           @remove="setProcess(removeItem(form.process, index))"
           @move="(delta) => move(index, delta)"

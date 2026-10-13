@@ -2,7 +2,7 @@
 import { ChevronDownIcon } from '@lucide/vue'
 import { OUTCOMES, type Outcome } from '@tt/domain'
 import type { StageRef } from '@/lib/candidate-schemas'
-import { stageLabelKey, stageTone } from '@/lib/pipeline-board'
+import { stageName, stageTone } from '@/lib/pipeline-board'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
@@ -44,7 +44,7 @@ const others = computed(() => props.stages.filter((stage) => stage.id !== props.
       <DropdownMenuContent align="end" class="w-60">
         <DropdownMenuLabel class="text-xs font-medium text-muted-foreground">{{ t('candidate.actions.moveHint') }}</DropdownMenuLabel>
         <DropdownMenuItem v-for="stage in others" :key="stage.id" :data-testid="`detail-move-${stage.id}`" @select="emit('move', stage.id)">
-          <StageDot :tone="stageTone(stage)" />{{ t(stageLabelKey(stage)) }}
+          <StageDot :tone="stageTone(stage)" />{{ stageName(stage, t) }}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

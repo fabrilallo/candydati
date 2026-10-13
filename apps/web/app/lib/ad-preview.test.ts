@@ -30,8 +30,8 @@ describe('formToPreview', () => {
         city: 'Milano',
         onsiteDaysPerWeek: '3',
         process: [
-          { type: 'screening_call', durationMinutes: '30', conductedBy: 'recruiter', note: ' ' },
-          { type: 'offer', durationMinutes: '', conductedBy: 'founder', note: '' },
+          { id: '', title: '', type: 'screening_call', durationMinutes: '30', conductedBy: 'recruiter', note: ' ' },
+          { id: '', title: '', type: 'offer', durationMinutes: '', conductedBy: 'founder', note: '' },
         ],
         responsibilities: [' a ', '', 'b'],
       }),
@@ -53,5 +53,10 @@ describe('formToPreview', () => {
 
   it('falls back to the default language for an unknown one', () => {
     expect(formToPreview(form({ language: 'xx' })).language).toBe('it')
+  })
+
+  it('keeps the title of a stage', () => {
+    const stage = { id: '', title: ' Prova pratica ', type: 'live_exercise', durationMinutes: '60', conductedBy: 'recruiter', note: '' }
+    expect(formToPreview(form({ process: [stage] })).process[0]?.title).toBe('Prova pratica')
   })
 })

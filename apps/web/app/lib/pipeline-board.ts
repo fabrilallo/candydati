@@ -80,6 +80,9 @@ export const replaceCard = (pipeline: PipelineDto, fresh: ApplicationCardDto): P
 /** Translation key of a stage name: `received`, or the type of the declared stage. */
 export const stageLabelKey = (stage: StageRef): string => (stage.declared ? `taxonomy.stageTypes.${stage.declared.type}` : 'pipeline.received')
 
+/** What to call a stage: its own title when it has one, otherwise the translated name of its type. */
+export const stageName = (stage: StageRef, t: (key: string) => string): string => stage.declared?.title ?? t(stageLabelKey(stage))
+
 export type StageTone = 'received' | 'conversation' | 'exercise' | 'offer'
 
 const EXERCISES: ReadonlySet<StageType> = new Set(['take_home_assignment', 'live_exercise', 'case_study'])

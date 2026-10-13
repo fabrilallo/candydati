@@ -56,6 +56,16 @@ describe('PublicJobBody', () => {
     expect(wrapper.find('[data-testid="job-response-time"]').text()).toContain('entro 5 giorni')
   })
 
+  it('names a stage by its title when it has one, otherwise by its type', async () => {
+    const [first, second] = completeContent.process
+    const process = [{ ...first!, title: 'Una chiacchierata' }, second!]
+    const wrapper = await mountSuspended(PublicJobBody, { props: { page: page({ process }) } })
+    const stages = wrapper.findAll('[data-testid="job-stage"]').map((node) => node.text())
+    expect(stages[0]).toContain('Una chiacchierata')
+    expect(stages[0]).not.toContain('Chiamata conoscitiva')
+    expect(stages[1]).toContain('Colloquio tecnico')
+  })
+
   it('splits requirements into two lists, shows technologies as tags and hides empty sections', async () => {
     const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
     const sections = wrapper.findAll('[data-section]').map((node) => node.attributes('data-section'))

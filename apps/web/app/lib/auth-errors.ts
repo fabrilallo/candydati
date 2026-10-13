@@ -2,12 +2,15 @@
 export class AppError extends Error {
   readonly key: string
   readonly code: string | null
+  /** Structured validation issues of the api (`path` + `message`), when it sent any. */
+  readonly issues: readonly { readonly path: string; readonly message: string }[]
 
-  constructor(key: string, code: string | null = null) {
+  constructor(key: string, code: string | null = null, issues: readonly { readonly path: string; readonly message: string }[] = []) {
     super(key)
     this.name = 'AppError'
     this.key = key
     this.code = code
+    this.issues = issues
   }
 }
 

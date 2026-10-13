@@ -137,7 +137,7 @@ const saveTemplate = async (name: string): Promise<void> => {
             <JobBasicsSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
             <JobSalarySection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
             <JobWorkSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
-            <JobProcessSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
+            <JobProcessSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" :open-counts="ed.openCounts.value" :blocked-stages="ed.blockedStages.value" @patch="ed.patch" />
             <JobDescriptionSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
             <JobExtrasSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
           </fieldset>

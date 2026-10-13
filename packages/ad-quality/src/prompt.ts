@@ -74,7 +74,7 @@ function renderAd(content: JobContent): string {
     ...section('Work mode', workModeLines(content)),
     ...section('Salary', salaryLines(content)),
     ...section('Selection process', [
-      ...content.process.map((stage) => `${stage.type}, ${stage.durationMinutes} min, ${stage.conductedBy}${stage.note === undefined ? '' : `: ${stage.note}`}`),
+      ...content.process.map((stage) => `${stage.title ?? stage.type}, ${stage.durationMinutes} min, ${stage.conductedBy}${stage.note === undefined ? '' : `: ${stage.note}`}`),
       ...(content.responseDays === undefined ? [] : [`response within ${content.responseDays} days`]),
     ]),
     ...section('Summary', content.summary),

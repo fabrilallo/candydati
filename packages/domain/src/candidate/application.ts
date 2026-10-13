@@ -48,7 +48,7 @@ export type ApplicationForm = z.infer<typeof applicationFormSchema>;
 export const RECEIVED_STAGE_ID = 'received';
 
 export interface PipelineStage {
-  /** `received` or `stage-<index>` (index in the declared process, 0-based). */
+  /** `received` or the stable id of the declared stage (legacy stages without one fall back to `stage-<index>`). */
   readonly id: string;
   /** null for `received`; otherwise the declared stage. */
   readonly declared: SelectionStage | null;
@@ -56,7 +56,7 @@ export interface PipelineStage {
 
 export const pipelineStagesOf = (process: readonly SelectionStage[]): readonly PipelineStage[] => [
   { id: RECEIVED_STAGE_ID, declared: null },
-  ...process.map((stage, index) => ({ id: `stage-${index}`, declared: stage })),
+  ...process.map((stage, index) => ({ id: stage.id ?? `stage-${index}`, declared: stage })),
 ];
 
 export const OUTCOMES = ['hired', 'not_selected', 'withdrawn'] as const;

@@ -5,7 +5,7 @@ import { durationOptions } from '@/lib/editor-inputs'
 import type { StageForm } from '@/lib/job-form'
 
 /** One stage as a compact row: type, duration (presets), who conducts it, an optional note. Labels show on the first row. */
-const props = defineProps<{ id: string; stage: StageForm; index: number; count: number; disabled: boolean; language: string }>()
+const props = defineProps<{ id: string; stage: StageForm; index: number; count: number; disabled: boolean; language: string; openCount?: number; blocked?: boolean }>()
 const emit = defineEmits<{ change: [stage: StageForm]; remove: []; move: [delta: -1 | 1] }>()
 const { t } = useI18n()
 const x = useAdText(() => props.language)
@@ -16,6 +16,10 @@ const conductorOptions = STAGE_CONDUCTORS.map((value) => ({ value, label: t(`tax
 const durations = computed(() => durationOptions(props.stage.durationMinutes, x.value))
 const update = (changes: Partial<StageForm>): void => emit('change', { ...props.stage, ...changes })
 const n = computed(() => props.index + 1)
+const typeLabel = computed(() => (props.stage.type === '' ? '' : t(`taxonomy.stageTypes.${props.stage.type}`)))
+/** A stage that holds open candidates cannot be removed: the row says so, with the number when it is known. */
+const removeBlocked = computed(() => (props.openCount ?? 0) > 0 || props.blocked === true)
+const blockedText = computed(() => ((props.openCount ?? 0) > 0 ? t('job.editor.process.removeBlocked', { count: props.openCount }, props.openCount ?? 0) : t('job.errors.stageHasOpenApplications')))
 /** Three columns only when the form is wide: then the labels of the first row name the columns. */
 const labelClass = computed(() => (props.index > 0 ? 'text-xs text-muted-foreground @2xl:sr-only' : 'text-xs text-muted-foreground'))
 </script>
@@ -49,6 +53,21 @@ const labelClass = computed(() => (props.index > 0 ? 'text-xs text-muted-foregro
           </template>
         </FormField>
       </div>
+      <FormField :id="`${id}-title`" :label="t('job.editor.fields.stageTitle')" :hint="t('job.editor.process.titleHint')" label-class="text-xs text-muted-foreground">
+        <template #default="{ invalid, describedBy }">
+          <Input
+            :id="`${id}-title`"
+            :model-value="stage.title"
+            :disabled="disabled"
+            maxlength="80"
+            :placeholder="typeLabel || t('job.editor.fields.stageType')"
+            :aria-invalid="invalid"
+            :aria-describedby="describedBy"
+            data-testid="stage-title"
+            @update:model-value="update({ title: String($event) })"
+          />
+        </template>
+      </FormField>
       <div class="flex items-center gap-1.5">
         <Input
           :id="`${id}-note`"
@@ -64,6 +83,8 @@ const labelClass = computed(() => (props.index > 0 ? 'text-xs text-muted-foregro
           v-if="!disabled"
           :index="index"
           :count="count"
+          :remove-disabled="removeBlocked"
+          :remove-described-by="removeBlocked ? `${id}-blocked` : undefined"
           :remove-label="t('job.editor.process.remove', { n })"
           :up-label="t('job.editor.process.moveUp', { n })"
           :down-label="t('job.editor.process.moveDown', { n })"
@@ -71,6 +92,8 @@ const labelClass = computed(() => (props.index > 0 ? 'text-xs text-muted-foregro
           @move="(delta) => emit('move', delta)"
         />
       </div>
+      <p v-if="openCount" class="figure text-xs text-muted-foreground" data-testid="stage-open-count">{{ t('job.editor.process.openCandidates', { count: openCount }, openCount) }}</p>
+      <p v-if="removeBlocked" :id="`${id}-blocked`" class="text-xs font-medium text-warning" data-testid="stage-remove-blocked">{{ blockedText }}</p>
     </div>
   </li>
 </template>

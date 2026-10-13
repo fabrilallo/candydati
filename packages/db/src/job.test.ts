@@ -1,4 +1,7 @@
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { eq } from 'drizzle-orm';
 import { createDb, runMigrations, type DbHandle } from './index.js';
@@ -67,5 +70,60 @@ describe('job and job_template tables', () => {
 
   it('rejects a job for a missing organization', async () => {
     await expect(insertJob('missing', 's')).rejects.toThrow();
+  });
+});
+
+describe('migration 0005_job_stage_ids', () => {
+  const sqlFile = join(dirname(fileURLToPath(import.meta.url)), '../drizzle/0005_job_stage_ids.sql');
+  const stage = (type: string, extra: object = {}) => ({ type, durationMinutes: 30, conductedBy: 'recruiter', ...extra });
+  let migration: readonly string[];
+
+  const processOf = async (table: 'job' | 'job_template', id: string): Promise<unknown> => {
+    const { rows } = await handle.pool.query(`select content -> 'process' as process from ${table} where id = $1`, [id]);
+    return rows[0]?.process;
+  };
+
+  beforeAll(async () => {
+    await runMigrations(url);
+    handle = createDb(url);
+    migration = readFileSync(sqlFile, 'utf8').split('--> statement-breakpoint');
+  });
+  afterAll(async () => {
+    await handle.close();
+  });
+
+  const runMigration = async () => {
+    for (const statement of migration) await handle.pool.query(statement);
+  };
+
+  it('writes stage-<index> into stages without id, in jobs and templates, and keeps existing ids', async () => {
+    const org = await insertOrg();
+    const jobId = randomUUID();
+    const templateId = randomUUID();
+    const process = [stage('screening_call'), stage('hr_interview', { id: 'stg-keep' }), stage('offer', { note: 'x' })];
+    await handle.db.insert(job).values({ id: jobId, organizationId: org, slug: 'm', title: 'T', content: { title: 'T', process } as never, createdBy: 'u1' });
+    await handle.db.insert(jobTemplate).values({ id: templateId, organizationId: org, name: 'n', content: { title: 'T', process } as never, createdBy: 'u1' });
+
+    await runMigration();
+
+    const expected = [
+      { ...process[0], id: 'stage-0' },
+      { ...process[1], id: 'stg-keep' },
+      { ...process[2], id: 'stage-2' },
+    ];
+    expect(await processOf('job', jobId)).toEqual(expected);
+    expect(await processOf('job_template', templateId)).toEqual(expected);
+  });
+
+  it('is idempotent and leaves contents without a process untouched', async () => {
+    const org = await insertOrg();
+    const bare = randomUUID();
+    const empty = randomUUID();
+    await handle.db.insert(job).values({ id: bare, organizationId: org, slug: 'b', title: 'T', content: { title: 'T' } as never, createdBy: 'u1' });
+    await handle.db.insert(job).values({ id: empty, organizationId: org, slug: 'e', title: 'T', content: { title: 'T', process: [] } as never, createdBy: 'u1' });
+    await runMigration();
+    await runMigration();
+    expect(await processOf('job', bare)).toBeNull();
+    expect(await processOf('job', empty)).toEqual([]);
   });
 });

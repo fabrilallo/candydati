@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BoardColumn } from '@/lib/pipeline-board'
-import { stageLabelKey, stageTone } from '@/lib/pipeline-board'
+import { stageName, stageTone } from '@/lib/pipeline-board'
 import { formatDuration } from '@/lib/job-view'
 
 /** One stage of the board: dot, name, count, who runs it, the cards, and the drop line while something hovers. */
@@ -25,7 +25,7 @@ const detail = computed(() => {
     <header class="grid gap-0.5 px-2 pt-1.5 pb-1">
       <div class="flex items-center gap-2">
         <StageDot :tone="stageTone(column)" />
-        <h2 :id="titleId" class="min-w-0 truncate text-sm font-semibold">{{ t(stageLabelKey(column)) }}</h2>
+        <h2 :id="titleId" class="min-w-0 truncate text-sm font-semibold">{{ stageName(column, t) }}</h2>
         <span class="figure rounded-full bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground ring-1 ring-border" data-testid="column-count">
           <span class="sr-only">{{ t('pipeline.columnCount', { count: column.cards.length }, column.cards.length) }}</span>
           <span aria-hidden="true">{{ column.cards.length }}</span>

@@ -1,5 +1,8 @@
 import {
+  assignStageIds,
   checkPublishable,
+  DuplicateStageIdError,
+  pipelineStagesOf,
   jobContentSchema,
   type Job,
   type JobContent,
@@ -30,4 +33,33 @@ export function parseContent(raw: unknown): JobContent {
   throw new ValidationError(
     parsed.error.issues.map((issue) => ({ path: ['content', ...issue.path].join('.'), message: issue.message })),
   );
+}
+
+/** Gives every stage its stable id (existing ids are kept). A repeated id is a validation error. */
+export function withStageIds(content: JobContent, newId: () => string): JobContent {
+  try {
+    // Ids are hex fragments of the generated id: letters, digits and dashes only.
+    return { ...content, process: assignStageIds(content.process, () => `stg-${newId().replace(/[^a-z0-9]/gi, '').toLowerCase().slice(0, 8)}`) };
+  } catch (error) {
+    if (error instanceof DuplicateStageIdError) {
+      throw new ValidationError([{ path: 'process', message: `duplicate_stage_id:${error.stageId}` }]);
+    }
+    throw error;
+  }
+}
+
+/** One issue per stage of `before` that `after` no longer has and that still holds open applications. */
+export async function assertNoOpenStageRemoved(
+  deps: Pick<JobDeps, 'applicationCounts'>,
+  job: Job,
+  after: JobContent,
+): Promise<void> {
+  const kept = new Set(pipelineStagesOf(after.process).map((stage) => stage.id));
+  const removed = pipelineStagesOf(job.content.process).filter((stage) => stage.declared !== null && !kept.has(stage.id));
+  if (removed.length === 0) return;
+  const open = await deps.applicationCounts.openByStage(job.organizationId, job.id);
+  const blocked = removed.filter((stage) => (open[stage.id] ?? 0) > 0);
+  if (blocked.length > 0) {
+    throw new ValidationError(blocked.map((stage) => ({ path: 'process', message: `stage_has_open_applications:${stage.id}` })));
+  }
 }

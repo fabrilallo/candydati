@@ -1,6 +1,7 @@
 import { jobContentSchema, TEMPLATE_NAME_MAX, type JobTemplate } from '@tt/domain';
 import { z } from 'zod';
 import { defineJobUseCase } from './define.js';
+import { withStageIds } from './shared.js';
 
 const inputSchema = z.object({ name: z.string().trim().min(1).max(TEMPLATE_NAME_MAX), content: jobContentSchema });
 
@@ -19,7 +20,7 @@ export const createJobTemplate = defineJobUseCase({
       id: deps.newId(),
       organizationId: actor.organizationId,
       name: input.name,
-      content: input.content,
+      content: withStageIds(input.content, deps.newId),
       createdBy: actor.id ?? 'system',
       createdAt: now,
       updatedAt: now,

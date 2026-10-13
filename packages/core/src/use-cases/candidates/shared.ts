@@ -21,12 +21,14 @@ export async function requireCandidate(deps: Pick<CandidateDeps, 'candidates'>, 
 
 export async function loadCardView(deps: CandidateDeps, application: Application): Promise<ApplicationCardView> {
   const { organizationId } = application;
-  const [candidate, extraction, counts] = await Promise.all([
+  const [candidate, extraction, counts, job] = await Promise.all([
     requireCandidate(deps, organizationId, application.candidateId),
     deps.extractions.findByApplication(organizationId, application.id),
     deps.notes.countByApplication(organizationId, [application.id]),
+    requireJob(deps, organizationId, application.jobId),
   ]);
-  return { application, candidate, extraction, noteCount: counts[application.id] ?? 0 };
+  const stageRemoved = !pipelineStagesOf(job.content.process).some((stage) => stage.id === application.stageId);
+  return { application, candidate, extraction, noteCount: counts[application.id] ?? 0, stageRemoved };
 }
 
 async function loadNotes(deps: CandidateDeps, candidate: Candidate): Promise<readonly NoteView[]> {

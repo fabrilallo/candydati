@@ -4,6 +4,8 @@ import {
   buildApplication,
   buildCandidate,
   buildExtraction,
+  buildJob,
+  completeJobContent,
   buildNote,
   seedCandidateWorld,
   userActor,
@@ -116,4 +118,39 @@ describe('decideApplication', () => {
       else await expect(run).rejects.toBeInstanceOf(ForbiddenError);
     },
   );
+});
+
+describe('stages removed from the job', () => {
+  const removed = () =>
+    seedCandidateWorld({
+      candidates: [buildCandidate({ organizationId: ORG_A })],
+      applications: [
+        buildApplication({ organizationId: ORG_A, stageId: 'stage-0' }),
+        buildApplication({ id: 'app_2', candidateId: 'cand_1', organizationId: ORG_A, stageId: 'stg-gone', outcome: 'hired', closedAt: new Date() }),
+      ],
+    });
+
+  it('flags cards whose stage no longer exists and does not crash', async () => {
+    const view = await getPipeline(removed(), recruiter, { jobId: 'job_1' });
+    expect(view.cards.map((c) => [c.application.id, c.stageRemoved])).toEqual([['app_1', false], ['app_2', true]]);
+    expect(view.stages.map((s) => s.count)).toEqual([0, 1, 0]);
+  });
+
+  it('flags the decided card returned by decideApplication', async () => {
+    const deps = seedCandidateWorld({ applications: [buildApplication({ organizationId: ORG_A, stageId: 'stg-gone' })] });
+    const card = await decideApplication(deps, recruiter, { applicationId: 'app_1', outcome: 'not_selected' });
+    expect(card.stageRemoved).toBe(true);
+  });
+
+  it('moveApplication validates against the current stage ids, not positions', async () => {
+    const stages = [
+      { id: 'stg-b', type: 'technical_interview', durationMinutes: 60, conductedBy: 'technical_lead' },
+      { id: 'stg-a', type: 'hr_interview', durationMinutes: 30, conductedBy: 'recruiter' },
+    ] as const;
+    const deps = seedCandidateWorld({
+      jobs: [buildJob({ id: 'job_1', organizationId: ORG_A, status: 'published', content: completeJobContent({ title: 'x', process: [...stages] }) })],
+    });
+    await expect(moveApplication(deps, recruiter, { applicationId: 'app_1', stageId: 'stage-0' })).rejects.toBeInstanceOf(ValidationError);
+    await expect(moveApplication(deps, recruiter, { applicationId: 'app_1', stageId: 'stg-a' })).resolves.toMatchObject({ application: { stageId: 'stg-a' } });
+  });
 });

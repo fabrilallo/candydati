@@ -17,6 +17,15 @@ describe('jobContentJsonSchema', () => {
     expect(schema.properties).toHaveProperty('process');
   });
 
+  it('describes the optional stage id and title', () => {
+    const schema = jobContentJsonSchema() as { properties: { process: { items: { properties: Record<string, unknown>; required: string[] } } } };
+    const stage = schema.properties.process.items;
+    expect(stage.properties).toHaveProperty('id');
+    expect(stage.properties).toHaveProperty('title');
+    expect(stage.required).not.toContain('id');
+    expect(stage.required).not.toContain('title');
+  });
+
   it('is deterministic across calls', () => {
     expect(JSON.stringify(jobContentJsonSchema())).toBe(JSON.stringify(jobContentJsonSchema()));
   });

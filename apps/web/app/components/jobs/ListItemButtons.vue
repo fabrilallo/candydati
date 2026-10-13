@@ -2,7 +2,7 @@
 import { ArrowDownIcon, ArrowUpIcon, XIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 
-defineProps<{ index: number; count: number; disabled?: boolean; removeLabel: string; upLabel: string; downLabel: string }>()
+defineProps<{ index: number; count: number; disabled?: boolean; removeDisabled?: boolean; removeDescribedBy?: string; removeLabel: string; upLabel: string; downLabel: string }>()
 defineEmits<{ remove: []; move: [delta: -1 | 1] }>()
 </script>
 
@@ -14,7 +14,7 @@ defineEmits<{ remove: []; move: [delta: -1 | 1] }>()
     <Button type="button" variant="ghost" size="icon-sm" :disabled="disabled || index === count - 1" :aria-label="downLabel" @click="$emit('move', 1)">
       <ArrowDownIcon aria-hidden="true" />
     </Button>
-    <Button type="button" variant="ghost" size="icon-sm" class="hover:bg-destructive-soft hover:text-destructive" :disabled="disabled" :aria-label="removeLabel" @click="$emit('remove')">
+    <Button type="button" variant="ghost" size="icon-sm" class="hover:bg-destructive-soft hover:text-destructive" :disabled="disabled || removeDisabled" :aria-label="removeLabel" :aria-describedby="removeDescribedBy" @click="$emit('remove')">
       <XIcon aria-hidden="true" />
     </Button>
   </div>

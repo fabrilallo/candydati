@@ -2,7 +2,7 @@
 import type { Outcome } from '@tt/domain'
 import type { ApplicationCardDto, StageRef } from '@/lib/candidate-schemas'
 import { fullName } from '@/lib/candidate-view'
-import { stageLabelKey, type Board } from '@/lib/pipeline-board'
+import { stageName as nameOfStage, type Board } from '@/lib/pipeline-board'
 import { NativeSelect } from '@/components/ui/native-select'
 
 /**
@@ -15,7 +15,7 @@ const { t } = useI18n()
 const root = ref<HTMLElement | null>(null)
 const stageName = (stageId: string): string => {
   const stage = props.stages.find((item) => item.id === stageId)
-  return stage ? t(stageLabelKey(stage)) : stageId
+  return stage ? nameOfStage(stage, t) : stageId
 }
 const dnd = useBoardDrag({
   root,
@@ -36,7 +36,7 @@ const hintId = 'pipeline-card-hint'
     <label class="grid gap-1.5 md:hidden">
       <span class="text-sm font-medium">{{ t('pipeline.stageSwitcher') }}</span>
       <NativeSelect v-model="selected" data-testid="stage-switcher">
-        <option v-for="column in board.columns" :key="column.id" :value="column.id">{{ t(stageLabelKey(column)) }} ({{ column.cards.length }})</option>
+        <option v-for="column in board.columns" :key="column.id" :value="column.id">{{ nameOfStage(column, t) }} ({{ column.cards.length }})</option>
       </NativeSelect>
     </label>
     <div class="-mx-4 flex items-start gap-3 overflow-x-auto px-4 pb-3 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0" data-testid="pipeline-board">

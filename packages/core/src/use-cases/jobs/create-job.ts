@@ -2,7 +2,7 @@ import { jobSlug, type Job } from '@tt/domain';
 import { z } from 'zod';
 import { NotFoundError } from '../../errors.js';
 import { defineJobUseCase } from './define.js';
-import { parseContent } from './shared.js';
+import { parseContent, withStageIds } from './shared.js';
 
 const SLUG_SUFFIX_LENGTH = 6;
 
@@ -35,7 +35,7 @@ export const createJob = defineJobUseCase({
   handler: async ({ deps, actor, input }): Promise<Job> => {
     const template = input.templateId ? await deps.jobTemplates.findById(actor.organizationId, input.templateId) : null;
     if (input.templateId && !template) throw new NotFoundError('Template not found.');
-    const content = parseContent(template ? mergeContent(template.content, input.content) : input.content);
+    const content = withStageIds(parseContent(template ? mergeContent(template.content, input.content) : input.content), deps.newId);
     const id = deps.newId();
     const now = deps.now();
     return deps.jobs.create({

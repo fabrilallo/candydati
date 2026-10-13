@@ -2,6 +2,10 @@ import { checkPublishable, jobContentSchema, type JobContent, type JobRole, type
 
 /** One stage as typed in the editor: numbers stay strings until the form is turned into content. */
 export interface StageForm {
+  /** Stable id given by the server. Empty for a stage that was never saved: the server assigns it. */
+  readonly id: string
+  /** Optional free title; empty means "show the type". */
+  readonly title: string
   readonly type: string
   readonly durationMinutes: string
   readonly conductedBy: string
@@ -36,7 +40,7 @@ export interface JobForm {
   readonly culture: string
 }
 
-export const emptyStage = (): StageForm => ({ type: '', durationMinutes: '', conductedBy: '', note: '' })
+export const emptyStage = (): StageForm => ({ id: '', title: '', type: '', durationMinutes: '', conductedBy: '', note: '' })
 
 export const emptyForm = (language: string = 'it'): JobForm => ({
   title: '',
@@ -68,6 +72,8 @@ export const emptyForm = (language: string = 'it'): JobForm => ({
 const str = (value: string | number | undefined): string => (value === undefined ? '' : String(value))
 
 const stageToForm = (stage: SelectionStage): StageForm => ({
+  id: stage.id ?? '',
+  title: stage.title ?? '',
   type: stage.type,
   durationMinutes: str(stage.durationMinutes),
   conductedBy: stage.conductedBy,
@@ -113,11 +119,13 @@ const optionalNumber = (value: string): number | undefined => {
 const cleanLines = (items: readonly string[]): string[] => items.map((item) => item.trim()).filter((item) => item !== '')
 
 const STAGE_FIELDS = ['type', 'durationMinutes', 'conductedBy'] as const
-const isBlankStage = (stage: StageForm): boolean => STAGE_FIELDS.every((field) => stage[field].trim() === '') && stage.note.trim() === ''
+const isBlankStage = (stage: StageForm): boolean => STAGE_FIELDS.every((field) => stage[field].trim() === '') && stage.note.trim() === '' && stage.title.trim() === ''
 /** Complete means: the three required fields are filled. */
 export const isCompleteStage = (stage: StageForm): boolean => STAGE_FIELDS.every((field) => stage[field].trim() !== '')
 
 const stageToInput = (stage: StageForm): Record<string, unknown> => ({
+  ...(stage.id === '' ? {} : { id: stage.id }),
+  ...(optional(stage.title) === undefined ? {} : { title: optional(stage.title) }),
   type: stage.type,
   durationMinutes: optionalNumber(stage.durationMinutes),
   conductedBy: stage.conductedBy,
@@ -151,6 +159,21 @@ export const formToInput = (form: JobForm): Record<string, unknown> => {
     workLifeBalance: form.workLifeBalance,
     culture: form.culture,
   }
+}
+
+/**
+ * Pure: the form with the stage ids the server assigned. `saved` holds the stages that were sent, in order (blank
+ * rows are not sent, so they are skipped); a stage that already has an id keeps it.
+ */
+export const adoptStageIds = (form: JobForm, saved: JobContent): JobForm => {
+  let next = 0
+  const process = form.process.map((stage) => {
+    if (isBlankStage(stage)) return stage
+    const assigned = saved.process[next]?.id
+    next += 1
+    return stage.id === '' && assigned !== undefined ? { ...stage, id: assigned } : stage
+  })
+  return { ...form, process }
 }
 
 export type FieldErrors = Readonly<Record<string, string>>

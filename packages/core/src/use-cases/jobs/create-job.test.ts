@@ -84,3 +84,13 @@ describe('createJob', () => {
     else await expect(run).rejects.toBeInstanceOf(ForbiddenError);
   });
 });
+
+describe('createJob stage ids', () => {
+  it('assigns an id to every declared stage', async () => {
+    const deps = createTestJobDeps();
+    const content = { title: 'Dev', process: [{ type: 'hr_interview', durationMinutes: 30, conductedBy: 'recruiter', title: 'Ciao' }, { type: 'offer', durationMinutes: 30, conductedBy: 'recruiter', id: 'mine' }] };
+    const job = await createJob(deps, actor, { content });
+    expect(job.content.process.map((s) => s.id)).toEqual([expect.stringMatching(/^stg-[a-z0-9]+$/), 'mine']);
+    expect(job.content.process[0]?.title).toBe('Ciao');
+  });
+});

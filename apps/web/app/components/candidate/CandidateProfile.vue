@@ -3,7 +3,7 @@ import { BriefcaseIcon, CalendarClockIcon, LinkIcon, MailIcon, MessageSquareQuot
 import type { CandidateApplicationDto, CandidateDetailDto } from '@/lib/candidate-schemas'
 import { applicationStatus, retentionState, stageOf } from '@/lib/candidate-view'
 import { formatDate } from '@/lib/format'
-import { stageLabelKey } from '@/lib/pipeline-board'
+import { stageName } from '@/lib/pipeline-board'
 import { Badge } from '@/components/ui/badge'
 
 /** Key and value list of the profile (docs/DESIGN.md "Elenco chiave e valore"), then what was read from the CV. */
@@ -12,9 +12,9 @@ const { t, locale } = useI18n()
 const candidate = computed(() => props.detail.candidate)
 const retention = computed(() => retentionState(candidate.value.retentionExpiresAt, props.now))
 const showAll = ref(false)
-const stageName = (app: CandidateApplicationDto): string => {
+const stageNameOf = (app: CandidateApplicationDto): string => {
   const stage = stageOf(app)
-  return stage ? t(stageLabelKey(stage)) : ''
+  return stage ? stageName(stage, t) : app.stageRemoved ? t('pipeline.stageRemoved') : ''
 }
 const rowClass = 'grid gap-1 py-3 sm:grid-cols-[12rem_minmax(0,1fr)] sm:gap-4'
 const labelClass = 'flex items-center gap-2 text-sm text-muted-foreground'
@@ -47,7 +47,7 @@ const labelClass = 'flex items-center gap-2 text-sm text-muted-foreground'
           <ul class="grid gap-2">
             <li v-for="app in detail.applications" :key="app.id" class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm" data-testid="profile-application">
               <NuxtLink :to="`/app/jobs/${app.job.id}/candidates`" class="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground hover:bg-muted">{{ app.job.title }}</NuxtLink>
-              <span class="text-muted-foreground">{{ stageName(app) }}</span>
+              <span class="text-muted-foreground">{{ stageNameOf(app) }}</span>
               <Badge :variant="applicationStatus(app).tone">{{ t(applicationStatus(app).key) }}</Badge>
               <span class="figure text-xs text-muted-foreground">{{ t('candidate.fields.appliedOn', { date: formatDate(app.createdAt, locale) }) }}</span>
             </li>

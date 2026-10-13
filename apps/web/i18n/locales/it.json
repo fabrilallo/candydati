@@ -565,7 +565,8 @@
       "loadFailed": "Non riusciamo a caricare l'annuncio.",
       "privacyNoticeRequired": "Per pubblicare serve l'informativa privacy dell'organizzazione: senza, nessuno potrebbe candidarsi.",
       "privacyNoticeLink": "Scrivi l'informativa",
-      "privacyNoticeAskAdmin": "Chiedi a una persona amministratrice di pubblicarla."
+      "privacyNoticeAskAdmin": "Chiedi a una persona amministratrice di pubblicarla.",
+      "stageHasOpenApplications": "Una fase con candidati aperti non si può rimuovere. Sposta prima i candidati in un'altra fase."
     },
     "list": {
       "title": "Annunci",
@@ -679,6 +680,7 @@
         "salaryRange": "Da {min} a {max}",
         "stageConductedBy": "Chi la conduce",
         "stageNote": "Nota per il candidato (facoltativa)",
+        "stageTitle": "Titolo della fase",
         "summary": "Presentazione del ruolo",
         "responsibilities": "Responsabilità",
         "mustHave": "Requisiti obbligatori",
@@ -717,7 +719,10 @@
         "stage": "Fase {n}",
         "remove": "Rimuovi la fase {n}",
         "moveUp": "Sposta su la fase {n}",
-        "moveDown": "Sposta giù la fase {n}"
+        "moveDown": "Sposta giù la fase {n}",
+        "titleHint": "Facoltativo. Se vuoto mostriamo il tipo.",
+        "openCandidates": "1 candidato in questa fase | {count} candidati in questa fase",
+        "removeBlocked": "Sposta prima il candidato in un'altra fase | Sposta prima i {count} candidati in un'altra fase"
       },
       "history": "Storico",
       "openPublic": "Apri la pagina pubblica",
@@ -964,6 +969,7 @@
     },
     "received": "Ricevute",
     "receivedHint": "Nuove candidature, ancora da guardare",
+    "stageRemoved": "Fase rimossa",
     "columnCount": "1 candidatura | {count} candidature",
     "emptyColumn": "Nessuna candidatura in questa fase",
     "emptyFiltered": "Nessun risultato in questa fase",

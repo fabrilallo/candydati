@@ -39,6 +39,8 @@ export const applicationCardSchema = z.object({
   stageChangedAt: isoDate,
   closedAt: isoDate.nullable(),
   noteCount: z.number().int().nonnegative(),
+  /** The stage was removed from the job's process: shown as "stage removed". */
+  stageRemoved: z.boolean().default(false),
   candidate: z.object({
     id: z.string(),
     firstName: z.string(),
@@ -92,6 +94,7 @@ export const candidateApplicationSchema = z.object({
   id: z.string(),
   job: z.object({ id: z.string(), title: z.string(), slug: z.string() }),
   stageId: z.string(),
+  stageRemoved: z.boolean().default(false),
   stages: z.array(stageRefSchema),
   outcome: z.enum(OUTCOMES).nullable(),
   message: z.string(),

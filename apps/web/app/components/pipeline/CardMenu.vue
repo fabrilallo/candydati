@@ -2,7 +2,7 @@
 import { ArrowRightLeftIcon, CircleCheckBigIcon, EllipsisVerticalIcon, PanelRightOpenIcon } from '@lucide/vue'
 import { OUTCOMES, type Outcome } from '@tt/domain'
 import type { StageRef } from '@/lib/candidate-schemas'
-import { stageLabelKey, stageTone } from '@/lib/pipeline-board'
+import { stageName, stageTone } from '@/lib/pipeline-board'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,7 +38,7 @@ const { t } = useI18n()
           <DropdownMenuSubContent class="w-60">
             <DropdownMenuItem v-for="stage in stages" :key="stage.id" :disabled="stage.id === stageId" :data-testid="`move-to-${stage.id}`" @select="emit('move', stage.id)">
               <StageDot :tone="stageTone(stage)" />
-              <span class="min-w-0 flex-1 truncate">{{ t(stageLabelKey(stage)) }}</span>
+              <span class="min-w-0 flex-1 truncate">{{ stageName(stage, t) }}</span>
               <span v-if="stage.id === stageId" class="text-xs text-muted-foreground">{{ t('pipeline.card.here') }}</span>
             </DropdownMenuItem>
           </DropdownMenuSubContent>

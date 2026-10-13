@@ -24,7 +24,15 @@ const lines = z.array(line).max(JOB_LIST_MAX);
 const text = z.string().trim().max(JOB_TEXT_MAX);
 const countryCode = z.string().regex(/^[A-Z]{2}$/, 'country_code');
 
+/** Stable identity of a stage: candidates are attached to it, so it survives reordering and renaming. */
+export const STAGE_ID_PATTERN = /^[a-z0-9-]{1,40}$/;
+export const STAGE_TITLE_MAX = 80;
+
 export const selectionStageSchema = z.object({
+  /** Optional in input: the server assigns one to every stage without it. */
+  id: z.string().regex(STAGE_ID_PATTERN, 'stage_id').optional(),
+  /** Free title; when absent the type is shown. */
+  title: z.string().trim().min(1).max(STAGE_TITLE_MAX).optional(),
   type: z.enum(STAGE_TYPES),
   /** Minutes the candidate should set aside (a take-home assignment counts its expected effort). */
   durationMinutes: z.number().int().min(5).max(60 * 24 * 5),

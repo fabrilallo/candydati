@@ -94,7 +94,7 @@ const call = async <T>(request: JobApiRequest, url: string, schema: z.ZodType<T>
     const { code, issues = [] } = failure.data.error
     // Publishing needs the organization's privacy notice first (Phase 2): a specific message with a way to fix it.
     if (issues.some((issue) => issue.message === PRIVACY_NOTICE_REQUIRED)) throw new AppError('job.errors.privacyNoticeRequired', PRIVACY_NOTICE_REQUIRED)
-    throw new AppError(jobErrorKey(code, status), code)
+    throw new AppError(jobErrorKey(code, status), code, issues)
   }
   const envelope = successSchema.safeParse(body)
   const data = envelope.success ? schema.safeParse(envelope.data.data) : null

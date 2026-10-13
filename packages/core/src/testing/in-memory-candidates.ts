@@ -9,6 +9,7 @@ import type {
   CvExtractionRepository,
   UserDirectory,
 } from '../candidate-ports.js';
+import type { OpenApplicationCounts } from '../job-ports.js';
 import type { ApplicationIntake, IntakeRepositories } from '../intake-ports.js';
 import type { AuditLogRepository } from '../ports.js';
 
@@ -192,6 +193,15 @@ export function createInMemoryApplicationIntake(store: CandidateStore, auditLog:
         store.write(before);
         throw error;
       }
+    },
+  };
+}
+
+export function createInMemoryApplicationCounts(store: CandidateStore): OpenApplicationCounts {
+  return {
+    async openByStage(organizationId, jobId) {
+      const open = store.read().applications.filter((a) => a.organizationId === organizationId && a.jobId === jobId && a.outcome === null);
+      return open.reduce<Record<string, number>>((counts, a) => ({ ...counts, [a.stageId]: (counts[a.stageId] ?? 0) + 1 }), {});
     },
   };
 }

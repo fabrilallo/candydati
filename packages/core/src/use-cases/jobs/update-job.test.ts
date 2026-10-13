@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
-import { buildJob, completeJobContent, createInMemoryJobRepository, createTestJobDeps, userActor } from '../../testing/index.js';
+import {
+  buildApplication,
+  buildJob,
+  completeJobContent,
+  createCandidateStore,
+  createInMemoryApplicationCounts,
+  createInMemoryJobRepository,
+  createTestJobDeps,
+  userActor,
+} from '../../testing/index.js';
 import { updateJob } from './update-job.js';
 
 const actor = userActor({ role: 'recruiter', organizationId: 'org_a' });
@@ -60,5 +69,84 @@ describe('updateJob', () => {
     await expect(
       updateJob(deps, userActor({ role: 'interviewer', organizationId: 'org_a' }), { jobId: job.id, content: { title: 'x' } }),
     ).rejects.toBeInstanceOf(ForbiddenError);
+  });
+});
+
+describe('updateJob stage ids', () => {
+  const stage = (id: string | undefined, type = 'hr_interview' as const) => ({
+    ...(id === undefined ? {} : { id }),
+    type,
+    durationMinutes: 30,
+    conductedBy: 'recruiter' as const,
+  });
+  const withProcess = (process: readonly ReturnType<typeof stage>[]) => completeJobContent({ title: 'Dev', process: [...process] });
+
+  const seededWithApplications = (applications: Parameters<typeof buildApplication>[0][]) => {
+    const job = buildJob({
+      organizationId: 'org_a',
+      status: 'published',
+      content: withProcess([stage('stg-a'), stage('stg-b', 'technical_interview'), stage('stg-c', 'final_interview')]),
+    });
+    const store = createCandidateStore({ applications: applications.map((a) => buildApplication({ organizationId: 'org_a', ...a })) });
+    const deps = createTestJobDeps({ jobs: createInMemoryJobRepository([job]), applicationCounts: createInMemoryApplicationCounts(store) });
+    return { job, deps };
+  };
+
+  it('keeps given ids and assigns fresh unique ones to new stages', async () => {
+    const { job, deps } = seeded();
+    const updated = await updateJob(deps, actor, { jobId: job.id, content: withProcess([stage('stg-a'), stage(undefined), stage(undefined)]) });
+    const ids = updated.content.process.map((s) => s.id);
+    expect(ids[0]).toBe('stg-a');
+    expect(ids.every((id) => id !== undefined && /^[a-z0-9-]{1,40}$/.test(id))).toBe(true);
+    expect(new Set(ids).size).toBe(3);
+  });
+
+  it('rejects duplicate stage ids', async () => {
+    const { job, deps } = seeded();
+    const error = await updateJob(deps, actor, { jobId: job.id, content: withProcess([stage('dup'), stage('dup')]) }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).issues).toEqual([{ path: 'process', message: 'duplicate_stage_id:dup' }]);
+  });
+
+  it('allows reordering, renaming and adding stages even with open candidates', async () => {
+    const { job, deps } = seededWithApplications([{ stageId: 'stg-a' }, { id: 'app_2', stageId: 'stg-b' }]);
+    const content = withProcess([{ ...stage('stg-b', 'technical_interview'), title: 'Prova tecnica' } as never, stage('stg-a'), stage('stg-c', 'final_interview'), stage(undefined, 'offer')]);
+    const updated = await updateJob(deps, actor, { jobId: job.id, content });
+    expect(updated.content.process.map((s) => s.id).slice(0, 3)).toEqual(['stg-b', 'stg-a', 'stg-c']);
+    expect(updated.content.process).toHaveLength(4);
+  });
+
+  it('refuses to drop a stage that has open applications, one issue per blocked stage', async () => {
+    const { job, deps } = seededWithApplications([{ stageId: 'stg-a' }, { id: 'app_2', stageId: 'stg-c' }]);
+    const error = await updateJob(deps, actor, { jobId: job.id, content: withProcess([stage('stg-b', 'technical_interview')]) }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).issues).toEqual([
+      { path: 'process', message: 'stage_has_open_applications:stg-a' },
+      { path: 'process', message: 'stage_has_open_applications:stg-c' },
+    ]);
+    expect(deps.auditLog.events()).toHaveLength(0);
+    expect((await deps.jobs.findById('org_a', job.id))?.content.process).toHaveLength(3);
+  });
+
+  it('allows dropping a stage that has only decided applications', async () => {
+    const { job, deps } = seededWithApplications([{ stageId: 'stg-a', outcome: 'not_selected', closedAt: new Date() }]);
+    const updated = await updateJob(deps, actor, { jobId: job.id, content: withProcess([stage('stg-b', 'technical_interview'), stage('stg-c', 'final_interview')]) });
+    expect(updated.content.process).toHaveLength(2);
+  });
+
+  it('ignores open applications of other organizations and jobs', async () => {
+    const { job, deps } = seededWithApplications([
+      { stageId: 'stg-a', organizationId: 'org_b' },
+      { id: 'app_2', stageId: 'stg-a', jobId: 'other_job' },
+    ]);
+    await expect(updateJob(deps, actor, { jobId: job.id, content: withProcess([stage('stg-b', 'technical_interview')]) })).resolves.toBeDefined();
+  });
+
+  it('treats legacy stages without id as stage-<index> when comparing', async () => {
+    const legacy = buildJob({ organizationId: 'org_a', status: 'published' });
+    const store = createCandidateStore({ applications: [buildApplication({ organizationId: 'org_a', stageId: 'stage-1' })] });
+    const deps = createTestJobDeps({ jobs: createInMemoryJobRepository([legacy]), applicationCounts: createInMemoryApplicationCounts(store) });
+    const error = await updateJob(deps, actor, { jobId: legacy.id, content: withProcess([stage('x')]) }).catch((e: unknown) => e);
+    expect((error as ValidationError).issues).toEqual([{ path: 'process', message: 'stage_has_open_applications:stage-1' }]);
   });
 });

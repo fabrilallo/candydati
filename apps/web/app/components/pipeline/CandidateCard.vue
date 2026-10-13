@@ -88,6 +88,7 @@ const moreTags = computed(() => Math.max(0, props.card.candidate.tags.length - T
 
     <div class="flex items-center justify-between gap-3 border-t pt-3 text-xs text-muted-foreground">
       <time :datetime="card.stageChangedAt" :title="t('pipeline.card.inStageSince')">{{ since }}</time>
+      <span v-if="card.stageRemoved" class="rounded-full bg-muted px-2 py-0.5 font-medium" data-testid="card-stage-removed">{{ t('pipeline.stageRemoved') }}</span>
       <span v-if="card.noteCount > 0" class="inline-flex items-center gap-1" data-testid="card-notes">
         <MessageSquareTextIcon class="size-3.5" aria-hidden="true" />
         <span class="sr-only">{{ t('pipeline.card.notes', { count: card.noteCount }, card.noteCount) }}</span>

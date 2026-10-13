@@ -84,7 +84,7 @@ describe('JobWorkSection', () => {
 })
 
 describe('JobProcessSection', () => {
-  const stage = (type: string) => ({ type, durationMinutes: '30', conductedBy: 'recruiter', note: '' })
+  const stage = (type: string, extra: { id?: string; title?: string } = {}) => ({ id: '', title: '', type, durationMinutes: '30', conductedBy: 'recruiter', note: '', ...extra })
 
   it('adds, removes and reorders stages without mutating the form', async () => {
     const stages = Object.freeze([stage('screening_call'), stage('offer')])
@@ -101,6 +101,34 @@ describe('JobProcessSection', () => {
     await wrapper.find('button[aria-label="Rimuovi la fase 2"]').trigger('click')
     expect((wrapper.emitted('patch')?.[2]?.[0] as { process: { type: string }[] }).process.map((s) => s.type)).toEqual(['screening_call'])
     expect(stages.map((s) => s.type)).toEqual(['screening_call', 'offer'])
+  })
+
+  it('has an optional title field per stage, with the translated type as placeholder, and keeps the id', async () => {
+    const wrapper = await mountSuspended(JobProcessSection, { props: props({ process: [stage('screening_call', { id: 'stg-a' })] }) })
+    const input = wrapper.find('#job-field-process-0-title')
+    expect(input.attributes('placeholder')).toBe('Chiamata conoscitiva')
+    expect(wrapper.text()).toContain('Facoltativo. Se vuoto mostriamo il tipo.')
+    await input.setValue('Chiacchierata')
+    expect(wrapper.emitted('patch')?.[0]).toEqual([{ process: [{ ...stage('screening_call'), id: 'stg-a', title: 'Chiacchierata' }] }])
+  })
+
+  it('disables removal and explains why when the stage has open candidates', async () => {
+    const wrapper = await mountSuspended(JobProcessSection, {
+      props: { ...props({ process: [stage('screening_call', { id: 'stg-a' }), stage('offer', { id: 'stg-b' })] }), openCounts: { 'stg-a': 2 } },
+    })
+    expect(wrapper.find('button[aria-label="Rimuovi la fase 1"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.find('button[aria-label="Rimuovi la fase 2"]').attributes('disabled')).toBeUndefined()
+    expect(wrapper.find('[data-testid="stage-remove-blocked"]').text()).toBe("Sposta prima i 2 candidati in un'altra fase")
+    expect(wrapper.find('[data-testid="stage-open-count"]').text()).toBe('2 candidati in questa fase')
+    expect(wrapper.findAll('[data-testid="stage-remove-blocked"]')).toHaveLength(1)
+  })
+
+  it('blocks the row the server refused, even without a known count', async () => {
+    const wrapper = await mountSuspended(JobProcessSection, {
+      props: { ...props({ process: [stage('screening_call', { id: 'stg-a' })] }), blockedStages: new Set(['stg-a']) },
+    })
+    expect(wrapper.find('button[aria-label="Rimuovi la fase 1"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.find('[data-testid="stage-remove-blocked"]').text()).toContain('non si può rimuovere')
   })
 
   it('offers stage durations as presets read like the candidate will read them', async () => {

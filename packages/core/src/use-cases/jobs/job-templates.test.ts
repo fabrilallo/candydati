@@ -79,3 +79,12 @@ describe('deleteJobTemplate', () => {
     await expect(deleteJobTemplate(createTestJobDeps(), userActor({ role, organizationId: 'org_a' }), { templateId: 't' })).rejects.toBeInstanceOf(ForbiddenError);
   });
 });
+
+describe('createJobTemplate stage ids', () => {
+  it('assigns an id to every declared stage', async () => {
+    const deps = createTestJobDeps();
+    const content = { title: 'Dev', process: [{ type: 'hr_interview', durationMinutes: 30, conductedBy: 'recruiter' }] };
+    const t = await createJobTemplate(deps, actor, { name: 'Eng', content });
+    expect(t.content.process[0]?.id).toMatch(/^stg-[a-z0-9]+$/);
+  });
+});

@@ -46,6 +46,7 @@ export * from './use-cases/candidates/run-cv-extraction.js';
 export * from './adapters/drizzle-privacy-notices.js';
 export * from './adapters/drizzle-candidates.js';
 export * from './adapters/drizzle-applications.js';
+export * from './adapters/drizzle-application-counts.js';
 export * from './adapters/drizzle-candidate-notes.js';
 export * from './adapters/drizzle-cv-extractions.js';
 export * from './adapters/drizzle-candidate-search.js';

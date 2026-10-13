@@ -6,6 +6,8 @@ export interface ApplicationCardView {
   readonly candidate: Candidate;
   readonly extraction: CvExtractionRecord | null;
   readonly noteCount: number;
+  /** The stage of the application is no longer in the job's process (it was removed after the decision). */
+  readonly stageRemoved: boolean;
 }
 
 /** `from` feeds the audit event. */

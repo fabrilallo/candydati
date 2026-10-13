@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { appendItem, checkForm, insertItem, contentToForm, emptyForm, emptyStage, formToInput, isCompleteStage, moveItem, removeItem, replaceItem, snapshotOf, validateForm, type JobForm } from './job-form'
+import { adoptStageIds, appendItem, checkForm, insertItem, contentToForm, emptyForm, emptyStage, formToInput, isCompleteStage, moveItem, removeItem, replaceItem, snapshotOf, validateForm, type JobForm } from './job-form'
 
 const complete: JobForm = {
   ...emptyForm('en'),
@@ -13,7 +13,7 @@ const complete: JobForm = {
   country: 'IT',
   city: 'Milano',
   onsiteDaysPerWeek: '2',
-  process: [{ type: 'screening_call', durationMinutes: '30', conductedBy: 'recruiter', note: ' intro ' }],
+  process: [{ id: '', title: '', type: 'screening_call', durationMinutes: '30', conductedBy: 'recruiter', note: ' intro ' }],
   responseDays: '5',
   responsibilities: ['a', ' b ', '', 'c'],
   mustHave: ['TypeScript'],
@@ -79,7 +79,7 @@ describe('contentToForm', () => {
 describe('stages and lists', () => {
   it('knows when a stage is complete', () => {
     expect(isCompleteStage(emptyStage())).toBe(false)
-    expect(isCompleteStage({ type: 'offer', durationMinutes: '10', conductedBy: 'founder', note: '' })).toBe(true)
+    expect(isCompleteStage({ id: '', title: '', type: 'offer', durationMinutes: '10', conductedBy: 'founder', note: '' })).toBe(true)
   })
 
   it('updates lists without mutating them', () => {
@@ -148,5 +148,47 @@ describe('checkForm', () => {
   it('is not publishable with a malformed number even if the rules hold', () => {
     const check = checkForm({ ...complete, responsibilities: ['a', 'b', 'c'], responseDays: '1.5' })
     expect(check.publishable).toBe(false)
+  })
+})
+
+
+describe('stage ids and titles', () => {
+  const saved = (ids: (string | undefined)[]) =>
+    ({ process: ids.map((id) => ({ ...(id === undefined ? {} : { id }), type: 'offer', durationMinutes: 30, conductedBy: 'founder' })) }) as never
+
+  it('carries the id and the title from content to form and back to the input', () => {
+    const content = {
+      ...validateForm(complete).content!,
+      process: [{ id: 'stg-a', title: 'Chiacchierata', type: 'screening_call' as const, durationMinutes: 30, conductedBy: 'recruiter' as const }],
+    }
+    const form = contentToForm(content)
+    expect(form.process[0]).toMatchObject({ id: 'stg-a', title: 'Chiacchierata' })
+    expect((formToInput(form).process as unknown[])[0]).toMatchObject({ id: 'stg-a', title: 'Chiacchierata' })
+  })
+
+  it('sends no id for a new stage and no title when blank', () => {
+    const input = formToInput({ ...complete, process: [{ ...emptyStage(), type: 'offer', durationMinutes: '10', conductedBy: 'founder', title: '  ' }] })
+    expect((input.process as Record<string, unknown>[])[0]).not.toHaveProperty('id')
+    expect((input.process as Record<string, unknown>[])[0]).not.toHaveProperty('title')
+  })
+
+  it('keeps ids when stages are reordered', () => {
+    const a = { ...emptyStage(), id: 'stg-a', type: 'offer', durationMinutes: '10', conductedBy: 'founder' }
+    const b = { ...a, id: 'stg-b' }
+    expect(moveItem([a, b], 0, 1).map((stage) => stage.id)).toEqual(['stg-b', 'stg-a'])
+  })
+
+  it('adopts the ids the server assigned, skipping blank rows and keeping existing ids', () => {
+    const filled = { ...emptyStage(), type: 'offer', durationMinutes: '10', conductedBy: 'founder' }
+    const form = { ...complete, process: [{ ...filled, id: 'stg-a' }, emptyStage(), filled, filled] }
+    const adopted = adoptStageIds(form, saved(['stg-a', 'stg-new1', 'stg-new2']))
+    expect(adopted.process.map((stage) => stage.id)).toEqual(['stg-a', '', 'stg-new1', 'stg-new2'])
+    expect(form.process[2]?.id).toBe('')
+  })
+
+  it('does not dirty the form: the adopted form is the new baseline', () => {
+    const filled = { ...emptyStage(), type: 'offer', durationMinutes: '10', conductedBy: 'founder' }
+    const form = { ...complete, process: [filled] }
+    expect(snapshotOf(adoptStageIds(form, saved(['stg-x'])))).not.toBe(snapshotOf(form))
   })
 })

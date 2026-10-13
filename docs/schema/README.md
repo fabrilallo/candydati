@@ -6,3 +6,6 @@
   le applica `checkPublishable` di `@tt/domain` sopra la forma.
 - Per rigenerarlo dopo una modifica allo schema: `pnpm --filter @tt/domain schema` (compila e scrive questo file).
 - Una modifica incompatibile richiede una nuova versione (`job-content.v2.json`), senza riscrivere la v1.
+- Le fasi del processo (`process[]`) hanno due campi opzionali, aggiunti senza cambiare versione perché compatibili con i dati esistenti:
+  `id` (stringa stabile, `^[a-z0-9-]{1,40}$`; il server la assegna alle fasi che ne sono prive e la restituisce sempre) e `title`
+  (titolo libero di 1-80 caratteri; se manca si mostra il tipo). I candidati sono legati all'`id`, non alla posizione.

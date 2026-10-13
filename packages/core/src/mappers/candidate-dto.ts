@@ -44,6 +44,8 @@ export interface ApplicationCardDto {
   readonly stageChangedAt: string;
   readonly closedAt: string | null;
   readonly noteCount: number;
+  /** True when the stage no longer exists in the job's process: show "stage removed". */
+  readonly stageRemoved: boolean;
   readonly candidate: {
     readonly id: string;
     readonly firstName: string;
@@ -98,6 +100,7 @@ export interface CandidateDetailDto {
     readonly id: string;
     readonly job: { readonly id: string; readonly title: string; readonly slug: string };
     readonly stageId: string;
+    readonly stageRemoved: boolean;
     readonly stages: readonly { readonly id: string; readonly declared: SelectionStage | null }[];
     readonly outcome: Outcome | null;
     readonly message: string;
@@ -141,6 +144,7 @@ export const toApplicationCardDto = (view: ApplicationCardView): ApplicationCard
     stageChangedAt: iso(application.stageChangedAt),
     closedAt: isoOrNull(application.closedAt),
     noteCount: view.noteCount,
+    stageRemoved: view.stageRemoved,
     candidate: {
       id: candidate.id,
       firstName: candidate.firstName,
@@ -202,6 +206,7 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
     id: application.id,
     job: { id: job.id, title: job.content.title, slug: job.slug },
     stageId: application.stageId,
+    stageRemoved: !stages.some((stage) => stage.id === application.stageId),
     stages: stages.map(toStageDto),
     outcome: application.outcome,
     message: application.message,

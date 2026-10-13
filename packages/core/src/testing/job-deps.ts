@@ -1,6 +1,7 @@
 import type { JobDeps } from '../job-ports.js';
 import { createInMemoryAuditLog, type InMemoryAuditLog } from './in-memory-audit-log.js';
 import { fakeAdQualityAnalyzer } from './job-fixtures.js';
+import { createCandidateStore, createInMemoryApplicationCounts } from './in-memory-candidates.js';
 import { createInMemoryPrivacyNoticeRepository } from './in-memory-privacy.js';
 import {
   createInMemoryJobRepository,
@@ -18,6 +19,7 @@ export function createTestJobDeps(overrides: Partial<TestJobDeps> = {}): TestJob
     jobs: createInMemoryJobRepository(),
     jobTemplates: createInMemoryJobTemplateRepository(),
     organizations: createInMemoryOrganizationDirectory(),
+    applicationCounts: createInMemoryApplicationCounts(createCandidateStore()),
     privacyNotices: createInMemoryPrivacyNoticeRepository(),
     adQuality: fakeAdQualityAnalyzer(),
     adQualityThreshold: 6,

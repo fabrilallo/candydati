@@ -68,9 +68,16 @@ export interface OrganizationDirectory {
   findById(id: string): Promise<PublicOrganization | null>;
 }
 
+/** Open applications (no outcome yet) of a job, grouped by pipeline stage id. Always filtered by organization. */
+export interface OpenApplicationCounts {
+  /** Stages with no open application are absent. */
+  openByStage(organizationId: string, jobId: string): Promise<Readonly<Record<string, number>>>;
+}
+
 export interface JobDeps extends CoreDeps {
   readonly jobs: JobRepository;
   readonly jobTemplates: JobTemplateRepository;
+  readonly applicationCounts: OpenApplicationCounts;
   readonly organizations: OrganizationDirectory;
   /** Publishing a job requires an active privacy notice. */
   readonly privacyNotices: PrivacyNoticeRepository;

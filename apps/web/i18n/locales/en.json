@@ -565,7 +565,8 @@
       "loadFailed": "We could not load the ad.",
       "privacyNoticeRequired": "Publishing needs the organization's privacy notice: without it nobody could apply.",
       "privacyNoticeLink": "Write the notice",
-      "privacyNoticeAskAdmin": "Ask an admin to publish it."
+      "privacyNoticeAskAdmin": "Ask an admin to publish it.",
+      "stageHasOpenApplications": "A stage with open candidates cannot be removed. Move the candidates to another stage first."
     },
     "list": {
       "title": "Jobs",
@@ -679,6 +680,7 @@
         "salaryRange": "From {min} to {max}",
         "stageConductedBy": "Conducted by",
         "stageNote": "Note for the candidate (optional)",
+        "stageTitle": "Stage title",
         "summary": "Role overview",
         "responsibilities": "Responsibilities",
         "mustHave": "Must-have requirements",
@@ -717,7 +719,10 @@
         "stage": "Stage {n}",
         "remove": "Remove stage {n}",
         "moveUp": "Move stage {n} up",
-        "moveDown": "Move stage {n} down"
+        "moveDown": "Move stage {n} down",
+        "titleHint": "Optional. If empty we show the type.",
+        "openCandidates": "1 candidate in this stage | {count} candidates in this stage",
+        "removeBlocked": "Move the candidate to another stage first | Move the {count} candidates to another stage first"
       },
       "history": "History",
       "openPublic": "Open the public page",
@@ -964,6 +969,7 @@
     },
     "received": "Received",
     "receivedHint": "New applications, not looked at yet",
+    "stageRemoved": "Stage removed",
     "columnCount": "1 application | {count} applications",
     "emptyColumn": "No applications in this stage",
     "emptyFiltered": "No matches in this stage",

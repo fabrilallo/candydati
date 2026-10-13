@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
+  createDrizzleApplicationCounts,
   createDrizzleAuditLog,
   createDrizzleJobTemplates,
   createDrizzleJobs,
@@ -95,6 +96,7 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
       auditLog,
       jobs: createDrizzleJobs(db),
       jobTemplates: createDrizzleJobTemplates(db),
+      applicationCounts: createDrizzleApplicationCounts(db),
       organizations: createDrizzleOrganizationDirectory(db),
       privacyNotices: createDrizzlePrivacyNotices(db),
       adQuality,

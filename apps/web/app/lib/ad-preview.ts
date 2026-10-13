@@ -15,7 +15,7 @@ const lines = (items: readonly string[]): string[] => items.map((item) => item.t
 const defined = <T extends object>(value: T): T => Object.fromEntries(Object.entries(value).filter(([, v]) => v !== undefined)) as T
 
 const stageOf = (stage: StageForm): SelectionStage | undefined =>
-  valid(selectionStageSchema, defined({ type: stage.type, durationMinutes: number(stage.durationMinutes), conductedBy: stage.conductedBy, note: text(stage.note) }))
+  valid(selectionStageSchema, defined({ title: text(stage.title), type: stage.type, durationMinutes: number(stage.durationMinutes), conductedBy: stage.conductedBy, note: text(stage.note) }))
 
 const shape = jobContentSchema.shape
 

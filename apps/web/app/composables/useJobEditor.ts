@@ -1,8 +1,9 @@
 import type { JobDto, JobTemplateDto } from '@tt/domain'
 import { toast } from 'vue-sonner'
-import { errorKeyOf } from '@/lib/auth-errors'
+import { AppError, errorKeyOf } from '@/lib/auth-errors'
 import { closeJob, createJob, createTemplate, publishJob, updateJob } from '@/lib/job-api'
-import { contentToForm, emptyForm, snapshotOf, validateForm } from '@/lib/job-form'
+import { adoptStageIds, contentToForm, emptyForm, snapshotOf, validateForm } from '@/lib/job-form'
+import { blockedStageIds } from '@/lib/job-issues'
 import { can } from '@/lib/permissions-ui'
 import { needsConfirmation } from '@/lib/quality-view'
 import { visibleIssueErrors } from '@/lib/ad-gaps'
@@ -34,6 +35,11 @@ export const useJobEditor = (init: EditorInit) => {
   const attempted = ref(false)
   const confirmOpen = ref(false)
   const isNew = init.job === null
+  const blockedStages = ref<ReadonlySet<string>>(new Set())
+  /** Open candidates per stage, only for a published job and only for who can read candidates. */
+  const counts = init.job?.status === 'published' && can(role.value, 'candidate:read') ? usePipelineData(init.job.id) : null
+  const openCounts = computed<Readonly<Record<string, number>>>(() => Object.fromEntries((counts?.pipeline.value?.stages ?? []).map((stage) => [stage.id, stage.count])))
+  onMounted(() => void counts?.refresh())
 
   const status = computed(() => job.value?.status ?? 'draft')
   const readOnly = computed(() => status.value === 'closed' || !can(role.value, job.value ? 'job:update' : 'job:create'))
@@ -68,7 +74,10 @@ export const useJobEditor = (init: EditorInit) => {
     return false
   }
   const fail = (error: unknown): false => {
-    errorKey.value = errorKeyOf(error)
+    const blocked = error instanceof AppError ? blockedStageIds(error.issues) : new Set<string>()
+    blockedStages.value = blocked
+    errorKey.value = blocked.size > 0 ? 'job.errors.stageHasOpenApplications' : errorKeyOf(error)
+    if (blocked.size > 0) void counts?.refresh()
     return false
   }
   /** A job created on the "new" page continues at its own address. */
@@ -79,6 +88,7 @@ export const useJobEditor = (init: EditorInit) => {
   const save = async (options: { navigate: boolean } = { navigate: true }): Promise<boolean> => {
     attempted.value = true
     errorKey.value = null
+    blockedStages.value = new Set()
     const sent = draft.form.value
     const { content } = validateForm(sent)
     if (!content) return setKey('job.actions.cannotSave')
@@ -87,7 +97,11 @@ export const useJobEditor = (init: EditorInit) => {
       const current = job.value
       const created = current === null
       job.value = created ? await createJob(api, content, init.template?.id) : await updateJob(api, current.id, content)
-      draft.markSaved(sent)
+      const adopted = adoptStageIds(sent, job.value.content)
+      // The server gave ids to the new stages: the form keeps them, unless the stages were edited meanwhile.
+      if (JSON.stringify(draft.form.value.process) === JSON.stringify(sent.process)) draft.patch({ process: adopted.process })
+      draft.markSaved(adopted)
+      void counts?.refresh()
       toast.success(t(created ? 'job.actions.created' : 'job.actions.saved'))
       if (options.navigate) await goToSaved()
       return true
@@ -186,6 +200,8 @@ export const useJobEditor = (init: EditorInit) => {
   return {
     ...draft,
     job,
+    openCounts,
+    blockedStages,
     status,
     readOnly,
     permissions,

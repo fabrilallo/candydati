@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { card, pipeline } from '~~/test/fixtures/candidate-fixtures'
-import { adjacentStage, boardOf, decideCard, matchesQuery, moveCard, replaceCard, stageLabelKey, stageTone } from './pipeline-board'
+import { adjacentStage, boardOf, decideCard, matchesQuery, moveCard, replaceCard, stageLabelKey, stageName, stageTone } from './pipeline-board'
 
 const LATER = '2026-10-14T09:00:00.000Z'
 
@@ -103,5 +103,15 @@ describe('stages', () => {
     expect(adjacentStage(stages, 'stage-1', 1)).toBeNull()
     expect(adjacentStage(stages, 'received', -1)).toBeNull()
     expect(adjacentStage(stages, 'nope', 1)).toBeNull()
+  })
+})
+
+describe('stageName', () => {
+  const t = (key: string) => `t:${key}`
+  it('shows the title when present, otherwise the translated type', () => {
+    const [received, plain] = pipeline().stages
+    expect(stageName(received!, t)).toBe('t:pipeline.received')
+    expect(stageName(plain!, t)).toBe('t:taxonomy.stageTypes.screening_call')
+    expect(stageName({ ...plain!, declared: { ...plain!.declared!, title: 'Chiacchierata' } }, t)).toBe('Chiacchierata')
   })
 })

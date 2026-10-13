@@ -19,13 +19,15 @@ export const getPipeline = defineCandidateUseCase({
       deps.extractions.findByApplications(actor.organizationId, ids),
       deps.notes.countByApplication(actor.organizationId, ids),
     ]);
+    const pipeline = pipelineStagesOf(job.content.process);
     const cards = applications.flatMap((application) => {
       const candidate = candidates.find((c) => c.id === application.candidateId);
       if (!candidate) return [];
       const extraction = extractions.find((e) => e.applicationId === application.id) ?? null;
-      return [{ application, candidate, extraction, noteCount: counts[application.id] ?? 0 }];
+      const stageRemoved = !pipeline.some((stage) => stage.id === application.stageId);
+      return [{ application, candidate, extraction, noteCount: counts[application.id] ?? 0, stageRemoved }];
     });
-    const stages = pipelineStagesOf(job.content.process).map((stage) => ({
+    const stages = pipeline.map((stage) => ({
       stage,
       count: cards.filter((c) => c.application.outcome === null && c.application.stageId === stage.id).length,
     }));

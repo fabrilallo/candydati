@@ -110,6 +110,12 @@ describe('pipelineStagesOf', () => {
     expect(stages.slice(1).map((item) => item.declared)).toEqual(process);
   });
 
+  it('uses the stable id of each stage, not its position', () => {
+    const process = [{ ...stage(0), id: 'stg-b' }, { ...stage(1), id: 'stage-0' }];
+    expect(pipelineStagesOf(process).map((item) => item.id)).toEqual(['received', 'stg-b', 'stage-0']);
+    expect(pipelineStagesOf([...process].reverse()).map((item) => item.id)).toEqual(['received', 'stage-0', 'stg-b']);
+  });
+
   it('does not mutate the declared process', () => {
     const process = [stage(0)];
     const snapshot = structuredClone(process);

@@ -5,6 +5,7 @@ export * from './audit/events.js';
 export * from './http/envelope.js';
 export * from './job/taxonomy.js';
 export * from './job/content.js';
+export * from './job/stage-ids.js';
 export * from './job/quality.js';
 export * from './job/job.js';
 export * from './job/job-posting.js';

@@ -4,7 +4,7 @@ import type { Outcome } from '@tt/domain'
 import type { ApplicationCardDto } from '@/lib/candidate-schemas'
 import { applicationStatus, currentApplication, fullName, stageOf } from '@/lib/candidate-view'
 import { can } from '@/lib/permissions-ui'
-import { stageLabelKey } from '@/lib/pipeline-board'
+import { stageName } from '@/lib/pipeline-board'
 import type { TabItem } from '@/lib/tabs'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -74,9 +74,14 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
           <PersonAvatar :name="name" size="lg" />
           <div class="grid min-w-0 gap-1">
             <component :is="heading" class="text-2xl leading-tight font-semibold tracking-tight break-words" data-testid="candidate-name">{{ name }}</component>
-            <p v-if="current && stage" class="text-sm text-muted-foreground" data-testid="candidate-stage">
+            <p v-if="current && !stage && current.stageRemoved" class="text-sm text-muted-foreground" data-testid="candidate-stage">
               {{ t('candidate.header.stage') }}
-              <NuxtLink :to="`/app/jobs/${current.job.id}/candidates`" class="font-medium text-primary underline-offset-4 hover:underline">{{ t(stageLabelKey(stage)) }}</NuxtLink>
+              <span class="font-medium text-foreground" data-testid="stage-removed">{{ t('pipeline.stageRemoved') }}</span>
+              <span class="text-muted-foreground">, {{ current.job.title }}</span>
+            </p>
+            <p v-else-if="current && stage" class="text-sm text-muted-foreground" data-testid="candidate-stage">
+              {{ t('candidate.header.stage') }}
+              <NuxtLink :to="`/app/jobs/${current.job.id}/candidates`" class="font-medium text-primary underline-offset-4 hover:underline">{{ stageName(stage, t) }}</NuxtLink>
               <span class="text-muted-foreground">, {{ current.job.title }}</span>
             </p>
             <p v-if="status" class="flex items-center gap-1.5 text-sm text-muted-foreground" data-testid="candidate-status">
