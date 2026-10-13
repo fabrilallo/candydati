@@ -15,46 +15,75 @@ describe('PublicJobBody', () => {
     await useNuxtApp().$i18n.loadLocaleMessages('en')
   })
 
-  it('shows the salary range, contract, work mode and place', async () => {
+  it('puts the salary range, process and response time first, then the quieter facts', async () => {
     const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
     const facts = Object.fromEntries(wrapper.findAll('[data-fact]').map((node) => [node.attributes('data-fact'), node.text()]))
-    expect(facts.salary).toContain('45.000')
-    expect(facts.salary).toContain('60.000')
-    expect(facts.salary).toContain('lordi all\'anno (RAL)')
+    expect(Object.keys(facts)).toEqual(['salary', 'process', 'response', 'contract', 'seniority', 'workMode', 'location'])
+    expect(facts.salary).toContain('RAL lorda')
+    expect(facts.salary).toContain('45.000 - 60.000 €')
+    expect(facts.process).toContain('2 fasi')
+    expect(facts.process).toContain('circa 2 h')
+    expect(facts.response).toContain('entro 5 giorni')
     expect(facts.contract).toContain('Tempo indeterminato')
     expect(facts.workMode).toContain('Ibrido')
+    expect(facts.workMode).toContain('2 giorni a settimana in sede')
     expect(facts.location).toContain('Milano, Italia')
-    expect(facts.location).toContain('2 giorni a settimana in sede')
+  })
+
+  it('names the gross period when the salary is not yearly', async () => {
+    const wrapper = await mountSuspended(PublicJobBody, { props: { page: page({ salary: { min: 3000, max: 3500, currency: 'EUR', period: 'month' } }) } })
+    const salary = wrapper.find('[data-fact="salary"]').text()
+    expect(salary).toContain('lordi al mese')
+    expect(salary).toContain('3.000 - 3.500 €')
   })
 
   it('lists the selection process in order with duration and who conducts it, plus the response time', async () => {
     const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
     const stages = wrapper.findAll('[data-testid="job-stage"]').map((node) => node.text())
     expect(stages).toHaveLength(2)
-    expect(stages[0]).toContain('1. Chiamata conoscitiva')
-    expect(stages[0]).toContain('30 min, a cura di: Recruiter')
-    expect(stages[1]).toContain('2. Colloquio tecnico')
-    expect(stages[1]).toContain('1 h 30 min, a cura di: Responsabile tecnico')
+    expect(stages[0]).toContain('Chiamata conoscitiva')
+    expect(stages[0]).toContain('30 min')
+    expect(stages[0]).toContain('Con: Recruiter')
+    expect(stages[1]).toContain('Colloquio tecnico')
+    expect(stages[1]).toContain('1 h 30 min')
+    expect(stages[1]).toContain('Con: Responsabile tecnico')
     expect(stages[1]).toContain('Pair su un problema reale')
+    expect(wrapper.find('[data-testid="process-summary"]').text()).toBe('2 fasi, circa 2 h')
     expect(wrapper.find('[data-testid="job-process"] ol').exists()).toBe(true)
     expect(wrapper.find('[data-testid="job-response-time"]').text()).toContain('entro 5 giorni')
   })
 
-  it('splits requirements into two lists and shows every section that has content', async () => {
+  it('splits requirements into two lists, shows technologies as tags and hides empty sections', async () => {
     const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
     const sections = wrapper.findAll('[data-section]').map((node) => node.attributes('data-section'))
-    expect(sections).toEqual(['responsibilities', 'mustHave', 'niceToHave', 'technologies', 'benefits', 'growth', 'culture'])
+    expect(sections).toEqual(['summary', 'responsibilities', 'mustHave', 'niceToHave', 'technologies', 'benefits', 'growth', 'culture'])
     expect(wrapper.find('[data-section="mustHave"]').text()).toContain('TypeScript')
     expect(wrapper.find('[data-section="niceToHave"]').text()).toContain('Postgres')
+    expect(wrapper.find('[data-section="technologies"] li').text()).toBe('Node.js')
     expect(wrapper.find('[data-section="workLifeBalance"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="ad-gap"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="ad-hint"]').exists()).toBe(false)
+  })
+
+  it('uses one h1 for the title and h2 for the sections', async () => {
+    const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
+    expect(wrapper.findAll('h1').map((node) => node.text())).toEqual(['Backend developer'])
+    expect(wrapper.findAll('h2').map((node) => node.text())).toContain('Processo di selezione')
+  })
+
+  it('links back to every open position', async () => {
+    const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
+    expect(wrapper.find('[data-testid="back-to-jobs"]').attributes('href')).toBe('/careers/acme')
+    expect(wrapper.find('[data-testid="back-to-jobs"]').text()).toBe('Tutte le posizioni aperte')
   })
 
   it('reads in the language of the ad, not of the visitor', async () => {
     const wrapper = await mountSuspended(PublicJobBody, { props: { page: page({ language: 'en' }) } })
-    expect(wrapper.attributes('lang')).toBe('en')
+    expect(wrapper.find('[data-testid="job-ad"]').attributes('lang')).toBe('en')
     expect(wrapper.text()).toContain('Selection process')
     expect(wrapper.text()).toContain('What you will do')
     expect(wrapper.text()).toContain('You will hear back within 5 days after each stage.')
+    expect(wrapper.find('[data-fact="salary"]').text()).toContain('€45,000 - 60,000')
     expect(wrapper.text()).not.toContain('Processo di selezione')
   })
 
@@ -62,6 +91,7 @@ describe('PublicJobBody', () => {
     const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
     expect(wrapper.find('form').exists()).toBe(false)
     expect(wrapper.find('button').exists()).toBe(false)
+    expect(wrapper.find('input').exists()).toBe(false)
   })
 })
 
@@ -75,6 +105,8 @@ describe('CareersList', () => {
     workMode: 'remote' as const,
     location: { country: 'IT' },
     salary: { min: 40000, max: 50000, currency: 'EUR' as const, period: 'year' as const },
+    stageCount: 2,
+    responseDays: 5,
     publishedAt: '2026-10-13T10:00:00.000Z',
   }
 

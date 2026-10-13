@@ -31,17 +31,24 @@ export const toJobDto = (job: Job): JobDto => ({
   closedAt: isoOrNull(job.closedAt),
 });
 
-export const toJobSummaryDto = (job: Job): JobSummaryDto => ({
-  id: job.id,
-  slug: job.slug,
-  status: job.status,
-  title: job.content.title,
-  role: job.content.role ?? null,
-  publishable: checkPublishable(job.content).length === 0,
-  qualityTotal: job.quality?.total ?? null,
-  updatedAt: iso(job.updatedAt),
-  publishedAt: isoOrNull(job.publishedAt),
-});
+export const toJobSummaryDto = (job: Job, qualityThreshold: number): JobSummaryDto => {
+  const issueCount = checkPublishable(job.content).length;
+  return {
+    id: job.id,
+    slug: job.slug,
+    status: job.status,
+    title: job.content.title,
+    role: job.content.role ?? null,
+    publishable: issueCount === 0,
+    publishIssueCount: issueCount,
+    salary: job.content.salary,
+    workMode: job.content.workMode ?? null,
+    qualityTotal: job.quality?.total ?? null,
+    belowThreshold: job.quality !== null && job.quality.total < qualityThreshold,
+    updatedAt: iso(job.updatedAt),
+    publishedAt: isoOrNull(job.publishedAt),
+  };
+};
 
 export const toJobTemplateDto = (template: JobTemplate): JobTemplateDto => ({
   id: template.id,
@@ -88,6 +95,8 @@ export function toPublicJobSummaryDto(job: Job): PublicJobSummaryDto {
     workMode: content.workMode,
     location: content.location,
     salary: content.salary,
+    stageCount: content.process.length,
+    responseDays: content.responseDays,
     publishedAt,
   };
 }

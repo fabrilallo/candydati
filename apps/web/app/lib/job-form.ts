@@ -181,6 +181,8 @@ export const roleOrNull = (value: string): JobRole | null => (value === '' ? nul
 // --- immutable list helpers -------------------------------------------------------------------------------
 
 export const appendItem = <T>(items: readonly T[], item: T): readonly T[] => [...items, item]
+/** Inserts at `index` (clamped to the end). */
+export const insertItem = <T>(items: readonly T[], index: number, item: T): readonly T[] => [...items.slice(0, index), item, ...items.slice(index)]
 export const removeItem = <T>(items: readonly T[], index: number): readonly T[] => items.filter((_, i) => i !== index)
 export const replaceItem = <T>(items: readonly T[], index: number, item: T): readonly T[] => items.map((current, i) => (i === index ? item : current))
 /** Swaps the item with its neighbour; out-of-range moves return the same list. */

@@ -38,6 +38,15 @@ describe('JobSalarySection', () => {
     await wrapper.find('#job-field-salary-max').setValue('60000')
     expect(wrapper.emitted('patch')?.[0]).toEqual([{ salaryMax: '60000' }])
   })
+
+  it('writes amounts with thousands separators and the currency of the ad, storing digits only', async () => {
+    const wrapper = await mountSuspended(JobSalarySection, { props: props({ salaryMin: '45000', language: 'en', currency: 'GBP' }) })
+    expect((wrapper.find('#job-field-salary-min').element as HTMLInputElement).value).toBe('45,000')
+    expect(wrapper.text()).toContain('£')
+    await wrapper.find('#job-field-salary-min').setValue('48.500 €')
+    expect(wrapper.emitted('patch')?.[0]).toEqual([{ salaryMin: '48500' }])
+    expect((wrapper.find('#job-field-salary-min').element as HTMLInputElement).value).toBe('48,500')
+  })
 })
 
 describe('JobWorkSection', () => {
@@ -50,6 +59,19 @@ describe('JobWorkSection', () => {
     const wrapper = await mountSuspended(JobWorkSection, { props: props({ workMode }) })
     expect(wrapper.find('#job-field-location-city').exists()).toBe(shown)
     expect(wrapper.find('#job-field-location-onsiteDaysPerWeek').exists()).toBe(shown)
+  })
+
+  it('picks the work mode from a radio group with arrow keys', async () => {
+    const wrapper = await mountSuspended(JobWorkSection, { props: props({ workMode: 'remote' }) })
+    const radios = wrapper.findAll('#job-field-workMode [role="radio"]')
+    expect(radios.map((radio) => radio.attributes('aria-checked'))).toEqual(['true', 'false', 'false'])
+    expect(radios.map((radio) => radio.attributes('tabindex'))).toEqual(['0', '-1', '-1'])
+    await radios[0]?.trigger('keydown', { key: 'ArrowRight' })
+    expect(wrapper.emitted('patch')?.[0]).toEqual([{ workMode: 'hybrid' }])
+    await radios[0]?.trigger('keydown', { key: 'End' })
+    expect(wrapper.emitted('patch')?.[1]).toEqual([{ workMode: 'onsite' }])
+    await radios[0]?.trigger('keydown', { key: 'ArrowLeft' })
+    expect(wrapper.emitted('patch')?.[2]).toEqual([{ workMode: 'onsite' }])
   })
 
   it('offers a country select with ISO codes, sorted by Italian name', async () => {
@@ -79,6 +101,14 @@ describe('JobProcessSection', () => {
     await wrapper.find('button[aria-label="Rimuovi la fase 2"]').trigger('click')
     expect((wrapper.emitted('patch')?.[2]?.[0] as { process: { type: string }[] }).process.map((s) => s.type)).toEqual(['screening_call'])
     expect(stages.map((s) => s.type)).toEqual(['screening_call', 'offer'])
+  })
+
+  it('offers stage durations as presets read like the candidate will read them', async () => {
+    const wrapper = await mountSuspended(JobProcessSection, { props: props({ process: [stage('screening_call')] }) })
+    const labels = wrapper.findAll('#job-field-process-0-duration option').map((option) => option.text())
+    expect(labels).toContain('30 min')
+    expect(labels).toContain('1 h 30 min')
+    expect(labels).toContain('2 g')
   })
 
   it('edits a stage field and the response time', async () => {

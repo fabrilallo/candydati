@@ -17,8 +17,11 @@ describe('job mappers', () => {
   });
 
   it('maps summaries', () => {
-    expect(toJobSummaryDto(published)).toMatchObject({ title: 'Backend Developer', role: 'backend_developer', publishable: true, qualityTotal: 8 });
-    const draft = toJobSummaryDto(buildJob({ content: completeJobContent({ title: 'x' }) , quality: null }));
+    expect(toJobSummaryDto(published, 6)).toMatchObject({ title: 'Backend Developer', role: 'backend_developer', publishable: true, publishIssueCount: 0, qualityTotal: 8, belowThreshold: false });
+    expect(toJobSummaryDto(published, 9).belowThreshold).toBe(true);
+    expect(toJobSummaryDto(published, 6).salary).toEqual(published.content.salary);
+    const draft = toJobSummaryDto(buildJob({ content: completeJobContent({ title: 'x', process: [] }), quality: null }), 6);
+    expect(draft).toMatchObject({ publishIssueCount: 1, belowThreshold: false });
     expect(draft.qualityTotal).toBeNull();
     expect(draft.publishedAt).toBeNull();
   });
@@ -32,7 +35,7 @@ describe('job mappers', () => {
     const dto = toPublicJobDto(published);
     expect(Object.keys(dto).sort()).toEqual(['content', 'publishedAt', 'slug']);
     const summary = toPublicJobSummaryDto(published);
-    expect(summary).toMatchObject({ slug: published.slug, title: 'Backend Developer', role: 'backend_developer' });
+    expect(summary).toMatchObject({ slug: published.slug, title: 'Backend Developer', role: 'backend_developer', stageCount: published.content.process.length, responseDays: published.content.responseDays });
     expect(JSON.stringify(summary)).not.toContain('org_test');
   });
 

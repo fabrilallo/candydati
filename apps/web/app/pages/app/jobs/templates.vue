@@ -10,15 +10,14 @@ const allowed = computed(() => can(viewer.value?.role ?? null, 'job_template:rea
 </script>
 
 <template>
-  <div class="grid gap-6">
-    <header class="grid gap-2">
-      <NuxtLink to="/app/jobs" class="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+  <div class="grid gap-8">
+    <div class="grid gap-3">
+      <NuxtLink to="/app/jobs" class="inline-flex w-fit items-center gap-1.5 rounded-sm text-sm text-muted-foreground transition-colors hover:text-foreground">
         <ArrowLeftIcon class="size-4" aria-hidden="true" />
         {{ t('job.editor.back') }}
       </NuxtLink>
-      <h1 class="text-2xl font-semibold tracking-tight">{{ t('job.templates.title') }}</h1>
-      <p class="text-sm text-muted-foreground">{{ t('job.templates.subtitle') }}</p>
-    </header>
+      <PageHeader :title="t('job.templates.title')" :description="t('job.templates.subtitle')" />
+    </div>
     <TemplatesPanel v-if="allowed" />
     <FormAlert v-else message-key="job.templates.forbidden" />
   </div>

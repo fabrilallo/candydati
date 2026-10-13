@@ -11,7 +11,7 @@ const { t } = useI18n()
   <JobSection id="job-description" :title="t('job.editor.sections.description')">
     <TextBlock id="job-field-summary" :label="t('job.editor.fields.summary')" :model-value="form.summary" :disabled="disabled" :error="errors.summary" @update:model-value="emit('patch', { summary: $event })" />
     <StringListField :id="fieldIdOf('responsibilities')" :label="t('job.editor.fields.responsibilities')" :hint="t('job.editor.hints.responsibilities')" :model-value="form.responsibilities" :disabled="disabled" :error="errors.responsibilities" @update:model-value="emit('patch', { responsibilities: $event })" />
-    <div class="grid gap-6 md:grid-cols-2">
+    <div class="grid items-start gap-6 @xl:grid-cols-2">
       <StringListField :id="fieldIdOf('requirements.mustHave')" :label="t('job.editor.fields.mustHave')" :hint="t('job.editor.hints.mustHave')" :model-value="form.mustHave" :disabled="disabled" :error="errors['requirements.mustHave']" @update:model-value="emit('patch', { mustHave: $event })" />
       <StringListField id="job-field-requirements-niceToHave" :label="t('job.editor.fields.niceToHave')" :hint="t('job.editor.hints.niceToHave')" :model-value="form.niceToHave" :disabled="disabled" :error="errors['requirements.niceToHave']" @update:model-value="emit('patch', { niceToHave: $event })" />
     </div>

@@ -14,21 +14,28 @@ const props = defineProps<ToasterProps>()
       '--normal-bg': 'var(--popover)',
       '--normal-text': 'var(--popover-foreground)',
       '--normal-border': 'var(--border)',
-      '--border-radius': 'var(--radius)',
+      '--border-radius': '14px',
+      '--success-bg': 'var(--popover)',
+      '--success-text': 'var(--popover-foreground)',
+      '--success-border': 'var(--border)',
+      '--error-bg': 'var(--popover)',
+      '--error-text': 'var(--popover-foreground)',
+      '--error-border': 'var(--border)',
     }"
     v-bind="props"
+    :toast-options="{ ...props.toastOptions, class: cn('tt-toast', props.toastOptions?.class) }"
   >
     <template #success-icon>
-      <CircleCheckIcon class="size-4" />
+      <CircleCheckIcon class="size-4 text-success" />
     </template>
     <template #info-icon>
-      <InfoIcon class="size-4" />
+      <InfoIcon class="size-4 text-primary" />
     </template>
     <template #warning-icon>
-      <TriangleAlertIcon class="size-4" />
+      <TriangleAlertIcon class="size-4 text-warning" />
     </template>
     <template #error-icon>
-      <OctagonXIcon class="size-4" />
+      <OctagonXIcon class="size-4 text-destructive" />
     </template>
     <template #loading-icon>
       <div>

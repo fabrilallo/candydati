@@ -9,11 +9,8 @@ const allowed = computed(() => can(viewer.value?.role ?? null, 'audit:read'))
 </script>
 
 <template>
-  <div class="grid gap-6">
-    <header class="grid gap-1">
-      <h1 class="text-2xl font-semibold tracking-tight">{{ t('audit.title') }}</h1>
-      <p class="text-sm text-muted-foreground">{{ t('audit.subtitle', { organization: viewer?.organization?.name ?? '' }) }}</p>
-    </header>
+  <div class="grid gap-8">
+    <PageHeader :title="t('audit.title')" :description="t('audit.subtitle', { organization: viewer?.organization?.name ?? '' })" />
     <AuditLogPanel v-if="allowed" />
     <FormAlert v-else message-key="audit.forbidden" />
   </div>

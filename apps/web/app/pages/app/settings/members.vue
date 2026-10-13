@@ -34,28 +34,35 @@ const cancelInvitation = async (id: string): Promise<void> => {
 
 <template>
   <div class="grid gap-8">
-    <header class="grid gap-1">
-      <h1 class="text-2xl font-semibold tracking-tight">{{ t('members.title') }}</h1>
-      <p class="text-sm text-muted-foreground">{{ t('members.subtitle', { organization: viewer?.organization?.name ?? '' }) }}</p>
-    </header>
+    <PageHeader :title="t('members.title')" :description="t('members.subtitle', { organization: viewer?.organization?.name ?? '' })" />
 
     <div v-if="loadErrorKey" class="grid gap-3">
       <FormAlert :message-key="loadErrorKey" />
       <div><Button variant="outline" @click="() => refresh()">{{ t('common.retry') }}</Button></div>
     </div>
 
-    <template v-else-if="organization">
-      <section aria-labelledby="members-title" class="grid gap-3">
-        <h2 id="members-title" class="text-base font-semibold">{{ t('members.listTitle') }}</h2>
-        <div class="rounded-lg border bg-card"><MembersTable :members="organization.members" :current-user-id="viewer?.user.id ?? ''" /></div>
-      </section>
+    <div v-else-if="organization" class="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div class="grid gap-8">
+        <section aria-labelledby="members-title" class="grid gap-3">
+          <h2 id="members-title" class="flex items-baseline gap-2 text-base font-semibold tracking-tight">
+            {{ t('members.listTitle') }}
+            <span class="figure text-sm font-normal text-muted-foreground">{{ organization.members.length }}</span>
+          </h2>
+          <MembersTable :members="organization.members" :current-user-id="viewer?.user.id ?? ''" />
+        </section>
 
-      <section v-if="canManageInvitations" aria-labelledby="pending-title" class="grid gap-3">
-        <h2 id="pending-title" class="text-base font-semibold">{{ t('members.pendingTitle') }}</h2>
-        <PendingInvitations :invitations="organization.invitations" :can-cancel="canManageInvitations" :busy-id="busyId" @cancel="cancelInvitation" />
-      </section>
+        <section v-if="canManageInvitations" aria-labelledby="pending-title" class="grid gap-3">
+          <h2 id="pending-title" class="flex items-baseline gap-2 text-base font-semibold tracking-tight">
+            {{ t('members.pendingTitle') }}
+            <span v-if="organization.invitations.length" class="figure text-sm font-normal text-muted-foreground">{{ organization.invitations.length }}</span>
+          </h2>
+          <PendingInvitations :invitations="organization.invitations" :can-cancel="canManageInvitations" :busy-id="busyId" @cancel="cancelInvitation" />
+        </section>
+      </div>
 
-      <InviteForm :actor-role="role" @invited="() => refresh()" />
-    </template>
+      <div class="lg:sticky lg:top-6 lg:order-none">
+        <InviteForm :actor-role="role" @invited="() => refresh()" />
+      </div>
+    </div>
   </div>
 </template>

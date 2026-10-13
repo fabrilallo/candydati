@@ -71,13 +71,55 @@
     "account": "Account",
     "signOut": "Sign out",
     "signedOut": "You are signed out",
-    "openMenu": "Open the user menu"
+    "openMenu": "Open the user menu",
+    "openNav": "Open navigation",
+    "switchOrganization": "Switch organization",
+    "organizations": "Your organizations",
+    "current": "Active organization",
+    "switched": "You are now working in {organization}"
   },
   "dashboard": {
     "title": "Overview",
     "welcome": "Hi, {name}",
-    "emptyTitle": "Nothing here yet",
-    "emptyBody": "Invite a colleague from the Members page: every action shows up in the audit log."
+    "subtitle": "The job ads of {organization} at a glance.",
+    "countsLabel": "Job ads by status",
+    "counts": {
+      "draft": "Drafts",
+      "published": "Published",
+      "closed": "Closed"
+    },
+    "countsHint": {
+      "draft": "To complete and publish",
+      "published": "Visible on the careers page",
+      "closed": "No longer taking applications"
+    },
+    "viewAll": "See all job ads",
+    "newJob": "New job ad",
+    "invite": "Invite a colleague",
+    "careersTitle": "Careers page",
+    "careersBody": "Published job ads appear here, with salary and selection process visible to everyone.",
+    "careersOpen": "Open the careers page",
+    "startTitle": "First steps",
+    "startIntro": "Three steps to put your first transparent job ad online.",
+    "start": {
+      "job": {
+        "title": "Write your first job ad",
+        "body": "Salary range and process stages are required: without them the ad cannot be published.",
+        "cta": "Create a job ad"
+      },
+      "publish": {
+        "title": "Publish it",
+        "body": "It appears on the careers page with the response time you declared.",
+        "cta": "See the careers page"
+      },
+      "team": {
+        "title": "Invite the people who hire with you",
+        "body": "Every team action is kept in the audit log.",
+        "cta": "Invite a colleague"
+      }
+    },
+    "teamTitle": "Your team",
+    "teamBody": "Invite colleagues and choose their role. Every action is kept in the log."
   },
   "members": {
     "title": "Members",
@@ -131,7 +173,9 @@
     "targetTypes": {
       "organization": "Organization",
       "invitation": "Invitation",
-      "member": "Member"
+      "member": "Member",
+      "job": "Job ad",
+      "job_template": "Template"
     },
     "empty": "No actions recorded yet.",
     "loadFailed": "We could not load the audit log.",
@@ -162,6 +206,16 @@
       },
       "audit": {
         "read": "Read the audit log"
+      },
+      "job": {
+        "created": "Created a job ad",
+        "updated": "Edited a job ad",
+        "published": "Published a job ad",
+        "closed": "Closed a job ad"
+      },
+      "job_template": {
+        "created": "Saved a job ad template",
+        "deleted": "Deleted a job ad template"
       }
     }
   },
@@ -425,6 +479,33 @@
       "emptyTitle": "No job ads yet",
       "emptyBody": "Create the first one: it starts as a draft and is published once it has everything it needs.",
       "emptyFiltered": "No job ads with this status.",
+      "filters": {
+        "all": "All",
+        "draft": "Drafts",
+        "published": "Published",
+        "closed": "Closed"
+      },
+      "readyToPublish": "Ready to publish",
+      "missingItems": "1 item missing | {count} items missing",
+      "belowThreshold": "Below threshold",
+      "belowThresholdLong": "Quality below the recommended threshold",
+      "scoreLabel": "Quality {score} out of 10",
+      "updatedAgo": "Updated {time}",
+      "showAll": "Show all job ads",
+      "empty": {
+        "draft": {
+          "title": "No drafts",
+          "body": "Every ad starts as a draft and stays one until it has a salary, a process and response times."
+        },
+        "published": {
+          "title": "No published ads",
+          "body": "When a draft is ready, publish it from the editor and it shows up on the careers page right away."
+        },
+        "closed": {
+          "title": "No closed ads",
+          "body": "Closed ads stay here as a history, they are never deleted."
+        }
+      },
       "forbidden": "You do not have permission to see job ads.",
       "pagination": {
         "status": "Page {page} of {pages} · {total} job ads"
@@ -441,6 +522,17 @@
       "fromTemplate": "Created from the template “{name}”.",
       "templateMissing": "The requested template no longer exists: starting from a blank ad.",
       "publishedNote": "This ad is published and can still be edited, as long as it keeps meeting the publishing requirements.",
+      "workspace": {
+        "modes": "Editor view",
+        "edit": "Edit",
+        "preview": "Preview",
+        "saved": "Saved",
+        "saving": "Saving…",
+        "ready": "Ready to publish",
+        "missingShort": "1 missing | {count} missing",
+        "more": "More actions",
+        "previewCaption": "What candidates will see"
+      },
       "sections": {
         "basics": "Basics",
         "salary": "Salary",
@@ -467,7 +559,9 @@
         "onsiteDaysPerWeek": "On-site days per week",
         "responseDays": "Response time (days)",
         "stageType": "Stage type",
-        "stageDuration": "Duration (minutes)",
+        "stageDuration": "Duration",
+        "responseDaysUnit": "days",
+        "salaryRange": "From {min} to {max}",
         "stageConductedBy": "Conducted by",
         "stageNote": "Note for the candidate (optional)",
         "summary": "Role overview",
@@ -498,9 +592,11 @@
         "remove": "Remove",
         "moveUp": "Move up",
         "moveDown": "Move down",
-        "item": "{label}, item {n}"
+        "item": "{label}, item {n}",
+        "placeholder": "Type and press Enter for the next item"
       },
       "process": {
+        "notePlaceholder": "Note for the candidate, optional",
         "add": "Add stage",
         "empty": "No stages yet. Add at least the first one.",
         "stage": "Stage {n}",
@@ -514,6 +610,34 @@
       "ready": "All requirements are met: the ad can be published.",
       "missing": "1 item missing | {count} items missing",
       "go": "Go to field"
+    },
+    "preview": {
+      "gaps": {
+        "title": "The ad has no title yet",
+        "role": "Choose the role",
+        "seniority": "Seniority is missing",
+        "contractType": "Contract type is missing",
+        "salary": "The salary is missing: add it to publish",
+        "salaryMin": "The minimum salary is missing",
+        "salaryMax": "The maximum salary is missing: candidates need the range",
+        "workMode": "Work mode is missing",
+        "place": "Country of work is missing",
+        "process": "No stages yet: describe the selection process to publish",
+        "responseDays": "Response time is missing: state it to publish",
+        "responsibilities": "At least three responsibilities are needed",
+        "mustHave": "Add at least one required skill"
+      },
+      "optional": {
+        "summary": "Add a short introduction to the role",
+        "niceToHave": "Add nice-to-have skills, if any",
+        "technologies": "Add technologies and tools",
+        "benefits": "Add benefits: candidates look for them",
+        "growth": "Tell how people grow in this role",
+        "workLifeBalance": "Describe hours and flexibility",
+        "culture": "Tell how the team works"
+      },
+      "vague": "Vague phrase: {category}",
+      "vagueOpen": "Vague phrase, see the suggested rewrite"
     },
     "quality": {
       "title": "Ad quality",
@@ -535,7 +659,9 @@
       "improvementsEmpty": "No suggestions: great work.",
       "sourceRules": "Rule-based analysis, no model.",
       "sourceModel": "Analysis by a language model.",
-      "stale": "The ad changed after this analysis."
+      "stale": "The ad changed after this analysis.",
+      "details": "Analysis details",
+      "highlighted": "Vague phrases are underlined in the preview: open them for the rewrite."
     },
     "publish": {
       "action": "Publish",
@@ -553,7 +679,10 @@
       "copy": "Copy address",
       "copied": "Address copied",
       "published": "Ad published",
-      "noAnalysis": "The quality analysis could not run, but the ad was published."
+      "noAnalysis": "The quality analysis could not run, but the ad was published.",
+      "liveTitle": "The ad is live",
+      "liveBody": "It is now on the careers page, with salary and process in plain sight. Share the address wherever you look for people.",
+      "liveDone": "Done"
     },
     "actions": {
       "save": "Save",
@@ -585,7 +714,18 @@
         "actions": "Actions"
       },
       "empty": "No templates yet. Save an ad as a template from the editor.",
-      "use": "Create ad",
+      "emptyTitle": "No templates yet",
+      "emptyBody": "A template keeps the salary, process and requirements of an ad that works. Open an ad in the editor and choose “Save as template”.",
+      "emptyAction": "Go to job ads",
+      "facts": {
+        "salary": "Salary",
+        "stages": "1-stage process | {count}-stage process",
+        "requirements": "1 requirement | {count} requirements",
+        "responsibilities": "1 responsibility | {count} responsibilities",
+        "benefits": "1 benefit | {count} benefits",
+        "none": "Title only"
+      },
+      "use": "Use template",
       "useFor": "Create an ad from the template {name}",
       "delete": "Delete",
       "deleteFor": "Delete the template {name}",
@@ -611,7 +751,19 @@
     "responseValue": "You will hear back within 1 day after each stage. | You will hear back within {count} days after each stage.",
     "published": "Published on {date}",
     "backToJobs": "All open positions",
+    "facts": {
+      "ral": "Gross annual salary",
+      "stages": "1 stage | {count} stages",
+      "about": "about {duration}",
+      "within": "within 1 day | within {count} days",
+      "afterEachStage": "after each stage",
+      "processTotal": "total time of the process",
+      "conductedBy": "With: {who}"
+    },
     "headings": {
+      "role": "The role",
+      "requirements": "Requirements",
+      "workplace": "How we work",
       "responsibilities": "What you will do",
       "mustHave": "What you need",
       "niceToHave": "Nice to have",
@@ -627,16 +779,59 @@
       "days": "{n} d",
       "hoursMinutes": "{h} h {m} min"
     },
-    "metaDescription": "{title}: {role}, {seniority}, {contract}. {salary}."
+    "metaDescription": "{title}: {role}, {seniority}, {contract}. {salary}.",
+    "poweredBy": "Careers page on {name}",
+    "footer": "Here salary, selection process and response times are always declared."
   },
   "careers": {
     "title": "Open positions at {organization}",
-    "subtitle": "Every ad states the salary, the selection process and the response times.",
+    "subtitle": "Every ad tells you the pay, how we select, and when you will hear back.",
     "metaDescription": "Open positions at {organization}: salary, work mode and selection process always stated.",
     "empty": "There are no open positions right now.",
-    "emptyBody": "Check back soon.",
+    "emptyBody": "When we open one, you will find it here with salary, process and response times already written.",
     "count": "No open positions | 1 open position | {count} open positions",
     "notFound": "This careers page does not exist.",
-    "logo": "{organization} logo"
+    "logo": "{organization} logo",
+    "stats": {
+      "open": "Open position | Open positions",
+      "response": "day at most for an answer | days at most for an answer"
+    },
+    "filters": {
+      "label": "Filter by work mode",
+      "all": "All",
+      "reset": "Show all positions",
+      "noMatch": "No positions with this work mode."
+    },
+    "job": {
+      "stages": "1 stage | {count} stages",
+      "response": "answer in 1 day | answer in {count} days"
+    }
+  },
+  "promise": {
+    "label": "Product principles",
+    "lead": "{name} is an open source ATS on the candidate's side.",
+    "salary": {
+      "title": "Salary in the clear.",
+      "body": "A job ad without a salary range cannot be published."
+    },
+    "process": {
+      "title": "A declared process.",
+      "body": "Stages, who runs them, how long they take and when you hear back, all visible before applying."
+    },
+    "answer": {
+      "title": "Every candidate gets an answer.",
+      "body": "No application is left without an outcome, and no decision about people is automated."
+    },
+    "footer": "Open code, full export at any time."
+  },
+  "errorPage": {
+    "notFoundTitle": "This page does not exist",
+    "notFoundBody": "The link may be old or contain a typo.",
+    "unreachableTitle": "The service is not responding",
+    "unreachableBody": "We cannot reach the server right now. Try again in a moment.",
+    "genericTitle": "Something went wrong",
+    "genericBody": "We logged the problem. Try again, or go back to the start.",
+    "home": "Back to the start",
+    "code": "Error {code}"
   }
 }

@@ -1,6 +1,7 @@
 /*
- * Design tokens (Tailwind 4 + shadcn-vue). Restrained "paper and ink" palette: warm neutrals, one deep green
- * for actions, state colours only for state. Dark mode = class `dark` on <html> (set by @nuxtjs/color-mode).
+ * Design tokens (Tailwind 4 + shadcn-vue). Direction "Editoriale nitido": cool off-white and near-black, ONE cobalt
+ * accent, Geist. State colours are used only for state. Contract and measured contrast ratios: docs/DESIGN.md.
+ * Dark mode = class `dark` on <html> (set by @nuxtjs/color-mode). Fonts are loaded in nuxt.config (`css`).
  */
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -9,64 +10,80 @@
 
 :root {
   color-scheme: light;
-  --background: #f7f6f2;
-  --foreground: #1d1c19;
-  --card: #fffffe;
-  --card-foreground: #1d1c19;
-  --popover: #fffffe;
-  --popover-foreground: #1d1c19;
-  --primary: #1e4d3e;
-  --primary-foreground: #f7f6f2;
-  --secondary: #ecebe5;
-  --secondary-foreground: #1d1c19;
-  --muted: #efeee8;
-  --muted-foreground: #5f5c54;
-  --accent: #e9e8e1;
-  --accent-foreground: #1d1c19;
-  --destructive: #b42318;
-  --destructive-foreground: #ffffff;
-  --success: #1b6b4a;
-  --success-soft: #e3f1ea;
-  --warning: #9a5b00;
-  --warning-soft: #fbf0d9;
-  --border: #e2e0d8;
-  --input: #cfccc1;
-  --ring: #2f7a63;
-  --radius: 0.5rem;
-  --sidebar: #f1f0ea;
+  --background: #f6f7f9;
+  --foreground: #111318;
+  --card: #fdfdfe;
+  --card-foreground: #111318;
+  --popover: #fdfdfe;
+  --popover-foreground: #111318;
+  --primary: #1f47d6;
+  --primary-hover: #1a3cb8;
+  --primary-foreground: #f6f7f9;
+  --secondary: #eceef2;
+  --secondary-foreground: #111318;
+  --muted: #edeff3;
+  --muted-foreground: #596070;
+  --accent: #e8edfd;
+  --accent-foreground: #1a3bb8;
+  --destructive: #b3261e;
+  --destructive-foreground: #f6f7f9;
+  --destructive-soft: #fbeae8;
+  --success: #1e6b4b;
+  --success-soft: #e4f2eb;
+  --warning: #8a5300;
+  --warning-soft: #faf0dc;
+  --border: #e3e6eb;
+  --input: #d2d7de;
+  --ring: #1f47d6;
+  --sidebar: #f0f2f5;
+  --overlay: rgb(17 19 24 / 0.42);
+  --shadow-color: 220 30% 20%;
+  /* Inverse surface for the auth promise panel. */
+  --inverse: #111318;
+  --inverse-foreground: #f6f7f9;
+  --inverse-muted: #a9b0bc;
+  --inverse-accent: #7d9bff;
 }
 
 .dark {
   color-scheme: dark;
-  --background: #121211;
-  --foreground: #ecebe5;
-  --card: #1a1a18;
-  --card-foreground: #ecebe5;
-  --popover: #1f1f1c;
-  --popover-foreground: #ecebe5;
-  --primary: #86c9ae;
-  --primary-foreground: #0f1a15;
-  --secondary: #262622;
-  --secondary-foreground: #ecebe5;
-  --muted: #212120;
-  --muted-foreground: #a3a095;
-  --accent: #2a2a26;
-  --accent-foreground: #ecebe5;
-  --destructive: #f2877c;
-  --destructive-foreground: #1a0b09;
-  --success: #7fcfa6;
-  --success-soft: #16261f;
-  --warning: #e8b655;
-  --warning-soft: #2b2212;
-  --border: #2c2c28;
-  --input: #3a3a35;
-  --ring: #86c9ae;
-  --sidebar: #171715;
+  --background: #0e1013;
+  --foreground: #eceef2;
+  --card: #15181d;
+  --card-foreground: #eceef2;
+  --popover: #1a1d23;
+  --popover-foreground: #eceef2;
+  --primary: #7d9bff;
+  --primary-hover: #96afff;
+  --primary-foreground: #0b1020;
+  --secondary: #1f232a;
+  --secondary-foreground: #eceef2;
+  --muted: #1b1f25;
+  --muted-foreground: #9aa1ad;
+  --accent: #18213d;
+  --accent-foreground: #a9bdff;
+  --destructive: #f2938a;
+  --destructive-foreground: #1a0b0a;
+  --destructive-soft: #2c1615;
+  --success: #7ccba2;
+  --success-soft: #132620;
+  --warning: #e2b864;
+  --warning-soft: #2a2213;
+  --border: #252a31;
+  --input: #323842;
+  --ring: #7d9bff;
+  --sidebar: #111317;
+  --overlay: rgb(5 6 9 / 0.7);
+  --shadow-color: 220 40% 2%;
+  --inverse: #15181d;
+  --inverse-foreground: #eceef2;
+  --inverse-muted: #9aa1ad;
+  --inverse-accent: #7d9bff;
 }
 
 @theme inline {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -74,6 +91,7 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -83,6 +101,7 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
@@ -91,10 +110,34 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-sidebar: var(--sidebar);
-  --radius-sm: calc(var(--radius) - 2px);
-  --radius-md: var(--radius);
-  --radius-lg: calc(var(--radius) + 2px);
-  --radius-xl: calc(var(--radius) + 6px);
+  --color-overlay: var(--overlay);
+  --color-inverse: var(--inverse);
+  --color-inverse-foreground: var(--inverse-foreground);
+  --color-inverse-muted: var(--inverse-muted);
+  --color-inverse-accent: var(--inverse-accent);
+
+  /* Radius rule: controls 8px (md), cards/panels/dialogs/menus 14px (lg, xl, 2xl), inner menu items 6px (sm). */
+  --radius: 0.5rem;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 14px;
+  --radius-2xl: 14px;
+
+  /* Shadows tinted to the cool background hue, never pure black. */
+  --shadow-xs: 0 1px 1px 0 hsl(var(--shadow-color) / 0.05);
+  --shadow-sm: 0 1px 2px 0 hsl(var(--shadow-color) / 0.06), 0 1px 3px 0 hsl(var(--shadow-color) / 0.05);
+  --shadow-md: 0 2px 4px -1px hsl(var(--shadow-color) / 0.06), 0 6px 16px -4px hsl(var(--shadow-color) / 0.1);
+  --shadow-lg: 0 4px 8px -2px hsl(var(--shadow-color) / 0.08), 0 16px 40px -8px hsl(var(--shadow-color) / 0.18);
+
+  /* Motion: one curve, short durations. */
+  --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-shimmer: shimmer 1.6s var(--ease-snap) infinite;
+
+  @keyframes shimmer {
+    from { background-position: 150% 0; }
+    to { background-position: -50% 0; }
+  }
 }
 
 @layer base {
@@ -103,10 +146,19 @@
   }
   html {
     -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "tnum" 1, "cv11" 1;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  ::selection {
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
   }
   :focus-visible {
     outline: 2px solid var(--ring);
@@ -114,9 +166,33 @@
   }
 }
 
+/* Figures that are compared at a glance: salaries, counts, dates in lists. */
+@utility figure {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
+}
+
+/* Toasts (vue-sonner): same font, tinted shadow, quiet type. */
+[data-sonner-toaster] [data-sonner-toast].tt-toast {
+  font-family: var(--font-sans);
+  box-shadow: var(--shadow-lg);
+  gap: 0.625rem;
+  padding: 0.875rem 1rem;
+}
+[data-sonner-toaster] [data-sonner-toast].tt-toast [data-title] {
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+[data-sonner-toaster] [data-sonner-toast].tt-toast [data-description] {
+  color: var(--muted-foreground);
 }

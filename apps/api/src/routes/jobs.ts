@@ -18,7 +18,7 @@ export function registerJobRoutes(app: FastifyInstance, ctx: AppContext): void {
 
   app.get('/api/v1/jobs', async (request) => {
     const { items, meta } = await listJobs(deps, await ctx.resolveActor(request), request.query);
-    return ok(items.map(toJobSummaryDto), meta);
+    return ok(items.map((job) => toJobSummaryDto(job, deps.adQualityThreshold)), meta);
   });
 
   app.post('/api/v1/jobs', limit, async (request, reply) => {

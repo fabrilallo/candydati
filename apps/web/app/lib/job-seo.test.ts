@@ -37,7 +37,7 @@ describe('buildJobSeo', () => {
   })
 
   it('falls back to a generated description in the language of the ad', () => {
-    expect(build(page(), 'https://x.test').description).toBe('Backend developer: Backend developer, Senior, Permanent. €45,000 – €60,000, gross per year.')
+    expect(build(page(), 'https://x.test').description).toBe('Backend developer: Backend developer, Senior, Permanent. €45,000 - €60,000, gross per year.')
     expect(build(page({ language: 'it' }), 'https://x.test').description).toContain('Tempo indeterminato')
   })
 

@@ -32,6 +32,12 @@ describe('TemplatesPanel', () => {
     expect(row.text()).toContain('Backend developer')
     expect(row.find('a').attributes('href')).toBe('/app/jobs/new?template=t1')
     expect(row.find('a').attributes('aria-label')).toBe('Crea un annuncio dal template Backend senior')
+    expect(row.find('a').text()).toBe('Usa template')
+  })
+
+  it('says what each template pre-fills', async () => {
+    const wrapper = await mountPanel()
+    expect(wrapper.find('[data-testid="template-summary"]').text()).toBe('RAL, processo in 2 fasi, 2 requisiti, 3 attività, 1 benefit')
   })
 
   it('deletes only after confirmation', async () => {
@@ -43,6 +49,7 @@ describe('TemplatesPanel', () => {
     document.body.querySelector<HTMLElement>('[data-testid="confirm"]')?.click()
     await vi.waitFor(() => expect(state.deleted).toEqual(['t1']))
     await vi.waitFor(() => expect(wrapper.find('[data-testid="templates-empty"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="templates-empty"]').text()).toContain('Salva come template')
   })
 
   it('does not offer deletion without job_template:delete', async () => {

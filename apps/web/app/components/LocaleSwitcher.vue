@@ -5,7 +5,7 @@ const { t, locale, setLocale } = useI18n()
 </script>
 
 <template>
-  <div role="group" :aria-label="t('common.language')" class="inline-flex rounded-md border bg-card p-0.5 text-xs font-medium">
+  <div role="group" :aria-label="t('common.language')" class="inline-flex items-center text-xs font-medium">
     <button
       v-for="code in SUPPORTED_LOCALES"
       :key="code"
@@ -13,8 +13,8 @@ const { t, locale, setLocale } = useI18n()
       :aria-pressed="locale === code"
       :lang="code"
       :title="t(`locales.${code}`)"
-      class="rounded-[5px] px-2 py-1 uppercase tracking-wide transition-colors"
-      :class="locale === code ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'"
+      class="h-8 rounded-md px-2 uppercase tracking-wide transition-colors duration-150"
+      :class="locale === code ? 'font-semibold text-foreground' : 'text-muted-foreground hover:text-foreground'"
       @click="setLocale(code)"
     >
       {{ code }}

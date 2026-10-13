@@ -44,34 +44,93 @@ afterEach(() => {
   mounted.splice(0).forEach((wrapper) => wrapper.unmount())
 })
 
-describe('JobEditor rule panel', () => {
-  it('disables Publish and lists what is missing, computed locally', async () => {
+const openMenu = async (wrapper: Awaited<ReturnType<typeof mountEditor>>, testId: string): Promise<void> => {
+  await wrapper.find(`[data-testid="${testId}"]`).trigger('keydown', { key: 'Enter' })
+  await flushPromises()
+}
+
+describe('JobEditor readiness and gaps', () => {
+  it('disables Publish and shows what is missing in place, computed locally', async () => {
     const wrapper = await mountEditor({ job: makeJob({ content: incompleteContent }) })
     expect(wrapper.find('[data-testid="publish"]').attributes('disabled')).toBeDefined()
-    const issues = wrapper.findAll('[data-testid="checklist-issue"]').map((row) => row.text())
-    expect(issues.length).toBeGreaterThanOrEqual(8)
-    expect(issues.join(' ')).toContain('Ruolo')
+    expect(wrapper.find('[data-testid="readiness"]').text()).toContain('Mancano 10 elementi')
+    const gaps = wrapper.findAll('[data-testid="ad-gap"]').map((gap) => gap.attributes('data-gap'))
+    expect(new Set(gaps)).toEqual(new Set(['role', 'seniority', 'contractType', 'salary', 'workMode', 'place', 'process', 'responseDays', 'responsibilities', 'mustHave']))
+    expect(wrapper.find('[data-gap="salary"]').text()).toBe('Manca la RAL: aggiungila per pubblicare')
     expect(wrapper.text()).toContain('Completa gli elementi mancanti per pubblicare')
+    expect(state.calls).toEqual([])
   })
 
-  it('updates the list as the form changes and enables Publish when nothing is missing', async () => {
+  it('updates as the form changes, with Enter adding the next item, and enables Publish when nothing is missing', async () => {
     const wrapper = await mountEditor({ job: makeJob({ content: { ...completeContent, responsibilities: ['una', 'due'] } }) })
-    expect(wrapper.findAll('[data-testid="checklist-issue"]')).toHaveLength(1)
-    expect(wrapper.find('[data-testid="publish"]').attributes('disabled')).toBeDefined()
-    await wrapper.find('#job-field-responsibilities-1').setValue('due')
-    const add = wrapper.findAll('#job-field-responsibilities button').find((button) => button.text() === 'Aggiungi voce')
-    await add?.trigger('click')
+    expect(wrapper.find('[data-testid="readiness"]').text()).toContain('Manca 1 elemento')
+    expect(wrapper.find('[data-gap="responsibilities"]').text()).toBe('Servono almeno tre responsabilità')
+    await wrapper.find('#job-field-responsibilities-1').trigger('keydown', { key: 'Enter' })
     await wrapper.find('#job-field-responsibilities-2').setValue('tre')
-    expect(wrapper.find('[data-testid="checklist-ready"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="readiness-ready"]').text()).toBe('Pronto per pubblicare')
+    expect(wrapper.find('[data-testid="ad-gap"]').exists()).toBe(false)
     expect(wrapper.find('[data-testid="publish"]').attributes('disabled')).toBeUndefined()
+  })
+
+  it('keeps a fresh draft quiet and shows a field rule once the user leaves the field', async () => {
+    const wrapper = await mountEditor({ job: null })
+    expect(wrapper.find('#job-field-role').attributes('aria-invalid')).toBeUndefined()
+    await wrapper.find('#job-field-role').trigger('focusout')
+    expect(wrapper.find('#job-field-role').attributes('aria-invalid')).toBe('true')
+    expect(wrapper.find('#job-field-role-error').text()).toBe('Campo obbligatorio per pubblicare')
+    expect(wrapper.find('#job-field-seniority').attributes('aria-invalid')).toBeUndefined()
+  })
+
+  it('reveals every rule on the form when the readiness list is opened', async () => {
+    const wrapper = await mountEditor({ job: makeJob({ content: incompleteContent }) })
+    await openMenu(wrapper, 'readiness')
+    expect(body().querySelectorAll('[data-testid="readiness-gap"]')).toHaveLength(10)
+    expect(wrapper.find('#job-field-seniority').attributes('aria-invalid')).toBe('true')
+  })
+
+  it('jumps from a gap in the preview to its form field', async () => {
+    const wrapper = await mountSuspended(JobEditor, { props: { template: null, job: makeJob({ content: incompleteContent }) }, attachTo: document.body })
+    mounted.push(wrapper)
+    await wrapper.find('[data-gap="salary"]').trigger('click')
+    await flushPromises()
+    expect(document.activeElement?.id).toBe('job-field-salary-min')
   })
 
   it('shows city and on-site days only for hybrid and on-site work', async () => {
     const wrapper = await mountEditor()
     expect(wrapper.find('#job-field-location-city').exists()).toBe(true)
-    await wrapper.find('#job-field-workMode').setValue('remote')
+    await wrapper.findAll('#job-field-workMode [role="radio"]').find((radio) => radio.text() === 'Da remoto')?.trigger('click')
     expect(wrapper.find('#job-field-location-city').exists()).toBe(false)
     expect(wrapper.find('#job-field-location-onsiteDaysPerWeek').exists()).toBe(false)
+  })
+})
+
+describe('JobEditor live preview', () => {
+  it('renders the ad as the candidate will read it, updated as you type', async () => {
+    const wrapper = await mountEditor()
+    expect(wrapper.find('[data-testid="job-ad"]').attributes('data-mode')).toBe('preview')
+    expect(wrapper.find('[data-testid="ad-title"]').text()).toBe('Backend developer')
+    await wrapper.find('#job-field-title').setValue('Backend developer senior')
+    expect(wrapper.find('[data-testid="ad-title"]').text()).toBe('Backend developer senior')
+    await wrapper.find('#job-field-salary-max').setValue('70000')
+    expect(wrapper.find('[data-fact="salary"]').text()).toContain('45.000 - 70.000 €')
+    expect(state.calls).toEqual([])
+  })
+
+  it('underlines the vague phrases of the last analysis in the preview', async () => {
+    const wrapper = await mountEditor({ job: makeJob({ content: { ...completeContent, summary: 'Offriamo uno stipendio competitivo.' } }) })
+    expect(wrapper.find('[data-testid="vague-mark"]').exists()).toBe(false)
+    await wrapper.find('[data-testid="analyze"]').trigger('click')
+    await settled(['quality'])
+    expect(wrapper.find('[data-testid="vague-mark"]').text()).toContain('stipendio competitivo')
+  })
+
+  it('switches between form and preview below xl', async () => {
+    const wrapper = await mountEditor()
+    expect(wrapper.find('[data-testid="editor-form-pane"]').classes()).not.toContain('hidden')
+    await wrapper.findAll('#editor-mode [role="radio"]').find((radio) => radio.text() === 'Anteprima')?.trigger('click')
+    expect(wrapper.find('[data-testid="editor-form-pane"]').classes()).toContain('hidden')
+    expect(wrapper.find('[data-testid="editor-preview-pane"]').classes()).not.toContain('hidden')
   })
 })
 
@@ -84,6 +143,8 @@ describe('JobEditor publish flow', () => {
     expect(byTestId('below-threshold-dialog')).toBeNull()
     await vi.waitFor(() => expect(wrapper.find('[data-testid="public-url"]').text()).toBe('http://localhost:3000/careers/acme/backend-developer-abc123'))
     expect(wrapper.find('[data-testid="publish"]').exists()).toBe(false)
+    expect(byTestId('published-dialog-url')?.textContent).toBe('http://localhost:3000/careers/acme/backend-developer-abc123')
+    useState('job-just-published').value = null
   })
 
   it('asks for confirmation below the threshold and lets the user go back', async () => {
@@ -108,6 +169,7 @@ describe('JobEditor publish flow', () => {
     byTestId('publish-anyway')?.click()
     await settled(['quality', 'publish'])
     await vi.waitFor(() => expect(wrapper.find('[data-testid="published-panel"]').exists()).toBe(true))
+    useState('job-just-published').value = null
   })
 
   it('saves first when the form is dirty, then analyses, then publishes', async () => {
@@ -153,8 +215,8 @@ describe('JobEditor saving', () => {
 
   it('saves the current form as a template with a name', async () => {
     const wrapper = await mountEditor()
-    const open = wrapper.findAll('button').find((button) => button.text() === 'Salva come template')
-    await open?.trigger('click')
+    await openMenu(wrapper, 'more-actions')
+    body().querySelector<HTMLElement>('[data-testid="save-template"]')?.click()
     await flushPromises()
     const input = body().querySelector<HTMLInputElement>('#template-name')
     await new DOMWrapper(input!).setValue('Backend senior')
@@ -174,7 +236,9 @@ describe('JobEditor permissions and status', () => {
     expect(wrapper.find('[data-testid="publish"]').exists()).toBe(false)
     expect(wrapper.find('[data-testid="close-job"]').exists()).toBe(false)
     expect(wrapper.find('#job-field-title').attributes('disabled')).toBeDefined()
-    expect(wrapper.find('[data-testid="publish-checklist"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="readiness"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="quality-panel"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="job-ad"]').exists()).toBe(true)
   })
 
   it('hides Publish without job:publish but lets a hiring manager edit', async () => {
@@ -188,7 +252,8 @@ describe('JobEditor permissions and status', () => {
     const wrapper = await mountEditor({ job: makeJob({ status: 'published', publishedAt: '2026-10-13T11:00:00.000Z' }) })
     expect(wrapper.find('[data-testid="save"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="published-panel"]').exists()).toBe(true)
-    await wrapper.find('[data-testid="close-job"]').trigger('click')
+    await openMenu(wrapper, 'more-actions')
+    body().querySelector<HTMLElement>('[data-testid="close-job"]')?.click()
     await flushPromises()
     expect(state.calls).toEqual([])
     byTestId('confirm')?.click()
@@ -199,6 +264,16 @@ describe('JobEditor permissions and status', () => {
 
   it('offers no way to close a draft', async () => {
     const wrapper = await mountEditor()
-    expect(wrapper.find('[data-testid="close-job"]').exists()).toBe(false)
+    await openMenu(wrapper, 'more-actions')
+    expect(body().querySelector('[data-testid="save-template"]')).not.toBeNull()
+    expect(body().querySelector('[data-testid="close-job"]')).toBeNull()
+  })
+
+  it('announces the save state', async () => {
+    const wrapper = await mountEditor()
+    expect(wrapper.find('[data-testid="save-status"]').attributes('aria-live')).toBe('polite')
+    expect(wrapper.find('[data-testid="save-status"]').text()).toBe('Salvato')
+    await wrapper.find('#job-field-title').setValue('Altro titolo')
+    expect(wrapper.find('[data-testid="save-status"]').text()).toBe('Modifiche non salvate')
   })
 })

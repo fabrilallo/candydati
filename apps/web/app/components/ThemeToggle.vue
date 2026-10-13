@@ -11,7 +11,7 @@ const toggle = (): void => {
 </script>
 
 <template>
-  <Button variant="ghost" size="icon" :aria-label="`${t('theme.label')}: ${isDark ? t('theme.dark') : t('theme.light')}`" @click="toggle">
+  <Button variant="ghost" size="icon-sm" class="text-muted-foreground hover:text-foreground" :aria-label="`${t('theme.label')}: ${isDark ? t('theme.dark') : t('theme.light')}`" @click="toggle">
     <ClientOnly>
       <SunIcon v-if="isDark" class="size-4" aria-hidden="true" />
       <MoonIcon v-else class="size-4" aria-hidden="true" />

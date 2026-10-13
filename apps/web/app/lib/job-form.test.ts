@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { appendItem, checkForm, contentToForm, emptyForm, emptyStage, formToInput, isCompleteStage, moveItem, removeItem, replaceItem, snapshotOf, validateForm, type JobForm } from './job-form'
+import { appendItem, checkForm, insertItem, contentToForm, emptyForm, emptyStage, formToInput, isCompleteStage, moveItem, removeItem, replaceItem, snapshotOf, validateForm, type JobForm } from './job-form'
 
 const complete: JobForm = {
   ...emptyForm('en'),
@@ -89,6 +89,9 @@ describe('stages and lists', () => {
     expect(replaceItem(list, 0, 'z')).toEqual(['z', 'b', 'c'])
     expect(moveItem(list, 1, -1)).toEqual(['b', 'a', 'c'])
     expect(moveItem(list, 1, 1)).toEqual(['a', 'c', 'b'])
+    expect(insertItem(list, 1, 'x')).toEqual(['a', 'x', 'b', 'c'])
+    expect(insertItem(list, 3, 'x')).toEqual(['a', 'b', 'c', 'x'])
+    expect(insertItem(list, 9, 'x')).toEqual(['a', 'b', 'c', 'x'])
     expect(list).toEqual(['a', 'b', 'c'])
   })
 

@@ -24,7 +24,11 @@ export const jobSummarySchema = z.object({
   title: z.string(),
   role: z.enum(JOB_ROLES).nullable(),
   publishable: z.boolean(),
+  publishIssueCount: z.number().int().min(0),
+  salary: jobContentSchema.shape.salary,
+  workMode: z.enum(WORK_MODES).nullable(),
   qualityTotal: z.number().nullable(),
+  belowThreshold: z.boolean(),
   updatedAt: isoDate,
   publishedAt: isoDate.nullable(),
 })
@@ -49,6 +53,8 @@ const publicSummarySchema = z.object({
   workMode: z.enum(WORK_MODES),
   location: jobContentSchema.shape.location,
   salary: jobContentSchema.shape.salary,
+  stageCount: z.number().int().min(0),
+  responseDays: z.number().int().min(1),
   publishedAt: isoDate,
 })
 

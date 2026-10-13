@@ -74,7 +74,13 @@ export interface JobSummaryDto {
   readonly title: string;
   readonly role: JobContent['role'] | null;
   readonly publishable: boolean;
+  /** How many publication rules the draft still fails (0 when `publishable`). */
+  readonly publishIssueCount: number;
+  readonly salary: JobContent['salary'];
+  readonly workMode: JobContent['workMode'] | null;
   readonly qualityTotal: number | null;
+  /** True when the stored score is under the platform threshold. Always false without a score. */
+  readonly belowThreshold: boolean;
   readonly updatedAt: string;
   readonly publishedAt: string | null;
 }
@@ -114,6 +120,10 @@ export interface PublicJobSummaryDto {
   readonly workMode: PublishedJobContent['workMode'];
   readonly location: PublishedJobContent['location'];
   readonly salary: PublishedJobContent['salary'];
+  /** Number of selection stages the candidate will go through. */
+  readonly stageCount: number;
+  /** Days within which the candidate hears back after each stage. */
+  readonly responseDays: number;
   readonly publishedAt: string;
 }
 

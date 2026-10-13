@@ -52,4 +52,14 @@ describe('StringListField', () => {
     expect(readOnly.findAll('button')).toHaveLength(0)
     expect(readOnly.find('input').attributes('disabled')).toBeDefined()
   })
+
+  it('Enter adds the next item and Backspace on an empty item removes it', async () => {
+    const wrapper = await mountList(['uno', ''])
+    await wrapper.findAll('input')[0]?.trigger('keydown', { key: 'Enter' })
+    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual([['uno', '', '']])
+    await wrapper.findAll('input')[1]?.trigger('keydown', { key: 'Backspace' })
+    expect(wrapper.emitted('update:modelValue')?.[1]).toEqual([['uno']])
+    await wrapper.findAll('input')[0]?.trigger('keydown', { key: 'Backspace' })
+    expect(wrapper.emitted('update:modelValue')).toHaveLength(2)
+  })
 })

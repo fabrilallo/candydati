@@ -13,10 +13,10 @@ const onCreated = async (): Promise<void> => {
 </script>
 
 <template>
-  <div class="grid gap-6">
-    <div class="grid gap-1.5">
-      <h1 class="text-2xl font-semibold tracking-tight">{{ t('onboarding.title') }}</h1>
-      <p class="text-sm text-muted-foreground">{{ t('onboarding.subtitle') }}</p>
+  <div class="grid gap-8">
+    <div class="grid gap-2">
+      <h1 class="text-3xl font-semibold tracking-tight">{{ t('onboarding.title') }}</h1>
+      <p class="text-[0.9375rem] text-muted-foreground">{{ t('onboarding.subtitle') }}</p>
     </div>
     <OnboardingForm @created="onCreated" />
   </div>

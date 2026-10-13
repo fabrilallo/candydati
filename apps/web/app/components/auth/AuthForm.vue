@@ -29,7 +29,7 @@ const onSubmit = async (): Promise<void> => {
 </script>
 
 <template>
-  <form class="grid gap-4" novalidate @submit.prevent="onSubmit">
+  <form class="grid gap-5" novalidate @submit.prevent="onSubmit">
     <FormField v-if="isSignup" id="name" :label="t('auth.name')" :error="form.errors.value.name">
       <template #default="{ invalid, describedBy }">
         <Input id="name" autocomplete="name" :model-value="values.name" :aria-invalid="invalid" :aria-describedby="describedBy" @update:model-value="set('name', $event)" />
@@ -46,7 +46,7 @@ const onSubmit = async (): Promise<void> => {
       </template>
     </FormField>
     <FormAlert :message-key="form.submitError.value" />
-    <Button type="submit" :disabled="form.pending.value">
+    <Button type="submit" size="lg" class="mt-1 w-full" :disabled="form.pending.value">
       {{ form.pending.value ? t(`auth.${mode}.submitting`) : t(`auth.${mode}.submit`) }}
     </Button>
   </form>

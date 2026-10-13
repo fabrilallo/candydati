@@ -43,23 +43,25 @@ const respond = async (accept: boolean): Promise<void> => {
 </script>
 
 <template>
-  <div class="grid gap-6">
+  <div class="grid gap-8">
     <template v-if="invitation">
-      <div class="grid gap-1.5">
-        <h1 class="text-2xl font-semibold tracking-tight">{{ t('invitation.title', { organization: invitation.organizationName }) }}</h1>
-        <p v-if="roleLabel" class="text-sm text-muted-foreground">{{ t('invitation.subtitle', { role: roleLabel }) }}</p>
-        <p v-if="invitation.inviterEmail" class="text-sm text-muted-foreground">{{ t('invitation.from', { inviter: invitation.inviterEmail }) }}</p>
-        <p class="text-sm text-muted-foreground">{{ t('invitation.forEmail', { email: invitation.email }) }}</p>
+      <div class="grid gap-2">
+        <h1 class="text-3xl font-semibold tracking-tight">{{ t('invitation.title', { organization: invitation.organizationName }) }}</h1>
+        <p v-if="roleLabel" class="text-[0.9375rem] text-muted-foreground">{{ t('invitation.subtitle', { role: roleLabel }) }}</p>
+      </div>
+      <div class="grid gap-1 rounded-xl border bg-card px-5 py-4 text-sm shadow-xs">
+        <p v-if="invitation.inviterEmail">{{ t('invitation.from', { inviter: invitation.inviterEmail }) }}</p>
+        <p class="text-muted-foreground">{{ t('invitation.forEmail', { email: invitation.email }) }}</p>
       </div>
       <FormAlert :message-key="actionErrorKey" />
-      <div v-if="pending" class="flex flex-wrap gap-3">
-        <Button :disabled="busy" @click="respond(true)">{{ t('invitation.accept') }}</Button>
-        <Button variant="outline" :disabled="busy" @click="respond(false)">{{ t('invitation.reject') }}</Button>
+      <div v-if="pending" class="grid gap-2 sm:grid-cols-[1fr_auto]">
+        <Button size="lg" :disabled="busy" @click="respond(true)">{{ t('invitation.accept') }}</Button>
+        <Button size="lg" variant="ghost" :disabled="busy" @click="respond(false)">{{ t('invitation.reject') }}</Button>
       </div>
       <p v-else class="text-sm text-muted-foreground">{{ t('invitation.notPending', { status: invitation.status }) }}</p>
     </template>
     <template v-else>
-      <h1 class="text-2xl font-semibold tracking-tight">{{ t('invitation.loadFailed') }}</h1>
+      <h1 class="text-3xl font-semibold tracking-tight">{{ t('invitation.loadFailed') }}</h1>
       <FormAlert :message-key="data?.errorKey ?? 'errors.generic'" />
       <div><Button variant="outline" as-child><NuxtLink to="/app">{{ t('invitation.goToApp') }}</NuxtLink></Button></div>
     </template>

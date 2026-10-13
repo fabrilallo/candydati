@@ -6,12 +6,12 @@ const salary = { min: 45000, max: 60000, currency: 'EUR' as const, period: 'year
 
 describe('salary', () => {
   it('shows the range in the language of the ad', () => {
-    expect(salaryRange(salary, 'en')).toBe('€45,000 – €60,000')
-    expect(salaryRange(salary, 'it').replace(/\s/g, ' ')).toBe('45.000 € – 60.000 €')
+    expect(salaryRange(salary, 'en')).toBe('€45,000 - €60,000')
+    expect(salaryRange(salary, 'it').replace(/\s/g, ' ')).toBe('45.000 € - 60.000 €')
   })
 
   it('states that amounts are gross', () => {
-    expect(salaryLine(salary, 'en', translatorFor('en'))).toBe('€45,000 – €60,000, gross per year')
+    expect(salaryLine(salary, 'en', translatorFor('en'))).toBe('€45,000 - €60,000, gross per year')
     expect(salaryLine({ ...salary, period: 'month' }, 'it', translatorFor('it'))).toContain('lordi al mese')
   })
 
@@ -53,6 +53,6 @@ describe('places and urls', () => {
   })
 
   it('maps a status to a badge tone', () => {
-    expect([statusTone('published'), statusTone('draft'), statusTone('closed')]).toEqual(['default', 'secondary', 'outline'])
+    expect([statusTone('published'), statusTone('draft'), statusTone('closed')]).toEqual(['success', 'secondary', 'outline'])
   })
 })

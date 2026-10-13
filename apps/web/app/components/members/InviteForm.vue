@@ -28,12 +28,12 @@ const onSubmit = async (): Promise<void> => {
 </script>
 
 <template>
-  <section aria-labelledby="invite-title" class="grid gap-4 rounded-xl border bg-card p-5">
+  <section aria-labelledby="invite-title" class="grid gap-5 rounded-xl border bg-card p-5 shadow-xs sm:p-6">
     <div class="grid gap-1">
-      <h2 id="invite-title" class="text-base font-semibold">{{ t('members.inviteTitle') }}</h2>
+      <h2 id="invite-title" class="text-base font-semibold tracking-tight">{{ t('members.inviteTitle') }}</h2>
       <p class="text-sm text-muted-foreground">{{ roles.length ? t('members.inviteHint') : t('members.noInvitePermission') }}</p>
     </div>
-    <form v-if="roles.length" class="grid gap-4 sm:grid-cols-[1fr_12rem_auto] sm:items-start" novalidate data-testid="invite-form" @submit.prevent="onSubmit">
+    <form v-if="roles.length" class="grid gap-4" novalidate data-testid="invite-form" @submit.prevent="onSubmit">
       <FormField id="invite-email" :label="t('members.email')" :error="form.errors.value.email">
         <template #default="{ invalid, describedBy }">
           <Input id="invite-email" type="email" autocomplete="off" inputmode="email" :model-value="form.values.value.email" :aria-invalid="invalid" :aria-describedby="describedBy" @update:model-value="form.setField('email', String($event))" />
@@ -44,10 +44,10 @@ const onSubmit = async (): Promise<void> => {
           <RoleSelect id="invite-role" :model-value="form.values.value.role" :roles="roles" :invalid="invalid" :described-by="describedBy" @update:model-value="form.setField('role', $event as Role)" />
         </template>
       </FormField>
-      <Button type="submit" class="sm:mt-[1.375rem]" :disabled="form.pending.value">
+      <FormAlert :message-key="form.submitError.value" />
+      <Button type="submit" class="w-full" :disabled="form.pending.value">
         {{ form.pending.value ? t('members.inviting') : t('members.invite') }}
       </Button>
-      <div class="sm:col-span-3"><FormAlert :message-key="form.submitError.value" /></div>
     </form>
   </section>
 </template>

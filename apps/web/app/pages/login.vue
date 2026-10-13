@@ -6,15 +6,15 @@ const signupLink = computed(() => (typeof route.query.redirect === 'string' ? { 
 </script>
 
 <template>
-  <div class="grid gap-6">
-    <div class="grid gap-1.5">
-      <h1 class="text-2xl font-semibold tracking-tight">{{ t('auth.login.title') }}</h1>
-      <p class="text-sm text-muted-foreground">{{ t('auth.login.subtitle') }}</p>
+  <div class="grid gap-8">
+    <div class="grid gap-2">
+      <h1 class="text-3xl font-semibold tracking-tight">{{ t('auth.login.title') }}</h1>
+      <p class="text-[0.9375rem] text-muted-foreground">{{ t('auth.login.subtitle') }}</p>
     </div>
     <AuthForm mode="login" />
-    <p class="text-sm text-muted-foreground">
+    <p class="border-t pt-6 text-sm text-muted-foreground">
       {{ t('auth.login.noAccount') }}
-      <NuxtLink :to="signupLink" rel="nofollow" class="font-medium text-foreground underline underline-offset-4">{{ t('auth.login.signupLink') }}</NuxtLink>
+      <NuxtLink :to="signupLink" rel="nofollow" class="font-medium text-primary underline-offset-4 hover:underline">{{ t('auth.login.signupLink') }}</NuxtLink>
     </p>
   </div>
 </template>

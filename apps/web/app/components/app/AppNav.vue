@@ -13,15 +13,15 @@ const isActive = (to: string): boolean => (to === '/app' ? route.path === '/app'
 
 <template>
   <nav :aria-label="t('nav.main')">
-    <ul class="flex gap-1 md:flex-col">
+    <ul class="grid gap-0.5">
       <li v-for="item in items" :key="item.id">
         <NuxtLink
           :to="item.to"
           :aria-current="isActive(item.to) ? 'page' : undefined"
-          class="flex items-center gap-2.5 whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition-colors"
-          :class="isActive(item.to) ? 'bg-accent text-foreground' : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'"
+          class="flex h-9 items-center gap-3 rounded-md px-2.5 text-sm font-medium transition-colors duration-150"
+          :class="isActive(item.to) ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'"
         >
-          <component :is="icons[item.id]" class="size-4" aria-hidden="true" />
+          <component :is="icons[item.id]" class="size-[1.125rem] shrink-0" aria-hidden="true" />
           {{ t(`nav.${item.id}`) }}
         </NuxtLink>
       </li>

@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { MemberRow } from '@/lib/auth-api'
+import { initials } from '@/lib/initials'
 import { parseMemberRole } from '@/lib/permissions-ui'
 
+/** Members as a list: person first (name, email), role as a pill on the right. */
 defineProps<{ members: readonly MemberRow[]; currentUserId: string }>()
 const { t } = useI18n()
 const roleLabel = (raw: string): string => {
@@ -13,23 +15,19 @@ const roleLabel = (raw: string): string => {
 </script>
 
 <template>
-  <Table>
-    <TableHeader>
-      <TableRow>
-        <TableHead>{{ t('members.columns.name') }}</TableHead>
-        <TableHead>{{ t('members.columns.email') }}</TableHead>
-        <TableHead>{{ t('members.columns.role') }}</TableHead>
-      </TableRow>
-    </TableHeader>
-    <TableBody>
-      <TableRow v-for="member in members" :key="member.id" data-testid="member-row">
-        <TableCell class="font-medium">
-          {{ member.name }}
-          <span v-if="member.userId === currentUserId" class="ml-1 text-xs font-normal text-muted-foreground">({{ t('common.you') }})</span>
-        </TableCell>
-        <TableCell class="text-muted-foreground">{{ member.email }}</TableCell>
-        <TableCell><Badge variant="secondary">{{ roleLabel(member.role) }}</Badge></TableCell>
-      </TableRow>
-    </TableBody>
-  </Table>
+  <ul class="divide-y rounded-xl border bg-card shadow-xs">
+    <li v-for="member in members" :key="member.id" class="flex items-center gap-3 px-4 py-3.5 sm:px-5" data-testid="member-row">
+      <Avatar class="size-9">
+        <AvatarFallback :class="member.userId === currentUserId ? '' : 'bg-secondary text-secondary-foreground'">{{ initials(member.name) }}</AvatarFallback>
+      </Avatar>
+      <div class="grid min-w-0 flex-1 leading-tight">
+        <p class="flex min-w-0 items-baseline gap-1.5 text-sm font-medium">
+          <span class="truncate">{{ member.name }}</span>
+          <span v-if="member.userId === currentUserId" class="shrink-0 text-xs font-normal text-muted-foreground">({{ t('common.you') }})</span>
+        </p>
+        <p class="truncate text-sm text-muted-foreground">{{ member.email }}</p>
+      </div>
+      <Badge variant="secondary" class="shrink-0">{{ roleLabel(member.role) }}</Badge>
+    </li>
+  </ul>
 </template>

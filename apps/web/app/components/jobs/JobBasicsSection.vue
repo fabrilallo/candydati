@@ -18,19 +18,29 @@ const languageOptions = SUPPORTED_LOCALES.map((value) => ({ value, label: t(`loc
 
 <template>
   <JobSection id="job-basics" :title="t('job.editor.sections.basics')">
-    <div class="grid gap-4 sm:grid-cols-2">
+    <FormField :id="fieldIdOf('title')" :label="t('job.editor.fields.title')" :error="errors.title">
+      <template #default="{ invalid, describedBy }">
+        <Input
+          :id="fieldIdOf('title')"
+          :model-value="form.title"
+          :disabled="disabled"
+          maxlength="120"
+          required
+          class="h-11 text-base font-medium md:text-base"
+          :aria-invalid="invalid"
+          :aria-describedby="describedBy"
+          @update:model-value="emit('patch', { title: String($event) })"
+        />
+      </template>
+    </FormField>
+    <div class="grid items-start gap-x-4 gap-y-5 sm:grid-cols-2">
       <div class="sm:col-span-2">
-        <FormField :id="fieldIdOf('title')" :label="t('job.editor.fields.title')" :error="errors.title">
+        <FormField :id="fieldIdOf('role')" :label="t('job.editor.fields.role')" :error="errors.role">
           <template #default="{ invalid, describedBy }">
-            <Input :id="fieldIdOf('title')" :model-value="form.title" :disabled="disabled" maxlength="120" required :aria-invalid="invalid" :aria-describedby="describedBy" @update:model-value="emit('patch', { title: String($event) })" />
+            <SelectInput :id="fieldIdOf('role')" :model-value="form.role" :options="roleOptions" :placeholder="t('job.editor.fields.rolePlaceholder')" :disabled="disabled" :invalid="invalid" :described-by="describedBy" @update:model-value="emit('patch', { role: $event })" />
           </template>
         </FormField>
       </div>
-      <FormField :id="fieldIdOf('role')" :label="t('job.editor.fields.role')" :error="errors.role">
-        <template #default="{ invalid, describedBy }">
-          <SelectInput :id="fieldIdOf('role')" :model-value="form.role" :options="roleOptions" :placeholder="t('job.editor.fields.rolePlaceholder')" :disabled="disabled" :invalid="invalid" :described-by="describedBy" @update:model-value="emit('patch', { role: $event })" />
-        </template>
-      </FormField>
       <FormField :id="fieldIdOf('seniority')" :label="t('job.editor.fields.seniority')" :error="errors.seniority">
         <template #default="{ invalid, describedBy }">
           <SelectInput :id="fieldIdOf('seniority')" :model-value="form.seniority" :options="seniorityOptions" :placeholder="t('job.editor.fields.choose')" :disabled="disabled" :invalid="invalid" :described-by="describedBy" @update:model-value="emit('patch', { seniority: $event })" />

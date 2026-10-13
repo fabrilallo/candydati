@@ -71,13 +71,55 @@
     "account": "Account",
     "signOut": "Esci",
     "signedOut": "Sei uscito",
-    "openMenu": "Apri il menu dell'utente"
+    "openMenu": "Apri il menu dell'utente",
+    "openNav": "Apri la navigazione",
+    "switchOrganization": "Cambia organizzazione",
+    "organizations": "Le tue organizzazioni",
+    "current": "Organizzazione attiva",
+    "switched": "Ora lavori in {organization}"
   },
   "dashboard": {
     "title": "Panoramica",
     "welcome": "Ciao, {name}",
-    "emptyTitle": "Qui non c'è ancora niente",
-    "emptyBody": "Invita un collega dalla pagina Membri: ogni azione compare nel registro."
+    "subtitle": "Gli annunci di {organization} a colpo d'occhio.",
+    "countsLabel": "Annunci per stato",
+    "counts": {
+      "draft": "Bozze",
+      "published": "Pubblicati",
+      "closed": "Chiusi"
+    },
+    "countsHint": {
+      "draft": "Da completare e pubblicare",
+      "published": "Visibili sulla pagina carriere",
+      "closed": "Non ricevono più candidature"
+    },
+    "viewAll": "Vedi tutti gli annunci",
+    "newJob": "Nuovo annuncio",
+    "invite": "Invita un collega",
+    "careersTitle": "Pagina carriere",
+    "careersBody": "Gli annunci pubblicati compaiono qui, con RAL e processo di selezione visibili a tutti.",
+    "careersOpen": "Apri la pagina carriere",
+    "startTitle": "Primi passi",
+    "startIntro": "Tre passi per mettere online il primo annuncio trasparente.",
+    "start": {
+      "job": {
+        "title": "Scrivi il primo annuncio",
+        "body": "Range RAL e fasi del processo sono obbligatori: senza, l'annuncio non si pubblica.",
+        "cta": "Crea un annuncio"
+      },
+      "publish": {
+        "title": "Pubblicalo",
+        "body": "Compare sulla pagina carriere con i tempi di risposta che hai dichiarato.",
+        "cta": "Vedi la pagina carriere"
+      },
+      "team": {
+        "title": "Invita chi seleziona con te",
+        "body": "Ogni azione del team resta nel registro delle azioni.",
+        "cta": "Invita un collega"
+      }
+    },
+    "teamTitle": "Il tuo team",
+    "teamBody": "Invita colleghi e scegli il loro ruolo. Ogni azione resta nel registro."
   },
   "members": {
     "title": "Membri",
@@ -131,7 +173,9 @@
     "targetTypes": {
       "organization": "Organizzazione",
       "invitation": "Invito",
-      "member": "Membro"
+      "member": "Membro",
+      "job": "Annuncio",
+      "job_template": "Modello"
     },
     "empty": "Ancora nessuna azione registrata.",
     "loadFailed": "Non siamo riusciti a caricare il registro.",
@@ -162,6 +206,16 @@
       },
       "audit": {
         "read": "Ha letto il registro delle azioni"
+      },
+      "job": {
+        "created": "Ha creato un annuncio",
+        "updated": "Ha modificato un annuncio",
+        "published": "Ha pubblicato un annuncio",
+        "closed": "Ha chiuso un annuncio"
+      },
+      "job_template": {
+        "created": "Ha salvato un modello di annuncio",
+        "deleted": "Ha eliminato un modello di annuncio"
       }
     }
   },
@@ -425,6 +479,33 @@
       "emptyTitle": "Ancora nessun annuncio",
       "emptyBody": "Crea il primo annuncio: parte come bozza e si pubblica quando ha tutto quello che serve.",
       "emptyFiltered": "Nessun annuncio in questo stato.",
+      "filters": {
+        "all": "Tutti",
+        "draft": "Bozze",
+        "published": "Pubblicati",
+        "closed": "Chiusi"
+      },
+      "readyToPublish": "Pronto per pubblicare",
+      "missingItems": "Manca 1 elemento | Mancano {count} elementi",
+      "belowThreshold": "Sotto soglia",
+      "belowThresholdLong": "Qualità sotto la soglia consigliata",
+      "scoreLabel": "Qualità {score} su 10",
+      "updatedAgo": "Aggiornato {time}",
+      "showAll": "Mostra tutti gli annunci",
+      "empty": {
+        "draft": {
+          "title": "Nessuna bozza",
+          "body": "Ogni annuncio nasce come bozza e ci resta finché non ha retribuzione, processo e tempi di risposta."
+        },
+        "published": {
+          "title": "Nessun annuncio pubblicato",
+          "body": "Quando una bozza è pronta, si pubblica dall'editor e compare subito nella pagina carriere."
+        },
+        "closed": {
+          "title": "Nessun annuncio chiuso",
+          "body": "Gli annunci chiusi restano qui come storico, senza essere cancellati."
+        }
+      },
       "forbidden": "Non hai il permesso di vedere gli annunci.",
       "pagination": {
         "status": "Pagina {page} di {pages} · {total} annunci"
@@ -441,6 +522,17 @@
       "fromTemplate": "Creato dal template “{name}”.",
       "templateMissing": "Il template richiesto non esiste più: si parte da un annuncio vuoto.",
       "publishedNote": "L'annuncio è pubblicato e si può ancora modificare, purché continui a rispettare i requisiti di pubblicazione.",
+      "workspace": {
+        "modes": "Vista dell'editor",
+        "edit": "Modifica",
+        "preview": "Anteprima",
+        "saved": "Salvato",
+        "saving": "Salvataggio…",
+        "ready": "Pronto per pubblicare",
+        "missingShort": "Manca 1 | Mancano {count}",
+        "more": "Altre azioni",
+        "previewCaption": "Così la vedrà chi si candida"
+      },
       "sections": {
         "basics": "Informazioni di base",
         "salary": "Retribuzione",
@@ -467,7 +559,9 @@
         "onsiteDaysPerWeek": "Giorni in sede a settimana",
         "responseDays": "Tempo di risposta (giorni)",
         "stageType": "Tipo di fase",
-        "stageDuration": "Durata (minuti)",
+        "stageDuration": "Durata",
+        "responseDaysUnit": "giorni",
+        "salaryRange": "Da {min} a {max}",
         "stageConductedBy": "Chi la conduce",
         "stageNote": "Nota per il candidato (facoltativa)",
         "summary": "Presentazione del ruolo",
@@ -498,9 +592,11 @@
         "remove": "Rimuovi",
         "moveUp": "Sposta su",
         "moveDown": "Sposta giù",
-        "item": "{label}, voce {n}"
+        "item": "{label}, voce {n}",
+        "placeholder": "Scrivi e premi Invio per la voce successiva"
       },
       "process": {
+        "notePlaceholder": "Nota per il candidato, facoltativa",
         "add": "Aggiungi fase",
         "empty": "Nessuna fase ancora. Aggiungi almeno la prima.",
         "stage": "Fase {n}",
@@ -514,6 +610,34 @@
       "ready": "Tutti i requisiti sono soddisfatti: l'annuncio si può pubblicare.",
       "missing": "Manca 1 elemento | Mancano {count} elementi",
       "go": "Vai al campo"
+    },
+    "preview": {
+      "gaps": {
+        "title": "Manca il titolo dell'annuncio",
+        "role": "Scegli il ruolo",
+        "seniority": "Manca il livello",
+        "contractType": "Manca il contratto",
+        "salary": "Manca la RAL: aggiungila per pubblicare",
+        "salaryMin": "Manca la RAL minima",
+        "salaryMax": "Manca la RAL massima: il range serve a chi si candida",
+        "workMode": "Manca la modalità di lavoro",
+        "place": "Manca il paese di lavoro",
+        "process": "Nessuna fase: descrivi il processo di selezione per pubblicare",
+        "responseDays": "Manca il tempo di risposta: dichiaralo per pubblicare",
+        "responsibilities": "Servono almeno tre responsabilità",
+        "mustHave": "Indica almeno un requisito obbligatorio"
+      },
+      "optional": {
+        "summary": "Aggiungi una presentazione del ruolo",
+        "niceToHave": "Aggiungi i requisiti preferenziali, se ce ne sono",
+        "technologies": "Aggiungi tecnologie e strumenti",
+        "benefits": "Aggiungi i benefit: chi si candida li cerca",
+        "growth": "Racconta come si cresce in questo ruolo",
+        "workLifeBalance": "Descrivi orari e flessibilità",
+        "culture": "Racconta come si lavora nel team"
+      },
+      "vague": "Frase vaga: {category}",
+      "vagueOpen": "Frase vaga, vedi la riscrittura proposta"
     },
     "quality": {
       "title": "Qualità dell'annuncio",
@@ -535,7 +659,9 @@
       "improvementsEmpty": "Nessun suggerimento: ottimo lavoro.",
       "sourceRules": "Analisi a regole, senza modello.",
       "sourceModel": "Analisi con un modello linguistico.",
-      "stale": "L'annuncio è cambiato dopo questa analisi."
+      "stale": "L'annuncio è cambiato dopo questa analisi.",
+      "details": "Dettagli dell'analisi",
+      "highlighted": "Le frasi vaghe sono sottolineate nell'anteprima: aprile per la riscrittura."
     },
     "publish": {
       "action": "Pubblica",
@@ -553,7 +679,10 @@
       "copy": "Copia indirizzo",
       "copied": "Indirizzo copiato",
       "published": "Annuncio pubblicato",
-      "noAnalysis": "L'analisi di qualità non è riuscita, ma l'annuncio è stato pubblicato."
+      "noAnalysis": "L'analisi di qualità non è riuscita, ma l'annuncio è stato pubblicato.",
+      "liveTitle": "L'annuncio è online",
+      "liveBody": "Da adesso è sulla pagina carriere, con retribuzione e processo in chiaro. Condividi l'indirizzo dove cerchi persone.",
+      "liveDone": "Fatto"
     },
     "actions": {
       "save": "Salva",
@@ -585,7 +714,18 @@
         "actions": "Azioni"
       },
       "empty": "Nessun template ancora. Salva un annuncio come template dall'editor.",
-      "use": "Crea annuncio",
+      "emptyTitle": "Nessun template ancora",
+      "emptyBody": "Un template conserva retribuzione, processo e requisiti di un annuncio che funziona. Apri un annuncio nell'editor e scegli “Salva come template”.",
+      "emptyAction": "Vai agli annunci",
+      "facts": {
+        "salary": "RAL",
+        "stages": "processo in 1 fase | processo in {count} fasi",
+        "requirements": "1 requisito | {count} requisiti",
+        "responsibilities": "1 attività | {count} attività",
+        "benefits": "1 benefit | {count} benefit",
+        "none": "Solo il titolo"
+      },
+      "use": "Usa template",
       "useFor": "Crea un annuncio dal template {name}",
       "delete": "Elimina",
       "deleteFor": "Elimina il template {name}",
@@ -611,7 +751,19 @@
     "responseValue": "Riceverai un riscontro entro 1 giorno dopo ogni fase. | Riceverai un riscontro entro {count} giorni dopo ogni fase.",
     "published": "Pubblicato il {date}",
     "backToJobs": "Tutte le posizioni aperte",
+    "facts": {
+      "ral": "RAL lorda",
+      "stages": "1 fase | {count} fasi",
+      "about": "circa {duration}",
+      "within": "entro 1 giorno | entro {count} giorni",
+      "afterEachStage": "dopo ogni fase",
+      "processTotal": "tempo totale del processo",
+      "conductedBy": "Con: {who}"
+    },
     "headings": {
+      "role": "Il ruolo",
+      "requirements": "Requisiti",
+      "workplace": "Come si lavora",
       "responsibilities": "Cosa farai",
       "mustHave": "Cosa serve",
       "niceToHave": "Cosa è un plus",
@@ -627,16 +779,59 @@
       "days": "{n} g",
       "hoursMinutes": "{h} h {m} min"
     },
-    "metaDescription": "{title}: {role}, {seniority}, {contract}. {salary}."
+    "metaDescription": "{title}: {role}, {seniority}, {contract}. {salary}.",
+    "poweredBy": "Pagina carriere su {name}",
+    "footer": "Qui retribuzione, processo di selezione e tempi di risposta sono sempre dichiarati."
   },
   "careers": {
     "title": "Posizioni aperte in {organization}",
-    "subtitle": "Ogni annuncio indica retribuzione, processo di selezione e tempi di risposta.",
+    "subtitle": "Ogni annuncio dice quanto si guadagna, come si seleziona e quando riceverai una risposta.",
     "metaDescription": "Le posizioni aperte in {organization}: retribuzione, modalità di lavoro e processo di selezione sempre dichiarati.",
     "empty": "Al momento non ci sono posizioni aperte.",
-    "emptyBody": "Torna a trovarci presto.",
+    "emptyBody": "Quando ne apriremo una, la troverai qui con retribuzione, processo e tempi di risposta già scritti.",
     "count": "Nessuna posizione aperta | 1 posizione aperta | {count} posizioni aperte",
     "notFound": "Questa pagina carriere non esiste.",
-    "logo": "Logo di {organization}"
+    "logo": "Logo di {organization}",
+    "stats": {
+      "open": "Posizione aperta | Posizioni aperte",
+      "response": "giorno al massimo per una risposta | giorni al massimo per una risposta"
+    },
+    "filters": {
+      "label": "Filtra per modalità di lavoro",
+      "all": "Tutte",
+      "reset": "Mostra tutte le posizioni",
+      "noMatch": "Nessuna posizione con questa modalità di lavoro."
+    },
+    "job": {
+      "stages": "1 fase | {count} fasi",
+      "response": "risposta in 1 giorno | risposta in {count} giorni"
+    }
+  },
+  "promise": {
+    "label": "I principi del prodotto",
+    "lead": "{name} è un ATS open source dalla parte di chi si candida.",
+    "salary": {
+      "title": "RAL in chiaro.",
+      "body": "Un annuncio senza range retributivo non si può pubblicare."
+    },
+    "process": {
+      "title": "Processo dichiarato.",
+      "body": "Fasi, chi le conduce, durata e tempi di risposta sono visibili prima di candidarsi."
+    },
+    "answer": {
+      "title": "Ogni candidato riceve una risposta.",
+      "body": "Nessuna candidatura resta senza esito, e nessuna decisione sulle persone è automatica."
+    },
+    "footer": "Codice aperto, export completo in qualsiasi momento."
+  },
+  "errorPage": {
+    "notFoundTitle": "Questa pagina non esiste",
+    "notFoundBody": "Il link potrebbe essere vecchio o contenere un errore di battitura.",
+    "unreachableTitle": "Il servizio non risponde",
+    "unreachableBody": "Non riusciamo a raggiungere il server in questo momento. Riprova tra qualche istante.",
+    "genericTitle": "Qualcosa non ha funzionato",
+    "genericBody": "Abbiamo registrato il problema. Riprova, o torna alla pagina iniziale.",
+    "home": "Torna all'inizio",
+    "code": "Errore {code}"
   }
 }

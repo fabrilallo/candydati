@@ -1,26 +1,34 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { pageCount } from '@/lib/audit-api'
+import { can } from '@/lib/permissions-ui'
 
 const { t } = useI18n()
+const { viewer } = useViewer()
 const { status, page, jobs, meta, errorKey, loading, refresh, setStatus, goTo } = useJobList()
+const { counts } = useJobCounts()
 const pages = computed(() => (meta.value ? pageCount(meta.value) : 1))
+const role = computed(() => viewer.value?.role ?? null)
+// One "now" for server and browser (carried by the payload), so relative times agree on hydration.
+const nowMs = useState('jobs-now', () => Date.now())
+const now = computed(() => new Date(nowMs.value))
+const showFilter = computed(() => counts.value === null || counts.value.total > 0 || status.value !== null)
 </script>
 
 <template>
   <div class="grid gap-4">
-    <JobsFilter :status="status" @update:status="setStatus" />
+    <JobStatusFilter v-if="showFilter" :status="status" :counts="counts" @update:status="setStatus" />
     <div v-if="errorKey" class="grid gap-3">
       <FormAlert :message-key="errorKey" />
       <div><Button variant="outline" @click="() => refresh()">{{ t('common.retry') }}</Button></div>
     </div>
     <template v-else>
-      <div v-if="loading && jobs.length === 0" class="grid gap-2" aria-busy="true">
-        <Skeleton v-for="n in 5" :key="n" class="h-12 w-full" />
-      </div>
+      <JobListSkeleton v-if="loading && jobs.length === 0" />
       <div v-else :class="loading ? 'opacity-60 transition-opacity' : ''" :aria-busy="loading">
-        <JobsTable :jobs="jobs" :filtered="status !== null" />
+        <JobListEmpty v-if="jobs.length === 0" :status="status" :can-create="can(role, 'job:create')" :can-use-templates="can(role, 'job_template:read')" @show-all="setStatus(null)" />
+        <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+          <JobListItem v-for="job in jobs" :key="job.id" :job="job" :now="now" />
+        </ul>
       </div>
       <PaginationBar v-if="meta && meta.total > 0" :page="page" :pages="pages" :total="meta.total" :disabled="loading" status-key="job.list.pagination.status" @update:page="goTo" />
     </template>

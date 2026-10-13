@@ -15,10 +15,15 @@ const pages = computed(() => (meta.value ? pageCount(meta.value) : 1))
       <div><Button variant="outline" @click="() => refresh()">{{ t('common.retry') }}</Button></div>
     </div>
     <template v-else>
-      <div v-if="loading && events.length === 0" class="grid gap-2" aria-busy="true">
-        <Skeleton v-for="n in 5" :key="n" class="h-12 w-full" />
-      </div>
-      <div v-else :class="loading ? 'opacity-60 transition-opacity' : ''" :aria-busy="loading">
+      <ol v-if="loading && events.length === 0" class="divide-y rounded-xl border bg-card" aria-busy="true" :aria-label="t('common.loading')">
+        <li v-for="n in 6" :key="n" class="grid grid-cols-[2rem_1fr_auto] items-center gap-x-4 px-5 py-4">
+          <Skeleton class="row-span-2 size-8 rounded-full" />
+          <Skeleton class="h-4 w-2/3 max-w-80" />
+          <Skeleton class="row-span-2 hidden h-3 w-24 sm:block" />
+          <Skeleton class="mt-2 h-3 w-1/3 max-w-40" />
+        </li>
+      </ol>
+      <div v-else class="transition-opacity duration-200" :class="loading ? 'opacity-60' : ''" :aria-busy="loading">
         <AuditLogTable :events="events" />
       </div>
       <PaginationBar v-if="meta && meta.total > 0" :page="page" :pages="pages" :total="meta.total" :disabled="loading" @update:page="goTo" />

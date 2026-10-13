@@ -1,23 +1,47 @@
 <script setup lang="ts">
 import type { PublicJobSummaryDto } from '@tt/domain'
-import { publicJobPath, salaryLine, workLine } from '@/lib/job-view'
+import { ArrowRightIcon, ClockIcon, ListChecksIcon } from '@lucide/vue'
+import { placeLine, publicJobPath, salaryRange } from '@/lib/job-view'
 
-defineProps<{ orgSlug: string; job: PublicJobSummaryDto }>()
+const props = defineProps<{ orgSlug: string; job: PublicJobSummaryDto }>()
 const { t, locale } = useI18n()
-const tr = useVisitorTranslate()
+const salary = computed(() => salaryRange(props.job.salary, locale.value))
+const quiet = computed(() =>
+  [
+    t(`taxonomy.roles.${props.job.role}`),
+    t(`taxonomy.seniority.${props.job.seniority}`),
+    t(`taxonomy.contractTypes.${props.job.contractType}`),
+    t(`taxonomy.workModes.${props.job.workMode}`),
+    placeLine({ workMode: props.job.workMode, location: props.job.location }, locale.value),
+  ]
+    .filter((part) => part !== '')
+    .join(' · '),
+)
 </script>
 
 <template>
   <li>
-    <article class="relative grid gap-2 rounded-xl border bg-card p-5 transition-colors focus-within:border-ring hover:border-ring/60" data-testid="careers-job">
-      <h2 class="text-lg font-semibold tracking-tight">
-        <NuxtLink :to="publicJobPath(orgSlug, job.slug)" class="underline-offset-4 after:absolute after:inset-0 hover:underline" data-testid="careers-job-link">{{ job.title }}</NuxtLink>
-      </h2>
-      <p class="text-sm text-muted-foreground">
-        {{ t(`taxonomy.roles.${job.role}`) }} · {{ t(`taxonomy.seniority.${job.seniority}`) }} · {{ t(`taxonomy.contractTypes.${job.contractType}`) }}
-      </p>
-      <p class="text-sm">{{ workLine({ workMode: job.workMode, location: job.location }, locale, tr) }}</p>
-      <p class="text-sm font-medium" data-testid="careers-salary">{{ salaryLine(job.salary, locale, tr) }}</p>
+    <article
+      class="group relative -mx-4 grid gap-x-8 gap-y-3 rounded-xl px-4 py-5 transition-[background-color,box-shadow] duration-150 ease-snap hover:bg-card hover:shadow-xs active:bg-muted has-[a:focus-visible]:bg-card has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-ring/50 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start"
+      data-testid="careers-job"
+    >
+      <div class="grid min-w-0 gap-1.5">
+        <h3 class="text-xl font-semibold leading-snug tracking-tight">
+          <NuxtLink :to="publicJobPath(orgSlug, job.slug)" class="outline-none transition-colors duration-150 after:absolute after:inset-0 group-hover:text-primary" data-testid="careers-job-link">{{ job.title }}</NuxtLink>
+          <ArrowRightIcon class="ml-1.5 inline size-4 -translate-x-1 align-[-0.1em] text-primary opacity-0 transition-[opacity,transform] duration-150 ease-snap group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:transition-none" aria-hidden="true" />
+        </h3>
+        <p class="text-sm text-muted-foreground">{{ quiet }}</p>
+      </div>
+      <div class="grid gap-2 sm:justify-items-end sm:text-right">
+        <p class="grid gap-0.5">
+          <span class="figure text-2xl font-semibold leading-none tracking-tighter" data-testid="careers-salary">{{ salary }}</span>
+          <span class="text-xs text-muted-foreground">{{ t(`taxonomy.salaryPeriodsGross.${job.salary.period}`) }}</span>
+        </p>
+        <p class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm font-medium sm:justify-end" data-testid="careers-process">
+          <span class="inline-flex items-center gap-1.5"><ListChecksIcon class="size-4 text-muted-foreground" aria-hidden="true" />{{ t('careers.job.stages', { count: job.stageCount }, job.stageCount) }}</span>
+          <span class="inline-flex items-center gap-1.5"><ClockIcon class="size-4 text-muted-foreground" aria-hidden="true" />{{ t('careers.job.response', { count: job.responseDays }, job.responseDays) }}</span>
+        </p>
+      </div>
     </article>
   </li>
 </template>

@@ -1,4 +1,5 @@
 import {
+  AUDIT_ACTIONS,
   CONTRACT_TYPES,
   JOB_ROLES,
   JOB_ROLE_FAMILIES,
@@ -64,6 +65,10 @@ describe('locale files', () => {
     for (const code of ['it', 'en'] as const) expect(paths.filter((path) => !flat[code][`job.fields.${path}`])).toEqual([])
   })
 
+  it('label every audit action in both languages', () => {
+    for (const code of ['it', 'en'] as const) expect(AUDIT_ACTIONS.filter((action) => !flat[code][`audit.actions.${action}`])).toEqual([])
+  })
+
   it('use the same placeholders in both languages', () => {
     const mismatched = Object.keys(flat.it).filter((key) => JSON.stringify(placeholders(flat.it[key] ?? '')) !== JSON.stringify(placeholders(flat.en[key] ?? '')))
     expect(mismatched).toEqual([])
@@ -73,6 +78,11 @@ describe('locale files', () => {
     const pluralOf = (text: string): number => text.split(' | ').length
     const mismatched = Object.keys(flat.it).filter((key) => pluralOf(flat.it[key] ?? '') !== pluralOf(flat.en[key] ?? ''))
     expect(mismatched).toEqual([])
+  })
+
+  it.each(Object.keys(flat))('%s uses no em or en dash (docs/DESIGN.md copy rules)', (code) => {
+    const dashed = Object.entries(flat[code as 'it' | 'en']).filter(([, value]) => /[–—]/.test(value))
+    expect(dashed).toEqual([])
   })
 
   it('keeps both languages registered', () => {

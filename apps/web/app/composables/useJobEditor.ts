@@ -5,6 +5,7 @@ import { closeJob, createJob, createTemplate, publishJob, updateJob } from '@/li
 import { contentToForm, emptyForm, snapshotOf, validateForm } from '@/lib/job-form'
 import { can } from '@/lib/permissions-ui'
 import { needsConfirmation } from '@/lib/quality-view'
+import { visibleIssueErrors } from '@/lib/ad-gaps'
 
 export interface EditorInit {
   readonly job: JobDto | null
@@ -42,6 +43,25 @@ export const useJobEditor = (init: EditorInit) => {
     template: can(role.value, 'job_template:create'),
   }))
   const fieldErrors = computed(() => (attempted.value ? draft.check.value.errors : {}))
+  /** Controls the user has left: their publish rules start to show (a fresh draft is not a wall of red). */
+  const touched = ref<ReadonlySet<string>>(new Set())
+  /** The user asked what is missing: every publish rule shows on its field. */
+  const revealed = ref(false)
+  const touch = (ids: readonly string[]): void => {
+    if (ids.every((id) => touched.value.has(id))) return
+    touched.value = new Set([...touched.value, ...ids])
+  }
+  const reveal = (): void => {
+    revealed.value = true
+  }
+  /** Validation problems win over publish rules on the same field. */
+  const errors = computed(() => ({ ...visibleIssueErrors({ issues: draft.check.value.issues, touched: touched.value, attempted: revealed.value }), ...fieldErrors.value }))
+  /** Shared across the navigation from `/app/jobs/new` to the saved ad, so the confirmation survives it. */
+  const justPublished = useState<string | null>('job-just-published', () => null)
+  const publishedOpen = computed(() => job.value !== null && justPublished.value === job.value.id)
+  const dismissPublished = (): void => {
+    justPublished.value = null
+  }
 
   const setKey = (key: string): false => {
     errorKey.value = key
@@ -95,6 +115,7 @@ export const useJobEditor = (init: EditorInit) => {
     try {
       const result = await publishJob(api, job.value.id)
       job.value = result.job
+      if (result.job.status === 'published') justPublished.value = result.job.id
       if (result.quality) quality.set(result.quality, snapshotOf(draft.form.value))
       toast.success(t('job.publish.published'))
       if (!result.quality) toast.message(t('job.publish.noAnalysis'))
@@ -162,5 +183,29 @@ export const useJobEditor = (init: EditorInit) => {
 
   useUnsavedGuard(draft.dirty)
 
-  return { ...draft, job, status, readOnly, permissions, busy, errorKey, fieldErrors, confirmOpen, quality, save, analyze, publish, confirmPublish, cancelPublish, close, saveTemplate }
+  return {
+    ...draft,
+    job,
+    status,
+    readOnly,
+    permissions,
+    busy,
+    errorKey,
+    fieldErrors,
+    errors,
+    touch,
+    reveal,
+    revealed,
+    publishedOpen,
+    dismissPublished,
+    confirmOpen,
+    quality,
+    save,
+    analyze,
+    publish,
+    confirmPublish,
+    cancelPublish,
+    close,
+    saveTemplate,
+  }
 }

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { NativeSelect } from '@/components/ui/native-select'
+
 export interface SelectOption {
   readonly value: string
   readonly label: string
@@ -24,23 +26,22 @@ const groups = computed(() => {
 </script>
 
 <template>
-  <select
+  <NativeSelect
     :id="id"
-    :value="modelValue"
+    :model-value="modelValue"
     :disabled="disabled"
     :aria-invalid="invalid || undefined"
     :aria-describedby="describedBy"
-    class="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive dark:bg-input/30"
-    @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
+    @update:model-value="$emit('update:modelValue', $event)"
   >
-    <option v-if="placeholder !== undefined" value="" class="bg-popover text-popover-foreground">{{ placeholder }}</option>
+    <option v-if="placeholder !== undefined" value="">{{ placeholder }}</option>
     <template v-for="group in groups" :key="group.label">
       <optgroup v-if="group.label !== ''" :label="group.label">
-        <option v-for="option in group.options" :key="option.value" :value="option.value" :selected="option.value === modelValue" class="bg-popover text-popover-foreground">{{ option.label }}</option>
+        <option v-for="option in group.options" :key="option.value" :value="option.value" :selected="option.value === modelValue">{{ option.label }}</option>
       </optgroup>
       <template v-else>
-        <option v-for="option in group.options" :key="option.value" :value="option.value" :selected="option.value === modelValue" class="bg-popover text-popover-foreground">{{ option.label }}</option>
+        <option v-for="option in group.options" :key="option.value" :value="option.value" :selected="option.value === modelValue">{{ option.label }}</option>
       </template>
     </template>
-  </select>
+  </NativeSelect>
 </template>

@@ -7,15 +7,15 @@ const intlLocale = (language: string): string => (language === 'it' ? 'it-IT' : 
 export const formatMoney = (amount: number, currency: string, language: string): string =>
   new Intl.NumberFormat(intlLocale(language), { style: 'currency', currency, maximumFractionDigits: 0 }).format(amount)
 
-/** `45.000 € – 60.000 €`; a single bound is shown alone. Always whole units, always the currency. */
+/** `45.000 € - 60.000 €`; a single bound is shown alone. Always whole units, always the currency. */
 export const salaryRange = (salary: JobContent['salary'], language: string): string => {
   const { min, max, currency } = salary
-  if (min !== undefined && max !== undefined) return min === max ? formatMoney(min, currency, language) : `${formatMoney(min, currency, language)} – ${formatMoney(max, currency, language)}`
+  if (min !== undefined && max !== undefined) return min === max ? formatMoney(min, currency, language) : `${formatMoney(min, currency, language)} - ${formatMoney(max, currency, language)}`
   const only = min ?? max
   return only === undefined ? '' : formatMoney(only, currency, language)
 }
 
-/** `45.000 € – 60.000 €, lordi all'anno (RAL)`. */
+/** `45.000 € - 60.000 €, lordi all'anno (RAL)`. */
 export const salaryLine = (salary: JobContent['salary'], language: string, tr: Translate): string => {
   const range = salaryRange(salary, language)
   return range === '' ? '' : `${range}, ${tr(`taxonomy.salaryPeriodsGross.${salary.period}`)}`
@@ -54,5 +54,6 @@ export const publicJobPath = (orgSlug: string, jobSlug: string): string => `/car
 export const careersPath = (orgSlug: string): string => `/careers/${encodeURIComponent(orgSlug)}`
 export const absoluteUrl = (siteUrl: string, path: string): string => `${siteUrl.replace(/\/+$/, '')}${path}`
 
-export type BadgeTone = 'default' | 'secondary' | 'outline'
-export const statusTone = (status: JobStatus): BadgeTone => (status === 'published' ? 'default' : status === 'draft' ? 'secondary' : 'outline')
+export type BadgeTone = 'success' | 'secondary' | 'outline'
+/** Status pills (docs/DESIGN.md): published = success (live), draft = neutral, closed = outline (muted). */
+export const statusTone = (status: JobStatus): BadgeTone => (status === 'published' ? 'success' : status === 'draft' ? 'secondary' : 'outline')
