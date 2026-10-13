@@ -4,6 +4,7 @@ import {
   JOB_ROLES,
   JOB_ROLE_FAMILIES,
   JOB_STATUSES,
+  PERMISSIONS,
   PUBLISH_RULES,
   QUALITY_CATEGORIES,
   SALARY_PERIODS,
@@ -15,6 +16,7 @@ import {
 import { describe, expect, it } from 'vitest'
 import en from '../../i18n/locales/en.json'
 import it_ from '../../i18n/locales/it.json'
+import { AGENT_TOOLS, MCP_TOOLS } from './phase6-contract'
 
 type Tree = { readonly [key: string]: string | Tree }
 const locales: Readonly<Record<string, Tree>> = { it: it_ as Tree, en: en as Tree }
@@ -39,6 +41,9 @@ const labelled: ReadonlyArray<readonly [string, readonly string[]]> = [
   ['job.rules', PUBLISH_RULES],
   ['job.status', JOB_STATUSES],
   ['quality.categories', QUALITY_CATEGORIES],
+  ['apiKeys.scope', PERMISSIONS.map((permission) => permission.replace(':', '.'))],
+  ['mcp.tools', MCP_TOOLS],
+  ['assistant.steps', AGENT_TOOLS.flatMap((tool) => [`${tool}.running`, `${tool}.done`])],
 ]
 
 const placeholders = (text: string): string[] => [...text.matchAll(/\{(\w+)\}/g)].map((match) => match[1] as string).sort()

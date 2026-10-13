@@ -26,3 +26,5 @@ export * from './webhook/webhook.js';
 export * from './candidate/export.js';
 export * from './candidate/correction.js';
 export * from './candidate/retention.js';
+export * from './access/machine-access.js';
+export * from './access/api-key.js';

@@ -28,6 +28,8 @@ export const STATEMENTS = {
   webhook: ['manage'],
   /** Export of the whole organization's data (PLAN §7). */
   data: ['export'],
+  /** Keys for the public API and MCP. Never grantable to a key or to the agent (a key does not mint keys). */
+  api_key: ['manage'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -63,6 +65,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     automation: ['manage'],
     webhook: ['manage'],
     data: ['export'],
+    api_key: ['manage'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],

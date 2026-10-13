@@ -40,7 +40,11 @@ import { configuredProviders } from './wiring/configured-providers.js';
 import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
 import { zipWriterFactory } from '@tt/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
-import type { Actor } from '@tt/core';
+import type { Actor, ApiKeyDeps, DelegatedActor } from '@tt/core';
+import { authenticateApiKey } from '@tt/core';
+import { createKeyRateLimiter } from './http/key-rate-limit.js';
+import { createRequestActors } from './http/request-actors.js';
+import { createApiKeyDeps } from './wiring/api-key-deps.js';
 
 export interface RateLimitSettings {
   /** Requests per minute per client on every route. */
@@ -56,11 +60,14 @@ export interface RateLimitSettings {
   /** Public applications allowed per client in `applyWindowMinutes`. */
   readonly applyMax?: number | undefined;
   readonly applyWindowMinutes?: number | undefined;
+  /** Requests per minute per API key (on top of the per-client limit). */
+  readonly apiKeyMax?: number | undefined;
 }
 
 export const DEFAULT_PUBLIC_MAX = 120;
 export const DEFAULT_QUALITY_MAX = 20;
 export const DEFAULT_INBOUND_MAX = 120;
+export const DEFAULT_API_KEY_MAX = 120;
 export const DEFAULT_APPLY_MAX = 5;
 export const DEFAULT_APPLY_WINDOW_MINUTES = 10;
 export const DEFAULT_RATE_LIMIT: RateLimitSettings = { max: 300, authMax: 20, publicMax: DEFAULT_PUBLIC_MAX, qualityMax: DEFAULT_QUALITY_MAX };
@@ -70,7 +77,13 @@ export interface AppContext {
   readonly auth: Auth;
   readonly auditLog: AuditLogRepository;
   readonly userNames: UserNameLookup;
+  /** Bearer API key when present (cookies ignored), otherwise the session. */
   readonly resolveActor: (request: FastifyRequest) => Promise<Actor>;
+  /** Session only: refuses any request that carries a bearer. */
+  readonly resolveSessionActor: (request: FastifyRequest) => Promise<Actor>;
+  /** Bearer API key only (MCP). */
+  readonly resolveKeyActor: (request: FastifyRequest) => Promise<DelegatedActor>;
+  readonly apiKeyDeps: ApiKeyDeps;
   readonly checkDatabase: () => Promise<void>;
   readonly rateLimit: RateLimitSettings;
   readonly jobDeps: JobDeps;
@@ -114,6 +127,13 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     },
     findRole: (userId, organizationId) => findMemberRole(db, userId, organizationId),
   });
+  const apiKeyDeps = createApiKeyDeps(db, auditLog);
+  const limits = rateLimit ?? DEFAULT_RATE_LIMIT;
+  const actors = createRequestActors({
+    session: async (request) => resolveFromHeaders(fromNodeHeaders(request.headers)),
+    authenticate: (secret) => authenticateApiKey(apiKeyDeps, secret),
+    limiter: createKeyRateLimiter({ max: limits.apiKeyMax ?? env.API_KEY_RATE_LIMIT ?? DEFAULT_API_KEY_MAX, windowMs: 60_000 }),
+  });
   const phase2 = createPhase2Deps({ db, auditLog, files, queue, receipts: messaging.receipts });
   const phase5 = createPhase5Deps({ db, auditLog, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipWriterFactory });
   return {
@@ -121,7 +141,8 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     auth,
     auditLog,
     userNames: createUserNameLookup(db),
-    resolveActor: (request) => resolveFromHeaders(fromNodeHeaders(request.headers)),
+    ...actors,
+    apiKeyDeps,
     ...phase2,
     ...phase5,
     ...createPhase4Deps({ db, auditLog, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),

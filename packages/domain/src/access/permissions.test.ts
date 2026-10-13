@@ -121,6 +121,11 @@ describe('permissions', () => {
     for (const role of ['recruiter', 'hiring_manager', 'interviewer'] as const) expect(roleHasPermission(role, 'webhook:manage')).toBe(false);
   });
 
+  it('lets only owner and admin manage api keys', () => {
+    for (const role of ['owner', 'admin'] as const) expect(roleHasPermission(role, 'api_key:manage')).toBe(true);
+    for (const role of ['recruiter', 'hiring_manager', 'interviewer'] as const) expect(roleHasPermission(role, 'api_key:manage')).toBe(false);
+  });
+
   it('gives recruiters no administrative permission', () => {
     expect(permissionsOf('recruiter').some((permission) => permission.startsWith('member:'))).toBe(false);
   });

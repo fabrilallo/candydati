@@ -5,6 +5,7 @@ import { createEmailProvider } from '@tt/providers';
 import type { Db } from '@tt/db';
 import type { AdQualityAnalyzer } from '@tt/domain';
 import { createConfiguredAnalyzer } from './ai/ad-quality.js';
+import { registerAgentRoutes } from './agent/routes.js';
 import { toEmailIdentity, toEmailSender } from '@tt/providers';
 import { createAppContext, type RateLimitSettings } from './app-context.js';
 import { registerAuthRoutes } from './auth/fastify-auth.js';
@@ -14,6 +15,9 @@ import { registerErrorHandler } from './http/error-handler.js';
 import { registerCsrfProtection } from './plugins/csrf.js';
 import { registerSecurity, trustedOrigins } from './plugins/security.js';
 import { registerApplicationCvRoute } from './routes/application-cv.js';
+import { registerApiKeyRoutes } from './routes/api-keys.js';
+import { registerMcpRoute } from './mcp/route.js';
+import { registerOpenApiRoute } from './openapi/route.js';
 import { registerAttentionRoutes } from './routes/attention.js';
 import { registerAutomationRoutes } from './routes/automations.js';
 import { registerNotificationRoutes } from './routes/notifications.js';
@@ -89,6 +93,9 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
 
   registerCsrfProtection(app, trustedOrigins(deps.env));
   registerHealthRoutes(app, ctx);
+  registerOpenApiRoute(app, ctx);
+  registerApiKeyRoutes(app, ctx);
+  registerMcpRoute(app, ctx);
   registerAuthRoutes(app, ctx.auth, ctx.rateLimit.authMax);
   registerAuditLogRoutes(app, ctx);
   registerJobQualityRoute(app, ctx);
@@ -114,5 +121,6 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerEmailTemplateRoutes(app, ctx);
   registerMessageRoutes(app, ctx);
   await registerInboundEmailRoutes(app, ctx);
+  registerAgentRoutes(app, ctx);
   return app;
 }

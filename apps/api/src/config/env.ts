@@ -38,6 +38,8 @@ const envSchema = z.object({
   FAST_MODEL: z.string().regex(/^[^/\s]+\/\S+$/, 'must look like provider/model').optional(),
   /** Mastra `provider/model` of the agent. Only the provider name is ever shown (registro dei trattamenti). */
   AGENT_MODEL: z.string().regex(/^[^/\s]+\/\S+$/, 'must look like provider/model').optional(),
+  /** Requests per minute allowed to each API key. */
+  API_KEY_RATE_LIMIT: z.coerce.number().int().min(1).optional(),
   TRUSTED_ORIGINS: z.string().optional().transform(splitList).pipe(z.array(z.url())),
 });
 

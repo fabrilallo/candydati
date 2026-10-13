@@ -48,6 +48,9 @@ export const API_UNREACHABLE = { code: 'api_unreachable', message: 'The service 
 /** Only `/api` and `/api/...`: anything else is not ours to forward (and never escapes the api origin). */
 export const isApiPath = (pathWithQuery: string): boolean => /^\/api(?:[/?]|$)/.test(pathWithQuery)
 
+/** The MCP endpoint (`{siteUrl}/mcp`), forwarded as is: the bearer key travels in `Authorization`, untouched. */
+export const isMcpPath = (pathWithQuery: string): boolean => /^\/mcp\/?(?:\?|$)/.test(pathWithQuery)
+
 export const apiTarget = (apiOrigin: string, pathWithQuery: string): string => `${apiOrigin.replace(/\/+$/, '')}${pathWithQuery}`
 
 /** The client IP as a CDN in front saw it, else the chain we received: the api (`trustProxy`) reads the leftmost. */

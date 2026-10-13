@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
 import {
+  apiKeyActor,
   buildJobTemplate,
   completeJobContent,
   createInMemoryJobTemplateRepository,
@@ -12,6 +13,12 @@ import { createJob } from './create-job.js';
 const actor = userActor({ role: 'recruiter', organizationId: 'org_a' });
 
 describe('createJob', () => {
+  it('records the person behind an API key as the creator, never the key', async () => {
+    const keyActor = apiKeyActor({ role: 'recruiter', organizationId: 'org_a', onBehalfOfUserId: 'user_42' });
+    const job = await createJob(createTestJobDeps(), keyActor, { content: { title: 'Data Engineer' } });
+    expect(job.createdBy).toBe('user_42');
+  });
+
   it('creates a draft with only a title, slug from title and id, and audits it', async () => {
     const deps = createTestJobDeps();
     const job = await createJob(deps, actor, { content: { title: 'Backend Developer (Milano)' } });

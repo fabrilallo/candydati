@@ -6,7 +6,10 @@
     "you": "tu",
     "language": "Lingua",
     "skipToContent": "Vai al contenuto",
-    "close": "Chiudi"
+    "close": "Chiudi",
+    "copy": "Copia",
+    "copied": "Copiato",
+    "copyFailed": "Copia non riuscita"
   },
   "locales": {
     "it": "Italiano",
@@ -41,7 +44,8 @@
     "tasks": "Le mie attività",
     "webhooks": "Webhook",
     "attentionCount": "{count} da gestire",
-    "data": "Dati"
+    "data": "Dati",
+    "api": "API e integrazioni"
   },
   "roles": {
     "owner": "Proprietario",
@@ -361,6 +365,10 @@
       "webhook": {
         "saved": "Ha salvato un webhook",
         "deleted": "Ha eliminato un webhook"
+      },
+      "api_key": {
+        "created": "Ha creato una chiave API",
+        "revoked": "Ha revocato una chiave API"
       }
     }
   },
@@ -1898,5 +1906,310 @@
     "download": "Scarica",
     "downloadLabel": "Scarica l'export del {date}",
     "polling": "Si aggiorna da solo finché l'export è in preparazione."
+  },
+  "apiKeys": {
+    "pageTitle": "API e integrazioni",
+    "pageDescription": "Collega i tuoi sistemi e i tuoi agenti agli stessi servizi dell'interfaccia, con gli stessi permessi e lo stesso registro delle azioni.",
+    "title": "Chiavi API",
+    "description": "Ogni chiave agisce per conto di chi l'ha creata e non ha mai più permessi di quella persona. Se la persona lascia l'organizzazione, la chiave smette di funzionare.",
+    "add": "Nuova chiave",
+    "empty": "Nessuna chiave. Creane una per collegare un sistema esterno o un agente.",
+    "newTitle": "Nuova chiave API",
+    "newDescription": "Scegli solo i permessi che servono all'integrazione. Potrai revocare la chiave in qualsiasi momento.",
+    "fields": {
+      "name": "Nome",
+      "nameHint": "Per riconoscerla dopo, per esempio \"Agente del team HR\".",
+      "scopes": "Cosa può fare",
+      "scopesHint": "Ti proponiamo solo quello che puoi fare anche tu.",
+      "expiry": "Scadenza"
+    },
+    "areas": {
+      "jobs": "Annunci",
+      "candidates": "Candidati",
+      "communication": "Comunicazione",
+      "work": "Attività e automazioni",
+      "organization": "Organizzazione",
+      "other": "Altro"
+    },
+    "scope": {
+      "organization": {
+        "update": "Modificare i dati dell'organizzazione",
+        "delete": "Eliminare l'organizzazione"
+      },
+      "member": {
+        "create": "Aggiungere membri",
+        "update": "Cambiare il ruolo dei membri",
+        "delete": "Rimuovere membri"
+      },
+      "invitation": {
+        "create": "Invitare persone",
+        "cancel": "Annullare inviti"
+      },
+      "audit": {
+        "read": "Leggere il registro delle azioni"
+      },
+      "job": {
+        "read": "Leggere gli annunci",
+        "create": "Creare bozze di annunci",
+        "update": "Modificare gli annunci",
+        "publish": "Pubblicare gli annunci",
+        "close": "Chiudere gli annunci"
+      },
+      "job_template": {
+        "read": "Leggere i template",
+        "create": "Creare template",
+        "delete": "Eliminare template"
+      },
+      "candidate": {
+        "read": "Leggere candidati e CV",
+        "update": "Modificare i dati dei candidati",
+        "move": "Spostare i candidati di fase",
+        "decide": "Registrare l'esito",
+        "export": "Esportare i dati di un candidato",
+        "erase": "Cancellare i dati di un candidato"
+      },
+      "candidate_note": {
+        "create": "Scrivere note sui candidati"
+      },
+      "privacy": {
+        "manage": "Gestire informativa e conservazione"
+      },
+      "message": {
+        "read": "Leggere i messaggi",
+        "send": "Inviare messaggi ai candidati"
+      },
+      "email_template": {
+        "manage": "Gestire i modelli email"
+      },
+      "email_settings": {
+        "manage": "Gestire mittente e dominio email"
+      },
+      "task": {
+        "read": "Leggere le attività",
+        "manage": "Creare e completare attività"
+      },
+      "automation": {
+        "manage": "Gestire le automazioni"
+      },
+      "webhook": {
+        "manage": "Gestire i webhook"
+      },
+      "data": {
+        "export": "Esportare tutti i dati"
+      },
+      "api_key": {
+        "manage": "Gestire le chiavi API"
+      }
+    },
+    "withheld": "Alcune cose una chiave non le può fare mai: decisioni sui candidati, messaggi ai candidati e amministrazione restano a una persona.",
+    "expiry": {
+      "30": "Tra 30 giorni",
+      "90": "Tra 90 giorni",
+      "365": "Tra un anno",
+      "never": "Non scade"
+    },
+    "create": "Crea chiave",
+    "creating": "Creo",
+    "secret": {
+      "title": "Chiave creata",
+      "label": "Usala nell'intestazione Authorization come Bearer.",
+      "warning": "Copiala adesso: non la mostreremo più. Se la perdi, revocala e creane un'altra.",
+      "copy": "Copia",
+      "copied": "Copiata",
+      "copyFailed": "Non siamo riusciti a copiare: selezionala e copiala a mano.",
+      "confirm": "Ho salvato la chiave in un posto sicuro",
+      "done": "Fatto"
+    },
+    "status": {
+      "active": "Attiva",
+      "expired": "Scaduta",
+      "revoked": "Revocata"
+    },
+    "meta": {
+      "createdBy": "Creata da {name} il {date}",
+      "created": "Creata il {date}",
+      "lastUsed": "Ultimo uso il {date}",
+      "neverUsed": "Mai usata",
+      "revokedOn": "Revocata il {date}",
+      "expired": "Scaduta il {date}",
+      "expires": "Scade il {date}",
+      "noExpiry": "Non scade"
+    },
+    "prefixLabel": "Inizia con tt_{prefix}",
+    "revoke": "Revoca",
+    "revokeTitle": "Revocare la chiave?",
+    "revokeBody": "{name} smette subito di funzionare. Le integrazioni che la usano riceveranno un errore.",
+    "revokeConfirm": "Revoca chiave",
+    "revoked": "Chiave revocata",
+    "errors": {
+      "nameRequired": "Dai un nome alla chiave",
+      "nameTooLong": "Il nome è troppo lungo",
+      "scopesRequired": "Scegli almeno un permesso"
+    }
+  },
+  "mcp": {
+    "title": "Come collegare un agente (MCP)",
+    "description": "Un agente compatibile con MCP (Model Context Protocol) può lavorare sugli annunci e leggere la pipeline con una chiave API. Usa gli stessi servizi dell'interfaccia e i permessi della chiave.",
+    "endpoint": "Indirizzo del server",
+    "endpointHint": "Streamable HTTP. Autenticazione solo con chiave API.",
+    "copyEndpoint": "Copia l'indirizzo del server MCP",
+    "config": "Configurazione per il client",
+    "copyConfig": "Copia la configurazione",
+    "configHint": "Sostituisci il segnaposto con la tua chiave. Non condividere mai il file con la chiave dentro.",
+    "tokenPlaceholder": "tt_LA_TUA_CHIAVE",
+    "toolsTitle": "Strumenti disponibili",
+    "toolsNote": "Non ci sono strumenti per spostare, valutare, scartare o scrivere ai candidati: restano decisioni di una persona.",
+    "tools": {
+      "list_jobs": "Elenca gli annunci, filtrabili per stato.",
+      "get_job": "Legge un annuncio con il suo contenuto e lo stato.",
+      "create_job": "Crea un annuncio in bozza.",
+      "update_job": "Modifica il contenuto di un annuncio.",
+      "analyze_job_ad": "Analizza la qualità del testo e indica le frasi vaghe.",
+      "check_publishable": "Dice cosa manca perché l'annuncio sia pubblicabile.",
+      "publish_job": "Pubblica un annuncio completo. Serve il permesso di pubblicazione.",
+      "get_pipeline": "Fasi con i conteggi e le schede, senza testi dei CV.",
+      "list_attention": "Candidature in attesa di risposta o vicine alla scadenza.",
+      "add_candidate_note": "Aggiunge una nota interna a un candidato.",
+      "create_task": "Crea un'attività su un candidato o un annuncio.",
+      "list_job_templates": "Elenca i template degli annunci.",
+      "get_job_stats": "Numeri degli annunci per la panoramica."
+    }
+  },
+  "apiReference": {
+    "title": "Riferimento API",
+    "description": "Tutte le rotte utilizzabili con una chiave, generate dal documento OpenAPI. Apri una rotta per vederne parametri, corpo e risposte.",
+    "download": "Documento OpenAPI",
+    "auth": "Autenticazione",
+    "envelope": "Formato delle risposte",
+    "empty": "Il documento non contiene rotte.",
+    "other": "Altro",
+    "public": "Pubblica",
+    "needsKey": "Richiede una chiave",
+    "parameters": "Parametri",
+    "body": "Corpo della richiesta",
+    "responses": "Risposte",
+    "required": "obbligatorio",
+    "in": {
+      "path": "nel percorso",
+      "query": "nella query",
+      "header": "nell'intestazione",
+      "cookie": "nel cookie"
+    }
+  },
+  "assistant": {
+    "title": "Assistente",
+    "you": "Tu",
+    "lookingAt": "Stai guardando: {page}",
+    "reset": "Nuova conversazione",
+    "promise": "L'assistente non valuta e non scarta candidati.",
+    "conversation": "Conversazione con l'assistente",
+    "thinking": "Ci sto pensando…",
+    "error": "L'assistente non ha risposto. Riprova tra qualche secondo.",
+    "input": "Scrivi all'assistente",
+    "placeholder": "Chiedi qualcosa. Invio per mandare.",
+    "send": "Invia",
+    "stop": "Ferma la risposta",
+    "shortcut": "Apri o chiudi l'assistente ({keys})",
+    "views": {
+      "dashboard": "Panoramica",
+      "attention": "Da gestire",
+      "tasks": "Le mie attività",
+      "jobs": "Annunci",
+      "job_new": "Nuovo annuncio",
+      "job_editor": "Annuncio",
+      "job_pipeline": "Candidati dell'annuncio",
+      "job_automations": "Automazioni dell'annuncio",
+      "templates": "Template",
+      "candidates": "Candidati",
+      "candidate": "Scheda candidato",
+      "settings": "Impostazioni",
+      "other": "Questa pagina"
+    },
+    "empty": {
+      "title": "Come posso aiutarti?",
+      "body": "Scrivo e correggo annunci, preparo risposte che poi invii tu, ti dico cosa è in scadenza. Vedo la pagina in cui sei.",
+      "suggestions": "Suggerimenti"
+    },
+    "suggestions": {
+      "today": "Cosa devo fare oggi?",
+      "writeAd": "Scrivi un annuncio per un backend developer a Milano",
+      "improveAd": "Rendi più chiaro questo annuncio",
+      "checkAd": "Cosa manca per pubblicarlo?",
+      "pipeline": "A che punto è la selezione di questo annuncio?",
+      "reply": "Prepara una risposta per questa candidatura",
+      "summary": "Riassumi lo scambio di messaggi"
+    },
+    "off": {
+      "title": "L'assistente non è attivo",
+      "body": "Su questa installazione non è configurato un modello linguistico. Tutto il resto funziona come sempre.",
+      "admin": "Per attivarlo, imposta la variabile AGENT_MODEL del servizio api con un modello nel formato fornitore/modello, poi riavvia il servizio.",
+      "member": "Se ti serve, chiedi a chi amministra l'organizzazione."
+    },
+    "steps": {
+      "get_job": {
+        "running": "Leggo l'annuncio",
+        "done": "Ho letto l'annuncio"
+      },
+      "draft_job_content": {
+        "running": "Scrivo una proposta di annuncio",
+        "done": "Ho scritto una proposta di annuncio"
+      },
+      "update_job_draft": {
+        "running": "Aggiorno la bozza",
+        "done": "Ho aggiornato la bozza"
+      },
+      "analyze_job_ad": {
+        "running": "Analizzo la qualità",
+        "done": "Ho analizzato la qualità"
+      },
+      "get_pipeline_summary": {
+        "running": "Guardo la pipeline",
+        "done": "Ho guardato la pipeline"
+      },
+      "list_attention": {
+        "running": "Controllo cosa è in scadenza",
+        "done": "Ho controllato cosa è in scadenza"
+      },
+      "get_candidate_brief": {
+        "running": "Leggo la candidatura",
+        "done": "Ho letto la candidatura"
+      },
+      "draft_message": {
+        "running": "Preparo una bozza di messaggio",
+        "done": "Ho preparato una bozza di messaggio"
+      },
+      "create_task": {
+        "running": "Creo un'attività",
+        "done": "Ho creato un'attività"
+      },
+      "list_job_templates": {
+        "running": "Guardo i template",
+        "done": "Ho guardato i template"
+      },
+      "generic": {
+        "running": "Ci lavoro",
+        "done": "Fatto"
+      },
+      "failed": "Un passaggio non è riuscito"
+    },
+    "draftMessage": {
+      "title": "Bozza per {name}",
+      "thisCandidate": "questa persona",
+      "youSend": "Lo invii tu, dopo averlo rivisto.",
+      "cannotSend": "Puoi modificarla e copiarla. L'invio spetta a chi ha il permesso.",
+      "review": "Rivedi e invia"
+    },
+    "draftJob": {
+      "label": "Proposta di annuncio",
+      "salary": "RAL",
+      "city": "Città",
+      "stages": "Fasi",
+      "responsibilities": "Responsabilità",
+      "note": "Non salvo nulla: la rivedi e salvi tu.",
+      "appliedNote": "Inserita nel modulo. Controlla e salva.",
+      "apply": "Applica alla bozza",
+      "create": "Crea una bozza",
+      "applied": "Proposta inserita nel modulo, non ancora salvata"
+    }
   }
 }

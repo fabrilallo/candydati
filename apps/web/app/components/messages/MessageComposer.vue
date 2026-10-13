@@ -9,7 +9,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 /**
  * Writes one message to one or many applications: template (or none), subject, body with variables, the live preview
  * for one candidate, and "Invia" behind a confirmation that names who receives it (PLAN §6: a person always
- * confirms). With `initialKind` the matching template is filled in, never sent.
+ * confirms). With `initialKind` the matching template is filled in, with `initialDraft` that text; never sent.
  */
 const props = withDefaults(
   defineProps<{
@@ -20,10 +20,12 @@ const props = withDefaults(
     recipient?: string
     bulk?: boolean
     initialKind?: EmailTemplateKind | null
+    /** Text to start from (a draft of the assistant): filled in once, never sent without the person. */
+    initialDraft?: { readonly subject: string; readonly body: string } | null
     skippable?: boolean
     idPrefix: string
   }>(),
-  { recipient: '', bulk: false, initialKind: null, skippable: false },
+  { recipient: '', bulk: false, initialKind: null, initialDraft: null, skippable: false },
 )
 const emit = defineEmits<{ sent: [count: number]; skip: [] }>()
 const { t } = useI18n()
@@ -36,7 +38,11 @@ const confirmOpen = ref(false)
 const choose = (id: string): void => {
   composer.applyTemplate(library.templates.value?.find((item) => item.id === id) ?? null)
 }
-const prefilled = ref(false)
+const prefilled = ref(props.initialDraft !== null)
+if (props.initialDraft) {
+  composer.subject.value = props.initialDraft.subject
+  composer.body.value = props.initialDraft.body
+}
 watch(
   [() => library.templates.value, () => props.initialKind],
   ([templates, kind]) => {

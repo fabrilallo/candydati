@@ -121,30 +121,50 @@ async function resolveDefaultOverride(deps: MessagingDeps, organizationId: strin
   return kind !== 'custom' && isSingletonKind(kind as EmailTemplateKind) ? deps.templates.findByKind(organizationId, kind as EmailTemplateKind) : null;
 }
 
+const renderInput = z.object({
+  subject: z.string().max(1000),
+  body: z.string().max(100_000),
+  applicationId: z.string().min(1),
+});
+
+async function renderForApplication(
+  deps: MessagingDeps,
+  organizationId: string,
+  input: z.infer<typeof renderInput>,
+): Promise<MessagePreview> {
+  const application = await requireApplicationInOrganization(deps, organizationId, input.applicationId);
+  const [organization, candidate, job] = await Promise.all([
+    requireOrganization(deps, organizationId),
+    requireCandidate(deps, organizationId, application.candidateId),
+    requireJob(deps, organizationId, application.jobId),
+  ]);
+  const values = buildTemplateValues({ config: deps.config, organization, job, candidate, stageId: application.stageId });
+  const subject = renderTemplate(input.subject, values);
+  const body = renderTemplate(input.body, values);
+  return {
+    subject: oneLine(subject.text),
+    body: body.text,
+    unknownVariables: [...new Set([...subject.unknownVariables, ...body.unknownVariables])],
+  };
+}
+
 /** Renders subject and body for one application, so the sender sees what the candidate will read. */
 export const previewMessage = defineMessagingUseCase({
   name: 'previewMessage',
-  input: z.object({
-    subject: z.string().max(1000),
-    body: z.string().max(100_000),
-    applicationId: z.string().min(1),
-  }),
+  input: renderInput,
   permission: 'message:send',
   audit: { skip: 'preview only: nothing is stored or sent' },
-  handler: async ({ deps, actor, input }): Promise<MessagePreview> => {
-    const application = await requireApplicationInOrganization(deps, actor.organizationId, input.applicationId);
-    const [organization, candidate, job] = await Promise.all([
-      requireOrganization(deps, actor.organizationId),
-      requireCandidate(deps, actor.organizationId, application.candidateId),
-      requireJob(deps, actor.organizationId, application.jobId),
-    ]);
-    const values = buildTemplateValues({ config: deps.config, organization, job, candidate, stageId: application.stageId });
-    const subject = renderTemplate(input.subject, values);
-    const body = renderTemplate(input.body, values);
-    return {
-      subject: oneLine(subject.text),
-      body: body.text,
-      unknownVariables: [...new Set([...subject.unknownVariables, ...body.unknownVariables])],
-    };
-  },
+  handler: ({ deps, actor, input }): Promise<MessagePreview> => renderForApplication(deps, actor.organizationId, input),
+});
+
+/**
+ * Same rendering as `previewMessage`, readable by anyone who may read the conversation (`message:read`): the assistant
+ * prepares drafts as itself, whoever the person is. `templateId` only names the template the text came from.
+ */
+export const renderMessageDraft = defineMessagingUseCase({
+  name: 'renderMessageDraft',
+  input: renderInput.extend({ templateId: z.string().min(1).optional() }),
+  permission: 'message:read',
+  audit: { skip: 'render only: nothing is stored or sent' },
+  handler: ({ deps, actor, input }): Promise<MessagePreview> => renderForApplication(deps, actor.organizationId, input),
 });

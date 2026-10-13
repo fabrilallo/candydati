@@ -26,6 +26,7 @@ const current = computed(() => {
   const apps = detail.value?.applications ?? []
   return apps.find((app) => app.id === props.applicationId) ?? currentApplication(apps)
 })
+useAssistantFocus(() => props.candidateId, () => current.value?.id ?? props.applicationId)
 const open = computed(() => current.value !== null && current.value.outcome === null)
 const name = computed(() => (detail.value ? fullName(detail.value.candidate) : ''))
 const stage = computed(() => (current.value ? stageOf(current.value) : null))

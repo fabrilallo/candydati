@@ -118,13 +118,14 @@ describe('sendMessage', () => {
       else expect(await rejection(run)).toBeInstanceOf(ForbiddenError);
     });
 
-    it('never lets the agent send, even with a recruiter behind it, but lets an API key of a person', async () => {
+    it('never lets the agent or an API key send, even with a recruiter behind them', async () => {
       const deps = seedMessagingWorld();
       const input = { applicationIds: ['app_1'], subject: 's', body: 'b' };
       expect(await rejection(sendMessage(deps, agentActor({ organizationId: ORG_A, role: 'recruiter' }), input))).toBeInstanceOf(ForbiddenError);
       expect(deps.messagingStore.read().messages).toHaveLength(0);
-      await expect(sendMessage(deps, apiKeyActor({ organizationId: ORG_A, role: 'recruiter', onBehalfOfUserId: 'user_k' }), input)).resolves.toBeDefined();
-      expect(deps.messagingStore.read().messages[0]?.sentBy).toBe('user_k');
+      const key = apiKeyActor({ organizationId: ORG_A, role: 'recruiter', onBehalfOfUserId: 'user_k', scopes: ['message:send'] });
+      expect(await rejection(sendMessage(deps, key, input))).toBeInstanceOf(ForbiddenError);
+      expect(deps.messagingStore.read().messages).toHaveLength(0);
     });
   });
 });

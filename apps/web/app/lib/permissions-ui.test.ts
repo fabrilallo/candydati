@@ -63,12 +63,14 @@ describe('defaultInviteRole', () => {
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
     expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'candidates', 'templates', 'members', 'emailTemplates'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'candidates', 'templates', 'members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'data', 'audit'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'candidates', 'templates', 'members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'api', 'data', 'audit'])
   })
 
   it('shows webhooks only with webhook:manage and the work queues to everyone who reads candidates', () => {
     expect(visibleNav('admin').map((item) => item.id)).toContain('webhooks')
     expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('webhooks')
+    expect(visibleNav('admin').map((item) => item.id)).toContain('api')
+    expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('api')
     expect(visibleNav('interviewer').map((item) => item.id)).toEqual(expect.arrayContaining(['attention', 'tasks']))
   })
 
@@ -90,7 +92,7 @@ describe('navSections', () => {
   it('groups the visible items and drops nothing the role may see', () => {
     expect(navSections('owner').map((section) => [section.id, section.items.map((item) => item.id)])).toEqual([
       ['work', ['dashboard', 'attention', 'tasks', 'jobs', 'candidates', 'templates']],
-      ['organization', ['members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'data', 'audit']],
+      ['organization', ['members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'api', 'data', 'audit']],
     ])
     expect(navSections(null).map((section) => section.id)).toEqual(['work', 'organization'])
   })

@@ -1,0 +1,66 @@
+import { describe, expect, it } from 'vitest';
+import {
+  AGENT_EXTRA_FORBIDDEN,
+  forbiddenPermissions,
+  grantablePermissions,
+  isForbiddenFor,
+  MACHINE_FORBIDDEN_PERMISSIONS,
+} from './machine-access.js';
+import { PERMISSIONS, permissionsOf, ROLES } from './permissions.js';
+
+describe('machine access', () => {
+  it('forbids decisions, messages and administration to machines', () => {
+    for (const permission of [
+      'candidate:decide',
+      'candidate:erase',
+      'message:send',
+      'organization:delete',
+      'member:create',
+      'member:update',
+      'member:delete',
+      'invitation:create',
+      'invitation:cancel',
+      'privacy:manage',
+      'webhook:manage',
+      'email_settings:manage',
+      'data:export',
+      'api_key:manage',
+    ] as const) {
+      expect(MACHINE_FORBIDDEN_PERMISSIONS).toContain(permission);
+    }
+    expect(MACHINE_FORBIDDEN_PERMISSIONS).not.toContain('job:read');
+  });
+
+  it('keeps candidate:move for keys but not for the agent', () => {
+    expect(AGENT_EXTRA_FORBIDDEN).toEqual(['candidate:move']);
+    expect(isForbiddenFor('api_key', 'candidate:move')).toBe(false);
+    expect(isForbiddenFor('agent', 'candidate:move')).toBe(true);
+    expect(isForbiddenFor('agent', 'message:send')).toBe(true);
+  });
+
+  it('has no list for users and the system', () => {
+    expect(forbiddenPermissions('user')).toEqual([]);
+    expect(forbiddenPermissions('system')).toEqual([]);
+  });
+
+  it('role matrix: grantable is the role minus the forbidden list, for every role', () => {
+    for (const role of ROLES) {
+      expect(grantablePermissions(role, 'user')).toEqual(permissionsOf(role));
+      const key = grantablePermissions(role, 'api_key');
+      const agent = grantablePermissions(role, 'agent');
+      for (const permission of PERMISSIONS) {
+        const has = permissionsOf(role).includes(permission);
+        expect(key.includes(permission)).toBe(has && !MACHINE_FORBIDDEN_PERMISSIONS.includes(permission));
+        expect(agent.includes(permission)).toBe(has && !MACHINE_FORBIDDEN_PERMISSIONS.includes(permission) && permission !== 'candidate:move');
+      }
+    }
+  });
+
+  it('lets a recruiter key read and write ads and move candidates, never decide or send', () => {
+    const key = grantablePermissions('recruiter', 'api_key');
+    expect(key).toContain('job:create');
+    expect(key).toContain('candidate:move');
+    expect(key).not.toContain('candidate:decide');
+    expect(key).not.toContain('message:send');
+  });
+});

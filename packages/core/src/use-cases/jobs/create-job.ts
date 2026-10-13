@@ -45,7 +45,8 @@ export const createJob = defineJobUseCase({
       status: 'draft',
       content,
       quality: null,
-      createdBy: actor.id ?? 'system',
+      // The person behind an agent or API key owns the ad (deadline reminders go to them), never the key.
+      createdBy: actor.onBehalfOfUserId ?? actor.id ?? 'system',
       createdAt: now,
       updatedAt: now,
       publishedAt: null,

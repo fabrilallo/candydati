@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { API_UNREACHABLE, apiTarget, downstreamResponseHeaders, isApiPath, proxyToApi, upstreamRequestHeaders, type FetchLike, type ProxyRequest } from '~~/server/lib/api-proxy'
+import { API_UNREACHABLE, apiTarget, downstreamResponseHeaders, isApiPath, isMcpPath, proxyToApi, upstreamRequestHeaders, type FetchLike, type ProxyRequest } from '~~/server/lib/api-proxy'
 
 const API = 'https://api.internal'
 
@@ -21,6 +21,14 @@ describe('api proxy paths', () => {
     expect(isApiPath('/api?x=1')).toBe(true)
     expect(isApiPath('/apifoo')).toBe(false)
     expect(isApiPath('/dashboard')).toBe(false)
+  })
+
+  it('forwards the MCP endpoint and nothing that only starts like it', () => {
+    expect(isMcpPath('/mcp')).toBe(true)
+    expect(isMcpPath('/mcp?x=1')).toBe(true)
+    expect(isMcpPath('/mcp/')).toBe(true)
+    expect(isMcpPath('/mcpx')).toBe(false)
+    expect(isMcpPath('/app/mcp')).toBe(false)
   })
 
   it('joins the api origin and the path without double slashes', () => {

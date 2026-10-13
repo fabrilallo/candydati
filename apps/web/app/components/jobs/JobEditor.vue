@@ -20,6 +20,7 @@ const { t, locale } = useI18n()
 const config = useRuntimeConfig()
 const { viewer } = useViewer()
 const ed = useJobEditor({ job: props.job, template: props.template })
+useAssistantJobBridge(ed)
 // The preview reads in the language of the ad, which can be switched while editing.
 await preloadAdLanguages()
 

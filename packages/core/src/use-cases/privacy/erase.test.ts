@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
 import {
   agentActor,
+  apiKeyActor,
   createInMemoryTaskQueue,
   CV_KEY_1,
   CV_KEY_2,
@@ -90,10 +91,14 @@ describe('eraseCandidate', () => {
     expect(error).toBeInstanceOf(NotFoundError);
   });
 
-  it('is recorded for an agent with the user it acts for, within the agent permissions', async () => {
+  it('is refused to an agent and to an API key, whatever the role behind them', async () => {
     const deps = await seedPrivacyData();
-    await eraseCandidate(deps, agentActor({ role: 'recruiter', organizationId: ORG_A, onBehalfOfUserId: 'user_r' }), { candidateId: 'cand_1', confirmName: fullName });
-    expect(deps.auditLog.events().find((e) => e.action === 'candidate.erased')?.actor).toMatchObject({ type: 'agent', onBehalfOfUserId: 'user_r' });
+    const input = { candidateId: 'cand_1', confirmName: fullName };
+    const agent = agentActor({ role: 'recruiter', organizationId: ORG_A, onBehalfOfUserId: 'user_r' });
+    const key = apiKeyActor({ role: 'owner', organizationId: ORG_A, onBehalfOfUserId: 'user_r' });
+    expect(await rejection(eraseCandidate(deps, agent, input))).toBeInstanceOf(ForbiddenError);
+    expect(await rejection(eraseCandidate(deps, key, input))).toBeInstanceOf(ForbiddenError);
+    expect(deps.auditLog.events().some((e) => e.action === 'candidate.erased')).toBe(false);
   });
 });
 

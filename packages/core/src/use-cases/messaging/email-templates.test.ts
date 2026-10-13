@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
 import { buildEmailTemplate, seedMessagingWorld, userActor, ORG_A, ORG_B } from '../../testing/index.js';
-import { deleteEmailTemplate, listEmailTemplates, previewMessage, saveEmailTemplate } from './email-templates.js';
+import { deleteEmailTemplate, listEmailTemplates, previewMessage, renderMessageDraft, saveEmailTemplate } from './email-templates.js';
 
 const recruiter = userActor({ role: 'recruiter', organizationId: ORG_A });
 const rejection = (promise: Promise<unknown>) => promise.catch((e: unknown) => e);
@@ -122,5 +122,25 @@ describe('previewMessage', () => {
     const body = { subject: 's', body: 'b', applicationId: 'app_1' };
     expect(await rejection(previewMessage(seedMessagingWorld(), userActor({ role: 'owner', organizationId: ORG_B }), body))).toBeInstanceOf(NotFoundError);
     expect(await rejection(previewMessage(seedMessagingWorld(), userActor({ role: 'hiring_manager', organizationId: ORG_A }), body))).toBeInstanceOf(ForbiddenError);
+  });
+});
+
+describe('renderMessageDraft', () => {
+  const body = { subject: 'Hi {{ candidate.firstName }}', body: '{{ job.title }} {{ y }}', applicationId: 'app_1' };
+
+  it('renders like previewMessage for roles that can read messages but not send', async () => {
+    const deps = seedMessagingWorld();
+    const interviewer = userActor({ role: 'interviewer', organizationId: ORG_A });
+    const draft = await renderMessageDraft(deps, interviewer, { ...body, templateId: 't1' });
+    expect(draft).toEqual(await previewMessage(deps, recruiter, body));
+    expect(draft.unknownVariables).toEqual(['y']);
+    expect(deps.auditLog.events()).toHaveLength(0);
+    expect(deps.messagingStore.read().messages).toHaveLength(0);
+  });
+
+  it('is not found for a foreign organization, for every role', async () => {
+    for (const role of ['owner', 'interviewer'] as const) {
+      expect(await rejection(renderMessageDraft(seedMessagingWorld(), userActor({ role, organizationId: ORG_B }), body))).toBeInstanceOf(NotFoundError);
+    }
   });
 });

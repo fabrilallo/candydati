@@ -21,7 +21,8 @@ export const createJobTemplate = defineJobUseCase({
       organizationId: actor.organizationId,
       name: input.name,
       content: withStageIds(input.content, deps.newId),
-      createdBy: actor.id ?? 'system',
+      // The person behind an agent or API key owns the ad (deadline reminders go to them), never the key.
+      createdBy: actor.onBehalfOfUserId ?? actor.id ?? 'system',
       createdAt: now,
       updatedAt: now,
     });

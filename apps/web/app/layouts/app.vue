@@ -34,5 +34,6 @@ watch(() => route.fullPath, () => {
         <slot />
       </div>
     </div>
+    <AssistantPanel />
   </div>
 </template>

@@ -45,6 +45,8 @@ export const AUDIT_ACTIONS = [
   'automation.ran',
   'webhook.saved',
   'webhook.deleted',
+  'api_key.created',
+  'api_key.revoked',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

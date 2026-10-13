@@ -18,3 +18,5 @@ export * from './automation-deps.js';
 export * from './in-memory-privacy-ops.js';
 export * from './privacy-deps.js';
 export * from './privacy-seed.js';
+export * from './in-memory-api-keys.js';
+export * from './api-key-deps.js';

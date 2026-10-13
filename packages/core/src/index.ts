@@ -103,3 +103,8 @@ export * from './use-cases/privacy/run-retention.js';
 export * from './use-cases/privacy/retention-overview.js';
 export * from './adapters/drizzle-erasure.js';
 export * from './adapters/drizzle-privacy.js';
+export * from './api-key-ports.js';
+export * from './mappers/api-key-dto.js';
+export * from './use-cases/api-keys/api-keys.js';
+export * from './use-cases/api-keys/authenticate-api-key.js';
+export * from './adapters/drizzle-api-keys.js';

@@ -6,7 +6,10 @@
     "you": "you",
     "language": "Language",
     "skipToContent": "Skip to content",
-    "close": "Close"
+    "close": "Close",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyFailed": "Copy failed"
   },
   "locales": {
     "it": "Italiano",
@@ -41,7 +44,8 @@
     "tasks": "My tasks",
     "webhooks": "Webhooks",
     "attentionCount": "{count} need attention",
-    "data": "Data"
+    "data": "Data",
+    "api": "API and integrations"
   },
   "roles": {
     "owner": "Owner",
@@ -361,6 +365,10 @@
       "webhook": {
         "saved": "Saved a webhook",
         "deleted": "Deleted a webhook"
+      },
+      "api_key": {
+        "created": "Created an API key",
+        "revoked": "Revoked an API key"
       }
     }
   },
@@ -1898,5 +1906,310 @@
     "download": "Download",
     "downloadLabel": "Download the export of {date}",
     "polling": "Updates by itself while the export is being prepared."
+  },
+  "apiKeys": {
+    "pageTitle": "API and integrations",
+    "pageDescription": "Connect your systems and your agents to the same services as the interface, with the same permissions and the same audit log.",
+    "title": "API keys",
+    "description": "Each key acts on behalf of the person who created it and never has more permissions than they do. If that person leaves the organization, the key stops working.",
+    "add": "New key",
+    "empty": "No keys yet. Create one to connect an external system or an agent.",
+    "newTitle": "New API key",
+    "newDescription": "Pick only the permissions the integration needs. You can revoke the key at any time.",
+    "fields": {
+      "name": "Name",
+      "nameHint": "To recognise it later, for example \"HR team agent\".",
+      "scopes": "What it can do",
+      "scopesHint": "We only offer what you can do yourself.",
+      "expiry": "Expiry"
+    },
+    "areas": {
+      "jobs": "Job ads",
+      "candidates": "Candidates",
+      "communication": "Communication",
+      "work": "Tasks and automations",
+      "organization": "Organization",
+      "other": "Other"
+    },
+    "scope": {
+      "organization": {
+        "update": "Edit the organization details",
+        "delete": "Delete the organization"
+      },
+      "member": {
+        "create": "Add members",
+        "update": "Change members' roles",
+        "delete": "Remove members"
+      },
+      "invitation": {
+        "create": "Invite people",
+        "cancel": "Cancel invitations"
+      },
+      "audit": {
+        "read": "Read the audit log"
+      },
+      "job": {
+        "read": "Read job ads",
+        "create": "Create draft job ads",
+        "update": "Edit job ads",
+        "publish": "Publish job ads",
+        "close": "Close job ads"
+      },
+      "job_template": {
+        "read": "Read templates",
+        "create": "Create templates",
+        "delete": "Delete templates"
+      },
+      "candidate": {
+        "read": "Read candidates and CVs",
+        "update": "Edit candidate details",
+        "move": "Move candidates between stages",
+        "decide": "Record the outcome",
+        "export": "Export a candidate's data",
+        "erase": "Erase a candidate's data"
+      },
+      "candidate_note": {
+        "create": "Write notes on candidates"
+      },
+      "privacy": {
+        "manage": "Manage privacy notice and retention"
+      },
+      "message": {
+        "read": "Read messages",
+        "send": "Send messages to candidates"
+      },
+      "email_template": {
+        "manage": "Manage email templates"
+      },
+      "email_settings": {
+        "manage": "Manage email sender and domain"
+      },
+      "task": {
+        "read": "Read tasks",
+        "manage": "Create and complete tasks"
+      },
+      "automation": {
+        "manage": "Manage automations"
+      },
+      "webhook": {
+        "manage": "Manage webhooks"
+      },
+      "data": {
+        "export": "Export all data"
+      },
+      "api_key": {
+        "manage": "Manage API keys"
+      }
+    },
+    "withheld": "Some things a key can never do: decisions about candidates, messages to candidates and administration stay with a person.",
+    "expiry": {
+      "30": "In 30 days",
+      "90": "In 90 days",
+      "365": "In one year",
+      "never": "Never expires"
+    },
+    "create": "Create key",
+    "creating": "Creating",
+    "secret": {
+      "title": "Key created",
+      "label": "Use it in the Authorization header as a Bearer token.",
+      "warning": "Copy it now: we will not show it again. If you lose it, revoke it and create another one.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyFailed": "We could not copy it: select it and copy it by hand.",
+      "confirm": "I have stored the key somewhere safe",
+      "done": "Done"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "revoked": "Revoked"
+    },
+    "meta": {
+      "createdBy": "Created by {name} on {date}",
+      "created": "Created on {date}",
+      "lastUsed": "Last used on {date}",
+      "neverUsed": "Never used",
+      "revokedOn": "Revoked on {date}",
+      "expired": "Expired on {date}",
+      "expires": "Expires on {date}",
+      "noExpiry": "Never expires"
+    },
+    "prefixLabel": "Starts with tt_{prefix}",
+    "revoke": "Revoke",
+    "revokeTitle": "Revoke the key?",
+    "revokeBody": "{name} stops working right away. Integrations using it will get an error.",
+    "revokeConfirm": "Revoke key",
+    "revoked": "Key revoked",
+    "errors": {
+      "nameRequired": "Give the key a name",
+      "nameTooLong": "The name is too long",
+      "scopesRequired": "Pick at least one permission"
+    }
+  },
+  "mcp": {
+    "title": "How to connect an agent (MCP)",
+    "description": "An agent that speaks MCP (Model Context Protocol) can work on job ads and read the pipeline with an API key. It uses the same services as the interface and the key's permissions.",
+    "endpoint": "Server address",
+    "endpointHint": "Streamable HTTP. Authentication with an API key only.",
+    "copyEndpoint": "Copy the MCP server address",
+    "config": "Client configuration",
+    "copyConfig": "Copy the configuration",
+    "configHint": "Replace the placeholder with your key. Never share the file with the key in it.",
+    "tokenPlaceholder": "tt_YOUR_KEY",
+    "toolsTitle": "Available tools",
+    "toolsNote": "There are no tools to move, assess, reject or write to candidates: those stay a person's decision.",
+    "tools": {
+      "list_jobs": "Lists job ads, filterable by status.",
+      "get_job": "Reads a job ad with its content and status.",
+      "create_job": "Creates a draft job ad.",
+      "update_job": "Edits the content of a job ad.",
+      "analyze_job_ad": "Analyses the quality of the text and points out vague phrases.",
+      "check_publishable": "Tells what is missing for the ad to be publishable.",
+      "publish_job": "Publishes a complete job ad. Needs the publish permission.",
+      "get_pipeline": "Stages with counts and cards, without CV text.",
+      "list_attention": "Applications waiting for a reply or close to their deadline.",
+      "add_candidate_note": "Adds an internal note to a candidate.",
+      "create_task": "Creates a task on a candidate or a job ad.",
+      "list_job_templates": "Lists job ad templates.",
+      "get_job_stats": "Job ad figures for the overview."
+    }
+  },
+  "apiReference": {
+    "title": "API reference",
+    "description": "Every route usable with a key, generated from the OpenAPI document. Open a route to see its parameters, body and responses.",
+    "download": "OpenAPI document",
+    "auth": "Authentication",
+    "envelope": "Response format",
+    "empty": "The document has no routes.",
+    "other": "Other",
+    "public": "Public",
+    "needsKey": "Needs a key",
+    "parameters": "Parameters",
+    "body": "Request body",
+    "responses": "Responses",
+    "required": "required",
+    "in": {
+      "path": "in the path",
+      "query": "in the query",
+      "header": "in a header",
+      "cookie": "in a cookie"
+    }
+  },
+  "assistant": {
+    "title": "Assistant",
+    "you": "You",
+    "lookingAt": "You are looking at: {page}",
+    "reset": "New conversation",
+    "promise": "The assistant does not assess or reject candidates.",
+    "conversation": "Conversation with the assistant",
+    "thinking": "Thinking…",
+    "error": "The assistant did not answer. Try again in a few seconds.",
+    "input": "Write to the assistant",
+    "placeholder": "Ask something. Enter to send.",
+    "send": "Send",
+    "stop": "Stop the answer",
+    "shortcut": "Open or close the assistant ({keys})",
+    "views": {
+      "dashboard": "Overview",
+      "attention": "Needs attention",
+      "tasks": "My tasks",
+      "jobs": "Job ads",
+      "job_new": "New job ad",
+      "job_editor": "Job ad",
+      "job_pipeline": "Candidates of the job ad",
+      "job_automations": "Job ad automations",
+      "templates": "Templates",
+      "candidates": "Candidates",
+      "candidate": "Candidate profile",
+      "settings": "Settings",
+      "other": "This page"
+    },
+    "empty": {
+      "title": "How can I help?",
+      "body": "I write and fix job ads, prepare replies that you then send, and tell you what is due. I can see the page you are on.",
+      "suggestions": "Suggestions"
+    },
+    "suggestions": {
+      "today": "What should I do today?",
+      "writeAd": "Write a job ad for a backend developer in Milan",
+      "improveAd": "Make this job ad clearer",
+      "checkAd": "What is missing to publish it?",
+      "pipeline": "Where does the hiring for this job ad stand?",
+      "reply": "Prepare a reply for this application",
+      "summary": "Summarise the message thread"
+    },
+    "off": {
+      "title": "The assistant is not active",
+      "body": "No language model is configured on this installation. Everything else works as usual.",
+      "admin": "To turn it on, set the AGENT_MODEL variable of the api service to a model in the provider/model format, then restart the service.",
+      "member": "If you need it, ask whoever administers the organization."
+    },
+    "steps": {
+      "get_job": {
+        "running": "Reading the job ad",
+        "done": "I read the job ad"
+      },
+      "draft_job_content": {
+        "running": "Writing a job ad proposal",
+        "done": "I wrote a job ad proposal"
+      },
+      "update_job_draft": {
+        "running": "Updating the draft",
+        "done": "I updated the draft"
+      },
+      "analyze_job_ad": {
+        "running": "Analysing the quality",
+        "done": "I analysed the quality"
+      },
+      "get_pipeline_summary": {
+        "running": "Looking at the pipeline",
+        "done": "I looked at the pipeline"
+      },
+      "list_attention": {
+        "running": "Checking what is due",
+        "done": "I checked what is due"
+      },
+      "get_candidate_brief": {
+        "running": "Reading the application",
+        "done": "I read the application"
+      },
+      "draft_message": {
+        "running": "Preparing a draft message",
+        "done": "I prepared a draft message"
+      },
+      "create_task": {
+        "running": "Creating a task",
+        "done": "I created a task"
+      },
+      "list_job_templates": {
+        "running": "Looking at the templates",
+        "done": "I looked at the templates"
+      },
+      "generic": {
+        "running": "Working on it",
+        "done": "Done"
+      },
+      "failed": "A step did not work"
+    },
+    "draftMessage": {
+      "title": "Draft for {name}",
+      "thisCandidate": "this person",
+      "youSend": "You send it, after reviewing it.",
+      "cannotSend": "You can edit and copy it. Sending is up to someone with the permission.",
+      "review": "Review and send"
+    },
+    "draftJob": {
+      "label": "Job ad proposal",
+      "salary": "Salary",
+      "city": "City",
+      "stages": "Stages",
+      "responsibilities": "Responsibilities",
+      "note": "I do not save anything: you review it and save.",
+      "appliedNote": "Put in the form. Check it and save.",
+      "apply": "Apply to the draft",
+      "create": "Create a draft",
+      "applied": "Proposal put in the form, not saved yet"
+    }
   }
 }
