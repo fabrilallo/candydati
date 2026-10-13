@@ -6,6 +6,7 @@ const AREAS = [
   ['candidates', ['candidate', 'candidate_note', 'feedback']],
   ['communication', ['message', 'email_template']],
   ['work', ['task', 'automation']],
+  ['reports', ['report']],
   ['organization', ['organization', 'audit']],
 ] as const satisfies ReadonlyArray<readonly [string, readonly Resource[]]>
 

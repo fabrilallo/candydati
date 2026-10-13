@@ -9,7 +9,7 @@ import { createDrizzleOutbox } from './drizzle-outbox.js';
  * fails loudly instead of leaving data behind), every statement filters by `organization_id`.
  */
 export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
-  const { application, candidate, candidateNote, consentToken, conversation, cvExtraction, feedbackRequest, interviewFeedback, message, notification, outboxEvent, task, webhookDelivery } = schema;
+  const { application, applicationStageEvent, candidate, candidateNote, consentToken, conversation, cvExtraction, feedbackRequest, interviewFeedback, message, notification, outboxEvent, responsePromise, task, webhookDelivery } = schema;
 
   /** Outbox events (and their deliveries) whose data mentions one of these ids under `key`. */
   const deleteEvents = async (organizationId: string, key: 'applicationId' | 'candidateId', ids: readonly string[]): Promise<void> => {
@@ -47,6 +47,8 @@ export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
       await db.delete(consentToken).where(and(eq(consentToken.organizationId, organizationId), inArray(consentToken.applicationId, ids)));
       await db.delete(interviewFeedback).where(and(eq(interviewFeedback.organizationId, organizationId), inArray(interviewFeedback.applicationId, ids)));
       await db.delete(feedbackRequest).where(and(eq(feedbackRequest.organizationId, organizationId), inArray(feedbackRequest.applicationId, ids)));
+      await db.delete(responsePromise).where(and(eq(responsePromise.organizationId, organizationId), inArray(responsePromise.applicationId, ids)));
+      await db.delete(applicationStageEvent).where(and(eq(applicationStageEvent.organizationId, organizationId), inArray(applicationStageEvent.applicationId, ids)));
       await db.delete(application).where(and(eq(application.organizationId, organizationId), inArray(application.id, ids)));
       return rows.map((row) => row.cvKey);
     },

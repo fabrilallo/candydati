@@ -2,6 +2,7 @@ import { SYSTEM_SENDER, textToHtml, type Message } from '@tt/domain';
 import { z } from 'zod';
 import { toAuditActor, type Actor } from '../../actor.js';
 import type { DeliverDeps } from '../../messaging-ports.js';
+import { answerPromise } from '../reports/tracking.js';
 import { defineUseCase } from '../../use-case.js';
 import { ensureConversation, formatFrom, replyToAddress, senderIdentity } from './shared.js';
 import type { DeliverResult } from './views.js';
@@ -27,6 +28,7 @@ async function markResponded(deps: DeliverDeps, message: Message, sentAt: Date):
   if (!application || application.outcome !== null || application.respondedAt !== null) return;
   if (message.createdAt < application.stageChangedAt) return;
   await deps.applications.save({ ...application, respondedAt: sentAt, responseDueAt: null });
+  await answerPromise(deps.promises, application.organizationId, application.id, sentAt);
 }
 
 const isPermanent = (error: unknown): boolean => (error as { permanent?: unknown } | null)?.permanent === true;

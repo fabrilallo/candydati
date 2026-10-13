@@ -49,6 +49,8 @@ export function createInMemoryErasure(world: ErasureWorld): ErasureTransaction {
           extractions: store.read().extractions.filter((e) => !(own(e) && ids.has(e.applicationId))),
           notes: store.read().notes.filter((n) => !(own(n) && n.applicationId !== null && ids.has(n.applicationId))),
           applications: store.read().applications.filter((a) => !(own(a) && ids.has(a.id))),
+          stageEvents: store.read().stageEvents.filter((e) => !(own(e) && ids.has(e.applicationId))),
+          promises: store.read().promises.filter((p) => !(own(p) && ids.has(p.applicationId))),
         });
         return doomed.map((a) => a.cv.key);
       },

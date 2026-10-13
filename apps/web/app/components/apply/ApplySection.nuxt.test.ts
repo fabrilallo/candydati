@@ -114,6 +114,7 @@ describe('ApplySection', () => {
 
   // The multipart body itself is covered in lib/application-form.test.ts: the in-process test fetch drops FormData.
   it('sends the application once, then restates the response commitment of the ad', async () => {
+    const append = vi.spyOn(FormData.prototype, 'append')
     const wrapper = await mountSection()
     await fillValid(wrapper)
     await wrapper.find('[data-testid="consent-pool"]').setValue(true)
@@ -121,6 +122,10 @@ describe('ApplySection', () => {
     await wrapper.find('form').trigger('submit')
     await vi.waitFor(() => expect(wrapper.find('[data-testid="apply-success"]').exists()).toBe(true))
     expect(state.posts).toBe(1)
+    // Opened directly (no utm_source, ref or referrer in the test page): the source reads as direct.
+    const data = append.mock.calls.find(([name]) => name === 'data')?.[1]
+    expect(JSON.parse(String(data))).toMatchObject({ firstName: 'Giulia', origin: 'direct' })
+    append.mockRestore()
     expect(wrapper.find('[data-testid="apply-commitment"]').text()).toBe('Riceverai una risposta entro 5 giorni dopo ogni fase.')
     expect(wrapper.find('[data-testid="apply-success"]').text()).toContain('Ti scriveremo a giulia@example.com.')
     expect(document.activeElement?.id).toBe('apply-success-title')

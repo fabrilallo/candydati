@@ -32,6 +32,6 @@ export const createDeadlinesScanQueue = ({ scan, feedback, stale, digest, now }:
       const staleResult = stale ? await scanStaleJobs(stale, { now: at }) : { digests: [] };
       const digests = mergeDigests(deadlines.digests, staleResult.digests);
       const result = await sendDigests(digest, digests);
-      logger.info({ jobId, digests: digests.length, feedbackReminded: reminders.reminded, feedbackFailed: reminders.failed, ...result }, 'deadline scan finished');
+      logger.info({ jobId, digests: digests.length, missedPromises: deadlines.missedPromises, feedbackReminded: reminders.reminded, feedbackFailed: reminders.failed, ...result }, 'deadline scan finished');
     },
   });

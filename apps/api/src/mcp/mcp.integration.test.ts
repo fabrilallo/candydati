@@ -57,7 +57,7 @@ describe('MCP tools', () => {
     expect([...names].sort()).toEqual([...MCP_TOOL_NAMES].sort());
     expect(names).toEqual([
       'list_jobs', 'get_job', 'create_job', 'update_job', 'analyze_job_ad', 'check_publishable', 'publish_job',
-      'get_pipeline', 'list_attention', 'add_candidate_note', 'create_task', 'list_job_templates', 'get_job_stats',
+      'get_pipeline', 'list_attention', 'add_candidate_note', 'create_task', 'list_job_templates', 'get_job_stats', 'get_reports',
     ]);
     expect(names.filter((name) => /move|decid|messag|send|erase|delete|reject|hire|rank|score|compare/.test(name))).toEqual([]);
     for (const tool of tools) expect(tool.description!.length).toBeGreaterThan(40);

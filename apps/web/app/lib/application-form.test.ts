@@ -113,6 +113,13 @@ describe('submitApplication', () => {
     expect((body.get('cv') as File).name).toBe('cv.pdf')
   })
 
+  it('adds where the candidate came from to the json data', async () => {
+    const request = vi.fn<JobApiRequest>(async () => ({ status: 201, body: { success: true, data: { received: true }, error: null } }))
+    await submitApplication(request, 'acme', 'b', form, file, 'linkedin')
+    const body = request.mock.calls[0]?.[1]?.body as FormData
+    expect(JSON.parse(String(body.get('data')))).toEqual({ ...form, origin: 'linkedin' })
+  })
+
   it('throws a mapped failure', async () => {
     const request = vi.fn<JobApiRequest>(async () => ({ status: 409, body: { success: false, data: null, error: { code: 'conflict', message: 'already_applied' } } }))
     await expect(submitApplication(request, 'acme', 'b', form, file)).rejects.toMatchObject({ key: 'apply.errors.alreadyApplied' })

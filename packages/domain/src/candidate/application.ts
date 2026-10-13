@@ -106,6 +106,8 @@ export interface Application {
   readonly importBatchId: string | null;
   readonly retentionExpiresAt: Date;
   readonly source: 'careers_page' | 'manual' | 'import';
+  /** Short sanitized label of where it came from (`sanitizeOrigin`): `linkedin`, `google.com`, `direct`, `import`, `manual`. */
+  readonly origin: string;
   readonly createdAt: Date;
   readonly updatedAt: Date;
   readonly stageChangedAt: Date;

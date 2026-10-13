@@ -5,7 +5,7 @@ import { ASSISTANT_AGENT_ID, createAssistantAgent } from './assistant.js';
 import { createModelJobDrafter, type JobDrafter } from './job-drafter.js';
 import { createAgentTools } from './tools/index.js';
 
-export type AgentContext = Pick<AppContext, 'env' | 'jobDeps' | 'candidateDeps' | 'messagingDeps' | 'taskDeps'>;
+export type AgentContext = Pick<AppContext, 'env' | 'jobDeps' | 'candidateDeps' | 'messagingDeps' | 'taskDeps' | 'reportDeps'>;
 
 export interface RuntimeOptions {
   readonly model: MastraModelConfig;
@@ -22,6 +22,7 @@ export function createAgentRuntime(ctx: AgentContext, { model, draftJob, onToolE
     candidateDeps: ctx.candidateDeps,
     messagingDeps: ctx.messagingDeps,
     taskDeps: ctx.taskDeps,
+    reportDeps: ctx.reportDeps,
     draftJob: draftJob ?? createModelJobDrafter(model),
     onToolError,
   });

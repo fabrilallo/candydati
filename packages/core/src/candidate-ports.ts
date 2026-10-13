@@ -11,6 +11,7 @@ import type {
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { MessageRepository } from './messaging-ports.js';
 import type { CoreDeps } from './ports.js';
+import type { ResponsePromiseRepository, StageEventRepository } from './report-ports.js';
 
 /** Privacy notices are immutable: there is no update and no delete. */
 export interface PrivacyNoticeRepository {
@@ -133,6 +134,9 @@ export interface CandidateDeps extends CoreDeps {
   readonly feedback?: FeedbackStageEntryParts;
   /** `application.moved` and `application.decided` events for webhooks. */
   readonly outbox: OutboxRepository;
+  /** Stage events and response promises, written when an application moves or is decided. */
+  readonly stageEvents: StageEventRepository;
+  readonly promises: ResponsePromiseRepository;
   readonly newId: () => string;
   readonly now: () => Date;
 }

@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import { ApiFailure } from '@/lib/api-call'
+import { applicationOrigin } from '@/lib/application-origin'
 import { emptyApplyValues, needsNoticeReload, submitApplication, toApplicationForm, type ApplyErrors, type ApplyValues } from '@/lib/application-form'
 import type { PublicPrivacyNoticeDto } from '@/lib/candidate-schemas'
 import { checkCvFile } from '@/lib/cv-file'
@@ -54,7 +55,8 @@ export const useApplyForm = (target: { readonly org: string; readonly job: strin
     }
     pending.value = true
     try {
-      await submitApplication(request, target.org, target.job, result.form, file.value)
+      const origin = applicationOrigin({ search: window.location.search, referrer: document.referrer, host: window.location.host })
+      await submitApplication(request, target.org, target.job, result.form, file.value, origin)
       done.value = true
       return null
     } catch (error) {

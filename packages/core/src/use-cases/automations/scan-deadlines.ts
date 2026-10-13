@@ -26,6 +26,8 @@ export interface DigestEntry {
 
 export interface DeadlineScanResult {
   readonly digests: readonly DigestEntry[];
+  /** Deadline scan only: open promises found past due and flipped to `missed` by this run. */
+  readonly missedPromises?: number;
 }
 
 const ESCALATION_ROLES = ['owner', 'admin'];
@@ -76,6 +78,8 @@ export const scanDeadlines = defineSystemJob<ScanDeps, z.ZodObject<{ now: z.ZodD
   input: z.object({ now: z.date() }),
   handler: async ({ deps, input }): Promise<DeadlineScanResult> => {
     const { now } = input;
+    // Past-due promises become `missed` here, once an hour; they stay unanswered until someone replies.
+    const missedPromises = await deps.promises.markOverdueMissedAcrossOrganizations(now);
     const created: Notification[] = [];
     const contexts = new Map<string, OrganizationContext>();
     const context = (organizationId: string): OrganizationContext => {
@@ -139,7 +143,7 @@ export const scanDeadlines = defineSystemJob<ScanDeps, z.ZodObject<{ now: z.ZodD
         `task_due:${task.id}`,
       );
     }
-    return { digests: await buildDigests(context, created) };
+    return { digests: await buildDigests(context, created), missedPromises };
   },
 });
 

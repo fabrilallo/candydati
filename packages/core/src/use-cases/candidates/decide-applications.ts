@@ -30,7 +30,7 @@ export const decideApplications = defineCandidateUseCase({
       throw new ConflictError('At least one application is already decided.');
     }
     for (const application of applications) {
-      await closeApplication(deps, application, input.outcome);
+      await closeApplication(deps, application, input.outcome, actor.type);
       await deps.auditLog.append({
         organizationId: actor.organizationId,
         actor: toAuditActor(actor),

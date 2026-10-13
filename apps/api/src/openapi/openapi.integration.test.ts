@@ -35,7 +35,7 @@ describe('route registry', () => {
       expect(MACHINE_FORBIDDEN_PERMISSIONS).not.toContain(route.scope);
     }
     const paths = ROUTE_REGISTRY.map((route) => route.path);
-    expect(paths.some((path) => /api-keys|decide|move|messages|privacy|export|webhooks|notifications|erase/.test(path))).toBe(false);
+    expect(paths.some((path) => /api-keys|decide|move|messages|privacy|export(?!\.csv)|webhooks|notifications|erase/.test(path))).toBe(false);
   });
 });
 

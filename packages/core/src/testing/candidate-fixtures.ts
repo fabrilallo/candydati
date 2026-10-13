@@ -74,6 +74,7 @@ export const buildApplication = (overrides: Partial<Application> = {}): Applicat
   importBatchId: null,
   retentionExpiresAt: new Date('2027-01-01T00:00:00.000Z'),
   source: 'careers_page',
+  origin: 'direct',
   createdAt: DATE,
   updatedAt: DATE,
   stageChangedAt: DATE,

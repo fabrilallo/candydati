@@ -40,6 +40,16 @@ describe('eraseCandidate', () => {
     expect(deps.files.keys()).toEqual([CV_KEY_3]);
   });
 
+  it('removes the stage events and response promises of the erased applications and keeps the others', async () => {
+    const deps = await seedPrivacyData();
+    const event = (applicationId: string) => ({ id: `ev_${applicationId}`, organizationId: ORG_A, applicationId, jobId: 'job_1', fromStageId: null, toStageId: 'received', outcome: null, occurredAt: new Date(), actorType: 'system' as const, backfilled: false });
+    const promise = (applicationId: string) => ({ id: `p_${applicationId}`, organizationId: ORG_A, applicationId, jobId: 'job_1', stageId: 'received', startedAt: new Date(), dueAt: new Date(), respondedAt: null, status: 'open' as const, backfilled: false });
+    deps.store.write({ stageEvents: ['app_1', 'app_2', 'app_3'].map(event), promises: ['app_1', 'app_2', 'app_3'].map(promise) });
+    await eraseCandidate(deps, recruiter, { candidateId: 'cand_1', confirmName: fullName });
+    expect(deps.store.read().stageEvents.map((e) => e.applicationId)).toEqual(['app_3']);
+    expect(deps.store.read().promises.map((p) => p.applicationId)).toEqual(['app_3']);
+  });
+
   it('leaves an audit event with ids and counts only, and the webhook event with ids only', async () => {
     const deps = await seedPrivacyData();
     await eraseCandidate(deps, recruiter, { candidateId: 'cand_1', confirmName: fullName });

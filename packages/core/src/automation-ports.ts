@@ -4,6 +4,7 @@ import type { TaskQueue } from './intake-ports.js';
 import type { JobRepository } from './job-ports.js';
 import type { EmailTemplateRepository, MessagingDeps } from './messaging-ports.js';
 import type { CoreDeps } from './ports.js';
+import type { ResponsePromiseRepository } from './report-ports.js';
 
 export interface NotificationListQuery {
   readonly organizationId: string;
@@ -111,6 +112,8 @@ export interface ScanDeps {
   readonly tasks: TaskRepository;
   readonly notifications: NotificationRepository;
   readonly members: MemberDirectory;
+  /** Overdue open promises are flipped to missed on every run. */
+  readonly promises: ResponsePromiseRepository;
   readonly newId: () => string;
 }
 

@@ -11,6 +11,7 @@ import type { ApplicationRepository, CandidateRepository, UserDirectory } from '
 import type { TaskQueue } from './intake-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { CoreDeps } from './ports.js';
+import type { ResponsePromiseRepository } from './report-ports.js';
 
 export interface EmailTemplateRepository {
   /** Every template of the organization, newest first. Defaults are not stored: only edits and custom ones. */
@@ -116,6 +117,8 @@ export interface MessagingDeps extends CoreDeps {
   readonly settings: EmailSettingsRepository;
   readonly conversations: ConversationRepository;
   readonly messages: MessageRepository;
+  /** A person's message answers the promise of the current stage. */
+  readonly promises: ResponsePromiseRepository;
   readonly queue: TaskQueue;
   readonly identity: EmailIdentity;
   readonly sender: EmailSender;
@@ -135,7 +138,7 @@ export interface ReceiptDeps
 
 export type DeliverDeps = Pick<
   MessagingDeps,
-  'auditLog' | 'organizations' | 'candidates' | 'applications' | 'settings' | 'conversations' | 'messages' | 'sender' | 'config' | 'newToken' | 'now'
+  'auditLog' | 'organizations' | 'candidates' | 'applications' | 'settings' | 'conversations' | 'messages' | 'promises' | 'sender' | 'config' | 'newToken' | 'now'
 >;
 
 export type InboundDeps = Pick<

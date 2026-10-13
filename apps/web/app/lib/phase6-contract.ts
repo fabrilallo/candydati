@@ -79,6 +79,7 @@ export const MCP_TOOLS = [
   'create_task',
   'list_job_templates',
   'get_job_stats',
+  'get_reports',
 ] as const
 export type McpTool = (typeof MCP_TOOLS)[number]
 

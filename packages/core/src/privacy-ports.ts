@@ -15,7 +15,7 @@ import type { OutboxRepository } from './webhook-ports.js';
 export interface ErasureStore {
   /**
    * Deletes, for the given applications: notifications, tasks, outbox events and webhook deliveries that point to them,
-   * messages, conversations, CV extractions, notes about them, interview feedback and its requests and finally the applications. Returns their CV file keys.
+   * messages, conversations, CV extractions, stage events and response promises, notes about them, interview feedback and its requests and finally the applications. Returns their CV file keys.
    */
   deleteApplications(organizationId: string, applicationIds: readonly string[]): Promise<readonly string[]>;
   /**

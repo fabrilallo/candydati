@@ -3,6 +3,7 @@ import type { ApplicationRepository, CandidateRepository, CvExtractionRepository
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { ReceiptDeps } from './messaging-ports.js';
 import type { AuditLogRepository } from './ports.js';
+import type { StageEventRepository, ResponsePromiseRepository } from './report-ports.js';
 import type { OutboxRepository } from './webhook-ports.js';
 
 /** Binary storage for CVs. Keys are chosen by core; `@tt/providers` implements it (local disk, S3/MinIO). */
@@ -128,6 +129,9 @@ export interface IntakeRepositories {
   readonly auditLog: AuditLogRepository;
   /** The `application.received` event is written in the same transaction as the application. */
   readonly outbox: OutboxRepository;
+  /** The `received` stage event and the first promise are written in the same transaction as the application. */
+  readonly stageEvents: StageEventRepository;
+  readonly promises: ResponsePromiseRepository;
 }
 
 /** Runs `work` in ONE database transaction: if it throws, nothing it wrote remains. */

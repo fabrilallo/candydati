@@ -1,5 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { z } from 'zod';
+import { getReportsTool } from './tools-reports.js';
 import { addCandidateNoteTool, createTaskTool, getJobStatsTool, listAttentionTool, listJobTemplatesTool } from './tools-work.js';
 import {
   analyzeJobAdTool,
@@ -33,6 +34,7 @@ const TOOLS = [
   createTaskTool,
   listJobTemplatesTool,
   getJobStatsTool,
+  getReportsTool,
 ] as const;
 
 export const MCP_TOOL_NAMES: readonly string[] = TOOLS.map((tool) => tool.name);

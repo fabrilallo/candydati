@@ -89,6 +89,8 @@ export const application = pgTable(
     importBatchId: text('import_batch_id').references(() => importBatch.id, { onDelete: 'restrict' }),
     retentionExpiresAt: timestamp('retention_expires_at', { withTimezone: true }).notNull(),
     source: text('source').$type<'careers_page' | 'manual' | 'import'>().notNull(),
+    /** Sanitized label of where the application came from; `direct` when unknown. */
+    origin: text('origin').notNull().default('direct'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
     stageChangedAt: timestamp('stage_changed_at', { withTimezone: true }).defaultNow().notNull(),

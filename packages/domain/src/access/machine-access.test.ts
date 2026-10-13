@@ -85,6 +85,13 @@ describe('job:approve', () => {
     expect(isForbiddenFor('user', 'job:approve')).toBe(false);
   });
 
+  it('lets keys and the agent read reports: aggregates carry no personal data', () => {
+    expect(isForbiddenFor('api_key', 'report:read')).toBe(false);
+    expect(isForbiddenFor('agent', 'report:read')).toBe(false);
+    expect(grantablePermissions('recruiter', 'api_key')).toContain('report:read');
+    expect(grantablePermissions('interviewer', 'api_key')).not.toContain('report:read');
+  });
+
   it('can be used by keys for feedback reads, since an interviewer-level key is harmless', () => {
     expect(isForbiddenFor('api_key', 'feedback:read')).toBe(false);
   });

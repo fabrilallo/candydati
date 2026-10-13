@@ -44,6 +44,7 @@ import { registerExportRoutes } from './routes/exports.js';
 import { registerPrivacyOverviewRoutes } from './routes/privacy-overview.js';
 import { registerImportRoutes } from './routes/imports.js';
 import { registerPublicConsentRoutes } from './routes/public-consent.js';
+import { registerReportRoutes } from './routes/reports.js';
 import { registerStatsRoutes } from './routes/stats.js';
 import { registerFeedbackRoutes } from './routes/feedback.js';
 import { registerPublicFeedbackRoutes } from './routes/public-feedback.js';
@@ -66,6 +67,8 @@ export interface ServerDeps {
   readonly messaging?: { readonly sender: MessageSender; readonly identity: EmailIdentity } | undefined;
   /** Channels to distribute ads to besides the built-in feed. Empty by default (open source); hosted deployments pass theirs. */
   readonly distributionChannels?: readonly DistributionChannel[] | undefined;
+  /** Test seam: the "now" of the reports. */
+  readonly reportClock?: (() => Date) | undefined;
 }
 
 const loggerOptions = (env: Env) =>
@@ -94,6 +97,7 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
     queue: deps.queue,
     ...messaging,
     distributionChannels: deps.distributionChannels,
+    reportClock: deps.reportClock,
     onReceiptError: (error) => app.log.error({ err: error }, 'receipt email not queued'),
     adQuality: deps.adQuality ?? createConfiguredAnalyzer(deps.env.FAST_MODEL, app.log),
   });
@@ -134,6 +138,7 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerPublicConsentRoutes(app, ctx);
   await registerImportRoutes(app, ctx);
   registerStatsRoutes(app, ctx);
+  registerReportRoutes(app, ctx);
   registerEmailSettingsRoutes(app, ctx);
   registerEmailTemplateRoutes(app, ctx);
   registerMessageRoutes(app, ctx);

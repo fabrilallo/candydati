@@ -4,6 +4,7 @@ import {
   computeResponseDueAt,
   retentionExpiry,
   RECEIVED_STAGE_ID,
+  sanitizeOrigin,
   type Application,
   type ApplicationForm,
   type Candidate,
@@ -16,6 +17,7 @@ import type { IntakeRepositories, SniffedCv, SubmitApplicationDeps } from '../..
 import { definePublicQuery, parseInput } from '../../use-case.js';
 import { enqueueAutomations } from '../automations/enqueue.js';
 import { queueReceipt } from '../messaging/receipt.js';
+import { trackStageEntry } from '../reports/tracking.js';
 import { recordEvent } from '../webhooks/record-event.js';
 
 export const CAREERS_PAGE_ACTOR_ID = 'careers_page';
@@ -27,6 +29,8 @@ export const applicationSubmissionSchema = z.object({
   /** Raw form fields: parsed with `applicationFormSchema` after the honeypot check. */
   form: z.record(z.string(), z.unknown()),
   cv: z.object({ bytes: z.instanceof(Uint8Array), declaredName: z.string().max(300) }),
+  /** `utm_source`, `ref` or the referrer host of the ad URL (the route picks it with `pickOrigin`). Sanitized here: never a URL. */
+  origin: z.string().max(500).optional(),
   client: z.object({ ip: z.string().optional(), userAgent: z.string().optional() }).optional(),
 });
 export type ApplicationSubmission = z.input<typeof applicationSubmissionSchema>;
@@ -63,6 +67,7 @@ interface Intake {
   readonly cv: SniffedCv;
   readonly cvKey: string;
   readonly cvSize: number;
+  readonly origin: string;
   readonly now: Date;
   readonly candidateId: string;
   /** The promise to answer, from the job's declared response time. */
@@ -123,6 +128,7 @@ async function storeApplication(deps: SubmitApplicationDeps, repositories: Intak
     importBatchId: null,
     retentionExpiresAt,
     source: 'careers_page',
+    origin: intake.origin,
     createdAt: now,
     updatedAt: now,
     stageChangedAt: now,
@@ -131,6 +137,7 @@ async function storeApplication(deps: SubmitApplicationDeps, repositories: Intak
     respondedAt: null,
   };
   await repositories.applications.create(application);
+  await trackStageEntry({ stageEvents: repositories.stageEvents, promises: repositories.promises, newId: deps.newId }, application, null, 'system');
   await repositories.extractions.upsert({
     applicationId: application.id,
     organizationId,
@@ -208,6 +215,7 @@ export const submitApplication = definePublicQuery<SubmitApplicationDeps, typeof
       cv,
       cvKey: `organizations/${organization.id}/applications/${applicationId}/cv`,
       cvSize: input.cv.bytes.byteLength,
+      origin: sanitizeOrigin(input.origin),
       now,
       candidateId: deps.newId(),
       responseDueAt: computeResponseDueAt(now, job),

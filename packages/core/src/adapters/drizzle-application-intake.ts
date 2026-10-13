@@ -5,6 +5,7 @@ import { createDrizzleAuditLog } from './drizzle-audit-log.js';
 import { createDrizzleCandidates } from './drizzle-candidates.js';
 import { createDrizzleCvExtractions } from './drizzle-cv-extractions.js';
 import { createDrizzleOutbox } from './drizzle-outbox.js';
+import { createDrizzleResponsePromises, createDrizzleStageEvents } from './drizzle-report-history.js';
 
 /** One Postgres transaction for candidate, application, extraction, audit event and outbox event: all of it or none of it. */
 export function createDrizzleApplicationIntake(db: Db): ApplicationIntake {
@@ -17,6 +18,8 @@ export function createDrizzleApplicationIntake(db: Db): ApplicationIntake {
           extractions: createDrizzleCvExtractions(tx),
           auditLog: createDrizzleAuditLog(tx),
           outbox: createDrizzleOutbox(tx),
+          stageEvents: createDrizzleStageEvents(tx),
+          promises: createDrizzleResponsePromises(tx),
         }),
       ),
   };

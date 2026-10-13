@@ -91,7 +91,12 @@ function operation(route: RouteSpec): Json {
       ? { requestBody: { required: true, content: { [bodyType]: { schema: jsonSchema(route.body, 'input') } } } }
       : {}),
     responses: {
-      [String(route.status ?? 200)]: { description: 'Success', content: { 'application/json': { schema: envelope(route.response) } } },
+      [String(route.status ?? 200)]: {
+        description: 'Success',
+        content: route.fileMediaType
+          ? { [route.fileMediaType]: { schema: { type: 'string' } } }
+          : { 'application/json': { schema: envelope(route.response) } },
+      },
       ...errorResponses(isPublic),
     },
   };

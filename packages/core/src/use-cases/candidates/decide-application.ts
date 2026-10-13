@@ -1,7 +1,8 @@
-import { OUTCOMES, type Application, type Outcome } from '@tt/domain';
+import { OUTCOMES, type ActorType, type Application, type Outcome } from '@tt/domain';
 import { z } from 'zod';
 import type { CandidateDeps } from '../../candidate-ports.js';
 import { ConflictError } from '../../errors.js';
+import { trackDecision } from '../reports/tracking.js';
 import { recordEvent } from '../webhooks/record-event.js';
 import { defineCandidateUseCase } from './define.js';
 import { loadCardView, requireApplication } from './shared.js';
@@ -11,7 +12,7 @@ import type { ApplicationCardView } from './views.js';
  * Closes an open application: outcome, closing time, and the promise kept (answered now, no deadline left). Also writes
  * the `application.decided` event. Shared by the single and the bulk decision.
  */
-export async function closeApplication(deps: CandidateDeps, application: Application, outcome: Outcome): Promise<Application> {
+export async function closeApplication(deps: CandidateDeps, application: Application, outcome: Outcome, actorType: ActorType): Promise<Application> {
   if (application.outcome !== null) throw new ConflictError('The application is already decided.');
   const now = deps.now();
   const saved = await deps.applications.save({
@@ -22,6 +23,7 @@ export async function closeApplication(deps: CandidateDeps, application: Applica
     responseDueAt: null,
     respondedAt: application.respondedAt ?? now,
   });
+  await trackDecision(deps, saved, outcome, actorType);
   await recordEvent(deps, saved.organizationId, 'application.decided', { applicationId: saved.id, jobId: saved.jobId, outcome });
   return saved;
 }
@@ -38,6 +40,6 @@ export const decideApplication = defineCandidateUseCase({
   },
   handler: async ({ deps, actor, input }): Promise<ApplicationCardView> => {
     const application = await requireApplication(deps, actor.organizationId, input.applicationId);
-    return loadCardView(deps, await closeApplication(deps, application, input.outcome));
+    return loadCardView(deps, await closeApplication(deps, application, input.outcome, actor.type));
   },
 });

@@ -31,6 +31,7 @@ import {
   staleJobSchema,
   submitFeedbackBody,
 } from './schemas-hr.js';
+import { reportsSchema } from './schemas-reports.js';
 import { consentAnswerBody, consentRequestSchema, importBatchPageSchema, importBatchSchema, importUploadBody, undoImportSchema } from './schemas-import.js';
 import { interviewerInputSchema, jobRequestInputSchema, JOB_REQUEST_STATUSES } from '@tt/domain';
 import { importItemSelectionSchema, importMappingSchema, IMPORT_CONFIDENCES, IMPORT_ITEMS_PAGE_MAX } from '@tt/domain';
@@ -86,6 +87,8 @@ export interface RouteSpec {
   /** Session only: an API key is refused. `scope` then names the permission, not an API key scope. */
   readonly sessionOnly?: boolean;
   readonly status?: number;
+  /** The success body is this media type (a file), not the JSON envelope. */
+  readonly fileMediaType?: string;
   readonly response: {
     readonly schema: ComponentName | z.ZodType;
     readonly list?: boolean;
@@ -98,6 +101,7 @@ function approvalSettingBody() {
   return z.object({ requireApproval: z.boolean() });
 }
 const contentBody = z.object({ content: jobContentSchema });
+const reportQuery = z.object({ from: z.iso.datetime().describe('Start of the period (ISO 8601).'), to: z.iso.datetime().describe('End of the period, at most 800 days after `from`.'), jobId: z.string().min(1).optional() });
 const idResult = z.object({ id: z.string() });
 
 const jobs: readonly RouteSpec[] = [
@@ -298,4 +302,16 @@ const publicRoutes: readonly RouteSpec[] = [
 ];
 
 /** Every `/api/v1` route that works with an API key, each paired with the Zod schemas of its input and output. */
-export const ROUTE_REGISTRY: readonly RouteSpec[] = [...jobs, ...candidates, ...importRoutes, ...hrRoutes, ...publicRoutes];
+const reportRoutes: readonly RouteSpec[] = [
+  {
+    method: 'get', path: '/api/v1/reports', tag: 'Reports', summary: 'Hiring reports of a period', scope: 'report:read', query: reportQuery,
+    description: 'Time to hire, time to fill, funnel, sources, response promises and outcome coverage. Numbers only: no names. Every rate carries its denominator.',
+    response: { schema: reportsSchema },
+  },
+  {
+    method: 'get', path: '/api/v1/reports/export.csv', tag: 'Reports', summary: 'Hiring reports as one CSV', scope: 'report:read', query: reportQuery,
+    description: 'The same figures as one CSV file with a block per section.', fileMediaType: 'text/csv; charset=utf-8', response: { schema: reportsSchema },
+  },
+];
+
+export const ROUTE_REGISTRY: readonly RouteSpec[] = [...jobs, ...reportRoutes, ...candidates, ...importRoutes, ...hrRoutes, ...publicRoutes];

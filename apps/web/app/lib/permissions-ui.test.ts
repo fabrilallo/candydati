@@ -34,6 +34,20 @@ describe('can', () => {
   })
 })
 
+describe('reports (phase 10)', () => {
+  it('lets owner, admin, recruiter and hiring manager read the reports, not interviewers', () => {
+    expect((['owner', 'admin', 'recruiter', 'hiring_manager', 'interviewer'] as const).map((role) => can(role, 'report:read'))).toEqual([true, true, true, true, false])
+    expect(can(null, 'report:read')).toBe(false)
+  })
+
+  it('lists the reports under Selezione, right after the candidates', () => {
+    const work = navSections('hiring_manager').find((section) => section.id === 'work')?.items.map((item) => item.id) ?? []
+    expect(work.indexOf('reports')).toBe(work.indexOf('candidates') + 1)
+    expect(visibleNav('interviewer').map((item) => item.id)).not.toContain('reports')
+    expect(activeNavId('/app/reports', visibleNav('owner'))).toBe('reports')
+  })
+})
+
 describe('assignableRoles', () => {
   it('lets an owner assign every role', () => {
     expect(assignableRoles('owner')).toEqual(['owner', 'admin', 'recruiter', 'hiring_manager', 'interviewer'])
@@ -62,8 +76,8 @@ describe('defaultInviteRole', () => {
 
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
-    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'imports', 'templates', 'members', 'emailTemplates', 'distribution'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'imports', 'templates', 'members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'distribution', 'api', 'data', 'audit'])
+    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates', 'members', 'emailTemplates', 'distribution'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates', 'members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'distribution', 'api', 'data', 'audit'])
   })
 
   it('shows webhooks only with webhook:manage and the work queues to everyone who reads candidates', () => {
@@ -97,7 +111,7 @@ describe('visibleNav', () => {
 describe('navSections', () => {
   it('groups the visible items and drops nothing the role may see', () => {
     expect(navSections('owner').map((section) => [section.id, section.items.map((item) => item.id)])).toEqual([
-      ['work', ['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'imports', 'templates']],
+      ['work', ['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates']],
       ['organization', ['members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'distribution', 'api', 'data', 'audit']],
     ])
     expect(navSections(null).map((section) => section.id)).toEqual(['work', 'organization'])

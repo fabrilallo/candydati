@@ -7,6 +7,7 @@ import {
   createDrizzleJobs,
   createDrizzleNotifications,
   createDrizzleOutbox,
+  createDrizzleResponsePromises,
   createDrizzleTasks,
   createDrizzleWebhookDeliveries,
   createDrizzleWebhookEndpoints,
@@ -42,6 +43,7 @@ export function scanDeps(t: TestApp): ScanDeps {
   return {
     applications: createDrizzleApplications(db),
     jobs: createDrizzleJobs(db),
+    promises: createDrizzleResponsePromises(db),
     tasks: createDrizzleTasks(db),
     notifications: createDrizzleNotifications(db),
     members: createDrizzleMemberDirectory(db),

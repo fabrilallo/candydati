@@ -6,6 +6,7 @@ import {
   createDrizzleEmailSettings,
   createDrizzleMessages,
   createDrizzleOrganizationDirectory,
+  createDrizzleResponsePromises,
   type DeliverDeps,
   type EmailSender,
 } from '@tt/core';
@@ -31,6 +32,7 @@ export function createDeliverDeps({ db, sender, platform, email }: EmailDelivery
     settings: createDrizzleEmailSettings(db),
     conversations: createDrizzleConversations(db),
     messages: createDrizzleMessages(db),
+    promises: createDrizzleResponsePromises(db),
     sender,
     config: toMessagingConfig(platform, email),
     newToken: newConversationToken,

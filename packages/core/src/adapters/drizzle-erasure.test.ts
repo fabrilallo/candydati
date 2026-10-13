@@ -91,6 +91,8 @@ async function addApplication(org: string, jobId: string, candidateId: string, p
     { id: randomUUID(), organizationId: org, userId: 'user_y', kind: 'response_overdue', applicationId: id, jobId, taskId: null, payload: { stageId: 'received' }, createdAt: NOW, readAt: null },
     `response_overdue:${id}`,
   );
+  await handle.db.insert(schema.applicationStageEvent).values({ id: randomUUID(), organizationId: org, applicationId: id, jobId, toStageId: 'received', occurredAt: NOW, actorType: 'system' });
+  await handle.db.insert(schema.responsePromise).values({ id: randomUUID(), organizationId: org, applicationId: id, jobId, stageId: 'received', startedAt: NOW, dueAt: NOW, status: 'open' });
   const requestId = randomUUID();
   await handle.db.insert(schema.feedbackRequest).values({ id: requestId, organizationId: org, applicationId: id, jobId, stageId: 'stage-0', interviewerKind: 'external', interviewerEmail: 'ext@partner.example', interviewerName: 'Eva Interviewer', tokenHash: randomUUID(), expiresAt: NOW, requestedBy: 'user_x', submittedAt: NOW });
   await handle.db.insert(schema.interviewFeedback).values({ id: randomUUID(), organizationId: org, applicationId: id, requestId, stageId: 'stage-0', interviewerName: 'Eva Interviewer', answers: { tech_shown: `${person.firstName} ${person.lastName} was great` }, recommendation: 'proceed', submittedAt: NOW });
@@ -177,7 +179,7 @@ describe('erasure on Postgres', () => {
     const needles = [world.candidateId, ...world.applicationIds, world.person.email, world.person.firstName, world.person.lastName, world.person.phone];
     const before = await leftovers(needles);
     expect(Object.keys(before).length).toBeGreaterThan(8);
-    expect(Object.keys(before)).toEqual(expect.arrayContaining(['feedback_request', 'interview_feedback']));
+    expect(Object.keys(before)).toEqual(expect.arrayContaining(['feedback_request', 'interview_feedback', 'application_stage_event', 'response_promise']));
 
     const deps = depsFor(world);
     const result = await eraseCandidate(deps, recruiter(world.org), { candidateId: world.candidateId, confirmName: fullName(world) });

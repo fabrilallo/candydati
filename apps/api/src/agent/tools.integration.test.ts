@@ -65,6 +65,7 @@ describe('assistant tool list', () => {
       'get_candidate_brief',
       'get_job',
       'get_pipeline_summary',
+      'get_reports_summary',
       'list_attention',
       'list_job_templates',
       'list_jobs',

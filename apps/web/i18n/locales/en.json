@@ -48,7 +48,8 @@
     "api": "API and integrations",
     "distribution": "Distribution",
     "imports": "Import",
-    "jobRequests": "Requests"
+    "jobRequests": "Requests",
+    "reports": "Reports"
   },
   "jobRequests": {
     "title": "Hiring requests",
@@ -2235,6 +2236,7 @@
       "candidates": "Candidates",
       "communication": "Communication",
       "work": "Tasks and automations",
+      "reports": "Reports",
       "organization": "Organization",
       "other": "Other"
     },
@@ -2314,6 +2316,9 @@
       "feedback": {
         "manage": "Choose interviewers and ask for feedback",
         "read": "Read interview feedback"
+      },
+      "report": {
+        "read": "Read aggregated reports"
       }
     },
     "withheld": "Some things a key can never do: decisions about candidates, messages to candidates and administration stay with a person.",
@@ -2387,7 +2392,8 @@
       "add_candidate_note": "Adds an internal note to a candidate.",
       "create_task": "Creates a task on a candidate or a job ad.",
       "list_job_templates": "Lists job ad templates.",
-      "get_job_stats": "Job ad figures for the overview."
+      "get_job_stats": "Job ad figures for the overview.",
+      "get_reports": "Aggregated figures of a period: timing, stage moves, sources and responses, with no personal data."
     }
   },
   "apiReference": {
@@ -2959,6 +2965,118 @@
     "unavailable": {
       "title": "Page unavailable",
       "body": "We cannot load the request right now. Please try again later."
+    }
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "How hiring is going in the chosen period: timing, moves between stages, where applications come from and responses.",
+    "period": {
+      "label": "Period",
+      "presets": {
+        "last30": "Last 30 days",
+        "last90": "Last 90 days",
+        "last365": "Last 12 months",
+        "custom": "Custom"
+      },
+      "from": "From",
+      "to": "To",
+      "apply": "Apply",
+      "errors": {
+        "missing": "Enter both dates.",
+        "order": "The start date comes after the end date.",
+        "future": "The end date cannot be in the future."
+      }
+    },
+    "job": {
+      "label": "Job",
+      "all": "All jobs"
+    },
+    "export": "Export CSV",
+    "basis": "{count} of {total}",
+    "days": "day | days",
+    "received": "Received",
+    "smallSample": "With fewer than {min} cases a percentage says little: you will see a dash instead.",
+    "sectionError": "This section could not be shown.",
+    "empty": {
+      "title": "No activity in this period",
+      "body": "Figures appear as soon as applications, responses and outcomes come in. Try a longer period or another job."
+    },
+    "headlines": {
+      "title": "Key figures",
+      "timeToHire": {
+        "label": "Median time to hire",
+        "basis": "no hires | over 1 hire | over {count} hires",
+        "info": "Days from application to hire: half of the people hired took less."
+      },
+      "responses": {
+        "label": "Responses on time",
+        "info": "Responses sent within the days promised in the ad, out of all responses due in the period."
+      },
+      "coverage": {
+        "label": "Applications with an outcome",
+        "info": "Applications that got an outcome, among those for jobs closed or online for at least 60 days."
+      },
+      "received": {
+        "label": "Applications received",
+        "info": "Applications that came in during the period, from any source."
+      }
+    },
+    "funnel": {
+      "title": "Moves between stages",
+      "info": "How many applications entered each stage in the period and how many moved on to the next one.",
+      "entered": "entered | entered | entered",
+      "toNext": "to the next stage ({count} of {total})",
+      "emptyTitle": "No applications in this period",
+      "emptyBody": "Here you will see how many applications enter each stage and how many move on."
+    },
+    "outcomes": {
+      "hired": "Hired",
+      "not_selected": "Not selected",
+      "withdrawn": "Withdrawn"
+    },
+    "sources": {
+      "title": "Sources",
+      "info": "Where applications come from and how many hires each source leads to.",
+      "hires": "no hires | 1 hire | {count} hires",
+      "hireRate": "hire rate {rate}",
+      "named": {
+        "direct": "Direct",
+        "import": "Import",
+        "manual": "Added by hand"
+      },
+      "emptyTitle": "No applications in this period",
+      "emptyBody": "Add utm_source or ref to the job link you share (for example ?utm_source=linkedin) to know where people come from."
+    },
+    "responses": {
+      "title": "Response times",
+      "info": "By stage type: responses sent within the promised days and responses sent late.",
+      "keptLabel": "within the promised time",
+      "median": "Median time",
+      "hours": "{n} h",
+      "days": "{n} days",
+      "open": "Waiting now",
+      "overdue": "Already late",
+      "rowBasis": "{kept} on time, {missed} late",
+      "kept": "On time",
+      "missed": "Late",
+      "firstResponse": "First response after applying",
+      "emptyTitle": "No responses due in this period",
+      "emptyBody": "Every ad promises a response within a number of days: here you will see how often the promise was kept."
+    },
+    "times": {
+      "title": "Timing per job",
+      "info": "Hire: days from application to hire. Fill: days from publication to the first hire.",
+      "fillMedian": "day median time to fill | days median time to fill",
+      "fillBasis": "no jobs | 1 job | {count} jobs",
+      "job": "Job",
+      "hires": "Hires",
+      "median": "Median",
+      "p75": "3 in 4 within",
+      "fill": "Fill",
+      "scale": "Position on the days scale",
+      "scaleMax": "Scale from 0 to {days} days",
+      "emptyTitle": "No hires in this period",
+      "emptyBody": "When an application ends with a hire, the days it took show up here."
     }
   }
 }

@@ -34,6 +34,8 @@ export const STATEMENTS = {
   import: ['manage'],
   /** Interview feedback without login: `manage` sets interviewers and asks for feedback, `read` opens what was left (with candidate:read). */
   feedback: ['manage', 'read'],
+  /** Aggregated reports (no personal data): grantable to API keys and the agent. */
+  report: ['read'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -72,6 +74,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     api_key: ['manage'],
     import: ['manage'],
     feedback: ['manage', 'read'],
+    report: ['read'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],
@@ -84,6 +87,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     automation: ['manage'],
     import: ['manage'],
     feedback: ['manage', 'read'],
+    report: ['read'],
   },
   /**
    * Writes and edits ads and moves candidates through the stages. Putting ads online, taking them down and deciding
@@ -97,6 +101,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     message: ['read'],
     task: ['read', 'manage'],
     feedback: ['manage', 'read'],
+    report: ['read'],
   },
   interviewer: {
     job: ['read'],

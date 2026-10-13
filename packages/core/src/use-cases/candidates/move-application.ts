@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
 import { enqueueAutomations } from '../automations/enqueue.js';
 import { toAuditActor } from '../../actor.js';
+import { trackStageEntry } from '../reports/tracking.js';
 import { requestFeedbackOnStageEntry } from '../feedback/request-on-stage-entry.js';
 import { requireJob } from '../jobs/shared.js';
 import { recordEvent } from '../webhooks/record-event.js';
@@ -38,6 +39,7 @@ export const moveApplication = defineCandidateUseCase({
       responseDueAt: computeResponseDueAt(now, job),
       respondedAt: null,
     });
+    await trackStageEntry(deps, saved, application.stageId, actor.type);
     await recordEvent(deps, saved.organizationId, 'application.moved', {
       applicationId: saved.id,
       jobId: saved.jobId,

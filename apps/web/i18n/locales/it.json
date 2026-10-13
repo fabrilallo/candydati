@@ -48,7 +48,8 @@
     "api": "API e integrazioni",
     "distribution": "Distribuzione",
     "imports": "Import",
-    "jobRequests": "Richieste"
+    "jobRequests": "Richieste",
+    "reports": "Report"
   },
   "jobRequests": {
     "title": "Richieste di assunzione",
@@ -2235,6 +2236,7 @@
       "candidates": "Candidati",
       "communication": "Comunicazione",
       "work": "Attività e automazioni",
+      "reports": "Report",
       "organization": "Organizzazione",
       "other": "Altro"
     },
@@ -2314,6 +2316,9 @@
       "feedback": {
         "manage": "Scegliere chi fa i colloqui e chiedere feedback",
         "read": "Leggere i feedback dei colloqui"
+      },
+      "report": {
+        "read": "Leggere i report aggregati"
       }
     },
     "withheld": "Alcune cose una chiave non le può fare mai: decisioni sui candidati, messaggi ai candidati e amministrazione restano a una persona.",
@@ -2387,7 +2392,8 @@
       "add_candidate_note": "Aggiunge una nota interna a un candidato.",
       "create_task": "Crea un'attività su un candidato o un annuncio.",
       "list_job_templates": "Elenca i template degli annunci.",
-      "get_job_stats": "Numeri degli annunci per la panoramica."
+      "get_job_stats": "Numeri degli annunci per la panoramica.",
+      "get_reports": "Numeri aggregati del periodo: tempi, passaggi tra le fasi, provenienza e risposte, senza dati personali."
     }
   },
   "apiReference": {
@@ -2959,6 +2965,118 @@
     "unavailable": {
       "title": "Pagina non disponibile",
       "body": "Non riusciamo a caricare la richiesta in questo momento. Riprova più tardi."
+    }
+  },
+  "reports": {
+    "title": "Report",
+    "subtitle": "Come procede la selezione nel periodo scelto: tempi, passaggi tra le fasi, provenienza delle candidature e risposte.",
+    "period": {
+      "label": "Periodo",
+      "presets": {
+        "last30": "Ultimi 30 giorni",
+        "last90": "Ultimi 90 giorni",
+        "last365": "Ultimi 12 mesi",
+        "custom": "Personalizzato"
+      },
+      "from": "Dal",
+      "to": "Al",
+      "apply": "Applica",
+      "errors": {
+        "missing": "Indica entrambe le date.",
+        "order": "La data di inizio viene dopo quella di fine.",
+        "future": "La data di fine non può essere nel futuro."
+      }
+    },
+    "job": {
+      "label": "Annuncio",
+      "all": "Tutti gli annunci"
+    },
+    "export": "Esporta CSV",
+    "basis": "{count} su {total}",
+    "days": "giorno | giorni",
+    "received": "Ricevute",
+    "smallSample": "Con meno di {min} casi una percentuale non dice molto: al suo posto trovi un trattino.",
+    "sectionError": "Questa sezione non può essere mostrata.",
+    "empty": {
+      "title": "Nessuna attività nel periodo",
+      "body": "I numeri compaiono appena arrivano candidature, risposte ed esiti. Prova un periodo più lungo o un altro annuncio."
+    },
+    "headlines": {
+      "title": "Numeri principali",
+      "timeToHire": {
+        "label": "Tempo di assunzione mediano",
+        "basis": "nessuna assunzione | su 1 assunzione | su {count} assunzioni",
+        "info": "Giorni tra la candidatura e l'assunzione: metà delle persone assunte ci ha messo di meno."
+      },
+      "responses": {
+        "label": "Risposte nei tempi",
+        "info": "Risposte arrivate entro i giorni promessi nell'annuncio, sul totale delle risposte dovute nel periodo."
+      },
+      "coverage": {
+        "label": "Candidature con esito",
+        "info": "Candidature che hanno ricevuto un esito, tra quelle per annunci chiusi o online da almeno 60 giorni."
+      },
+      "received": {
+        "label": "Candidature ricevute",
+        "info": "Candidature arrivate nel periodo, da qualsiasi provenienza."
+      }
+    },
+    "funnel": {
+      "title": "Passaggi tra le fasi",
+      "info": "Quante candidature sono entrate in ogni fase nel periodo e quante sono passate a quella dopo.",
+      "entered": "entrata | entrata | entrate",
+      "toNext": "alla fase dopo ({count} su {total})",
+      "emptyTitle": "Nessuna candidatura nel periodo",
+      "emptyBody": "Qui vedrai quante candidature entrano in ogni fase e quante vanno avanti."
+    },
+    "outcomes": {
+      "hired": "Assunte",
+      "not_selected": "Non selezionate",
+      "withdrawn": "Ritirate"
+    },
+    "sources": {
+      "title": "Provenienza",
+      "info": "Da dove arrivano le candidature e quante assunzioni ne nascono.",
+      "hires": "nessuna assunzione | 1 assunzione | {count} assunzioni",
+      "hireRate": "tasso di assunzione {rate}",
+      "named": {
+        "direct": "Diretta",
+        "import": "Import",
+        "manual": "Inserita a mano"
+      },
+      "emptyTitle": "Nessuna candidatura nel periodo",
+      "emptyBody": "Aggiungi utm_source o ref al link dell'annuncio che condividi (per esempio ?utm_source=linkedin) per sapere da dove arrivano."
+    },
+    "responses": {
+      "title": "Tempi di risposta",
+      "info": "Per tipo di fase: risposte arrivate entro i giorni promessi e risposte arrivate in ritardo.",
+      "keptLabel": "nei tempi promessi",
+      "median": "Tempo mediano",
+      "hours": "{n} h",
+      "days": "{n} giorni",
+      "open": "In attesa ora",
+      "overdue": "Già in ritardo",
+      "rowBasis": "{kept} nei tempi, {missed} in ritardo",
+      "kept": "Nei tempi",
+      "missed": "In ritardo",
+      "firstResponse": "Prima risposta dopo la candidatura",
+      "emptyTitle": "Nessuna risposta dovuta nel periodo",
+      "emptyBody": "Ogni annuncio promette una risposta entro un certo numero di giorni: qui vedrai quante volte la promessa è stata mantenuta."
+    },
+    "times": {
+      "title": "Tempi per annuncio",
+      "info": "Assunzione: giorni dalla candidatura all'assunzione. Copertura: giorni dalla pubblicazione alla prima assunzione.",
+      "fillMedian": "giorno di copertura mediana | giorni di copertura mediana",
+      "fillBasis": "nessun annuncio | 1 annuncio | {count} annunci",
+      "job": "Annuncio",
+      "hires": "Assunzioni",
+      "median": "Mediana",
+      "p75": "3 su 4 entro",
+      "fill": "Copertura",
+      "scale": "Posizione sulla scala dei giorni",
+      "scaleMax": "Scala da 0 a {days} giorni",
+      "emptyTitle": "Nessuna assunzione nel periodo",
+      "emptyBody": "Quando una candidatura si chiude con un'assunzione, qui compaiono i giorni che ci sono voluti."
     }
   }
 }

@@ -1,7 +1,8 @@
-import type { CandidateDeps, JobDeps, MessagingDeps, TaskDeps } from '@tt/core';
+import type { CandidateDeps, JobDeps, MessagingDeps, ReportDeps, TaskDeps } from '@tt/core';
 import type { JobDrafter } from '../job-drafter.js';
 import { createCreateTaskTool, createDraftMessageTool } from './action-tools.js';
 import { createCandidateBriefTool, createListAttentionTool, createPipelineSummaryTool } from './candidate-tools.js';
+import { createReportsSummaryTool } from './report-tools.js';
 import {
   createAnalyzeJobAdTool,
   createDraftJobContentTool,
@@ -16,6 +17,7 @@ export interface AgentToolDeps {
   readonly candidateDeps: CandidateDeps;
   readonly messagingDeps: MessagingDeps;
   readonly taskDeps: TaskDeps;
+  readonly reportDeps: ReportDeps;
   readonly draftJob: JobDrafter;
   readonly onToolError?: ((error: unknown, tool: string) => void) | undefined;
 }
@@ -37,6 +39,7 @@ export function createAgentTools(deps: AgentToolDeps) {
     createCandidateBriefTool(deps.candidateDeps, deps.messagingDeps),
     createDraftMessageTool(deps.messagingDeps),
     createCreateTaskTool(deps.taskDeps),
+    createReportsSummaryTool(deps.reportDeps),
   ];
   return Object.freeze(Object.fromEntries(tools.map((tool) => [tool.id, tool])));
 }

@@ -1,4 +1,4 @@
-import type { Application, Candidate, CandidateNote, CvExtractionRecord } from '@tt/domain';
+import type { Application, Candidate, CandidateNote, CvExtractionRecord, ResponsePromise, StageEvent } from '@tt/domain';
 import { ConflictError } from '../errors.js';
 import type {
   ApplicationRepository,
@@ -13,6 +13,7 @@ import type { OpenApplicationCounts } from '../job-ports.js';
 import type { ApplicationIntake, IntakeRepositories } from '../intake-ports.js';
 import type { AuditLogRepository } from '../ports.js';
 import type { OutboxRepository } from '../webhook-ports.js';
+import { createInMemoryResponsePromises, createInMemoryStageEvents } from './in-memory-reports.js';
 
 /** The rows of the four candidate tables. Replaced wholesale (never mutated) so a snapshot is just a reference. */
 export interface CandidateStoreState {
@@ -20,6 +21,8 @@ export interface CandidateStoreState {
   readonly applications: readonly Application[];
   readonly notes: readonly CandidateNote[];
   readonly extractions: readonly CvExtractionRecord[];
+  readonly stageEvents: readonly StageEvent[];
+  readonly promises: readonly ResponsePromise[];
 }
 
 export interface CandidateStore {
@@ -28,7 +31,7 @@ export interface CandidateStore {
 }
 
 export const createCandidateStore = (initial: Partial<CandidateStoreState> = {}): CandidateStore => {
-  let state: CandidateStoreState = { candidates: [], applications: [], notes: [], extractions: [], ...initial };
+  let state: CandidateStoreState = { candidates: [], applications: [], notes: [], extractions: [], stageEvents: [], promises: [], ...initial };
   return {
     read: () => state,
     write: (next) => {
@@ -219,6 +222,8 @@ export function createInMemoryApplicationIntake(store: CandidateStore, auditLog:
     extractions: createInMemoryCvExtractionRepository(store),
     auditLog,
     outbox,
+    stageEvents: createInMemoryStageEvents(store),
+    promises: createInMemoryResponsePromises(store),
   };
   return {
     async run(work) {

@@ -104,6 +104,7 @@ function newApplication(ctx: Context, prepared: Prepared, candidateId: string): 
     importBatchId: batch.id,
     retentionExpiresAt: expiresAt,
     source: 'import',
+    origin: 'import',
     createdAt: importedAt,
     updatedAt: importedAt,
     stageChangedAt: importedAt,

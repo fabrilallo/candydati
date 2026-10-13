@@ -14,7 +14,7 @@ describe('scopeGroups', () => {
     expect(offered).toContain('candidate:read')
     expect(offered).not.toContain('message:send')
     expect(offered).not.toContain('candidate:decide')
-    expect(groups.map((group) => group.area)).toEqual(['jobs', 'candidates', 'communication', 'work', 'organization'])
+    expect(groups.map((group) => group.area)).toEqual(['jobs', 'candidates', 'communication', 'work', 'reports', 'organization'])
     expect(groups.every((group) => group.scopes.length > 0)).toBe(true)
   })
 

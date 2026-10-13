@@ -70,6 +70,7 @@ describe('permissions', () => {
       'task:manage',
       'feedback:manage',
       'feedback:read',
+      'report:read',
     ]);
     expect(roleHasPermission('hiring_manager', 'message:send')).toBe(false);
     expect(roleHasPermission('hiring_manager', 'job:publish')).toBe(false);
@@ -87,6 +88,10 @@ describe('permissions', () => {
       'task:read',
       'feedback:read',
     ]);
+  });
+
+  it('gives report:read to owner, admin, recruiter and hiring manager', () => {
+    expect(ROLES.filter((role) => roleHasPermission(role, 'report:read'))).toEqual(['owner', 'admin', 'recruiter', 'hiring_manager']);
   });
 
   it('gives job:approve only to owner and admin', () => {

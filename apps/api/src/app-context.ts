@@ -8,7 +8,9 @@ import {
   createDrizzleJobs,
   createDrizzleOrganizationDirectory,
   createDrizzlePrivacyNotices,
+  createDrizzleReports,
   type AuditLogRepository,
+  type ReportDeps,
   type AutomationRuleDeps,
   type NotificationDeps,
   type TaskDeps,
@@ -100,6 +102,8 @@ export interface AppContext {
   readonly checkDatabase: () => Promise<void>;
   readonly rateLimit: RateLimitSettings;
   readonly jobDeps: JobDeps;
+  /** Read-only aggregates of the history kept by core. */
+  readonly reportDeps: ReportDeps;
   readonly candidateDeps: CandidateDeps;
   readonly privacyDeps: PrivacyDeps;
   readonly submitDeps: SubmitApplicationDeps;
@@ -137,9 +141,11 @@ export interface AppContextDeps {
   readonly onReceiptError: (error: unknown) => void;
   /** Distribution channels beyond the built-in feed: none by default, hosted deployments register theirs. */
   readonly distributionChannels?: readonly DistributionChannel[] | undefined;
+  /** "Now" of the reports (open and overdue promises, job age). The real clock unless a test fixes it. */
+  readonly reportClock?: (() => Date) | undefined;
 }
 
-export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files, queue, sender, identity, onReceiptError, distributionChannels }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files, queue, sender, identity, onReceiptError, distributionChannels, reportClock }: AppContextDeps): AppContext {
   const auditLog = createDrizzleAuditLog(db);
   const auth = createAuth({ env, db, auditLog, emailSender });
   const messaging = createMessagingDeps({ env, db, auditLog, queue, sender, identity, onReceiptError });
@@ -191,6 +197,7 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
     rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
     jobDeps,
+    reportDeps: { auditLog, jobs: jobDeps.jobs, reports: createDrizzleReports(db), now: reportClock ?? (() => new Date()) },
     distributionDeps,
     publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
   };

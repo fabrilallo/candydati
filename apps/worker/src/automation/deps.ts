@@ -13,6 +13,7 @@ import {
   createDrizzleNotifications,
   createDrizzleOrganizationDirectory,
   createDrizzleOutbox,
+  createDrizzleResponsePromises,
   createDrizzleTasks,
   createDrizzleUserDirectory,
   createDrizzleWebhookDeliveries,
@@ -58,6 +59,7 @@ export function createPhase4WorkerDeps(wiring: AutomationWiring): Phase4WorkerDe
   const tasks = createDrizzleTasks(db);
   const endpoints = createDrizzleWebhookEndpoints(db);
   const outbox = createDrizzleOutbox(db);
+  const promises = createDrizzleResponsePromises(db);
   return {
     run: {
       auditLog,
@@ -70,6 +72,7 @@ export function createPhase4WorkerDeps(wiring: AutomationWiring): Phase4WorkerDe
       settings: createDrizzleEmailSettings(db),
       conversations: createDrizzleConversations(db),
       messages: createDrizzleMessages(db),
+      promises,
       queue,
       identity: wiring.identity,
       sender: wiring.sender,
@@ -90,6 +93,6 @@ export function createPhase4WorkerDeps(wiring: AutomationWiring): Phase4WorkerDe
       ...clock,
     },
     publish: { endpoints, outbox, queue, now: clock.now },
-    scan: { applications, jobs, tasks, notifications, members: createDrizzleMemberDirectory(db), newId: clock.newId },
+    scan: { applications, jobs, promises, tasks, notifications, members: createDrizzleMemberDirectory(db), newId: clock.newId },
   };
 }
