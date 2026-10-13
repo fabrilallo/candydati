@@ -19,3 +19,12 @@ export const applyRouteConfig = (ctx: AppContext) => ({
 
 /** Provider webhooks: signed, server-to-server, and their own budget apart from the public pages. */
 export const inboundRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.inboundMax ?? DEFAULT_INBOUND_MAX);
+
+export const DEFAULT_IMPORT_MAX = 10;
+export const DEFAULT_CONSENT_MAX = 30;
+
+/** An upload can be 200 MB read into memory and parsed: a handful per minute and client is plenty. */
+export const importUploadRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.importMax ?? DEFAULT_IMPORT_MAX);
+
+/** The public reconfirmation page: tokens are unguessable, but guessing must still be slow. */
+export const consentRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.consentMax ?? DEFAULT_CONSENT_MAX);

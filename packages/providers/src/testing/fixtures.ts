@@ -1,3 +1,4 @@
+import ExcelJS from 'exceljs';
 import { crc32 } from 'node:zlib';
 
 const encoder = new TextEncoder();
@@ -78,4 +79,12 @@ export function makePdf(lines: readonly string[]): Uint8Array {
   pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n${offsets.map((o) => `${String(o).padStart(10, '0')} 00000 n \n`).join('')}`;
   pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
   return Uint8Array.from(Buffer.from(pdf, 'latin1'));
+}
+
+/** A valid XLSX with one sheet: the first row is the header. */
+export async function makeXlsx(rows: readonly (readonly string[])[], sheetName = 'Sheet1'): Promise<Uint8Array> {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet(sheetName);
+  for (const row of rows) sheet.addRow([...row]);
+  return new Uint8Array(await workbook.xlsx.writeBuffer());
 }

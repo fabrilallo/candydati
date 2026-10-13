@@ -1,0 +1,24 @@
+import type { Db } from '@tt/db';
+import type { ImportCommitTransaction } from '../import-ports.js';
+import { createDrizzleApplications } from './drizzle-applications.js';
+import { createDrizzleCandidateNotes } from './drizzle-candidate-notes.js';
+import { createDrizzleCandidates } from './drizzle-candidates.js';
+import { createDrizzleCvExtractions } from './drizzle-cv-extractions.js';
+import { createDrizzleConsentTokens, createDrizzleImportItems } from './drizzle-imports.js';
+
+/** One Postgres transaction per chunk of an import: candidates, applications, extractions, notes, tokens and item status, all or none. */
+export function createDrizzleImportCommit(db: Db): ImportCommitTransaction {
+  return {
+    run: (work) =>
+      db.transaction((tx) =>
+        work({
+          candidates: createDrizzleCandidates(tx),
+          applications: createDrizzleApplications(tx),
+          extractions: createDrizzleCvExtractions(tx),
+          notes: createDrizzleCandidateNotes(tx),
+          importItems: createDrizzleImportItems(tx),
+          consentTokens: createDrizzleConsentTokens(tx),
+        }),
+      ),
+  };
+}

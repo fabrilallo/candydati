@@ -9,7 +9,7 @@ import { createDrizzleOutbox } from './drizzle-outbox.js';
  * fails loudly instead of leaving data behind), every statement filters by `organization_id`.
  */
 export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
-  const { application, candidate, candidateNote, conversation, cvExtraction, message, notification, outboxEvent, task, webhookDelivery } = schema;
+  const { application, candidate, candidateNote, consentToken, conversation, cvExtraction, message, notification, outboxEvent, task, webhookDelivery } = schema;
 
   /** Outbox events (and their deliveries) whose data mentions one of these ids under `key`. */
   const deleteEvents = async (organizationId: string, key: 'applicationId' | 'candidateId', ids: readonly string[]): Promise<void> => {
@@ -44,6 +44,7 @@ export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
       await db.delete(conversation).where(and(eq(conversation.organizationId, organizationId), inArray(conversation.applicationId, ids)));
       await db.delete(cvExtraction).where(and(eq(cvExtraction.organizationId, organizationId), inArray(cvExtraction.applicationId, ids)));
       await db.delete(candidateNote).where(and(eq(candidateNote.organizationId, organizationId), inArray(candidateNote.applicationId, ids)));
+      await db.delete(consentToken).where(and(eq(consentToken.organizationId, organizationId), inArray(consentToken.applicationId, ids)));
       await db.delete(application).where(and(eq(application.organizationId, organizationId), inArray(application.id, ids)));
       return rows.map((row) => row.cvKey);
     },

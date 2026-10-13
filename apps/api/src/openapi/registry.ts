@@ -20,6 +20,8 @@ import {
   pipelineSchema,
   taskSchema,
 } from './schemas-work.js';
+import { consentAnswerBody, consentRequestSchema, importBatchPageSchema, importBatchSchema, importUploadBody, undoImportSchema } from './schemas-import.js';
+import { importItemSelectionSchema, importMappingSchema, IMPORT_CONFIDENCES, IMPORT_ITEMS_PAGE_MAX } from '@tt/domain';
 
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
 
@@ -37,6 +39,10 @@ export const COMPONENT_SCHEMAS = {
   AttentionItem: attentionItemSchema,
   Task: taskSchema,
   JobStats: jobStatsSchema,
+  ImportBatch: importBatchSchema,
+  ImportBatchPage: importBatchPageSchema,
+  UndoImportResult: undoImportSchema,
+  ConsentRequest: consentRequestSchema,
   PublicCareers: publicCareersSchema,
   PublicJobPage: publicJobPageSchema,
   PublicOrganizationSummary: publicOrganizationSummarySchema,
@@ -55,6 +61,10 @@ export interface RouteSpec {
   readonly scope: Permission | null;
   readonly query?: z.ZodObject;
   readonly body?: z.ZodType;
+  /** The body is `multipart/form-data` instead of JSON. */
+  readonly multipart?: boolean;
+  /** Session only: an API key is refused. `scope` then names the permission, not an API key scope. */
+  readonly sessionOnly?: boolean;
   readonly status?: number;
   readonly response: {
     readonly schema: ComponentName | z.ZodType;
@@ -140,6 +150,42 @@ const candidates: readonly RouteSpec[] = [
   { method: 'post', path: '/api/v1/tasks/:id/reopen', tag: 'Tasks', summary: 'Reopen a task', scope: 'task:manage', response: { schema: 'Task' } },
 ];
 
+
+const importRoutes: readonly RouteSpec[] = [
+  {
+    method: 'post', path: '/api/v1/imports', tag: 'Import', summary: 'Upload files to import', scope: 'import:manage', sessionOnly: true, status: 201, multipart: true,
+    description: 'Fields `jobId`, `stageId`, then up to 1000 `files`: ZIP of CVs (PDF, DOCX), CSV, XLSX or a Notion export, 200 MB in total. Types are decided from the content, never the name. The analysis runs in the background: poll the batch until `ready` or `failed`.',
+    body: importUploadBody, response: { schema: z.object({ id: z.string(), status: z.string() }) },
+  },
+  { method: 'get', path: '/api/v1/imports', tag: 'Import', summary: 'List import batches', scope: 'import:manage', sessionOnly: true, response: { schema: 'ImportBatch', list: true } },
+  {
+    method: 'get', path: '/api/v1/imports/:id', tag: 'Import', summary: 'Preview of an import', scope: 'import:manage', sessionOnly: true,
+    description: 'The batch and one page of the proposed people, each with its confidence (`high`, `medium`, `low`), conflicts and missing data.',
+    query: z.object({ page: z.number().int().min(1).optional(), limit: z.number().int().min(1).max(IMPORT_ITEMS_PAGE_MAX).optional(), confidence: z.enum(IMPORT_CONFIDENCES).optional() }),
+    response: { schema: 'ImportBatchPage' },
+  },
+  {
+    method: 'put', path: '/api/v1/imports/:id/mapping', tag: 'Import', summary: 'Change the column mapping', scope: 'import:manage', sessionOnly: true,
+    description: 'Runs the matching again over the stored CVs and rows. Include/exclude choices made before are lost.',
+    body: z.object({ mapping: importMappingSchema }), response: { schema: 'ImportBatchPage' },
+  },
+  {
+    method: 'put', path: '/api/v1/imports/:id/items', tag: 'Import', summary: 'Include or exclude people, change the target', scope: 'import:manage', sessionOnly: true,
+    body: z.object({ items: z.array(importItemSelectionSchema).optional(), target: z.object({ jobId: z.string(), stageId: z.string() }).optional() }),
+    response: { schema: 'ImportBatchPage' },
+  },
+  {
+    method: 'post', path: '/api/v1/imports/:id/commit', tag: 'Import', summary: 'Confirm the import', scope: 'import:manage', sessionOnly: true, status: 202,
+    description: 'Queues the commit: candidates and applications are created with consent still to be renewed, visible only in the pipeline of the target job, and each person with an email gets a reconfirmation link.',
+    response: { schema: 'ImportBatch' },
+  },
+  {
+    method: 'post', path: '/api/v1/imports/:id/undo', tag: 'Import', summary: 'Undo an import', scope: 'import:manage', sessionOnly: true,
+    description: 'Erases everything the batch created, except people who already reconfirmed (their data is theirs to keep): those are counted in `skippedReconfirmed`.',
+    response: { schema: 'UndoImportResult' },
+  },
+];
+
 const publicRoutes: readonly RouteSpec[] = [
   {
     method: 'get', path: '/api/v1/public/organizations/:orgSlug', tag: 'Public', summary: 'An organization', scope: null,
@@ -160,7 +206,17 @@ const publicRoutes: readonly RouteSpec[] = [
     method: 'get', path: '/api/v1/public/organizations/:orgSlug/jobs/:jobSlug', tag: 'Public', summary: 'A published ad', scope: null,
     response: { schema: 'PublicJobPage' },
   },
+  {
+    method: 'get', path: '/api/v1/public/consent/:token', tag: 'Public', summary: 'Reconfirmation page of an imported candidate', scope: null,
+    description: 'The single-use link token is the only credential. Unknown or expired: 404. Already answered: 409. Never cached, not open to other origins.',
+    response: { schema: 'ConsentRequest' },
+  },
+  {
+    method: 'post', path: '/api/v1/public/consent/:token', tag: 'Public', summary: 'Answer a reconfirmation', scope: null,
+    description: 'Send `scopes` (with `selection`) to give consent against the active privacy notice, or `decline: true` to have the data erased at once.',
+    body: consentAnswerBody, response: { schema: z.object({ status: z.enum(['reconfirmed', 'declined']) }) },
+  },
 ];
 
 /** Every `/api/v1` route that works with an API key, each paired with the Zod schemas of its input and output. */
-export const ROUTE_REGISTRY: readonly RouteSpec[] = [...jobs, ...candidates, ...publicRoutes];
+export const ROUTE_REGISTRY: readonly RouteSpec[] = [...jobs, ...candidates, ...importRoutes, ...publicRoutes];

@@ -78,6 +78,7 @@ export async function buildCandidateExport(sources: ExportSources, candidate: Ca
       closedAt: isoOrNull(application.closedAt),
       retentionExpiresAt: iso(application.retentionExpiresAt),
       consent: {
+        status: application.consentStatus,
         privacyNoticeVersion: application.consent.privacyNoticeVersion,
         scopes: [...application.consent.scopes],
         givenAt: iso(application.consent.givenAt),

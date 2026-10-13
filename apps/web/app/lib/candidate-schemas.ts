@@ -1,6 +1,7 @@
-import { CONSENT_SCOPES, cvExtractionSchema, EXTRACTION_STATUSES, JOB_STATUSES, OUTCOMES, selectionStageSchema, SUPPORTED_LOCALES } from '@tt/domain'
+import { cvExtractionSchema, EXTRACTION_STATUSES, JOB_STATUSES, OUTCOMES, selectionStageSchema, SUPPORTED_LOCALES } from '@tt/domain'
 import { z } from 'zod'
 import { responseFields } from './phase4-contract'
+import { applicationConsentSchema, cardConsentFields, importedFields } from './phase8-contract'
 
 /**
  * Zod mirrors of the Phase 2 DTOs (docs: phase 2 contract). Every response of the candidate, pipeline and privacy
@@ -52,7 +53,10 @@ export const applicationCardSchema = z.object({
     headline: z.string().nullable(),
     location: z.string().nullable(),
     yearsOfExperience: z.number().int().nonnegative().nullable(),
+    ...importedFields,
   }),
+  /** Imported, consent to renew, erased at `retentionExpiresAt` without reconfirmation (phase 8 contract). */
+  ...cardConsentFields,
 })
 export type ApplicationCardDto = z.infer<typeof applicationCardSchema>
 
@@ -74,6 +78,7 @@ export const candidateSummarySchema = z.object({
   applicationCount: z.number().int().nonnegative(),
   lastAppliedAt: isoDate.nullable(),
   retentionExpiresAt: isoDate,
+  ...importedFields,
 })
 export type CandidateSummaryDto = z.infer<typeof candidateSummarySchema>
 
@@ -104,9 +109,12 @@ export const candidateApplicationSchema = z.object({
   createdAt: isoDate,
   stageChangedAt: isoDate,
   closedAt: isoDate.nullable(),
-  consent: z.object({ privacyNoticeVersion: z.number().int().positive(), scopes: z.array(z.enum(CONSENT_SCOPES)), givenAt: isoDate }),
+  /** Imported applications (phase 8) have no notice version nor scopes until the person reconfirms. */
+  consent: applicationConsentSchema,
+  ...importedFields,
   retentionExpiresAt: isoDate,
-  cv: z.object({ fileName: z.string(), mediaType: z.string(), sizeBytes: z.number().int().nonnegative() }),
+  /** Null for a candidate imported from a table row without a CV (phase 8). */
+  cv: z.object({ fileName: z.string(), mediaType: z.string(), sizeBytes: z.number().int().nonnegative() }).nullable().default(null),
   /** Absent while the extraction job has not written its record yet. */
   extraction: extractionSchema.nullable().default(null),
   /** Messages in the conversation (phase 3 contract). Unknown (null) when the api does not send it. */
@@ -128,6 +136,7 @@ export const candidateDetailSchema = z.object({
     talentPool: z.boolean(),
     retentionExpiresAt: isoDate,
     createdAt: isoDate,
+    ...importedFields,
   }),
   applications: z.array(candidateApplicationSchema),
   notes: z.array(noteSchema),

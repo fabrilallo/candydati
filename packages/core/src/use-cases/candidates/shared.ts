@@ -37,9 +37,20 @@ async function loadNotes(deps: CandidateDeps, candidate: Candidate): Promise<rea
   return notes.map((note) => ({ note, authorName: names[note.authorId] ?? UNKNOWN_AUTHOR }));
 }
 
-export async function loadCandidateDetail(deps: CandidateDeps, candidate: Candidate): Promise<CandidateDetailView> {
+/**
+ * Imported people who have not reconfirmed (`to_renew`) are visible only through the application of their import job:
+ * everywhere else their applications do not exist. `viaJobId` is the job whose pipeline the viewer came from.
+ */
+export const isVisibleApplication = (application: Application, viaJobId: string | undefined): boolean =>
+  application.consentStatus === 'given' || (viaJobId !== undefined && application.jobId === viaJobId);
+
+export async function loadCandidateDetail(
+  deps: CandidateDeps,
+  candidate: Candidate,
+  visible: (application: Application) => boolean = () => true,
+): Promise<CandidateDetailView> {
   const { organizationId } = candidate;
-  const applications = await deps.applications.listByCandidate(organizationId, candidate.id);
+  const applications = (await deps.applications.listByCandidate(organizationId, candidate.id)).filter(visible);
   const extractions = await deps.extractions.findByApplications(organizationId, applications.map((a) => a.id));
   const messageCounts = await deps.messages.countByApplication(organizationId, applications.map((a) => a.id));
   const jobIds = [...new Set(applications.map((a) => a.jobId))];

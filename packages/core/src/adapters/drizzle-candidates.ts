@@ -46,6 +46,14 @@ export function createDrizzleCandidates(db: DbExecutor): CandidateRepository {
     findById: (organizationId, id) => one(and(eq(candidate.organizationId, organizationId), eq(candidate.id, id))),
     findByEmail: (organizationId, email) =>
       one(and(eq(candidate.organizationId, organizationId), sql`lower(${candidate.email}) = ${email.toLowerCase()}`)),
+    async findByEmails(organizationId, emails) {
+      if (emails.length === 0) return [];
+      const rows = await db
+        .select()
+        .from(candidate)
+        .where(and(eq(candidate.organizationId, organizationId), inArray(sql`lower(${candidate.email})`, emails.map((email) => email.toLowerCase()))));
+      return rows.map(toCandidate);
+    },
     async findByIds(organizationId, ids) {
       if (ids.length === 0) return [];
       const rows = await db

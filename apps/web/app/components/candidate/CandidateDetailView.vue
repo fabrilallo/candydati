@@ -3,6 +3,7 @@ import { FileTextIcon, ListTodoIcon, MailIcon, MessageSquareTextIcon, ShieldChec
 import type { EmailTemplateKind, Outcome } from '@tt/domain'
 import type { ApplicationCardDto } from '@/lib/candidate-schemas'
 import { applicationStatus, currentApplication, fullName, stageOf } from '@/lib/candidate-view'
+import { renewalDeadline } from '@/lib/import-view'
 import { messageTotal, outcomeTemplateKind } from '@/lib/message-view'
 import { can } from '@/lib/permissions-ui'
 import { stageName } from '@/lib/pipeline-board'
@@ -33,6 +34,7 @@ const stage = computed(() => (current.value ? stageOf(current.value) : null))
 const status = computed(() => (current.value ? applicationStatus(current.value) : null))
 const nowMs = useState('candidate-now', () => Date.now())
 const now = computed(() => new Date(nowMs.value))
+const renewBy = computed(() => (detail.value ? renewalDeadline(detail.value.applications) : null))
 
 type Tab = 'profile' | 'cv' | 'notes' | 'messages' | 'tasks' | 'privacy'
 const tab = ref<Tab>('profile')
@@ -110,6 +112,7 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
               <span class="font-medium" :class="status.tone === 'success' ? 'text-success' : 'text-foreground'">{{ t(status.key) }}</span>
               <ResponsePill v-if="current" :application="current" :now="now" class="ml-1" />
             </p>
+            <p v-if="renewBy"><ConsentRenewPill status="to_renew" :expires-at="renewBy" :now="now" /></p>
           </div>
         </div>
         <ApplicationActions

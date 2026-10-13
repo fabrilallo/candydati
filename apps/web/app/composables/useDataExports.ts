@@ -19,16 +19,18 @@ export const useDataExports = () => {
   const { t } = useI18n()
   const request = useJobsApi()
   const { data, refresh } = useAsyncData('data-exports', () => loaded(() => listDataExports(request)))
-  const items = ref<readonly DataExportDto[] | null>(data.value?.data ?? null)
-  watch(data, (fresh) => {
-    if (fresh?.data) items.value = fresh.data
+  // Polled or just-created lists override the first load; a computed (not a watcher) so the server render and hydration agree.
+  const override = ref<readonly DataExportDto[] | null>(null)
+  watch(data, () => {
+    override.value = null
   })
+  const items = computed(() => override.value ?? data.value?.data ?? null)
   const creating = ref(false)
   const visibility = useDocumentVisibility()
 
   const poll = async (): Promise<void> => {
     try {
-      items.value = await listDataExports(request)
+      override.value = await listDataExports(request)
     } catch (error) {
       console.error('[exports] poll failed', error instanceof Error ? error.message : error)
     }
@@ -49,7 +51,7 @@ export const useDataExports = () => {
       const created = await createDataExport(request)
       const now = new Date().toISOString()
       const placeholder: DataExportDto = { id: created.id, status: created.status, sizeBytes: null, createdAt: now, completedAt: null, expiresAt: null }
-      items.value = [placeholder, ...(items.value ?? []).filter((item) => item.id !== created.id)]
+      override.value = [placeholder, ...(items.value ?? []).filter((item) => item.id !== created.id)]
       toast.success(t('dataExport.created'))
     } catch (error) {
       toast.error(t(errorKeyOf(error)))

@@ -1,6 +1,7 @@
 import {
   ATTENTION_STATES,
   CONSENT_SCOPES,
+  CONSENT_STATUSES,
   EXTRACTION_STATUSES,
   JOB_STATUSES,
   NOTIFICATION_KINDS,
@@ -24,6 +25,8 @@ import { z } from 'zod';
 
 const isoDate = z.iso.datetime();
 const person = z.object({ id: z.string(), firstName: z.string(), lastName: z.string() });
+const consentStatus = z.enum(CONSENT_STATUSES);
+const importBatchId = z.string().nullable();
 const stage = z.object({ id: z.string(), declared: selectionStageSchema.nullable() });
 
 export const applicationCardSchema: z.ZodType<ApplicationCardDto> = z.object({
@@ -38,6 +41,9 @@ export const applicationCardSchema: z.ZodType<ApplicationCardDto> = z.object({
   respondedAt: isoDate.nullable(),
   responseState: z.enum(RESPONSE_STATES),
   noteCount: z.number().int(),
+  consentStatus,
+  importBatchId,
+  retentionExpiresAt: isoDate,
   stageRemoved: z.boolean(),
   candidate: person.extend({
     tags: z.array(z.string()),
@@ -60,6 +66,8 @@ export const candidateSummarySchema: z.ZodType<CandidateSummaryDto> = z.object({
   email: z.string(),
   tags: z.array(z.string()),
   talentPool: z.boolean(),
+  consentStatus,
+  importBatchId,
   applicationCount: z.number().int(),
   lastAppliedAt: isoDate.nullable(),
   retentionExpiresAt: isoDate,
@@ -80,6 +88,8 @@ export const candidateDetailSchema: z.ZodType<CandidateDetailDto> = z.object({
     linkedinUrl: z.string().nullable(),
     tags: z.array(z.string()),
     talentPool: z.boolean(),
+    consentStatus,
+    importBatchId,
     retentionExpiresAt: isoDate,
     createdAt: isoDate,
   }),
@@ -98,7 +108,8 @@ export const candidateDetailSchema: z.ZodType<CandidateDetailDto> = z.object({
       responseDueAt: isoDate.nullable(),
       respondedAt: isoDate.nullable(),
       responseState: z.enum(RESPONSE_STATES),
-      consent: z.object({ privacyNoticeVersion: z.number().int(), scopes: z.array(z.enum(CONSENT_SCOPES)), givenAt: isoDate }),
+      consent: z.object({ status: consentStatus, privacyNoticeVersion: z.number().int().nullable(), scopes: z.array(z.enum(CONSENT_SCOPES)), givenAt: isoDate.nullable() }),
+      importBatchId,
       retentionExpiresAt: isoDate,
       cv: z.object({ fileName: z.string(), mediaType: z.string(), sizeBytes: z.number().int() }),
       extraction: z.object({

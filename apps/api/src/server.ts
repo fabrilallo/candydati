@@ -42,6 +42,8 @@ import { registerApplicationRightsRoutes } from './routes/application-rights.js'
 import { registerCandidateRightsRoutes } from './routes/candidate-rights.js';
 import { registerExportRoutes } from './routes/exports.js';
 import { registerPrivacyOverviewRoutes } from './routes/privacy-overview.js';
+import { registerImportRoutes } from './routes/imports.js';
+import { registerPublicConsentRoutes } from './routes/public-consent.js';
 import { registerStatsRoutes } from './routes/stats.js';
 
 export interface ServerDeps {
@@ -121,6 +123,8 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerPrivacyOverviewRoutes(app, ctx);
   registerExportRoutes(app, ctx);
   await registerPublicApplicationRoute(app, ctx);
+  registerPublicConsentRoutes(app, ctx);
+  await registerImportRoutes(app, ctx);
   registerStatsRoutes(app, ctx);
   registerEmailSettingsRoutes(app, ctx);
   registerEmailTemplateRoutes(app, ctx);

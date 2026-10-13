@@ -16,8 +16,11 @@ export const loginLocation = (fullPath: string): string => (fullPath === HOME ||
 
 const isInvitationPath = (path: string): boolean => path.startsWith('/accept-invitation/')
 const isAppPath = (path: string): boolean => path === HOME || path.startsWith(`${HOME}/`)
-/** Public careers pages: indexable, server-rendered, open to anyone whatever their session. */
-export const isPublicPath = (path: string): boolean => path === '/careers' || path.startsWith('/careers/')
+/**
+ * Public pages, open to anyone whatever their session: the careers pages (indexable, server-rendered) and the
+ * reconfirmation of imported candidates (`/consent/<token>`, noindex).
+ */
+export const isPublicPath = (path: string): boolean => path === '/careers' || path.startsWith('/careers/') || path.startsWith('/consent/')
 const isGuestPath = (path: string): boolean => path === LOGIN || path === SIGNUP
 
 const afterSignIn = (viewer: Viewer, redirect: unknown): string => safeRedirect(redirect) ?? (viewer.organization ? HOME : ONBOARDING)

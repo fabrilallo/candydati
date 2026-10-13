@@ -8,6 +8,13 @@ import { SUPPORTED_LOCALES } from '../platform/config.js';
 export const CONSENT_SCOPES = ['selection', 'talent_pool'] as const;
 export type ConsentScope = (typeof CONSENT_SCOPES)[number];
 
+/**
+ * `given`: the candidate consented through our form (or reconfirmed). `to_renew`: imported data, never consented through
+ * our form; visible only in the pipeline of its import job until the candidate reconfirms (PLAN §7).
+ */
+export const CONSENT_STATUSES = ['given', 'to_renew'] as const;
+export type ConsentStatus = (typeof CONSENT_STATUSES)[number];
+
 export const RETENTION_MIN_DAYS = 30;
 export const RETENTION_MAX_DAYS = 365 * 5;
 /** Defaults proposed in the privacy settings; the organization (data controller) decides. */
@@ -37,7 +44,11 @@ export interface PrivacyNotice extends PrivacyNoticeInput {
   readonly createdAt: Date;
 }
 
-/** Stored on every application: what the candidate agreed to, against which text, when. */
+/**
+ * Stored on every application: what the candidate agreed to, against which text, when. For a `to_renew` application
+ * (see `Application.consentStatus`) nothing was agreed: `scopes` is empty, `privacyNoticeId` is '' and
+ * `privacyNoticeVersion` is 0; `givenAt` is when the reconfirmation was requested.
+ */
 export interface ConsentRecord {
   readonly privacyNoticeId: string;
   readonly privacyNoticeVersion: number;

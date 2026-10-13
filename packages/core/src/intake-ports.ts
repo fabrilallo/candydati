@@ -24,6 +24,8 @@ export const TASK_NAMES = [
   'retention.run',
   'organization.export',
   'distribution.sync',
+  'import.analyze',
+  'import.commit',
 ] as const;
 export type TaskName = (typeof TASK_NAMES)[number];
 
@@ -69,6 +71,12 @@ export interface DistributionSyncPayload {
   readonly jobId: string;
 }
 
+/** Parse the uploaded files of an import batch and propose the candidates (`import.analyze`), or write them (`import.commit`). */
+export interface ImportTaskPayload {
+  readonly organizationId: string;
+  readonly batchId: string;
+}
+
 export interface TaskPayloads {
   readonly 'cv.extract': CvExtractPayload;
   readonly 'email.send': EmailSendPayload;
@@ -81,6 +89,8 @@ export interface TaskPayloads {
   readonly 'retention.run': Readonly<Record<string, never>>;
   readonly 'organization.export': OrganizationExportPayload;
   readonly 'distribution.sync': DistributionSyncPayload;
+  readonly 'import.analyze': ImportTaskPayload;
+  readonly 'import.commit': ImportTaskPayload;
 }
 
 /** A task as enqueued: the name decides the payload. */

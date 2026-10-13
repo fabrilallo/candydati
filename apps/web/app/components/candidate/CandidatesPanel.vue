@@ -73,6 +73,7 @@ const filtered = computed(() => list.query.value.trim() !== '' || list.talentPoo
         <div v-if="list.candidates.value.length === 0" class="grid justify-items-start gap-1 rounded-xl border border-dashed border-input px-6 py-8" data-testid="candidates-empty">
           <p class="text-[0.9375rem] font-medium">{{ filtered ? t('candidates.emptyFiltered') : t('candidates.empty') }}</p>
           <p class="text-sm text-muted-foreground">{{ filtered ? t('candidates.emptyFilteredBody') : t('candidates.emptyBody') }}</p>
+          <p v-if="filtered" class="text-sm text-muted-foreground" data-testid="candidates-imported-note">{{ t('candidates.importedNote') }}</p>
         </div>
         <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
           <CandidateRow v-for="candidate in list.candidates.value" :key="candidate.id" :candidate="candidate" :now="now" :active-tag="list.tag.value" @tag="toggleTag" />

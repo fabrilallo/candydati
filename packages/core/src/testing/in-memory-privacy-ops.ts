@@ -4,6 +4,7 @@ import type { AuditLogRepository } from '../ports.js';
 import type { CandidateStore } from './in-memory-candidates.js';
 import type { InMemoryNotifications, InMemoryOutbox, InMemoryTasks, InMemoryWebhookDeliveries } from './in-memory-automation.js';
 import type { MessagingStore } from './in-memory-messaging.js';
+import type { ImportStore } from './in-memory-imports.js';
 
 export interface ErasureWorld {
   readonly store: CandidateStore;
@@ -13,6 +14,8 @@ export interface ErasureWorld {
   readonly outbox: InMemoryOutbox;
   readonly deliveries: InMemoryWebhookDeliveries;
   readonly auditLog: AuditLogRepository;
+  /** Consent tokens go with their applications. */
+  readonly importStore?: ImportStore;
 }
 
 /** Same rules as the Postgres store, over the in-memory stores. The candidate store rolls back on failure; the others do not. */
@@ -34,6 +37,7 @@ export function createInMemoryErasure(world: ErasureWorld): ErasureTransaction {
           messages: messagingStore.read().messages.filter((m) => !(own(m) && ids.has(m.applicationId))),
           conversations: messagingStore.read().conversations.filter((c) => !(own(c) && ids.has(c.applicationId))),
         });
+        world.importStore?.write({ tokens: world.importStore.read().tokens.filter((t) => !(own(t) && ids.has(t.applicationId))) });
         store.write({
           extractions: store.read().extractions.filter((e) => !(own(e) && ids.has(e.applicationId))),
           notes: store.read().notes.filter((n) => !(own(n) && n.applicationId !== null && ids.has(n.applicationId))),

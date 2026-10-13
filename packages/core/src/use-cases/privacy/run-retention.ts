@@ -62,7 +62,8 @@ async function warn(deps: RetentionDeps, contexts: (org: string) => Organization
 async function eraseExpired(deps: RetentionDeps, expired: readonly Application[]): Promise<{ erased: Map<string, number>; failures: RetentionFailure[] }> {
   const erased = new Map<string, number>();
   const failures: RetentionFailure[] = [];
-  for (const [, group] of groupBy(expired, (a) => `${a.organizationId}\u0000${a.candidateId}`)) {
+  // Imported data nobody reconfirmed within IMPORT_RECONFIRM_DAYS goes with its own reason.
+  for (const [, group] of groupBy(expired, (a) => `${a.organizationId}\u0000${a.candidateId}\u0000${a.consentStatus}`)) {
     const first = group[0];
     if (!first) continue;
     try {
@@ -70,7 +71,7 @@ async function eraseExpired(deps: RetentionDeps, expired: readonly Application[]
         organizationId: first.organizationId,
         candidateId: first.candidateId,
         applicationIds: group.map((a) => a.id),
-        reason: 'retention',
+        reason: first.consentStatus === 'to_renew' ? 'consent_not_renewed' : 'retention',
         actor: SYSTEM_ACTOR,
       });
       erased.set(first.organizationId, (erased.get(first.organizationId) ?? 0) + result.applicationCount);
@@ -108,7 +109,8 @@ export const runRetention = defineSystemJob<RetentionDeps, z.ZodObject<{ now: z.
     const { now } = input;
     const expiring = await deps.applications.listRetentionExpiringAcrossOrganizations(new Date(now.getTime() + RETENTION_WARNING_DAYS * DAY_MS));
     const expired = expiring.filter((a) => a.retentionExpiresAt <= now);
-    const upcoming = expiring.filter((a) => a.retentionExpiresAt > now);
+    // Imported applications always expire within the reconfirmation window: no warning, the email already asked.
+    const upcoming = expiring.filter((a) => a.retentionExpiresAt > now && a.consentStatus === 'given');
     const contexts = new Map<string, OrganizationContext>();
     const context = (organizationId: string): OrganizationContext => {
       const found = contexts.get(organizationId) ?? new OrganizationContext(deps, organizationId);

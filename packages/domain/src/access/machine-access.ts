@@ -20,6 +20,7 @@ export const MACHINE_FORBIDDEN_PERMISSIONS: readonly Permission[] = PERMISSIONS.
       'email_settings:manage',
       'data:export',
       'api_key:manage',
+      'import:manage',
     ].includes(permission),
 );
 

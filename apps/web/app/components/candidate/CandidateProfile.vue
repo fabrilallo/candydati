@@ -3,6 +3,7 @@ import { BriefcaseIcon, CalendarClockIcon, LinkIcon, MailIcon, MessageSquareQuot
 import type { CandidateApplicationDto, CandidateDetailDto } from '@/lib/candidate-schemas'
 import { applicationStatus, retentionState, stageOf } from '@/lib/candidate-view'
 import { formatDate } from '@/lib/format'
+import { isToRenew } from '@/lib/import-view'
 import { stageName } from '@/lib/pipeline-board'
 import { Badge } from '@/components/ui/badge'
 
@@ -65,7 +66,8 @@ const labelClass = 'flex items-center gap-2 text-sm text-muted-foreground'
       <div v-if="current" :class="rowClass">
         <dt :class="labelClass"><ShieldCheckIcon class="size-4" aria-hidden="true" />{{ t('candidate.fields.consent') }}</dt>
         <dd class="grid gap-1.5 text-sm" data-testid="profile-consent">
-          <p class="figure">{{ t('candidate.fields.consentVersion', { version: current.consent.privacyNoticeVersion, date: formatDate(current.consent.givenAt, locale) }) }}</p>
+          <p v-if="!isToRenew(current) && current.consent.privacyNoticeVersion !== null && current.consent.givenAt" class="figure">{{ t('candidate.fields.consentVersion', { version: current.consent.privacyNoticeVersion, date: formatDate(current.consent.givenAt, locale) }) }}</p>
+          <p v-else class="text-muted-foreground" data-testid="profile-consent-to-renew">{{ t('consentRenew.notGiven') }}</p>
           <ul class="flex flex-wrap gap-1.5">
             <li v-for="scope in current.consent.scopes" :key="scope"><Badge variant="secondary">{{ t(`candidate.scopes.${scope}`) }}</Badge></li>
           </ul>

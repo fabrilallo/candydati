@@ -49,6 +49,10 @@ export const AUDIT_ACTIONS = [
   'webhook.deleted',
   'api_key.created',
   'api_key.revoked',
+  'import.created',
+  'import.committed',
+  'import.undone',
+  'candidate.consent_reconfirmed',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

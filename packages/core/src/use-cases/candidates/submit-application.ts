@@ -78,6 +78,7 @@ function mergeCandidate(existing: Candidate | null, intake: Intake, consent: Con
     email: form.email,
     tags: [],
     talentPool: false,
+    importBatchId: null,
     createdAt: now,
   };
   const retention = existing && existing.retentionExpiresAt > expiresAt ? existing.retentionExpiresAt : expiresAt;
@@ -118,6 +119,8 @@ async function storeApplication(deps: SubmitApplicationDeps, repositories: Intak
     message: form.message,
     cv: { key: intake.cvKey, fileName: intake.cv.fileName, mediaType: intake.cv.mediaType, sizeBytes: intake.cvSize },
     consent,
+    consentStatus: 'given',
+    importBatchId: null,
     retentionExpiresAt,
     source: 'careers_page',
     createdAt: now,

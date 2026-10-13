@@ -72,17 +72,23 @@ function operation(route: RouteSpec): Json {
     ...pathParams(route.path).map((name) => ({ name, in: 'path', required: true, schema: { type: 'string' } })),
     ...(route.query ? queryParameters(route.query) : []),
   ];
-  const scopeNote = route.scope ? ` Requires the \`${route.scope}\` scope.` : '';
+  const scopeNote = route.sessionOnly
+    ? ` Session only: requires the \`${route.scope}\` permission, and a request with an API key is refused with 403.`
+    : route.scope
+      ? ` Requires the \`${route.scope}\` scope.`
+      : '';
+  const bodyType = route.multipart ? 'multipart/form-data' : 'application/json';
   return {
     operationId: operationIdOf(route),
     tags: [route.tag],
     summary: route.summary,
     description: `${route.description ?? route.summary}${scopeNote}`,
-    security: isPublic ? [] : [{ bearerAuth: [] }],
-    ...(route.scope ? { 'x-required-scope': route.scope } : {}),
+    security: isPublic ? [] : route.sessionOnly ? [{ sessionCookie: [] }] : [{ bearerAuth: [] }],
+    ...(route.scope && !route.sessionOnly ? { 'x-required-scope': route.scope } : {}),
+    ...(route.sessionOnly ? { 'x-required-permission': route.scope } : {}),
     ...(parameters.length > 0 ? { parameters } : {}),
     ...(route.body
-      ? { requestBody: { required: true, content: { 'application/json': { schema: jsonSchema(route.body, 'input') } } } }
+      ? { requestBody: { required: true, content: { [bodyType]: { schema: jsonSchema(route.body, 'input') } } } }
       : {}),
     responses: {
       [String(route.status ?? 200)]: { description: 'Success', content: { 'application/json': { schema: envelope(route.response) } } },
@@ -130,13 +136,15 @@ export function buildOpenApiDocument(info: OpenApiInfo, routes: readonly RouteSp
       title: info.title,
       version: info.version,
       description:
-        'The routes tagged `Public` need no authentication and are open to any origin (CORS `*`, GET only, no credentials). Everything else: authenticate with `Authorization: Bearer <key>`. A key never has more than the person who created it, and can never move, decide on, message or erase candidates. Every response uses the same envelope: `success`, `data`, `error`, and `meta` for pages.',
+        'The routes tagged `Public` need no authentication and are open to any origin (CORS `*`, GET only, no credentials). The routes under `/api/v1/public/consent` are public too but not cross-origin: the link token is the credential. Everything else: authenticate with `Authorization: Bearer <key>`. A key never has more than the person who created it, and can never move, decide on, message or erase candidates. Every response uses the same envelope: `success`, `data`, `error`, and `meta` for pages.',
     },
     tags: [...new Set(routes.map((route) => route.tag))].map((name) => ({ name })),
     security: [{ bearerAuth: [] }],
     paths,
     components: {
-      securitySchemes: { bearerAuth: { type: 'http', scheme: 'bearer', description: 'An API key (`tt_...`), created in the settings by an owner or admin.' } },
+      securitySchemes: {
+        sessionCookie: { type: 'apiKey', in: 'cookie', name: 'better-auth.session_token', description: 'The browser session. Used by the routes that no API key may call (imports).' },
+        bearerAuth: { type: 'http', scheme: 'bearer', description: 'An API key (`tt_...`), created in the settings by an owner or admin.' } },
       schemas: {
         ...schemas,
         PageMeta: { type: 'object', required: ['total', 'page', 'limit'], properties: { total: { type: 'integer' }, page: { type: 'integer' }, limit: { type: 'integer' } } },

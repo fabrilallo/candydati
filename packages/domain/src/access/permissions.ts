@@ -30,6 +30,8 @@ export const STATEMENTS = {
   data: ['export'],
   /** Keys for the public API and MCP. Never grantable to a key or to the agent (a key does not mint keys). */
   api_key: ['manage'],
+  /** Bulk import of CVs and sheets, and undoing a batch. Never grantable to a key or to the agent. */
+  import: ['manage'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -66,6 +68,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     webhook: ['manage'],
     data: ['export'],
     api_key: ['manage'],
+    import: ['manage'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],
@@ -76,6 +79,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     email_template: ['manage'],
     task: ['read', 'manage'],
     automation: ['manage'],
+    import: ['manage'],
   },
   /**
    * Writes and edits ads and moves candidates through the stages. Putting ads online, taking them down and deciding

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CONSENT_SCOPES } from './privacy.js';
+import { CONSENT_SCOPES, CONSENT_STATUSES } from './privacy.js';
 import { EXTRACTION_STATUSES, OUTCOMES, cvExtractionSchema } from './application.js';
 import { MESSAGE_DIRECTIONS, MESSAGE_STATUSES } from '../messaging/message.js';
 
@@ -31,7 +31,7 @@ const exportedApplicationSchema = z.object({
   id: z.string(),
   jobId: z.string(),
   jobTitle: z.string(),
-  source: z.enum(['careers_page', 'manual']),
+  source: z.enum(['careers_page', 'manual', 'import']),
   /** Current stage and when the application entered it. */
   stageId: z.string(),
   stageChangedAt: date,
@@ -41,7 +41,9 @@ const exportedApplicationSchema = z.object({
   closedAt: nullableDate,
   retentionExpiresAt: date,
   consent: z.object({
-    privacyNoticeVersion: z.number().int().positive(),
+    /** `to_renew`: imported data, nothing consented yet (version 0, no scopes). */
+    status: z.enum(CONSENT_STATUSES).default('given'),
+    privacyNoticeVersion: z.number().int().min(0),
     scopes: z.array(z.enum(CONSENT_SCOPES)),
     givenAt: date,
   }),

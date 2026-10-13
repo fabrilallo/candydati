@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { SelectionStage } from '../job/content.js';
-import { CONSENT_SCOPES, type ConsentRecord } from './privacy.js';
+import { CONSENT_SCOPES, type ConsentRecord, type ConsentStatus } from './privacy.js';
 
 export const CV_MAX_BYTES = 10 * 1024 * 1024;
 /** Checked against the file's magic bytes, never only the declared type or the extension. */
@@ -76,6 +76,8 @@ export interface Candidate {
   readonly talentPool: boolean;
   /** Max of the retention expiries of the candidate's applications. */
   readonly retentionExpiresAt: Date;
+  /** The import batch that created this candidate; null for everyone else. */
+  readonly importBatchId: string | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -98,8 +100,12 @@ export interface Application {
   readonly message: string;
   readonly cv: StoredFile;
   readonly consent: ConsentRecord;
+  /** `to_renew` for imported data until the candidate reconfirms: then `consent` holds the real consent. */
+  readonly consentStatus: ConsentStatus;
+  /** The import batch that created this application; null for everyone else. */
+  readonly importBatchId: string | null;
   readonly retentionExpiresAt: Date;
-  readonly source: 'careers_page' | 'manual';
+  readonly source: 'careers_page' | 'manual' | 'import';
   readonly createdAt: Date;
   readonly updatedAt: Date;
   readonly stageChangedAt: Date;

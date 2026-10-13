@@ -18,7 +18,7 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   return allowed[0] ?? null
 }
 
-export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'candidates' | 'templates' | 'members' | 'privacy' | 'email' | 'emailTemplates' | 'webhooks' | 'distribution' | 'api' | 'data' | 'audit'
+export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'candidates' | 'imports' | 'templates' | 'members' | 'privacy' | 'email' | 'emailTemplates' | 'webhooks' | 'distribution' | 'api' | 'data' | 'audit'
 export type NavSectionId = 'work' | 'organization'
 
 export interface NavItem {
@@ -34,6 +34,7 @@ const NAV: readonly NavItem[] = [
   { id: 'tasks', to: '/app/tasks', section: 'work', permission: 'task:read' },
   { id: 'jobs', to: '/app/jobs', section: 'work', permission: 'job:read' },
   { id: 'candidates', to: '/app/candidates', section: 'work', permission: 'candidate:read' },
+  { id: 'imports', to: '/app/imports', section: 'work', permission: 'import:manage' },
   { id: 'templates', to: '/app/jobs/templates', section: 'work', permission: 'job_template:read' },
   { id: 'members', to: '/app/settings/members', section: 'organization' },
   { id: 'privacy', to: '/app/settings/privacy', section: 'organization', permission: 'privacy:manage' },

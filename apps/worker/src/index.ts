@@ -20,6 +20,9 @@ import { createOrganizationExportQueue } from './queues/organization-export.js';
 import { createRetentionRunQueue } from './queues/retention-run.js';
 import { createCvExtractionDeps } from './cv-extraction/deps.js';
 import { createCvExtractQueue } from './queues/cv-extract.js';
+import { createImportWorkerDeps } from './import/deps.js';
+import { createImportAnalyzeQueue } from './queues/import-analyze.js';
+import { createImportCommitQueue } from './queues/import-commit.js';
 import { createEmailSendQueue } from './queues/email-send.js';
 import { QUEUE_DEFINITIONS } from './queues/definitions.js';
 import { startWorker, type WorkerHandle } from './worker.js';
@@ -75,6 +78,16 @@ const main = async (): Promise<void> => {
   });
   const messaging = toMessagingConfig(env.platform, env.email);
   const privacy = createPrivacyWorkerDeps({ db: database.db, files, queue: createPgBossQueue(boss) });
+  const imports = createImportWorkerDeps({
+    db: database.db,
+    files,
+    queue: createPgBossQueue(boss),
+    platform: env.platform,
+    email: env.email,
+    fastModel: env.FAST_MODEL,
+    onModelError: (reason) => logger.warn({ reason }, 'cv model failed, keeping the plain text'),
+    onMailError: (error) => logger.error({ err: error }, 'reconfirmation email not queued'),
+  });
   const digest = {
     sender,
     from: formatDigestFrom(env.platform.name, `${messaging.emailFromLocal}@${messaging.emailDomain}`),
@@ -94,6 +107,8 @@ const main = async (): Promise<void> => {
       digest,
       now: () => new Date(),
     }),
+    createImportAnalyzeQueue({ deps: imports.analysis, extractor: imports.extractor }),
+    createImportCommitQueue(imports.commit),
     createFilesDeleteQueue(files),
     createOrganizationExportQueue(privacy.organizationExport),
     createRetentionRunQueue({ retention: privacy.retention, digest, now: () => new Date() }),

@@ -44,7 +44,7 @@ export interface TestApp {
   close(): Promise<void>;
 }
 
-const HIGH_LIMITS: RateLimitSettings = { max: 100_000, authMax: 100_000, publicMax: 100_000, qualityMax: 100_000, applyMax: 100_000 };
+const HIGH_LIMITS: RateLimitSettings = { max: 100_000, authMax: 100_000, publicMax: 100_000, qualityMax: 100_000, applyMax: 100_000, importMax: 100_000, consentMax: 100_000 };
 
 export async function createTestApp(options: { rateLimit?: RateLimitSettings; emailSender?: EmailSender; adQuality?: AdQualityAnalyzer; distributionChannels?: readonly DistributionChannel[] } = {}): Promise<TestApp> {
   const handle = createDb(apiTestDatabaseUrl(), 4);

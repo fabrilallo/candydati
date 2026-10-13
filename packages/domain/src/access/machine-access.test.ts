@@ -6,6 +6,7 @@ import {
   isForbiddenFor,
   MACHINE_FORBIDDEN_PERMISSIONS,
 } from './machine-access.js';
+import { roleHasPermission } from './permissions.js';
 import { PERMISSIONS, permissionsOf, ROLES } from './permissions.js';
 
 describe('machine access', () => {
@@ -62,5 +63,15 @@ describe('machine access', () => {
     expect(key).toContain('candidate:move');
     expect(key).not.toContain('candidate:decide');
     expect(key).not.toContain('message:send');
+  });
+});
+
+describe('import:manage', () => {
+  it('is for owner, admin and recruiter, never for a key or the agent', () => {
+    for (const role of ['owner', 'admin', 'recruiter'] as const) expect(roleHasPermission(role, 'import:manage')).toBe(true);
+    for (const role of ['hiring_manager', 'interviewer'] as const) expect(roleHasPermission(role, 'import:manage')).toBe(false);
+    expect(isForbiddenFor('api_key', 'import:manage')).toBe(true);
+    expect(isForbiddenFor('agent', 'import:manage')).toBe(true);
+    expect(isForbiddenFor('user', 'import:manage')).toBe(false);
   });
 });

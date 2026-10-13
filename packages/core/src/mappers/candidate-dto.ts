@@ -1,6 +1,7 @@
 import type {
   Candidate,
   ConsentScope,
+  ConsentStatus,
   CvExtraction,
   ExtractionStatus,
   JobStatus,
@@ -49,6 +50,12 @@ export interface ApplicationCardDto {
   readonly respondedAt: string | null;
   readonly responseState: ResponseState;
   readonly noteCount: number;
+  /** `to_renew`: imported, waiting for the candidate to reconfirm consent. */
+  readonly consentStatus: ConsentStatus;
+  /** The import batch that created this application; null otherwise. */
+  readonly importBatchId: string | null;
+  /** When the data is erased unless consent is renewed (for `to_renew`: the days left). */
+  readonly retentionExpiresAt: string;
   /** True when the stage no longer exists in the job's process: show "stage removed". */
   readonly stageRemoved: boolean;
   readonly candidate: {
@@ -75,6 +82,9 @@ export interface CandidateSummaryDto {
   readonly email: string;
   readonly tags: readonly string[];
   readonly talentPool: boolean;
+  /** Always `given`: search never lists people who still have to reconfirm. */
+  readonly consentStatus: ConsentStatus;
+  readonly importBatchId: string | null;
   readonly applicationCount: number;
   readonly lastAppliedAt: string | null;
   readonly retentionExpiresAt: string;
@@ -98,6 +108,9 @@ export interface CandidateDetailDto {
     readonly linkedinUrl: string | null;
     readonly tags: readonly string[];
     readonly talentPool: boolean;
+    /** `to_renew` while every visible application is waiting for the candidate's reconfirmation. */
+    readonly consentStatus: ConsentStatus;
+    readonly importBatchId: string | null;
     readonly retentionExpiresAt: string;
     readonly createdAt: string;
   };
@@ -115,7 +128,14 @@ export interface CandidateDetailDto {
     readonly responseDueAt: string | null;
     readonly respondedAt: string | null;
     readonly responseState: ResponseState;
-    readonly consent: { readonly privacyNoticeVersion: number; readonly scopes: readonly ConsentScope[]; readonly givenAt: string };
+    /** For `to_renew`: no version, no scopes, no date, because nothing was agreed. */
+    readonly consent: {
+      readonly status: ConsentStatus;
+      readonly privacyNoticeVersion: number | null;
+      readonly scopes: readonly ConsentScope[];
+      readonly givenAt: string | null;
+    };
+    readonly importBatchId: string | null;
     readonly retentionExpiresAt: string;
     readonly cv: { readonly fileName: string; readonly mediaType: string; readonly sizeBytes: number };
     readonly extraction: { readonly status: ExtractionStatus; readonly data: CvExtraction | null; readonly source: 'model' | 'text' | null };
@@ -157,6 +177,9 @@ export const toApplicationCardDto = (view: ApplicationCardView): ApplicationCard
     respondedAt: isoOrNull(application.respondedAt),
     responseState: view.responseState,
     noteCount: view.noteCount,
+    consentStatus: application.consentStatus,
+    importBatchId: application.importBatchId,
+    retentionExpiresAt: iso(application.retentionExpiresAt),
     stageRemoved: view.stageRemoved,
     candidate: {
       id: candidate.id,
@@ -185,6 +208,8 @@ export const toCandidateSummaryDto = ({ candidate, applicationCount, lastApplied
   email: candidate.email,
   tags: candidate.tags,
   talentPool: candidate.talentPool,
+  consentStatus: 'given',
+  importBatchId: candidate.importBatchId,
   applicationCount,
   lastAppliedAt: isoOrNull(lastAppliedAt),
   retentionExpiresAt: iso(candidate.retentionExpiresAt),
@@ -200,7 +225,7 @@ export const toNoteDto = ({ note, authorName }: NoteView): NoteDto => ({
   createdAt: iso(note.createdAt),
 });
 
-const toCandidateDto = (candidate: Candidate): CandidateDetailDto['candidate'] => ({
+const toCandidateDto = (candidate: Candidate, consentStatus: ConsentStatus): CandidateDetailDto['candidate'] => ({
   id: candidate.id,
   firstName: candidate.firstName,
   lastName: candidate.lastName,
@@ -209,12 +234,14 @@ const toCandidateDto = (candidate: Candidate): CandidateDetailDto['candidate'] =
   linkedinUrl: candidate.linkedinUrl,
   tags: candidate.tags,
   talentPool: candidate.talentPool,
+  consentStatus,
+  importBatchId: candidate.importBatchId,
   retentionExpiresAt: iso(candidate.retentionExpiresAt),
   createdAt: iso(candidate.createdAt),
 });
 
 export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetailDto => ({
-  candidate: toCandidateDto(view.candidate),
+  candidate: toCandidateDto(view.candidate, view.applications.some((a) => a.application.consentStatus === 'given') ? 'given' : 'to_renew'),
   applications: view.applications.map(({ application, job, stages, extraction, messageCount, responseState }) => ({
     id: application.id,
     job: { id: job.id, title: job.content.title, slug: job.slug },
@@ -229,11 +256,11 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
     responseDueAt: isoOrNull(application.responseDueAt),
     respondedAt: isoOrNull(application.respondedAt),
     responseState,
-    consent: {
-      privacyNoticeVersion: application.consent.privacyNoticeVersion,
-      scopes: application.consent.scopes,
-      givenAt: iso(application.consent.givenAt),
-    },
+    consent:
+      application.consentStatus === 'given'
+        ? { status: 'given', privacyNoticeVersion: application.consent.privacyNoticeVersion, scopes: application.consent.scopes, givenAt: iso(application.consent.givenAt) }
+        : { status: 'to_renew', privacyNoticeVersion: null, scopes: [], givenAt: null },
+    importBatchId: application.importBatchId,
     retentionExpiresAt: iso(application.retentionExpiresAt),
     cv: { fileName: application.cv.fileName, mediaType: application.cv.mediaType, sizeBytes: application.cv.sizeBytes },
     extraction: { status: extraction?.status ?? 'pending', data: extraction?.data ?? null, source: extraction?.source ?? null },

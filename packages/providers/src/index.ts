@@ -12,3 +12,7 @@ export { createMastraGenerator, GENERATOR_TEMPERATURE, GENERATOR_TIMEOUT_MS } fr
 export * from './email/index.js';
 export * from './http/index.js';
 export { createZipWriter, assertZipPath, zipWriterFactory } from './zip/zip-writer.js';
+export * from './import/index.js';
+export { gatherSources, NOTION_FILES_HEADER, type SourceFile, type FoundCv, type Gathered } from './import/gather.js';
+export { parseCvs, DEFAULT_ANALYSIS_CONCURRENCY, DEFAULT_ANALYSIS_BUDGET_MS, type ParseCvOptions } from './import/parse-cvs.js';
+export { runImportAnalysis, type ImportAnalysisDeps, type ImportAnalysisOutcome, type RunImportAnalysisOptions } from './import/run-analysis.js';

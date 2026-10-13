@@ -49,6 +49,7 @@ import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
 import { createApiKeyDeps } from './wiring/api-key-deps.js';
 import { createDistributionDeps } from './wiring/distribution-deps.js';
+import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
 
 export interface RateLimitSettings {
   /** Requests per minute per client on every route. */
@@ -64,6 +65,10 @@ export interface RateLimitSettings {
   /** Public applications allowed per client in `applyWindowMinutes`. */
   readonly applyMax?: number | undefined;
   readonly applyWindowMinutes?: number | undefined;
+  /** Import uploads per minute per client. */
+  readonly importMax?: number | undefined;
+  /** Requests per minute per client on the public reconfirmation routes. */
+  readonly consentMax?: number | undefined;
   /** Requests per minute per API key (on top of the per-client limit). */
   readonly apiKeyMax?: number | undefined;
 }
@@ -106,6 +111,8 @@ export interface AppContext {
   readonly rightsDeps: Phase5Deps['rightsDeps'];
   readonly exportDeps: Phase5Deps['exportDeps'];
   readonly overviewDeps: Phase5Deps['overviewDeps'];
+  readonly importDeps: ImportWiring['importDeps'];
+  readonly consentDeps: ImportWiring['consentDeps'];
 }
 
 export interface AppContextDeps {
@@ -156,6 +163,7 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     apiKeyDeps,
     ...phase2,
     ...phase5,
+    ...createImportDeps({ db, auditLog, files, queue }),
     ...createPhase4Deps({ db, auditLog, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     messagingDeps: messaging.messagingDeps,
     inboundDeps: messaging.inboundDeps,

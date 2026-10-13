@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { DownloadIcon, PencilLineIcon, Trash2Icon } from '@lucide/vue'
-import type { CandidateCorrection, ConsentScope, Role } from '@tt/domain'
+import { isPlaceholderEmail, type CandidateCorrection, type ConsentScope, type Role } from '@tt/domain'
 import type { EraseTarget } from '@/composables/useCandidateRights'
 import type { CandidateApplicationDto, CandidateDetailDto } from '@/lib/candidate-schemas'
 import { candidateExportUrl } from '@/lib/gdpr-api'
 import { withdrawConsequence } from '@/lib/gdpr-view'
+import { renewalDeadline } from '@/lib/import-view'
 import { can } from '@/lib/permissions-ui'
 import { Button } from '@/components/ui/button'
 
@@ -19,6 +20,7 @@ const rights = useCandidateRights(() => props.detail.candidate.id)
 const canExport = computed(() => can(props.role, 'candidate:export'))
 const canUpdate = computed(() => can(props.role, 'candidate:update'))
 const canErase = computed(() => can(props.role, 'candidate:erase'))
+const renewBy = computed(() => renewalDeadline(props.detail.applications))
 
 const correcting = ref(false)
 const correctError = ref<string | null>(null)
@@ -75,6 +77,8 @@ const rowClass = 'flex flex-wrap items-start gap-x-4 gap-y-3 px-5 py-4 sm:px-6'
 <template>
   <div class="grid gap-8" data-testid="privacy-panel">
     <p class="text-sm text-muted-foreground">{{ t('gdpr.intro') }}</p>
+
+    <ConsentRenewNotice v-if="renewBy" :expires-at="renewBy" :has-email="detail.candidate.email.trim() !== '' && !isPlaceholderEmail(detail.candidate.email)" :now="now" />
 
     <section class="grid gap-3" aria-labelledby="gdpr-consents">
       <h2 id="gdpr-consents" class="text-base font-semibold tracking-tight">{{ t('gdpr.consents.title') }}</h2>

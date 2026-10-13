@@ -39,6 +39,11 @@ function filtersOf(query: CandidateSearchQuery): SQL | undefined {
   const text = query.query?.trim() ?? '';
   return and(
     eq(candidate.organizationId, query.organizationId),
+    // Imported people who have not reconfirmed are visible only in the pipeline of their import job.
+    sql`(
+      exists (select 1 from ${application} where "application"."candidate_id" = ${outer.id} and "application"."organization_id" = ${outer.organizationId} and "application"."consent_status" = 'given')
+      or not exists (select 1 from ${application} where "application"."candidate_id" = ${outer.id} and "application"."organization_id" = ${outer.organizationId} and "application"."consent_status" = 'to_renew')
+    )`,
     query.talentPool === undefined ? undefined : eq(candidate.talentPool, query.talentPool),
     query.tag === undefined ? undefined : sql`${query.tag} = any(${candidate.tags})`,
     text === '' ? undefined : textFilter(text),
@@ -47,8 +52,8 @@ function filtersOf(query: CandidateSearchQuery): SQL | undefined {
 
 /** Postgres implementation. Most recently applied first; every statement filters by `organization_id`. */
 export function createDrizzleCandidateSearch(db: DbExecutor): CandidateSearch {
-  const applicationCount = sql<number>`(select count(*)::int from ${application} where "application"."candidate_id" = ${outer.id})`;
-  const lastAppliedAt = sql<Date | null>`(select max("application"."created_at") from ${application} where "application"."candidate_id" = ${outer.id})`;
+  const applicationCount = sql<number>`(select count(*)::int from ${application} where "application"."candidate_id" = ${outer.id} and "application"."consent_status" = 'given')`;
+  const lastAppliedAt = sql<Date | null>`(select max("application"."created_at") from ${application} where "application"."candidate_id" = ${outer.id} and "application"."consent_status" = 'given')`;
   return {
     async search(query) {
       const where = filtersOf(query);

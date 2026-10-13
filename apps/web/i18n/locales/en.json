@@ -46,7 +46,8 @@
     "attentionCount": "{count} need attention",
     "data": "Data",
     "api": "API and integrations",
-    "distribution": "Distribution"
+    "distribution": "Distribution",
+    "imports": "Import"
   },
   "roles": {
     "owner": "Owner",
@@ -337,7 +338,8 @@
         "cv_downloaded": "Opened or downloaded a CV",
         "erased": "Erased a candidate's data",
         "exported": "Exported a candidate's data",
-        "corrected": "Corrected a candidate's data"
+        "corrected": "Corrected a candidate's data",
+        "consent_reconfirmed": "An imported candidate confirmed consent"
       },
       "candidate_note": {
         "created": "Wrote a note on a candidate"
@@ -374,6 +376,11 @@
       },
       "distribution": {
         "channel_updated": "Switched a distribution channel on or off"
+      },
+      "import": {
+        "created": "Uploaded files to import",
+        "committed": "Imported candidates",
+        "undone": "Undid an import"
       }
     }
   },
@@ -1161,7 +1168,8 @@
     "cv": {
       "download": "Download",
       "previewTitle": "Preview of {name}",
-      "noPreview": "Previews are available for PDFs only. Download the file to open it."
+      "noPreview": "Previews are available for PDFs only. Download the file to open it.",
+      "none": "No CV: this person was imported from a table."
     },
     "notes": {
       "label": "New note",
@@ -1203,7 +1211,8 @@
     "emptyBody": "They will come from the public pages of your published ads.",
     "emptyFiltered": "No results",
     "emptyFilteredBody": "Try other words or remove a filter.",
-    "pagination": "Page {page} of {pages} · {total} candidates"
+    "pagination": "Page {page} of {pages} · {total} candidates",
+    "importedNote": "Imported people appear here only after confirming their consent. Until then you find them in the pipeline of the job they were imported into."
   },
   "privacy": {
     "title": "Privacy notice",
@@ -2009,6 +2018,9 @@
       },
       "api_key": {
         "manage": "Manage API keys"
+      },
+      "import": {
+        "manage": "Import candidates"
       }
     },
     "withheld": "Some things a key can never do: decisions about candidates, messages to candidates and administration stay with a person.",
@@ -2272,6 +2284,283 @@
       "on": "On",
       "off": "Off",
       "toggle": "Turn {channel} on or off"
+    }
+  },
+  "imports": {
+    "title": "Import",
+    "description": "Bring the CVs and spreadsheets you already have into a pipeline. You check everything before confirming and can undo the import at any time.",
+    "new": "New import",
+    "newTitle": "New import",
+    "list": {
+      "label": "Imports",
+      "empty": "No imports yet",
+      "emptyBody": "Upload a folder of CVs or an Excel sheet: you will see a preview before any candidate is created.",
+      "by": "by {name}",
+      "noJob": "job no longer available",
+      "created": "1 new | {count} new",
+      "merged": "1 merged | {count} merged",
+      "reconfirmed": "1 confirmed | {count} confirmed",
+      "proposed": "1 candidate proposed | {count} candidates proposed",
+      "files": "1 file | {count} files",
+      "open": "Open",
+      "resume": "Resume",
+      "undo": "Undo import",
+      "error": "We could not load the imports."
+    },
+    "status": {
+      "uploaded": "Uploaded",
+      "analyzing": "Analysing",
+      "ready": "To review",
+      "importing": "Importing",
+      "done": "Imported",
+      "failed": "Failed",
+      "undone": "Undone"
+    },
+    "undo": {
+      "title": "Undo the import of {date}?",
+      "intro": "This erases for good:",
+      "created": "the people created by this import, with CVs, notes and applications (1 person) | the people created by this import, with CVs, notes and applications ({count} people)",
+      "merged": "for people who already existed, only the application, notes and files the import added (1 person) | for people who already existed, only the application, notes and files the import added ({count} people)",
+      "kept": "People who already confirmed their consent stay: from then on the data is theirs and undoing does not touch it.",
+      "irreversible": "This cannot be reversed.",
+      "confirm": "Undo import",
+      "cancel": "Keep the import",
+      "done": "Import undone",
+      "doneKept": "Import undone. 1 person had already confirmed and stays. | Import undone. {count} people had already confirmed and stay."
+    },
+    "steps": {
+      "label": "Import steps",
+      "files": "Files",
+      "analysis": "Analysis",
+      "mapping": "Columns",
+      "preview": "Preview",
+      "confirm": "Confirm",
+      "result": "Result"
+    },
+    "files": {
+      "intro": "CVs as PDF or DOCX, ZIP archives (folders inside are fine, a Notion export too), CSV or Excel sheets. You can mix them: we match CVs with table rows.",
+      "drop": "Drop files or folders here",
+      "chooseFiles": "Choose files",
+      "chooseFolder": "Choose a folder",
+      "limits": "Up to {files} files and {size} per import, at most {rows} table rows.",
+      "picked": "Chosen files",
+      "count": "1 file | {count} files",
+      "kinds": {
+        "cv": "1 CV | {count} CVs",
+        "table": "1 table | {count} tables",
+        "archive": "1 archive | {count} archives"
+      },
+      "skipped": "Left out",
+      "skipReasons": {
+        "unsupported": "unsupported format",
+        "empty": "empty file"
+      },
+      "hidden": "1 system file ignored | {count} system files ignored",
+      "more": "and {count} more",
+      "remove": "Remove {name}",
+      "clear": "Remove all",
+      "errors": {
+        "tooManyFiles": "Too many files: {count}. The limit is {max} per import, split them into several imports.",
+        "tooLarge": "Too large: {size}. The limit is {max} per import.",
+        "tooLargeServer": "The files exceed the import size limit."
+      },
+      "target": "Where the candidates go",
+      "job": "Job",
+      "jobPlaceholder": "Choose a job",
+      "stage": "Starting stage",
+      "stageHint": "Every imported candidate starts at this stage.",
+      "stagesLoading": "Loading stages…",
+      "noJobs": "No open jobs. Create a job first: imported candidates join its pipeline.",
+      "createJob": "Create a job",
+      "upload": "Upload and analyse",
+      "uploading": "Uploading, {percent}%",
+      "cancel": "Stop",
+      "cancelled": "Upload stopped"
+    },
+    "analysis": {
+      "title": "Analysis in progress",
+      "body": "We read every CV and every row. You can close this page: the analysis goes on and you will find the import in the list.",
+      "progress": "{done} of {total}",
+      "cvs": "CVs",
+      "rows": "Table rows",
+      "ignored": "Ignored files",
+      "ignoredTitle": "Ignored files and why",
+      "failed": "The analysis failed",
+      "failedBody": "No candidate was created. Check the files and try a new import.",
+      "back": "Back to imports"
+    },
+    "ignored": {
+      "unsupported": "unsupported format",
+      "unreadable": "unreadable or damaged",
+      "empty": "empty",
+      "tooLarge": "too large",
+      "duplicate": "same as another file",
+      "archive": "suspicious archive, too compressed or too large",
+      "encrypted": "password protected",
+      "other": "not usable"
+    },
+    "mapping": {
+      "title": "Check the columns",
+      "intro": "For each table we suggest what each column holds. Fix what is wrong: when you continue, the matches are worked out again.",
+      "noTables": "There are no tables in this import: candidates come from the CVs only.",
+      "column": "Column",
+      "samples": "Examples",
+      "field": "Content",
+      "fieldOf": "Content of column {column}",
+      "empty": "empty",
+      "fields": {
+        "ignore": "Ignore",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "fullName": "Full name",
+        "email": "Email",
+        "phone": "Phone",
+        "linkedin": "LinkedIn",
+        "notes": "Notes",
+        "tags": "Tags",
+        "file": "CV file name"
+      },
+      "warnings": {
+        "noName": "No column holds the name: rows match CVs only by email or file name.",
+        "noEmail": "No email column: without an email people do not receive the consent request."
+      },
+      "apply": "Rematch and continue",
+      "reset": "Restore the suggestion"
+    },
+    "preview": {
+      "intro": "This is who will be imported. Untick anyone you do not want to bring in.",
+      "confidence": {
+        "label": "Confidence",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low"
+      },
+      "confidenceHint": {
+        "high": "CV and row matched by email or file name",
+        "medium": "matched by first and last name",
+        "low": "uncertain match, check it"
+      },
+      "filters": {
+        "label": "Preview filters",
+        "confidence": "Confidence",
+        "problem": "To check",
+        "all": "All",
+        "noEmail": "No email",
+        "conflicts": "Different data",
+        "merged": "Already there",
+        "excluded": "Excluded"
+      },
+      "bulk": {
+        "label": "Selection by confidence",
+        "include": "Include",
+        "exclude": "Exclude",
+        "includeLabel": "Include everyone with {level} confidence",
+        "excludeLabel": "Exclude everyone with {level} confidence"
+      },
+      "include": "Include {name}",
+      "sources": "Sources",
+      "row": "row {row}",
+      "noEmail": "No email: will not receive the consent request and will be erased after {days} days",
+      "existing": "Already here as {name}: we add the application without changing their data",
+      "conflicts": "Data different from what is saved",
+      "conflict": "{field}: saved {kept}, in the import {other}",
+      "noMatch": "No candidates with these filters.",
+      "selected": "{count} included out of {total}",
+      "noItems": "The analysis found no candidates in these files.",
+      "unnamed": "No name",
+      "next": "Continue",
+      "back": "Back",
+      "conflictSources": "{field}: used {kept}, set aside {other}",
+      "conflictFields": {
+        "email": "Email",
+        "phone": "Phone",
+        "name": "Name",
+        "linkedinUrl": "LinkedIn"
+      }
+    },
+    "confirm": {
+      "title": "Confirm the import",
+      "created": "1 new candidate | {count} new candidates",
+      "merged": "1 merged with an existing candidate | {count} merged with existing candidates",
+      "excluded": "1 excluded | {count} excluded",
+      "into": "Into the pipeline of {job}, stage {stage}.",
+      "consentTitle": "What happens to consent",
+      "consent": {
+        "renew": "These people did not give consent through your form: their consent has to be renewed.",
+        "email": "Whoever has an email gets a message right away to confirm or decline, with your privacy notice.",
+        "visible": "Until they confirm, they are visible only in this job's pipeline: not in the candidate database nor in other jobs.",
+        "erased": "Whoever does not confirm within {days} days is erased with all their data. Whoever declines is erased at once."
+      },
+      "noEmail": "1 person has no email: they will not receive the request and will be erased after {days} days. | {count} people have no email: they will not receive the request and will be erased after {days} days.",
+      "action": "Import 1 candidate | Import {count} candidates",
+      "nothing": "No candidate included: go back to the preview and include at least one.",
+      "createdLabel": "new candidate | new candidates",
+      "mergedLabel": "merged with an existing candidate | merged with existing candidates",
+      "excludedLabel": "excluded | excluded"
+    },
+    "result": {
+      "importing": "Import in progress",
+      "importingBody": "We are creating the candidates and sending the consent requests. You can close this page.",
+      "done": "Import complete",
+      "doneBody": "The candidates are in the pipeline and the consent requests are on their way.",
+      "openPipeline": "Open the pipeline",
+      "backToList": "Back to imports",
+      "undone": "Import undone on {date}",
+      "undoneBody": "What the import had created has been erased."
+    }
+  },
+  "consentRenew": {
+    "pill": "Consent to renew",
+    "daysLeft": "expires today | 1 day left | {count} days left",
+    "hint": "Imported: the person has not confirmed consent yet.",
+    "title": "Consent to renew",
+    "why": "This person was imported, they did not apply through the form: they have not consented to data processing yet. Until they confirm, they are visible only in the pipeline of the job they were imported into.",
+    "emailSent": "They received an email to confirm or decline. If they confirm, consent counts as for a normal application.",
+    "noEmail": "They have no email address, so they did not receive the confirmation request.",
+    "deadline": "Without confirmation the data is erased on {date}",
+    "notGiven": "Not given yet: imported candidate, waiting for confirmation."
+  },
+  "reconfirm": {
+    "metaTitle": "Your data at {organization}",
+    "title": "Your data at {organization}",
+    "intro": "{organization} imported your CV into its recruiting system, for the {job} position.",
+    "introNoJob": "{organization} imported your CV into its recruiting system.",
+    "choice": "You did not apply here, so the choice is yours: you can confirm they may keep your data, or ask for it to be erased.",
+    "deadline": "If you do not answer by {date}, your data is erased anyway.",
+    "confirm": "I confirm",
+    "decline": "I do not want my data to be kept",
+    "declineHint": "If you do not confirm, we erase all your data at once: CV, contacts and notes. It cannot be undone.",
+    "declineSure": "Erase all your data now?",
+    "declineYes": "Yes, erase my data",
+    "declineNo": "No, go back",
+    "sending": "Sending…",
+    "done": {
+      "title": "Thank you, you confirmed",
+      "body": "{organization} may keep your data for this selection. You can withdraw consent whenever you like by writing to {email}."
+    },
+    "erased": {
+      "title": "Your data has been erased",
+      "body": "{organization} no longer has your CV or your contacts. You will not receive further messages about this selection."
+    },
+    "invalid": {
+      "title": "Invalid link",
+      "body": "This link does not work. Check that you copied all of it from the email."
+    },
+    "expired": {
+      "title": "Link expired",
+      "body": "The time to answer is over and your data has already been erased."
+    },
+    "used": {
+      "title": "You already answered",
+      "body": "This request already has an answer. To change your choice, write to the company directly."
+    },
+    "rateLimited": {
+      "title": "Too many attempts",
+      "body": "Wait a few minutes, then reload the page."
+    },
+    "unavailable": {
+      "title": "Page unavailable",
+      "body": "We cannot load the request right now. Please try again later."
     }
   }
 }

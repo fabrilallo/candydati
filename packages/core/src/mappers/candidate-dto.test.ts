@@ -52,6 +52,9 @@ describe('candidate DTO mappers', () => {
       respondedAt: null,
       responseState: 'closed',
       noteCount: 3,
+      consentStatus: 'given',
+      importBatchId: null,
+      retentionExpiresAt: '2027-01-01T00:00:00.000Z',
       stageRemoved: false,
       candidate: { id: 'cand_1', firstName: 'Ada', lastName: 'Lovelace', tags: ['go'], headline: 'Senior engineer', location: 'Milano', yearsOfExperience: 8 },
     });
@@ -98,6 +101,8 @@ describe('candidate DTO mappers', () => {
       email: 'ada@example.com',
       tags: ['go'],
       talentPool: false,
+      consentStatus: 'given',
+      importBatchId: null,
       applicationCount: 2,
       lastAppliedAt: '2026-02-01T00:00:00.000Z',
       retentionExpiresAt: '2027-01-01T00:00:00.000Z',
@@ -132,6 +137,8 @@ describe('candidate DTO mappers', () => {
       linkedinUrl: null,
       tags: ['go'],
       talentPool: false,
+      consentStatus: 'given',
+      importBatchId: null,
       retentionExpiresAt: '2027-01-01T00:00:00.000Z',
       createdAt: '2026-01-01T00:00:00.000Z',
     });
@@ -139,7 +146,7 @@ describe('candidate DTO mappers', () => {
     expect(app).toMatchObject({
       id: 'app_1',
       job: { id: 'job_1', title: 'Backend Developer', slug: 'backend-developer-abc123' },
-      consent: { privacyNoticeVersion: 1, scopes: ['selection'], givenAt: '2026-01-01T00:00:00.000Z' },
+      consent: { status: 'given', privacyNoticeVersion: 1, scopes: ['selection'], givenAt: '2026-01-01T00:00:00.000Z' },
       cv: { fileName: 'cv.pdf', mediaType: 'application/pdf', sizeBytes: 64 },
       extraction: { status: 'pending', data: null, source: null },
       stages: [{ id: 'received', declared: null }, { id: 'stage-0' }, { id: 'stage-1' }],

@@ -30,7 +30,7 @@ describe('route registry', () => {
 
   it('only asks for scopes a key can hold, and leaves out the routes a key can never use', () => {
     for (const route of ROUTE_REGISTRY) {
-      if (route.scope === null) continue;
+      if (route.scope === null || route.sessionOnly) continue;
       expect(isPermission(route.scope)).toBe(true);
       expect(MACHINE_FORBIDDEN_PERMISSIONS).not.toContain(route.scope);
     }
@@ -84,7 +84,7 @@ describe('OpenAPI document', () => {
 
   it('documents the public read-only API under the Public tag, with the summary and the full feed', () => {
     const doc = document();
-    const publicPaths = Object.keys(doc.paths).filter((path) => path.startsWith('/api/v1/public/'));
+    const publicPaths = Object.keys(doc.paths).filter((path) => path.startsWith('/api/v1/public/organizations'));
     expect(publicPaths.toSorted()).toEqual([
       '/api/v1/public/organizations/{orgSlug}',
       '/api/v1/public/organizations/{orgSlug}/feed',

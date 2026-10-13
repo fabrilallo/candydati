@@ -65,6 +65,10 @@ export function createInMemoryCandidateRepository(store: CandidateStore): Candid
     async findByEmail(organizationId, email) {
       return inOrg(organizationId).find((c) => c.email.toLowerCase() === email.toLowerCase()) ?? null;
     },
+    async findByEmails(organizationId, emails) {
+      const wanted = new Set(emails.map((email) => email.toLowerCase()));
+      return inOrg(organizationId).filter((c) => wanted.has(c.email.toLowerCase()));
+    },
     async findByIds(organizationId, ids) {
       return inOrg(organizationId).filter((c) => ids.includes(c.id));
     },
@@ -110,6 +114,9 @@ export function createInMemoryApplicationRepository(store: CandidateStore): Appl
     },
     async listRetentionExpiringAcrossOrganizations(before) {
       return expiring(store.read().applications, before);
+    },
+    async listByImportBatch(organizationId, batchId) {
+      return newestFirst(inOrg(organizationId).filter((a) => a.importBatchId === batchId));
     },
   };
 }
@@ -177,11 +184,15 @@ export function createInMemoryCandidateSearch(store: CandidateStore): CandidateS
       const summaries: CandidateSummary[] = store
         .read()
         .candidates.filter((c) => c.organizationId === query.organizationId)
+        .filter((c) => {
+          const own = store.read().applications.filter((a) => a.candidateId === c.id);
+          return own.some((a) => a.consentStatus === 'given') || !own.some((a) => a.consentStatus === 'to_renew');
+        })
         .filter((c) => query.talentPool === undefined || c.talentPool === query.talentPool)
         .filter((c) => query.tag === undefined || c.tags.includes(query.tag))
         .filter((c) => text === '' || matchesText(store, c, text))
         .map((candidate) => {
-          const own = store.read().applications.filter((a) => a.candidateId === candidate.id);
+          const own = store.read().applications.filter((a) => a.candidateId === candidate.id && a.consentStatus === 'given');
           const last = own.map((a) => a.createdAt.getTime()).reduce((max, t) => Math.max(max, t), 0);
           return { candidate, applicationCount: own.length, lastAppliedAt: own.length > 0 ? new Date(last) : null };
         });

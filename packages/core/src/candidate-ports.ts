@@ -33,6 +33,8 @@ export interface CandidateRepository {
   /** Case-insensitive. */
   findByEmail(organizationId: string, email: string): Promise<Candidate | null>;
   findByIds(organizationId: string, ids: readonly string[]): Promise<readonly Candidate[]>;
+  /** Case-insensitive; the emails that match nobody are simply absent. */
+  findByEmails(organizationId: string, emails: readonly string[]): Promise<readonly Candidate[]>;
 }
 
 export interface ApplicationRepository {
@@ -55,6 +57,8 @@ export interface ApplicationRepository {
   listRetentionExpiringBefore(organizationId: string, before: Date): Promise<readonly Application[]>;
   /** Same, across every organization. Only for the retention job. */
   listRetentionExpiringAcrossOrganizations(before: Date): Promise<readonly Application[]>;
+  /** Every application (open or decided) created by an import batch, newest first. */
+  listByImportBatch(organizationId: string, batchId: string): Promise<readonly Application[]>;
 }
 
 export interface CandidateNoteRepository {
@@ -72,6 +76,10 @@ export interface CvExtractionRepository {
   findByApplications(organizationId: string, applicationIds: readonly string[]): Promise<readonly CvExtractionRecord[]>;
 }
 
+/**
+ * `search` lists only candidates who gave consent: imported ones waiting for reconfirmation (`to_renew`) never appear
+ * here, and neither do their applications in the application count.
+ */
 export interface CandidateSearchQuery {
   readonly organizationId: string;
   /** Matches name, email, tags and CV text. Blank or absent: no text filter. */

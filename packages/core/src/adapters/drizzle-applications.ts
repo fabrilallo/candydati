@@ -23,6 +23,8 @@ export const toApplication = (row: Row): Application => ({
   message: row.message,
   cv: { key: row.cvKey, fileName: row.cvFileName, mediaType: toMediaType(row.cvMediaType), sizeBytes: row.cvSizeBytes },
   consent: { ...row.consent, givenAt: new Date(row.consent.givenAt) },
+  consentStatus: row.consentStatus,
+  importBatchId: row.importBatchId,
   retentionExpiresAt: row.retentionExpiresAt,
   source: row.source,
   createdAt: row.createdAt,
@@ -46,6 +48,8 @@ const toValues = (a: Application) => ({
   cvMediaType: a.cv.mediaType,
   cvSizeBytes: a.cv.sizeBytes,
   consent: a.consent,
+  consentStatus: a.consentStatus,
+  importBatchId: a.importBatchId,
   retentionExpiresAt: a.retentionExpiresAt,
   source: a.source,
   createdAt: a.createdAt,
@@ -108,5 +112,6 @@ export function createDrizzleApplications(db: DbExecutor): ApplicationRepository
     listAwaitingResponseAcrossOrganizations: (dueBefore) => awaiting(and(...awaitingFilter(dueBefore))),
     listRetentionExpiringBefore: (organizationId, before) => expiring(and(eq(application.organizationId, organizationId), lte(application.retentionExpiresAt, before))),
     listRetentionExpiringAcrossOrganizations: (before) => expiring(lte(application.retentionExpiresAt, before)),
+    listByImportBatch: (organizationId, batchId) => list(and(eq(application.organizationId, organizationId), eq(application.importBatchId, batchId))),
   };
 }

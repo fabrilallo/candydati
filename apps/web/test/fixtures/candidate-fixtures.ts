@@ -32,7 +32,10 @@ export const card = (id: string, stageId = 'received', overrides: Partial<Applic
   responseDueAt: null,
   respondedAt: null,
   responseState: null,
-  candidate: { id: `c-${id}`, firstName: 'Giulia', lastName: `Rossi ${id}`, tags: [], headline: 'Backend engineer', location: 'Milano', yearsOfExperience: 6 },
+  candidate: { id: `c-${id}`, firstName: 'Giulia', lastName: `Rossi ${id}`, tags: [], headline: 'Backend engineer', location: 'Milano', yearsOfExperience: 6, consentStatus: 'given', importBatchId: null },
+  consentStatus: 'given',
+  importBatchId: null,
+  retentionExpiresAt: null,
   ...overrides,
 })
 
@@ -69,6 +72,8 @@ export const detail = (overrides: Partial<CandidateDetailDto> = {}): CandidateDe
     talentPool: true,
     retentionExpiresAt: '2028-10-13T10:00:00.000Z',
     createdAt: T0,
+    consentStatus: 'given',
+    importBatchId: null,
   },
   applications: [
     {
@@ -82,7 +87,9 @@ export const detail = (overrides: Partial<CandidateDetailDto> = {}): CandidateDe
       createdAt: T0,
       stageChangedAt: T0,
       closedAt: null,
-      consent: { privacyNoticeVersion: 3, scopes: ['selection', 'talent_pool'], givenAt: T0 },
+      consent: { status: 'given', privacyNoticeVersion: 3, scopes: ['selection', 'talent_pool'], givenAt: T0 },
+      consentStatus: 'given',
+      importBatchId: null,
       retentionExpiresAt: '2028-10-13T10:00:00.000Z',
       cv: { fileName: 'giulia-rossi.pdf', mediaType: 'application/pdf', sizeBytes: 1_572_864 },
       messageCount: 2,
@@ -118,5 +125,7 @@ export const summary = (id: string, overrides: Partial<CandidateSummaryDto> = {}
   applicationCount: 1,
   lastAppliedAt: T0,
   retentionExpiresAt: '2027-10-13T10:00:00.000Z',
+  consentStatus: 'given',
+  importBatchId: null,
   ...overrides,
 })
