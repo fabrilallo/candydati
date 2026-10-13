@@ -42,7 +42,9 @@ export async function registerInboundEmailRoutes(app: FastifyInstance, ctx: AppC
     scope.post('/api/v1/inbound/email/raw', options, async (request, reply) => {
       const body = rawBody(request);
       const header = request.headers['x-tt-signature'];
-      if (!secret || !verifyHmacSignature(body, typeof header === 'string' ? header : undefined, secret)) {
+      const timestamp = request.headers['x-tt-timestamp'];
+      const signed = verifyHmacSignature(body, typeof header === 'string' ? header : undefined, secret ?? '', typeof timestamp === 'string' ? timestamp : undefined);
+      if (!secret || !signed) {
         return reply.status(401).send(fail('unauthorized', 'Invalid signature.'));
       }
       try {

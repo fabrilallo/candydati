@@ -105,7 +105,7 @@ export async function sendRequestEmail(
       to: request.interviewerEmail,
       subject: mail.subject.replace(/\s+/g, ' ').trim(),
       text: mail.text,
-      html: textToHtml(mail.text),
+      html: textToHtml(mail.text, { literals: [context.candidate.firstName, context.candidate.lastName, `${context.candidate.firstName} ${context.candidate.lastName}`] }),
       headers: { 'Auto-Submitted': 'auto-generated' },
     });
     return true;

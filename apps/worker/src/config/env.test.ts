@@ -94,4 +94,15 @@ describe('loadEnv webhooks', () => {
     expect(loadEnv({ ...base, WEBHOOKS_ALLOW_PRIVATE: 'true' }).WEBHOOKS_ALLOW_PRIVATE).toBe(true);
     expect(loadEnv({ ...base, WEBHOOKS_ALLOW_PRIVATE: 'yes' }).WEBHOOKS_ALLOW_PRIVATE).toBe(false);
   });
+
+  it('refuses private webhook targets in production', () => {
+    expect(() => loadEnv({ ...base, NODE_ENV: 'production', WEBHOOKS_ALLOW_PRIVATE: 'true' })).toThrow(/WEBHOOKS_ALLOW_PRIVATE.*production/);
+    expect(loadEnv({ ...base, NODE_ENV: 'production' }).WEBHOOKS_ALLOW_PRIVATE).toBe(false);
+  });
+
+  it('budgets the model at 1000 extractions per organization and day unless told otherwise', () => {
+    expect(loadEnv(base).CV_MODEL_DAILY_BUDGET).toBe(1000);
+    expect(loadEnv({ ...base, CV_MODEL_DAILY_BUDGET: '25' }).CV_MODEL_DAILY_BUDGET).toBe(25);
+    expect(() => loadEnv({ ...base, CV_MODEL_DAILY_BUDGET: '0' })).toThrow(/CV_MODEL_DAILY_BUDGET/);
+  });
 });

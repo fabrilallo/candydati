@@ -11,7 +11,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "test": "turbo run test",
+    "test": "turbo run test --filter=!@tt/e2e",
+    "test:e2e": "pnpm --filter @tt/e2e test",
     "test:coverage": "turbo run test:coverage",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",

@@ -188,6 +188,14 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     ...phase5,
     ...createImportDeps({ db, auditLog, files, queue }),
     ...createPhase4Deps({ db, auditLog, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
+    submitDeps: {
+      ...phase2.submitDeps,
+      dailyCaps: {
+        applications: phase2.candidateDeps.applications,
+        perOrganization: env.APPLICATIONS_DAILY_MAX_PER_ORGANIZATION,
+        perJob: env.APPLICATIONS_DAILY_MAX_PER_JOB,
+      },
+    },
     feedbackDeps: hr.feedbackDeps,
     publicFeedbackDeps: hr.publicFeedbackDeps,
     jobRequestDeps: hr.jobRequestDeps,

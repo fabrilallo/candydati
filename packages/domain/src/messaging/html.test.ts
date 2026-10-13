@@ -24,6 +24,19 @@ describe('textToHtml', () => {
     expect(html).toContain('&quot;');
   });
 
+  it('does not linkify values that came from outside, but still links the template own URLs', () => {
+    const name = 'https://evil.example/login';
+    const html = textToHtml(`Ciao ${name}\n\nApri https://good.example/jobs/1.`, { literals: [name, 'Rossi'] });
+    expect(html).toContain('Ciao https://evil.example/login');
+    expect(html).not.toContain('href="https://evil.example');
+    expect(html).toContain('<a href="https://good.example/jobs/1" rel="noopener noreferrer">https://good.example/jobs/1</a>.');
+  });
+
+  it('escapes literals and ignores regex characters in them', () => {
+    const html = textToHtml('x http://a.example/(<b>)+ y', { literals: ['http://a.example/(<b>)+'] });
+    expect(html).toBe('<p>x http://a.example/(&lt;b&gt;)+ y</p>');
+  });
+
   it('returns an empty string for blank text', () => {
     expect(textToHtml('  \n\n ')).toBe('');
     expect(escapeHtml('plain')).toBe('plain');

@@ -52,10 +52,38 @@ describe('upstream request headers', () => {
     expect(headers.get('x-forwarded-proto')).toBe('https')
   })
 
-  it('passes the client ip seen by the CDN in front, else the received chain', () => {
-    expect(upstreamRequestHeaders(request({ headers: new Headers({ 'cf-connecting-ip': '203.0.113.7', 'x-forwarded-for': '10.0.0.1' }) })).get('x-forwarded-for')).toBe('203.0.113.7')
-    expect(upstreamRequestHeaders(request({ headers: new Headers({ 'x-forwarded-for': '198.51.100.2' }) })).get('x-forwarded-for')).toBe('198.51.100.2')
-    expect(upstreamRequestHeaders(request({ headers: new Headers() })).has('x-forwarded-for')).toBe(false)
+  it('uses the socket address as the one clean x-forwarded-for, ignoring whatever the client sent', () => {
+    const headers = upstreamRequestHeaders(
+      request({
+        socketAddress: '198.51.100.2',
+        headers: new Headers({ 'x-forwarded-for': '1.1.1.1, 2.2.2.2', 'x-real-ip': '3.3.3.3', 'cf-connecting-ip': '4.4.4.4', 'true-client-ip': '5.5.5.5', forwarded: 'for=6.6.6.6', 'x-client-ip': '7.7.7.7' }),
+      }),
+    )
+    expect(headers.get('x-forwarded-for')).toBe('198.51.100.2')
+    for (const name of ['x-real-ip', 'cf-connecting-ip', 'true-client-ip', 'forwarded', 'x-client-ip']) expect(headers.has(name)).toBe(false)
+  })
+
+  it('answers the same for every spoofed value: they all share the address of the socket', () => {
+    const seen = new Set(
+      ['9.9.9.1', '9.9.9.2', '9.9.9.3'].map((spoofed) =>
+        upstreamRequestHeaders(request({ socketAddress: '198.51.100.2', headers: new Headers({ 'cf-connecting-ip': spoofed, 'x-forwarded-for': spoofed }) })).get('x-forwarded-for'),
+      ),
+    )
+    expect([...seen]).toEqual(['198.51.100.2'])
+  })
+
+  it('trusts cf-connecting-ip only when the deploy says the web is behind Cloudflare, and only if it is an address', () => {
+    const headers = new Headers({ 'cf-connecting-ip': '203.0.113.7', 'x-forwarded-for': '1.1.1.1' })
+    const behind = upstreamRequestHeaders(request({ socketAddress: '172.16.0.9', headers, trustCloudflare: true }))
+    expect(behind.get('x-forwarded-for')).toBe('203.0.113.7')
+    expect(behind.has('cf-connecting-ip')).toBe(false)
+    expect(upstreamRequestHeaders(request({ socketAddress: '172.16.0.9', headers, trustCloudflare: false })).get('x-forwarded-for')).toBe('172.16.0.9')
+    expect(upstreamRequestHeaders(request({ socketAddress: '172.16.0.9', headers: new Headers({ 'cf-connecting-ip': 'not-an-ip, 1.1.1.1' }), trustCloudflare: true })).get('x-forwarded-for')).toBe('172.16.0.9')
+  })
+
+  it('normalizes an IPv4-mapped socket address and sends nothing when the address is unknown', () => {
+    expect(upstreamRequestHeaders(request({ socketAddress: '::ffff:198.51.100.2', headers: new Headers() })).get('x-forwarded-for')).toBe('198.51.100.2')
+    expect(upstreamRequestHeaders(request({ socketAddress: undefined, headers: new Headers({ 'x-forwarded-for': '1.1.1.1' }) })).has('x-forwarded-for')).toBe(false)
   })
 })
 

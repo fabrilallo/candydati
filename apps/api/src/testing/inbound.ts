@@ -1,10 +1,13 @@
-import { createHmac } from 'node:crypto';
 import { schema, eq } from '@tt/db';
+import { signHmacPayload } from '@tt/providers';
 import type { FastifyInstance } from 'fastify';
 import type { TestApp } from './test-app.js';
 import { WEBHOOK_SECRET } from './test-app.js';
 
-export const sign = (body: string | Buffer, secret = WEBHOOK_SECRET): string => `sha256=${createHmac('sha256', secret).update(body).digest('hex')}`;
+/** Unix seconds taken once: every request of a test run is signed and sent with the same, fresh timestamp. */
+export const TIMESTAMP = String(Math.floor(Date.now() / 1000));
+
+export const sign = (body: string | Buffer, secret = WEBHOOK_SECRET, timestamp = TIMESTAMP): string => signHmacPayload(body, timestamp, secret);
 
 export interface MimeOptions {
   readonly token: string;
@@ -35,11 +38,11 @@ export function rawReply({ token, from, messageId = `<${Math.random().toString(3
   ].join('\r\n');
 }
 
-export const postRaw = (app: FastifyInstance, body: string, signature: string | undefined) =>
+export const postRaw = (app: FastifyInstance, body: string, signature: string | undefined, timestamp: string | null = TIMESTAMP) =>
   app.inject({
     method: 'POST',
     url: '/api/v1/inbound/email/raw',
-    headers: { 'content-type': 'message/rfc822', ...(signature ? { 'x-tt-signature': signature } : {}) },
+    headers: { 'content-type': 'message/rfc822', ...(signature ? { 'x-tt-signature': signature } : {}), ...(timestamp ? { 'x-tt-timestamp': timestamp } : {}) },
     payload: body,
   });
 

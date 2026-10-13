@@ -12,7 +12,7 @@ import {
   type PrivacyNotice,
 } from '@tt/domain';
 import { z } from 'zod';
-import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
+import { ConflictError, NotFoundError, RateLimitedError, ValidationError } from '../../errors.js';
 import type { IntakeRepositories, SniffedCv, SubmitApplicationDeps } from '../../intake-ports.js';
 import { definePublicQuery, parseInput } from '../../use-case.js';
 import { enqueueAutomations } from '../automations/enqueue.js';
@@ -185,6 +185,21 @@ async function enqueueExtraction(deps: SubmitApplicationDeps, intake: Intake): P
   }
 }
 
+export const APPLICATIONS_BUSY_MESSAGE = 'We are receiving a lot of applications right now. Please try again tomorrow.';
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Both caps count what is already stored in the last 24 hours; above either one nothing more is accepted. */
+async function assertUnderDailyCaps(deps: SubmitApplicationDeps, organizationId: string, jobId: string, now: Date): Promise<void> {
+  const caps = deps.dailyCaps;
+  if (!caps) return;
+  const since = new Date(now.getTime() - DAY_MS);
+  const [inOrganization, inJob] = await Promise.all([
+    caps.applications.countCreatedSince(organizationId, since),
+    caps.applications.countCreatedSince(organizationId, since, jobId),
+  ]);
+  if (inOrganization >= caps.perOrganization || inJob >= caps.perJob) throw new RateLimitedError(APPLICATIONS_BUSY_MESSAGE);
+}
+
 const isFilledHoneypot = (form: Record<string, unknown>): boolean =>
   typeof form.website === 'string' ? form.website.length > 0 : form.website !== undefined && form.website !== null;
 
@@ -206,6 +221,7 @@ export const submitApplication = definePublicQuery<SubmitApplicationDeps, typeof
     const notice = assertNoticeIsCurrent(await deps.privacyNotices.findActive(organization.id), form);
     const applicationId = deps.newId();
     const now = deps.now();
+    await assertUnderDailyCaps(deps, organization.id, job.id, now);
     const intake: Intake = {
       organizationId: organization.id,
       applicationId,

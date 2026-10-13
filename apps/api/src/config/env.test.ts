@@ -21,6 +21,30 @@ describe('parseEnv FAST_MODEL', () => {
   });
 });
 
+describe('parseEnv WEBHOOKS_ALLOW_PRIVATE', () => {
+  it('is accepted outside production and refused in production', () => {
+    expect(parseEnv({ ...valid, WEBHOOKS_ALLOW_PRIVATE: 'true' }).WEBHOOKS_ALLOW_PRIVATE).toBe(true);
+    expect(parseEnv({ ...valid, NODE_ENV: 'test', WEBHOOKS_ALLOW_PRIVATE: 'true' }).WEBHOOKS_ALLOW_PRIVATE).toBe(true);
+    expect(() => parseEnv({ ...valid, NODE_ENV: 'production', INBOUND_WEBHOOK_SECRET: 'w'.repeat(32), WEBHOOKS_ALLOW_PRIVATE: 'true' })).toThrow(/WEBHOOKS_ALLOW_PRIVATE.*production/);
+    expect(parseEnv({ ...valid, NODE_ENV: 'production', INBOUND_WEBHOOK_SECRET: 'w'.repeat(32) }).WEBHOOKS_ALLOW_PRIVATE).toBe(false);
+  });
+});
+
+describe('parseEnv TRUST_PROXY and daily caps', () => {
+  it('defaults to loopback only, and reads a hop count or a list', () => {
+    expect(parseEnv(valid).TRUST_PROXY).toEqual(['loopback']);
+    expect(parseEnv({ ...valid, TRUST_PROXY: '1' }).TRUST_PROXY).toBe(1);
+    expect(parseEnv({ ...valid, TRUST_PROXY: '10.0.0.0/8,loopback' }).TRUST_PROXY).toEqual(['10.0.0.0/8', 'loopback']);
+    expect(() => parseEnv({ ...valid, TRUST_PROXY: 'true' })).toThrow(/TRUST_PROXY/);
+  });
+
+  it('caps public applications per day by default at 500 per organization and 200 per job', () => {
+    expect(parseEnv(valid)).toMatchObject({ APPLICATIONS_DAILY_MAX_PER_ORGANIZATION: 500, APPLICATIONS_DAILY_MAX_PER_JOB: 200 });
+    expect(parseEnv({ ...valid, APPLICATIONS_DAILY_MAX_PER_JOB: '50' }).APPLICATIONS_DAILY_MAX_PER_JOB).toBe(50);
+    expect(() => parseEnv({ ...valid, APPLICATIONS_DAILY_MAX_PER_JOB: '0' })).toThrow(/APPLICATIONS_DAILY_MAX_PER_JOB/);
+  });
+});
+
 describe('parseEnv', () => {
   it('applies defaults', () => {
     const env = parseEnv(valid);

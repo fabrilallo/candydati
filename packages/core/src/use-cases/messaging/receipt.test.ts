@@ -16,6 +16,7 @@ import {
 } from '../../testing/index.js';
 import type { ReceiptDeps } from '../../messaging-ports.js';
 import { submitApplication } from '../candidates/submit-application.js';
+import { RECEIPTS_PER_RECIPIENT_PER_DAY } from './receipt.js';
 
 const submission = () => ({ organizationSlug: 'acme', jobSlug: 'backend', form: validApplicationForm(), cv: { bytes: fakePdfBytes(), declaredName: 'cv.pdf' } });
 const empty = () => seedCandidateWorld({ candidates: [], applications: [], extractions: [] });
@@ -54,6 +55,16 @@ describe('application receipt', () => {
     expect(messages[0]?.bodyText).not.toContain('{{');
     expect(conversations).toHaveLength(1);
     expect(deps.queue.jobs()).toContainEqual({ name: 'email.send', payload: { organizationId: ORG_A, messageId: messages[0]?.id } });
+  });
+
+  it('sends at most three receipts a day to the same person of the same organization', async () => {
+    const deps = empty();
+    const receipts = receiptsFor(deps);
+    for (let i = 0; i < 5; i += 1) {
+      await submitApplication({ ...deps, receipts }, submission());
+      deps.store.write({ applications: [] }); // the next submission is a new application of the same person
+    }
+    expect(deps.messagingStore.read().messages).toHaveLength(RECEIPTS_PER_RECIPIENT_PER_DAY);
   });
 
   it('uses English defaults for an English ad and the organization template when it has one', async () => {

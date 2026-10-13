@@ -88,7 +88,7 @@ export function createPhase4WorkerDeps(wiring: AutomationWiring): Phase4WorkerDe
       endpoints,
       deliveries: createDrizzleWebhookDeliveries(db),
       outbox,
-      poster: createHttpPoster({ timeoutMs: 10_000 }),
+      poster: createHttpPoster({ timeoutMs: 10_000, allowPrivate: wiring.allowPrivateWebhooks }),
       hostGuard: createHostGuard({ allowPrivate: wiring.allowPrivateWebhooks, production: wiring.production }),
       ...clock,
     },

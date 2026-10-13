@@ -38,10 +38,32 @@ export function verifyResendSignature(
   });
 }
 
-/** Generic webhook: header `x-tt-signature: sha256=<hex>` over the raw body, secret used as-is. */
-export function verifyHmacSignature(rawBody: RawBody, header: string | undefined, secret: string): boolean {
+/** Generic webhook: how far in the past a timestamp may be (like Svix), and how far in the future (clock skew). */
+export const HMAC_MAX_AGE_SECONDS = 300;
+export const HMAC_MAX_FUTURE_SECONDS = 60;
+
+const hmacOf = (secret: string, timestamp: string, rawBody: RawBody): Buffer =>
+  createHmac('sha256', secret).update(`${timestamp}.`).update(rawBody).digest();
+
+/** The header value a sender computes: `sha256=<hex HMAC-SHA256 of "<timestamp>.<body>">`. `timestamp` is unix seconds. */
+export const signHmacPayload = (rawBody: RawBody, timestamp: string, secret: string): string =>
+  `sha256=${hmacOf(secret, timestamp, rawBody).toString('hex')}`;
+
+/**
+ * Generic webhook: `x-tt-signature: sha256=<hex>` over `<timestamp>.<raw body>`, with the unix-seconds timestamp in
+ * `x-tt-timestamp`, secret used as-is. A timestamp older than 5 minutes or more than 1 minute ahead is refused, so a
+ * captured request cannot be replayed later.
+ */
+export function verifyHmacSignature(
+  rawBody: RawBody,
+  header: string | undefined,
+  secret: string,
+  timestamp: string | undefined,
+  now: Date = new Date(),
+): boolean {
   const match = /^sha256=([0-9a-f]{64})$/i.exec(header?.trim() ?? '');
-  if (!match?.[1]) return false;
-  const expected = createHmac('sha256', secret).update(rawBody).digest();
-  return safeEqual(Buffer.from(match[1], 'hex'), expected);
+  if (!match?.[1] || !timestamp || !/^\d{1,12}$/.test(timestamp)) return false;
+  const age = now.getTime() / 1000 - Number(timestamp);
+  if (age > HMAC_MAX_AGE_SECONDS || age < -HMAC_MAX_FUTURE_SECONDS) return false;
+  return safeEqual(Buffer.from(match[1], 'hex'), hmacOf(secret, timestamp, rawBody));
 }

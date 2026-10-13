@@ -14,17 +14,38 @@ function linkify(escaped: string): string {
   });
 }
 
+export interface TextToHtmlOptions {
+  /**
+   * Values that came from the outside (a candidate's name typed in the public form) and were substituted into the
+   * text: they are shown as escaped plain text and never become links, even if they look like a URL.
+   */
+  readonly literals?: readonly string[] | undefined;
+}
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** Linkifies the text except where it is one of the `literals`. */
+function linkifyOutside(paragraph: string, literals: readonly string[]): string {
+  if (literals.length === 0) return linkify(escapeHtml(paragraph));
+  const pattern = new RegExp(`(${[...literals].sort((a, b) => b.length - a.length).map(escapeRegExp).join('|')})`);
+  return paragraph
+    .split(pattern)
+    .map((part, index) => (index % 2 === 1 ? escapeHtml(part) : linkify(escapeHtml(part))))
+    .join('');
+}
+
 /**
  * Plain text to a minimal HTML body: everything is escaped, blank lines separate `<p>`, single line breaks become
  * `<br>`, and only http(s) URLs become links.
  */
-export function textToHtml(text: string): string {
+export function textToHtml(text: string, options: TextToHtmlOptions = {}): string {
+  const literals = (options.literals ?? []).filter((value) => /https?:\/\//i.test(value));
   const paragraphs = text
     .replaceAll('\r\n', '\n')
     .split(/\n{2,}/)
     .map((paragraph) => paragraph.trim())
     .filter((paragraph) => paragraph !== '');
-  return paragraphs.map((paragraph) => `<p>${linkify(escapeHtml(paragraph)).replaceAll('\n', '<br>')}</p>`).join('\n');
+  return paragraphs.map((paragraph) => `<p>${linkifyOutside(paragraph, literals).replaceAll('\n', '<br>')}</p>`).join('\n');
 }
 
 const ENTITIES: Readonly<Record<string, string>> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };

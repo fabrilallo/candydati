@@ -139,6 +139,13 @@ export interface ApplicationIntake {
   run<T>(work: (repositories: IntakeRepositories) => Promise<T>): Promise<T>;
 }
 
+/** Applications accepted per day: above either cap the public form answers 429. Counts stored applications. */
+export interface ApplicationDailyCaps {
+  readonly applications: Pick<ApplicationRepository, 'countCreatedSince'>;
+  readonly perOrganization: number;
+  readonly perJob: number;
+}
+
 export interface SubmitApplicationDeps {
   readonly organizations: OrganizationDirectory;
   readonly jobs: JobRepository;
@@ -148,6 +155,8 @@ export interface SubmitApplicationDeps {
   readonly queue: TaskQueue;
   /** Phase 3: when present, a receipt email is queued after the application is stored. Its failure never fails the application. */
   readonly receipts?: ReceiptDeps;
+  /** Absent: no cap (unit tests). The api always sets it. */
+  readonly dailyCaps?: ApplicationDailyCaps;
   readonly cvSniffer: CvSniffer;
   readonly newId: () => string;
   readonly now: () => Date;
@@ -161,5 +170,7 @@ export interface CvExtractionDeps {
   readonly textExtractor: CvTextExtractor;
   /** Null when no model is configured: only the plain text is extracted (`text_only`). */
   readonly modelExtractor: CvModelExtractor | null;
+  /** Extractions per organization and day that may call the model; beyond it only the text is extracted. Absent: no cap. */
+  readonly modelDailyBudget?: number;
   readonly now: () => Date;
 }

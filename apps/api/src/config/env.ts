@@ -1,6 +1,7 @@
 import { loadEmailConfig, loadS3Config, type EmailConfig, type S3Config } from '@tt/providers';
 import { loadPlatformConfig, type PlatformConfig } from '@tt/domain';
 import { z } from 'zod';
+import { parseTrustProxy } from './trust-proxy.js';
 
 const splitList = (value: string | undefined): readonly string[] =>
   (value ?? '')
@@ -19,6 +20,13 @@ const strictFlag = z
   .string()
   .optional()
   .transform((value) => (value ?? '').trim().toLowerCase() === 'true');
+
+/** A positive whole number with a default: used by the daily caps. */
+const dailyCap = (fallback: number) => z.coerce.number().int().min(1).default(fallback);
+
+/** The refusal is a function of two variables, so it lives on the object, not on a field. */
+const refuseOpenWebhooksInProduction = (env: { NODE_ENV: string; WEBHOOKS_ALLOW_PRIVATE: boolean }): boolean =>
+  !(env.NODE_ENV === 'production' && env.WEBHOOKS_ALLOW_PRIVATE);
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -41,6 +49,24 @@ const envSchema = z.object({
   /** Requests per minute allowed to each API key. */
   API_KEY_RATE_LIMIT: z.coerce.number().int().min(1).optional(),
   TRUSTED_ORIGINS: z.string().optional().transform(splitList).pipe(z.array(z.url())),
+  /** Proxies whose `X-Forwarded-For` is believed: a hop count or addresses/CIDRs. Default: loopback only. Never "everyone". */
+  TRUST_PROXY: z
+    .string()
+    .optional()
+    .transform((value, ctx) => {
+      try {
+        return parseTrustProxy(value);
+      } catch (error) {
+        ctx.addIssue({ code: 'custom', message: error instanceof Error ? error.message : 'invalid' });
+        return z.NEVER;
+      }
+    }),
+  /** Applications the public form accepts per organization and per job in 24 hours. Above it the form answers 429. */
+  APPLICATIONS_DAILY_MAX_PER_ORGANIZATION: dailyCap(500),
+  APPLICATIONS_DAILY_MAX_PER_JOB: dailyCap(200),
+}).refine(refuseOpenWebhooksInProduction, {
+  path: ['WEBHOOKS_ALLOW_PRIVATE'],
+  message: 'must not be true in production (it turns off the protection against requests to internal addresses)',
 });
 
 export type Env = Readonly<z.infer<typeof envSchema>> & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig };

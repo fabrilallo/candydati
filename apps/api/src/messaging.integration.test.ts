@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { TestUser } from './testing/client.js';
 import { createWorld, personForm, type World } from './testing/candidate-world.js';
-import { postRaw, QUOTED, rawReply, sign, tokenOf } from './testing/inbound.js';
+import { postRaw, QUOTED, rawReply, sign, TIMESTAMP, tokenOf } from './testing/inbound.js';
 import { createTestApp, uniqueEmail, type TestApp } from './testing/test-app.js';
 
 interface Template { id: string; kind: string; subject: string; body: string; isDefault: boolean }
@@ -176,6 +176,7 @@ describe('inbound email', () => {
     expect((await postRaw(t.app, body, sign(body, 'another-secret-another-secret-123456'))).statusCode).toBe(401);
     expect((await postRaw(t.app, body, undefined)).statusCode).toBe(401);
     expect((await postRaw(t.app, body, sign(`${body}x`))).statusCode).toBe(401);
+    expect((await postRaw(t.app, body, sign(body), null)).statusCode).toBe(401);
     expect((await t.app.inject({ method: 'POST', url: '/api/v1/inbound/email/resend', payload: '{}', headers: { 'content-type': 'application/json' } })).statusCode).toBe(401);
     expect((await messagesOf(w.owner, id)).filter((m) => m.direction === 'inbound')).toHaveLength(0);
   });
@@ -197,6 +198,17 @@ describe('inbound email', () => {
     expect((await messagesOf(w.owner, id)).find((m) => m.direction === 'inbound')).toMatchObject({ unverifiedSender: true });
   });
 
+  it('refuses a replay: a signature over an old or future timestamp is not accepted, even when it is genuine', async () => {
+    const w = await createWorld(t);
+    const { id, email } = await apply(w);
+    const body = rawReply({ token: await tokenOf(t, id), from: email });
+    const now = Number(TIMESTAMP);
+    for (const stamp of [String(now - 301), String(now + 120)]) {
+      expect((await postRaw(t.app, body, sign(body, undefined, stamp), stamp)).statusCode).toBe(401);
+    }
+    expect((await messagesOf(w.owner, id)).filter((m) => m.direction === 'inbound')).toHaveLength(0);
+  });
+
   it('stores a duplicate Message-ID once', async () => {
     const w = await createWorld(t);
     const { id, email } = await apply(w);
@@ -208,7 +220,7 @@ describe('inbound email', () => {
 
   it('is not subject to the origin check', async () => {
     const body = rawReply({ token: 'b'.repeat(32), from: 'x@example.com' });
-    const reply = await t.app.inject({ method: 'POST', url: '/api/v1/inbound/email/raw', headers: { origin: 'https://evil.example', 'content-type': 'message/rfc822', 'x-tt-signature': sign(body) }, payload: body });
+    const reply = await t.app.inject({ method: 'POST', url: '/api/v1/inbound/email/raw', headers: { origin: 'https://evil.example', 'content-type': 'message/rfc822', 'x-tt-signature': sign(body), 'x-tt-timestamp': TIMESTAMP }, payload: body });
     expect(reply.statusCode).toBe(202);
   });
 });

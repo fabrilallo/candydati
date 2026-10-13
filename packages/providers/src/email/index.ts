@@ -11,7 +11,7 @@ export {
   type ResendReceivedContent,
 } from './inbound.js';
 export { parseRawMime, RAW_MIME_MAX_BYTES } from './mime.js';
-export { verifyResendSignature, verifyHmacSignature, SVIX_TOLERANCE_SECONDS, type HeaderBag, type RawBody } from './signature.js';
+export { verifyResendSignature, verifyHmacSignature, signHmacPayload, HMAC_MAX_AGE_SECONDS, HMAC_MAX_FUTURE_SECONDS, SVIX_TOLERANCE_SECONDS, type HeaderBag, type RawBody } from './signature.js';
 export { stripQuotedReply } from './quoted-reply.js';
 export { extractReplyToken } from './reply-token.js';
 export { htmlToText } from './html-text.js';

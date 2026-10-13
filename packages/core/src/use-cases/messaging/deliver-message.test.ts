@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildCandidate,
   buildEmailSettings,
   buildMessage,
   createFakeEmailSender,
@@ -43,6 +44,19 @@ describe('deliverMessage', () => {
       metadata: { applicationId: 'app_1', sentBy: 'user_test' },
     });
     expect(JSON.stringify(deps.auditLog.events())).not.toContain('Hello');
+  });
+
+  it('never turns the candidate name into a link, while the template links stay', async () => {
+    const name = 'https://evil.example/login';
+    const deps = world({
+      candidates: [buildCandidate({ organizationId: ORG_A, firstName: name })],
+      messaging: { messages: [queued({ bodyText: `Ciao ${name}\n\nApri https://good.example/x` })], conversations: [{ applicationId: 'app_1', organizationId: ORG_A, token: 'a'.repeat(24) }] },
+    });
+    expect(await run(deps)).toBe('sent');
+    const html = deps.sender.sent()[0]?.html ?? '';
+    expect(html).not.toContain('href="https://evil.example');
+    expect(html).toContain('Ciao https://evil.example/login');
+    expect(html).toContain('<a href="https://good.example/x"');
   });
 
   it('uses a verified own domain as From, never an unverified one', async () => {

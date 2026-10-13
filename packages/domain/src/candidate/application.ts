@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { SelectionStage } from '../job/content.js';
+import { NAME_MAX, personNameSchema } from './person-name.js';
 import { CONSENT_SCOPES, type ConsentRecord, type ConsentStatus } from './privacy.js';
 
 export const CV_MAX_BYTES = 10 * 1024 * 1024;
@@ -7,7 +8,7 @@ export const CV_MAX_BYTES = 10 * 1024 * 1024;
 export const CV_MEDIA_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'] as const;
 export type CvMediaType = (typeof CV_MEDIA_TYPES)[number];
 
-export const NAME_MAX = 120;
+export { NAME_MAX };
 export const MESSAGE_MAX = 3000;
 export const NOTE_MAX = 5000;
 export const TAG_MAX = 40;
@@ -18,8 +19,8 @@ export const TAGS_PER_CANDIDATE_MAX = 20;
  * no birth date, no gender, no marital status, no address. The CV arrives as a separate multipart part.
  */
 export const applicationFormSchema = z.object({
-  firstName: z.string().trim().min(1).max(NAME_MAX),
-  lastName: z.string().trim().min(1).max(NAME_MAX),
+  firstName: personNameSchema,
+  lastName: personNameSchema,
   email: z.email().max(254).transform((value) => value.toLowerCase()),
   phone: z
     .string()

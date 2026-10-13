@@ -127,6 +127,9 @@ export function createInMemoryMessageRepository(store: MessagingStore): MessageR
       const messages = inOrg(organizationId);
       return Object.fromEntries(applicationIds.map((id) => [id, messages.filter((m) => m.applicationId === id).length]));
     },
+    async countOutboundSince(organizationId, candidateId, since) {
+      return inOrg(organizationId).filter((m) => m.candidateId === candidateId && m.direction === 'outbound' && m.createdAt >= since).length;
+    },
   };
 }
 

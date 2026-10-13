@@ -12,6 +12,11 @@ describe('createCvExtractionDeps', () => {
     expect(typeof deps.textExtractor.extractText).toBe('function');
   });
 
+  it('carries the daily model budget when given', () => {
+    expect(createCvExtractionDeps({ db, files: createInMemoryFileStorage(), modelDailyBudget: 7, onModelError: vi.fn() }).modelDailyBudget).toBe(7);
+    expect(createCvExtractionDeps({ db, files: createInMemoryFileStorage(), onModelError: vi.fn() }).modelDailyBudget).toBeUndefined();
+  });
+
   it('adds a model extractor when FAST_MODEL is set, and reports a failure by message only', async () => {
     const onModelError = vi.fn();
     const deps = createCvExtractionDeps({ db, files: createInMemoryFileStorage(), fastModel: 'unknown-provider/none', onModelError });

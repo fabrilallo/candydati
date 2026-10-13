@@ -1,11 +1,11 @@
 import { z } from 'zod';
-import { NAME_MAX } from './application.js';
+import { personNameSchema } from './person-name.js';
 
 /** Fields a recruiter may correct on the candidate's request (GDPR art. 16). `null` clears phone or LinkedIn. */
 export const candidateCorrectionSchema = z
   .object({
-    firstName: z.string().trim().min(1).max(NAME_MAX).optional(),
-    lastName: z.string().trim().min(1).max(NAME_MAX).optional(),
+    firstName: personNameSchema.optional(),
+    lastName: personNameSchema.optional(),
     email: z
       .email()
       .max(254)

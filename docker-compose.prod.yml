@@ -1,0 +1,145 @@
+# Self-hosting: tutto lo stack (postgres, minio, api, worker, web) in un comando.
+#   cp .env.example .env   # poi imposta i valori obbligatori (vedi README, sezione Self-hosting)
+#   docker compose -f docker-compose.prod.yml up -d --build
+# Con la posta di sviluppo (Mailpit): aggiungi --profile mail e TT_EMAIL_PROVIDER=smtp.
+# Solo "web" e' pubblicato sull'host (WEB_PORT); api, worker, postgres e minio restano sulla rete interna.
+# Le variabili sono lette dal .env nella cartella corrente; gli indirizzi dei servizi interni sono fissati qui
+# e sovrascrivono quelli di sviluppo (localhost) presenti nel .env.
+
+x-app-env: &app-env
+  NODE_ENV: production
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  DATABASE_URL: postgres://${POSTGRES_USER:-tt}:${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-team_tracker}
+  S3_ENDPOINT: http://minio:9000
+  S3_REGION: ${S3_REGION:-us-east-1}
+  S3_BUCKET: ${S3_BUCKET:-team-tracker}
+  S3_ACCESS_KEY: ${S3_ACCESS_KEY:?imposta S3_ACCESS_KEY}
+  S3_SECRET_KEY: ${S3_SECRET_KEY:?imposta S3_SECRET_KEY}
+  S3_FORCE_PATH_STYLE: "true"
+  PLATFORM_NAME: ${PLATFORM_NAME:-team-tracker}
+  PLATFORM_URL: ${PLATFORM_URL:?imposta PLATFORM_URL}
+  PLATFORM_SUPPORT_EMAIL: ${PLATFORM_SUPPORT_EMAIL:-support@example.com}
+  PLATFORM_DEFAULT_LOCALE: ${PLATFORM_DEFAULT_LOCALE:-it}
+  PLATFORM_AD_QUALITY_THRESHOLD: ${PLATFORM_AD_QUALITY_THRESHOLD:-6}
+  EMAIL_PROVIDER: ${TT_EMAIL_PROVIDER:-log}
+  SMTP_HOST: ${TT_SMTP_HOST:-mailpit}
+  SMTP_PORT: ${SMTP_PORT:-1025}
+  SMTP_SECURE: ${SMTP_SECURE:-false}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  RESEND_API_KEY: ${RESEND_API_KEY:-}
+  EMAIL_DOMAIN: ${EMAIL_DOMAIN:-localhost}
+  EMAIL_FROM_LOCAL: ${EMAIL_FROM_LOCAL:-noreply}
+  EMAIL_INBOUND_DOMAIN: ${EMAIL_INBOUND_DOMAIN:-inbound.localhost}
+  WEBHOOKS_ALLOW_PRIVATE: "false"
+  AGENT_MODEL: ${AGENT_MODEL:-}
+  FAST_MODEL: ${FAST_MODEL:-}
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY:-}
+  CV_MODEL_DAILY_BUDGET: ${CV_MODEL_DAILY_BUDGET:-1000}
+
+name: ${COMPOSE_PROJECT_NAME:-team-tracker-prod}
+
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-tt}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-team_tracker}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    # Le immagini community di MinIO non sono piu' pubblicate su Docker Hub: build Chainguard.
+    image: cgr.dev/chainguard/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?imposta S3_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?imposta S3_SECRET_KEY}
+    volumes:
+      - miniodata:/data
+    networks: [internal]
+
+  mailpit:
+    profiles: [mail]
+    image: axllent/mailpit:v1.31.5
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_UI_PORT:-8025}:8025"
+    networks: [internal]
+
+  api:
+    build: { context: ., target: api }
+    image: team-tracker-api:${TT_VERSION:-local}
+    restart: unless-stopped
+    depends_on:
+      postgres: { condition: service_healthy }
+      minio: { condition: service_started }
+    environment:
+      <<: *app-env
+      RUN_MIGRATIONS: "true"
+      API_PORT: "4000"
+      API_HOST: 0.0.0.0
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?imposta BETTER_AUTH_SECRET (almeno 32 caratteri)}
+      BETTER_AUTH_URL: ${PLATFORM_URL}
+      WEB_ORIGIN: ${PLATFORM_URL}
+      TRUSTED_ORIGINS: ${TRUSTED_ORIGINS:-}
+      # L'api si fida di x-forwarded-for solo dalla rete interna (dove sta il web). Mai "true".
+      TRUST_PROXY: ${TRUST_PROXY:-${TT_SUBNET:-172.31.77.0/24}}
+      APPLICATIONS_DAILY_MAX_PER_ORGANIZATION: ${APPLICATIONS_DAILY_MAX_PER_ORGANIZATION:-500}
+      APPLICATIONS_DAILY_MAX_PER_JOB: ${APPLICATIONS_DAILY_MAX_PER_JOB:-200}
+      INBOUND_WEBHOOK_SECRET: ${INBOUND_WEBHOOK_SECRET:?imposta INBOUND_WEBHOOK_SECRET (almeno 32 caratteri)}
+    ports:
+      - "${API_PUBLISH:-127.0.0.1:4000}:4000"
+    networks: [internal]
+
+  worker:
+    build: { context: ., target: worker }
+    image: team-tracker-worker:${TT_VERSION:-local}
+    restart: unless-stopped
+    depends_on:
+      api: { condition: service_healthy }
+    environment:
+      <<: *app-env
+    networks: [internal]
+
+  web:
+    build:
+      context: .
+      target: web
+      args:
+        NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE: ${PLATFORM_DEFAULT_LOCALE:-it}
+    image: team-tracker-web:${TT_VERSION:-local}
+    restart: unless-stopped
+    depends_on:
+      api: { condition: service_healthy }
+    environment:
+      NODE_ENV: production
+      NUXT_API_INTERNAL_URL: http://api:4000
+      NUXT_PUBLIC_PLATFORM_NAME: ${PLATFORM_NAME:-team-tracker}
+      NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE: ${PLATFORM_DEFAULT_LOCALE:-it}
+      NUXT_PUBLIC_SITE_URL: ${PLATFORM_URL}
+      NUXT_TRUST_CLOUDFLARE: ${NUXT_TRUST_CLOUDFLARE:-false}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    networks: [internal]
+
+networks:
+  internal:
+    ipam:
+      config:
+        - subnet: ${TT_SUBNET:-172.31.77.0/24}
+
+volumes:
+  pgdata:
+  miniodata:

@@ -1,4 +1,4 @@
-import { AuditWriteError, ConflictError, ForbiddenError, NotFoundError, ValidationError } from '@tt/core';
+import { AuditWriteError, ConflictError, ForbiddenError, NotFoundError, RateLimitedError, ValidationError } from '@tt/core';
 import { describe, expect, it } from 'vitest';
 import { UnauthenticatedError, toHttpFailure } from './errors.js';
 
@@ -7,6 +7,7 @@ describe('toHttpFailure', () => {
     [new ForbiddenError(), 403, 'forbidden'],
     [new NotFoundError(), 404, 'not_found'],
     [new ConflictError(), 409, 'conflict'],
+    [new RateLimitedError(), 429, 'rate_limited'],
     [new UnauthenticatedError(), 401, 'unauthenticated'],
   ])('maps %o', (error, status, code) => {
     expect(toHttpFailure(error)).toMatchObject({ status, code, log: false });

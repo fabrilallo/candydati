@@ -1,4 +1,4 @@
-export const ERROR_CODES = ['forbidden', 'not_found', 'validation_failed', 'conflict', 'audit_failed'] as const;
+export const ERROR_CODES = ['forbidden', 'not_found', 'validation_failed', 'conflict', 'rate_limited', 'audit_failed'] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
 /**
@@ -34,6 +34,15 @@ export class ConflictError extends CoreError {
   readonly code = 'conflict';
 
   constructor(message = 'The request conflicts with the current state.') {
+    super(message);
+  }
+}
+
+/** A daily cap was reached. `message` is safe to show to the person who hit it. */
+export class RateLimitedError extends CoreError {
+  readonly code = 'rate_limited';
+
+  constructor(message = 'Too many requests. Please try again later.') {
     super(message);
   }
 }

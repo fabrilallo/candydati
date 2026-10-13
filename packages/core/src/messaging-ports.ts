@@ -60,6 +60,8 @@ export interface MessageRepository {
   listByApplication(organizationId: string, applicationId: string): Promise<readonly Message[]>;
   /** Messages per application id; applications without messages are 0. */
   countByApplication(organizationId: string, applicationIds: readonly string[]): Promise<Readonly<Record<string, number>>>;
+  /** Outbound messages to the candidate created at or after `since` (queued, sent or failed). */
+  countOutboundSince(organizationId: string, candidateId: string, since: Date): Promise<number>;
 }
 
 export interface DomainCheck {

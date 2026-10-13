@@ -17,6 +17,7 @@ export const CORE_STATUS: Readonly<Record<ErrorCode, number>> = {
   not_found: 404,
   validation_failed: 422,
   conflict: 409,
+  rate_limited: 429,
   audit_failed: 500,
 };
 

@@ -1,6 +1,6 @@
 import { CV_MAX_BYTES } from '@tt/domain';
 import { describe, expect, it } from 'vitest';
-import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
+import { ConflictError, NotFoundError, RateLimitedError, ValidationError } from '../../errors.js';
 import {
   buildApplication,
   buildCandidate,
@@ -16,7 +16,7 @@ import {
   validApplicationForm,
   ORG_A,
 } from '../../testing/index.js';
-import { submitApplication, type ApplicationSubmission } from './submit-application.js';
+import { APPLICATIONS_BUSY_MESSAGE, submitApplication, type ApplicationSubmission } from './submit-application.js';
 
 const submission = (overrides: Partial<ApplicationSubmission> = {}): ApplicationSubmission => ({
   organizationSlug: 'acme',
@@ -104,6 +104,33 @@ describe('submitApplication: success', () => {
     const fresh = await submitApplication(empty(), submission());
     const known = await submitApplication(seedCandidateWorld({ applications: [], extractions: [] }), submission({ form: validApplicationForm({ email: 'ada@example.com' }) }));
     expect(known).toEqual(fresh);
+  });
+});
+
+describe('submitApplication: daily caps', () => {
+  const capped = (perOrganization: number, perJob: number) => {
+    const deps = empty();
+    return { ...deps, dailyCaps: { applications: deps.applications, perOrganization, perJob } };
+  };
+  const apply = (deps: ReturnType<typeof capped>, email: string) => submitApplication(deps, submission({ form: validApplicationForm({ email }) }));
+
+  it('answers with a friendly rate limit once the job reached its daily cap, storing nothing more', async () => {
+    const deps = capped(100, 2);
+    await apply(deps, 'a@example.com');
+    await apply(deps, 'b@example.com');
+    const error = await rejection(apply(deps, 'c@example.com'));
+    expect(error).toBeInstanceOf(RateLimitedError);
+    expect((error as RateLimitedError).message).toBe(APPLICATIONS_BUSY_MESSAGE);
+    expect(deps.store.read().applications).toHaveLength(2);
+  });
+
+  it('applies the organization cap across jobs, and forgets applications older than a day', async () => {
+    const deps = capped(2, 100);
+    await apply(deps, 'a@example.com');
+    await apply(deps, 'b@example.com');
+    expect(await rejection(apply(deps, 'c@example.com'))).toBeInstanceOf(RateLimitedError);
+    const later = { ...deps, now: () => new Date(deps.now().getTime() + 25 * 60 * 60 * 1000) };
+    await expect(apply(later, 'c@example.com')).resolves.toEqual({ received: true });
   });
 });
 

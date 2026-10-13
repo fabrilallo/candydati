@@ -24,10 +24,19 @@ async function readText(deps: CvExtractionDeps, key: string, mediaType: CvMediaT
   }
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Cost guard: past the daily budget of the organization the model is skipped and only the text is kept. */
+async function overBudget(deps: CvExtractionDeps, organizationId: string): Promise<boolean> {
+  if (deps.modelDailyBudget === undefined) return false;
+  const since = new Date(deps.now().getTime() - DAY_MS);
+  return (await deps.extractions.countFinishedSince(organizationId, since)) >= deps.modelDailyBudget;
+}
+
 /** The model's answer is untrusted: it only counts if it matches the schema. Any failure leaves the plain text. */
-async function readStructured(deps: CvExtractionDeps, text: string): Promise<Outcome> {
+async function readStructured(deps: CvExtractionDeps, organizationId: string, text: string): Promise<Outcome> {
   const textOnly: Outcome = { status: 'text_only', text, data: null, source: 'text' };
-  if (!deps.modelExtractor) return textOnly;
+  if (!deps.modelExtractor || (await overBudget(deps, organizationId))) return textOnly;
   try {
     const parsed = cvExtractionSchema.safeParse(await deps.modelExtractor.extract(text));
     return parsed.success ? { status: 'done', text, data: parsed.data, source: 'model' } : textOnly;
@@ -52,7 +61,7 @@ export const runCvExtraction = defineUseCase<CvExtractionDeps, typeof inputSchem
     const current = await deps.extractions.findByApplication(input.organizationId, application.id);
     if (current && (current.status === 'done' || current.status === 'text_only')) return current.status;
     const text = await readText(deps, application.cv.key, application.cv.mediaType);
-    const outcome = text === null ? FAILED : await readStructured(deps, text);
+    const outcome = text === null ? FAILED : await readStructured(deps, input.organizationId, text);
     await deps.extractions.upsert({
       applicationId: application.id,
       organizationId: input.organizationId,

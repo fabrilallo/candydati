@@ -8,6 +8,7 @@ import type {
   ParsedImportRow,
 } from './import.js';
 import type { ImportMapping } from './mapping.js';
+import { safePersonNameOrEmpty } from '../candidate/person-name.js';
 import { fileStem, nameFromFileName, nameKey, nameSimilarity, normalizeEmail, normalizeText, phoneDigits, splitFullName } from './names.js';
 
 /** Fuzzy name pairing needs at least this Levenshtein ratio, and a clear winner. */
@@ -67,8 +68,8 @@ function toRowRecord(row: ParsedImportRow, mapping: ImportMapping): RowRecord {
   const split = cell(mapping.fullName) !== '' ? splitFullName(cell(mapping.fullName)) : null;
   return {
     indexes: [row.index],
-    firstName: cell(mapping.firstName) || split?.firstName || '',
-    lastName: cell(mapping.lastName) || split?.lastName || '',
+    firstName: safePersonNameOrEmpty(cell(mapping.firstName) || split?.firstName || ''),
+    lastName: safePersonNameOrEmpty(cell(mapping.lastName) || split?.lastName || ''),
     email: normalizeEmail(cell(mapping.email)),
     phone: orNull(cell(mapping.phone).slice(0, 40)),
     linkedinUrl: linkedinOf(cell(mapping.linkedin)),
@@ -219,9 +220,11 @@ function sourceConflicts(cv: CvRecord, row: RowRecord): readonly ImportConflict[
 
 const CONFIDENCE: Readonly<Record<Pair['basis'], ImportConfidence>> = { email: 'high', file_name: 'high', name: 'medium', fuzzy_name: 'low', single: 'high' };
 
+const safeNames = (name: { firstName: string; lastName: string }) => ({ firstName: safePersonNameOrEmpty(name.firstName), lastName: safePersonNameOrEmpty(name.lastName) });
+
 function buildItem(cv: CvRecord | null, row: RowRecord | null, basis: Pair['basis'], existingByEmail: MatchInput['existingByEmail']): MatchedItem {
   const rowName = row ? { firstName: row.firstName, lastName: row.lastName } : null;
-  const cvName = cv ? splitFullName(cv.name) : null;
+  const cvName = cv ? safeNames(splitFullName(cv.name)) : null;
   const name = rowName && (rowName.firstName !== '' || rowName.lastName !== '') ? rowName : (cvName ?? { firstName: '', lastName: '' });
   const email = row?.email ?? cv?.email ?? null;
   const phone = row?.phone ?? cv?.phone ?? null;

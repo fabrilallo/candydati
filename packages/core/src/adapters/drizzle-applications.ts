@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNotNull, isNull, lte, schema } from '@tt/db';
+import { and, asc, count, desc, eq, gte, isNotNull, isNull, lte, schema } from '@tt/db';
 import { CV_MEDIA_TYPES, type Application, type CvMediaType } from '@tt/domain';
 import type { ApplicationRepository } from '../candidate-ports.js';
 import { ConflictError } from '../errors.js';
@@ -115,5 +115,19 @@ export function createDrizzleApplications(db: DbExecutor): ApplicationRepository
     listRetentionExpiringBefore: (organizationId, before) => expiring(and(eq(application.organizationId, organizationId), lte(application.retentionExpiresAt, before))),
     listRetentionExpiringAcrossOrganizations: (before) => expiring(lte(application.retentionExpiresAt, before)),
     listByImportBatch: (organizationId, batchId) => list(and(eq(application.organizationId, organizationId), eq(application.importBatchId, batchId))),
+    async countCreatedSince(organizationId, since, jobId) {
+      const [row] = await db
+        .select({ total: count() })
+        .from(application)
+        .where(
+          and(
+            eq(application.organizationId, organizationId),
+            eq(application.source, 'careers_page'),
+            gte(application.createdAt, since),
+            ...(jobId === undefined ? [] : [eq(application.jobId, jobId)]),
+          ),
+        );
+      return row?.total ?? 0;
+    },
   };
 }

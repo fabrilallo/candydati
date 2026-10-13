@@ -1,0 +1,16 @@
+**/node_modules
+**/dist
+**/.nuxt
+**/.output
+**/.turbo
+**/coverage
+**/.data
+.git
+.github
+.env
+.env.*
+!.env.example
+docs
+**/*.test.ts
+**/.DS_Store
+.tmp-e2e

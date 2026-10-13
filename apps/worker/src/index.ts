@@ -62,6 +62,7 @@ const main = async (): Promise<void> => {
     db: database.db,
     files,
     fastModel: env.FAST_MODEL,
+    modelDailyBudget: env.CV_MODEL_DAILY_BUDGET,
     onModelError: (reason) => logger.warn({ reason }, 'cv model failed, keeping the plain text'),
   });
   const provider = createEmailProvider(env.email, (line) => logger.info(line));

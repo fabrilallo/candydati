@@ -40,6 +40,11 @@ describe('applicationFormSchema', () => {
     expect(applicationFormSchema.safeParse({ ...validForm, lastName: 'a'.repeat(NAME_MAX + 1) }).success).toBe(false);
   });
 
+  it.each(['https://evil.example', 'www.evil.example', 'a@b.it', '<b>x</b>', 'Ada\nLovelace'])('rejects %j as a name (phishing through the receipt)', (name) => {
+    expect(applicationFormSchema.safeParse({ ...validForm, firstName: name }).success).toBe(false);
+    expect(applicationFormSchema.safeParse({ ...validForm, lastName: name }).success).toBe(false);
+  });
+
   it('rejects a message over the maximum', () => {
     expect(applicationFormSchema.safeParse({ ...validForm, message: 'a'.repeat(MESSAGE_MAX + 1) }).success).toBe(false);
   });

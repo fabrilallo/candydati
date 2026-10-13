@@ -76,7 +76,7 @@ export const deliverMessage = defineUseCase<DeliverDeps, typeof inputSchema, Del
         to: candidate.email,
         subject: message.subject,
         text: message.bodyText,
-        html: textToHtml(message.bodyText),
+        html: textToHtml(message.bodyText, { literals: [candidate.firstName, candidate.lastName] }),
         headers: message.sentBy === SYSTEM_SENDER ? { 'Auto-Submitted': 'auto-generated' } : {},
       }));
     } catch (error) {

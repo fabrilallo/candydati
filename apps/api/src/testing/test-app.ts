@@ -7,6 +7,7 @@ import type { InvitationEmail, EmailSender } from '../auth/email-sender.js';
 import type { RateLimitSettings } from '../app-context.js';
 import { parseEnv, type Env } from '../config/env.js';
 import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer, type FakeEmailSender, type InMemoryFileStorage, type InMemoryTaskQueue } from '@tt/core/testing';
+import type { SignInLockout } from '../auth/sign-in-lockout.js';
 import { buildServer } from '../server.js';
 import { apiTestDatabaseUrl } from './test-database.js';
 
@@ -46,14 +47,14 @@ export interface TestApp {
 
 const HIGH_LIMITS: RateLimitSettings = { max: 100_000, authMax: 100_000, publicMax: 100_000, qualityMax: 100_000, applyMax: 100_000, importMax: 100_000, consentMax: 100_000 };
 
-export async function createTestApp(options: { rateLimit?: RateLimitSettings; emailSender?: EmailSender; adQuality?: AdQualityAnalyzer; distributionChannels?: readonly DistributionChannel[]; reportClock?: () => Date } = {}): Promise<TestApp> {
+export async function createTestApp(options: { rateLimit?: RateLimitSettings; emailSender?: EmailSender; adQuality?: AdQualityAnalyzer; distributionChannels?: readonly DistributionChannel[]; reportClock?: () => Date; env?: Record<string, string>; signInLockout?: SignInLockout } = {}): Promise<TestApp> {
   const handle = createDb(apiTestDatabaseUrl(), 4);
   const sent: InvitationEmail[] = [];
   const files = createInMemoryFileStorage();
   const queue = createInMemoryTaskQueue();
   const fakeSender = createFakeEmailSender();
   const emailSender: EmailSender = options.emailSender ?? { sendInvitation: async (email) => void sent.push(email) };
-  const app = await buildServer({ env: testEnv(), db: handle.db, emailSender, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, reportClock: options.reportClock });
+  const app = await buildServer({ env: testEnv(options.env), signInLockout: options.signInLockout, db: handle.db, emailSender, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, reportClock: options.reportClock });
   await app.ready();
   return {
     app,

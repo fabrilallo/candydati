@@ -121,6 +121,9 @@ export function createInMemoryApplicationRepository(store: CandidateStore): Appl
     async listByImportBatch(organizationId, batchId) {
       return newestFirst(inOrg(organizationId).filter((a) => a.importBatchId === batchId));
     },
+    async countCreatedSince(organizationId, since, jobId) {
+      return inOrg(organizationId).filter((a) => a.source === 'careers_page' && a.createdAt >= since && (jobId === undefined || a.jobId === jobId)).length;
+    },
   };
 }
 
@@ -162,6 +165,9 @@ export function createInMemoryCvExtractionRepository(store: CandidateStore): CvE
     },
     async findByApplications(organizationId, applicationIds) {
       return inOrg(organizationId).filter((e) => applicationIds.includes(e.applicationId));
+    },
+    async countFinishedSince(organizationId, since) {
+      return inOrg(organizationId).filter((e) => (e.status === 'done' || e.status === 'text_only') && e.updatedAt >= since).length;
     },
   };
 }

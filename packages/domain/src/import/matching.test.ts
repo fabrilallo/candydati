@@ -123,6 +123,12 @@ describe('matchImport duplicates and single sources', () => {
     expect(item?.flags).toContain('incomplete_name');
   });
 
+  it('drops names that carry a link or an address and flags the item', () => {
+    const [item] = run([], [row(2, { Nome: 'https://evil.example/login', Cognome: 'a@b.it', Email: 'x@y.it' })]);
+    expect(item?.candidate).toMatchObject({ firstName: '', lastName: '' });
+    expect(item?.flags).toContain('incomplete_name');
+  });
+
   it('skips empty rows and rows without usable data', () => {
     expect(run([], [row(2, {}), row(3, { Nome: '', Email: 'not-an-email' })])).toEqual([]);
   });

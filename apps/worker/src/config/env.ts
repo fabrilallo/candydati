@@ -18,6 +18,11 @@ const envSchema = z.object({
   /** `WEBHOOKS_ALLOW_PRIVATE=true`: the SSRF guard lets webhooks reach localhost and private addresses (development only). */
   WEBHOOKS_ALLOW_PRIVATE: strictFlag,
   FAST_MODEL: z.string().regex(/^[^/\s]+\/\S+$/, 'must look like provider/model').optional(),
+  /** CV extractions per organization and day that may call the model; beyond it only the text is extracted. */
+  CV_MODEL_DAILY_BUDGET: z.coerce.number().int().min(1).default(1000),
+}).refine((env) => !(env.NODE_ENV === 'production' && env.WEBHOOKS_ALLOW_PRIVATE), {
+  path: ['WEBHOOKS_ALLOW_PRIVATE'],
+  message: 'must not be true in production (it turns off the protection against requests to internal addresses)',
 });
 
 export type WorkerEnv = Readonly<z.infer<typeof envSchema>> & { readonly s3: S3Config; readonly email: EmailConfig; readonly platform: PlatformConfig };

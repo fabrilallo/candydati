@@ -12,7 +12,7 @@ export const forwardToApi = (matches: (pathWithQuery: string) => boolean) =>
     if (!matches(pathWithQuery)) return
 
     const body = event.method === 'GET' || event.method === 'HEAD' ? undefined : await readRawBody(event, false)
-    const { apiInternalUrl } = useRuntimeConfig(event)
+    const { apiInternalUrl, trustCloudflare } = useRuntimeConfig(event)
     return proxyToApi(
       apiInternalUrl,
       {
@@ -22,6 +22,8 @@ export const forwardToApi = (matches: (pathWithQuery: string) => boolean) =>
         body: body ?? undefined,
         host: url.host,
         protocol: url.protocol === 'https:' ? 'https' : 'http',
+        socketAddress: event.node.req.socket.remoteAddress,
+        trustCloudflare,
       },
       (input, init) => fetch(input, init),
     )

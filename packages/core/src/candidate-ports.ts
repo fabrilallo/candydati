@@ -61,6 +61,8 @@ export interface ApplicationRepository {
   listRetentionExpiringAcrossOrganizations(before: Date): Promise<readonly Application[]>;
   /** Every application (open or decided) created by an import batch, newest first. */
   listByImportBatch(organizationId: string, batchId: string): Promise<readonly Application[]>;
+  /** Applications stored at or after `since`, in the organization or, when `jobId` is given, for that job only. */
+  countCreatedSince(organizationId: string, since: Date, jobId?: string): Promise<number>;
 }
 
 export interface CandidateNoteRepository {
@@ -76,6 +78,8 @@ export interface CvExtractionRepository {
   upsert(record: CvExtractionRecord): Promise<CvExtractionRecord>;
   findByApplication(organizationId: string, applicationId: string): Promise<CvExtractionRecord | null>;
   findByApplications(organizationId: string, applicationIds: readonly string[]): Promise<readonly CvExtractionRecord[]>;
+  /** Extractions finished (`done` or `text_only`) at or after `since`: what the daily model budget counts. */
+  countFinishedSince(organizationId: string, since: Date): Promise<number>;
 }
 
 /**

@@ -13,6 +13,9 @@ import { createLogEmailSender, type EmailSender } from './auth/email-sender.js';
 import type { Env } from './config/env.js';
 import { registerErrorHandler } from './http/error-handler.js';
 import { registerCsrfProtection } from './plugins/csrf.js';
+import { registerNoStoreByDefault } from './plugins/cache-control.js';
+import { requestLogSerializer } from './http/log-serializers.js';
+import type { SignInLockout } from './auth/sign-in-lockout.js';
 import { registerSecurity, trustedOrigins } from './plugins/security.js';
 import { registerApplicationCvRoute } from './routes/application-cv.js';
 import { registerApiKeyRoutes } from './routes/api-keys.js';
@@ -69,6 +72,8 @@ export interface ServerDeps {
   readonly distributionChannels?: readonly DistributionChannel[] | undefined;
   /** Test seam: the "now" of the reports. */
   readonly reportClock?: (() => Date) | undefined;
+  /** Failed sign-ins per account. In memory by default (one api instance); a shared store goes here. */
+  readonly signInLockout?: SignInLockout | undefined;
 }
 
 const loggerOptions = (env: Env) =>
@@ -77,12 +82,18 @@ const loggerOptions = (env: Env) =>
     : {
         level: env.LOG_LEVEL,
         redact: ['req.headers.cookie', 'req.headers.authorization'],
+        // Public links carry their token in the path: it never reaches the logs.
+        serializers: { req: requestLogSerializer },
         ...(env.NODE_ENV === 'development' ? { transport: { target: 'pino-pretty', options: { colorize: true } } } : {}),
       };
 
+/** Fastify wants a list or a function: a hop count trusts the nearest N hops. */
+const toFastifyTrustProxy = (value: Env['TRUST_PROXY']): string[] | ((address: string, hop: number) => boolean) =>
+  typeof value === 'number' ? (_address, hop) => hop < value : [...value];
+
 /** Builds the app from injected dependencies; nothing listens until the caller does. */
 export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
-  const app = Fastify({ logger: loggerOptions(deps.env), trustProxy: true });
+  const app = Fastify({ logger: loggerOptions(deps.env), trustProxy: toFastifyTrustProxy(deps.env.TRUST_PROXY) });
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
 
@@ -103,6 +114,7 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   });
 
   registerErrorHandler(app);
+  registerNoStoreByDefault(app);
   await registerSecurity(app, deps.env, ctx.rateLimit);
 
   registerCsrfProtection(app, trustedOrigins(deps.env));
@@ -110,7 +122,7 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerOpenApiRoute(app, ctx);
   registerApiKeyRoutes(app, ctx);
   registerMcpRoute(app, ctx);
-  registerAuthRoutes(app, ctx.auth, ctx.rateLimit.authMax);
+  registerAuthRoutes(app, ctx.auth, ctx.rateLimit.authMax, deps.signInLockout);
   registerAuditLogRoutes(app, ctx);
   registerJobQualityRoute(app, ctx);
   registerJobRoutes(app, ctx);

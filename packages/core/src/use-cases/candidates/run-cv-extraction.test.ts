@@ -38,6 +38,21 @@ describe('runCvExtraction', () => {
     });
   });
 
+  it('skips the model once the organization used its daily budget, keeping the text', async () => {
+    const finished = Array.from({ length: 2 }, (_, i) => buildExtraction({ organizationId: ORG_A, applicationId: `old_${i}`, status: 'done', updatedAt: new Date('2026-06-01T09:00:00.000Z') }));
+    const deps = seedCandidateWorld({ extractions: [pending, ...finished], overrides: { modelExtractor: fakeModelExtractor({ headline: 'Engineer' }), modelDailyBudget: 2 } });
+    await deps.files.put(KEY, fakePdfBytes(), 'application/pdf');
+    expect(await runCvExtraction(deps, worker, input)).toBe('text_only');
+    expect(await stored(deps)).toMatchObject({ status: 'text_only', source: 'text', data: null });
+  });
+
+  it('keeps using the model under the budget and forgets extractions older than a day', async () => {
+    const old = buildExtraction({ organizationId: ORG_A, applicationId: 'old_1', status: 'done', updatedAt: new Date('2026-05-30T09:00:00.000Z') });
+    const deps = seedCandidateWorld({ extractions: [pending, old], overrides: { modelExtractor: fakeModelExtractor({ headline: 'Engineer' }), modelDailyBudget: 1 } });
+    await deps.files.put(KEY, fakePdfBytes(), 'application/pdf');
+    expect(await runCvExtraction(deps, worker, input)).toBe('done');
+  });
+
   it('stores text_only when no model is configured', async () => {
     const deps = await world();
     expect(await runCvExtraction(deps, worker, input)).toBe('text_only');

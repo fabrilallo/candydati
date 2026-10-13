@@ -1,4 +1,4 @@
-import { and, eq, inArray, schema } from '@tt/db';
+import { and, count, eq, gte, inArray, schema } from '@tt/db';
 import { cvExtractionSchema, type CvExtractionRecord } from '@tt/domain';
 import type { CvExtractionRepository } from '../candidate-ports.js';
 import type { DbExecutor } from './db-executor.js';
@@ -54,6 +54,13 @@ export function createDrizzleCvExtractions(db: DbExecutor): CvExtractionReposito
         .from(cvExtraction)
         .where(and(eq(cvExtraction.organizationId, organizationId), inArray(cvExtraction.applicationId, [...applicationIds])));
       return rows.map(toRecord);
+    },
+    async countFinishedSince(organizationId, since) {
+      const [row] = await db
+        .select({ total: count() })
+        .from(cvExtraction)
+        .where(and(eq(cvExtraction.organizationId, organizationId), inArray(cvExtraction.status, ['done', 'text_only']), gte(cvExtraction.updatedAt, since)));
+      return row?.total ?? 0;
     },
   };
 }

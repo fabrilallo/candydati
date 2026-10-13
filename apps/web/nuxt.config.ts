@@ -46,6 +46,8 @@ export default defineNuxtConfig({
   nitro: { preset: 'node-server' },
   runtimeConfig: {
     apiInternalUrl: API_ORIGIN,
+    /** `NUXT_TRUST_CLOUDFLARE=true`: only when the site is reachable through Cloudflare alone; then `cf-connecting-ip` is the client IP. */
+    trustCloudflare: false,
     public: {
       siteUrl: 'http://localhost:3000',
       platformName: '',

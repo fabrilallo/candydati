@@ -1,6 +1,6 @@
 import { createHmac } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { verifyHmacSignature, verifyResendSignature } from './signature.js';
+import { signHmacPayload, verifyHmacSignature, verifyResendSignature } from './signature.js';
 
 const secretBytes = Buffer.from('0123456789abcdef0123456789abcdef');
 const secret = `whsec_${secretBytes.toString('base64')}`;
@@ -50,16 +50,31 @@ describe('verifyResendSignature', () => {
 
 describe('verifyHmacSignature', () => {
   const key = 'x'.repeat(32);
-  const hex = createHmac('sha256', key).update(body).digest('hex');
-  it('accepts a valid signature', () => {
-    expect(verifyHmacSignature(body, `sha256=${hex}`, key)).toBe(true);
-    expect(verifyHmacSignature(Buffer.from(body), `sha256=${hex.toUpperCase()}`, key)).toBe(true);
+  const hex = (stamp: string, payload = body) => createHmac('sha256', key).update(`${stamp}.${payload}`).digest('hex');
+  const at = (seconds: number) => String(Number(ts) + seconds);
+  it('accepts a valid signature over timestamp.body (string and bytes)', () => {
+    expect(verifyHmacSignature(body, `sha256=${hex(ts)}`, key, ts, now)).toBe(true);
+    expect(verifyHmacSignature(Buffer.from(body), `sha256=${hex(ts).toUpperCase()}`, key, ts, now)).toBe(true);
+    expect(signHmacPayload(body, ts, key)).toBe(`sha256=${hex(ts)}`);
   });
   it('rejects bad, malformed or missing signatures', () => {
-    expect(verifyHmacSignature(`${body}x`, `sha256=${hex}`, key)).toBe(false);
-    expect(verifyHmacSignature(body, `sha256=${hex}`, 'y'.repeat(32))).toBe(false);
-    expect(verifyHmacSignature(body, hex, key)).toBe(false);
-    expect(verifyHmacSignature(body, 'sha256=abcd', key)).toBe(false);
-    expect(verifyHmacSignature(body, undefined, key)).toBe(false);
+    expect(verifyHmacSignature(`${body}x`, `sha256=${hex(ts)}`, key, ts, now)).toBe(false);
+    expect(verifyHmacSignature(body, `sha256=${hex(ts)}`, 'y'.repeat(32), ts, now)).toBe(false);
+    expect(verifyHmacSignature(body, hex(ts), key, ts, now)).toBe(false);
+    expect(verifyHmacSignature(body, 'sha256=abcd', key, ts, now)).toBe(false);
+    expect(verifyHmacSignature(body, undefined, key, ts, now)).toBe(false);
+  });
+  it('rejects a missing, malformed or unsigned timestamp (the old body-only scheme no longer works)', () => {
+    const bodyOnly = createHmac('sha256', key).update(body).digest('hex');
+    expect(verifyHmacSignature(body, `sha256=${bodyOnly}`, key, ts, now)).toBe(false);
+    expect(verifyHmacSignature(body, `sha256=${hex(ts)}`, key, undefined, now)).toBe(false);
+    expect(verifyHmacSignature(body, `sha256=${hex('abc')}`, key, 'abc', now)).toBe(false);
+    expect(verifyHmacSignature(body, `sha256=${hex(ts)}`, key, at(1), now)).toBe(false);
+  });
+  it('refuses anything older than 5 minutes or more than 1 minute in the future', () => {
+    expect(verifyHmacSignature(body, `sha256=${hex(at(-300))}`, key, at(-300), now)).toBe(true);
+    expect(verifyHmacSignature(body, `sha256=${hex(at(-301))}`, key, at(-301), now)).toBe(false);
+    expect(verifyHmacSignature(body, `sha256=${hex(at(60))}`, key, at(60), now)).toBe(true);
+    expect(verifyHmacSignature(body, `sha256=${hex(at(61))}`, key, at(61), now)).toBe(false);
   });
 });

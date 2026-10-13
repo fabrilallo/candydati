@@ -4,6 +4,10 @@ import type { ReceiptDeps } from '../../messaging-ports.js';
 import { enqueueDelivery } from './send-message.js';
 import { buildTemplateValues, ensureConversation, oneLine } from './shared.js';
 
+/** Anyone can type any address in the public form: a receipt must not become a way to mail a stranger over and over. */
+export const RECEIPTS_PER_RECIPIENT_PER_DAY = 3;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 export interface ReceiptInput {
   readonly organization: { readonly id: string; readonly name: string; readonly slug: string };
   readonly job: Job;
@@ -22,6 +26,9 @@ export async function queueReceipt(
 ): Promise<boolean> {
   const { receipts } = deps;
   try {
+    const since = new Date(deps.now().getTime() - DAY_MS);
+    const sent = await receipts.messages.countOutboundSince(input.organization.id, input.candidate.id, since);
+    if (sent >= RECEIPTS_PER_RECIPIENT_PER_DAY) return false;
     const stored = await receipts.templates.findByKind(input.organization.id, 'receipt');
     const template = stored ?? defaultEmailTemplate('receipt', input.job.content.language);
     const values = buildTemplateValues({
