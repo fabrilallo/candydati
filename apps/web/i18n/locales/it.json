@@ -25,7 +25,6 @@
     "jobs": "Annunci",
     "audit": "Registro delle azioni",
     "settings": "Impostazioni",
-    "shortcuts": "Scorciatoie",
     "sidebar": "Barra laterale",
     "templates": "Template",
     "publishedCount": "{count} pubblicati",
@@ -88,8 +87,6 @@
     "organizations": "Le tue organizzazioni",
     "current": "Organizzazione attiva",
     "switched": "Ora lavori in {organization}",
-    "collapseNav": "Chiudi il pannello di navigazione",
-    "expandNav": "Apri il pannello di navigazione",
     "careersPage": "Pagina carriere",
     "breadcrumbs": "Percorso"
   },

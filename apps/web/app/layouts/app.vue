@@ -2,14 +2,13 @@
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 
 /**
- * App shell: icon rail and collapsible navigation panel on the sidebar surface (from lg), the page in an inset panel.
+ * App shell: one navigation sidebar with labels (from lg), the page in an inset panel.
  * Below lg the panel becomes a drawer opened from the top bar. Pages render their own `AppPage` (top bar and main).
  */
 const { t } = useI18n()
 const platform = usePlatform()
 const route = useRoute()
-const { panelOpen, drawerOpen, restore } = useNavPanel()
-onMounted(restore)
+const { drawerOpen } = useNavPanel()
 watch(() => route.fullPath, () => {
   drawerOpen.value = false
 })
@@ -19,8 +18,7 @@ watch(() => route.fullPath, () => {
   <div class="min-h-dvh bg-sidebar lg:flex">
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:shadow-md">{{ t('common.skipToContent') }}</a>
     <aside class="hidden shrink-0 lg:sticky lg:top-0 lg:flex lg:h-dvh" :aria-label="t('nav.sidebar')">
-      <AppRail />
-      <div v-show="panelOpen" id="nav-panel" class="w-60 border-l border-border/70" data-testid="nav-panel">
+      <div id="nav-panel" class="w-64" data-testid="nav-panel">
         <AppNavPanel />
       </div>
     </aside>

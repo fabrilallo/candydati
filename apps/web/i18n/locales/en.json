@@ -25,7 +25,6 @@
     "jobs": "Jobs",
     "audit": "Audit log",
     "settings": "Settings",
-    "shortcuts": "Shortcuts",
     "sidebar": "Sidebar",
     "templates": "Templates",
     "publishedCount": "{count} published",
@@ -88,8 +87,6 @@
     "organizations": "Your organizations",
     "current": "Active organization",
     "switched": "You are now working in {organization}",
-    "collapseNav": "Collapse the navigation panel",
-    "expandNav": "Expand the navigation panel",
     "careersPage": "Careers page",
     "breadcrumbs": "Breadcrumbs"
   },
