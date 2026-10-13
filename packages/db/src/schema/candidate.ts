@@ -21,7 +21,7 @@ const organizationRef = () =>
     .references(() => organization.id, { onDelete: 'restrict' });
 
 /**
- * Versioned privacy notice (PLAN §7). Rows are never updated: a change is a new version, and every application
+ * Versioned privacy notice (PRODUCT.md §6). Rows are never updated: a change is a new version, and every application
  * keeps the version it consented to. `version` is unique inside the organization.
  */
 export const privacyNotice = pgTable(

@@ -3,7 +3,7 @@ import { PERMISSIONS, permissionsOf, type Permission, type Role } from './permis
 
 /**
  * Never grantable to an API key or to the agent, whatever the role of the person behind it: decisions on people,
- * messages to candidates and administration stay with a person (PLAN §6). `authorize` checks this list on every call,
+ * messages to candidates and administration stay with a person (PRODUCT.md §5). `authorize` checks this list on every call,
  * so even a key whose scopes were tampered with in the database cannot use these.
  */
 export const MACHINE_FORBIDDEN_PERMISSIONS: readonly Permission[] = PERMISSIONS.filter(

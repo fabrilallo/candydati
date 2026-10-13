@@ -15,7 +15,7 @@ export const TAG_MAX = 40;
 export const TAGS_PER_CANDIDATE_MAX = 20;
 
 /**
- * Public application form, without registration (PLAN §2). Only what selection needs (§7 minimisation): no photo,
+ * Public application form, without registration (PRODUCT.md §3.1). Only what selection needs (§7 minimisation): no photo,
  * no birth date, no gender, no marital status, no address. The CV arrives as a separate multipart part.
  */
 export const applicationFormSchema = z.object({
@@ -43,7 +43,7 @@ export const applicationFormSchema = z.object({
 export type ApplicationForm = z.infer<typeof applicationFormSchema>;
 
 /**
- * Pipeline stages of a job: `received`, then one per stage of the DECLARED process (PLAN §5.1: what the candidate
+ * Pipeline stages of a job: `received`, then one per stage of the DECLARED process (PRODUCT.md §4.1: what the candidate
  * reads is what the recruiter uses), in order. Outcomes are not stages: they close the application.
  */
 export const RECEIVED_STAGE_ID = 'received';

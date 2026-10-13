@@ -51,7 +51,7 @@ export const jobStatsDtoSchema = z.object({
       }),
     ),
   }),
-  /** What published ads promise to candidates (PLAN §1, principle 2). */
+  /** What published ads promise to candidates (PRODUCT.md §2, principle 2). */
   process: z.object({
     jobCount: count,
     averageStages: z.number().nullable(),
@@ -59,7 +59,7 @@ export const jobStatsDtoSchema = z.object({
     averageProcessMinutes: z.number().nullable(),
     averageResponseDays: z.number().nullable(),
   }),
-  /** Which PLAN §5.1 rules keep drafts from being published. */
+  /** Which PRODUCT.md §4.1 rules keep drafts from being published. */
   readiness: z.object({
     draftCount: count,
     /** Drafts that already satisfy every rule. */

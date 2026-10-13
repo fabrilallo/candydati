@@ -7,7 +7,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 
 /**
- * Internal notes (docs/DESIGN.md "Feed delle note"): composer on top, N to focus it, Ctrl or Cmd + Enter to save;
+ * Internal notes (docs/DESIGN-SYSTEM.md "Feed delle note"): composer on top, N to focus it, Ctrl or Cmd + Enter to save;
  * then the notes, newest first, with the job they are about. Candidates never see them.
  */
 const props = defineProps<{ notes: readonly NoteDto[]; applications: readonly CandidateApplicationDto[]; currentId: string | null; canCreate: boolean; busy: boolean; authorName: string }>()

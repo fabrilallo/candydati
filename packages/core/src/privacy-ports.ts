@@ -9,7 +9,7 @@ import type { AuditLogRepository, CoreDeps } from './ports.js';
 import type { OutboxRepository } from './webhook-ports.js';
 
 /**
- * Removes everything stored about applications and candidates (PLAN §7). One implementation per storage; the Postgres one
+ * Removes everything stored about applications and candidates (PRODUCT.md §6). One implementation per storage; the Postgres one
  * runs inside the transaction `ErasureTransaction.run` opens, so a failure leaves nothing half deleted.
  */
 export interface ErasureStore {

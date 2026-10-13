@@ -4,7 +4,7 @@ import { formatDate } from '@/lib/format'
 import { responseCountdown, type CountdownTone, type ResponseInput } from '@/lib/response-countdown'
 
 /**
- * The promise "risposta entro N giorni" for one application (docs/DESIGN.md: neutral on track, warning when near,
+ * The promise "risposta entro N giorni" for one application (docs/DESIGN-SYSTEM.md: neutral on track, warning when near,
  * destructive when late; "Risposto" stays quiet). Renders nothing for closed applications or without a deadline.
  */
 const props = defineProps<{ application: ResponseInput; now: Date }>()

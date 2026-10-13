@@ -62,7 +62,7 @@ export const locationSchema = z.object({
 
 /**
  * What a draft may hold: only the title is required, everything else can be filled in later.
- * `publishableJobContentSchema` is the same shape with the rules of PLAN §5.1 switched on.
+ * `publishableJobContentSchema` is the same shape with the rules of PRODUCT.md §4.1 switched on.
  */
 export const jobContentSchema = z.object({
   title: z.string().trim().min(1).max(JOB_TITLE_MAX),
@@ -132,7 +132,7 @@ const requiredPaths = (content: JobContent): readonly string[] => {
 };
 
 /**
- * The deterministic block of PLAN §5.1: an empty result means the ad may be published. No model involved.
+ * The deterministic block of PRODUCT.md §4.1: an empty result means the ad may be published. No model involved.
  * The quality score is a separate, non-blocking check.
  */
 export function checkPublishable(content: JobContent): readonly PublishIssue[] {

@@ -2,7 +2,7 @@
 import type { LinkTab } from '@/lib/tabs'
 
 /**
- * Underline tabs that lead to different pages (docs/DESIGN.md "Schede sottolineate"): same look as `UnderlineTabs`,
+ * Underline tabs that lead to different pages (docs/DESIGN-SYSTEM.md "Schede sottolineate"): same look as `UnderlineTabs`,
  * but links with `aria-current="page"` on the current one.
  */
 defineProps<{ items: readonly LinkTab[]; label: string; current: string }>()

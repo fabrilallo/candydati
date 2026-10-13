@@ -39,7 +39,7 @@ describe('familyOfRole', () => {
 });
 
 describe('closed lists', () => {
-  it('keeps the work modes and seniority levels of PLAN §5.1', () => {
+  it('keeps the work modes and seniority levels of PRODUCT.md §4.1', () => {
     expect(WORK_MODES).toEqual(['remote', 'hybrid', 'onsite']);
     expect(SENIORITY_LEVELS).toContain('senior');
   });

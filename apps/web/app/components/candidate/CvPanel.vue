@@ -7,7 +7,7 @@ import { formatDateTime } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 
 /**
- * The original CV, always available (PLAN Fase 2): a PDF previews inline, a DOCX downloads. Every preview and
+ * The original CV, always available (PRODUCT.md §3.1): a PDF previews inline, a DOCX downloads. Every preview and
  * download is recorded by the api, so the preview loads only when this tab is open.
  */
 const props = defineProps<{ application: CandidateApplicationDto }>()

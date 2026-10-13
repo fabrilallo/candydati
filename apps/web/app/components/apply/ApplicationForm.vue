@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
 /**
- * The application form of the public page: no account, only what selection needs (PLAN §7 minimisation), the CV,
+ * The application form of the public page: no account, only what selection needs (PRODUCT.md §6 minimisation), the CV,
  * and the consents. Sent as multipart; on success the parent shows the confirmation.
  */
 const props = defineProps<{ org: string; job: string; organization: string; language: string; notice: PublicPrivacyNoticeDto }>()

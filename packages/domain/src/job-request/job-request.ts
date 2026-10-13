@@ -9,7 +9,7 @@ export type JobRequestStatus = (typeof JOB_REQUEST_STATUSES)[number];
 export const HEADCOUNT_MAX = 100;
 export const REQUEST_NOTE_MAX = 2000;
 
-/** What a hiring manager fills in to ask for a position (PLAN Phase 9). Budget is gross annual, in whole units. */
+/** What a hiring manager fills in to ask for a position (PRODUCT.md §3.1). Budget is gross annual, in whole units. */
 export const jobRequestInputSchema = z
   .object({
     title: z.string().trim().min(1).max(JOB_TITLE_MAX),

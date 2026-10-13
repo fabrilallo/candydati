@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { checkPublishable, isPublishable, PUBLISH_RULES, isPublishedContent, jobContentSchema, type JobContentInput } from './content.js';
 
-/** A complete ad that satisfies every rule of PLAN §5.1 (hybrid, so city and onsite days are required). */
+/** A complete ad that satisfies every rule of PRODUCT.md §4.1 (hybrid, so city and onsite days are required). */
 const COMPLETE: JobContentInput = {
   title: 'Backend Developer',
   language: 'it',

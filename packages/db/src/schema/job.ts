@@ -4,7 +4,7 @@ import { index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'dr
 import { organization } from './auth.js';
 
 /**
- * The job ad (PLAN §5). `content` is validated with `jobContentSchema` when read: jsonb is a boundary.
+ * The job ad (PRODUCT.md §4). `content` is validated with `jobContentSchema` when read: jsonb is a boundary.
  * `organization_id` is RESTRICT like the audit log: an organization with ads is archived, never hard-deleted.
  * `created_by` is plain text with no foreign key, so ads survive the removal of the user who wrote them.
  */
@@ -28,7 +28,7 @@ export const job = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
     publishedAt: timestamp('published_at', { withTimezone: true }),
     closedAt: timestamp('closed_at', { withTimezone: true }),
-    /** Approval of the budget (PLAN Phase 9): all five are set together, or none. Written by `approvals`, never by `jobs.save`. */
+    /** Approval of the budget (PRODUCT.md §3.1): all five are set together, or none. Written by `approvals`, never by `jobs.save`. */
     approvalApprovedBy: text('approval_approved_by'),
     approvalApprovedAt: timestamp('approval_approved_at', { withTimezone: true }),
     approvalSalaryMin: integer('approval_salary_min'),

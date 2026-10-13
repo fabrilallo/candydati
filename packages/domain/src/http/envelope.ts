@@ -1,4 +1,4 @@
-/** The one response shape of the API (PLAN §9): outcome, data, error, pagination metadata. */
+/** The one response shape of the API (PRODUCT.md §8.2): outcome, data, error, pagination metadata. */
 export interface PageMeta {
   readonly total: number;
   readonly page: number;

@@ -45,7 +45,7 @@ export const organizationSetting = pgTable('organization_setting', {
   organizationId: text('organization_id')
     .primaryKey()
     .references(() => organization.id, { onDelete: 'restrict' }),
-  /** Publishing needs an approved budget (PLAN Phase 9). Off by default. */
+  /** Publishing needs an approved budget (PRODUCT.md §3.1). Off by default. */
   requireApproval: boolean('require_approval').notNull().default(false),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });

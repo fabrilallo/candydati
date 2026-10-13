@@ -5,7 +5,7 @@ import { recordEvent } from '../webhooks/record-event.js';
 import { defineJobUseCase } from './define.js';
 
 /**
- * Only from `published`, and only when no application is still open (PLAN §1, principle 3): a person decides each one
+ * Only from `published`, and only when no application is still open (PRODUCT.md §2, principle 3): a person decides each one
  * first (`decideApplications` closes them in bulk). A closed ad is never reopened.
  */
 export const closeJob = defineJobUseCase({

@@ -3,7 +3,7 @@ import type { ImportConfidence } from '@tt/domain'
 import { Badge } from '@/components/ui/badge'
 
 /**
- * How sure the match between CV and row is. A state, so state colours (docs/DESIGN.md): high = success,
+ * How sure the match between CV and row is. A state, so state colours (docs/DESIGN-SYSTEM.md): high = success,
  * medium = neutral, low = warning. The reason is in the title and for screen readers.
  */
 defineProps<{ level: ImportConfidence }>()

@@ -9,7 +9,7 @@ import { can } from '@/lib/permissions-ui'
 import { Button } from '@/components/ui/button'
 
 /**
- * "Privacy e dati" of the candidate detail (PLAN §7): consent per application, then the four rights, each with one
+ * "Privacy e dati" of the candidate detail (PRODUCT.md §6): consent per application, then the four rights, each with one
  * plain sentence. `updated` carries a fresh detail; `erased` says whether the whole candidate is gone.
  */
 const props = defineProps<{ detail: CandidateDetailDto; name: string; now: Date; role: Role | null }>()

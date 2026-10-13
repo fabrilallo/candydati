@@ -10,7 +10,7 @@ export const STATEMENTS = {
   audit: ['read'],
   job: ['read', 'create', 'update', 'publish', 'close', 'approve'],
   job_template: ['read', 'create', 'delete'],
-  /** Candidates and their applications. `read` opens the profile and the CV, and is audited (PLAN §7). */
+  /** Candidates and their applications. `read` opens the profile and the CV, and is audited (PRODUCT.md §6). */
   candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
   /** Notes on candidates: interviewers can write them too. */
   candidate_note: ['create'],
@@ -26,7 +26,7 @@ export const STATEMENTS = {
   /** Per-stage rules. They can send a template or create a task, never move or decide. */
   automation: ['manage'],
   webhook: ['manage'],
-  /** Export of the whole organization's data (PLAN §7). */
+  /** Export of the whole organization's data (PRODUCT.md §6). */
   data: ['export'],
   /** Keys for the public API and MCP. Never grantable to a key or to the agent (a key does not mint keys). */
   api_key: ['manage'],

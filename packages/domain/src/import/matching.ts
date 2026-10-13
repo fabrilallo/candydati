@@ -269,7 +269,7 @@ function buildItem(cv: CvRecord | null, row: RowRecord | null, basis: Pair['basi
 }
 
 /**
- * Crosses CVs with sheet rows (PLAN Fase 8). Pairing evidence, strongest first: same email (high), the row names the CV
+ * Crosses CVs with sheet rows (PRODUCT.md §3.1). Pairing evidence, strongest first: same email (high), the row names the CV
  * file (high), same name in any order, accents and case ignored (medium), fuzzy name (low). Duplicates inside the batch
  * (same email) are merged; people already in the database by email carry `existing` and the fields that differ.
  * Pure: no I/O. Items come CV first (in file order), then the rows without a CV.

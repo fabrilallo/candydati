@@ -3,7 +3,7 @@ import { TASK_TITLE_MAX } from '../task/task.js';
 
 /**
  * What a rule may do when an application ENTERS a stage. Deliberately only these two: there is no `move` and no
- * `decide` action, because nothing decides about a candidate automatically (PLAN §1, principle 4).
+ * `decide` action, because nothing decides about a candidate automatically (PRODUCT.md §2, principle 4).
  */
 export const AUTOMATION_ACTIONS = ['send_template', 'create_task'] as const;
 export type AutomationActionType = (typeof AUTOMATION_ACTIONS)[number];

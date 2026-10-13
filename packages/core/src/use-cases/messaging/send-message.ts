@@ -49,7 +49,7 @@ async function assertTemplateExists(deps: MessagingDeps, organizationId: string,
 /**
  * Sends one email to each of the applications (bulk = many ids). Everything is validated and rendered before anything
  * is stored; then one `queued` message and one `email.send` task per recipient. Always a person's decision: the agent
- * never sends (PLAN §6). Closed applications can receive messages: outcome messages go out after deciding.
+ * never sends (PRODUCT.md §5). Closed applications can receive messages: outcome messages go out after deciding.
  */
 export const sendMessage = defineMessagingUseCase({
   name: 'sendMessage',

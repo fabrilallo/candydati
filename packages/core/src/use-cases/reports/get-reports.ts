@@ -15,7 +15,7 @@ async function loadJobs(deps: ReportDeps, organizationId: string, jobId: string 
 }
 
 /**
- * Time to hire, time to fill, funnel, sources, response promises and outcome coverage for a period (PLAN Fase 10). Numbers
+ * Time to hire, time to fill, funnel, sources, response promises and outcome coverage for a period (PRODUCT.md §3.1). Numbers
  * only: no candidate data. The figures come from the stage events and promises kept since Phase 10 (older ones are rebuilt
  * best effort), and applications erased under GDPR are gone from them.
  */

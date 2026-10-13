@@ -81,7 +81,7 @@ const locationFields = (content: PublishedJobContent): Record<string, unknown> =
     : { jobLocation: place(content) };
 
 /**
- * schema.org JobPosting with the salary range always present (PLAN §6). Returns a plain object: the caller
+ * schema.org JobPosting with the salary range always present (PRODUCT.md §5). Returns a plain object: the caller
  * serializes it into a `<script type="application/ld+json">` tag, escaping `<` as `<`.
  */
 export function buildJobPostingJsonLd({ job, organization, url, headings }: JobPostingInput): Record<string, unknown> {

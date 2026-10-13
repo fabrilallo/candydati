@@ -10,7 +10,7 @@ export const FEEDBACK_REMINDER_DAYS = [2, 5] as const;
 export const INTERVIEWERS_PER_STAGE_MAX = 5;
 export const INTERVIEWER_NAME_MAX = 120;
 
-/** An opinion for the person who decides: it is not a score and it decides nothing (PLAN §1, principle 4). */
+/** An opinion for the person who decides: it is not a score and it decides nothing (PRODUCT.md §2, principle 4). */
 export const FEEDBACK_RECOMMENDATIONS = ['proceed', 'do_not_proceed', 'discuss'] as const;
 export type FeedbackRecommendation = (typeof FEEDBACK_RECOMMENDATIONS)[number];
 

@@ -8,7 +8,7 @@ export const FILES_DELETE_QUEUE = 'files.delete';
 export const filesDeletePayload = z.object({ organizationId: z.string().min(1), key: z.string().min(1) });
 
 /**
- * Retries the deletion of a stored file whose row was already erased (PLAN §7). A failure is rethrown so pg-boss retries
+ * Retries the deletion of a stored file whose row was already erased (PRODUCT.md §6). A failure is rethrown so pg-boss retries
  * with backoff (the sender sets the limits). A key outside the organization's own prefix is refused, never deleted:
  * the payload is data, and a task must not be a way to remove another organization's files.
  */

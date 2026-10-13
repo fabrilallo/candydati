@@ -86,7 +86,7 @@ export type StageTone = 'received' | 'conversation' | 'exercise' | 'offer'
 
 const EXERCISES: ReadonlySet<StageType> = new Set(['take_home_assignment', 'live_exercise', 'case_study'])
 
-/** One dot colour per family of stage (docs/DESIGN.md: a dot only when it codes something). */
+/** One dot colour per family of stage (docs/DESIGN-SYSTEM.md: a dot only when it codes something). */
 export const stageTone = (stage: StageRef): StageTone => {
   if (!stage.declared || stage.id === RECEIVED_STAGE_ID) return 'received'
   if (stage.declared.type === 'offer') return 'offer'

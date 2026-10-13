@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 /**
- * Closing a job (PLAN Fase 4: a job with open applications does not close). Before confirming, it counts the open
+ * Closing a job (PRODUCT.md §2.3: a job with open applications does not close). Before confirming, it counts the open
  * applications. With some open it offers "Chiudi le candidature aperte come Non selezionato" (one decision each, made
  * by this person), then the Phase 3 bulk composer with the outcome template, which the person sends or skips; only
  * then the job closes. The same flow opens when the api refuses a close with `open_applications:<n>`.

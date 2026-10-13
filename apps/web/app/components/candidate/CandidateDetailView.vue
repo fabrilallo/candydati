@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
- * The candidate profile (docs/DESIGN.md "Scheda candidato"), shared by the side sheet of the board and the full page:
+ * The candidate profile (docs/DESIGN-SYSTEM.md "Scheda candidato"), shared by the side sheet of the board and the full page:
  * header with stage and status and the actions on the current application, tags, then Profilo, CV and Note.
  */
 /** `viaJobId`: the pipeline the profile is opened from, so a person still to reconfirm can be shown there. */

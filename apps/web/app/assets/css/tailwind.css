@@ -1,6 +1,6 @@
 /*
  * Design tokens (Tailwind 4 + shadcn-vue). Direction "Editoriale nitido": cool off-white and near-black, ONE cobalt
- * accent, Geist. State colours are used only for state. Contract and measured contrast ratios: docs/DESIGN.md.
+ * accent, Geist. State colours are used only for state. Contract and measured contrast ratios: docs/DESIGN-SYSTEM.md.
  * Dark mode = class `dark` on <html> (set by @nuxtjs/color-mode). Fonts are loaded in nuxt.config (`css`).
  */
 @import "tailwindcss";

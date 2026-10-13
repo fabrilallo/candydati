@@ -3,7 +3,7 @@ import type { JobStatsDto } from '@tt/domain'
 import { blockerLabel, type Blocker } from '@/lib/stats-view'
 
 /**
- * Which publication rules (PLAN §5.1) keep drafts from going out: a ranked bar list, one bar per rule, scaled on the
+ * Which publication rules (PRODUCT.md §4.1) keep drafts from going out: a ranked bar list, one bar per rule, scaled on the
  * number of drafts. The rules are the standard, so this shows where writers get stuck, not who is behind.
  */
 const props = defineProps<{ readiness: JobStatsDto['readiness'] }>()

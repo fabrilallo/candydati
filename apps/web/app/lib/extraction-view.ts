@@ -2,7 +2,7 @@ import type { ExtractionDto, CvExtraction  } from '@tt/domain'
 
 /**
  * What the profile shows of the automatic CV extraction. Always a suggestion next to the original document, which
- * stays the source of truth (PLAN Fase 2).
+ * stays the source of truth (PRODUCT.md §3.1).
  */
 export type ExtractionView =
   | { readonly kind: 'pending' }

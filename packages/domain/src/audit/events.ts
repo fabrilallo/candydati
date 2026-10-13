@@ -65,7 +65,7 @@ export const AUDIT_ACTIONS = [
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
-/** Who did it. Agent and API-key actions stay distinguishable from human ones (PLAN §6). */
+/** Who did it. Agent and API-key actions stay distinguishable from human ones (PRODUCT.md §5). */
 export const ACTOR_TYPES = ['user', 'agent', 'api_key', 'system'] as const;
 export type ActorType = (typeof ACTOR_TYPES)[number];
 

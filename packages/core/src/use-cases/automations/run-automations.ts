@@ -113,7 +113,7 @@ const claimRun = (deps: AutomationRunDeps, rule: AutomationRule, application: Ap
  * Worker use case (system actor, task `automation.run`): runs the enabled rules of the stage the application just
  * entered. Re-checks everything when it runs: an application that moved on, was decided or is gone is skipped. Rules run
  * independently; a failing one notifies its creator (`automation_failed`) and never stops the others or undoes the
- * move. There is no rule that moves or decides, so this can never do either (PLAN §1, principle 4).
+ * move. There is no rule that moves or decides, so this can never do either (PRODUCT.md §2, principle 4).
  *
  * Idempotent: each rule records its run for this stage entry in the same transaction as what it does, so a redelivered
  * task finds the record and neither sends the template nor creates the task again.

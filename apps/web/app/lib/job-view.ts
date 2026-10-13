@@ -51,5 +51,5 @@ export const careersPath = (orgSlug: string): string => `/careers/${encodeURICom
 export const absoluteUrl = (siteUrl: string, path: string): string => `${siteUrl.replace(/\/+$/, '')}${path}`
 
 export type BadgeTone = 'success' | 'secondary' | 'outline'
-/** Status pills (docs/DESIGN.md): published = success (live), draft = neutral, closed = outline (muted). */
+/** Status pills (docs/DESIGN-SYSTEM.md): published = success (live), draft = neutral, closed = outline (muted). */
 export const statusTone = (status: JobStatus): BadgeTone => (status === 'published' ? 'success' : status === 'draft' ? 'secondary' : 'outline')

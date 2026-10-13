@@ -5,7 +5,7 @@ import { isVisibleApplication, loadCandidateDetail, requireCandidate } from './s
 import type { CandidateDetailView } from './views.js';
 
 /**
- * Every read of a profile is audited: it is personal data (PLAN §7). A candidate imported and not yet reconfirmed
+ * Every read of a profile is audited: it is personal data (PRODUCT.md §6). A candidate imported and not yet reconfirmed
  * (`to_renew`) is found only with `viaJobId`, the job of their import, and shows only that job's application; for
  * anyone else, or from anywhere else, they do not exist.
  */

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { JobContent } from './content.js';
 
-/** The ten categories of the FuffAnnuncio business analysis (PLAN §5.2). Each is scored from 0 to 1. */
+/** The ten categories of the FuffAnnuncio business analysis (PRODUCT.md §4.3). Each is scored from 0 to 1. */
 export const QUALITY_CATEGORIES = [
   'selection_process',
   'role_requirements',
@@ -46,7 +46,7 @@ export type AdQualityReport = z.infer<typeof adQualityReportSchema>;
 export const totalOf = (scores: AdQualityReport['scores']): number =>
   Math.round(QUALITY_CATEGORIES.reduce((sum, category) => sum + scores[category], 0) * 10) / 10;
 
-/** Below the threshold the ad is flagged, never blocked (PLAN §5.2). */
+/** Below the threshold the ad is flagged, never blocked (PRODUCT.md §4.3). */
 export const isBelowQualityThreshold = (report: AdQualityReport, threshold: number): boolean => report.total < threshold;
 
 /** Scores the ad, never the candidates. */

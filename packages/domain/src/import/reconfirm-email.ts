@@ -16,7 +16,7 @@ export interface ReconfirmEmail {
 }
 
 /**
- * The system email that asks an imported candidate to reconfirm consent (PLAN §7). Plain text, in the language of the
+ * The system email that asks an imported candidate to reconfirm consent (PRODUCT.md §6). Plain text, in the language of the
  * ad. It says why they are written to, what happens if they do nothing and how to say no.
  */
 export function reconfirmEmail(input: ReconfirmEmailInput): ReconfirmEmail {

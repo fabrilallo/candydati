@@ -2,7 +2,7 @@
 import { setLucideProps } from '@lucide/vue'
 import { Toaster } from '@/components/ui/sonner'
 
-/** One icon family, one stroke (docs/DESIGN.md). */
+/** One icon family, one stroke (docs/DESIGN-SYSTEM.md). */
 setLucideProps({ strokeWidth: 1.5 })
 
 const platform = usePlatform()

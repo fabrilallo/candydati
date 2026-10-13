@@ -8,7 +8,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 
 /**
  * Writes one message to one or many applications: template (or none), subject, body with variables, the live preview
- * for one candidate, and "Invia" behind a confirmation that names who receives it (PLAN §6: a person always
+ * for one candidate, and "Invia" behind a confirmation that names who receives it (PRODUCT.md §5: a person always
  * confirms). With `initialKind` the matching template is filled in, with `initialDraft` that text; never sent.
  */
 const props = withDefaults(

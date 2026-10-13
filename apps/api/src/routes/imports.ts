@@ -22,7 +22,7 @@ const withoutUndefined = (input: Readonly<Record<string, unknown>>): Record<stri
   Object.fromEntries(Object.entries(input).filter(([, value]) => value !== undefined));
 
 /**
- * Import of CVs, sheets and Notion exports (PLAN Fase 8). Session only: `import:manage` is never grantable to a key or the
+ * Import of CVs, sheets and Notion exports (PRODUCT.md §3.1). Session only: `import:manage` is never grantable to a key or the
  * agent, and a request carrying a bearer is refused before anything runs. The routes are thin: the use cases hold the rules.
  */
 export async function registerImportRoutes(app: FastifyInstance, ctx: AppContext): Promise<void> {

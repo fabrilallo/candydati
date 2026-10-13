@@ -5,7 +5,7 @@ import type { Translate } from '@/lib/ad-text'
 import { retentionCopy } from '@/lib/consent-copy'
 
 /**
- * The privacy notice and the two separate consents (PLAN §7): selection, required; talent pool, optional. How long
+ * The privacy notice and the two separate consents (PRODUCT.md §6): selection, required; talent pool, optional. How long
  * the data is kept is said in plain words next to each choice.
  */
 const props = defineProps<{ notice: PublicPrivacyNoticeDto; organization: string; selection: boolean; talentPool: boolean; error?: string | undefined; x: Translate }>()

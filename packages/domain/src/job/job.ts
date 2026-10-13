@@ -61,7 +61,7 @@ export const jobDtoSchema = z.object({
   status: z.enum(JOB_STATUSES),
   content: jobContentSchema,
   quality: adQualityReportSchema.nullable(),
-  /** Empty when the ad satisfies PLAN §5.1 and may be published. */
+  /** Empty when the ad satisfies PRODUCT.md §4.1 and may be published. */
   publishIssues: z.array(z.object({ path: z.string(), rule: z.string(), detail: complianceDetailSchema.optional() })),
   /** Doubtful compliance findings: shown to the author, never blocking. */
   complianceWarnings: z.array(z.object({ path: z.string(), rule: z.enum(COMPLIANCE_WARNING_RULES), detail: complianceDetailSchema })),

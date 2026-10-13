@@ -22,7 +22,7 @@ export const createImportBatchInput = z.object({
 });
 
 /**
- * Registers an import (PLAN Fase 8): checks the target job and stage, stores the uploaded originals under the batch
+ * Registers an import (PRODUCT.md §3.1): checks the target job and stage, stores the uploaded originals under the batch
  * prefix and queues `import.analyze`. The files are ZIPs of CVs, CSV, XLSX or a Notion export: the worker unpacks and
  * parses them, with the zip-bomb limits. If the task cannot be queued the batch is `failed`, never stuck `uploaded`.
  */

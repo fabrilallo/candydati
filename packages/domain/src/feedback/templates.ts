@@ -15,7 +15,7 @@ const q = (id: string, it: string, en: string, required = true): FeedbackQuestio
 const CANDIDATE_QUESTIONS = q('candidate_questions', 'Domande e dubbi del candidato', "The candidate's questions and doubts", false);
 
 /**
- * Fixed questions per stage type (PLAN §5, Phase 9). They ask what was seen, never for a mark: there is no score and no
+ * Fixed questions per stage type (PRODUCT.md §4, Phase 9). They ask what was seen, never for a mark: there is no score and no
  * ranking anywhere in feedback (principle 4). The recommendation (`proceed | do_not_proceed | discuss`) is a separate,
  * mandatory field and an opinion for whoever decides.
  */

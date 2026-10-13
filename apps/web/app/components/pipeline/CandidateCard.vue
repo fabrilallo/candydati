@@ -5,7 +5,7 @@ import { fullName } from '@/lib/candidate-view'
 import { relativeTime } from '@/lib/job-list-view'
 
 /**
- * A candidate on the board (docs/DESIGN.md "Card candidato"): initials, name, headline, experience and location,
+ * A candidate on the board (docs/DESIGN-SYSTEM.md "Card candidato"): initials, name, headline, experience and location,
  * tags, then the time in the stage and the notes. No score, no match: the product has none by choice.
  */
 const props = defineProps<{

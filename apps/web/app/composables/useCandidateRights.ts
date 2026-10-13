@@ -12,7 +12,7 @@ export type CorrectOutcome = { readonly detail: CandidateDetailDto } | { readonl
 export type EraseTarget = { readonly kind: 'candidate' } | { readonly kind: 'application'; readonly applicationId: string; readonly jobTitle: string; readonly last: boolean }
 
 /**
- * The four rights of the candidate (PLAN §7) as the recruiter carries them out: correct, withdraw a consent, erase.
+ * The four rights of the candidate (PRODUCT.md §6) as the recruiter carries them out: correct, withdraw a consent, erase.
  * The export is a plain download link. Every call is audited by the api.
  */
 export const useCandidateRights = (candidateId: MaybeRefOrGetter<string>) => {

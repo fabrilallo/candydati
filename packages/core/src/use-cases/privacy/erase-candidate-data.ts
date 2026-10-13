@@ -50,7 +50,7 @@ export class FileCleanupError extends Error {
 }
 
 /**
- * THE erasure (PLAN §7), used by the recruiter's request, the consent withdrawal and the retention job: nothing else
+ * THE erasure (PRODUCT.md §6), used by the recruiter's request, the consent withdrawal and the retention job: nothing else
  * deletes candidate data. In one transaction it removes the applications and everything hanging from them, the
  * candidate when no application is left, and writes the audit event `candidate.erased` (ids and counts only) and the
  * webhook event of the same name. After the commit it deletes the CV files; the ones that fail are retried by the worker.

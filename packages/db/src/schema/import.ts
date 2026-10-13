@@ -10,7 +10,7 @@ const organizationRef = () =>
     .references(() => organization.id, { onDelete: 'restrict' });
 
 /**
- * One import (PLAN Fase 8): a folder of CVs and/or sheets turned into candidates of one job. The row stays after the
+ * One import (PRODUCT.md §3.1): a folder of CVs and/or sheets turned into candidates of one job. The row stays after the
  * undo with counts only; the proposed people (`import_item`, `import_analysis`) are deleted when the batch is done or undone.
  */
 export const importBatch = pgTable(

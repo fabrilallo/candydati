@@ -3,7 +3,7 @@ import { defineCandidateUseCase } from './define.js';
 import { requireApplication } from './shared.js';
 import type { CvFile } from './views.js';
 
-/** The original document, always reachable (PLAN §5). Every download or preview is audited. */
+/** The original document, always reachable (PRODUCT.md §4). Every download or preview is audited. */
 export const openCv = defineCandidateUseCase({
   name: 'openCv',
   input: z.object({ applicationId: z.string().min(1) }),

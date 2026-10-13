@@ -2,7 +2,7 @@
 import { Label } from '@/components/ui/label'
 
 /**
- * Label above, control, help below, error in place of the help (docs/DESIGN.md "Form"). Texts arrive already
+ * Label above, control, help below, error in place of the help (docs/DESIGN-SYSTEM.md "Form"). Texts arrive already
  * translated: the public form reads in the language of the ad, not of the visitor.
  */
 defineProps<{ id: string; label: string; optional?: string | undefined; hint?: string | undefined; error?: string | undefined }>()

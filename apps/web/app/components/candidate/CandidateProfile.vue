@@ -7,7 +7,7 @@ import { isToRenew } from '@/lib/import-view'
 import { stageName } from '@/lib/pipeline-board'
 import { Badge } from '@/components/ui/badge'
 
-/** Key and value list of the profile (docs/DESIGN.md "Elenco chiave e valore"), then what was read from the CV. */
+/** Key and value list of the profile (docs/DESIGN-SYSTEM.md "Elenco chiave e valore"), then what was read from the CV. */
 const props = defineProps<{ detail: CandidateDetailDto; current: CandidateApplicationDto | null; now: Date }>()
 const { t, locale } = useI18n()
 const candidate = computed(() => props.detail.candidate)

@@ -23,7 +23,7 @@ const groupBy = <T>(items: readonly T[], keyOf: (item: T) => string): ReadonlyMa
 };
 
 /**
- * Undoes a whole import while it is `done` (PLAN Fase 8): erases, through `eraseCandidateData` with reason `import_undone`,
+ * Undoes a whole import while it is `done` (PRODUCT.md §3.1): erases, through `eraseCandidateData` with reason `import_undone`,
  * every application the batch created that is still waiting for reconfirmation. A candidate the batch created goes
  * entirely (when nothing else of theirs remains); for someone who already existed only the applications, notes, files
  * and messages the batch added go. People who reconfirmed are skipped and counted. The batch becomes `undone`.

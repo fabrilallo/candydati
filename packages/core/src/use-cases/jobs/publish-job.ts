@@ -11,7 +11,7 @@ const APPROVAL_PATH = 'approval';
 
 export interface PublishJobResult {
   readonly job: Job;
-  /** Null only when the analysis failed: publication never waits on the score (PLAN §5.2). */
+  /** Null only when the analysis failed: publication never waits on the score (PRODUCT.md §4.3). */
   readonly quality: AdQualityAssessment | null;
 }
 

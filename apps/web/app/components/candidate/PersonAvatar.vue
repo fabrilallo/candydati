@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { initials } from '@/lib/initials'
 
-/** Initials only, never a photo (PLAN §7 minimisation). Other people sit on `secondary` (docs/DESIGN.md). */
+/** Initials only, never a photo (PRODUCT.md §6 minimisation). Other people sit on `secondary` (docs/DESIGN-SYSTEM.md). */
 withDefaults(defineProps<{ name: string; size?: 'sm' | 'md' | 'lg' }>(), { size: 'md' })
 const SIZES = { sm: 'size-8 text-xs', md: 'size-9 text-xs', lg: 'size-16 text-xl' } as const
 </script>

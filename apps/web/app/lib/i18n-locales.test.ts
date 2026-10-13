@@ -86,7 +86,7 @@ describe('locale files', () => {
     expect(mismatched).toEqual([])
   })
 
-  it.each(Object.keys(flat))('%s uses no em or en dash (docs/DESIGN.md copy rules)', (code) => {
+  it.each(Object.keys(flat))('%s uses no em or en dash (docs/DESIGN-SYSTEM.md copy rules)', (code) => {
     const dashed = Object.entries(flat[code as 'it' | 'en']).filter(([, value]) => /[–—]/.test(value))
     expect(dashed).toEqual([])
   })

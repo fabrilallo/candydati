@@ -9,7 +9,7 @@ export interface ResponseInput {
   readonly outcome: Outcome | null
 }
 
-/** docs/DESIGN.md: neutral on track, warning when near, destructive when late; "answered" stays quiet. */
+/** docs/DESIGN-SYSTEM.md: neutral on track, warning when near, destructive when late; "answered" stays quiet. */
 export type CountdownTone = 'neutral' | 'warning' | 'destructive' | 'quiet'
 
 export interface Countdown {

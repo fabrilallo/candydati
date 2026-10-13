@@ -21,7 +21,7 @@ export interface BoardDragOptions {
 /**
  * Moving cards on the board: native drag and drop with a lifted, slightly rotated drag image and a drop line, and
  * the keyboard alternative (Space to pick up, arrows to choose the stage, Space or Enter to drop, Esc to cancel),
- * announced through a live region (docs/DESIGN.md "Trascinamento").
+ * announced through a live region (docs/DESIGN-SYSTEM.md "Trascinamento").
  */
 export const useBoardDrag = (options: BoardDragOptions) => {
   const { t } = useI18n()

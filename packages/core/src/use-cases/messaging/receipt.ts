@@ -16,7 +16,7 @@ export interface ReceiptInput {
 }
 
 /**
- * The only automatic message (PLAN §6): the application receipt, with the organization's `receipt` template or the
+ * The only automatic message (PRODUCT.md §5): the application receipt, with the organization's `receipt` template or the
  * default one in the language of the ad. Never throws: the application is already stored and must not fail because of
  * an email. Returns whether the receipt was queued; failures go to `receipts.onError`.
  */

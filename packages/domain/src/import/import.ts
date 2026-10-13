@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { cvExtractionSchema } from '../candidate/application.js';
 import { importMappingSchema, type ImportMapping } from './mapping.js';
 
-/** Days an imported candidate has to reconfirm consent before their data is erased (PLAN §7). */
+/** Days an imported candidate has to reconfirm consent before their data is erased (PRODUCT.md §6). */
 export const IMPORT_RECONFIRM_DAYS = 30;
 
 export const IMPORT_LIMITS = {

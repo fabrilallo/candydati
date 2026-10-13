@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { SUPPORTED_LOCALES } from '../platform/config.js';
 
 /**
- * Consent scopes (PLAN §7). `selection`: only the position applied for. `talent_pool`: also future positions of
+ * Consent scopes (PRODUCT.md §6). `selection`: only the position applied for. `talent_pool`: also future positions of
  * the same organization. They are separate choices; `selection` is always required to apply.
  */
 export const CONSENT_SCOPES = ['selection', 'talent_pool'] as const;
@@ -10,7 +10,7 @@ export type ConsentScope = (typeof CONSENT_SCOPES)[number];
 
 /**
  * `given`: the candidate consented through our form (or reconfirmed). `to_renew`: imported data, never consented through
- * our form; visible only in the pipeline of its import job until the candidate reconfirms (PLAN §7).
+ * our form; visible only in the pipeline of its import job until the candidate reconfirms (PRODUCT.md §6).
  */
 export const CONSENT_STATUSES = ['given', 'to_renew'] as const;
 export type ConsentStatus = (typeof CONSENT_STATUSES)[number];
@@ -29,7 +29,7 @@ export const privacyNoticeInputSchema = z.object({
   language: z.enum(SUPPORTED_LOCALES),
   /** Plain text with blank-line paragraphs. Rendered escaped, never as HTML. */
   text: z.string().trim().min(200).max(PRIVACY_TEXT_MAX),
-  /** Who candidates contact to exercise their rights (PLAN §7). */
+  /** Who candidates contact to exercise their rights (PRODUCT.md §6). */
   contactEmail: z.email(),
   retentionDays: z.object({ selection: retentionDays, talent_pool: retentionDays }),
 });

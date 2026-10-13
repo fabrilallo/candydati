@@ -63,7 +63,7 @@ export const feedbackRequest = pgTable(
   ],
 );
 
-/** What an interviewer left. There is no score column on purpose (PLAN §1, principle 4). One per request. */
+/** What an interviewer left. There is no score column on purpose (PRODUCT.md §2, principle 4). One per request. */
 export const interviewFeedback = pgTable(
   'interview_feedback',
   {

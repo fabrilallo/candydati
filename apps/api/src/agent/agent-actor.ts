@@ -8,7 +8,7 @@ export const AGENT_ID = 'assistant';
 /**
  * What the assistant's tools need, and nothing else. Intersected with what the role can hand to an agent, so the
  * agent never has more than the person and never a machine-forbidden permission. Publishing, closing, moving,
- * deciding and sending are absent on purpose: those stay with a person (PLAN §1 principle 4, §6).
+ * deciding and sending are absent on purpose: those stay with a person (PRODUCT.md §2 principle 4, §6).
  */
 export const AGENT_TOOL_PERMISSIONS: readonly Permission[] = [
   'job:read',

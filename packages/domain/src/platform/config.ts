@@ -12,7 +12,7 @@ const platformEnvSchema = z.object({
   PLATFORM_URL: z.url().default('http://localhost:3000'),
   PLATFORM_SUPPORT_EMAIL: z.email().optional(),
   PLATFORM_DEFAULT_LOCALE: z.enum(SUPPORTED_LOCALES).default(DEFAULT_LOCALE),
-  /** 0-10. Below it an ad is flagged before publication, never blocked (PLAN §5.2). */
+  /** 0-10. Below it an ad is flagged before publication, never blocked (PRODUCT.md §4.3). */
   PLATFORM_AD_QUALITY_THRESHOLD: z.coerce.number().min(0).max(10).default(6),
 });
 

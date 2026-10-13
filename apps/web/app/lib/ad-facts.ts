@@ -18,7 +18,7 @@ export const groupAmount = (amount: number, language: string): string =>
 
 /**
  * The headline figure of an ad: `45.000 - 60.000 €` (it) or `£45,000 - 60,000` (en). The currency appears once,
- * where the language puts it; the separator is a plain hyphen (no en dash, see docs/DESIGN.md).
+ * where the language puts it; the separator is a plain hyphen (no en dash, see docs/DESIGN-SYSTEM.md).
  */
 export const salaryFigure = (salary: JobContent['salary'], language: string): string | null => {
   const { min, max, currency } = salary

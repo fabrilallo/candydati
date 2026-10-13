@@ -1,5 +1,5 @@
 /**
- * Closed lists used by the job ad (PLAN §5.1). Ids are stable and public: they appear in the API, the feeds and
+ * Closed lists used by the job ad (PRODUCT.md §4.1). Ids are stable and public: they appear in the API, the feeds and
  * the exported schema. Labels are translated in the apps, never stored.
  */
 export const JOB_ROLE_FAMILIES = {

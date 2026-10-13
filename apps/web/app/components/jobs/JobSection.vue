@@ -1,5 +1,5 @@
 <script setup lang="ts">
-/** A group of the form. No card: sections are separated by a rule and space (docs/DESIGN.md, cards only for real hierarchy). */
+/** A group of the form. No card: sections are separated by a rule and space (docs/DESIGN-SYSTEM.md, cards only for real hierarchy). */
 defineProps<{ id: string; title: string; description?: string | undefined }>()
 </script>
 

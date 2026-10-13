@@ -4,7 +4,7 @@ import { EXTRACTION_STATUSES, OUTCOMES, cvExtractionSchema } from './application
 import { FEEDBACK_RECOMMENDATIONS } from '../feedback/feedback.js';
 import { MESSAGE_DIRECTIONS, MESSAGE_STATUSES } from '../messaging/message.js';
 
-/** Identifier of the public, versioned schema of the candidate export (PLAN §7). Bump the version on breaking changes. */
+/** Identifier of the public, versioned schema of the candidate export (PRODUCT.md §6). Bump the version on breaking changes. */
 export const CANDIDATE_EXPORT_SCHEMA_ID = 'candidate-export.v1';
 
 const date = z.iso.datetime();

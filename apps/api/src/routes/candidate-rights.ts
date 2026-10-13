@@ -6,7 +6,7 @@ import type { AppContext } from '../app-context.js';
 import { sendZip } from '../http/zip-download.js';
 import { bodyOf, paramOf } from './request.js';
 
-/** Access, rectification and erasure of one candidate (PLAN §7). Thin adapters over the use cases. */
+/** Access, rectification and erasure of one candidate (PRODUCT.md §6). Thin adapters over the use cases. */
 export function registerCandidateRightsRoutes(app: FastifyInstance, ctx: AppContext): void {
   const deps = ctx.rightsDeps;
 
