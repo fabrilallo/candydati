@@ -1,0 +1,122 @@
+/*
+ * Design tokens (Tailwind 4 + shadcn-vue). Restrained "paper and ink" palette: warm neutrals, one deep green
+ * for actions, state colours only for state. Dark mode = class `dark` on <html> (set by @nuxtjs/color-mode).
+ */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  color-scheme: light;
+  --background: #f7f6f2;
+  --foreground: #1d1c19;
+  --card: #fffffe;
+  --card-foreground: #1d1c19;
+  --popover: #fffffe;
+  --popover-foreground: #1d1c19;
+  --primary: #1e4d3e;
+  --primary-foreground: #f7f6f2;
+  --secondary: #ecebe5;
+  --secondary-foreground: #1d1c19;
+  --muted: #efeee8;
+  --muted-foreground: #5f5c54;
+  --accent: #e9e8e1;
+  --accent-foreground: #1d1c19;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --success: #1b6b4a;
+  --success-soft: #e3f1ea;
+  --warning: #9a5b00;
+  --warning-soft: #fbf0d9;
+  --border: #e2e0d8;
+  --input: #cfccc1;
+  --ring: #2f7a63;
+  --radius: 0.5rem;
+  --sidebar: #f1f0ea;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #121211;
+  --foreground: #ecebe5;
+  --card: #1a1a18;
+  --card-foreground: #ecebe5;
+  --popover: #1f1f1c;
+  --popover-foreground: #ecebe5;
+  --primary: #86c9ae;
+  --primary-foreground: #0f1a15;
+  --secondary: #262622;
+  --secondary-foreground: #ecebe5;
+  --muted: #212120;
+  --muted-foreground: #a3a095;
+  --accent: #2a2a26;
+  --accent-foreground: #ecebe5;
+  --destructive: #f2877c;
+  --destructive-foreground: #1a0b09;
+  --success: #7fcfa6;
+  --success-soft: #16261f;
+  --warning: #e8b655;
+  --warning-soft: #2b2212;
+  --border: #2c2c28;
+  --input: #3a3a35;
+  --ring: #86c9ae;
+  --sidebar: #171715;
+}
+
+@theme inline {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "tnum" 1, "cv11" 1;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

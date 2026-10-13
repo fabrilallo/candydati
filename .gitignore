@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.turbo/
+.nuxt/
+.output/
+coverage/
+.data/
+.env
+.env.*
+!.env.example
+.DS_Store

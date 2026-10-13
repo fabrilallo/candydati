@@ -1,0 +1,157 @@
+{
+  "common": {
+    "loading": "Caricamento…",
+    "retry": "Riprova",
+    "cancel": "Annulla",
+    "you": "tu",
+    "language": "Lingua",
+    "skipToContent": "Vai al contenuto"
+  },
+  "locales": { "it": "Italiano", "en": "English" },
+  "theme": { "label": "Tema", "light": "Chiaro", "dark": "Scuro", "system": "Sistema" },
+  "nav": { "main": "Navigazione principale", "dashboard": "Panoramica", "members": "Membri", "audit": "Registro delle azioni", "settings": "Impostazioni" },
+  "roles": {
+    "owner": "Proprietario",
+    "admin": "Amministratore",
+    "recruiter": "Recruiter",
+    "hiring_manager": "Hiring manager",
+    "interviewer": "Intervistatore"
+  },
+  "auth": {
+    "name": "Nome e cognome",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "Almeno 10 caratteri.",
+    "login": {
+      "title": "Accedi",
+      "subtitle": "Entra nello spazio del tuo team.",
+      "submit": "Accedi",
+      "submitting": "Accesso in corso…",
+      "noAccount": "Non hai un account?",
+      "signupLink": "Registrati"
+    },
+    "signup": {
+      "title": "Crea il tuo account",
+      "subtitle": "Poi creerai l'organizzazione o accetterai un invito.",
+      "submit": "Crea account",
+      "submitting": "Creazione in corso…",
+      "hasAccount": "Hai già un account?",
+      "loginLink": "Accedi"
+    }
+  },
+  "onboarding": {
+    "title": "Crea la tua organizzazione",
+    "subtitle": "È lo spazio in cui il tuo team gestisce annunci e candidature. Sarai il proprietario.",
+    "name": "Nome dell'organizzazione",
+    "namePlaceholder": "Es. Acme Srl",
+    "slug": "Indirizzo breve",
+    "slugHint": "Lettere minuscole, numeri e trattini. Si ricava dal nome, puoi modificarlo.",
+    "submit": "Crea organizzazione",
+    "submitting": "Creazione in corso…",
+    "created": "Organizzazione creata"
+  },
+  "shell": {
+    "organization": "Organizzazione",
+    "account": "Account",
+    "signOut": "Esci",
+    "signedOut": "Sei uscito",
+    "openMenu": "Apri il menu dell'utente"
+  },
+  "dashboard": {
+    "title": "Panoramica",
+    "welcome": "Ciao, {name}",
+    "emptyTitle": "Qui non c'è ancora niente",
+    "emptyBody": "Invita un collega dalla pagina Membri: ogni azione compare nel registro."
+  },
+  "members": {
+    "title": "Membri",
+    "subtitle": "Chi fa parte di {organization} e con quale ruolo.",
+    "listTitle": "Membri dell'organizzazione",
+    "columns": { "name": "Nome", "email": "Email", "role": "Ruolo" },
+    "pendingTitle": "Inviti in sospeso",
+    "pendingEmpty": "Nessun invito in sospeso.",
+    "expires": "Scade il {date}",
+    "cancelInvitation": "Annulla invito",
+    "cancelInvitationFor": "Annulla l'invito per {email}",
+    "invitationCancelled": "Invito annullato",
+    "inviteTitle": "Invita un collega",
+    "inviteHint": "Riceverà un invito per unirsi con il ruolo scelto.",
+    "email": "Email del collega",
+    "role": "Ruolo",
+    "invite": "Invia invito",
+    "inviting": "Invio in corso…",
+    "invited": "Invito inviato a {email}",
+    "noInvitePermission": "Il tuo ruolo non permette di invitare persone.",
+    "noRoleSelf": "Nessun ruolo"
+  },
+  "audit": {
+    "title": "Registro delle azioni",
+    "subtitle": "Tutto ciò che è successo in {organization}, dal più recente. Il registro non si modifica.",
+    "columns": { "when": "Quando", "who": "Chi", "action": "Azione", "target": "Oggetto", "details": "Dettagli" },
+    "actor": {
+      "user": "Persona",
+      "agent": "Agente",
+      "api_key": "Chiave API",
+      "system": "Sistema",
+      "unknown": "Sconosciuto",
+      "onBehalf": "per conto di un utente"
+    },
+    "detail": { "email": "Email", "role": "Ruolo", "previousRole": "Ruolo precedente", "name": "Nome" },
+    "targetTypes": { "organization": "Organizzazione", "invitation": "Invito", "member": "Membro" },
+    "empty": "Ancora nessuna azione registrata.",
+    "loadFailed": "Non siamo riusciti a caricare il registro.",
+    "forbidden": "Non hai il permesso di leggere il registro delle azioni.",
+    "pagination": { "label": "Paginazione", "previous": "Pagina precedente", "next": "Pagina successiva", "status": "Pagina {page} di {pages} · {total} azioni" },
+    "actions": {
+      "unknown": "Azione non riconosciuta",
+      "organization": { "created": "Ha creato l'organizzazione", "updated": "Ha modificato l'organizzazione", "deleted": "Ha eliminato l'organizzazione" },
+      "invitation": {
+        "created": "Ha invitato una persona",
+        "accepted": "Ha accettato un invito",
+        "rejected": "Ha rifiutato un invito",
+        "cancelled": "Ha annullato un invito"
+      },
+      "member": { "added": "Ha aggiunto un membro", "role_changed": "Ha cambiato il ruolo di un membro", "removed": "Ha rimosso un membro" },
+      "audit": { "read": "Ha letto il registro delle azioni" }
+    }
+  },
+  "invitation": {
+    "title": "Invito a unirsi a {organization}",
+    "subtitle": "Entrerai come {role}.",
+    "from": "Invitato da {inviter}",
+    "forEmail": "Per {email}",
+    "accept": "Accetta invito",
+    "reject": "Rifiuta",
+    "accepted": "Ora fai parte di {organization}",
+    "rejected": "Invito rifiutato",
+    "notPending": "Questo invito non è più valido ({status}).",
+    "goToApp": "Vai all'app",
+    "loadFailed": "Non riusciamo a leggere questo invito."
+  },
+  "validation": {
+    "required": "Campo obbligatorio",
+    "email": "Inserisci un indirizzo email valido",
+    "passwordMin": "La password deve avere almeno 10 caratteri",
+    "passwordMax": "La password è troppo lunga",
+    "nameMin": "Almeno 2 caratteri",
+    "nameMax": "Troppo lungo",
+    "slug": "Solo lettere minuscole, numeri e trattini singoli",
+    "role": "Scegli un ruolo"
+  },
+  "errors": {
+    "generic": "Qualcosa non ha funzionato. Riprova tra poco.",
+    "invalidCredentials": "Email o password non corrette",
+    "emailTaken": "Esiste già un account con questa email",
+    "slugTaken": "Questo indirizzo breve è già in uso",
+    "alreadyInvited": "Questa persona ha già un invito in sospeso",
+    "alreadyMember": "Questa persona fa già parte dell'organizzazione",
+    "invitationNotFound": "Invito non trovato o scaduto",
+    "invitationWrongRecipient": "Questo invito è destinato a un altro indirizzo email",
+    "emailVerificationRequired": "Verifica prima il tuo indirizzo email",
+    "unauthenticated": "Accedi per continuare",
+    "forbidden": "Non hai il permesso di farlo",
+    "notFound": "Non trovato",
+    "tooManyRequests": "Troppe richieste, riprova tra poco",
+    "unreachable": "Il servizio non è raggiungibile in questo momento"
+  }
+}

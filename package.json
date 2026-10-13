@@ -1,0 +1,31 @@
+{
+  "name": "team-tracker",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ATS open source e agentico (nome in codice team-tracker). Il nome del prodotto si legge da PLATFORM_*.",
+  "license": "AGPL-3.0-only",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "pnpm --filter @tt/db generate",
+    "db:migrate": "pnpm --filter @tt/db migrate",
+    "db:studio": "pnpm --filter @tt/db studio",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "10.10.0",
+    "turbo": "2.10.12",
+    "typescript": "5.9.3",
+    "typescript-eslint": "^8.71.2"
+  }
+}

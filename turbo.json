@@ -1,0 +1,14 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalEnv": ["NODE_ENV"],
+  "globalPassThroughEnv": ["DATABASE_URL", "TEST_DATABASE_URL", "BETTER_AUTH_*", "WEB_ORIGIN", "TRUSTED_ORIGINS", "PLATFORM_*", "NUXT_*", "NITRO_PRESET"],
+  "tasks": {
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", ".output/**", ".nuxt/**"] },
+    "dev": { "cache": false, "persistent": true },
+    "test": { "dependsOn": ["^build"], "outputs": ["coverage/**"] },
+    "test:coverage": { "dependsOn": ["^build"], "outputs": ["coverage/**"] },
+    "lint": {},
+    "typecheck": { "dependsOn": ["^build"] }
+  }
+}

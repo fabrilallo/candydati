@@ -1,0 +1,157 @@
+{
+  "common": {
+    "loading": "Loading…",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "you": "you",
+    "language": "Language",
+    "skipToContent": "Skip to content"
+  },
+  "locales": { "it": "Italiano", "en": "English" },
+  "theme": { "label": "Theme", "light": "Light", "dark": "Dark", "system": "System" },
+  "nav": { "main": "Main navigation", "dashboard": "Overview", "members": "Members", "audit": "Audit log", "settings": "Settings" },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "recruiter": "Recruiter",
+    "hiring_manager": "Hiring manager",
+    "interviewer": "Interviewer"
+  },
+  "auth": {
+    "name": "Full name",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 10 characters.",
+    "login": {
+      "title": "Sign in",
+      "subtitle": "Step into your team's workspace.",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "noAccount": "No account yet?",
+      "signupLink": "Sign up"
+    },
+    "signup": {
+      "title": "Create your account",
+      "subtitle": "Next you will create an organization or accept an invitation.",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Sign in"
+    }
+  },
+  "onboarding": {
+    "title": "Create your organization",
+    "subtitle": "It is the space where your team manages job ads and applications. You will be its owner.",
+    "name": "Organization name",
+    "namePlaceholder": "e.g. Acme Inc.",
+    "slug": "Short address",
+    "slugHint": "Lowercase letters, numbers and dashes. Derived from the name, you can edit it.",
+    "submit": "Create organization",
+    "submitting": "Creating…",
+    "created": "Organization created"
+  },
+  "shell": {
+    "organization": "Organization",
+    "account": "Account",
+    "signOut": "Sign out",
+    "signedOut": "You are signed out",
+    "openMenu": "Open the user menu"
+  },
+  "dashboard": {
+    "title": "Overview",
+    "welcome": "Hi, {name}",
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "Invite a colleague from the Members page: every action shows up in the audit log."
+  },
+  "members": {
+    "title": "Members",
+    "subtitle": "Who is part of {organization} and with which role.",
+    "listTitle": "Organization members",
+    "columns": { "name": "Name", "email": "Email", "role": "Role" },
+    "pendingTitle": "Pending invitations",
+    "pendingEmpty": "No pending invitations.",
+    "expires": "Expires {date}",
+    "cancelInvitation": "Cancel invitation",
+    "cancelInvitationFor": "Cancel the invitation for {email}",
+    "invitationCancelled": "Invitation cancelled",
+    "inviteTitle": "Invite a colleague",
+    "inviteHint": "They will get an invitation to join with the chosen role.",
+    "email": "Colleague's email",
+    "role": "Role",
+    "invite": "Send invitation",
+    "inviting": "Sending…",
+    "invited": "Invitation sent to {email}",
+    "noInvitePermission": "Your role does not allow inviting people.",
+    "noRoleSelf": "No role"
+  },
+  "audit": {
+    "title": "Audit log",
+    "subtitle": "Everything that happened in {organization}, most recent first. The log cannot be edited.",
+    "columns": { "when": "When", "who": "Who", "action": "Action", "target": "Target", "details": "Details" },
+    "actor": {
+      "user": "Person",
+      "agent": "Agent",
+      "api_key": "API key",
+      "system": "System",
+      "unknown": "Unknown",
+      "onBehalf": "on behalf of a user"
+    },
+    "detail": { "email": "Email", "role": "Role", "previousRole": "Previous role", "name": "Name" },
+    "targetTypes": { "organization": "Organization", "invitation": "Invitation", "member": "Member" },
+    "empty": "No actions recorded yet.",
+    "loadFailed": "We could not load the audit log.",
+    "forbidden": "You do not have permission to read the audit log.",
+    "pagination": { "label": "Pagination", "previous": "Previous page", "next": "Next page", "status": "Page {page} of {pages} · {total} actions" },
+    "actions": {
+      "unknown": "Unrecognised action",
+      "organization": { "created": "Created the organization", "updated": "Updated the organization", "deleted": "Deleted the organization" },
+      "invitation": {
+        "created": "Invited a person",
+        "accepted": "Accepted an invitation",
+        "rejected": "Declined an invitation",
+        "cancelled": "Cancelled an invitation"
+      },
+      "member": { "added": "Added a member", "role_changed": "Changed a member's role", "removed": "Removed a member" },
+      "audit": { "read": "Read the audit log" }
+    }
+  },
+  "invitation": {
+    "title": "Invitation to join {organization}",
+    "subtitle": "You will join as {role}.",
+    "from": "Invited by {inviter}",
+    "forEmail": "For {email}",
+    "accept": "Accept invitation",
+    "reject": "Decline",
+    "accepted": "You are now part of {organization}",
+    "rejected": "Invitation declined",
+    "notPending": "This invitation is no longer valid ({status}).",
+    "goToApp": "Go to the app",
+    "loadFailed": "We cannot read this invitation."
+  },
+  "validation": {
+    "required": "Required field",
+    "email": "Enter a valid email address",
+    "passwordMin": "The password must be at least 10 characters",
+    "passwordMax": "The password is too long",
+    "nameMin": "At least 2 characters",
+    "nameMax": "Too long",
+    "slug": "Lowercase letters, numbers and single dashes only",
+    "role": "Choose a role"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again shortly.",
+    "invalidCredentials": "Incorrect email or password",
+    "emailTaken": "An account with this email already exists",
+    "slugTaken": "This short address is already taken",
+    "alreadyInvited": "This person already has a pending invitation",
+    "alreadyMember": "This person is already part of the organization",
+    "invitationNotFound": "Invitation not found or expired",
+    "invitationWrongRecipient": "This invitation is addressed to another email",
+    "emailVerificationRequired": "Verify your email address first",
+    "unauthenticated": "Sign in to continue",
+    "forbidden": "You are not allowed to do that",
+    "notFound": "Not found",
+    "tooManyRequests": "Too many requests, try again shortly",
+    "unreachable": "The service is not reachable right now"
+  }
+}

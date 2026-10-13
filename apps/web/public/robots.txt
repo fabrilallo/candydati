@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /app/
+Disallow: /api/
+Disallow: /onboarding
+Disallow: /accept-invitation/
+Disallow: /*?
+Disallow: /*?page=
+Disallow: /*?filters=
+Disallow: /*?sort=
+Disallow: /__nuxt_island/

@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: team-tracker-postgres
+    environment:
+      POSTGRES_USER: tt
+      POSTGRES_PASSWORD: tt
+      POSTGRES_DB: team_tracker
+    ports:
+      - "5434:5432"
+    volumes:
+      - tt-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tt -d team_tracker"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    # The MinIO community images are no longer published on Docker Hub or quay.io: this is the Chainguard build.
+    image: cgr.dev/chainguard/minio:latest
+    container_name: team-tracker-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: tt-minio
+      MINIO_ROOT_PASSWORD: tt-minio-secret
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - tt-minio:/data
+
+volumes:
+  tt-pgdata:
+  tt-minio:
