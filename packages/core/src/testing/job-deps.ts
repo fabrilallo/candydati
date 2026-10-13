@@ -1,4 +1,5 @@
 import type { JobDeps } from '../job-ports.js';
+import { createInMemoryJobApprovals, createInMemoryOrganizationSettings } from './in-memory-job-requests.js';
 import { createInMemoryAuditLog, type InMemoryAuditLog } from './in-memory-audit-log.js';
 import { fakeAdQualityAnalyzer } from './job-fixtures.js';
 import { createCandidateStore, createInMemoryApplicationCounts } from './in-memory-candidates.js';
@@ -33,6 +34,8 @@ export function createTestJobDeps(overrides: Partial<TestJobDeps> = {}): TestJob
     privacyNotices: createInMemoryPrivacyNoticeRepository(),
     outbox: createInMemoryOutbox(),
     automationRules: createInMemoryAutomationRules(),
+    approvals: createInMemoryJobApprovals(),
+    organizationSettings: createInMemoryOrganizationSettings(),
     adQuality: fakeAdQualityAnalyzer(),
     adQualityThreshold: 6,
     newId: () => {

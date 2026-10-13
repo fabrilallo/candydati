@@ -37,6 +37,9 @@ const COPY: Readonly<Record<Locale, Copy>> = {
       job_close_blocked: 'chiusura annuncio bloccata',
       automation_failed: 'automazione non riuscita',
       retention_expiring: 'dati in scadenza per conservazione',
+      job_stale: 'annuncio fermo da 90 giorni',
+      job_request_submitted: 'richiesta di apertura posizione da valutare',
+      job_request_decided: 'richiesta di apertura posizione valutata',
     },
     noJob: 'altro',
     open: 'Apri la lista',
@@ -53,6 +56,9 @@ const COPY: Readonly<Record<Locale, Copy>> = {
       job_close_blocked: 'job close blocked',
       automation_failed: 'automation failed',
       retention_expiring: 'data retention expiring',
+      job_stale: 'ad idle for 90 days',
+      job_request_submitted: 'position request to review',
+      job_request_decided: 'position request decided',
     },
     noJob: 'other',
     open: 'Open the list',
@@ -75,6 +81,20 @@ export function buildDigestEmail(config: DigestSender, entry: DigestEntry): { su
   const link = `${config.platformUrl.replace(/\/$/, '')}${ATTENTION_PATH}`;
   const text = [copy.greeting(entry.name), copy.intro, summarize(entry, copy).join('\n'), `${copy.open}: ${link}`].join('\n\n');
   return { subject: copy.subject(entry.notifications.length), text, html: textToHtml(text) };
+}
+
+/** Digests of the same person from different scans become one entry, so each person gets a single email per run. */
+export function mergeDigests(...groups: readonly (readonly DigestEntry[])[]): readonly DigestEntry[] {
+  const merged = new Map<string, DigestEntry>();
+  for (const entry of groups.flat()) {
+    const key = `${entry.organizationId}:${entry.userId}`;
+    const found = merged.get(key);
+    merged.set(
+      key,
+      found ? { ...found, notifications: [...found.notifications, ...entry.notifications], jobTitles: { ...found.jobTitles, ...entry.jobTitles } } : entry,
+    );
+  }
+  return [...merged.values()];
 }
 
 export interface DigestResult {

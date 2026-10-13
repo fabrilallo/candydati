@@ -1,5 +1,7 @@
-import { jobContentSchema, locationSchema, salarySchema, selectionStageSchema, type JobContent, type SelectionStage } from '@tt/domain'
+import { jobContentSchema, locationSchema, salarySchema, selectionStageSchema, type SelectionStage } from '@tt/domain'
+import { employmentToInput } from './employment-form'
 import type { JobForm, StageForm } from './job-form'
+import { employmentSchema, type Employment, type JobContent9 } from './phase9-contract'
 
 type Schema<T> = { safeParse: (value: unknown) => { success: true; data: T } | { success: false } }
 
@@ -19,12 +21,19 @@ const stageOf = (stage: StageForm): SelectionStage | undefined =>
 
 const shape = jobContentSchema.shape
 
+/** Each employment field on its own: a half-typed amount leaves out that field only. */
+const employmentOf = (form: JobForm): Employment | undefined => {
+  const raw = employmentToInput(form) ?? {}
+  const kept = Object.fromEntries(Object.entries(raw).filter(([key, value]) => employmentSchema.shape[key as keyof Employment]?.safeParse(value).success))
+  return Object.keys(kept).length === 0 ? undefined : (kept as Employment)
+}
+
 /**
  * Pure: the ad as it would read right now, for the live preview. Lenient where saving is strict: every value that
  * is not valid yet is simply left out (an empty title stays empty), so a half-written draft still renders and the
  * missing parts show up as gaps. Incomplete stages are not shown.
  */
-export const formToPreview = (form: JobForm): JobContent => {
+export const formToPreview = (form: JobForm): JobContent9 => {
   const remote = form.workMode === 'remote'
   const salary = valid(salarySchema, defined({ min: number(form.salaryMin), max: number(form.salaryMax), currency: form.currency, period: form.period }))
   const location = defined({
@@ -51,5 +60,7 @@ export const formToPreview = (form: JobForm): JobContent => {
     growth: form.growth.trim(),
     workLifeBalance: form.workLifeBalance.trim(),
     culture: form.culture.trim(),
-  }) as JobContent
+    employment: employmentOf(form),
+    protectedCategories: valid(shape.protectedCategories, text(form.protectedCategories)),
+  }) as JobContent9
 }

@@ -64,3 +64,33 @@ describe('JobAdView in preview', () => {
     expect(wrapper.find('[data-section="benefits"]').exists()).toBe(false)
   })
 })
+
+describe('JobAdView with employment terms and compliance', () => {
+  const publicView = (content: JobContent) => mountSuspended(JobAdView, { props: { content, organization, mode: 'public' as const } })
+
+  it('shows the CCNL and monthly payments in the facts band, quantified benefits first, and the legal sentence', async () => {
+    const wrapper = await publicView({
+      ...completeContent,
+      employment: { ccnl: 'commercio_terziario', level: '5° livello', monthlyPayments: 14, mealVoucher: { amountPerDay: 8, type: 'electronic' }, extraBenefits: ['health_insurance'] },
+      protectedCategories: 'also',
+    })
+    expect(wrapper.find('[data-fact="ccnl"]').text()).toContain('Commercio e terziario, 5° livello')
+    expect(wrapper.find('[data-fact="monthlyPayments"]').text()).toContain('14 mensilità')
+    const benefits = wrapper.findAll('[data-testid="employment-benefit"]').map((item) => item.text().replace(/\s/g, ' '))
+    expect(benefits).toEqual(['Buoni pasto da 8 € al giorno, elettronici', 'Assicurazione sanitaria'])
+    expect(wrapper.find('[data-section="benefits"]').text()).toContain('Buoni pasto')
+    expect(wrapper.find('[data-testid="protected-categories"]').text()).toBe('Posizione aperta anche agli iscritti alle liste del collocamento mirato ai sensi della L. 68/99.')
+  })
+
+  it('underlines compliance findings in the preview and applies a fix from the popover', async () => {
+    const item = { key: 'k', rule: 'gender_exclusive_title', path: 'title', fieldId: 'job-field-title', blocking: true, match: 'developer', suggestion: 'Rivolgiti a tutti.', messageKey: 'job.compliance.rules.gender_exclusive_title', fixes: [{ labelKey: 'job.compliance.fix.addMarker', params: { marker: '(m/f)' }, patch: { title: 'Backend developer (m/f)' } }] }
+    const wrapper = await preview(completeContent, { marks: [{ text: 'developer', item }] })
+    const mark = wrapper.find('[data-testid="compliance-mark"]')
+    expect(mark.attributes('data-blocking')).toBe('true')
+    await mark.trigger('click')
+    await flushPromises()
+    const fix = [...document.body.querySelectorAll('[data-testid="compliance-popover"] button')].find((button) => button.textContent?.includes('(m/f)')) as HTMLElement
+    fix.click()
+    expect(wrapper.emitted('fix')).toEqual([[item.fixes[0]]])
+  })
+})

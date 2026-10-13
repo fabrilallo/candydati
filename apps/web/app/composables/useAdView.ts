@@ -1,6 +1,8 @@
 import { SUPPORTED_LOCALES, type Locale, type VaguePhrase } from '@tt/domain'
 import type { ComputedRef, InjectionKey, MaybeRefOrGetter } from 'vue'
 import type { Gaps } from '@/lib/ad-gaps'
+import type { ComplianceFix } from '@/lib/compliance-fix'
+import type { ComplianceMark } from '@/lib/compliance-view'
 import type { Params, Translate } from '@/lib/ad-text'
 
 /**
@@ -36,6 +38,9 @@ export interface AdContext {
   readonly loudGaps: boolean
   /** Vague phrases of the last analysis, highlighted in the preview. */
   readonly phrases: readonly VaguePhrase[]
+  /** Compliance findings underlined in the preview (blocking in red, doubtful in amber). */
+  readonly marks: readonly ComplianceMark[]
+  readonly fix: (fix: ComplianceFix) => void
   /** Heading tag `depth` levels below the ad title (`h1` in public, `h2` in the preview). */
   readonly heading: (depth: number) => string
   readonly jump: (fieldId: string) => void

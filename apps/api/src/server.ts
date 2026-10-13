@@ -45,6 +45,10 @@ import { registerPrivacyOverviewRoutes } from './routes/privacy-overview.js';
 import { registerImportRoutes } from './routes/imports.js';
 import { registerPublicConsentRoutes } from './routes/public-consent.js';
 import { registerStatsRoutes } from './routes/stats.js';
+import { registerFeedbackRoutes } from './routes/feedback.js';
+import { registerPublicFeedbackRoutes } from './routes/public-feedback.js';
+import { registerJobRequestRoutes } from './routes/job-requests.js';
+import { registerStaleJobRoutes } from './routes/stale-jobs.js';
 
 export interface ServerDeps {
   readonly env: Env;
@@ -106,6 +110,10 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerAuditLogRoutes(app, ctx);
   registerJobQualityRoute(app, ctx);
   registerJobRoutes(app, ctx);
+  registerStaleJobRoutes(app, ctx);
+  registerFeedbackRoutes(app, ctx);
+  registerJobRequestRoutes(app, ctx);
+  registerPublicFeedbackRoutes(app, ctx);
   registerJobTemplateRoutes(app, ctx);
   registerDistributionRoutes(app, ctx);
   registerPublicJobRoutes(app, ctx);

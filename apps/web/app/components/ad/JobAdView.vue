@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import type { JobContent, PublishIssue, VaguePhrase } from '@tt/domain'
+import type { PublishIssue, VaguePhrase } from '@tt/domain'
 import { gapsBySlot } from '@/lib/ad-gaps'
+import type { ComplianceFix } from '@/lib/compliance-fix'
+import type { ComplianceMark } from '@/lib/compliance-view'
+import type { JobContent9 } from '@/lib/phase9-contract'
 import type { AdMode } from '@/composables/useAdView'
 
 /**
@@ -10,18 +13,19 @@ import type { AdMode } from '@/composables/useAdView'
  */
 const props = withDefaults(
   defineProps<{
-    content: JobContent
+    content: JobContent9
     organization: { readonly name: string; readonly logo: string | null }
     mode: AdMode
     publishedAt?: string | null
     issues?: readonly PublishIssue[]
     phrases?: readonly VaguePhrase[]
+    marks?: readonly ComplianceMark[]
     /** Show gaps in the warning tone (the user asked what is missing). */
     loudGaps?: boolean
   }>(),
-  { publishedAt: null, issues: () => [], phrases: () => [], loudGaps: false },
+  { publishedAt: null, issues: () => [], phrases: () => [], marks: () => [], loudGaps: false },
 )
-const emit = defineEmits<{ jump: [fieldId: string] }>()
+const emit = defineEmits<{ jump: [fieldId: string]; fix: [fix: ComplianceFix] }>()
 
 const language = computed(() => props.content.language)
 const x = useAdText(language)
@@ -36,6 +40,8 @@ provideAdContext(
     gaps: preview.value ? gapsBySlot(props.issues) : {},
     loudGaps: props.loudGaps,
     phrases: preview.value ? props.phrases : [],
+    marks: preview.value ? props.marks : [],
+    fix: (fix: ComplianceFix) => emit('fix', fix),
     heading: (depth: number) => `h${Math.min(6, base.value + depth)}`,
     jump: (fieldId: string) => emit('jump', fieldId),
   })),

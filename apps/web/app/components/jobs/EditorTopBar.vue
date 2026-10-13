@@ -4,6 +4,8 @@ import type { JobStatus } from '@tt/domain'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import type { Gap } from '@/lib/ad-gaps'
+import type { ComplianceFix } from '@/lib/compliance-fix'
+import type { ComplianceItem } from '@/lib/compliance-view'
 import type { SaveState } from '@/lib/editor-inputs'
 
 /**
@@ -14,6 +16,7 @@ const props = defineProps<{
   status: JobStatus
   saveState: SaveState
   gaps: readonly Gap[]
+  blocking?: readonly ComplianceItem[]
   readOnly: boolean
   canPublish: boolean
   canClose: boolean
@@ -22,7 +25,7 @@ const props = defineProps<{
   busy: string | null
   analysing: boolean
 }>()
-const emit = defineEmits<{ publish: []; close: []; template: []; jump: [fieldId: string]; reveal: [] }>()
+const emit = defineEmits<{ publish: []; close: []; template: []; jump: [fieldId: string]; reveal: []; fix: [fix: ComplianceFix] }>()
 const { t } = useI18n()
 
 const showPublish = computed(() => props.canPublish && props.status === 'draft')
@@ -34,7 +37,7 @@ const saveLabel = computed(() => (props.busy === 'save' ? t('job.actions.saving'
   <div class="flex min-w-0 flex-1 items-center justify-between gap-2 sm:justify-end sm:gap-3" data-testid="editor-bar">
     <div class="flex min-w-0 items-center gap-2 sm:gap-3">
       <SaveStatus v-if="!readOnly" :state="saveState" :class="saveState === 'saved' ? 'max-sm:hidden' : ''" />
-      <ReadinessMenu v-if="showPublish" :gaps="gaps" @jump="emit('jump', $event)" @reveal="emit('reveal')" />
+      <ReadinessMenu v-if="showPublish" :gaps="gaps" :blocking="blocking ?? []" @jump="emit('jump', $event)" @reveal="emit('reveal')" @fix="emit('fix', $event)" />
     </div>
     <div class="flex shrink-0 items-center gap-1.5">
       <Button v-if="!readOnly" type="submit" form="job-form" variant="outline" size="sm" :disabled="busy !== null" data-testid="save">

@@ -10,6 +10,7 @@ import {
   type Job,
   type Locale,
   type TemplateValues,
+  stageDisplayName,
 } from '@tt/domain';
 import { pipelineStagesOf, RECEIVED_STAGE_ID } from '@tt/domain';
 import { NotFoundError } from '../../errors.js';
@@ -20,16 +21,11 @@ export const DEFAULT_TEMPLATE_PREFIX = 'default:';
 
 const RECEIVED_LABEL: Readonly<Record<Locale, string>> = { it: 'Candidatura ricevuta', en: 'Application received' };
 
-const humanize = (value: string): string => {
-  const spaced = value.replaceAll('_', ' ');
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
-};
-
 /** What the candidate reads as the stage name: the declared title, else the type, in the language of the ad. */
 export function stageName(job: Job, stageId: string): string {
   if (stageId === RECEIVED_STAGE_ID) return RECEIVED_LABEL[job.content.language];
   const stage = pipelineStagesOf(job.content.process).find((candidate) => candidate.id === stageId)?.declared;
-  return stage ? (stage.title ?? humanize(stage.type)) : '';
+  return stage ? stageDisplayName(stage, job.content.language) : '';
 }
 
 export interface TemplateContext {

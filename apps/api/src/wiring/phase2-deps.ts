@@ -14,6 +14,7 @@ import {
   createDrizzleUserDirectory,
   type AuditLogRepository,
   type CandidateDeps,
+  type FeedbackStageEntryParts,
   type FileStorage,
   type PrivacyDeps,
   type ReceiptDeps,
@@ -35,10 +36,11 @@ export interface Phase2Inputs {
   readonly files: FileStorage;
   readonly queue: TaskQueue;
   readonly receipts: ReceiptDeps;
+  readonly feedback: FeedbackStageEntryParts;
 }
 
 /** Candidates, privacy notices and the public application: Drizzle repositories, injected storage and queue. */
-export function createPhase2Deps({ db, auditLog, files, queue, receipts }: Phase2Inputs): Phase2Deps {
+export function createPhase2Deps({ db, auditLog, files, queue, receipts, feedback }: Phase2Inputs): Phase2Deps {
   const jobs = createDrizzleJobs(db);
   const organizations = createDrizzleOrganizationDirectory(db);
   const privacyNotices = createDrizzlePrivacyNotices(db);
@@ -56,6 +58,7 @@ export function createPhase2Deps({ db, auditLog, files, queue, receipts }: Phase
       files,
       messages: createDrizzleMessages(db),
       queue,
+      feedback,
       outbox: createDrizzleOutbox(db),
       ...clock,
     },

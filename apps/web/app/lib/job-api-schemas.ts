@@ -14,10 +14,12 @@ import {
 } from '@tt/domain'
 import { z } from 'zod'
 import { publicPrivacyNoticeSchema, type PublicPrivacyNoticeDto } from './candidate-schemas'
+import { complianceWarningsSchema, contentSchema9, jobApprovalSchema } from './phase9-contract'
 
 const isoDate = z.iso.datetime()
 
-export const jobSchema = jobDtoSchema
+/** The job with the Phase 9 additions: employment terms in the content, compliance warnings, approval. */
+export const jobSchema = jobDtoSchema.extend({ content: contentSchema9, complianceWarnings: complianceWarningsSchema.default([]), approval: jobApprovalSchema })
 export const jobSummarySchema = z.object({
   id: z.string(),
   slug: z.string(),
@@ -33,7 +35,7 @@ export const jobSummarySchema = z.object({
   updatedAt: isoDate,
   publishedAt: isoDate.nullable(),
 })
-export const templateSchema = z.object({ id: z.string(), name: z.string(), content: jobContentSchema, updatedAt: isoDate })
+export const templateSchema = z.object({ id: z.string(), name: z.string(), content: contentSchema9, updatedAt: isoDate })
 export const assessmentSchema = z.object({ report: adQualityReportSchema, threshold: z.number(), belowThreshold: z.boolean() })
 export const publishIssueSchema = z.object({ path: z.string(), rule: z.string() })
 export const publishResultSchema = z.object({ job: jobSchema, quality: assessmentSchema.nullable() })
@@ -41,8 +43,8 @@ export const qualityResultSchema = z.object({ assessment: assessmentSchema, publ
 export const deletedSchema = z.object({ id: z.string() })
 
 const publishedContentSchema = z
-  .custom<PublishedJobContent>((value) => jobContentSchema.safeParse(value).success && isPublishedContent(jobContentSchema.parse(value)))
-  .transform((value) => jobContentSchema.parse(value) as PublishedJobContent)
+  .custom<PublishedJobContent>((value) => contentSchema9.safeParse(value).success && isPublishedContent(contentSchema9.parse(value)))
+  .transform((value) => contentSchema9.parse(value) as PublishedJobContent)
 const organizationSchema = z.object({ name: z.string(), slug: z.string(), logo: z.string().nullable() })
 
 const publicSummarySchema = z.object({

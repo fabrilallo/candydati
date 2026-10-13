@@ -3,7 +3,7 @@ import { API_KEY_NAME_MAX, grantablePermissions, type Permission, type Resource,
 /** Areas of the scope picker, in order, and the resources each one gathers. */
 const AREAS = [
   ['jobs', ['job', 'job_template']],
-  ['candidates', ['candidate', 'candidate_note']],
+  ['candidates', ['candidate', 'candidate_note', 'feedback']],
   ['communication', ['message', 'email_template']],
   ['work', ['task', 'automation']],
   ['organization', ['organization', 'audit']],

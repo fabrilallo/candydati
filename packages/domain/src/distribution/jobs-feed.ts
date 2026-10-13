@@ -67,7 +67,8 @@ const line = (name: string, value: string | number): string => textElement(name,
 const jobElement = (job: PublicJobDto, input: JobsFeedInput): string => {
   const { content } = job;
   const headings = (input.headings ?? FEED_HEADINGS)[SUPPORTED_LOCALES.includes(content.language) ? content.language : 'it'];
-  const optional = (name: string, value: string | undefined) => (value === undefined ? [] : [line(name, value)]);
+  const optional = (name: string, value: string | number | undefined) => (value === undefined ? [] : [line(name, value)]);
+  const { employment } = content;
   return [
     '    <job>',
     line('title', content.title),
@@ -92,6 +93,11 @@ const jobElement = (job: PublicJobDto, input: JobsFeedInput): string => {
     line('tt:seniority', content.seniority),
     line('tt:contractType', content.contractType),
     line('tt:workMode', content.workMode),
+    ...optional('tt:ccnl', employment?.ccnl === 'altro' ? (employment.ccnlOther ?? 'altro') : employment?.ccnl),
+    ...optional('tt:level', employment?.level),
+    ...optional('tt:monthlyPayments', employment?.monthlyPayments),
+    ...optional('tt:mealVoucher', employment?.mealVoucher === undefined ? undefined : `${employment.mealVoucher.amountPerDay} ${content.salary.currency} per day (${employment.mealVoucher.type})`),
+    ...optional('tt:welfare', employment?.welfareAnnual === undefined ? undefined : `${employment.welfareAnnual} ${content.salary.currency} per year`),
     line('tt:updated', rfc822(job.updatedAt)),
     '    </job>',
   ].join('\n');

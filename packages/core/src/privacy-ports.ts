@@ -1,6 +1,7 @@
 import type { DataExport, RetentionRun } from '@tt/domain';
 import type { ApplicationRepository, CandidateRepository, CandidateSearch, CandidateNoteRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
 import type { NotificationRepository, MemberDirectory } from './automation-ports.js';
+import type { FeedbackRecords } from './feedback-ports.js';
 import type { FileStorage, TaskQueue } from './intake-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { MessageRepository } from './messaging-ports.js';
@@ -14,7 +15,7 @@ import type { OutboxRepository } from './webhook-ports.js';
 export interface ErasureStore {
   /**
    * Deletes, for the given applications: notifications, tasks, outbox events and webhook deliveries that point to them,
-   * messages, conversations, CV extractions, notes about them and finally the applications. Returns their CV file keys.
+   * messages, conversations, CV extractions, notes about them, interview feedback and its requests and finally the applications. Returns their CV file keys.
    */
   deleteApplications(organizationId: string, applicationIds: readonly string[]): Promise<readonly string[]>;
   /**
@@ -87,7 +88,7 @@ export interface ConfiguredProviders {
 }
 
 /** Everything the candidate-rights use cases need on top of the candidate world. */
-export interface CandidateRightsDeps extends CoreDeps, ErasureDeps {
+export interface CandidateRightsDeps extends CoreDeps, ErasureDeps, FeedbackRecords {
   readonly candidates: CandidateRepository;
   readonly notes: CandidateNoteRepository;
   readonly extractions: CvExtractionRepository;
@@ -96,7 +97,7 @@ export interface CandidateRightsDeps extends CoreDeps, ErasureDeps {
   readonly privacyNotices: PrivacyNoticeRepository;
 }
 
-export interface OrganizationExportDeps extends CoreDeps {
+export interface OrganizationExportDeps extends CoreDeps, FeedbackRecords {
   readonly dataExports: DataExportRepository;
   readonly organizations: OrganizationDirectory;
   readonly jobs: JobRepository;

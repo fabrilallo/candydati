@@ -1,4 +1,4 @@
-import { createFakeEmailSender, createFakeHostGuard, createFakeHttpPoster, buildApplication, buildAutomationRule, buildEmailTemplate, buildOutboxEvent, buildWebhookEndpoint, seedAutomationWorld, ORG_A } from '@tt/core/testing';
+import { seedHrWorld, createFakeEmailSender, createFakeHostGuard, createFakeHttpPoster, buildApplication, buildAutomationRule, buildJob, buildEmailTemplate, buildOutboxEvent, buildWebhookEndpoint, seedAutomationWorld, ORG_A } from '@tt/core/testing';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
 import { formatDigestFrom } from '../deadlines/digest.js';
@@ -82,6 +82,21 @@ describe('deadlines.scan', () => {
     expect(deps.notifications.snapshot().map((n) => n.kind)).toEqual(['response_overdue']);
     expect(sender.sent()).toHaveLength(1);
     expect(sender.sent()[0]?.text).toContain('/app/attention');
+    await queue.handle(job(null));
+    expect(sender.sent()).toHaveLength(1);
+  });
+
+  it('also reminds interviewers and flags ads idle for 90 days, with one digest per person', async () => {
+    const now = new Date('2026-06-01T10:00:00.000Z');
+    const day = 86_400_000;
+    const ago = (days: number) => new Date(now.getTime() - days * day);
+    const hr = seedHrWorld({ jobs: [buildJob({ id: 'stale_1', slug: 'stale-1', organizationId: ORG_A, status: 'published', publishedAt: ago(120), updatedAt: ago(120), createdBy: 'recruiter_1' })], overrides: { now: () => now } });
+    const sender = createFakeEmailSender();
+    const queue = createDeadlinesScanQueue({ scan: seedAutomationWorld(), feedback: hr, stale: hr, digest: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' }, now: () => now });
+    await queue.handle(job(null));
+    expect(hr.notifications.snapshot().map((n) => n.kind)).toEqual(['job_stale']);
+    expect(sender.sent()).toHaveLength(1);
+    expect(sender.sent()[0]?.text).toContain('ad idle for 90 days');
     await queue.handle(job(null));
     expect(sender.sent()).toHaveLength(1);
   });

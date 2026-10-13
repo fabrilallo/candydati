@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { CONSENT_SCOPES, CONSENT_STATUSES } from './privacy.js';
 import { EXTRACTION_STATUSES, OUTCOMES, cvExtractionSchema } from './application.js';
+import { FEEDBACK_RECOMMENDATIONS } from '../feedback/feedback.js';
 import { MESSAGE_DIRECTIONS, MESSAGE_STATUSES } from '../messaging/message.js';
 
 /** Identifier of the public, versioned schema of the candidate export (PLAN §7). Bump the version on breaking changes. */
@@ -25,6 +26,25 @@ const exportedMessageSchema = z.object({
   body: z.string(),
   createdAt: date,
   sentAt: nullableDate,
+});
+
+const exportedFeedbackSchema = z.object({
+  id: z.string(),
+  stageId: z.string(),
+  interviewerName: z.string(),
+  answers: z.record(z.string(), z.string()),
+  recommendation: z.enum(FEEDBACK_RECOMMENDATIONS),
+  submittedAt: date,
+});
+
+/** A request for feedback sent to an interviewer: the interviewer's address is the interviewer's own data, not the candidate's. */
+const exportedFeedbackRequestSchema = z.object({
+  id: z.string(),
+  stageId: z.string(),
+  interviewerName: z.string(),
+  createdAt: date,
+  expiresAt: date,
+  submittedAt: nullableDate,
 });
 
 const exportedApplicationSchema = z.object({
@@ -57,6 +77,8 @@ const exportedApplicationSchema = z.object({
     })
     .nullable(),
   messages: z.array(exportedMessageSchema),
+  feedback: z.array(exportedFeedbackSchema).default([]),
+  feedbackRequests: z.array(exportedFeedbackRequestSchema).default([]),
 });
 
 /**

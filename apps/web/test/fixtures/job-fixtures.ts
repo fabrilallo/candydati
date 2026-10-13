@@ -35,6 +35,7 @@ export const makeJob = (overrides: Partial<JobDto> = {}): JobDto => ({
   content: completeContent,
   quality: null,
   publishIssues: [],
+  complianceWarnings: [],
   createdAt: NOW,
   updatedAt: NOW,
   publishedAt: null,

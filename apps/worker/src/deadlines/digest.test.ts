@@ -1,7 +1,7 @@
 import type { DigestEntry } from '@tt/core';
 import { createFakeEmailSender } from '@tt/core/testing';
 import { describe, expect, it } from 'vitest';
-import { buildDigestEmail, formatDigestFrom, sendDigests, type DigestSender } from './digest.js';
+import { buildDigestEmail, formatDigestFrom, mergeDigests, sendDigests, type DigestSender } from './digest.js';
 
 const note = (kind: 'response_overdue' | 'response_due_soon' | 'task_due', jobId: string | null = 'job_1') => ({
   id: `n_${Math.random()}`, organizationId: 'org_a', userId: 'u1', kind, applicationId: 'app_1', jobId, taskId: null, payload: {}, createdAt: new Date(), readAt: null,
@@ -46,5 +46,23 @@ describe('digest email', () => {
 
   it('sanitizes the platform name in the From header', () => {
     expect(formatDigestFrom('Evil"\r\nBcc: x', 'a@b.c')).toBe('"Evil   Bcc: x" <a@b.c>');
+  });
+});
+
+describe('new notification kinds and merging', () => {
+  const stale = { ...note('task_due', 'job_2'), kind: 'job_stale' as const };
+
+  it('names a stale ad in both languages', () => {
+    expect(buildDigestEmail(config(), entry({ notifications: [stale], jobTitles: { job_2: 'Data Analyst' } })).text).toContain('- Data Analyst: ad idle for 90 days');
+    expect(buildDigestEmail(config(createFakeEmailSender(), 'it'), entry({ notifications: [stale], jobTitles: { job_2: 'Data Analyst' } })).text).toContain('annuncio fermo da 90 giorni');
+  });
+
+  it('merges the digests of one person into a single entry and keeps the others apart', () => {
+    const other = entry({ userId: 'u2', email: 'ugo@acme.example' });
+    const merged = mergeDigests([entry(), other], [entry({ notifications: [stale], jobTitles: { job_2: 'Data Analyst' } })]);
+    expect(merged).toHaveLength(2);
+    expect(merged[0]?.notifications).toHaveLength(4);
+    expect(merged[0]?.jobTitles).toEqual({ job_1: 'Backend Developer', job_2: 'Data Analyst' });
+    expect(merged[1]?.userId).toBe('u2');
   });
 });

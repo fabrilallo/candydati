@@ -73,6 +73,8 @@ describe('public careers pages', () => {
     expect(isPublicPath('/app/careers/acme')).toBe(false)
     expect(isPublicPath('/consent/tok123')).toBe(true)
     expect(isPublicPath('/consent')).toBe(false)
+    expect(isPublicPath('/feedback/tok123')).toBe(true)
+    expect(isPublicPath('/feedback')).toBe(false)
   })
 
   it('lets anonymous visitors through', () => {

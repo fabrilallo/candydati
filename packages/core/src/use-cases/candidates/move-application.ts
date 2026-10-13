@@ -2,6 +2,8 @@ import { computeResponseDueAt, pipelineStagesOf } from '@tt/domain';
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
 import { enqueueAutomations } from '../automations/enqueue.js';
+import { toAuditActor } from '../../actor.js';
+import { requestFeedbackOnStageEntry } from '../feedback/request-on-stage-entry.js';
 import { requireJob } from '../jobs/shared.js';
 import { recordEvent } from '../webhooks/record-event.js';
 import { defineCandidateUseCase } from './define.js';
@@ -43,6 +45,18 @@ export const moveApplication = defineCandidateUseCase({
       to: saved.stageId,
     });
     await enqueueAutomations(deps, saved.organizationId, saved.id, saved.stageId);
+    if (deps.feedback) {
+      await requestFeedbackOnStageEntry(
+        { ...deps, ...deps.feedback },
+        {
+          organizationId: saved.organizationId,
+          applicationId: saved.id,
+          stageId: saved.stageId,
+          actor: toAuditActor(actor),
+          requestedBy: actor.onBehalfOfUserId ?? actor.id ?? 'system',
+        },
+      );
+    }
     return { ...(await loadCardView(deps, saved)), from: application.stageId };
   },
 });

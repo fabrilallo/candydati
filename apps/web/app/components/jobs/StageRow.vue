@@ -92,6 +92,7 @@ const labelClass = computed(() => (props.index > 0 ? 'text-xs text-muted-foregro
           @move="(delta) => emit('move', delta)"
         />
       </div>
+      <slot />
       <p v-if="openCount" class="figure text-xs text-muted-foreground" data-testid="stage-open-count">{{ t('job.editor.process.openCandidates', { count: openCount }, openCount) }}</p>
       <p v-if="removeBlocked" :id="`${id}-blocked`" class="text-xs font-medium text-warning" data-testid="stage-remove-blocked">{{ blockedText }}</p>
     </div>

@@ -5,6 +5,7 @@ import pino from 'pino';
 import { loadEnv } from './config/env.js';
 import { createDeliverDeps } from './email/deps.js';
 import { toEmailSender, toMessagingConfig } from '@tt/providers';
+import { createHrWorkerDeps } from './hr/deps.js';
 import { createPhase4WorkerDeps } from './automation/deps.js';
 import { formatDigestFrom } from './deadlines/digest.js';
 import { createPgBossQueue } from './queue/pg-boss-queue.js';
@@ -88,6 +89,7 @@ const main = async (): Promise<void> => {
     onModelError: (reason) => logger.warn({ reason }, 'cv model failed, keeping the plain text'),
     onMailError: (error) => logger.error({ err: error }, 'reconfirmation email not queued'),
   });
+  const hr = createHrWorkerDeps({ db: database.db, sender, config: messaging, onMailError: (error) => logger.error({ err: error }, 'feedback email not sent') });
   const digest = {
     sender,
     from: formatDigestFrom(env.platform.name, `${messaging.emailFromLocal}@${messaging.emailDomain}`),
@@ -104,6 +106,8 @@ const main = async (): Promise<void> => {
     createDistributionSyncQueue(createDistributionWorkerDeps({ db: database.db, platform: env.platform })),
     createDeadlinesScanQueue({
       scan: phase4.scan,
+      feedback: hr.feedback,
+      stale: hr.stale,
       digest,
       now: () => new Date(),
     }),

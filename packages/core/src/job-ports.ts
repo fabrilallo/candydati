@@ -1,6 +1,7 @@
 import type { AdQualityAnalyzer, Job, JobStatus, JobTemplate } from '@tt/domain';
 import type { PrivacyNoticeRepository } from './candidate-ports.js';
 import type { AutomationRuleRepository } from './automation-ports.js';
+import type { JobApprovalRepository, OrganizationSettingsRepository } from './job-request-ports.js';
 import type { CoreDeps } from './ports.js';
 import type { OutboxRepository } from './webhook-ports.js';
 
@@ -87,6 +88,9 @@ export interface JobDeps extends CoreDeps {
   readonly automationRules: AutomationRuleRepository;
   /** `job.published` and `job.closed` events for webhooks. */
   readonly outbox: OutboxRepository;
+  /** Publishing needs an approved budget when the organization requires it. */
+  readonly approvals: JobApprovalRepository;
+  readonly organizationSettings: OrganizationSettingsRepository;
   readonly adQuality: AdQualityAnalyzer;
   /** On the 0-10 scale; below it the ad is flagged, never blocked. */
   readonly adQualityThreshold: number;

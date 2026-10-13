@@ -10,6 +10,13 @@ describe('formToPreview', () => {
     expect(formToPreview(contentToForm(completeContent))).toEqual(completeContent)
   })
 
+  it('keeps the valid employment fields and drops the half-typed ones', () => {
+    const preview = formToPreview(form({ ccnl: 'credito', monthlyPayments: '20', mealVoucherAmount: '8', protectedCategories: 'also' }))
+    expect(preview.employment).toEqual({ ccnl: 'credito', mealVoucher: { amountPerDay: 8, type: 'electronic' } })
+    expect(preview.protectedCategories).toBe('also')
+    expect(formToPreview(form({ monthlyPayments: '20' })).employment).toBeUndefined()
+  })
+
   it('keeps an empty draft renderable: empty title, defaults, no stages', () => {
     const preview = formToPreview(form())
     expect(preview.title).toBe('')

@@ -25,4 +25,15 @@ describe('buildLlmsTxt', () => {
     expect(text.split('\n')[0]).toBe('# A cme x');
     expect(text).toContain('- [Dev senior # Heading](');
   });
+
+  it('adds one short line with the CCNL and the monthly payments when the ad has them', () => {
+    const jobs = [publicJob({ employment: { ccnl: 'commercio_terziario', level: '5° livello', monthlyPayments: 14, welfareAnnual: 900 } })];
+    const it = buildLlmsTxt({ organization: ORGANIZATION, jobs, baseUrl: BASE_URL });
+    expect(it).toContain('dopo ogni fase, CCNL Commercio e terziario, 5° livello, 14 mensilità.');
+    expect(it.split('\n').filter((line) => line.includes('CCNL'))).toHaveLength(1);
+    const en = buildLlmsTxt({ organization: ORGANIZATION, jobs, baseUrl: BASE_URL, locale: 'en' });
+    expect(en).toContain('after each stage, CCNL Commercio e terziario, 5° livello, 14 monthly payments.');
+    expect(buildLlmsTxt({ organization: ORGANIZATION, jobs: [publicJob({ employment: { monthlyPayments: 13 } })], baseUrl: BASE_URL })).toContain('dopo ogni fase, 13 mensilità.');
+    expect(buildLlmsTxt({ organization: ORGANIZATION, jobs: [publicJob()], baseUrl: BASE_URL })).not.toContain('CCNL');
+  });
 });

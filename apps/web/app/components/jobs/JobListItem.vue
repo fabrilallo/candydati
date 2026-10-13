@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { JobSummaryDto } from '@tt/domain'
 import { CheckIcon, CircleAlertIcon } from '@lucide/vue'
+import { Badge } from '@/components/ui/badge'
 import { jobFacts, readinessOf, relativeTime } from '@/lib/job-list-view'
 import { salaryRange } from '@/lib/job-view'
 import { formatScore } from '@/lib/quality-view'
 
-const props = defineProps<{ job: JobSummaryDto; now: Date }>()
+const props = withDefaults(defineProps<{ job: JobSummaryDto; now: Date; stale?: boolean; staleDays?: number }>(), { stale: false, staleDays: 0 })
 const { t, locale } = useI18n()
 const readiness = computed(() => readinessOf(props.job))
 const facts = computed(() => jobFacts(props.job))
@@ -52,7 +53,10 @@ const updated = computed(() => relativeTime(props.job.updatedAt, props.now, loca
     </div>
 
     <div class="col-start-2 row-start-1 grid justify-items-end gap-1 md:col-start-auto md:row-start-auto">
-      <JobStatusBadge :status="job.status" />
+      <div class="flex flex-wrap justify-end gap-1.5">
+        <JobStatusBadge :status="job.status" />
+        <Badge v-if="stale" variant="outline" data-testid="job-stale">{{ t('job.list.stale', { count: staleDays }) }}</Badge>
+      </div>
       <p class="whitespace-nowrap text-xs text-muted-foreground">
         <time :datetime="job.updatedAt">{{ t('job.list.updatedAgo', { time: updated }) }}</time>
       </p>

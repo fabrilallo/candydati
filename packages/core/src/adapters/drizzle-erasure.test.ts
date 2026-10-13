@@ -22,6 +22,7 @@ import { createDrizzleCandidateNotes } from './drizzle-candidate-notes.js';
 import { createDrizzleCandidates } from './drizzle-candidates.js';
 import { createDrizzleCvExtractions } from './drizzle-cv-extractions.js';
 import { createDrizzleErasure } from './drizzle-erasure.js';
+import { createDrizzleFeedbackRequests, createDrizzleInterviewFeedback } from './drizzle-feedback.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
 import { createDrizzleMemberDirectory } from './drizzle-members.js';
 import { createDrizzleMessages } from './drizzle-messages.js';
@@ -90,6 +91,9 @@ async function addApplication(org: string, jobId: string, candidateId: string, p
     { id: randomUUID(), organizationId: org, userId: 'user_y', kind: 'response_overdue', applicationId: id, jobId, taskId: null, payload: { stageId: 'received' }, createdAt: NOW, readAt: null },
     `response_overdue:${id}`,
   );
+  const requestId = randomUUID();
+  await handle.db.insert(schema.feedbackRequest).values({ id: requestId, organizationId: org, applicationId: id, jobId, stageId: 'stage-0', interviewerKind: 'external', interviewerEmail: 'ext@partner.example', interviewerName: 'Eva Interviewer', tokenHash: randomUUID(), expiresAt: NOW, requestedBy: 'user_x', submittedAt: NOW });
+  await handle.db.insert(schema.interviewFeedback).values({ id: randomUUID(), organizationId: org, applicationId: id, requestId, stageId: 'stage-0', interviewerName: 'Eva Interviewer', answers: { tech_shown: `${person.firstName} ${person.lastName} was great` }, recommendation: 'proceed', submittedAt: NOW });
   const endpointId = randomUUID();
   await handle.db.insert(schema.webhookEndpoint).values({ id: endpointId, organizationId: org, url: 'https://hook.example/x', secret: 'whsec_x', events: ['application.received'] });
   const eventId = randomUUID();
@@ -127,6 +131,8 @@ const depsFor = (world: World, overrides: Partial<CandidateRightsDeps> = {}): Ca
   notes: createDrizzleCandidateNotes(handle.db),
   extractions: createDrizzleCvExtractions(handle.db),
   messages: createDrizzleMessages(handle.db),
+  feedbackRequests: createDrizzleFeedbackRequests(handle.db),
+  interviewFeedback: createDrizzleInterviewFeedback(handle.db),
   privacyNotices: createDrizzlePrivacyNotices(handle.db),
   erasure: createDrizzleErasure(handle.db),
   files: world.files,
@@ -169,7 +175,9 @@ describe('erasure on Postgres', () => {
   it('after eraseCandidate NO table mentions the candidate, the applications, the email or the name, except audit_log (ids only)', async () => {
     const world = await buildWorld();
     const needles = [world.candidateId, ...world.applicationIds, world.person.email, world.person.firstName, world.person.lastName, world.person.phone];
-    expect(Object.keys(await leftovers(needles)).length).toBeGreaterThan(8);
+    const before = await leftovers(needles);
+    expect(Object.keys(before).length).toBeGreaterThan(8);
+    expect(Object.keys(before)).toEqual(expect.arrayContaining(['feedback_request', 'interview_feedback']));
 
     const deps = depsFor(world);
     const result = await eraseCandidate(deps, recruiter(world.org), { candidateId: world.candidateId, confirmName: fullName(world) });
@@ -197,7 +205,7 @@ describe('erasure on Postgres', () => {
     const world = await buildWorld();
     await eraseCandidate(depsFor(world), recruiter(world.org), { candidateId: world.candidateId, confirmName: fullName(world) });
     const left = await leftovers([world.otherCandidateId, world.otherApplicationId, world.bystander.email, world.bystander.lastName]);
-    for (const table of ['candidate', 'application', 'candidate_note', 'cv_extraction', 'conversation', 'message', 'task', 'notification', 'outbox_event']) {
+    for (const table of ['candidate', 'application', 'candidate_note', 'cv_extraction', 'conversation', 'message', 'task', 'notification', 'outbox_event', 'feedback_request', 'interview_feedback']) {
       expect(left[table] ?? 0, table).toBeGreaterThan(0);
     }
     expect(await rowsOf('webhook_delivery', world.org)).toBe(1);

@@ -47,7 +47,123 @@
     "data": "Data",
     "api": "API and integrations",
     "distribution": "Distribution",
-    "imports": "Import"
+    "imports": "Import",
+    "jobRequests": "Requests"
+  },
+  "jobRequests": {
+    "title": "Hiring requests",
+    "description": "Anyone who needs a new person asks here, with the reason and the budget. An approver decides, then the request becomes an ad.",
+    "new": "New request",
+    "newTitle": "New hiring request",
+    "newDescription": "Tell us who you need and why. The clearer the budget, the faster the decision.",
+    "list": {
+      "label": "Requests list",
+      "emptyCreate": "No requests yet",
+      "emptyCreateBody": "If your team needs a new person, open a request: add the role, the reason and the budget. Approvers will see it right away.",
+      "emptyReadOnly": "No requests yet",
+      "emptyReadOnlyBody": "When a hiring manager asks for a new hire, you will find it here.",
+      "headcount": "{count} person | {count} people",
+      "by": "by {name}",
+      "createdOn": "on {date}"
+    },
+    "status": {
+      "submitted": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "converted": "Ad created"
+    },
+    "fields": {
+      "title": "Position title",
+      "titleHint": "How you would name it in an ad, for example Backend developer.",
+      "role": "Role",
+      "choose": "Choose a role",
+      "reason": "Why this person is needed",
+      "reasonHint": "A replacement, a new project, a growing team: two lines are enough.",
+      "headcount": "How many people",
+      "salaryMin": "Minimum gross salary",
+      "salaryMax": "Maximum gross salary",
+      "salaryHint": "Gross annual salary, in euros.",
+      "workMode": "Work mode",
+      "location": "Location",
+      "locationHint": "City or office, if it matters.",
+      "desiredStart": "Desired start date",
+      "processNotes": "Stages and interviews",
+      "processNotesHint": "How many interviews, of what kind, how long.",
+      "interviewersNotes": "Who runs the interviews",
+      "interviewersNotesHint": "Names or roles of the people who will meet candidates.",
+      "budget": "Budget (gross annual)",
+      "requestedBy": "Requested by",
+      "requestedOn": "Sent on"
+    },
+    "form": {
+      "submit": "Send the request",
+      "submitting": "Sending…",
+      "sent": "Request sent",
+      "cancel": "Cancel",
+      "forbidden": "You are not allowed to open a request."
+    },
+    "errors": {
+      "title": "Write the position title.",
+      "role": "Choose the role.",
+      "reason": "Say in a few words why this person is needed.",
+      "headcount": "Say how many people are needed, from 1 to 100.",
+      "salaryMin": "Enter the minimum gross salary.",
+      "salaryMax": "Enter the maximum gross salary.",
+      "salaryOrder": "The maximum cannot be below the minimum.",
+      "desiredStart": "Use a valid date.",
+      "noteRequired": "Say why you are rejecting it: whoever asked will read it."
+    },
+    "detail": {
+      "back": "All requests",
+      "notFound": "This request no longer exists.",
+      "sections": {
+        "need": "The need",
+        "process": "Selection",
+        "decision": "Decision"
+      },
+      "none": "Not specified",
+      "decidedBy": "{name} on {date}",
+      "noNote": "No note.",
+      "waiting": "Waiting for an administrator to decide.",
+      "waitingConvert": "Approved: whoever manages hiring will create the ad.",
+      "openJob": "Open the ad",
+      "crumb": "Request"
+    },
+    "actions": {
+      "approve": "Approve",
+      "reject": "Reject",
+      "convert": "Create the ad",
+      "converting": "Creating the ad…",
+      "assistant": "Draft it with the assistant",
+      "assistantHint": "Creates the ad and asks the assistant to write a first draft from the request."
+    },
+    "decide": {
+      "approveTitle": "Approve this request?",
+      "approveBody": "Whoever manages hiring can then create the ad. The approved salary stays the limit for publishing.",
+      "rejectTitle": "Reject this request?",
+      "rejectBody": "Whoever opened it will receive your reason. This cannot be undone.",
+      "noteLabel": "Note (optional)",
+      "rejectNoteLabel": "Reason for rejecting",
+      "confirmApprove": "Approve the request",
+      "confirmReject": "Reject the request",
+      "working": "One moment…",
+      "cancel": "Cancel",
+      "approved": "Request approved",
+      "rejected": "Request rejected"
+    },
+    "assistant": {
+      "prompt": "Write a draft of the job ad from this hiring request. Use only what is written, and where something is missing tell me instead of making it up.\n{summary}",
+      "line": "{label}: {value}"
+    },
+    "converted": "Ad created",
+    "settings": {
+      "title": "Ad approval",
+      "label": "Require approval before publishing an ad",
+      "on": "An ad can be published only after an administrator approves it, and its salary cannot exceed the approved one. Requests are how you ask for it.",
+      "off": "Ads are published without approval. Requests are optional: they are for whoever wants the budget signed off.",
+      "saved": "Setting saved",
+      "loadFailed": "We cannot read the setting."
+    }
   },
   "roles": {
     "owner": "Owner",
@@ -297,7 +413,8 @@
         "created": "Created the organization",
         "updated": "Updated the organization",
         "deleted": "Deleted the organization",
-        "exported": "Exported all of the organization's data"
+        "exported": "Exported all of the organization's data",
+        "approval_setting_updated": "Changed whether ads need approval"
       },
       "invitation": {
         "created": "Invited a person",
@@ -318,7 +435,8 @@
         "updated": "Edited a job ad",
         "published": "Published a job ad",
         "closed": "Closed a job ad",
-        "distribution_synced": "Synced a job ad with the distribution channels"
+        "distribution_synced": "Synced a job ad with the distribution channels",
+        "interviewers_updated": "Changed who interviews for an ad"
       },
       "job_template": {
         "created": "Saved a job ad template",
@@ -381,6 +499,17 @@
         "created": "Uploaded files to import",
         "committed": "Imported candidates",
         "undone": "Undid an import"
+      },
+      "feedback": {
+        "requested": "Asked for feedback after an interview",
+        "submitted": "Left feedback after an interview",
+        "cv_opened": "Opened the CV from a feedback link"
+      },
+      "job_request": {
+        "submitted": "Sent a request to open a position",
+        "approved": "Approved a request to open a position",
+        "rejected": "Rejected a request to open a position",
+        "converted": "Created an ad from a request"
       }
     }
   },
@@ -555,6 +684,34 @@
       "technical_lead": "Technical lead",
       "founder": "A founder",
       "external_partner": "External partner"
+    },
+    "ccnl": {
+      "commercio_terziario": "Retail and services",
+      "metalmeccanico_industria": "Engineering industry",
+      "metalmeccanico_pmi": "Engineering SMEs (Confapi)",
+      "telecomunicazioni": "Telecommunications",
+      "credito": "Banking",
+      "chimico": "Chemicals",
+      "studi_professionali": "Professional firms",
+      "turismo": "Tourism",
+      "edilizia": "Construction",
+      "logistica_trasporti": "Logistics and transport",
+      "servizi_pulizia": "Cleaning services",
+      "cooperative_sociali": "Social cooperatives",
+      "sanita_privata": "Private healthcare",
+      "scuola_privata": "Private schools",
+      "altro": "Other"
+    },
+    "benefits": {
+      "health_insurance": "Health insurance",
+      "pension_fund": "Supplementary pension fund",
+      "fuel_vouchers": "Fuel vouchers",
+      "company_car": "Company car",
+      "phone": "Company phone",
+      "computer": "Company computer",
+      "transport_refund": "Transport reimbursement",
+      "gym": "Gym",
+      "nursery": "Company nursery"
     }
   },
   "quality": {
@@ -606,7 +763,10 @@
       "onsite_days_required": "Add how many days per week are spent on site",
       "too_few_stages": "Add at least one stage to the selection process",
       "too_few_responsibilities": "At least three responsibilities are needed",
-      "too_few_requirements": "Add at least one must-have requirement"
+      "too_few_requirements": "Add at least one must-have requirement",
+      "gender_exclusive_title": "The title addresses one sex only",
+      "gender_requirement": "It asks for a specific sex",
+      "discriminatory_requirement": "It contains a discriminatory requirement"
     },
     "validation": {
       "invalidChoice": "Pick one of the listed values",
@@ -661,6 +821,7 @@
       "belowThresholdLong": "Quality below the recommended threshold",
       "scoreLabel": "Quality {score} out of 10",
       "updatedAgo": "Updated {time}",
+      "stale": "Stale for {count} days",
       "showAll": "Show all job ads",
       "empty": {
         "draft": {
@@ -790,7 +951,8 @@
       "title": "What is missing to publish",
       "ready": "All requirements are met: the ad can be published.",
       "missing": "1 item missing | {count} items missing",
-      "go": "Go to field"
+      "go": "Go to field",
+      "toFix": "1 thing to fix | {count} things to fix"
     },
     "preview": {
       "gaps": {
@@ -925,6 +1087,105 @@
       "deciding": "Recording outcomes",
       "review": "Go to candidates",
       "decided": "1 outcome recorded | {count} outcomes recorded"
+    },
+    "compliance": {
+      "title": "Legal compliance",
+      "blockingIntro": "One point prevents publishing. | {count} points prevent publishing.",
+      "warningsIntro": "Nothing blocks publishing, but some sentences deserve a second look.",
+      "review": "To review",
+      "menuTitle": "To fix by law",
+      "fixed": "Fix applied. Remember to save.",
+      "rules": {
+        "gender_exclusive_title": "The title addresses one sex only",
+        "gender_requirement": "It asks for a specific sex",
+        "discriminatory_requirement": "Discriminatory requirement",
+        "gender_masculine_phrasing": "Masculine-only phrasing",
+        "age_proxy": "May exclude by age",
+        "nationality_proxy": "May exclude by nationality",
+        "protected_categories_wording": "Protected categories wording is not the legal one"
+      },
+      "fix": {
+        "addMarker": "Add {marker} to the title",
+        "useTitle": "Use «{title}»",
+        "remove": "Remove «{text}»",
+        "removeItem": "Remove the requirement «{text}»",
+        "replace": "Write «{text}»",
+        "legalWording": "Use the wording of Law 68/99"
+      }
+    },
+    "employment": {
+      "title": "Contract and benefits",
+      "description": "The agreement applied and benefits with figures: readers want to know how much, not just what.",
+      "ccnl": "Collective agreement (CCNL)",
+      "notSaid": "Not stated",
+      "ccnlOther": "Name of the agreement",
+      "level": "Grade",
+      "levelPlaceholder": "E.g. 5th level, Quadro",
+      "monthlyPayments": "Monthly payments",
+      "monthlyHint": "13 with the thirteenth month, 14 with the fourteenth.",
+      "monthlyOption": "{count} monthly payments",
+      "welfare": "Yearly welfare",
+      "welfareHint": "Welfare budget per year, per person.",
+      "mealVoucher": "Meal vouchers",
+      "mealVoucherAmount": "Meal voucher value per day",
+      "perDay": "{symbol} per day",
+      "mealVoucherType": "Meal voucher type",
+      "voucherTypes": {
+        "electronic": "Electronic",
+        "paper": "Paper"
+      },
+      "bonus": "Bonus",
+      "bonusHint": "How it works and what it is worth, e.g. up to 10% of the salary based on goals.",
+      "extraBenefits": "Included benefits",
+      "otherBenefits": "Other benefits",
+      "otherBenefitsHint": "Anything not in the list, one per line.",
+      "protectedLabel": "Protected categories (Law 68/99)",
+      "protected": {
+        "none": "Do not state",
+        "reserved": "Reserved",
+        "also": "Also open"
+      },
+      "protectedHint": "If the position is reserved or open to protected categories, the ad uses the wording the law requires.",
+      "protectedWillRead": "The ad will read: {sentence}"
+    },
+    "interviewers": {
+      "label": "Who interviews",
+      "nobody": "Nobody yet",
+      "add": "Add",
+      "team": "Team members",
+      "noMembers": "Every team member has already been chosen.",
+      "addExternal": "Someone outside the team",
+      "external": "external",
+      "name": "Full name",
+      "email": "Email",
+      "confirm": "Add",
+      "remove": "Remove {name}",
+      "nameRequired": "Write the name",
+      "emailInvalid": "Write a valid email",
+      "saved": "Interviewers updated",
+      "saveFailed": "The interviewers could not be updated",
+      "afterSave": "Save the ad to choose who interviews in this stage."
+    },
+    "approval": {
+      "approved": "Opening approved.",
+      "approvedDetail": "Approved by {name} on {date}.",
+      "someone": "an approver",
+      "range": "Approved salary: {range}",
+      "missing": "Your organization asks for approval before publishing: this ad does not have one yet.",
+      "exceeded": "The salary written here goes beyond the approved range: stay within it or ask for a new approval.",
+      "ask": "Ask for approval",
+      "errors": {
+        "required": "This ad needs an approval before it can be published.",
+        "rangeExceeded": "The salary of the ad goes beyond the approved range."
+      },
+      "asked": "Approval request sent",
+      "askFailed": "The request could not be sent",
+      "dialogTitle": "Ask for approval",
+      "dialogBody": "Approvers receive the ad with the salary written here. Explain why this position is needed.",
+      "reason": "Reason",
+      "reasonRequired": "Write the reason",
+      "send": "Send the request",
+      "sending": "Sending…"
     }
   },
   "public": {
@@ -974,7 +1235,22 @@
     "footer": "Here salary, selection process and response times are always declared.",
     "feedLink": "XML feed",
     "llmsLink": "llms.txt",
-    "feedTitle": "Job ads feed"
+    "feedTitle": "Job ads feed",
+    "employment": {
+      "ccnl": "Collective agreement",
+      "monthlyPaymentsLabel": "Monthly payments",
+      "monthlyPayments": "{count} monthly payments",
+      "mealVoucher": {
+        "electronic": "Meal vouchers of {amount} per day, electronic",
+        "paper": "Meal vouchers of {amount} per day, paper"
+      },
+      "welfare": "Corporate welfare of {amount} per year",
+      "bonus": "Bonus: {bonus}"
+    },
+    "protectedCategories": {
+      "reserved": "Position reserved for people registered in the targeted placement lists under Italian Law 68/99.",
+      "also": "Position also open to people registered in the targeted placement lists under Italian Law 68/99."
+    }
   },
   "careers": {
     "title": "Open positions at {organization}",
@@ -1100,7 +1376,8 @@
       "notes": "Notes",
       "messages": "Messages",
       "tasks": "Tasks",
-      "privacy": "Privacy and data"
+      "privacy": "Privacy and data",
+      "feedback": "Feedback"
     },
     "header": {
       "stage": "Stage:",
@@ -1537,7 +1814,8 @@
     "tabs": {
       "label": "Answer status",
       "overdue": "Overdue",
-      "due_soon": "Due soon"
+      "due_soon": "Due soon",
+      "stale": "Stale ads"
     },
     "stage": "Stage: {stage}",
     "owner": "Owner: {name}",
@@ -1557,6 +1835,16 @@
     "empty": {
       "overdue": "No overdue applications.",
       "due_soon": "No applications due in the next two days."
+    },
+    "stale": {
+      "hint": "Published ads with no activity for {days} days. They stay published until someone closes them.",
+      "list": "Stale ads",
+      "noActivity": "No activity for {count} days",
+      "published": "Published on {date}",
+      "openApplications": "No open applications | One open application | {count} open applications",
+      "open": "Open the ad",
+      "close": "Close the ad",
+      "empty": "No ad stale for more than {days} days"
     }
   },
   "notifications": {
@@ -1972,7 +2260,8 @@
         "create": "Create draft job ads",
         "update": "Edit job ads",
         "publish": "Publish job ads",
-        "close": "Close job ads"
+        "close": "Close job ads",
+        "approve": "Approve the opening of positions"
       },
       "job_template": {
         "read": "Read templates",
@@ -2021,6 +2310,10 @@
       },
       "import": {
         "manage": "Import candidates"
+      },
+      "feedback": {
+        "manage": "Choose interviewers and ask for feedback",
+        "read": "Read interview feedback"
       }
     },
     "withheld": "Some things a key can never do: decisions about candidates, messages to candidates and administration stay with a person.",
@@ -2519,6 +2812,111 @@
     "noEmail": "They have no email address, so they did not receive the confirmation request.",
     "deadline": "Without confirmation the data is erased on {date}",
     "notGiven": "Not given yet: imported candidate, waiting for confirmation."
+  },
+  "feedback": {
+    "tab": {
+      "title": "Interview feedback",
+      "intro": "What the people who met the candidate saw. It is material for whoever decides: no scores, no ranking.",
+      "empty": "No feedback has been requested for this application.",
+      "retry": "Try again",
+      "groups": {
+        "overdue": "Overdue",
+        "pending": "Waiting",
+        "submitted": "Received"
+      },
+      "request": {
+        "stage": "Stage: {stage}",
+        "asked": "Requested on {date}",
+        "expires": "The link expires on {date}",
+        "expired": "Link expired",
+        "submittedAt": "Sent on {date}",
+        "external": "External"
+      },
+      "feedbackBy": "{name}, stage {stage}",
+      "answered": "Answers",
+      "noAnswers": "No written answers.",
+      "opinion": "Recommendation: {value}",
+      "opinionNote": "This is the opinion of whoever ran the interview, not a decision and not a score."
+    },
+    "recommendation": {
+      "proceed": "Move forward",
+      "do_not_proceed": "Do not move forward",
+      "discuss": "Let's talk"
+    },
+    "request": {
+      "action": "Ask for feedback",
+      "title": "Ask for feedback",
+      "description": "We send a personal link, with no account needed, to whoever met the candidate.",
+      "stage": "Interview stage",
+      "stageHint": "If the stage already has declared interviewers, the link goes to them.",
+      "someoneElse": "Ask someone else",
+      "someoneElseHint": "An outside person, who receives the link by email.",
+      "name": "Name",
+      "email": "Email",
+      "submit": "Send the request",
+      "sending": "Sending…",
+      "cancel": "Cancel",
+      "sent": "Request sent",
+      "errors": {
+        "stage_required": "Choose a stage.",
+        "name_required": "Enter the name.",
+        "email_invalid": "Enter a valid email address."
+      }
+    },
+    "public": {
+      "metaTitle": "Feedback on {candidate}",
+      "title": "Your feedback on the interview",
+      "intro": "{organization} is asking for brief feedback on {candidate} for the {job} position. It takes a few minutes, from your phone too.",
+      "hello": "Hi {name}",
+      "stage": "Stage",
+      "stageNote": "Note on the stage",
+      "candidate": "Candidate",
+      "job": "Position",
+      "cv": {
+        "show": "View the CV",
+        "hide": "Hide the CV",
+        "title": "CV of {name}"
+      },
+      "questions": "What you saw",
+      "optional": "optional",
+      "answerPlaceholder": "Write here",
+      "recommendation": {
+        "title": "Your recommendation for the next stage",
+        "note": "This is an opinion for whoever decides, not a decision. You are not scoring the candidate."
+      },
+      "deadline": "The link is valid until {date}.",
+      "submit": "Send the feedback",
+      "sending": "Sending…",
+      "errors": {
+        "recommendation_required": "Choose a recommendation for the next stage.",
+        "answers_required": "Write at least one answer.",
+        "answer_too_long": "An answer is too long: {max} characters at most."
+      },
+      "done": {
+        "title": "Thank you, feedback sent",
+        "body": "{organization} receives it right away. You can close this page."
+      },
+      "invalid": {
+        "title": "Invalid link",
+        "body": "This link does not work. Check that you copied it in full from the email."
+      },
+      "expired": {
+        "title": "Link expired",
+        "body": "The time to answer is over. If the feedback is still needed, ask whoever wrote to you for a new link."
+      },
+      "used": {
+        "title": "Feedback already sent",
+        "body": "You have already answered with this link. Thank you."
+      },
+      "rateLimited": {
+        "title": "Too many attempts",
+        "body": "Wait a few minutes, then reload the page."
+      },
+      "unavailable": {
+        "title": "Page not available",
+        "body": "We cannot load the form right now. Please try again later."
+      }
+    }
   },
   "reconfirm": {
     "metaTitle": "Your data at {organization}",

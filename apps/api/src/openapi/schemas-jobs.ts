@@ -49,12 +49,15 @@ export const qualityAssessmentSchema: z.ZodType<AdQualityAssessment> = z.object(
   belowThreshold: z.boolean(),
 });
 
-export const publishIssueSchema = z.object({ path: z.string(), rule: z.enum(PUBLISH_RULES) });
+const complianceDetailSchema = z.object({ match: z.string(), suggestion: z.string() }).describe('The offending text and a suggested fix.');
+
+/** `detail` is present on compliance rules (both-sexes title, gender and discriminatory requirements). */
+export const publishIssueSchema = z.object({ path: z.string(), rule: z.enum(PUBLISH_RULES), detail: z.exactOptional(complianceDetailSchema) });
 
 /** `jobDtoSchema` with the publish rule ids as an enum. */
 export const jobSchema = jobDtoSchema.extend({ publishIssues: z.array(publishIssueSchema) });
 
-export const analyzeResultSchema = z.object({ assessment: qualityAssessmentSchema, publishIssues: z.array(publishIssueSchema) });
+export const analyzeResultSchema = z.object({ assessment: qualityAssessmentSchema, publishIssues: z.array(publishIssueSchema), complianceWarnings: jobDtoSchema.shape.complianceWarnings });
 
 export const publishResultSchema: z.ZodType<PublishJobResultDto> = z.object({
   job: jobSchema,

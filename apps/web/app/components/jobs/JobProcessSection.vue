@@ -3,10 +3,19 @@ import { PlusIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { fieldIdOf } from '@/lib/job-issues'
+import type { InterviewersBinding } from '@/lib/interviewers'
 import { appendItem, emptyStage, moveItem, removeItem, replaceItem, type FieldErrors, type JobForm, type StageForm } from '@/lib/job-form'
+import type { InterviewerDto } from '@/lib/phase9-contract'
 
-const props = defineProps<{ form: JobForm; disabled: boolean; errors: FieldErrors; openCounts?: Readonly<Record<string, number>>; blockedStages?: ReadonlySet<string> }>()
-const emit = defineEmits<{ patch: [changes: Partial<JobForm>] }>()
+const props = defineProps<{
+  form: JobForm
+  disabled: boolean
+  errors: FieldErrors
+  openCounts?: Readonly<Record<string, number>>
+  blockedStages?: ReadonlySet<string>
+  interviewers?: InterviewersBinding | null
+}>()
+const emit = defineEmits<{ patch: [changes: Partial<JobForm>]; interviewers: [stageId: string, list: readonly InterviewerDto[]] }>()
 const { t } = useI18n()
 
 const processId = fieldIdOf('process')
@@ -48,7 +57,19 @@ const move = async (index: number, delta: -1 | 1): Promise<void> => {
           @change="(next) => setProcess(replaceItem(form.process, index, next))"
           @remove="setProcess(removeItem(form.process, index))"
           @move="(delta) => move(index, delta)"
-        />
+        >
+          <template v-if="interviewers">
+            <StageInterviewers
+              v-if="stage.id !== ''"
+              :id="`${processId}-${index}-interviewers`"
+              :interviewers="interviewers.byStage[stage.id] ?? []"
+              :members="interviewers.members"
+              :busy="interviewers.saving === stage.id"
+              @change="(list) => emit('interviewers', stage.id, list)"
+            />
+            <p v-else class="text-xs text-muted-foreground" data-testid="interviewers-after-save">{{ t('job.interviewers.afterSave') }}</p>
+          </template>
+        </StageRow>
       </ol>
       <p v-else class="rounded-lg border border-dashed px-4 py-5 text-sm text-muted-foreground">{{ t('job.editor.process.empty') }}</p>
       <div v-if="!disabled">

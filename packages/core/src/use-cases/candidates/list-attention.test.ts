@@ -29,7 +29,7 @@ describe('listAttention', () => {
     ]);
     expect(page.total).toBe(2);
     expect(page.items[0]).toMatchObject({ candidate: { firstName: 'C1' }, job: { id: 'job_1' }, ownerName: 'Olivia Owner', stageLabel: 'Candidatura ricevuta' });
-    expect(page.items[1]?.stageLabel).toBe('Hr interview');
+    expect(page.items[1]?.stageLabel).toBe('Colloquio HR');
   });
 
   it('filters by state and paginates', async () => {

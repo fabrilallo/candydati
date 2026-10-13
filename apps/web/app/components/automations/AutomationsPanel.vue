@@ -3,6 +3,7 @@ import { InfoIcon, PlusIcon } from '@lucide/vue'
 import { pipelineStagesOf, type JobDto } from '@tt/domain'
 import type { RuleInput } from '@/lib/automation-api'
 import { describeRule, rulesByStage } from '@/lib/automation-view'
+import { can } from '@/lib/permissions-ui'
 import type { AutomationRuleDto } from '@/lib/phase4-contract'
 import { stageName, stageTone } from '@/lib/pipeline-board'
 import { Button } from '@/components/ui/button'
@@ -17,7 +18,11 @@ const { t } = useI18n()
 const automations = useAutomations(props.job.id)
 const templates = useEmailTemplates()
 const team = useMembers()
+const { viewer } = useViewer()
+/** "Chi fa il colloquio" lives next to the rules of each stage too: same list as in the editor. */
+const interviewers = can(viewer.value?.role ?? null, 'feedback:manage') ? useJobInterviewers(props.job.id) : null
 const stages = computed(() => pipelineStagesOf(props.job.content.process))
+const interviewStages = computed(() => new Set(props.job.content.process.flatMap((stage) => (stage.id ? [stage.id] : []))))
 const grouped = computed(() => rulesByStage(automations.rules.value ?? [], stages.value.map((stage) => stage.id)))
 const names = computed(() => ({
   template: (id: string) => templates.templates.value?.find((item) => item.id === id)?.name ?? null,
@@ -72,6 +77,14 @@ const authorOf = (rule: AutomationRuleDto): string | null => rule.createdBy.name
           </h2>
           <Button variant="outline" size="sm" :data-testid="`automation-add-${stage.id}`" @click="startEdit(stage.id, null)"><PlusIcon aria-hidden="true" />{{ t('automations.add') }}</Button>
         </div>
+        <StageInterviewers
+          v-if="interviewers && interviewStages.has(stage.id)"
+          :id="`automation-stage-${stage.id}-interviewers`"
+          :interviewers="interviewers.byStage.value[stage.id] ?? []"
+          :members="interviewers.members.value"
+          :busy="interviewers.saving.value === stage.id"
+          @change="(list) => interviewers?.save(stage.id, list)"
+        />
         <p v-if="(grouped[stage.id] ?? []).length === 0" class="rounded-xl border border-dashed border-input px-5 py-3.5 text-sm text-muted-foreground">{{ t('automations.empty') }}</p>
         <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
           <AutomationRule

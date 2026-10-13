@@ -1,4 +1,4 @@
-import type { JobContent } from '@tt/domain';
+import { employmentBenefitLines, type JobContent } from '@tt/domain';
 
 export type FragmentKey =
   | 'title'
@@ -28,7 +28,7 @@ export const fragmentsOf = (content: JobContent): readonly Fragment[] => [
   ...of('responsibilities', content.responsibilities),
   ...of('requirements', [...content.requirements.mustHave, ...content.requirements.niceToHave]),
   ...of('technologies', content.technologies),
-  ...of('benefits', content.benefits),
+  ...of('benefits', [...employmentBenefitLines(content.employment, content.language), ...content.benefits]),
   ...of('growth', [content.growth]),
   ...of('workLifeBalance', [content.workLifeBalance]),
   ...of('culture', [content.culture]),

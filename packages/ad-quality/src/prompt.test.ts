@@ -50,4 +50,18 @@ describe('buildQualityPrompt', () => {
     expect(prompt).toContain('answer in English');
     expect(prompt).not.toContain('## Benefits');
   });
+
+  it('renders the structured employment terms with the contract and the benefits', () => {
+    const { prompt } = buildQualityPrompt(
+      richAd({
+        benefits: ['Palestra'],
+        employment: { ccnl: 'commercio_terziario', level: '5° livello', monthlyPayments: 14, mealVoucher: { amountPerDay: 8, type: 'electronic' }, welfareAnnual: 1200 },
+      }),
+    );
+    expect(prompt).toContain('## Contract (CCNL and level)\nCommercio e terziario, 5° livello');
+    expect(prompt).toContain('- 14 mensilità');
+    expect(prompt).toContain('- Buoni pasto elettronici da 8 EUR al giorno');
+    expect(prompt).toContain('- Welfare aziendale: 1200 EUR all\'anno');
+    expect(prompt).toContain('- Palestra');
+  });
 });

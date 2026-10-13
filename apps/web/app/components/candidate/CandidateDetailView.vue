@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { FileTextIcon, ListTodoIcon, MailIcon, MessageSquareTextIcon, ShieldCheckIcon, UserRoundIcon } from '@lucide/vue'
+import { FileTextIcon, ListTodoIcon, MailIcon, MessagesSquareIcon, MessageSquareTextIcon, ShieldCheckIcon, UserRoundIcon } from '@lucide/vue'
 import type { EmailTemplateKind, Outcome } from '@tt/domain'
 import type { ApplicationCardDto } from '@/lib/candidate-schemas'
 import { applicationStatus, currentApplication, fullName, stageOf } from '@/lib/candidate-view'
 import { renewalDeadline } from '@/lib/import-view'
 import { messageTotal, outcomeTemplateKind } from '@/lib/message-view'
 import { can } from '@/lib/permissions-ui'
+import { canPhase9 } from '@/lib/phase9-contract'
 import { stageName } from '@/lib/pipeline-board'
 import type { TabItem } from '@/lib/tabs'
 import { Button } from '@/components/ui/button'
@@ -36,7 +37,7 @@ const nowMs = useState('candidate-now', () => Date.now())
 const now = computed(() => new Date(nowMs.value))
 const renewBy = computed(() => (detail.value ? renewalDeadline(detail.value.applications) : null))
 
-type Tab = 'profile' | 'cv' | 'notes' | 'messages' | 'tasks' | 'privacy'
+type Tab = 'profile' | 'cv' | 'notes' | 'messages' | 'tasks' | 'feedback' | 'privacy'
 const tab = ref<Tab>('profile')
 const canRead = computed(() => can(role.value, 'message:read'))
 const canSend = computed(() => can(role.value, 'message:send'))
@@ -47,6 +48,7 @@ const tabs = computed<readonly TabItem<Tab>[]>(() => [
   { value: 'notes', label: t('candidate.tabs.notes'), icon: MessageSquareTextIcon, count: detail.value?.notes.length ?? null, testId: 'tab-notes' },
   ...(canRead.value ? [{ value: 'messages' as const, label: t('candidate.tabs.messages'), icon: MailIcon, count: messageTotal(detail.value?.applications ?? []), testId: 'tab-messages' }] : []),
   ...(can(role.value, 'task:read') && current.value ? [{ value: 'tasks' as const, label: t('candidate.tabs.tasks'), icon: ListTodoIcon, testId: 'tab-tasks' }] : []),
+  ...(canPhase9(role.value, 'feedback:read') && current.value ? [{ value: 'feedback' as const, label: t('candidate.tabs.feedback'), icon: MessagesSquareIcon, testId: 'tab-feedback' }] : []),
   ...(canPrivacy.value ? [{ value: 'privacy' as const, label: t('candidate.tabs.privacy'), icon: ShieldCheckIcon, testId: 'tab-privacy' }] : []),
 ])
 /** One application erased while others stay: the profile is read again; the whole candidate gone: the parent leaves. */
@@ -156,6 +158,7 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
         @dismiss="proposal = null"
       />
       <ApplicationTasks v-else-if="tab === 'tasks' && current" :key="current.id" :application-id="current.id" :job-id="current.job.id" />
+      <FeedbackPanel v-else-if="tab === 'feedback' && current" :key="current.id" :application="current" :can-manage="canPhase9(role, 'feedback:manage')" />
       <CandidatePrivacyPanel v-else-if="tab === 'privacy'" :detail="detail" :name="name" :now="now" :role="role" @updated="c.replace" @erased="erased" />
     </template>
   </div>

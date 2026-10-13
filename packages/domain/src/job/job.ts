@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { COMPLIANCE_WARNING_RULES } from './compliance/types.js';
 import { jobContentSchema, type JobContent, type PublishIssue, type PublishedJobContent } from './content.js';
 import { adQualityReportSchema, type AdQualityAssessment, type AdQualityReport } from './quality.js';
 
@@ -52,6 +53,8 @@ export function jobSlug(title: string, suffix: string): string {
 
 const isoDate = z.iso.datetime();
 
+const complianceDetailSchema = z.object({ match: z.string(), suggestion: z.string() });
+
 export const jobDtoSchema = z.object({
   id: z.string(),
   slug: z.string(),
@@ -59,7 +62,9 @@ export const jobDtoSchema = z.object({
   content: jobContentSchema,
   quality: adQualityReportSchema.nullable(),
   /** Empty when the ad satisfies PLAN §5.1 and may be published. */
-  publishIssues: z.array(z.object({ path: z.string(), rule: z.string() })),
+  publishIssues: z.array(z.object({ path: z.string(), rule: z.string(), detail: complianceDetailSchema.optional() })),
+  /** Doubtful compliance findings: shown to the author, never blocking. */
+  complianceWarnings: z.array(z.object({ path: z.string(), rule: z.enum(COMPLIANCE_WARNING_RULES), detail: complianceDetailSchema })),
   createdAt: isoDate,
   updatedAt: isoDate,
   publishedAt: isoDate.nullable(),

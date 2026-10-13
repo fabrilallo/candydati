@@ -4,7 +4,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { NOW, ok, viewerWith } from '~~/test/fixtures/job-fixtures'
 import JobsPanel from './JobsPanel.vue'
 
-const state = vi.hoisted(() => ({ urls: [] as string[], total: 41, empty: false }))
+const state = vi.hoisted(() => ({ urls: [] as string[], total: 41, empty: false, stale: [] as unknown[] }))
+registerEndpoint('/api/v1/jobs/stale', () => ok(state.stale))
 const summary = (id: string, status: string, title = `Annuncio ${id}`) => ({
   id,
   slug: id,
@@ -19,6 +20,14 @@ const summary = (id: string, status: string, title = `Annuncio ${id}`) => ({
   belowThreshold: status === 'closed',
   updatedAt: NOW,
   publishedAt: null,
+})
+const staleJob = (id: string, daysSinceActivity: number) => ({
+  id,
+  title: `Annuncio ${id}`,
+  publishedAt: null,
+  lastActivityAt: NOW,
+  daysSinceActivity,
+  openApplications: 0,
 })
 registerEndpoint('/api/v1/jobs', (event) => {
   const params = new URL(event.node.req.url ?? '', 'http://x').searchParams
@@ -41,6 +50,7 @@ const mountPanel = async () => {
 beforeEach(() => {
   state.urls.length = 0
   state.empty = false
+  state.stale = []
   useViewer().viewer.value = viewerWith('owner')
 })
 afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
@@ -59,6 +69,15 @@ describe('JobsPanel', () => {
     expect(rows[0]?.find('[data-testid="job-below-threshold"]').exists()).toBe(false)
     expect(rows[0]?.find('time').attributes('datetime')).toBe(NOW)
     expect(rows[0]?.find('a').attributes('href')).toBe('/app/jobs/p1-a')
+  })
+
+  it('marks only the stale published ad with a quiet badge', async () => {
+    state.stale = [staleJob('p1-a', 120), staleJob('p1-b', 95)]
+    const wrapper = await mountPanel()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="job-stale"]').exists()).toBe(true))
+    const badges = wrapper.findAll('[data-testid="job-stale"]')
+    expect(badges).toHaveLength(1)
+    expect(wrapper.findAll('[data-testid="job-row"]')[0]?.find('[data-testid="job-stale"]').text()).toBe('Fermo da 120 giorni')
   })
 
   it('tells a draft what is missing and shows no score for it', async () => {

@@ -24,3 +24,6 @@ export * from './in-memory-distribution.js';
 export * from './distribution-deps.js';
 export * from './in-memory-imports.js';
 export * from './import-deps.js';
+export * from './in-memory-feedback.js';
+export * from './in-memory-job-requests.js';
+export * from './hr-deps.js';

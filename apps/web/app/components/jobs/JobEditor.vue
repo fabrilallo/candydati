@@ -2,6 +2,9 @@
 import { BriefcaseBusinessIcon, ExternalLinkIcon, EyeIcon, HistoryIcon, LockIcon, PencilLineIcon } from '@lucide/vue'
 import type { JobDto, JobTemplateDto } from '@tt/domain'
 import { gapList } from '@/lib/ad-gaps'
+import { APPROVAL_ERROR_KEYS, approvalState } from '@/lib/approval-view'
+import { complianceMarks } from '@/lib/compliance-view'
+import type { JobDto9 } from '@/lib/phase9-contract'
 import { formToPreview } from '@/lib/ad-preview'
 import { saveStateOf } from '@/lib/editor-inputs'
 import { focusField } from '@/lib/focus-field'
@@ -31,6 +34,21 @@ const modeTabs = computed<readonly TabItem<Mode>[]>(() => [
   { value: 'preview', label: t('job.editor.workspace.preview'), icon: EyeIcon, testId: 'mode-preview' },
 ])
 const closeOpen = ref(false)
+/** "Chi fa il colloquio" per stage, saved apart from the ad: only once the ad exists and for who manages feedback. */
+const interviewers = props.job && can(viewer.value?.role ?? null, 'feedback:manage') ? useJobInterviewers(props.job.id) : null
+/** Approval of the ad, only shown when the organization asks for it. A new ad has none until it is saved. */
+const jobApproval = props.job ? useJobApproval(props.job.id) : null
+const approval = computed(() => jobApproval?.status.value?.approval ?? (ed.job.value as JobDto9 | null)?.approval ?? null)
+const requireApproval = computed(() => jobApproval?.status.value?.requireApproval ?? null)
+const approvalNow = computed(() => (ed.status.value === 'draft' ? approvalState(requireApproval.value, approval.value, ed.form.value.salaryMin, ed.form.value.salaryMax) : 'off'))
+const askApproval = async (reason: string, done: (ok: boolean) => void): Promise<void> => done(jobApproval ? await jobApproval.ask(reason) : false)
+const refusedKey = computed(() => (ed.errorKey.value !== null && APPROVAL_ERROR_KEYS.includes(ed.errorKey.value) ? ed.errorKey.value : null))
+watch(refusedKey, (key) => {
+  if (key) void jobApproval?.refresh()
+})
+const interviewerBinding = computed(() =>
+  interviewers && !ed.readOnly.value ? { byStage: interviewers.byStage.value, members: interviewers.members.value, saving: interviewers.saving.value } : null,
+)
 const templateOpen = ref(false)
 
 const orgSlug = computed(() => viewer.value?.organization?.slug ?? '')
@@ -41,6 +59,7 @@ const heading = computed(() => ed.form.value.title.trim() || t(ed.job.value ? 'j
 const preview = computed(() => formToPreview(ed.form.value))
 const gaps = computed(() => gapList(ed.check.value.issues))
 const saveState = computed(() => saveStateOf({ busy: ed.busy.value, dirty: ed.dirty.value, saved: ed.job.value !== null }))
+const marks = computed(() => (ed.readOnly.value ? [] : complianceMarks(ed.compliance.value)))
 const phrases = computed(() => ed.quality.view.value?.vaguePhrases ?? [])
 const roleLabel = computed(() => (ed.form.value.role ? t(`taxonomy.roles.${ed.form.value.role}`) : null))
 const canAudit = computed(() => can(viewer.value?.role ?? null, 'audit:read'))
@@ -78,6 +97,7 @@ const saveTemplate = async (name: string): Promise<void> => {
         :status="ed.status.value"
         :save-state="saveState"
         :gaps="gaps"
+        :blocking="ed.compliance.value.blocking"
         :read-only="ed.readOnly.value"
         :can-publish="ed.permissions.value.publish"
         :can-close="ed.permissions.value.close"
@@ -90,6 +110,7 @@ const saveTemplate = async (name: string): Promise<void> => {
         @template="templateOpen = true"
         @jump="jump"
         @reveal="ed.reveal"
+        @fix="ed.applyFix"
       />
     </template>
   <div class="grid grid-cols-[minmax(0,1fr)] gap-6">
@@ -125,7 +146,19 @@ const saveTemplate = async (name: string): Promise<void> => {
       <p v-if="template && !job" class="text-sm text-muted-foreground">{{ t('job.editor.fromTemplate', { name: template.name }) }}</p>
       <FormAlert v-if="noticeKey" :message-key="noticeKey" />
       <PrivacyRequiredAlert v-if="ed.errorKey.value === 'job.errors.privacyNoticeRequired'" />
-      <FormAlert v-else-if="ed.errorKey.value" :message-key="ed.errorKey.value" />
+      <ApprovalNote
+        v-else-if="refusedKey || approvalNow !== 'off'"
+        :state="approvalNow"
+        :approval="approval"
+        :title="ed.form.value.title"
+        :currency="ed.form.value.currency"
+        :language="locale"
+        :refused-key="refusedKey"
+        :can-ask="jobApproval !== null"
+        :asking="jobApproval?.asking.value ?? false"
+        @ask="askApproval"
+      />
+      <FormAlert v-if="ed.errorKey.value && ed.errorKey.value !== 'job.errors.privacyNoticeRequired' && !refusedKey" :message-key="ed.errorKey.value" />
     </div>
 
     <div class="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] xl:gap-10">
@@ -138,8 +171,18 @@ const saveTemplate = async (name: string): Promise<void> => {
           <fieldset :disabled="ed.readOnly.value" class="contents">
             <JobBasicsSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
             <JobSalarySection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
+            <JobEmploymentSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
             <JobWorkSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
-            <JobProcessSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" :open-counts="ed.openCounts.value" :blocked-stages="ed.blockedStages.value" @patch="ed.patch" />
+            <JobProcessSection
+              :form="ed.form.value"
+              :disabled="ed.readOnly.value"
+              :errors="ed.errors.value"
+              :open-counts="ed.openCounts.value"
+              :blocked-stages="ed.blockedStages.value"
+              :interviewers="interviewerBinding"
+              @patch="ed.patch"
+              @interviewers="(stageId, list) => interviewers?.save(stageId, list)"
+            />
             <JobDescriptionSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
             <JobExtrasSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
           </fieldset>
@@ -160,7 +203,18 @@ const saveTemplate = async (name: string): Promise<void> => {
           :disabled="ed.busy.value !== null"
           @analyze="ed.analyze"
         />
-        <EditorPreviewPane :content="preview" :organization="organization" :issues="ed.check.value.issues" :phrases="phrases" :published-at="ed.job.value?.publishedAt ?? null" :loud-gaps="ed.revealed.value" @jump="jump" />
+        <CompliancePanel v-if="!ed.readOnly.value" :view="ed.compliance.value" :language="ed.form.value.language" :disabled="ed.readOnly.value" @fix="ed.applyFix" @jump="jump" />
+        <EditorPreviewPane
+          :content="preview"
+          :organization="organization"
+          :issues="ed.check.value.issues"
+          :phrases="phrases"
+          :marks="marks"
+          :published-at="ed.job.value?.publishedAt ?? null"
+          :loud-gaps="ed.revealed.value"
+          @jump="jump"
+          @fix="ed.applyFix"
+        />
       </div>
     </div>
 

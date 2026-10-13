@@ -47,7 +47,123 @@
     "data": "Dati",
     "api": "API e integrazioni",
     "distribution": "Distribuzione",
-    "imports": "Import"
+    "imports": "Import",
+    "jobRequests": "Richieste"
+  },
+  "jobRequests": {
+    "title": "Richieste di assunzione",
+    "description": "Chi ha bisogno di una persona lo chiede qui, con motivo e budget. Chi approva decide, poi la richiesta diventa un annuncio.",
+    "new": "Nuova richiesta",
+    "newTitle": "Nuova richiesta di assunzione",
+    "newDescription": "Racconta di chi hai bisogno e perché. Più è chiaro il budget, più in fretta si decide.",
+    "list": {
+      "label": "Elenco delle richieste",
+      "emptyCreate": "Nessuna richiesta per ora",
+      "emptyCreateBody": "Se ti serve una persona nel team, apri una richiesta: indica il ruolo, il motivo e il budget. Chi approva la vedrà subito.",
+      "emptyReadOnly": "Nessuna richiesta per ora",
+      "emptyReadOnlyBody": "Quando un hiring manager chiederà una nuova assunzione, la troverai qui.",
+      "headcount": "{count} persona | {count} persone",
+      "by": "di {name}",
+      "createdOn": "il {date}"
+    },
+    "status": {
+      "submitted": "In attesa",
+      "approved": "Approvata",
+      "rejected": "Rifiutata",
+      "converted": "Annuncio creato"
+    },
+    "fields": {
+      "title": "Titolo della posizione",
+      "titleHint": "Come la chiameresti in un annuncio, per esempio Sviluppatrice o sviluppatore backend.",
+      "role": "Ruolo",
+      "choose": "Scegli un ruolo",
+      "reason": "Perché serve questa persona",
+      "reasonHint": "Una sostituzione, un nuovo progetto, un team che cresce: due righe bastano.",
+      "headcount": "Quante persone",
+      "salaryMin": "RAL minima",
+      "salaryMax": "RAL massima",
+      "salaryHint": "Retribuzione annua lorda, in euro.",
+      "workMode": "Modalità di lavoro",
+      "location": "Sede",
+      "locationHint": "Città o ufficio, se serve.",
+      "desiredStart": "Data desiderata di ingresso",
+      "processNotes": "Fasi e colloqui",
+      "processNotesHint": "Quanti colloqui, di che tipo, quanto devono durare.",
+      "interviewersNotes": "Chi fa i colloqui",
+      "interviewersNotesHint": "Nomi o ruoli di chi incontrerà le persone candidate.",
+      "budget": "Budget (RAL)",
+      "requestedBy": "Richiesta di",
+      "requestedOn": "Inviata il"
+    },
+    "form": {
+      "submit": "Invia la richiesta",
+      "submitting": "Invio in corso…",
+      "sent": "Richiesta inviata",
+      "cancel": "Annulla",
+      "forbidden": "Non hai il permesso di aprire una richiesta."
+    },
+    "errors": {
+      "title": "Scrivi il titolo della posizione.",
+      "role": "Scegli il ruolo.",
+      "reason": "Spiega in poche parole perché serve questa persona.",
+      "headcount": "Indica quante persone servono, da 1 a 100.",
+      "salaryMin": "Indica la RAL minima.",
+      "salaryMax": "Indica la RAL massima.",
+      "salaryOrder": "La RAL massima non può essere sotto la minima.",
+      "desiredStart": "Usa una data valida.",
+      "noteRequired": "Spiega il motivo del rifiuto: chi ha chiesto la persona lo leggerà."
+    },
+    "detail": {
+      "back": "Tutte le richieste",
+      "notFound": "Questa richiesta non esiste più.",
+      "sections": {
+        "need": "Il fabbisogno",
+        "process": "Selezione",
+        "decision": "Decisione"
+      },
+      "none": "Non indicato",
+      "decidedBy": "{name} il {date}",
+      "noNote": "Nessuna nota.",
+      "waiting": "Aspetta la decisione di un amministratore.",
+      "waitingConvert": "Approvata: l'annuncio lo crea chi gestisce le selezioni.",
+      "openJob": "Apri l'annuncio",
+      "crumb": "Richiesta"
+    },
+    "actions": {
+      "approve": "Approva",
+      "reject": "Rifiuta",
+      "convert": "Crea l'annuncio",
+      "converting": "Creo l'annuncio…",
+      "assistant": "Prepara la bozza con l'assistente",
+      "assistantHint": "Crea l'annuncio e chiede all'assistente di scrivere una prima bozza dai dati della richiesta."
+    },
+    "decide": {
+      "approveTitle": "Approvare la richiesta?",
+      "approveBody": "Chi gestisce le selezioni potrà creare l'annuncio. La RAL approvata resta il limite per la pubblicazione.",
+      "rejectTitle": "Rifiutare la richiesta?",
+      "rejectBody": "Chi l'ha aperta riceve il tuo motivo. Non si può tornare indietro.",
+      "noteLabel": "Nota (facoltativa)",
+      "rejectNoteLabel": "Motivo del rifiuto",
+      "confirmApprove": "Approva la richiesta",
+      "confirmReject": "Rifiuta la richiesta",
+      "working": "Un momento…",
+      "cancel": "Annulla",
+      "approved": "Richiesta approvata",
+      "rejected": "Richiesta rifiutata"
+    },
+    "assistant": {
+      "prompt": "Scrivi una bozza dell'annuncio a partire da questa richiesta di assunzione. Usa solo quello che c'è scritto, e dove manca qualcosa dimmelo invece di inventarlo.\n{summary}",
+      "line": "{label}: {value}"
+    },
+    "converted": "Annuncio creato",
+    "settings": {
+      "title": "Approvazione degli annunci",
+      "label": "Richiedi l'approvazione prima di pubblicare un annuncio",
+      "on": "Un annuncio si pubblica solo dopo l'approvazione di un amministratore, e la RAL non può superare quella approvata. Le richieste restano il modo di chiederla.",
+      "off": "Gli annunci si pubblicano senza approvazione. Le richieste sono facoltative: servono a chi vuole farsi autorizzare il budget.",
+      "saved": "Impostazione salvata",
+      "loadFailed": "Non riusciamo a leggere l'impostazione."
+    }
   },
   "roles": {
     "owner": "Proprietario",
@@ -297,7 +413,8 @@
         "created": "Ha creato l'organizzazione",
         "updated": "Ha modificato l'organizzazione",
         "deleted": "Ha eliminato l'organizzazione",
-        "exported": "Ha esportato tutti i dati dell'organizzazione"
+        "exported": "Ha esportato tutti i dati dell'organizzazione",
+        "approval_setting_updated": "Ha cambiato l'obbligo di approvazione degli annunci"
       },
       "invitation": {
         "created": "Ha invitato una persona",
@@ -318,7 +435,8 @@
         "updated": "Ha modificato un annuncio",
         "published": "Ha pubblicato un annuncio",
         "closed": "Ha chiuso un annuncio",
-        "distribution_synced": "Ha sincronizzato un annuncio con i canali di distribuzione"
+        "distribution_synced": "Ha sincronizzato un annuncio con i canali di distribuzione",
+        "interviewers_updated": "Ha cambiato chi fa i colloqui di un annuncio"
       },
       "job_template": {
         "created": "Ha salvato un modello di annuncio",
@@ -381,6 +499,17 @@
         "created": "Ha caricato file da importare",
         "committed": "Ha importato candidati",
         "undone": "Ha annullato un import"
+      },
+      "feedback": {
+        "requested": "Ha chiesto un feedback dopo un colloquio",
+        "submitted": "Ha lasciato un feedback dopo un colloquio",
+        "cv_opened": "Ha aperto il CV dal link del feedback"
+      },
+      "job_request": {
+        "submitted": "Ha inviato una richiesta di apertura posizione",
+        "approved": "Ha approvato una richiesta di apertura posizione",
+        "rejected": "Ha rifiutato una richiesta di apertura posizione",
+        "converted": "Ha creato un annuncio da una richiesta"
       }
     }
   },
@@ -555,6 +684,34 @@
       "technical_lead": "Responsabile tecnico",
       "founder": "Fondatore o fondatrice",
       "external_partner": "Partner esterno"
+    },
+    "ccnl": {
+      "commercio_terziario": "Commercio e terziario",
+      "metalmeccanico_industria": "Metalmeccanico industria",
+      "metalmeccanico_pmi": "Metalmeccanico PMI (Confapi)",
+      "telecomunicazioni": "Telecomunicazioni",
+      "credito": "Credito",
+      "chimico": "Chimico",
+      "studi_professionali": "Studi professionali",
+      "turismo": "Turismo",
+      "edilizia": "Edilizia",
+      "logistica_trasporti": "Logistica e trasporti",
+      "servizi_pulizia": "Servizi di pulizia",
+      "cooperative_sociali": "Cooperative sociali",
+      "sanita_privata": "Sanità privata",
+      "scuola_privata": "Scuola privata",
+      "altro": "Altro"
+    },
+    "benefits": {
+      "health_insurance": "Assicurazione sanitaria",
+      "pension_fund": "Previdenza integrativa",
+      "fuel_vouchers": "Buoni carburante",
+      "company_car": "Auto aziendale",
+      "phone": "Telefono aziendale",
+      "computer": "Computer aziendale",
+      "transport_refund": "Rimborso dei trasporti",
+      "gym": "Palestra",
+      "nursery": "Asilo aziendale"
     }
   },
   "quality": {
@@ -606,7 +763,10 @@
       "onsite_days_required": "Indica quanti giorni a settimana si lavora in sede",
       "too_few_stages": "Aggiungi almeno una fase al processo di selezione",
       "too_few_responsibilities": "Servono almeno tre responsabilità",
-      "too_few_requirements": "Indica almeno un requisito obbligatorio"
+      "too_few_requirements": "Indica almeno un requisito obbligatorio",
+      "gender_exclusive_title": "Il titolo si rivolge a un solo sesso",
+      "gender_requirement": "Chiede un sesso preciso",
+      "discriminatory_requirement": "Contiene un requisito discriminatorio"
     },
     "validation": {
       "invalidChoice": "Scegli uno dei valori proposti",
@@ -661,6 +821,7 @@
       "belowThresholdLong": "Qualità sotto la soglia consigliata",
       "scoreLabel": "Qualità {score} su 10",
       "updatedAgo": "Aggiornato {time}",
+      "stale": "Fermo da {count} giorni",
       "showAll": "Mostra tutti gli annunci",
       "empty": {
         "draft": {
@@ -790,7 +951,8 @@
       "title": "Cosa manca per pubblicare",
       "ready": "Tutti i requisiti sono soddisfatti: l'annuncio si può pubblicare.",
       "missing": "Manca 1 elemento | Mancano {count} elementi",
-      "go": "Vai al campo"
+      "go": "Vai al campo",
+      "toFix": "1 cosa da sistemare | {count} cose da sistemare"
     },
     "preview": {
       "gaps": {
@@ -925,6 +1087,105 @@
       "deciding": "Registro gli esiti",
       "review": "Vai ai candidati",
       "decided": "1 esito registrato | {count} esiti registrati"
+    },
+    "compliance": {
+      "title": "Conformità alla legge",
+      "blockingIntro": "Un punto impedisce la pubblicazione. | {count} punti impediscono la pubblicazione.",
+      "warningsIntro": "Niente blocca la pubblicazione, ma alcune frasi meritano una seconda lettura.",
+      "review": "Da rivedere",
+      "menuTitle": "Da correggere per legge",
+      "fixed": "Correzione applicata. Ricordati di salvare.",
+      "rules": {
+        "gender_exclusive_title": "Il titolo si rivolge a un solo sesso",
+        "gender_requirement": "Chiede un sesso preciso",
+        "discriminatory_requirement": "Requisito discriminatorio",
+        "gender_masculine_phrasing": "Frase solo al maschile",
+        "age_proxy": "Può escludere per età",
+        "nationality_proxy": "Può escludere per nazionalità",
+        "protected_categories_wording": "Formula sulle categorie protette non corretta"
+      },
+      "fix": {
+        "addMarker": "Aggiungi {marker} al titolo",
+        "useTitle": "Usa «{title}»",
+        "remove": "Togli «{text}»",
+        "removeItem": "Togli il requisito «{text}»",
+        "replace": "Scrivi «{text}»",
+        "legalWording": "Usa la formula della L. 68/99"
+      }
+    },
+    "employment": {
+      "title": "Contratto e benefit",
+      "description": "Contratto applicato e benefit con le cifre: chi legge vuole sapere quanto, non solo cosa.",
+      "ccnl": "CCNL applicato",
+      "notSaid": "Non indicato",
+      "ccnlOther": "Nome del contratto",
+      "level": "Livello di inquadramento",
+      "levelPlaceholder": "Es. 5° livello, Quadro",
+      "monthlyPayments": "Mensilità",
+      "monthlyHint": "13 con la tredicesima, 14 con la quattordicesima.",
+      "monthlyOption": "{count} mensilità",
+      "welfare": "Welfare annuo",
+      "welfareHint": "Budget welfare all'anno, per persona.",
+      "mealVoucher": "Buoni pasto",
+      "mealVoucherAmount": "Valore del buono pasto al giorno",
+      "perDay": "{symbol} al giorno",
+      "mealVoucherType": "Tipo di buono pasto",
+      "voucherTypes": {
+        "electronic": "Elettronici",
+        "paper": "Cartacei"
+      },
+      "bonus": "Bonus",
+      "bonusHint": "Come funziona e quanto vale, es. fino al 10% della RAL in base agli obiettivi.",
+      "extraBenefits": "Benefit inclusi",
+      "otherBenefits": "Altri benefit",
+      "otherBenefitsHint": "Quello che non è nella lista, una voce per riga.",
+      "protectedLabel": "Categorie protette (L. 68/99)",
+      "protected": {
+        "none": "Non indicare",
+        "reserved": "Riservata",
+        "also": "Aperta anche"
+      },
+      "protectedHint": "Se la posizione è riservata o aperta alle categorie protette, l'annuncio userà la formula prevista dalla legge.",
+      "protectedWillRead": "Nell'annuncio si leggerà: {sentence}"
+    },
+    "interviewers": {
+      "label": "Chi fa il colloquio",
+      "nobody": "Nessuno ancora",
+      "add": "Aggiungi",
+      "team": "Persone del team",
+      "noMembers": "Tutte le persone del team sono già state scelte.",
+      "addExternal": "Persona esterna al team",
+      "external": "esterna",
+      "name": "Nome e cognome",
+      "email": "Email",
+      "confirm": "Aggiungi",
+      "remove": "Togli {name}",
+      "nameRequired": "Scrivi il nome",
+      "emailInvalid": "Scrivi un'email valida",
+      "saved": "Persone del colloquio aggiornate",
+      "saveFailed": "Non è stato possibile aggiornare chi fa il colloquio",
+      "afterSave": "Salva l'annuncio per scegliere chi fa il colloquio in questa fase."
+    },
+    "approval": {
+      "approved": "Apertura approvata.",
+      "approvedDetail": "Approvata da {name} il {date}.",
+      "someone": "un approvatore",
+      "range": "RAL approvata: {range}",
+      "missing": "La tua organizzazione chiede un'approvazione prima di pubblicare: questo annuncio non ne ha ancora una.",
+      "exceeded": "La RAL scritta qui va oltre il range approvato: rientra nel range o chiedi una nuova approvazione.",
+      "ask": "Chiedi l'approvazione",
+      "errors": {
+        "required": "Serve un'approvazione per pubblicare questo annuncio.",
+        "rangeExceeded": "La RAL dell'annuncio va oltre il range approvato."
+      },
+      "asked": "Richiesta di approvazione inviata",
+      "askFailed": "Non è stato possibile inviare la richiesta",
+      "dialogTitle": "Chiedi l'approvazione",
+      "dialogBody": "Chi approva riceve l'annuncio con la RAL scritta qui. Spiega perché serve questa posizione.",
+      "reason": "Motivazione",
+      "reasonRequired": "Scrivi la motivazione",
+      "send": "Invia la richiesta",
+      "sending": "Invio in corso…"
     }
   },
   "public": {
@@ -974,7 +1235,22 @@
     "footer": "Qui retribuzione, processo di selezione e tempi di risposta sono sempre dichiarati.",
     "feedLink": "Feed XML",
     "llmsLink": "llms.txt",
-    "feedTitle": "Feed degli annunci"
+    "feedTitle": "Feed degli annunci",
+    "employment": {
+      "ccnl": "CCNL",
+      "monthlyPaymentsLabel": "Mensilità",
+      "monthlyPayments": "{count} mensilità",
+      "mealVoucher": {
+        "electronic": "Buoni pasto da {amount} al giorno, elettronici",
+        "paper": "Buoni pasto da {amount} al giorno, cartacei"
+      },
+      "welfare": "Welfare aziendale di {amount} all'anno",
+      "bonus": "Bonus: {bonus}"
+    },
+    "protectedCategories": {
+      "reserved": "Posizione riservata agli iscritti alle liste del collocamento mirato ai sensi della L. 68/99.",
+      "also": "Posizione aperta anche agli iscritti alle liste del collocamento mirato ai sensi della L. 68/99."
+    }
   },
   "careers": {
     "title": "Posizioni aperte in {organization}",
@@ -1100,7 +1376,8 @@
       "notes": "Note",
       "messages": "Messaggi",
       "tasks": "Attività",
-      "privacy": "Privacy e dati"
+      "privacy": "Privacy e dati",
+      "feedback": "Feedback"
     },
     "header": {
       "stage": "Fase:",
@@ -1537,7 +1814,8 @@
     "tabs": {
       "label": "Stato della risposta",
       "overdue": "In ritardo",
-      "due_soon": "In scadenza"
+      "due_soon": "In scadenza",
+      "stale": "Annunci fermi"
     },
     "stage": "Fase: {stage}",
     "owner": "Responsabile: {name}",
@@ -1557,6 +1835,16 @@
     "empty": {
       "overdue": "Nessuna candidatura in ritardo.",
       "due_soon": "Nessuna candidatura in scadenza nei prossimi due giorni."
+    },
+    "stale": {
+      "hint": "Annunci pubblicati senza attività da {days} giorni. Restano pubblicati finché qualcuno non li chiude.",
+      "list": "Annunci fermi",
+      "noActivity": "Nessuna attività da {count} giorni",
+      "published": "Pubblicato il {date}",
+      "openApplications": "Nessuna candidatura aperta | Una candidatura aperta | {count} candidature aperte",
+      "open": "Apri l'annuncio",
+      "close": "Chiudi l'annuncio",
+      "empty": "Nessun annuncio fermo da più di {days} giorni"
     }
   },
   "notifications": {
@@ -1972,7 +2260,8 @@
         "create": "Creare bozze di annunci",
         "update": "Modificare gli annunci",
         "publish": "Pubblicare gli annunci",
-        "close": "Chiudere gli annunci"
+        "close": "Chiudere gli annunci",
+        "approve": "Approvare l'apertura delle posizioni"
       },
       "job_template": {
         "read": "Leggere i template",
@@ -2021,6 +2310,10 @@
       },
       "import": {
         "manage": "Importare candidati"
+      },
+      "feedback": {
+        "manage": "Scegliere chi fa i colloqui e chiedere feedback",
+        "read": "Leggere i feedback dei colloqui"
       }
     },
     "withheld": "Alcune cose una chiave non le può fare mai: decisioni sui candidati, messaggi ai candidati e amministrazione restano a una persona.",
@@ -2519,6 +2812,111 @@
     "noEmail": "Non ha un indirizzo email, quindi non ha ricevuto la richiesta di conferma.",
     "deadline": "Senza conferma i dati vengono cancellati il {date}",
     "notGiven": "Non ancora dato: candidato importato, in attesa di conferma."
+  },
+  "feedback": {
+    "tab": {
+      "title": "Feedback dei colloqui",
+      "intro": "Cosa hanno visto le persone che hanno incontrato il candidato. È materiale per chi decide: nessun voto, nessuna classifica.",
+      "empty": "Nessun feedback richiesto per questa candidatura.",
+      "retry": "Riprova",
+      "groups": {
+        "overdue": "In ritardo",
+        "pending": "In attesa",
+        "submitted": "Ricevuti"
+      },
+      "request": {
+        "stage": "Fase: {stage}",
+        "asked": "Richiesto il {date}",
+        "expires": "Il link scade il {date}",
+        "expired": "Link scaduto",
+        "submittedAt": "Inviato il {date}",
+        "external": "Esterno"
+      },
+      "feedbackBy": "{name}, fase {stage}",
+      "answered": "Risposte",
+      "noAnswers": "Nessuna risposta scritta.",
+      "opinion": "Indicazione: {value}",
+      "opinionNote": "È l'opinione di chi ha fatto il colloquio, non una decisione e non un voto."
+    },
+    "recommendation": {
+      "proceed": "Proseguire",
+      "do_not_proceed": "Non proseguire",
+      "discuss": "Parliamone"
+    },
+    "request": {
+      "action": "Chiedi feedback",
+      "title": "Chiedi un feedback",
+      "description": "Mandiamo un link personale, senza account, a chi ha incontrato il candidato.",
+      "stage": "Fase del colloquio",
+      "stageHint": "Se la fase ha già dei colloquianti dichiarati, il link va a loro.",
+      "someoneElse": "Chiedilo a un'altra persona",
+      "someoneElseHint": "Una persona esterna, che riceve il link per email.",
+      "name": "Nome",
+      "email": "Email",
+      "submit": "Invia la richiesta",
+      "sending": "Invio…",
+      "cancel": "Annulla",
+      "sent": "Richiesta inviata",
+      "errors": {
+        "stage_required": "Scegli una fase.",
+        "name_required": "Scrivi il nome.",
+        "email_invalid": "Scrivi un indirizzo email valido."
+      }
+    },
+    "public": {
+      "metaTitle": "Feedback su {candidate}",
+      "title": "Il tuo feedback sul colloquio",
+      "intro": "{organization} ti chiede un parere breve su {candidate} per la posizione {job}. Bastano pochi minuti, anche da telefono.",
+      "hello": "Ciao {name}",
+      "stage": "Fase",
+      "stageNote": "Nota sulla fase",
+      "candidate": "Candidato",
+      "job": "Posizione",
+      "cv": {
+        "show": "Vedi il CV",
+        "hide": "Nascondi il CV",
+        "title": "CV di {name}"
+      },
+      "questions": "Cosa hai visto",
+      "optional": "facoltativa",
+      "answerPlaceholder": "Scrivi qui",
+      "recommendation": {
+        "title": "La tua indicazione per la prossima fase",
+        "note": "È un'opinione per chi decide, non una decisione. Non dai un voto al candidato."
+      },
+      "deadline": "Il link vale fino al {date}.",
+      "submit": "Invia il feedback",
+      "sending": "Invio…",
+      "errors": {
+        "recommendation_required": "Scegli un'indicazione per la prossima fase.",
+        "answers_required": "Scrivi almeno una risposta.",
+        "answer_too_long": "Una risposta è troppo lunga: al massimo {max} caratteri."
+      },
+      "done": {
+        "title": "Grazie, feedback inviato",
+        "body": "{organization} lo riceve subito. Puoi chiudere questa pagina."
+      },
+      "invalid": {
+        "title": "Link non valido",
+        "body": "Questo link non funziona. Controlla di averlo copiato per intero dall'email."
+      },
+      "expired": {
+        "title": "Link scaduto",
+        "body": "Il tempo per rispondere è finito. Se il feedback serve ancora, chiedi un nuovo link a chi ti ha scritto."
+      },
+      "used": {
+        "title": "Feedback già inviato",
+        "body": "Hai già risposto con questo link. Grazie."
+      },
+      "rateLimited": {
+        "title": "Troppi tentativi",
+        "body": "Aspetta qualche minuto, poi ricarica la pagina."
+      },
+      "unavailable": {
+        "title": "Pagina non disponibile",
+        "body": "Non riusciamo a caricare il modulo in questo momento. Riprova più tardi."
+      }
+    }
   },
   "reconfirm": {
     "metaTitle": "I tuoi dati presso {organization}",

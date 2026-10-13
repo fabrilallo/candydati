@@ -13,6 +13,7 @@ import type {
 } from '@tt/domain'
 import { jobStatsDtoSchema } from '@tt/domain'
 import { z } from 'zod'
+import { approvalErrorKey } from './approval-view'
 import { AppError, authErrorKey, errorKeyOf } from './auth-errors'
 import {
   deletedSchema,
@@ -94,6 +95,9 @@ const call = async <T>(request: JobApiRequest, url: string, schema: z.ZodType<T>
     const { code, issues = [] } = failure.data.error
     // Publishing needs the organization's privacy notice first (Phase 2): a specific message with a way to fix it.
     if (issues.some((issue) => issue.message === PRIVACY_NOTICE_REQUIRED)) throw new AppError('job.errors.privacyNoticeRequired', PRIVACY_NOTICE_REQUIRED)
+    // Approval on (Phase 9): the ad needs an approved request, or its range goes beyond the approved one.
+    const approvalKey = approvalErrorKey(code, issues.map((issue) => issue.message))
+    if (approvalKey) throw new AppError(approvalKey, code, issues)
     throw new AppError(jobErrorKey(code, status), code, issues)
   }
   const envelope = successSchema.safeParse(body)

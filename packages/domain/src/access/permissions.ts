@@ -8,7 +8,7 @@ export const STATEMENTS = {
   member: ['create', 'update', 'delete'],
   invitation: ['create', 'cancel'],
   audit: ['read'],
-  job: ['read', 'create', 'update', 'publish', 'close'],
+  job: ['read', 'create', 'update', 'publish', 'close', 'approve'],
   job_template: ['read', 'create', 'delete'],
   /** Candidates and their applications. `read` opens the profile and the CV, and is audited (PLAN §7). */
   candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
@@ -32,6 +32,8 @@ export const STATEMENTS = {
   api_key: ['manage'],
   /** Bulk import of CVs and sheets, and undoing a batch. Never grantable to a key or to the agent. */
   import: ['manage'],
+  /** Interview feedback without login: `manage` sets interviewers and asks for feedback, `read` opens what was left (with candidate:read). */
+  feedback: ['manage', 'read'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -55,7 +57,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     member: ['create', 'update', 'delete'],
     invitation: ['create', 'cancel'],
     audit: ['read'],
-    job: ['read', 'create', 'update', 'publish', 'close'],
+    job: ['read', 'create', 'update', 'publish', 'close', 'approve'],
     job_template: ['read', 'create', 'delete'],
     candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
     candidate_note: ['create'],
@@ -69,6 +71,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     data: ['export'],
     api_key: ['manage'],
     import: ['manage'],
+    feedback: ['manage', 'read'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],
@@ -80,6 +83,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     task: ['read', 'manage'],
     automation: ['manage'],
     import: ['manage'],
+    feedback: ['manage', 'read'],
   },
   /**
    * Writes and edits ads and moves candidates through the stages. Putting ads online, taking them down and deciding
@@ -92,8 +96,16 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     candidate_note: ['create'],
     message: ['read'],
     task: ['read', 'manage'],
+    feedback: ['manage', 'read'],
   },
-  interviewer: { job: ['read'], candidate: ['read'], candidate_note: ['create'], message: ['read'], task: ['read'] },
+  interviewer: {
+    job: ['read'],
+    candidate: ['read'],
+    candidate_note: ['create'],
+    message: ['read'],
+    task: ['read'],
+    feedback: ['read'],
+  },
 };
 
 export const PERMISSIONS: readonly Permission[] = (Object.keys(STATEMENTS) as Resource[]).flatMap((resource) =>

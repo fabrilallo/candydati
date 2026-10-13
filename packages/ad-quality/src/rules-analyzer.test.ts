@@ -87,6 +87,14 @@ describe('rules analyzer', () => {
     it('1 when concrete', () => expect(scoreOf(build(concrete[category] ?? []), category)).toBe(1));
   });
 
+  it('counts the structured employment terms in the benefits category', () => {
+    const employment = { monthlyPayments: 14, mealVoucher: { amountPerDay: 8, type: 'electronic' }, extraBenefits: ['health_insurance'] };
+    expect(scoreOf(draft({ benefits: [], employment }), 'benefits')).toBe(1);
+    expect(scoreOf(draft({ benefits: ['Palestra', 'Asilo'], employment: { welfareAnnual: 1000 } }), 'benefits')).toBe(1);
+    expect(scoreOf(draft({ benefits: [], employment: { extraBenefits: ['gym', 'phone', 'computer'] } }), 'benefits')).toBe(0.5);
+    expect(scoreOf(draft({ benefits: [], employment: { level: '5° livello' } }), 'benefits')).toBe(0);
+  });
+
   it('keeps responsibilities and benefits at 0.5 without measurable elements', () => {
     expect(scoreOf(draft({ responsibilities: ['Mantenere le API', 'Scrivere i test', 'Fare le review'] }), 'responsibilities_clarity')).toBe(0.5);
     expect(scoreOf(draft({ benefits: ['Polizza sanitaria', 'Buoni pasto', 'Palestra'] }), 'benefits')).toBe(0.5);

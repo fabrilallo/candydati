@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkPublishable, isPublishable, isPublishedContent, jobContentSchema, type JobContentInput } from './content.js';
+import { checkPublishable, isPublishable, PUBLISH_RULES, isPublishedContent, jobContentSchema, type JobContentInput } from './content.js';
 
 /** A complete ad that satisfies every rule of PLAN §5.1 (hybrid, so city and onsite days are required). */
 const COMPLETE: JobContentInput = {
@@ -161,5 +161,21 @@ describe('jobContentSchema', () => {
     expect(input).toEqual(snapshot);
     expect(parsed).not.toBe(input);
     expect(parsed.responsibilities).not.toBe(input.responsibilities);
+  });
+
+  it('turns blocking compliance findings into publish issues with the offending text', () => {
+    const issues = checkPublishable(draft({ title: 'Cercasi ragazza per reception', summary: 'Età massima 30 anni.' }));
+    expect(issues.map((issue) => `${issue.path}:${issue.rule}`)).toEqual(['title:gender_requirement', 'summary:discriminatory_requirement']);
+    expect(issues[0]?.detail?.match).toBe('Cercasi ragazza');
+    expect(issues[1]?.detail?.suggestion).toMatch(/età/i);
+    expect(isPublishable(draft({ title: 'Sviluppatore Backend' }))).toBe(false);
+  });
+
+  it('does not block on compliance warnings', () => {
+    expect(checkPublishable(draft({ requirements: { mustHave: ['Neolaureato in informatica'], niceToHave: [] } }))).toEqual([]);
+  });
+
+  it('keeps the rule ids of compliance in the public list', () => {
+    expect(PUBLISH_RULES).toEqual(expect.arrayContaining(['gender_exclusive_title', 'gender_requirement', 'discriminatory_requirement']));
   });
 });

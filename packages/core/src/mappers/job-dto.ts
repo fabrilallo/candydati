@@ -1,5 +1,6 @@
 import {
   checkPublishable,
+  complianceWarnings,
   isPublishedContent,
   type Job,
   type JobDto,
@@ -24,7 +25,9 @@ export const toJobDto = (job: Job): JobDto => ({
   status: job.status,
   content: job.content,
   quality: job.quality,
-  publishIssues: checkPublishable(job.content).map(({ path, rule }) => ({ path, rule })),
+  // Compliance issues carry the offending text and a suggested fix for the editor.
+  publishIssues: checkPublishable(job.content).map(({ path, rule, detail }) => (detail ? { path, rule, detail } : { path, rule })),
+  complianceWarnings: complianceWarnings(job.content).map(({ path, rule, detail }) => ({ path, rule, detail })),
   createdAt: iso(job.createdAt),
   updatedAt: iso(job.updatedAt),
   publishedAt: isoOrNull(job.publishedAt),

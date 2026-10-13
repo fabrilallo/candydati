@@ -302,3 +302,48 @@ describe('JobEditor permissions and status', () => {
     expect(wrapper.find('[data-testid="save-status"]').text()).toBe('Modifiche non salvate')
   })
 })
+
+describe('JobEditor compliance', () => {
+  it('blocks a masculine-only title, lists it with its fix, and the fix makes the ad publishable again', async () => {
+    const wrapper = await mountEditor({ job: makeJob({ content: { ...completeContent, title: 'Sviluppatore backend' } }) })
+    await flushPromises()
+    expect(wrapper.find('[data-testid="publish"]').attributes('disabled') !== undefined).toBe(true)
+    const panel = wrapper.find('[data-testid="compliance-blocking"]')
+    expect(panel.text()).toContain('Il titolo si rivolge a un solo sesso')
+    expect(panel.text()).toContain('«Sviluppatore»')
+    await wrapper.find('[data-testid="compliance-fix"]').trigger('click')
+    await flushPromises()
+    expect((wrapper.find('#job-field-title').element as HTMLInputElement).value).toBe('Sviluppatore backend (m/f)')
+    expect(wrapper.find('[data-testid="compliance-panel"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="publish"]').attributes('disabled') !== undefined).toBe(false)
+  })
+
+  it('shows doubtful wording as a quiet list that never blocks', async () => {
+    const wrapper = await mountEditor({ job: makeJob({ content: { ...completeContent, summary: 'Il candidato ideale ama il codice.' } }) })
+    await flushPromises()
+    expect(wrapper.find('[data-testid="compliance-blocking"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="compliance-warnings"]').text()).toContain('Da rivedere')
+    expect(wrapper.find('[data-testid="publish"]').attributes('disabled') !== undefined).toBe(false)
+  })
+
+  it('explains a publication refused for approval and asks for it in place', async () => {
+    registerEndpoint('/api/v1/jobs/j2/publish', {
+      method: 'POST',
+      handler: (event) => {
+        setResponseStatus(event, 422)
+        return { success: false, data: null, error: { code: 'approval_required', message: 'x' } }
+      },
+    })
+    registerEndpoint('/api/v1/jobs/j2/approval', () => ok({ requireApproval: true, approval: null, publishable: false }))
+    registerEndpoint('/api/v1/jobs/j2/approval-request', { method: 'POST', handler: async (e) => ((state.bodies.approval = await readBody(e)), ok({ id: 'r1' })) })
+    const wrapper = await mountEditor({ job: makeJob({ id: 'j2' }) })
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="approval-note"]').attributes('data-state')).toBe('missing'))
+    await wrapper.find('[data-testid="publish"]').trigger('click')
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="approval-note"]').text()).toContain("Serve un'approvazione"))
+    await wrapper.find('[data-testid="approval-ask"]').trigger('click')
+    await flushPromises()
+    await new DOMWrapper(document.body.querySelector<HTMLTextAreaElement>('#approval-reason')!).setValue('Serve entro gennaio')
+    await new DOMWrapper(document.body.querySelector<HTMLElement>('[data-testid="approval-send"]')!).trigger('click')
+    await vi.waitFor(() => expect(state.bodies.approval).toEqual({ reason: 'Serve entro gennaio' }))
+  })
+})

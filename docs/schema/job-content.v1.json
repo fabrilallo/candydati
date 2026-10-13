@@ -313,6 +313,112 @@
       "default": "",
       "type": "string",
       "maxLength": 4000
+    },
+    "employment": {
+      "type": "object",
+      "properties": {
+        "ccnl": {
+          "type": "string",
+          "enum": [
+            "commercio_terziario",
+            "metalmeccanico_industria",
+            "metalmeccanico_pmi",
+            "telecomunicazioni",
+            "credito",
+            "chimico",
+            "studi_professionali",
+            "turismo",
+            "edilizia",
+            "logistica_trasporti",
+            "servizi_pulizia",
+            "cooperative_sociali",
+            "sanita_privata",
+            "scuola_privata",
+            "altro"
+          ]
+        },
+        "ccnlOther": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "level": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "monthlyPayments": {
+          "type": "integer",
+          "minimum": 12,
+          "maximum": 16
+        },
+        "mealVoucher": {
+          "type": "object",
+          "properties": {
+            "amountPerDay": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 100
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "electronic",
+                "paper"
+              ]
+            }
+          },
+          "required": [
+            "amountPerDay",
+            "type"
+          ]
+        },
+        "welfareAnnual": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 1000000
+        },
+        "bonus": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "extraBenefits": {
+          "maxItems": 9,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "health_insurance",
+              "pension_fund",
+              "fuel_vouchers",
+              "company_car",
+              "phone",
+              "computer",
+              "transport_refund",
+              "gym",
+              "nursery"
+            ]
+          }
+        },
+        "otherBenefits": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          }
+        }
+      }
+    },
+    "protectedCategories": {
+      "type": "string",
+      "enum": [
+        "none",
+        "reserved",
+        "also"
+      ]
     }
   },
   "required": [

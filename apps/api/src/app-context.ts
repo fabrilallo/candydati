@@ -50,6 +50,8 @@ import { createRequestActors } from './http/request-actors.js';
 import { createApiKeyDeps } from './wiring/api-key-deps.js';
 import { createDistributionDeps } from './wiring/distribution-deps.js';
 import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
+import { createHrDeps, type HrWiring } from './wiring/hr-deps.js';
+import { toMessagingConfig } from '@tt/providers';
 
 export interface RateLimitSettings {
   /** Requests per minute per client on every route. */
@@ -69,6 +71,8 @@ export interface RateLimitSettings {
   readonly importMax?: number | undefined;
   /** Requests per minute per client on the public reconfirmation routes. */
   readonly consentMax?: number | undefined;
+  /** Requests per minute per client on the public interview feedback routes. */
+  readonly feedbackMax?: number | undefined;
   /** Requests per minute per API key (on top of the per-client limit). */
   readonly apiKeyMax?: number | undefined;
 }
@@ -113,6 +117,11 @@ export interface AppContext {
   readonly overviewDeps: Phase5Deps['overviewDeps'];
   readonly importDeps: ImportWiring['importDeps'];
   readonly consentDeps: ImportWiring['consentDeps'];
+  readonly feedbackDeps: HrWiring['feedbackDeps'];
+  /** The public feedback form: a visitor with a link, no session. */
+  readonly publicFeedbackDeps: HrWiring['publicFeedbackDeps'];
+  readonly jobRequestDeps: HrWiring['jobRequestDeps'];
+  readonly staleJobDeps: HrWiring['staleJobDeps'];
 }
 
 export interface AppContextDeps {
@@ -150,9 +159,17 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     authenticate: (secret) => authenticateApiKey(apiKeyDeps, secret),
     limiter: createKeyRateLimiter({ max: limits.apiKeyMax ?? env.API_KEY_RATE_LIMIT ?? DEFAULT_API_KEY_MAX, windowMs: 60_000 }),
   });
-  const phase2 = createPhase2Deps({ db, auditLog, files, queue, receipts: messaging.receipts });
-  const phase5 = createPhase5Deps({ db, auditLog, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipWriterFactory });
-  const jobDeps = createJobDeps(db, auditLog, adQuality, env.platform.adQualityThreshold);
+  const hr = createHrDeps({
+    db,
+    auditLog,
+    files,
+    sender,
+    config: toMessagingConfig(env.platform, env.email),
+    onFeedbackMailError: (error) => onReceiptError(error),
+  });
+  const phase2 = createPhase2Deps({ db, auditLog, files, queue, receipts: messaging.receipts, feedback: hr.stageEntry });
+  const phase5 = createPhase5Deps({ db, auditLog, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipWriterFactory, feedbackRecords: hr.feedbackRecords });
+  const jobDeps = createJobDeps(db, auditLog, adQuality, env.platform.adQualityThreshold, hr);
   const distributionDeps = createDistributionDeps({ db, auditLog, publicBaseUrl: env.platform.url, channels: distributionChannels });
   return {
     env,
@@ -165,6 +182,10 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     ...phase5,
     ...createImportDeps({ db, auditLog, files, queue }),
     ...createPhase4Deps({ db, auditLog, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
+    feedbackDeps: hr.feedbackDeps,
+    publicFeedbackDeps: hr.publicFeedbackDeps,
+    jobRequestDeps: hr.jobRequestDeps,
+    staleJobDeps: hr.staleJobDeps,
     messagingDeps: messaging.messagingDeps,
     inboundDeps: messaging.inboundDeps,
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
@@ -175,7 +196,7 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
   };
 }
 
-function createJobDeps(db: Db, auditLog: AuditLogRepository, adQuality: AdQualityAnalyzer, adQualityThreshold: number): JobDeps {
+function createJobDeps(db: Db, auditLog: AuditLogRepository, adQuality: AdQualityAnalyzer, adQualityThreshold: number, hr: Pick<HrWiring, 'approvals' | 'organizationSettings'>): JobDeps {
   return {
     auditLog,
     jobs: createDrizzleJobs(db),
@@ -185,6 +206,8 @@ function createJobDeps(db: Db, auditLog: AuditLogRepository, adQuality: AdQualit
     privacyNotices: createDrizzlePrivacyNotices(db),
     automationRules: createDrizzleAutomationRules(db),
     outbox: createDrizzleOutbox(db),
+    approvals: hr.approvals,
+    organizationSettings: hr.organizationSettings,
     adQuality,
     adQualityThreshold,
     newId: randomUUID,

@@ -20,7 +20,7 @@ describe('scopeGroups', () => {
 
   it('never offers more than the role holds and drops empty areas', () => {
     const groups = scopeGroups('interviewer')
-    expect(groups.flatMap((group) => group.scopes)).toEqual(['job:read', 'candidate:read', 'candidate_note:create', 'message:read', 'task:read'])
+    expect(groups.flatMap((group) => group.scopes)).toEqual(['job:read', 'candidate:read', 'candidate_note:create', 'feedback:read', 'message:read', 'task:read'])
     expect(groups.map((group) => group.area)).not.toContain('organization')
   })
 

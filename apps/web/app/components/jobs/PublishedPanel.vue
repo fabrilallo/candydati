@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 const props = defineProps<{ path: string; url: string }>()
 const { t } = useI18n()
 const { copy, copied, isSupported } = useClipboard({ copiedDuring: 2000 })
+/** The server cannot know whether the browser can copy: the button appears after hydration, never mismatching it. */
+const mounted = useMounted()
 const copyUrl = async (): Promise<void> => {
   await copy(props.url)
   toast.success(t('job.publish.copied'))
@@ -21,7 +23,7 @@ const copyUrl = async (): Promise<void> => {
     </div>
     <div class="flex min-w-0 items-center gap-1.5">
       <p class="min-w-0 flex-1 truncate rounded-md border bg-background px-2.5 py-1.5 font-mono text-xs" :title="url" :aria-label="t('job.publish.urlLabel')" data-testid="public-url">{{ url }}</p>
-      <Button v-if="isSupported" type="button" variant="ghost" size="icon-sm" :aria-label="t('job.publish.copy')" @click="copyUrl">
+      <Button v-if="mounted && isSupported" type="button" variant="ghost" size="icon-sm" :aria-label="t('job.publish.copy')" @click="copyUrl">
         <component :is="copied ? CheckIcon : CopyIcon" aria-hidden="true" />
       </Button>
       <Button as-child variant="ghost" size="icon-sm">

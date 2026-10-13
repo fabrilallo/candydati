@@ -20,6 +20,15 @@ const complete: JobForm = {
 }
 
 describe('validateForm', () => {
+  it('carries employment terms and the protected categories flag, errors on the employment field', () => {
+    const ok = validateForm({ ...emptyForm(), title: 'Idea', ccnl: 'chimico', monthlyPayments: '14', protectedCategories: 'reserved' })
+    expect(ok.content?.employment).toEqual({ ccnl: 'chimico', monthlyPayments: 14 })
+    expect(ok.content?.protectedCategories).toBe('reserved')
+    expect(contentToForm(ok.content!).monthlyPayments).toBe('14')
+    const bad = validateForm({ ...emptyForm(), title: 'Idea', mealVoucherAmount: '500' })
+    expect(bad.errors['employment.mealVoucher']).toBe('job.validation.invalidValue')
+  })
+
   it('accepts a draft with only a title', () => {
     const result = validateForm({ ...emptyForm(), title: 'Idea' })
     expect(result.errors).toEqual({})
@@ -126,7 +135,7 @@ describe('checkForm', () => {
 
   it('is publishable once every rule holds', () => {
     const ready = { ...complete, responsibilities: ['a', 'b', 'c'] }
-    expect(checkForm(ready)).toEqual({ issues: [], errors: {}, publishable: true })
+    expect(checkForm(ready)).toEqual({ issues: [], errors: {}, publishable: true, warnings: [] })
   })
 
   it('reports rule violations live', () => {

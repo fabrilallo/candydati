@@ -1,4 +1,4 @@
-import { adQualityReportSchema, assess, checkPublishable, type AdQualityAssessment, type AdQualityReport, type Job } from '@tt/domain';
+import { adQualityReportSchema, assess, checkApproval, checkPublishable, type AdQualityAssessment, type AdQualityReport, type Job } from '@tt/domain';
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
 import type { JobDeps } from '../../job-ports.js';
@@ -7,6 +7,7 @@ import { defineJobUseCase } from './define.js';
 import { issuesToValidationError, requireJob } from './shared.js';
 
 const PRIVACY_NOTICE_PATH = 'organization.privacyNotice';
+const APPROVAL_PATH = 'approval';
 
 export interface PublishJobResult {
   readonly job: Job;
@@ -23,7 +24,7 @@ async function tryAnalyze(deps: JobDeps, job: Job): Promise<AdQualityReport | nu
   }
 }
 
-/** Only from `draft`. The §5.1 rules and an active privacy notice block; the quality score never does (it is flagged and audited). */
+/** Only from `draft`. The §5.1 rules, an active privacy notice and, when the organization requires it, an approved budget block; the quality score never does (it is flagged and audited). */
 export const publishJob = defineJobUseCase({
   name: 'publishJob',
   input: z.object({ jobId: z.string().min(1) }),
@@ -42,10 +43,13 @@ export const publishJob = defineJobUseCase({
     if (job.status !== 'draft') throw new ConflictError('Only a draft can be published.');
     const issues = checkPublishable(job.content);
     const notice = await deps.privacyNotices.findActive(actor.organizationId);
-    if (issues.length > 0 || !notice) {
+    const [settings, approval] = await Promise.all([deps.organizationSettings.get(actor.organizationId), deps.approvals.find(actor.organizationId, job.id)]);
+    const approvalIssue = checkApproval(settings.requireApproval, approval, job.content.salary);
+    if (issues.length > 0 || !notice || approvalIssue !== null) {
       throw new ValidationError([
         ...issuesToValidationError(issues).issues,
         ...(notice ? [] : [{ path: PRIVACY_NOTICE_PATH, message: 'privacy_notice_required' }]),
+        ...(approvalIssue === null ? [] : [{ path: APPROVAL_PATH, message: approvalIssue }]),
       ]);
     }
     const report = await tryAnalyze(deps, job);

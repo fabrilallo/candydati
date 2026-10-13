@@ -75,3 +75,17 @@ describe('import:manage', () => {
     expect(isForbiddenFor('user', 'import:manage')).toBe(false);
   });
 });
+
+describe('job:approve', () => {
+  it('is for owner and admin, never for a key or the agent', () => {
+    for (const role of ['owner', 'admin'] as const) expect(roleHasPermission(role, 'job:approve')).toBe(true);
+    for (const role of ['recruiter', 'hiring_manager', 'interviewer'] as const) expect(roleHasPermission(role, 'job:approve')).toBe(false);
+    expect(isForbiddenFor('api_key', 'job:approve')).toBe(true);
+    expect(isForbiddenFor('agent', 'job:approve')).toBe(true);
+    expect(isForbiddenFor('user', 'job:approve')).toBe(false);
+  });
+
+  it('can be used by keys for feedback reads, since an interviewer-level key is harmless', () => {
+    expect(isForbiddenFor('api_key', 'feedback:read')).toBe(false);
+  });
+});

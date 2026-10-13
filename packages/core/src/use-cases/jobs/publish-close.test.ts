@@ -82,6 +82,9 @@ describe('publishJob', () => {
     ['response days', { responseDays: undefined }, 'responseDays', 'required'],
     ['responsibilities', { responsibilities: ['a', 'b'] }, 'responsibilities', 'too_few_responsibilities'],
     ['requirements', { requirements: { mustHave: [] } }, 'requirements.mustHave', 'too_few_requirements'],
+    ['a title for one sex only', { language: 'it', title: 'Sviluppatore Backend' }, 'title', 'gender_exclusive_title'],
+    ['a sex requirement', { language: 'it', requirements: { mustHave: ['Solo uomini'], niceToHave: [] } }, 'requirements.mustHave.0', 'gender_requirement'],
+    ['an age limit', { language: 'it', requirements: { mustHave: ['Età massima 30 anni'], niceToHave: [] } }, 'requirements.mustHave.0', 'discriminatory_requirement'],
   ];
 
   it.each(blocks)('blocks without %s and saves nothing', async (_name, patch, path, rule) => {

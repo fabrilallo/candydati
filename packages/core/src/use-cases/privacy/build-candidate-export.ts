@@ -1,5 +1,6 @@
 import { candidateExportSchema, type Application, type Candidate, type CandidateExport } from '@tt/domain';
 import type { ApplicationRepository, CandidateNoteRepository, CvExtractionRepository } from '../../candidate-ports.js';
+import type { FeedbackRecords } from '../../feedback-ports.js';
 import type { FileStorage } from '../../intake-ports.js';
 import type { JobRepository } from '../../job-ports.js';
 import type { MessageRepository } from '../../messaging-ports.js';
@@ -17,7 +18,7 @@ export interface CandidateExportBundle {
   readonly missingFiles: readonly string[];
 }
 
-export interface ExportSources {
+export interface ExportSources extends FeedbackRecords {
   readonly applications: ApplicationRepository;
   readonly notes: CandidateNoteRepository;
   readonly extractions: CvExtractionRepository;
@@ -57,10 +58,12 @@ export async function buildCandidateExport(sources: ExportSources, candidate: Ca
   const exportedApplications: CandidateExport['applications'] = [];
   for (const application of applications) {
     const path = cvPathOf(application);
-    const [job, messages, bytes] = await Promise.all([
+    const [job, messages, bytes, feedback, feedbackRequests] = await Promise.all([
       sources.jobs.findById(organizationId, application.jobId),
       sources.messages.listByApplication(organizationId, application.id),
       readFile(sources.files, application.cv.key),
+      sources.interviewFeedback.listByApplication(organizationId, application.id),
+      sources.feedbackRequests.listByApplication(organizationId, application.id),
     ]);
     if (bytes) files.push({ path, bytes });
     else missingFiles.push(path);
@@ -93,6 +96,22 @@ export async function buildCandidateExport(sources: ExportSources, candidate: Ca
         body: m.bodyText,
         createdAt: iso(m.createdAt),
         sentAt: isoOrNull(m.sentAt),
+      })),
+      feedback: feedback.map((f) => ({
+        id: f.id,
+        stageId: f.stageId,
+        interviewerName: f.interviewerName,
+        answers: { ...f.answers },
+        recommendation: f.recommendation,
+        submittedAt: iso(f.submittedAt),
+      })),
+      feedbackRequests: feedbackRequests.map((r) => ({
+        id: r.id,
+        stageId: r.stageId,
+        interviewerName: r.interviewerName,
+        createdAt: iso(r.createdAt),
+        expiresAt: iso(r.expiresAt),
+        submittedAt: isoOrNull(r.submittedAt),
       })),
     });
   }

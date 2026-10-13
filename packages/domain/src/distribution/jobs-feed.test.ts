@@ -92,4 +92,44 @@ describe('buildJobsFeedXml', () => {
     expect(jobs.map((job) => childText(job, 'referencenumber'))).toEqual(['a', 'b']);
     expect(childText(jobs[0]!, 'description')).toContain('<h3>Compiti</h3>');
   });
+
+  describe('employment terms', () => {
+    const employment = {
+      ccnl: 'commercio_terziario',
+      level: '5° livello',
+      monthlyPayments: 14,
+      mealVoucher: { amountPerDay: 8, type: 'electronic' },
+      welfareAnnual: 1200,
+      bonus: 'Premio <di> risultato',
+      extraBenefits: ['gym'],
+    };
+    const jobOf = (overrides: Record<string, unknown>) => jobsOf(parseXml(build([publicJob(overrides)])))[0]!;
+
+    it('writes the tt elements', () => {
+      const job = jobOf({ employment });
+      expect(childText(job, 'tt:ccnl')).toBe('commercio_terziario');
+      expect(childText(job, 'tt:level')).toBe('5° livello');
+      expect(childText(job, 'tt:monthlyPayments')).toBe('14');
+      expect(childText(job, 'tt:mealVoucher')).toBe('8 EUR per day (electronic)');
+      expect(childText(job, 'tt:welfare')).toBe('1200 EUR per year');
+    });
+
+    it('puts CCNL, structured benefits and the legal sentence in the description', () => {
+      const description = childText(jobOf({ employment, protectedCategories: 'also' }), 'description');
+      expect(description).toContain('<p>CCNL: Commercio e terziario, 5° livello</p>');
+      expect(description).toContain('<li>14 mensilità</li>');
+      expect(description).toContain('<li>Buoni pasto elettronici da 8 EUR al giorno</li>');
+      expect(description).toContain('Bonus: Premio &lt;di&gt; risultato');
+      expect(description).toContain('collocamento mirato ai sensi della L. 68/99');
+    });
+
+    it('names the other CCNL and omits every tt element when there are no terms', () => {
+      expect(childText(jobOf({ employment: { ccnl: 'altro', ccnlOther: 'CCNL Agricoltura' } }), 'tt:ccnl')).toBe('CCNL Agricoltura');
+      const plain = jobOf({});
+      for (const name of ['tt:ccnl', 'tt:level', 'tt:monthlyPayments', 'tt:mealVoucher', 'tt:welfare']) {
+        expect(childrenNamed(plain, name)).toHaveLength(0);
+      }
+      expect(childText(plain, 'description')).not.toContain('CCNL');
+    });
+  });
 });

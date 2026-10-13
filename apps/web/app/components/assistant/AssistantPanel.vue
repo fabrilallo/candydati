@@ -30,6 +30,16 @@ useEventListener(import.meta.client ? window : null, 'keydown', (event: Keyboard
 watch(assistant.open, (open) => {
   if (open) void chat.checkStatus()
 })
+/** Another screen (a hiring request) hands the person a message to start from: it lands in the composer, unsent. */
+const prefill = useAssistantPrefill()
+watch(
+  prefill.pending,
+  (message) => {
+    const text = message === null ? null : prefill.take()
+    if (text !== null) input.value = text
+  },
+  { immediate: true },
+)
 
 const scrollToEnd = async (): Promise<void> => {
   await nextTick()

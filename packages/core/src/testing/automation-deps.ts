@@ -23,6 +23,7 @@ import {
 } from './in-memory-automation.js';
 import { createInMemoryApplicationCounts, createInMemoryUserDirectory } from './in-memory-candidates.js';
 import { createInMemoryJobTemplateRepository } from './in-memory-jobs.js';
+import { createInMemoryJobApprovals, createInMemoryOrganizationSettings } from './in-memory-job-requests.js';
 import type { TestMessagingDeps } from './messaging-deps.js';
 import { ORG_A } from './candidate-seed.js';
 
@@ -84,6 +85,8 @@ export function seedAutomationWorld(options: AutomationSeedOptions = {}): TestAu
       return `whsec_test_${secretCounter}`;
     },
     jobTemplates: createInMemoryJobTemplateRepository(),
+    approvals: createInMemoryJobApprovals(),
+    organizationSettings: createInMemoryOrganizationSettings(),
     applicationCounts: createInMemoryApplicationCounts(world.store),
     adQuality: fakeAdQualityAnalyzer(),
     adQualityThreshold: 6,

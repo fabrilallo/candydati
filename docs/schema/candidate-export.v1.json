@@ -96,7 +96,8 @@
             "type": "string",
             "enum": [
               "careers_page",
-              "manual"
+              "manual",
+              "import"
             ]
           },
           "stageId": {
@@ -150,9 +151,17 @@
           "consent": {
             "type": "object",
             "properties": {
+              "status": {
+                "default": "given",
+                "type": "string",
+                "enum": [
+                  "given",
+                  "to_renew"
+                ]
+              },
               "privacyNoticeVersion": {
                 "type": "integer",
-                "exclusiveMinimum": 0,
+                "minimum": 0,
                 "maximum": 9007199254740991
               },
               "scopes": {
@@ -172,6 +181,7 @@
               }
             },
             "required": [
+              "status",
               "privacyNoticeVersion",
               "scopes",
               "givenAt"
@@ -421,6 +431,104 @@
               ],
               "additionalProperties": false
             }
+          },
+          "feedback": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "stageId": {
+                  "type": "string"
+                },
+                "interviewerName": {
+                  "type": "string"
+                },
+                "answers": {
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "recommendation": {
+                  "type": "string",
+                  "enum": [
+                    "proceed",
+                    "do_not_proceed",
+                    "discuss"
+                  ]
+                },
+                "submittedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                }
+              },
+              "required": [
+                "id",
+                "stageId",
+                "interviewerName",
+                "answers",
+                "recommendation",
+                "submittedAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "feedbackRequests": {
+            "default": [],
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "stageId": {
+                  "type": "string"
+                },
+                "interviewerName": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "expiresAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                },
+                "submittedAt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "format": "date-time",
+                      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "stageId",
+                "interviewerName",
+                "createdAt",
+                "expiresAt",
+                "submittedAt"
+              ],
+              "additionalProperties": false
+            }
           }
         },
         "required": [
@@ -438,7 +546,9 @@
           "consent",
           "cv",
           "extraction",
-          "messages"
+          "messages",
+          "feedback",
+          "feedbackRequests"
         ],
         "additionalProperties": false
       }

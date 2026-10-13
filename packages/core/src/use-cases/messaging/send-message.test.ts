@@ -35,7 +35,7 @@ describe('sendMessage', () => {
     const { messages, conversations } = deps.messagingStore.read();
     expect(messages.map((m) => m.subject)).toEqual(['Ciao Ada', 'Ciao Bo', 'Ciao Cy']);
     expect(messages[0]?.bodyText).toBe('Sei in Candidatura ricevuta per Backend Developer presso Acme.\nhttps://platform.example/careers/acme/backend');
-    expect(messages[2]?.bodyText).toContain('Sei in Technical interview');
+    expect(messages[2]?.bodyText).toContain('Sei in Colloquio tecnico');
     expect(messages.every((m) => m.status === 'queued' && m.direction === 'outbound' && m.sentBy === 'user_r' && m.organizationId === ORG_A)).toBe(true);
     expect(new Set(conversations.map((c) => c.token)).size).toBe(3);
     expect(deps.queue.jobs()).toEqual(messages.map((m) => ({ name: 'email.send', payload: { organizationId: ORG_A, messageId: m.id } })));

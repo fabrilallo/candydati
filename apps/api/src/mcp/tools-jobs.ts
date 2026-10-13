@@ -35,6 +35,9 @@ const RULE_HINTS: Readonly<Record<PublishRule, string>> = {
   too_few_stages: 'Declare the selection process: at least one stage.',
   too_few_responsibilities: 'List at least three responsibilities.',
   too_few_requirements: 'List at least one must-have requirement.',
+  gender_exclusive_title: 'The title must address both sexes (D.Lgs. 198/2006): add "(m/f)" or a form like "Sviluppatore/trice".',
+  gender_requirement: 'Remove the requirement on sex: an ad cannot ask for a man or a woman.',
+  discriminatory_requirement: 'Remove the discriminatory requirement (age, nationality, appearance, family status, religion, opinions).',
 };
 
 export const listJobsTool = {

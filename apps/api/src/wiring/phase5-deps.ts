@@ -7,6 +7,8 @@ import {
   createDrizzleCvExtractions,
   createDrizzleDataExports,
   createDrizzleErasure,
+  createDrizzleFeedbackRequests,
+  createDrizzleInterviewFeedback,
   createDrizzleJobs,
   createDrizzleMessages,
   createDrizzleOrganizationDirectory,
@@ -16,6 +18,7 @@ import {
   type CandidateDeps,
   type CandidateRightsDeps,
   type ConfiguredProviders,
+  type FeedbackRecords,
   type FileStorage,
   type OrganizationExportDeps,
   type PrivacyOverviewDeps,
@@ -39,13 +42,15 @@ export interface Phase5Inputs {
   readonly candidateDeps: CandidateDeps;
   readonly providers: ConfiguredProviders;
   readonly zip: ZipWriterFactory;
+  readonly feedbackRecords: FeedbackRecords;
 }
 
-export type ExportInputs = Pick<Phase5Inputs, 'db' | 'auditLog' | 'files' | 'queue' | 'zip'>;
+export type ExportInputs = Pick<Phase5Inputs, 'db' | 'auditLog' | 'files' | 'queue' | 'zip'> & Partial<Pick<Phase5Inputs, 'feedbackRecords'>>;
 
 /** What the request and the worker task of the organization export need. */
-export function createExportDeps({ db, auditLog, files, queue, zip }: ExportInputs): OrganizationExportDeps {
+export function createExportDeps({ db, auditLog, files, queue, zip, feedbackRecords }: ExportInputs): OrganizationExportDeps {
   return {
+    ...(feedbackRecords ?? { feedbackRequests: createDrizzleFeedbackRequests(db), interviewFeedback: createDrizzleInterviewFeedback(db) }),
     auditLog,
     dataExports: createDrizzleDataExports(db),
     organizations: createDrizzleOrganizationDirectory(db),
@@ -65,7 +70,7 @@ export function createExportDeps({ db, auditLog, files, queue, zip }: ExportInpu
 }
 
 /** Candidate rights, organization export and the privacy overview on Postgres. */
-export function createPhase5Deps({ db, auditLog, files, queue, candidateDeps, providers, zip }: Phase5Inputs): Phase5Deps {
+export function createPhase5Deps({ db, auditLog, files, queue, candidateDeps, providers, zip, feedbackRecords }: Phase5Inputs): Phase5Deps {
   const jobs = createDrizzleJobs(db);
   const applications = createDrizzleApplications(db);
   const candidates = createDrizzleCandidates(db);
@@ -74,8 +79,8 @@ export function createPhase5Deps({ db, auditLog, files, queue, candidateDeps, pr
   const retentionRuns = createDrizzleRetentionRuns(db);
   const clock = { newId: randomUUID, now: () => new Date() };
   return {
-    rightsDeps: { ...candidateDeps, privacyNotices, erasure: createDrizzleErasure(db) },
-    exportDeps: createExportDeps({ db, auditLog, files, queue, zip }),
+    rightsDeps: { ...candidateDeps, ...feedbackRecords, privacyNotices, erasure: createDrizzleErasure(db) },
+    exportDeps: createExportDeps({ db, auditLog, files, queue, zip, feedbackRecords }),
     overviewDeps: { auditLog, applications, candidates, jobs, organizations, privacyNotices, retentionRuns, providers, now: clock.now },
   };
 }

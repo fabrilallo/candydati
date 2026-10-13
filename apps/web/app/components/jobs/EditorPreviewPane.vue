@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import { EyeIcon } from '@lucide/vue'
-import type { JobContent, PublishIssue, VaguePhrase } from '@tt/domain'
+import type { PublishIssue, VaguePhrase } from '@tt/domain'
+import type { ComplianceFix } from '@/lib/compliance-fix'
+import type { ComplianceMark } from '@/lib/compliance-view'
+import type { JobContent9 } from '@/lib/phase9-contract'
 
 /** Right pane of the editor: the live candidate view, updated as you type (local state, no network). */
 defineProps<{
-  content: JobContent
+  content: JobContent9
   organization: { readonly name: string; readonly logo: string | null }
   issues: readonly PublishIssue[]
   phrases: readonly VaguePhrase[]
+  marks?: readonly ComplianceMark[]
   publishedAt: string | null
   loudGaps: boolean
 }>()
-defineEmits<{ jump: [fieldId: string] }>()
+defineEmits<{ jump: [fieldId: string]; fix: [fix: ComplianceFix] }>()
 const { t } = useI18n()
 </script>
 
@@ -26,7 +30,7 @@ const { t } = useI18n()
       <span class="text-xs text-muted-foreground">{{ t(`locales.${content.language}`) }}</span>
     </div>
     <div class="rounded-xl border bg-background px-4 py-6 shadow-sm sm:px-8 sm:py-9">
-      <JobAdView :content="content" :organization="organization" mode="preview" :published-at="publishedAt" :issues="issues" :phrases="phrases" :loud-gaps="loudGaps" @jump="$emit('jump', $event)" />
+      <JobAdView :content="content" :organization="organization" mode="preview" :published-at="publishedAt" :issues="issues" :phrases="phrases" :marks="marks ?? []" :loud-gaps="loudGaps" @jump="$emit('jump', $event)" @fix="$emit('fix', $event)" />
     </div>
   </section>
 </template>

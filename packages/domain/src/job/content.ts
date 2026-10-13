@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import { SUPPORTED_LOCALES } from '../platform/config.js';
+import { checkCompliance } from './compliance/index.js';
+import type { ComplianceDetail } from './compliance/types.js';
+import { employmentSchema, PROTECTED_CATEGORIES } from './employment.js';
 import {
   CONTRACT_TYPES,
   JOB_ROLES,
@@ -82,6 +85,10 @@ export const jobContentSchema = z.object({
   growth: text.default(''),
   workLifeBalance: text.default(''),
   culture: text.default(''),
+  /** Contract, CCNL and quantified benefits. Optional: ads written before Phase 9 do not have them. */
+  employment: employmentSchema.optional(),
+  /** L. 68/99: the public page renders the correct legal sentence for `reserved` and `also`. */
+  protectedCategories: z.enum(PROTECTED_CATEGORIES).optional(),
 });
 export type JobContent = z.infer<typeof jobContentSchema>;
 export type JobContentInput = z.input<typeof jobContentSchema>;
@@ -95,6 +102,10 @@ export const PUBLISH_RULES = [
   'too_few_stages',
   'too_few_responsibilities',
   'too_few_requirements',
+  /** Compliance (see `checkCompliance`): blocking, with the offending text in `detail`. */
+  'gender_exclusive_title',
+  'gender_requirement',
+  'discriminatory_requirement',
 ] as const;
 export type PublishRule = (typeof PUBLISH_RULES)[number];
 
@@ -102,6 +113,8 @@ export interface PublishIssue {
   /** Dot path inside the content, e.g. `salary.max`. */
   readonly path: string;
   readonly rule: PublishRule;
+  /** Only for compliance rules: the offending text and a suggested fix. */
+  readonly detail?: ComplianceDetail;
 }
 
 const requiredPaths = (content: JobContent): readonly string[] => {
@@ -135,7 +148,8 @@ export function checkPublishable(content: JobContent): readonly PublishIssue[] {
   if (content.process.length === 0) issues.push({ path: 'process', rule: 'too_few_stages' });
   if (content.responsibilities.length < MIN_RESPONSIBILITIES) issues.push({ path: 'responsibilities', rule: 'too_few_responsibilities' });
   if (content.requirements.mustHave.length === 0) issues.push({ path: 'requirements.mustHave', rule: 'too_few_requirements' });
-  return issues;
+  const compliance = checkCompliance(content).blocking.map(({ path, rule, detail }): PublishIssue => ({ path, rule, detail }));
+  return [...issues, ...compliance];
 }
 
 export const isPublishable = (content: JobContent): boolean => checkPublishable(content).length === 0;

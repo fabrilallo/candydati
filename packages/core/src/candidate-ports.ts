@@ -1,3 +1,4 @@
+import type { FeedbackStageEntryParts } from './feedback-ports.js';
 import type { FileStorage, TaskQueue } from './intake-ports.js';
 import type { OutboxRepository } from './webhook-ports.js';
 import type {
@@ -128,6 +129,8 @@ export interface CandidateDeps extends CoreDeps {
   readonly files: FileStorage;
   /** `automation.run` is enqueued after a move. A failure to enqueue never undoes the move. */
   readonly queue: TaskQueue;
+  /** Phase 9: when present, entering a stage asks its interviewers for feedback. A failure never undoes the move. */
+  readonly feedback?: FeedbackStageEntryParts;
   /** `application.moved` and `application.decided` events for webhooks. */
   readonly outbox: OutboxRepository;
   readonly newId: () => string;

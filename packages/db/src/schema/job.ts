@@ -1,6 +1,6 @@
 import type { AdQualityReport, JobContent, JobStatus } from '@tt/domain';
 import { sql } from 'drizzle-orm';
-import { index, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 
 /**
@@ -28,6 +28,12 @@ export const job = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
     publishedAt: timestamp('published_at', { withTimezone: true }),
     closedAt: timestamp('closed_at', { withTimezone: true }),
+    /** Approval of the budget (PLAN Phase 9): all five are set together, or none. Written by `approvals`, never by `jobs.save`. */
+    approvalApprovedBy: text('approval_approved_by'),
+    approvalApprovedAt: timestamp('approval_approved_at', { withTimezone: true }),
+    approvalSalaryMin: integer('approval_salary_min'),
+    approvalSalaryMax: integer('approval_salary_max'),
+    approvalCurrency: text('approval_currency'),
   },
   (table) => [
     uniqueIndex('job_org_slug_uidx').on(table.organizationId, table.slug),

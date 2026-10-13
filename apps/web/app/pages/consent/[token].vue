@@ -14,8 +14,8 @@ const route = useRoute()
 const api = useJobsApi()
 const token = String(route.params.token)
 const { data } = await useAsyncData(`consent-${token}`, () => loadConsent(api, token))
-const cacheControl = useResponseHeader('cache-control')
-cacheControl.value = 'private, no-store'
+// Only the server answer carries headers; in the browser there is nothing to set.
+if (import.meta.server) useResponseHeader('cache-control').value = 'private, no-store'
 
 const visitor = useVisitorTranslate()
 const consent = data.value?.kind === 'ok' ? data.value.data : null

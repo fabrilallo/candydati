@@ -10,3 +10,7 @@
 - Le fasi del processo (`process[]`) hanno due campi opzionali, aggiunti senza cambiare versione perché compatibili con i dati esistenti:
   `id` (stringa stabile, `^[a-z0-9-]{1,40}$`; il server la assegna alle fasi che ne sono prive e la restituisce sempre) e `title`
   (titolo libero di 1-80 caratteri; se manca si mostra il tipo). I candidati sono legati all'`id`, non alla posizione.
+- Fase 9, campi opzionali aggiunti senza cambiare versione (gli annunci esistenti restano validi): `employment` (`ccnl` con id da un elenco dei CCNL più diffusi, `ccnlOther`, `level`,
+  `monthlyPayments` 12-16, `mealVoucher { amountPerDay, type: electronic | paper }`, `welfareAnnual`, `bonus`, `extraBenefits` con id da un elenco e `otherBenefits` libero) e
+  `protectedCategories` (`none | reserved | also`, L. 68/99). Anche la conformità (annuncio rivolto a entrambi i sessi, requisiti discriminatori, categorie protette) non è nel file:
+  la applica `checkCompliance` di `@tt/domain`, e le violazioni chiare bloccano la pubblicazione tramite `checkPublishable`.

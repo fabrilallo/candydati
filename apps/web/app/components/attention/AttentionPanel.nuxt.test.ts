@@ -3,12 +3,30 @@ import { flushPromises } from '@vue/test-utils'
 import { readBody } from 'h3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { pipeline } from '~~/test/fixtures/candidate-fixtures'
-import { ok, viewerWith } from '~~/test/fixtures/job-fixtures'
+import { makeJob, ok, viewerWith } from '~~/test/fixtures/job-fixtures'
 import { TEMPLATES } from '~~/test/fixtures/message-fixtures'
 import { attentionItem } from '~~/test/fixtures/phase4-fixtures'
 import AttentionPanel from './AttentionPanel.vue'
 
-const state = vi.hoisted(() => ({ overdue: 1, dueSoon: 1, moves: [] as unknown[], asked: [] as string[] }))
+const state = vi.hoisted(() => ({ overdue: 1, dueSoon: 1, moves: [] as unknown[], asked: [] as string[], stale: [] as unknown[], closed: [] as string[] }))
+const staleJob = (id: string, daysSinceActivity: number) => ({
+  id,
+  title: `Annuncio ${id}`,
+  publishedAt: '2026-06-01T10:00:00.000Z',
+  lastActivityAt: '2026-07-01T10:00:00.000Z',
+  daysSinceActivity,
+  openApplications: 2,
+})
+registerEndpoint('/api/v1/jobs/stale', () => ok(state.stale))
+registerEndpoint('/api/v1/jobs/j-stale/pipeline', () => ok(pipeline([])))
+registerEndpoint('/api/v1/jobs/j-stale/close', {
+  method: 'POST',
+  handler: () => {
+    state.closed.push('j-stale')
+    state.stale = []
+    return ok(makeJob({ id: 'j-stale', status: 'closed', closedAt: '2026-10-13T10:00:00.000Z' }))
+  },
+})
 registerEndpoint('/api/v1/applications/attention', (event) => {
   const url = String(event.node.req.url)
   state.asked.push(url)
@@ -44,6 +62,8 @@ beforeEach(() => {
   state.dueSoon = 1
   state.moves.length = 0
   state.asked.length = 0
+  state.stale = []
+  state.closed.length = 0
   clearNuxtData()
   useState('attention-now').value = Date.parse('2026-10-13T10:00:00.000Z')
   useViewer().viewer.value = viewerWith('recruiter')
@@ -98,6 +118,42 @@ describe('Da gestire', () => {
     state.overdue = 0
     const wrapper = await mountPanel()
     await vi.waitFor(() => expect(wrapper.find('[data-testid="attention-empty"]').text()).toBe('Nessuna candidatura in ritardo.'))
+  })
+
+  it('keeps the tabs when only stale ads wait, instead of the all-done block', async () => {
+    state.overdue = 0
+    state.dueSoon = 0
+    state.stale = [staleJob('j-stale', 120)]
+    const wrapper = await mountPanel()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="attention-tab-stale"]').text()).toContain('1'))
+    expect(wrapper.find('[data-testid="attention-all-done"]').exists()).toBe(false)
+  })
+
+  it('says when no ad is stale', async () => {
+    const wrapper = await mountPanel()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="attention-tab-stale"]').exists()).toBe(true))
+    await wrapper.find('[data-testid="attention-tab-stale"]').trigger('click')
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="attention-stale-empty"]').text()).toBe('Nessun annuncio fermo da più di 90 giorni'))
+  })
+
+  it('lists the stale ads in a third tab, and closes one after the confirmation', async () => {
+    state.stale = [staleJob('j-stale', 120)]
+    const wrapper = await mountPanel()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="attention-tab-stale"]').text()).toContain('1'))
+    await wrapper.find('[data-testid="attention-tab-stale"]').trigger('click')
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="attention-stale-row"]').exists()).toBe(true))
+    const row = wrapper.find('[data-testid="attention-stale-row"]')
+    expect(row.find('[data-testid="attention-stale-title"]').attributes('href')).toBe('/app/jobs/j-stale')
+    expect(row.text()).toContain('Annuncio j-stale')
+    expect(row.text()).toContain('Nessuna attività da 120 giorni')
+    expect(row.text()).toContain('2 candidature aperte')
+    expect(row.find('[data-testid="attention-stale-open"]').attributes('href')).toBe('/app/jobs/j-stale')
+    await row.find('[data-testid="attention-stale-close"]').trigger('click')
+    await vi.waitFor(() => expect(button('confirm')?.hasAttribute('disabled')).toBe(false))
+    button('confirm')?.click()
+    await vi.waitFor(() => expect(state.closed).toEqual(['j-stale']))
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="attention-stale-row"]').exists()).toBe(false))
+    expect(wrapper.find('[data-testid="attention-tab-stale"]').text()).toContain('0')
   })
 
   it('hides write and move without the permissions', async () => {

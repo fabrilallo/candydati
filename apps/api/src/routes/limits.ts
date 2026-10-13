@@ -28,3 +28,8 @@ export const importUploadRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLi
 
 /** The public reconfirmation page: tokens are unguessable, but guessing must still be slow. */
 export const consentRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.consentMax ?? DEFAULT_CONSENT_MAX);
+
+export const DEFAULT_FEEDBACK_MAX = 30;
+
+/** The public interview feedback page: the token is the only credential, so guessing must be slow. */
+export const feedbackRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.feedbackMax ?? DEFAULT_FEEDBACK_MAX);

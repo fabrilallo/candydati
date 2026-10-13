@@ -1,4 +1,5 @@
 import type { PublishedJobContent } from './content.js';
+import { ccnlSummary, employmentBenefitLines, protectedCategoriesSentence } from './employment.js';
 import type { PublicJobDto, PublicOrganizationDto } from './job.js';
 import type { ContractType, SalaryPeriod } from './taxonomy.js';
 
@@ -43,6 +44,11 @@ const paragraph = (heading: string, body: string): string =>
 const list = (heading: string, items: readonly string[]): string =>
   items.length > 0 ? `<h3>${escapeHtml(heading)}</h3><ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '';
 
+const legalSentence = (content: PublishedJobContent): string => {
+  const sentence = protectedCategoriesSentence(content.protectedCategories, content.language);
+  return sentence === null ? '' : `<p>${escapeHtml(sentence)}</p>`;
+};
+
 /** The ad as the HTML fragment schema.org expects in `description`. Every value is escaped. */
 export function jobDescriptionHtml(content: PublishedJobContent, headings: JobPostingHeadings): string {
   return [
@@ -51,10 +57,12 @@ export function jobDescriptionHtml(content: PublishedJobContent, headings: JobPo
     list(headings.mustHave, content.requirements.mustHave),
     list(headings.niceToHave, content.requirements.niceToHave),
     list(headings.technologies, content.technologies),
-    list(headings.benefits, content.benefits),
+    ccnlSummary(content.employment) === undefined ? '' : `<p>CCNL: ${escapeHtml(ccnlSummary(content.employment) ?? '')}</p>`,
+    list(headings.benefits, [...employmentBenefitLines(content.employment, content.language), ...content.benefits]),
     paragraph(headings.growth, content.growth),
     paragraph(headings.workLifeBalance, content.workLifeBalance),
     paragraph(headings.culture, content.culture),
+    legalSentence(content),
   ].join('');
 }
 

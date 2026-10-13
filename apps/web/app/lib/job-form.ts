@@ -1,4 +1,6 @@
-import { checkPublishable, jobContentSchema, type JobContent, type JobRole, type PublishIssue, type SelectionStage } from '@tt/domain'
+import { checkCompliance, checkPublishable, type ComplianceIssue, type JobContent, type JobRole, type PublishIssue, type SelectionStage } from '@tt/domain'
+import { emptyEmployment, employmentToForm, employmentToInput, type EmploymentForm } from './employment-form'
+import { contentSchema9, type JobContent9 } from './phase9-contract'
 
 /** One stage as typed in the editor: numbers stay strings until the form is turned into content. */
 export interface StageForm {
@@ -13,7 +15,7 @@ export interface StageForm {
 }
 
 /** Editor state. Flat on purpose: every update is `{ ...form, ...patch }`, never a mutation. */
-export interface JobForm {
+export interface JobForm extends EmploymentForm {
   readonly title: string
   readonly language: string
   readonly role: string
@@ -38,6 +40,8 @@ export interface JobForm {
   readonly growth: string
   readonly workLifeBalance: string
   readonly culture: string
+  /** `none`, `reserved`, `also` (L. 68/99), or empty when the ad does not say. */
+  readonly protectedCategories: string
 }
 
 export const emptyStage = (): StageForm => ({ id: '', title: '', type: '', durationMinutes: '', conductedBy: '', note: '' })
@@ -67,6 +71,8 @@ export const emptyForm = (language: string = 'it'): JobForm => ({
   growth: '',
   workLifeBalance: '',
   culture: '',
+  protectedCategories: '',
+  ...emptyEmployment(),
 })
 
 const str = (value: string | number | undefined): string => (value === undefined ? '' : String(value))
@@ -80,7 +86,7 @@ const stageToForm = (stage: SelectionStage): StageForm => ({
   note: stage.note ?? '',
 })
 
-export const contentToForm = (content: JobContent): JobForm => ({
+export const contentToForm = (content: JobContent9): JobForm => ({
   title: content.title,
   language: content.language,
   role: content.role ?? '',
@@ -105,6 +111,8 @@ export const contentToForm = (content: JobContent): JobForm => ({
   growth: content.growth,
   workLifeBalance: content.workLifeBalance,
   culture: content.culture,
+  protectedCategories: content.protectedCategories ?? '',
+  ...employmentToForm(content.employment),
 })
 
 const optional = (value: string): string | undefined => {
@@ -158,6 +166,8 @@ export const formToInput = (form: JobForm): Record<string, unknown> => {
     growth: form.growth,
     workLifeBalance: form.workLifeBalance,
     culture: form.culture,
+    employment: employmentToInput(form),
+    protectedCategories: optional(form.protectedCategories),
   }
 }
 
@@ -179,7 +189,7 @@ export const adoptStageIds = (form: JobForm, saved: JobContent): JobForm => {
 export type FieldErrors = Readonly<Record<string, string>>
 
 export type FormValidation =
-  | { readonly content: JobContent; readonly errors: Readonly<Record<string, never>> }
+  | { readonly content: JobContent9; readonly errors: Readonly<Record<string, never>> }
   | { readonly content: null; readonly errors: FieldErrors }
 
 const issueKey = (code: string, path: string): string => {
@@ -187,12 +197,15 @@ const issueKey = (code: string, path: string): string => {
   return code === 'invalid_value' ? 'job.validation.invalidChoice' : 'job.validation.invalidValue'
 }
 
+/** `employment.mealVoucher.amountPerDay` is shown on the amount field (`employment.mealVoucher`). */
+const employmentPath = (path: readonly string[]): string => (path[0] === 'employment' ? path.slice(0, 2).join('.') : path.join('.'))
+
 /** Pure: the content the form describes, or the first translation key per field path. */
 export const validateForm = (form: JobForm): FormValidation => {
-  const parsed = jobContentSchema.safeParse(formToInput(form))
+  const parsed = contentSchema9.safeParse(formToInput(form))
   if (parsed.success) return { content: parsed.data, errors: {} }
   const errors = parsed.error.issues.reduce<Record<string, string>>((acc, issue) => {
-    const path = issue.path.length > 1 && issue.path[0] === 'process' ? 'process' : issue.path.map(String).join('.')
+    const path = issue.path.length > 1 && issue.path[0] === 'process' ? 'process' : employmentPath(issue.path.map(String))
     const key = path === 'process' ? 'job.validation.stageIncomplete' : issueKey(issue.code, path)
     return path in acc ? acc : { ...acc, [path]: key }
   }, {})
@@ -224,6 +237,8 @@ export interface PublishCheck {
   readonly errors: FieldErrors
   /** Nothing blocks publication: every §5.1 rule holds and the form is well formed. */
   readonly publishable: boolean
+  /** Doubtful compliance findings ("Da rivedere"): shown, never blocking. */
+  readonly warnings: readonly ComplianceIssue[]
 }
 
 /**
@@ -235,5 +250,6 @@ export const checkForm = (form: JobForm): PublishCheck => {
   const lenient = validateForm({ ...form, title: form.title.trim() === '' ? '-' : form.title, process: form.process.filter(isCompleteStage) })
   const rules = lenient.content ? checkPublishable(lenient.content) : []
   const issues: readonly PublishIssue[] = form.title.trim() === '' ? [{ path: 'title', rule: 'required' }, ...rules] : rules
-  return { issues, errors, publishable: issues.length === 0 && Object.keys(errors).length === 0 }
+  const warnings = lenient.content ? checkCompliance(lenient.content).warnings : []
+  return { issues, errors, publishable: issues.length === 0 && Object.keys(errors).length === 0, warnings }
 }

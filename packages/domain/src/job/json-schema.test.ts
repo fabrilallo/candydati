@@ -29,4 +29,13 @@ describe('jobContentJsonSchema', () => {
   it('is deterministic across calls', () => {
     expect(JSON.stringify(jobContentJsonSchema())).toBe(JSON.stringify(jobContentJsonSchema()));
   });
+
+  it('describes the optional employment terms and the protected-categories flag', () => {
+    const schema = jobContentJsonSchema() as { required?: string[]; properties: Record<string, { properties?: Record<string, unknown> }> };
+    expect(schema.required).toEqual(['title']);
+    expect(Object.keys(schema.properties.employment?.properties ?? {})).toEqual(
+      expect.arrayContaining(['ccnl', 'level', 'monthlyPayments', 'mealVoucher', 'welfareAnnual', 'bonus', 'extraBenefits']),
+    );
+    expect(schema.properties).toHaveProperty('protectedCategories');
+  });
 });

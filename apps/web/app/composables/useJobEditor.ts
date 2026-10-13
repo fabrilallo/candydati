@@ -8,6 +8,8 @@ import { blockedStageIds } from '@/lib/job-issues'
 import { can } from '@/lib/permissions-ui'
 import { needsConfirmation } from '@/lib/quality-view'
 import { visibleIssueErrors } from '@/lib/ad-gaps'
+import type { ComplianceFix } from '@/lib/compliance-fix'
+import { complianceView } from '@/lib/compliance-view'
 
 export interface EditorInit {
   readonly job: JobDto | null
@@ -200,6 +202,14 @@ export const useJobEditor = (init: EditorInit) => {
     }
   }
 
+  /** Compliance findings of the form as it is now (local, instant), with their one-click fixes. */
+  const compliance = computed(() => complianceView(draft.form.value, draft.check.value.issues, draft.check.value.warnings))
+  const applyFix = (fix: ComplianceFix): void => {
+    if (readOnly.value) return
+    draft.patch(fix.patch)
+    toast.success(t('job.compliance.fixed'))
+  }
+
   useUnsavedGuard(draft.dirty)
 
   return {
@@ -221,6 +231,8 @@ export const useJobEditor = (init: EditorInit) => {
     dismissPublished,
     confirmOpen,
     quality,
+    compliance,
+    applyFix,
     save,
     analyze,
     publish,

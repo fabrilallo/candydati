@@ -13,7 +13,7 @@ import {
 } from './permissions.js';
 
 const JOB_PERMISSIONS: readonly Permission[] = PERMISSIONS.filter(
-  (permission) => permission.startsWith('job:') || permission.startsWith('job_template:'),
+  (permission) => (permission.startsWith('job:') && permission !== 'job:approve') || permission.startsWith('job_template:'),
 );
 
 describe('permissions', () => {
@@ -68,6 +68,8 @@ describe('permissions', () => {
       'message:read',
       'task:read',
       'task:manage',
+      'feedback:manage',
+      'feedback:read',
     ]);
     expect(roleHasPermission('hiring_manager', 'message:send')).toBe(false);
     expect(roleHasPermission('hiring_manager', 'job:publish')).toBe(false);
@@ -83,7 +85,17 @@ describe('permissions', () => {
       'candidate_note:create',
       'message:read',
       'task:read',
+      'feedback:read',
     ]);
+  });
+
+  it('gives job:approve only to owner and admin', () => {
+    expect(ROLES.filter((role) => roleHasPermission(role, 'job:approve'))).toEqual(['owner', 'admin']);
+  });
+
+  it('lets feedback be read by everyone who reads candidates and managed by those who run the process', () => {
+    for (const role of ROLES) expect(roleHasPermission(role, 'feedback:read')).toBe(roleHasPermission(role, 'candidate:read'));
+    expect(ROLES.filter((role) => roleHasPermission(role, 'feedback:manage'))).toEqual(['owner', 'admin', 'recruiter', 'hiring_manager']);
   });
 
   it('lets owner, admin and recruiter send messages and manage templates; only owner and admin manage email settings', () => {

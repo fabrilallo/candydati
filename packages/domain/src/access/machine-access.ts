@@ -21,6 +21,7 @@ export const MACHINE_FORBIDDEN_PERMISSIONS: readonly Permission[] = PERMISSIONS.
       'data:export',
       'api_key:manage',
       'import:manage',
+      'job:approve',
     ].includes(permission),
 );
 

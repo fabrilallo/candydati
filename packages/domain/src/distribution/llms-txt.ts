@@ -1,6 +1,7 @@
 import { DEFAULT_LOCALE, type Locale } from '../platform/config.js';
 import type { PublishedJobContent } from '../job/content.js';
 import type { PublicJobDto, PublicOrganizationDto } from '../job/job.js';
+import { ccnlSummary, monthlyPaymentsText } from '../job/employment.js';
 import { salaryText } from './jobs-feed.js';
 import { careersUrl, feedUrl, jobUrl } from './urls.js';
 
@@ -12,8 +13,17 @@ interface Texts {
   readonly none: string;
   readonly machineTitle: string;
   readonly feedLabel: string;
-  readonly detail: (content: PublishedJobContent) => string;
+  readonly detail: (content: PublishedJobContent, employmentTail: string) => string;
 }
+
+/** `, CCNL Commercio e terziario, 5° livello, 14 mensilità` when the ad declares them; empty otherwise. */
+const employmentTail = (content: PublishedJobContent, locale: Locale): string => {
+  const parts = [
+    ccnlSummary(content.employment) === undefined ? undefined : `CCNL ${ccnlSummary(content.employment)}`,
+    content.employment?.monthlyPayments === undefined ? undefined : monthlyPaymentsText(content.employment.monthlyPayments, locale),
+  ].filter((part): part is string => part !== undefined);
+  return parts.length === 0 ? '' : `, ${parts.join(', ')}`;
+};
 
 const where = (content: PublishedJobContent): string => [content.location.city, content.location.country].filter(Boolean).join(', ');
 
@@ -31,8 +41,8 @@ const TEXTS: Readonly<Record<Locale, Texts>> = {
     none: 'Al momento non ci sono posizioni aperte.',
     machineTitle: 'Per le macchine',
     feedLabel: 'Feed XML degli annunci',
-    detail: (c) =>
-      `${where(c)} (${c.workMode}), ${salaryText(c)}, ${c.process.length} fasi di selezione, risposta entro ${c.responseDays} giorni dopo ogni fase.`,
+    detail: (c, tail) =>
+      `${where(c)} (${c.workMode}), ${salaryText(c)}, ${c.process.length} fasi di selezione, risposta entro ${c.responseDays} giorni dopo ogni fase${tail}.`,
   },
   en: {
     summary: (organization, count) => `Open positions at ${organization}: ${count}. Every ad states the salary range, the selection stages and the response time before you apply.`,
@@ -47,8 +57,8 @@ const TEXTS: Readonly<Record<Locale, Texts>> = {
     none: 'There are no open positions right now.',
     machineTitle: 'For machines',
     feedLabel: 'XML feed of the ads',
-    detail: (c) =>
-      `${where(c)} (${c.workMode}), ${salaryText(c)}, ${c.process.length} selection stages, answer within ${c.responseDays} days after each stage.`,
+    detail: (c, tail) =>
+      `${where(c)} (${c.workMode}), ${salaryText(c)}, ${c.process.length} selection stages, answer within ${c.responseDays} days after each stage${tail}.`,
   },
 };
 
@@ -74,7 +84,7 @@ export function buildLlmsTxt({ organization, jobs, baseUrl, locale = DEFAULT_LOC
     jobs.length === 0
       ? [t.none]
       : jobs.map(
-          (job) => `- [${inline(job.content.title)}](${jobUrl(baseUrl, organization.slug, job.slug)}): ${inline(t.detail(job.content))}`,
+          (job) => `- [${inline(job.content.title)}](${jobUrl(baseUrl, organization.slug, job.slug)}): ${inline(t.detail(job.content, employmentTail(job.content, locale)))}`,
         );
   return [
     `# ${name}`,

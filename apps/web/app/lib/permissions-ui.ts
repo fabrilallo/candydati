@@ -18,7 +18,7 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   return allowed[0] ?? null
 }
 
-export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'candidates' | 'imports' | 'templates' | 'members' | 'privacy' | 'email' | 'emailTemplates' | 'webhooks' | 'distribution' | 'api' | 'data' | 'audit'
+export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'imports' | 'templates' | 'members' | 'privacy' | 'email' | 'emailTemplates' | 'webhooks' | 'distribution' | 'api' | 'data' | 'audit'
 export type NavSectionId = 'work' | 'organization'
 
 export interface NavItem {
@@ -33,6 +33,7 @@ const NAV: readonly NavItem[] = [
   { id: 'attention', to: '/app/attention', section: 'work', permission: 'candidate:read' },
   { id: 'tasks', to: '/app/tasks', section: 'work', permission: 'task:read' },
   { id: 'jobs', to: '/app/jobs', section: 'work', permission: 'job:read' },
+  { id: 'jobRequests', to: '/app/job-requests', section: 'work', permission: 'job:create' },
   { id: 'candidates', to: '/app/candidates', section: 'work', permission: 'candidate:read' },
   { id: 'imports', to: '/app/imports', section: 'work', permission: 'import:manage' },
   { id: 'templates', to: '/app/jobs/templates', section: 'work', permission: 'job_template:read' },

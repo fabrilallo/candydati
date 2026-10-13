@@ -8,3 +8,5 @@ export * from './privacy.js';
 export * from './api-key.js';
 export * from './distribution.js';
 export * from './import.js';
+export * from './feedback.js';
+export * from './job-request.js';
