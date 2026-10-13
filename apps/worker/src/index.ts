@@ -10,6 +10,8 @@ import { formatDigestFrom } from './deadlines/digest.js';
 import { createPgBossQueue } from './queue/pg-boss-queue.js';
 import { createAutomationRunQueue } from './queues/automation-run.js';
 import { createDeadlinesScanQueue } from './queues/deadlines-scan.js';
+import { createDistributionWorkerDeps } from './distribution/deps.js';
+import { createDistributionSyncQueue } from './queues/distribution-sync.js';
 import { createWebhookDeliverQueue } from './queues/webhook-deliver.js';
 import { createWebhookPublishQueue } from './queues/webhook-publish.js';
 import { createPrivacyWorkerDeps } from './privacy/deps.js';
@@ -86,6 +88,7 @@ const main = async (): Promise<void> => {
     createAutomationRunQueue(phase4.run),
     createWebhookDeliverQueue(phase4.deliver),
     createWebhookPublishQueue(phase4.publish),
+    createDistributionSyncQueue(createDistributionWorkerDeps({ db: database.db, platform: env.platform })),
     createDeadlinesScanQueue({
       scan: phase4.scan,
       digest,

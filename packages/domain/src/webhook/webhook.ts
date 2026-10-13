@@ -15,6 +15,8 @@ export const WEBHOOK_EVENT_TYPES = [
   'application.decided',
   'candidate.erased',
   'job.published',
+  /** A published ad was edited: what readers see changed. */
+  'job.updated',
   'job.closed',
 ] as const;
 export type WebhookEventType = (typeof WEBHOOK_EVENT_TYPES)[number];

@@ -28,3 +28,4 @@ export * from './candidate/correction.js';
 export * from './candidate/retention.js';
 export * from './access/machine-access.js';
 export * from './access/api-key.js';
+export * from './distribution/index.js';

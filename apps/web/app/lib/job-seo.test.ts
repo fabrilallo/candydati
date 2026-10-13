@@ -23,7 +23,7 @@ const content = jobContentSchema.parse({
 
 const page = (overrides: Partial<PublishedJobContent> = {}, logo: string | null = null): PublicJobPageDto => ({
   organization: { name: 'Acme', slug: 'acme', logo },
-  job: { slug: 'backend-1', content: { ...content, ...overrides }, publishedAt: '2026-10-13T10:00:00.000Z' },
+  job: { slug: 'backend-1', content: { ...content, ...overrides }, publishedAt: '2026-10-13T10:00:00.000Z', updatedAt: '2026-10-13T10:00:00.000Z' },
 })
 
 describe('buildJobSeo', () => {

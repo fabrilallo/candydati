@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { FileTextIcon, UsersRoundIcon, WorkflowIcon } from '@lucide/vue'
+import { FileTextIcon, RadioTowerIcon, UsersRoundIcon, WorkflowIcon } from '@lucide/vue'
 import { can } from '@/lib/permissions-ui'
 import type { LinkTab } from '@/lib/tabs'
 
 /**
- * "Candidati", "Annuncio" and, with `automation:manage`, "Automazioni": the pages of a job. Candidati carries the
+ * "Candidati", "Annuncio" and, with `automation:manage`, "Automazioni" and, with `job:publish`, "Distribuzione": the pages of a job. Candidati carries the
  * number of open applications when known and shows only to who can read candidates.
  */
-const props = defineProps<{ jobId: string; current: 'ad' | 'candidates' | 'automations' }>()
+const props = defineProps<{ jobId: string; current: 'ad' | 'candidates' | 'automations' | 'distribution' }>()
 const { t } = useI18n()
 const { viewer } = useViewer()
 const role = computed(() => viewer.value?.role ?? null)
@@ -19,8 +19,9 @@ const items = computed<readonly LinkTab[]>(() => [
   ...(canReadCandidates ? [{ to: `${base.value}/candidates`, label: t('pipeline.tabs.candidates'), icon: UsersRoundIcon, count: count.value, testId: 'tab-candidates' }] : []),
   { to: base.value, label: t('pipeline.tabs.ad'), icon: FileTextIcon, testId: 'tab-ad' },
   ...(can(role.value, 'automation:manage') ? [{ to: `${base.value}/automations`, label: t('pipeline.tabs.automations'), icon: WorkflowIcon, testId: 'tab-automations' }] : []),
+  ...(can(role.value, 'job:publish') ? [{ to: `${base.value}/distribution`, label: t('pipeline.tabs.distribution'), icon: RadioTowerIcon, testId: 'tab-distribution' }] : []),
 ])
-const currentPath = computed(() => ({ ad: base.value, candidates: `${base.value}/candidates`, automations: `${base.value}/automations` })[props.current])
+const currentPath = computed(() => ({ ad: base.value, candidates: `${base.value}/candidates`, automations: `${base.value}/automations`, distribution: `${base.value}/distribution` })[props.current])
 </script>
 
 <template>

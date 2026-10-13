@@ -1,5 +1,12 @@
+# The careers pages, the XML feed (/careers/<org>/jobs.xml), llms.txt and the per-organization sitemap
+# (/careers/<org>/sitemap.xml) live under /careers/ and stay crawlable. Feeds and llms.txt answer with
+# X-Robots-Tag: noindex because they are not pages. Sitemaps are per organization (there is no public list of
+# organizations), so each careers page points to its own with <link rel="sitemap">: a Sitemap line here is not possible.
 User-agent: *
 Allow: /careers/
+Allow: /careers/*/jobs.xml
+Allow: /careers/*/llms.txt
+Allow: /careers/*/sitemap.xml
 Disallow: /careers/*?
 Disallow: /app/
 Disallow: /api/

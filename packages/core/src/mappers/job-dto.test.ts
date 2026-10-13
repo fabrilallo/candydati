@@ -33,9 +33,9 @@ describe('job mappers', () => {
 
   it('maps public shapes without internal fields', () => {
     const dto = toPublicJobDto(published);
-    expect(Object.keys(dto).sort()).toEqual(['content', 'publishedAt', 'slug']);
+    expect(Object.keys(dto).sort()).toEqual(['content', 'publishedAt', 'slug', 'updatedAt']);
     const summary = toPublicJobSummaryDto(published);
-    expect(summary).toMatchObject({ slug: published.slug, title: 'Backend Developer', role: 'backend_developer', stageCount: published.content.process.length, responseDays: published.content.responseDays });
+    expect(summary).toMatchObject({ slug: published.slug, title: 'Backend Developer', role: 'backend_developer', stageCount: published.content.process.length, responseDays: published.content.responseDays, updatedAt: published.updatedAt.toISOString() });
     expect(JSON.stringify(summary)).not.toContain('org_test');
   });
 

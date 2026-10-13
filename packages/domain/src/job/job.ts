@@ -109,6 +109,8 @@ export interface PublicJobDto {
   readonly slug: string;
   readonly content: PublishedJobContent;
   readonly publishedAt: string;
+  /** Last edit: feeds and sitemaps use it as `lastmod`. */
+  readonly updatedAt: string;
 }
 
 export interface PublicJobSummaryDto {
@@ -125,11 +127,18 @@ export interface PublicJobSummaryDto {
   /** Days within which the candidate hears back after each stage. */
   readonly responseDays: number;
   readonly publishedAt: string;
+  readonly updatedAt: string;
 }
 
 export interface PublicCareersDto {
   readonly organization: PublicOrganizationDto;
   readonly jobs: readonly PublicJobSummaryDto[];
+}
+
+/** Everything the feeds need to render without authentication: the full content of every published ad. */
+export interface PublicFeedDto {
+  readonly organization: PublicOrganizationDto;
+  readonly jobs: readonly PublicJobDto[];
 }
 
 export interface PublicJobPageDto {

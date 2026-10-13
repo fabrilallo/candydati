@@ -20,6 +20,12 @@ describe('createPgBossQueue (worker)', () => {
     expect(WEBHOOK_RETRY).toMatchObject({ retryLimit: 5, retryBackoff: true });
   });
 
+  it('gives a distribution sync the same patience as a webhook', async () => {
+    const boss = fakeBoss();
+    await createPgBossQueue(boss).enqueue('distribution.sync', { organizationId: 'o', jobId: 'j' });
+    expect(boss.send).toHaveBeenCalledWith('distribution.sync', { organizationId: 'o', jobId: 'j' }, WEBHOOK_RETRY);
+  });
+
   it('fails when pg-boss drops the job', async () => {
     await expect(createPgBossQueue(fakeBoss(null)).enqueue('x', {})).rejects.toThrow(/not queued/);
   });

@@ -82,6 +82,23 @@ describe('OpenAPI document', () => {
     expect(doc.paths['/api/v1/jobs'].get.security).toEqual([{ bearerAuth: [] }]);
   });
 
+  it('documents the public read-only API under the Public tag, with the summary and the full feed', () => {
+    const doc = document();
+    const publicPaths = Object.keys(doc.paths).filter((path) => path.startsWith('/api/v1/public/'));
+    expect(publicPaths.toSorted()).toEqual([
+      '/api/v1/public/organizations/{orgSlug}',
+      '/api/v1/public/organizations/{orgSlug}/feed',
+      '/api/v1/public/organizations/{orgSlug}/jobs',
+      '/api/v1/public/organizations/{orgSlug}/jobs/{jobSlug}',
+    ]);
+    for (const path of publicPaths) expect(doc.paths[path].get).toMatchObject({ tags: ['Public'], security: [] });
+    expect(doc.tags).toContainEqual({ name: 'Public' });
+    expect(doc.components.schemas.PublicOrganizationSummary.properties).toHaveProperty('feedUrl');
+    expect(doc.components.schemas.PublicFeed.properties.jobs.items.properties).toHaveProperty('updatedAt');
+    expect(doc.components.schemas.PublicCareers.properties.jobs.items.properties).toHaveProperty('updatedAt');
+    expect(doc.info.description).toContain('CORS');
+  });
+
   it('is served publicly and cacheable at /api/v1/openapi.json', async () => {
     const response = await t.app.inject({ method: 'GET', url: '/api/v1/openapi.json' });
     expect(response.statusCode).toBe(200);

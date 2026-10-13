@@ -48,6 +48,7 @@ const jobOf = (content: PublishedJobContent): PublicJobDto => ({
   slug: 'backend-developer-a1b2c3',
   content,
   publishedAt: '2026-10-13T09:00:00.000Z',
+  updatedAt: '2026-10-14T09:00:00.000Z',
 });
 
 const postingOf = (overrides: Record<string, unknown>, organization = ORGANIZATION) =>

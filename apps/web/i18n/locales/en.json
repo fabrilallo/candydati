@@ -45,7 +45,8 @@
     "webhooks": "Webhooks",
     "attentionCount": "{count} need attention",
     "data": "Data",
-    "api": "API and integrations"
+    "api": "API and integrations",
+    "distribution": "Distribution"
   },
   "roles": {
     "owner": "Owner",
@@ -315,7 +316,8 @@
         "created": "Created a job ad",
         "updated": "Edited a job ad",
         "published": "Published a job ad",
-        "closed": "Closed a job ad"
+        "closed": "Closed a job ad",
+        "distribution_synced": "Synced a job ad with the distribution channels"
       },
       "job_template": {
         "created": "Saved a job ad template",
@@ -369,6 +371,9 @@
       "api_key": {
         "created": "Created an API key",
         "revoked": "Revoked an API key"
+      },
+      "distribution": {
+        "channel_updated": "Switched a distribution channel on or off"
       }
     }
   },
@@ -959,7 +964,10 @@
     },
     "metaDescription": "{title}: {role}, {seniority}, {contract}. {salary}.",
     "poweredBy": "Careers page on {name}",
-    "footer": "Here salary, selection process and response times are always declared."
+    "footer": "Here salary, selection process and response times are always declared.",
+    "feedLink": "XML feed",
+    "llmsLink": "llms.txt",
+    "feedTitle": "Job ads feed"
   },
   "careers": {
     "title": "Open positions at {organization}",
@@ -1017,7 +1025,8 @@
       "label": "Job sections",
       "candidates": "Candidates",
       "ad": "Job ad",
-      "automations": "Automations"
+      "automations": "Automations",
+      "distribution": "Distribution"
     },
     "received": "Received",
     "receivedHint": "New applications, not looked at yet",
@@ -1671,6 +1680,7 @@
       "application_moved": "Application moved to another stage",
       "application_decided": "Outcome recorded",
       "job_published": "Job published",
+      "job_updated": "Job ad edited",
       "job_closed": "Job closed",
       "ping": "Test",
       "candidate_erased": "A candidate's data erased"
@@ -2210,6 +2220,58 @@
       "apply": "Apply to the draft",
       "create": "Create a draft",
       "applied": "Proposal put in the form, not saved yet"
+    }
+  },
+  "distribution": {
+    "copyUrl": "Copy address",
+    "status": {
+      "feed": "In the XML feed",
+      "pending": "Pending",
+      "published": "Published",
+      "failed": "Error",
+      "removed": "Removed"
+    },
+    "feed": {
+      "label": "XML feed",
+      "hint": "Lists the published ads in a format job boards and aggregators can read.",
+      "jobHint": "It stays in the feed while the ad is published. When you close it, it leaves."
+    },
+    "llms": {
+      "label": "llms.txt",
+      "hint": "Plain text summary, written for language models."
+    },
+    "sitemap": {
+      "label": "Sitemap",
+      "hint": "Careers page and published ads, for search engines."
+    },
+    "api": {
+      "label": "Public API",
+      "hint": "Read only, no key needed. Returns the published ads as JSON.",
+      "jobHint": "Read only and no key needed: anyone can read this ad as JSON.",
+      "example": "Example",
+      "copyExample": "Copy the command"
+    },
+    "job": {
+      "title": "Distribution",
+      "description": "Where this ad lives and its status in each channel.",
+      "sync": "Sync again",
+      "syncQueued": "Sync started",
+      "updated": "Updated on {date}",
+      "open": "Open",
+      "error": "Last error: {message}",
+      "noChannels": "For now the ad only appears in the XML feed and in the public API. Other channels, such as job boards, can be connected by whoever runs this instance."
+    },
+    "settings": {
+      "title": "Distribution",
+      "description": "The public addresses of your ads and the channels connected to this instance.",
+      "addresses": "Public addresses",
+      "addressesBody": "They update by themselves: they only contain published ads.",
+      "channels": "Connected channels",
+      "channelsBody": "Each channel can be switched off for your organization. Ads already sent stay where they are until you sync them again.",
+      "empty": "No channel connected. The XML feed and the public API are always on; other channels are connected by whoever runs this instance.",
+      "on": "On",
+      "off": "Off",
+      "toggle": "Turn {channel} on or off"
     }
   }
 }

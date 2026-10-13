@@ -140,7 +140,7 @@ describe('public pages', () => {
     requirements: { mustHave: ['x'], niceToHave: [] },
   }
   it('validates the careers page', async () => {
-    const summary = { slug: 'dev', title: 'Dev', role: 'backend_developer', seniority: 'senior', contractType: 'permanent', workMode: 'remote', location: { country: 'IT' }, salary: published.salary, stageCount: 2, responseDays: 5, publishedAt: NOW }
+    const summary = { slug: 'dev', title: 'Dev', role: 'backend_developer', seniority: 'senior', contractType: 'permanent', workMode: 'remote', location: { country: 'IT' }, salary: published.salary, stageCount: 2, responseDays: 5, publishedAt: NOW, updatedAt: NOW }
     const request = send(ok({ organization, jobs: [summary] }))
     const careers = await fetchCareers(request, 'acme')
     expect(careers.jobs[0]?.slug).toBe('dev')
@@ -148,10 +148,10 @@ describe('public pages', () => {
   })
 
   it('validates the job page and refuses content that is not publishable', async () => {
-    const page = await fetchPublicJob(send(ok({ organization, job: { slug: 'dev', content: published, publishedAt: NOW } })), 'acme', 'dev')
+    const page = await fetchPublicJob(send(ok({ organization, job: { slug: 'dev', content: published, publishedAt: NOW, updatedAt: NOW } })), 'acme', 'dev')
     expect(page.job.content.salary.min).toBe(40000)
     const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    await expect(fetchPublicJob(send(ok({ organization, job: { slug: 'dev', content, publishedAt: NOW } })), 'acme', 'dev')).rejects.toMatchObject({ code: 'invalid_response' })
+    await expect(fetchPublicJob(send(ok({ organization, job: { slug: 'dev', content, publishedAt: NOW, updatedAt: NOW } })), 'acme', 'dev')).rejects.toMatchObject({ code: 'invalid_response' })
     spy.mockRestore()
   })
 

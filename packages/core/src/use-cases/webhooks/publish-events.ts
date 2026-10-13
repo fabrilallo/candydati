@@ -13,9 +13,12 @@ export interface PublishResult {
 
 export const OUTBOX_BATCH = 100;
 
+/** Events that change what an ad looks like in the channels: they also queue a distribution sync of that job. */
+const DISTRIBUTION_EVENTS: ReadonlySet<string> = new Set(['job.published', 'job.updated', 'job.closed']);
+
 /**
  * System job: fans the outbox out. For each unpublished event, one `webhook.deliver` task per enabled endpoint of the
- * event's organization that subscribes to its type, then the event is marked published. If an enqueue fails the event
+ * event's organization that subscribes to its type, plus one `distribution.sync` for job events, then the event is marked published. If an enqueue fails the event
  * stays unpublished and is retried; delivery is at-least-once, so consumers dedupe on the payload `id`.
  */
 export const publishWebhookEvents = defineSystemJob<WebhookPublishDeps, z.ZodObject<{ limit: z.ZodDefault<z.ZodNumber> }>, PublishResult>({
@@ -32,6 +35,10 @@ export const publishWebhookEvents = defineSystemJob<WebhookPublishDeps, z.ZodObj
         for (const endpoint of endpoints) {
           await deps.queue.enqueue('webhook.deliver', { organizationId: event.organizationId, eventId: event.id, endpointId: endpoint.id });
           enqueued += 1;
+        }
+        const jobId = event.data['jobId'];
+        if (DISTRIBUTION_EVENTS.has(event.type) && typeof jobId === 'string') {
+          await deps.queue.enqueue('distribution.sync', { organizationId: event.organizationId, jobId });
         }
         await deps.outbox.markPublished(event.organizationId, event.id, deps.now());
         published += 1;

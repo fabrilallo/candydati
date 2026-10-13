@@ -130,7 +130,7 @@ export function buildOpenApiDocument(info: OpenApiInfo, routes: readonly RouteSp
       title: info.title,
       version: info.version,
       description:
-        'Authenticate with `Authorization: Bearer <key>`. A key never has more than the person who created it, and can never move, decide on, message or erase candidates. Every response uses the same envelope: `success`, `data`, `error`, and `meta` for pages.',
+        'The routes tagged `Public` need no authentication and are open to any origin (CORS `*`, GET only, no credentials). Everything else: authenticate with `Authorization: Bearer <key>`. A key never has more than the person who created it, and can never move, decide on, message or erase candidates. Every response uses the same envelope: `success`, `data`, `error`, and `meta` for pages.',
     },
     tags: [...new Set(routes.map((route) => route.tag))].map((name) => ({ name })),
     security: [{ bearerAuth: [] }],

@@ -1,6 +1,6 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
-import type { EmailIdentity, EmailSender as MessageSender, FileStorage, TaskQueue } from '@tt/core';
+import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, TaskQueue } from '@tt/core';
 import { createEmailProvider } from '@tt/providers';
 import type { Db } from '@tt/db';
 import type { AdQualityAnalyzer } from '@tt/domain';
@@ -18,6 +18,7 @@ import { registerApplicationCvRoute } from './routes/application-cv.js';
 import { registerApiKeyRoutes } from './routes/api-keys.js';
 import { registerMcpRoute } from './mcp/route.js';
 import { registerOpenApiRoute } from './openapi/route.js';
+import { registerDistributionRoutes } from './routes/distribution.js';
 import { registerAttentionRoutes } from './routes/attention.js';
 import { registerAutomationRoutes } from './routes/automations.js';
 import { registerNotificationRoutes } from './routes/notifications.js';
@@ -57,6 +58,8 @@ export interface ServerDeps {
   readonly adQuality?: AdQualityAnalyzer | undefined;
   /** Messages to candidates: the provider chosen by EMAIL_PROVIDER by default, a fake in tests. */
   readonly messaging?: { readonly sender: MessageSender; readonly identity: EmailIdentity } | undefined;
+  /** Channels to distribute ads to besides the built-in feed. Empty by default (open source); hosted deployments pass theirs. */
+  readonly distributionChannels?: readonly DistributionChannel[] | undefined;
 }
 
 const loggerOptions = (env: Env) =>
@@ -84,6 +87,7 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
     files: deps.files,
     queue: deps.queue,
     ...messaging,
+    distributionChannels: deps.distributionChannels,
     onReceiptError: (error) => app.log.error({ err: error }, 'receipt email not queued'),
     adQuality: deps.adQuality ?? createConfiguredAnalyzer(deps.env.FAST_MODEL, app.log),
   });
@@ -101,6 +105,7 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerJobQualityRoute(app, ctx);
   registerJobRoutes(app, ctx);
   registerJobTemplateRoutes(app, ctx);
+  registerDistributionRoutes(app, ctx);
   registerPublicJobRoutes(app, ctx);
   registerPrivacyNoticeRoutes(app, ctx);
   registerPipelineRoutes(app, ctx);

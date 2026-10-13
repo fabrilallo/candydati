@@ -6,7 +6,9 @@ import {
   jobSummarySchema,
   jobTemplateSchema,
   publicCareersSchema,
+  publicFeedSchema,
   publicJobPageSchema,
+  publicOrganizationSummarySchema,
   publishResultSchema,
 } from './schemas-jobs.js';
 import {
@@ -37,6 +39,8 @@ export const COMPONENT_SCHEMAS = {
   JobStats: jobStatsSchema,
   PublicCareers: publicCareersSchema,
   PublicJobPage: publicJobPageSchema,
+  PublicOrganizationSummary: publicOrganizationSummarySchema,
+  PublicFeed: publicFeedSchema,
 } as const;
 export type ComponentName = keyof typeof COMPONENT_SCHEMAS;
 
@@ -138,11 +142,22 @@ const candidates: readonly RouteSpec[] = [
 
 const publicRoutes: readonly RouteSpec[] = [
   {
-    method: 'get', path: '/api/v1/public/organizations/:orgSlug/jobs', tag: 'Public careers', summary: 'Published ads of an organization', scope: null,
+    method: 'get', path: '/api/v1/public/organizations/:orgSlug', tag: 'Public', summary: 'An organization', scope: null,
+    description: 'Name, logo, the careers page and feed URLs, and how many ads are open. No authentication; open to any origin (CORS `*`, no credentials).',
+    response: { schema: 'PublicOrganizationSummary' },
+  },
+  {
+    method: 'get', path: '/api/v1/public/organizations/:orgSlug/jobs', tag: 'Public', summary: 'Published ads of an organization', scope: null,
+    description: 'One summary per published ad, newest first. Drafts and closed ads never appear.',
     response: { schema: 'PublicCareers' },
   },
   {
-    method: 'get', path: '/api/v1/public/organizations/:orgSlug/jobs/:jobSlug', tag: 'Public careers', summary: 'A published ad', scope: null,
+    method: 'get', path: '/api/v1/public/organizations/:orgSlug/feed', tag: 'Public', summary: 'Full content of the published ads', scope: null,
+    description: 'The complete public content of every published ad (what the XML feed, `llms.txt` and the sitemap are built from).',
+    response: { schema: 'PublicFeed' },
+  },
+  {
+    method: 'get', path: '/api/v1/public/organizations/:orgSlug/jobs/:jobSlug', tag: 'Public', summary: 'A published ad', scope: null,
     response: { schema: 'PublicJobPage' },
   },
 ];

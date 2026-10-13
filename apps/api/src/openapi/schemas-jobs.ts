@@ -74,6 +74,8 @@ export const publishedContentSchema = jobContentSchema.extend({
 
 const organizationSchema = z.object({ name: z.string(), slug: z.string(), logo: z.string().nullable() });
 
+const publicJobSchema = z.object({ slug: z.string(), content: publishedContentSchema, publishedAt: isoDate, updatedAt: isoDate });
+
 export const publicCareersSchema = z.object({
   organization: organizationSchema,
   jobs: z.array(
@@ -89,11 +91,20 @@ export const publicCareersSchema = z.object({
       stageCount: z.number().int(),
       responseDays: z.number().int(),
       publishedAt: isoDate,
+      updatedAt: isoDate,
     }),
   ),
 });
 
 export const publicJobPageSchema = z.object({
   organization: organizationSchema,
-  job: z.object({ slug: z.string(), content: publishedContentSchema, publishedAt: isoDate }),
+  job: publicJobSchema,
 });
+
+export const publicOrganizationSummarySchema = organizationSchema.extend({
+  careersUrl: z.string(),
+  feedUrl: z.string(),
+  openPositions: z.number().int().min(0),
+});
+
+export const publicFeedSchema = z.object({ organization: organizationSchema, jobs: z.array(publicJobSchema) });

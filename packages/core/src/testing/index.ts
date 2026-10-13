@@ -20,3 +20,5 @@ export * from './privacy-deps.js';
 export * from './privacy-seed.js';
 export * from './in-memory-api-keys.js';
 export * from './api-key-deps.js';
+export * from './in-memory-distribution.js';
+export * from './distribution-deps.js';

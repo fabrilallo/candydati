@@ -20,7 +20,8 @@ export const WEBHOOK_RETRY: RetryPolicy = { retryLimit: 5, retryDelay: 30, retry
 /** A stored file that must go (erasure): eight attempts, 60 s then doubling, so storage can be down for hours. */
 export const FILES_DELETE_RETRY: RetryPolicy = { retryLimit: 8, retryDelay: 60, retryBackoff: true };
 
-const retryFor = (name: string): RetryPolicy => (name === 'webhook.deliver' ? WEBHOOK_RETRY : name === 'files.delete' ? FILES_DELETE_RETRY : TASK_RETRY);
+/** A distribution channel (a job board) can be down as long as a webhook receiver: same policy. */
+const retryFor = (name: string): RetryPolicy => (name === 'webhook.deliver' || name === 'distribution.sync' ? WEBHOOK_RETRY : name === 'files.delete' ? FILES_DELETE_RETRY : TASK_RETRY);
 
 /** `TaskQueue` over pg-boss, with the same rules as the api: queue created on first use, a dropped job is a failure. */
 export function createPgBossQueue(boss: BossSender): TaskQueue {

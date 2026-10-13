@@ -2,6 +2,7 @@ import { jobContentSchema, pipelineStagesOf, type Job } from '@tt/domain';
 import { z } from 'zod';
 import { ConflictError } from '../../errors.js';
 import type { JobDeps } from '../../job-ports.js';
+import { recordEvent } from '../webhooks/record-event.js';
 import { defineJobUseCase } from './define.js';
 import { assertNoOpenStageRemoved, assertPublishable, requireJob, withStageIds } from './shared.js';
 
@@ -35,6 +36,8 @@ export const updateJob = defineJobUseCase({
     await assertNoOpenStageRemoved(deps, job, content);
     const saved = await deps.jobs.save({ ...job, content, updatedAt: deps.now() });
     await removeRulesOfRemovedStages(deps, job, content);
+    // What readers see changed: webhooks and the distribution sync hear about it. A draft is not visible to anyone.
+    if (saved.status === 'published') await recordEvent(deps, saved.organizationId, 'job.updated', { jobId: saved.id, slug: saved.slug });
     return saved;
   },
 });

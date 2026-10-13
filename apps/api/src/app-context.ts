@@ -14,6 +14,9 @@ import {
   type TaskDeps,
   type WebhookDeps,
   type CandidateDeps,
+  type DistributionChannel,
+  type DistributionDeps,
+  type PublicSiteDeps,
   type EmailIdentity,
   type EmailSender as MessageSender,
   type FileStorage,
@@ -45,6 +48,7 @@ import { authenticateApiKey } from '@tt/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
 import { createApiKeyDeps } from './wiring/api-key-deps.js';
+import { createDistributionDeps } from './wiring/distribution-deps.js';
 
 export interface RateLimitSettings {
   /** Requests per minute per client on every route. */
@@ -96,6 +100,9 @@ export interface AppContext {
   readonly taskDeps: TaskDeps;
   readonly automationDeps: AutomationRuleDeps;
   readonly webhookDeps: WebhookDeps;
+  readonly distributionDeps: DistributionDeps;
+  /** What the public reads need: published jobs, organizations, the privacy notice and the public base URL. */
+  readonly publicSiteDeps: PublicSiteDeps;
   readonly rightsDeps: Phase5Deps['rightsDeps'];
   readonly exportDeps: Phase5Deps['exportDeps'];
   readonly overviewDeps: Phase5Deps['overviewDeps'];
@@ -112,9 +119,11 @@ export interface AppContextDeps {
   readonly sender: MessageSender;
   readonly identity: EmailIdentity;
   readonly onReceiptError: (error: unknown) => void;
+  /** Distribution channels beyond the built-in feed: none by default, hosted deployments register theirs. */
+  readonly distributionChannels?: readonly DistributionChannel[] | undefined;
 }
 
-export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files, queue, sender, identity, onReceiptError }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files, queue, sender, identity, onReceiptError, distributionChannels }: AppContextDeps): AppContext {
   const auditLog = createDrizzleAuditLog(db);
   const auth = createAuth({ env, db, auditLog, emailSender });
   const messaging = createMessagingDeps({ env, db, auditLog, queue, sender, identity, onReceiptError });
@@ -136,6 +145,8 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
   });
   const phase2 = createPhase2Deps({ db, auditLog, files, queue, receipts: messaging.receipts });
   const phase5 = createPhase5Deps({ db, auditLog, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipWriterFactory });
+  const jobDeps = createJobDeps(db, auditLog, adQuality, env.platform.adQualityThreshold);
+  const distributionDeps = createDistributionDeps({ db, auditLog, publicBaseUrl: env.platform.url, channels: distributionChannels });
   return {
     env,
     auth,
@@ -150,19 +161,25 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     inboundDeps: messaging.inboundDeps,
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
     rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
-    jobDeps: {
-      auditLog,
-      jobs: createDrizzleJobs(db),
-      jobTemplates: createDrizzleJobTemplates(db),
-      applicationCounts: createDrizzleApplicationCounts(db),
-      organizations: createDrizzleOrganizationDirectory(db),
-      privacyNotices: createDrizzlePrivacyNotices(db),
-      automationRules: createDrizzleAutomationRules(db),
-      outbox: createDrizzleOutbox(db),
-      adQuality,
-      adQualityThreshold: env.platform.adQualityThreshold,
-      newId: randomUUID,
-      now: () => new Date(),
-    },
+    jobDeps,
+    distributionDeps,
+    publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
+  };
+}
+
+function createJobDeps(db: Db, auditLog: AuditLogRepository, adQuality: AdQualityAnalyzer, adQualityThreshold: number): JobDeps {
+  return {
+    auditLog,
+    jobs: createDrizzleJobs(db),
+    jobTemplates: createDrizzleJobTemplates(db),
+    applicationCounts: createDrizzleApplicationCounts(db),
+    organizations: createDrizzleOrganizationDirectory(db),
+    privacyNotices: createDrizzlePrivacyNotices(db),
+    automationRules: createDrizzleAutomationRules(db),
+    outbox: createDrizzleOutbox(db),
+    adQuality,
+    adQualityThreshold,
+    newId: randomUUID,
+    now: () => new Date(),
   };
 }

@@ -23,7 +23,7 @@ registerEndpoint(`${BASE}/applications`, {
 registerEndpoint(BASE, () =>
   ok({
     organization: { name: 'Acme', slug: 'acme', logo: null },
-    job: { slug: 'backend-1', content: completeContent, publishedAt: '2026-10-13T10:00:00.000Z' },
+    job: { slug: 'backend-1', content: completeContent, publishedAt: '2026-10-13T10:00:00.000Z', updatedAt: '2026-10-13T10:00:00.000Z' },
     privacyNotice: publicNotice({ version: 4 }),
   }),
 )

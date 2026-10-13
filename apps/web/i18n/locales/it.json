@@ -45,7 +45,8 @@
     "webhooks": "Webhook",
     "attentionCount": "{count} da gestire",
     "data": "Dati",
-    "api": "API e integrazioni"
+    "api": "API e integrazioni",
+    "distribution": "Distribuzione"
   },
   "roles": {
     "owner": "Proprietario",
@@ -315,7 +316,8 @@
         "created": "Ha creato un annuncio",
         "updated": "Ha modificato un annuncio",
         "published": "Ha pubblicato un annuncio",
-        "closed": "Ha chiuso un annuncio"
+        "closed": "Ha chiuso un annuncio",
+        "distribution_synced": "Ha sincronizzato un annuncio con i canali di distribuzione"
       },
       "job_template": {
         "created": "Ha salvato un modello di annuncio",
@@ -369,6 +371,9 @@
       "api_key": {
         "created": "Ha creato una chiave API",
         "revoked": "Ha revocato una chiave API"
+      },
+      "distribution": {
+        "channel_updated": "Ha acceso o spento un canale di distribuzione"
       }
     }
   },
@@ -959,7 +964,10 @@
     },
     "metaDescription": "{title}: {role}, {seniority}, {contract}. {salary}.",
     "poweredBy": "Pagina carriere su {name}",
-    "footer": "Qui retribuzione, processo di selezione e tempi di risposta sono sempre dichiarati."
+    "footer": "Qui retribuzione, processo di selezione e tempi di risposta sono sempre dichiarati.",
+    "feedLink": "Feed XML",
+    "llmsLink": "llms.txt",
+    "feedTitle": "Feed degli annunci"
   },
   "careers": {
     "title": "Posizioni aperte in {organization}",
@@ -1017,7 +1025,8 @@
       "label": "Sezioni dell'annuncio",
       "candidates": "Candidati",
       "ad": "Annuncio",
-      "automations": "Automazioni"
+      "automations": "Automazioni",
+      "distribution": "Distribuzione"
     },
     "received": "Ricevute",
     "receivedHint": "Nuove candidature, ancora da guardare",
@@ -1671,6 +1680,7 @@
       "application_moved": "Candidatura spostata di fase",
       "application_decided": "Esito registrato",
       "job_published": "Annuncio pubblicato",
+      "job_updated": "Annuncio modificato",
       "job_closed": "Annuncio chiuso",
       "ping": "Prova",
       "candidate_erased": "Dati di un candidato cancellati"
@@ -2210,6 +2220,58 @@
       "apply": "Applica alla bozza",
       "create": "Crea una bozza",
       "applied": "Proposta inserita nel modulo, non ancora salvata"
+    }
+  },
+  "distribution": {
+    "copyUrl": "Copia indirizzo",
+    "status": {
+      "feed": "Nel feed XML",
+      "pending": "In attesa",
+      "published": "Pubblicato",
+      "failed": "Errore",
+      "removed": "Rimosso"
+    },
+    "feed": {
+      "label": "Feed XML",
+      "hint": "Elenca gli annunci pubblicati in un formato leggibile dai job board e dagli aggregatori.",
+      "jobHint": "Resta nel feed finché l'annuncio è pubblicato. Quando lo chiudi, esce."
+    },
+    "llms": {
+      "label": "llms.txt",
+      "hint": "Riepilogo in testo semplice, pensato per i modelli linguistici."
+    },
+    "sitemap": {
+      "label": "Sitemap",
+      "hint": "Pagina carriere e annunci pubblicati, per i motori di ricerca."
+    },
+    "api": {
+      "label": "API pubblica",
+      "hint": "Sola lettura, senza chiave. Restituisce gli annunci pubblicati in JSON.",
+      "jobHint": "Sola lettura e senza chiave: chiunque può leggere questo annuncio in JSON.",
+      "example": "Esempio",
+      "copyExample": "Copia il comando"
+    },
+    "job": {
+      "title": "Distribuzione",
+      "description": "Dove si trova questo annuncio e in che stato è in ogni canale.",
+      "sync": "Sincronizza di nuovo",
+      "syncQueued": "Sincronizzazione avviata",
+      "updated": "Aggiornato il {date}",
+      "open": "Apri",
+      "error": "Ultimo errore: {message}",
+      "noChannels": "Per ora l'annuncio compare solo nel feed XML e nell'API pubblica. Altri canali, come i job board, possono essere collegati da chi gestisce questa istanza."
+    },
+    "settings": {
+      "title": "Distribuzione",
+      "description": "Gli indirizzi pubblici dei tuoi annunci e i canali collegati a questa istanza.",
+      "addresses": "Indirizzi pubblici",
+      "addressesBody": "Si aggiornano da soli: contengono solo gli annunci pubblicati.",
+      "channels": "Canali collegati",
+      "channelsBody": "Ogni canale si può spegnere per la tua organizzazione. Gli annunci già inviati restano dove sono finché non li sincronizzi di nuovo.",
+      "empty": "Nessun canale collegato. Il feed XML e l'API pubblica sono sempre attivi; altri canali li collega chi gestisce questa istanza.",
+      "on": "Attivo",
+      "off": "Spento",
+      "toggle": "Attiva o spegni {channel}"
     }
   }
 }

@@ -17,6 +17,8 @@ export const AUDIT_ACTIONS = [
   'job.updated',
   'job.published',
   'job.closed',
+  'job.distribution_synced',
+  'distribution.channel_updated',
   'job_template.created',
   'job_template.deleted',
   'privacy_notice.published',

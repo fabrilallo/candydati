@@ -23,6 +23,7 @@ export const TASK_NAMES = [
   'files.delete',
   'retention.run',
   'organization.export',
+  'distribution.sync',
 ] as const;
 export type TaskName = (typeof TASK_NAMES)[number];
 
@@ -62,6 +63,12 @@ export interface OrganizationExportPayload {
   readonly exportId: string;
 }
 
+/** Sync every registered distribution channel of a job with its current state. */
+export interface DistributionSyncPayload {
+  readonly organizationId: string;
+  readonly jobId: string;
+}
+
 export interface TaskPayloads {
   readonly 'cv.extract': CvExtractPayload;
   readonly 'email.send': EmailSendPayload;
@@ -73,6 +80,7 @@ export interface TaskPayloads {
   /** Scheduled daily at 03:00; no payload. */
   readonly 'retention.run': Readonly<Record<string, never>>;
   readonly 'organization.export': OrganizationExportPayload;
+  readonly 'distribution.sync': DistributionSyncPayload;
 }
 
 /** A task as enqueued: the name decides the payload. */

@@ -69,23 +69,23 @@ export const toPublicOrganizationDto = (organization: PublicOrganization): Publi
 });
 
 /** A published job that fails the §5.1 rules is corrupted data, not a user error: fail loudly. */
-function publishedParts(job: Job): { readonly content: PublishedJobContent; readonly publishedAt: string } {
+function publishedParts(job: Job): { readonly content: PublishedJobContent; readonly publishedAt: string; readonly updatedAt: string } {
   if (job.status !== 'published' || job.publishedAt === null) {
     throw new Error(`Job ${job.id} is not published: it cannot be exposed publicly.`);
   }
   if (!isPublishedContent(job.content)) {
     throw new Error(`Job ${job.id} is published but fails the publication rules (corrupted data).`);
   }
-  return { content: job.content, publishedAt: iso(job.publishedAt) };
+  return { content: job.content, publishedAt: iso(job.publishedAt), updatedAt: iso(job.updatedAt) };
 }
 
 export function toPublicJobDto(job: Job): PublicJobDto {
-  const { content, publishedAt } = publishedParts(job);
-  return { slug: job.slug, content, publishedAt };
+  const { content, publishedAt, updatedAt } = publishedParts(job);
+  return { slug: job.slug, content, publishedAt, updatedAt };
 }
 
 export function toPublicJobSummaryDto(job: Job): PublicJobSummaryDto {
-  const { content, publishedAt } = publishedParts(job);
+  const { content, publishedAt, updatedAt } = publishedParts(job);
   return {
     slug: job.slug,
     title: content.title,
@@ -98,5 +98,6 @@ export function toPublicJobSummaryDto(job: Job): PublicJobSummaryDto {
     stageCount: content.process.length,
     responseDays: content.responseDays,
     publishedAt,
+    updatedAt,
   };
 }

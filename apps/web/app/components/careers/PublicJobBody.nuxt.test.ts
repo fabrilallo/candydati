@@ -9,7 +9,7 @@ import PublicJobBody from './PublicJobBody.vue'
 
 const page = (overrides: Partial<PublishedJobContent> = {}, logo: string | null = null, privacyNotice: PublicJobPage['privacyNotice'] = null): PublicJobPage => ({
   organization: { name: 'Acme', slug: 'acme', logo },
-  job: { slug: 'backend-1', content: { ...(completeContent as PublishedJobContent), ...overrides }, publishedAt: '2026-10-13T10:00:00.000Z' },
+  job: { slug: 'backend-1', content: { ...(completeContent as PublishedJobContent), ...overrides }, publishedAt: '2026-10-13T10:00:00.000Z', updatedAt: '2026-10-13T10:00:00.000Z' },
   privacyNotice,
 })
 
@@ -130,6 +130,7 @@ describe('CareersList', () => {
     stageCount: 2,
     responseDays: 5,
     publishedAt: '2026-10-13T10:00:00.000Z',
+    updatedAt: '2026-10-13T10:00:00.000Z',
   }
 
   it('lists the ads with a stable path link and the salary always visible', async () => {

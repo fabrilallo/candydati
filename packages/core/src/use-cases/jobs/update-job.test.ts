@@ -32,6 +32,17 @@ describe('updateJob', () => {
     expect(deps.auditLog.events()[0]).toMatchObject({ action: 'job.updated', target: { type: 'job', id: job.id } });
   });
 
+  it('records a job.updated event for a published job, and none for a draft', async () => {
+    const published = seeded({ status: 'published', publishedAt: new Date('2026-05-01T00:00:00Z') });
+    await updateJob(published.deps, actor, { jobId: published.job.id, content: completeJobContent({ title: 'Edited' }) });
+    expect(published.deps.outbox.snapshot()).toEqual([
+      expect.objectContaining({ organizationId: 'org_a', type: 'job.updated', data: { jobId: published.job.id, slug: published.job.slug }, publishedAt: null }),
+    ]);
+    const draft = seeded();
+    await updateJob(draft.deps, actor, { jobId: draft.job.id, content: { title: 'Edited' } });
+    expect(draft.deps.outbox.snapshot()).toEqual([]);
+  });
+
   it('refuses a closed job', async () => {
     const { job, deps } = seeded({ status: 'closed' });
     await expect(updateJob(deps, actor, { jobId: job.id, content: { title: 'x' } })).rejects.toBeInstanceOf(ConflictError);
