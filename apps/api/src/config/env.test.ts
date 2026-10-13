@@ -6,6 +6,10 @@ const valid = {
   BETTER_AUTH_SECRET: 'a'.repeat(32),
   BETTER_AUTH_URL: 'http://localhost:3000',
   WEB_ORIGIN: 'http://localhost:3000',
+  S3_ENDPOINT: 'http://localhost:9000',
+  S3_BUCKET: 'team-tracker-test',
+  S3_ACCESS_KEY: 'key',
+  S3_SECRET_KEY: 'secret',
 };
 
 describe('parseEnv FAST_MODEL', () => {
@@ -76,5 +80,17 @@ describe('parseEnv', () => {
 
   it('returns a frozen object', () => {
     expect(Object.isFrozen(parseEnv(valid))).toBe(true);
+  });
+});
+
+describe('parseEnv S3', () => {
+  it('parses the storage settings', () => {
+    expect(parseEnv(valid).s3).toMatchObject({ endpoint: 'http://localhost:9000', bucket: 'team-tracker-test', forcePathStyle: false });
+  });
+
+  it('is required and names the variable, never the value', () => {
+    const { S3_SECRET_KEY: _omitted, ...without } = valid;
+    expect(() => parseEnv(without)).toThrow(/S3_SECRET_KEY/);
+    expect(() => parseEnv({ ...valid, S3_ENDPOINT: 'nope', S3_SECRET_KEY: 'topsecret' })).not.toThrow(/topsecret/);
   });
 });

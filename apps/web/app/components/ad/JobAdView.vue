@@ -46,6 +46,7 @@ provideAdContext(
   <article :lang="language" :data-mode="mode" class="@container grid gap-10" data-testid="job-ad">
     <AdHeader :title="content.title" :role="content.role" :seniority="content.seniority" :organization="organization" :published-at="publishedAt" />
     <AdFacts :content="content" />
+    <slot name="cta" />
     <AdProcess :process="content.process" :response-days="content.responseDays" />
     <AdRole :content="content" />
     <AdWorkplace :growth="content.growth" :work-life-balance="content.workLifeBalance" :culture="content.culture" />

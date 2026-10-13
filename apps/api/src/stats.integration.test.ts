@@ -2,6 +2,7 @@ import { completeJobContent } from '@tt/core/testing';
 import { jobStatsDtoSchema, STATS_WEEKS, type JobStatsDto } from '@tt/domain';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { TestUser } from './testing/client.js';
+import { publishNotice } from './testing/privacy.js';
 import { createTestApp, uniqueEmail, type TestApp } from './testing/test-app.js';
 
 const URL = '/api/v1/stats/jobs';
@@ -19,6 +20,7 @@ const newUser = (label: string) => new TestUser(t.app, uniqueEmail(label), `User
 async function ownerOf(name: string): Promise<TestUser> {
   const owner = await newUser(name).signUp();
   await owner.createOrganization(name);
+  await publishNotice(owner);
   return owner;
 }
 

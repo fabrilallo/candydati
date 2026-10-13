@@ -1,12 +1,23 @@
 import { createDb, runMigrations } from '@tt/db';
+import { createS3FileStorage } from '@tt/providers';
+import { PgBoss } from 'pg-boss';
 import { loadEnv } from './config/env.js';
+import { createPgBossQueue } from './queue/pg-boss-queue.js';
 import { buildServer } from './server.js';
+
+const PG_BOSS_SCHEMA = 'pgboss';
 
 async function main(): Promise<void> {
   const env = loadEnv();
   if (env.RUN_MIGRATIONS) await runMigrations(env.DATABASE_URL);
   const database = createDb(env.DATABASE_URL);
-  const app = await buildServer({ env, db: database.db });
+  const files = createS3FileStorage(env.s3);
+  await files.ensureBucket();
+  // The api only sends jobs: the worker owns scheduling and maintenance.
+  const boss = new PgBoss({ connectionString: env.DATABASE_URL, schema: PG_BOSS_SCHEMA, schedule: false, supervise: false });
+  await boss.start();
+  const app = await buildServer({ env, db: database.db, files, queue: createPgBossQueue(boss) });
+  boss.on('error', (error: Error) => app.log.error({ err: error }, 'pg-boss error'));
   if (env.RUN_MIGRATIONS) app.log.info('database migrations applied');
 
   let closing = false;
@@ -16,6 +27,7 @@ async function main(): Promise<void> {
     app.log.info({ signal }, 'shutting down');
     try {
       await app.close();
+      await boss.stop({ graceful: true, timeout: 10_000 });
       await database.close();
       process.exit(0);
     } catch (error) {

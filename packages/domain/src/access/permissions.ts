@@ -10,6 +10,12 @@ export const STATEMENTS = {
   audit: ['read'],
   job: ['read', 'create', 'update', 'publish', 'close'],
   job_template: ['read', 'create', 'delete'],
+  /** Candidates and their applications. `read` opens the profile and the CV, and is audited (PLAN §7). */
+  candidate: ['read', 'update', 'move', 'decide'],
+  /** Notes on candidates: interviewers can write them too. */
+  candidate_note: ['create'],
+  /** Privacy notice, consent texts and retention periods: the data controller's settings. */
+  privacy: ['manage'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -35,14 +41,27 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     audit: ['read'],
     job: ['read', 'create', 'update', 'publish', 'close'],
     job_template: ['read', 'create', 'delete'],
+    candidate: ['read', 'update', 'move', 'decide'],
+    candidate_note: ['create'],
+    privacy: ['manage'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],
     job_template: ['read', 'create', 'delete'],
+    candidate: ['read', 'update', 'move', 'decide'],
+    candidate_note: ['create'],
   },
-  /** Writes and edits ads; putting them online or taking them down stays with recruiters and admins. */
-  hiring_manager: { job: ['read', 'create', 'update'], job_template: ['read'] },
-  interviewer: { job: ['read'] },
+  /**
+   * Writes and edits ads and moves candidates through the stages. Putting ads online, taking them down and deciding
+   * the final outcome stay with recruiters and admins.
+   */
+  hiring_manager: {
+    job: ['read', 'create', 'update'],
+    job_template: ['read'],
+    candidate: ['read', 'update', 'move'],
+    candidate_note: ['create'],
+  },
+  interviewer: { job: ['read'], candidate: ['read'], candidate_note: ['create'] },
 };
 
 export const PERMISSIONS: readonly Permission[] = (Object.keys(STATEMENTS) as Resource[]).flatMap((resource) =>

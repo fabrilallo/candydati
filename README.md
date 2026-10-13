@@ -5,5 +5,5 @@ Nome in codice di un ATS open source e agentico, dalla parte del candidato: RAL 
 Il nome del prodotto non è deciso e non va scritto nel codice.
 
 - Piano: [`docs/PLAN.md`](docs/PLAN.md)
-- Stato: Fase 0 (fondamenta) e Fase 1 (annuncio e standard) fatte: organizzazioni, ruoli, inviti, registro delle azioni; editor dell'annuncio con blocco della pubblicazione, punteggio di qualità, template, pagina carriere pubblica con JSON-LD.
+- Stato: Fase 0 (fondamenta) e Fase 1 (annuncio e standard) fatte: organizzazioni, ruoli, inviti, registro delle azioni; editor dell'annuncio con blocco della pubblicazione, punteggio di qualità, template, pagina carriere pubblica con JSON-LD; Fase 2 (candidatura e pipeline): form senza registrazione con consenso versionato e CV, estrazione del CV, pipeline a fasi, scheda candidato, note, ricerca.
 - Avvio in locale: `cp .env.example .env`, `pnpm install`, `pnpm infra:up`, `pnpm dev` (web su :3000, api su :4000).

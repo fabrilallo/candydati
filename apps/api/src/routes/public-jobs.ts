@@ -14,7 +14,8 @@ interface OrgParams {
 /** No session needed. Only a successful reply is cacheable: errors never get the header. */
 export function registerPublicJobRoutes(app: FastifyInstance, ctx: AppContext): void {
   const config = publicRouteConfig(ctx);
-  const deps = { jobs: ctx.jobDeps.jobs, organizations: ctx.jobDeps.organizations };
+  const { jobs, organizations, privacyNotices } = ctx.jobDeps;
+  const deps = { jobs, organizations, privacyNotices };
 
   app.get('/api/v1/public/organizations/:orgSlug/jobs', { config }, async (request, reply) => {
     const { orgSlug } = request.params as OrgParams;

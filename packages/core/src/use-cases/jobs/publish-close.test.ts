@@ -4,7 +4,9 @@ import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '.
 import {
   buildJob,
   completeJobContent,
+  buildPrivacyNotice,
   createInMemoryJobRepository,
+  createInMemoryPrivacyNoticeRepository,
   createTestJobDeps,
   fakeAdQualityAnalyzer,
   fixedQualityReport,
@@ -18,7 +20,8 @@ import { publishJob } from './publish-job.js';
 const actor = userActor({ role: 'recruiter', organizationId: 'org_a' });
 const seeded = (overrides = {}, depsOverrides: Partial<TestJobDeps> = {}) => {
   const job = buildJob({ organizationId: 'org_a', ...overrides });
-  return { job, deps: createTestJobDeps({ jobs: createInMemoryJobRepository([job]), ...depsOverrides }) };
+  const privacyNotices = createInMemoryPrivacyNoticeRepository([buildPrivacyNotice({ organizationId: 'org_a' })]);
+  return { job, deps: createTestJobDeps({ jobs: createInMemoryJobRepository([job]), privacyNotices, ...depsOverrides }) };
 };
 
 describe('publishJob', () => {
@@ -93,6 +96,28 @@ describe('publishJob', () => {
   it('knows every publish rule used above', () => {
     const used = new Set(blocks.map((b) => b[3]));
     for (const rule of PUBLISH_RULES) expect(used.has(rule)).toBe(true);
+  });
+
+  it('requires an active privacy notice and saves nothing without it', async () => {
+    const { job, deps } = seeded({}, { privacyNotices: createInMemoryPrivacyNoticeRepository() });
+    const error = await publishJob(deps, actor, { jobId: job.id }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).issues).toEqual([{ path: 'organization.privacyNotice', message: 'privacy_notice_required' }]);
+    expect((await deps.jobs.findById('org_a', job.id))?.status).toBe('draft');
+    expect(deps.auditLog.events()).toHaveLength(0);
+  });
+
+  it('ignores the notice of another organization', async () => {
+    const other = createInMemoryPrivacyNoticeRepository([buildPrivacyNotice({ organizationId: 'org_b' })]);
+    const { job, deps } = seeded({}, { privacyNotices: other });
+    await expect(publishJob(deps, actor, { jobId: job.id })).rejects.toBeInstanceOf(ValidationError);
+  });
+
+  it('reports the notice together with the ad rules', async () => {
+    const { job, deps } = seeded({ content: completeJobContent({ title: 'x', process: [] }) }, { privacyNotices: createInMemoryPrivacyNoticeRepository() });
+    const error = (await publishJob(deps, actor, { jobId: job.id }).catch((e: unknown) => e)) as ValidationError;
+    expect(error.issues.map((i) => i.message)).toContain('privacy_notice_required');
+    expect(error.issues.length).toBeGreaterThan(1);
   });
 
   it('hides jobs of other organizations', async () => {

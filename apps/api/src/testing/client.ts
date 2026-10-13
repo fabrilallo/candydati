@@ -31,7 +31,7 @@ export class TestUser {
     readonly name: string,
   ) {}
 
-  async request<T = unknown>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, body?: unknown): Promise<Reply<T>> {
+  async request<T = unknown>(method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE', url: string, body?: unknown): Promise<Reply<T>> {
     const response = await this.app.inject({
       method,
       url,
@@ -44,6 +44,11 @@ export class TestUser {
     return { status: response.statusCode, body: (text ? JSON.parse(text) : null) as Reply<T>['body'], cookie: next };
   }
 
+  /** The raw response (headers and bytes), for downloads. */
+  download(url: string) {
+    return this.app.inject({ method: 'GET', url, headers: { origin: WEB_ORIGIN, ...(this.cookie ? { cookie: this.cookie } : {}) } });
+  }
+
   cookieHeader(): string {
     if (!this.cookie) throw new Error('not signed in');
     return this.cookie;
@@ -51,6 +56,7 @@ export class TestUser {
 
   get = <T = unknown>(url: string) => this.request<T>('GET', url);
   post = <T = unknown>(url: string, body: unknown = {}) => this.request<T>('POST', url, body);
+  patch = <T = unknown>(url: string, body: unknown = {}) => this.request<T>('PATCH', url, body);
   put = <T = unknown>(url: string, body: unknown = {}) => this.request<T>('PUT', url, body);
   delete = <T = unknown>(url: string) => this.request<T>('DELETE', url);
 

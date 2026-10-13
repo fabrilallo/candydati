@@ -43,6 +43,7 @@ const saveState = computed(() => saveStateOf({ busy: ed.busy.value, dirty: ed.di
 const phrases = computed(() => ed.quality.view.value?.vaguePhrases ?? [])
 const roleLabel = computed(() => (ed.form.value.role ? t(`taxonomy.roles.${ed.form.value.role}`) : null))
 const canAudit = computed(() => can(viewer.value?.role ?? null, 'audit:read'))
+const canReadCandidates = computed(() => can(viewer.value?.role ?? null, 'candidate:read'))
 const crumbs = computed(() => [{ label: t('nav.jobs'), to: '/app/jobs' }, { label: heading.value }])
 const noteKey = computed(() => (ed.status.value === 'closed' ? 'job.editor.closedNote' : ed.readOnly.value ? 'job.editor.readOnly' : null))
 
@@ -107,6 +108,7 @@ const saveTemplate = async (name: string): Promise<void> => {
         </Button>
       </template>
       <template #tabs>
+        <JobTabs v-if="ed.job.value && canReadCandidates" :job-id="ed.job.value.id" current="ad" />
         <div class="xl:hidden">
           <UnderlineTabs v-model="mode" :items="modeTabs" :label="t('job.editor.workspace.modes')" />
         </div>
@@ -120,7 +122,8 @@ const saveTemplate = async (name: string): Promise<void> => {
       </p>
       <p v-if="template && !job" class="text-sm text-muted-foreground">{{ t('job.editor.fromTemplate', { name: template.name }) }}</p>
       <FormAlert v-if="noticeKey" :message-key="noticeKey" />
-      <FormAlert v-if="ed.errorKey.value" :message-key="ed.errorKey.value" />
+      <PrivacyRequiredAlert v-if="ed.errorKey.value === 'job.errors.privacyNoticeRequired'" />
+      <FormAlert v-else-if="ed.errorKey.value" :message-key="ed.errorKey.value" />
     </div>
 
     <div class="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] xl:gap-10">

@@ -8,7 +8,6 @@ import type {
   JobTemplateDto,
   PageMeta,
   PublicCareersDto,
-  PublicJobPageDto,
   PublishIssue,
   PublishJobResultDto,
 } from '@tt/domain'
@@ -24,12 +23,14 @@ import {
   publishResultSchema,
   qualityResultSchema,
   templateSchema,
+  type PublicJobPage,
 } from './job-api-schemas'
 
 export const JOB_PAGE_SIZE = 20
+export const PRIVACY_NOTICE_REQUIRED = 'privacy_notice_required'
 
 export interface ApiCall {
-  readonly method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  readonly method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   readonly body?: unknown
 }
 /** Transport seam: returns the HTTP status and the parsed body. Never throws on non-2xx. */
@@ -54,7 +55,11 @@ export const toJobRequest =
   }
 
 const metaSchema = z.object({ total: z.number().int().nonnegative(), page: z.number().int().positive(), limit: z.number().int().positive() })
-const failureSchema = z.object({ success: z.literal(false), data: z.null(), error: z.object({ code: z.string(), message: z.string() }) })
+const failureSchema = z.object({
+  success: z.literal(false),
+  data: z.null(),
+  error: z.object({ code: z.string(), message: z.string(), issues: z.array(z.object({ path: z.string(), message: z.string() })).optional() }),
+})
 const successSchema = z.object({ success: z.literal(true), data: z.unknown(), error: z.null().optional(), meta: metaSchema.optional() })
 
 const CODE_KEYS: Readonly<Record<string, string>> = {
@@ -85,7 +90,12 @@ interface Parsed<T> {
 const call = async <T>(request: JobApiRequest, url: string, schema: z.ZodType<T>, init?: ApiCall): Promise<Parsed<T>> => {
   const { status, body } = await send(request, url, init)
   const failure = failureSchema.safeParse(body)
-  if (failure.success) throw new AppError(jobErrorKey(failure.data.error.code, status), failure.data.error.code)
+  if (failure.success) {
+    const { code, issues = [] } = failure.data.error
+    // Publishing needs the organization's privacy notice first (Phase 2): a specific message with a way to fix it.
+    if (issues.some((issue) => issue.message === PRIVACY_NOTICE_REQUIRED)) throw new AppError('job.errors.privacyNoticeRequired', PRIVACY_NOTICE_REQUIRED)
+    throw new AppError(jobErrorKey(code, status), code)
+  }
   const envelope = successSchema.safeParse(body)
   const data = envelope.success ? schema.safeParse(envelope.data.data) : null
   if (!envelope.success || !data?.success || status >= 400) {
@@ -144,7 +154,7 @@ export const getJobStats = async (request: JobApiRequest): Promise<JobStatsDto> 
 const publicBase = (org: string): string => `/api/v1/public/organizations/${encodeURIComponent(org)}/jobs`
 export const fetchCareers = async (request: JobApiRequest, org: string): Promise<PublicCareersDto> =>
   (await call(request, publicBase(org), publicCareersSchema)).data
-export const fetchPublicJob = async (request: JobApiRequest, org: string, job: string): Promise<PublicJobPageDto> =>
+export const fetchPublicJob = async (request: JobApiRequest, org: string, job: string): Promise<PublicJobPage> =>
   (await call(request, `${publicBase(org)}/${encodeURIComponent(job)}`, publicJobPageSchema)).data
 
 export type Loaded<T> = { readonly data: T; readonly errorKey: null } | { readonly data: null; readonly errorKey: string }

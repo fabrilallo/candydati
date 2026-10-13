@@ -1,13 +1,16 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import type { PublicJobPageDto, PublishedJobContent } from '@tt/domain'
-import { beforeAll, describe, expect, it } from 'vitest'
+import type { PublishedJobContent } from '@tt/domain'
+import type { PublicJobPage } from '@/lib/job-api-schemas'
+import { publicNotice } from '~~/test/fixtures/candidate-fixtures'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { completeContent } from '~~/test/fixtures/job-fixtures'
 import CareersList from './CareersList.vue'
 import PublicJobBody from './PublicJobBody.vue'
 
-const page = (overrides: Partial<PublishedJobContent> = {}, logo: string | null = null): PublicJobPageDto => ({
+const page = (overrides: Partial<PublishedJobContent> = {}, logo: string | null = null, privacyNotice: PublicJobPage['privacyNotice'] = null): PublicJobPage => ({
   organization: { name: 'Acme', slug: 'acme', logo },
   job: { slug: 'backend-1', content: { ...(completeContent as PublishedJobContent), ...overrides }, publishedAt: '2026-10-13T10:00:00.000Z' },
+  privacyNotice,
 })
 
 describe('PublicJobBody', () => {
@@ -87,11 +90,20 @@ describe('PublicJobBody', () => {
     expect(wrapper.text()).not.toContain('Processo di selezione')
   })
 
-  it('has no apply action in this phase', async () => {
+  it('says applications are not open while the organization has no privacy notice', async () => {
     const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
+    expect(wrapper.find('[data-testid="apply-not-open"]').text()).toBe('Le candidature per questo annuncio non sono ancora aperte.')
     expect(wrapper.find('form').exists()).toBe(false)
-    expect(wrapper.find('button').exists()).toBe(false)
-    expect(wrapper.find('input').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="apply-cta"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="apply-section"]').exists()).toBe(false)
+  })
+
+  it('offers the apply action near the facts and the section at the end, in the language of the ad', async () => {
+    const wrapper = await mountSuspended(PublicJobBody, { props: { page: page({ language: 'en' }, null, publicNotice()) } })
+    expect(wrapper.find('[data-testid="apply-cta"]').text()).toContain('Apply')
+    expect(wrapper.find('[data-testid="apply-section"] h2').text()).toBe('Apply for this position')
+    await wrapper.find('[data-testid="apply-cta"]').trigger('click')
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="application-form"]').exists()).toBe(true))
   })
 })
 

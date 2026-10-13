@@ -1,9 +1,11 @@
 import { adQualityReportSchema, assess, checkPublishable, type AdQualityAssessment, type AdQualityReport, type Job } from '@tt/domain';
 import { z } from 'zod';
-import { ConflictError } from '../../errors.js';
+import { ConflictError, ValidationError } from '../../errors.js';
 import type { JobDeps } from '../../job-ports.js';
 import { defineJobUseCase } from './define.js';
 import { issuesToValidationError, requireJob } from './shared.js';
+
+const PRIVACY_NOTICE_PATH = 'organization.privacyNotice';
 
 export interface PublishJobResult {
   readonly job: Job;
@@ -20,7 +22,7 @@ async function tryAnalyze(deps: JobDeps, job: Job): Promise<AdQualityReport | nu
   }
 }
 
-/** Only from `draft`. The §5.1 rules block; the quality score never does (it is flagged and audited). */
+/** Only from `draft`. The §5.1 rules and an active privacy notice block; the quality score never does (it is flagged and audited). */
 export const publishJob = defineJobUseCase({
   name: 'publishJob',
   input: z.object({ jobId: z.string().min(1) }),
@@ -38,7 +40,13 @@ export const publishJob = defineJobUseCase({
     const job = await requireJob(deps, actor.organizationId, input.jobId);
     if (job.status !== 'draft') throw new ConflictError('Only a draft can be published.');
     const issues = checkPublishable(job.content);
-    if (issues.length > 0) throw issuesToValidationError(issues);
+    const notice = await deps.privacyNotices.findActive(actor.organizationId);
+    if (issues.length > 0 || !notice) {
+      throw new ValidationError([
+        ...issuesToValidationError(issues).issues,
+        ...(notice ? [] : [{ path: PRIVACY_NOTICE_PATH, message: 'privacy_notice_required' }]),
+      ]);
+    }
     const report = await tryAnalyze(deps, job);
     const now = deps.now();
     const saved = await deps.jobs.save({ ...job, status: 'published', quality: report, publishedAt: now, updatedAt: now });

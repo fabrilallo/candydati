@@ -1,4 +1,5 @@
 import type { AdQualityAnalyzer, Job, JobStatus, JobTemplate } from '@tt/domain';
+import type { PrivacyNoticeRepository } from './candidate-ports.js';
 import type { CoreDeps } from './ports.js';
 
 export interface JobListQuery {
@@ -64,12 +65,15 @@ export interface PublicOrganization {
 
 export interface OrganizationDirectory {
   findBySlug(slug: string): Promise<PublicOrganization | null>;
+  findById(id: string): Promise<PublicOrganization | null>;
 }
 
 export interface JobDeps extends CoreDeps {
   readonly jobs: JobRepository;
   readonly jobTemplates: JobTemplateRepository;
   readonly organizations: OrganizationDirectory;
+  /** Publishing a job requires an active privacy notice. */
+  readonly privacyNotices: PrivacyNoticeRepository;
   readonly adQuality: AdQualityAnalyzer;
   /** On the 0-10 scale; below it the ad is flagged, never blocked. */
   readonly adQualityThreshold: number;
@@ -77,4 +81,4 @@ export interface JobDeps extends CoreDeps {
   readonly now: () => Date;
 }
 
-export type PublicJobDeps = Pick<JobDeps, 'jobs' | 'organizations'>;
+export type PublicJobDeps = Pick<JobDeps, 'jobs' | 'organizations' | 'privacyNotices'>;

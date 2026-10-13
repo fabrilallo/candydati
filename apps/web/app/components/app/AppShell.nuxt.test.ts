@@ -7,12 +7,14 @@ import AppRail from './AppRail.vue'
 import AppTopBar from './AppTopBar.vue'
 
 registerEndpoint('/api/v1/stats/jobs', () => ({ success: true, data: jobStatsFixture(), error: null }))
+registerEndpoint('/api/v1/candidates', () => ({ success: true, data: [], error: null, meta: { total: 12, page: 1, limit: 1 } }))
 
 const mounted: { unmount: () => void }[] = []
 const track = <T extends { unmount: () => void }>(wrapper: T): T => (mounted.push(wrapper), wrapper)
 
 beforeEach(() => {
   clearNuxtData('job-stats')
+  clearNuxtData('candidate-count')
   window.localStorage.clear()
   useNavPanel().panelOpen.value = true
 })
@@ -27,12 +29,23 @@ describe('AppNavPanel', () => {
     expect(wrapper.find('[data-testid="nav-count-jobs"]').text()).toContain('3 pubblicati')
   })
 
+  it('counts the candidates for whoever can read them, and links the privacy settings for admins', async () => {
+    useViewer().viewer.value = viewerWith('owner')
+    const wrapper = track(await mountSuspended(AppNavPanel))
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="nav-count-candidates"]').text()).toContain('12 candidati'))
+    const links = wrapper.findAll('nav a').map((link) => link.attributes('href'))
+    expect(links).toContain('/app/candidates')
+    expect(links).toContain('/app/settings/privacy')
+  })
+
   it('hides what the role cannot open and never asks for job stats without job:read', async () => {
     useViewer().viewer.value = viewerWith('interviewer')
     const wrapper = track(await mountSuspended(AppNavPanel))
     const links = wrapper.findAll('nav a').map((link) => link.attributes('href'))
     expect(links).not.toContain('/app/settings/audit-log')
     expect(links).not.toContain('/app/jobs/templates')
+    expect(links).not.toContain('/app/settings/privacy')
+    expect(links).toContain('/app/candidates')
   })
 
   it('carries language, theme and the user menu inside the mobile drawer only', async () => {
@@ -62,7 +75,7 @@ describe('AppRail', () => {
     useViewer().viewer.value = viewerWith('owner')
     const wrapper = track(await mountSuspended(AppRail))
     const labels = wrapper.findAll('nav a').map((link) => link.attributes('aria-label'))
-    expect(labels).toEqual(['Panoramica', 'Annunci', 'Template', 'Membri', 'Registro delle azioni'])
+    expect(labels).toEqual(['Panoramica', 'Annunci', 'Candidati', 'Template', 'Membri', 'Privacy', 'Registro delle azioni'])
   })
 })
 

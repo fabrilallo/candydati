@@ -27,10 +27,25 @@ describe('permissions', () => {
     expect(permissionsOf('owner')).toEqual(PERMISSIONS);
   });
 
-  it('lets an admin manage people and read the audit log but not delete the organization', () => {
+  it('gives the admin everything except deleting the organization', () => {
+    expect(permissionsOf('admin')).toEqual(PERMISSIONS.filter((permission) => permission !== 'organization:delete'));
     expect(roleHasPermission('admin', 'invitation:create')).toBe(true);
     expect(roleHasPermission('admin', 'audit:read')).toBe(true);
+    expect(roleHasPermission('admin', 'privacy:manage')).toBe(true);
     expect(roleHasPermission('admin', 'organization:delete')).toBe(false);
+  });
+
+  it('lets a recruiter read, update, move and decide on candidates, and write notes, but not manage privacy', () => {
+    for (const permission of [
+      'candidate:read',
+      'candidate:update',
+      'candidate:move',
+      'candidate:decide',
+      'candidate_note:create',
+    ] as const) {
+      expect(roleHasPermission('recruiter', permission)).toBe(true);
+    }
+    expect(roleHasPermission('recruiter', 'privacy:manage')).toBe(false);
   });
 
   it('gives the owner, admin and recruiter every job and job template permission', () => {
@@ -40,14 +55,25 @@ describe('permissions', () => {
     }
   });
 
-  it('lets a hiring manager write and edit ads but not publish or close them', () => {
-    expect(permissionsOf('hiring_manager')).toEqual(['job:read', 'job:create', 'job:update', 'job_template:read']);
+  it('lets a hiring manager write ads and move candidates, but not publish, close, decide or manage privacy', () => {
+    expect(permissionsOf('hiring_manager')).toEqual([
+      'job:read',
+      'job:create',
+      'job:update',
+      'job_template:read',
+      'candidate:read',
+      'candidate:update',
+      'candidate:move',
+      'candidate_note:create',
+    ]);
     expect(roleHasPermission('hiring_manager', 'job:publish')).toBe(false);
     expect(roleHasPermission('hiring_manager', 'job:close')).toBe(false);
+    expect(roleHasPermission('hiring_manager', 'candidate:decide')).toBe(false);
+    expect(roleHasPermission('hiring_manager', 'privacy:manage')).toBe(false);
   });
 
-  it('gives an interviewer read access to ads and nothing else', () => {
-    expect(permissionsOf('interviewer')).toEqual(['job:read']);
+  it('gives an interviewer read access to ads and candidates and note writing, and nothing else', () => {
+    expect(permissionsOf('interviewer')).toEqual(['job:read', 'candidate:read', 'candidate_note:create']);
   });
 
   it('gives recruiters no administrative permission', () => {

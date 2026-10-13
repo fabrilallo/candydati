@@ -1,0 +1,162 @@
+import { z } from 'zod';
+import type { SelectionStage } from '../job/content.js';
+import { CONSENT_SCOPES, type ConsentRecord } from './privacy.js';
+
+export const CV_MAX_BYTES = 10 * 1024 * 1024;
+/** Checked against the file's magic bytes, never only the declared type or the extension. */
+export const CV_MEDIA_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'] as const;
+export type CvMediaType = (typeof CV_MEDIA_TYPES)[number];
+
+export const NAME_MAX = 120;
+export const MESSAGE_MAX = 3000;
+export const NOTE_MAX = 5000;
+export const TAG_MAX = 40;
+export const TAGS_PER_CANDIDATE_MAX = 20;
+
+/**
+ * Public application form, without registration (PLAN §2). Only what selection needs (§7 minimisation): no photo,
+ * no birth date, no gender, no marital status, no address. The CV arrives as a separate multipart part.
+ */
+export const applicationFormSchema = z.object({
+  firstName: z.string().trim().min(1).max(NAME_MAX),
+  lastName: z.string().trim().min(1).max(NAME_MAX),
+  email: z.email().max(254).transform((value) => value.toLowerCase()),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^\+?[0-9 ()-]{6,20}$/, 'phone')
+    .optional(),
+  linkedinUrl: z.url().max(300).optional(),
+  message: z.string().trim().max(MESSAGE_MAX).default(''),
+  /** `selection` must be present: without it the application cannot be processed. */
+  consentScopes: z
+    .array(z.enum(CONSENT_SCOPES))
+    .min(1)
+    .refine((scopes) => scopes.includes('selection'), 'selection_consent_required')
+    .transform((scopes) => [...new Set(scopes)]),
+  /** Version the candidate read; refused if it is no longer the active one. */
+  privacyNoticeVersion: z.number().int().positive(),
+  /** Honeypot: humans leave it empty. */
+  website: z.string().max(0).optional(),
+});
+export type ApplicationForm = z.infer<typeof applicationFormSchema>;
+
+/**
+ * Pipeline stages of a job: `received`, then one per stage of the DECLARED process (PLAN §5.1: what the candidate
+ * reads is what the recruiter uses), in order. Outcomes are not stages: they close the application.
+ */
+export const RECEIVED_STAGE_ID = 'received';
+
+export interface PipelineStage {
+  /** `received` or `stage-<index>` (index in the declared process, 0-based). */
+  readonly id: string;
+  /** null for `received`; otherwise the declared stage. */
+  readonly declared: SelectionStage | null;
+}
+
+export const pipelineStagesOf = (process: readonly SelectionStage[]): readonly PipelineStage[] => [
+  { id: RECEIVED_STAGE_ID, declared: null },
+  ...process.map((stage, index) => ({ id: `stage-${index}`, declared: stage })),
+];
+
+export const OUTCOMES = ['hired', 'not_selected', 'withdrawn'] as const;
+export type Outcome = (typeof OUTCOMES)[number];
+
+export interface Candidate {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly firstName: string;
+  readonly lastName: string;
+  /** Unique per organization: the same person applying twice is one candidate with two applications. */
+  readonly email: string;
+  readonly phone: string | null;
+  readonly linkedinUrl: string | null;
+  readonly tags: readonly string[];
+  /** Latest consent across this candidate's applications decides talent-pool visibility. */
+  readonly talentPool: boolean;
+  /** Max of the retention expiries of the candidate's applications. */
+  readonly retentionExpiresAt: Date;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+export interface StoredFile {
+  readonly key: string;
+  readonly fileName: string;
+  readonly mediaType: CvMediaType;
+  readonly sizeBytes: number;
+}
+
+export interface Application {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly jobId: string;
+  readonly candidateId: string;
+  readonly stageId: string;
+  /** null while open. */
+  readonly outcome: Outcome | null;
+  readonly message: string;
+  readonly cv: StoredFile;
+  readonly consent: ConsentRecord;
+  readonly retentionExpiresAt: Date;
+  readonly source: 'careers_page' | 'manual';
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+  readonly stageChangedAt: Date;
+  readonly closedAt: Date | null;
+}
+
+export interface CandidateNote {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly candidateId: string;
+  /** The application the note is about, if any. */
+  readonly applicationId: string | null;
+  readonly authorId: string;
+  readonly body: string;
+  readonly createdAt: Date;
+}
+
+/**
+ * CV data extracted by a model or by text parsing. A suggestion shown next to the original document, which stays
+ * the source of truth. Never contains photo, birth date, age, gender, marital status, nationality or health data.
+ */
+export const cvExtractionSchema = z.object({
+  headline: z.string().max(200).optional(),
+  location: z.string().max(120).optional(),
+  yearsOfExperience: z.number().int().min(0).max(60).optional(),
+  experiences: z
+    .array(
+      z.object({
+        title: z.string().max(200),
+        company: z.string().max(200).optional(),
+        from: z.string().max(20).optional(),
+        to: z.string().max(20).optional(),
+        summary: z.string().max(600).optional(),
+      }),
+    )
+    .max(30)
+    .default([]),
+  education: z
+    .array(z.object({ title: z.string().max(200), institution: z.string().max(200).optional(), year: z.string().max(20).optional() }))
+    .max(15)
+    .default([]),
+  skills: z.array(z.string().max(60)).max(60).default([]),
+  languages: z.array(z.string().max(60)).max(15).default([]),
+});
+export type CvExtraction = z.infer<typeof cvExtractionSchema>;
+
+export const EXTRACTION_STATUSES = ['pending', 'done', 'text_only', 'failed'] as const;
+export type ExtractionStatus = (typeof EXTRACTION_STATUSES)[number];
+
+export interface CvExtractionRecord {
+  readonly applicationId: string;
+  readonly organizationId: string;
+  readonly status: ExtractionStatus;
+  /** Plain text of the document, used for search. */
+  readonly text: string | null;
+  readonly data: CvExtraction | null;
+  /** `text` when no model is configured: only the plain text was extracted. */
+  readonly source: 'model' | 'text' | null;
+  readonly updatedAt: Date;
+}

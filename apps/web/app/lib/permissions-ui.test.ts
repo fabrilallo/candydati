@@ -53,8 +53,14 @@ describe('defaultInviteRole', () => {
 
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
-    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'templates', 'members'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'templates', 'members', 'audit'])
+    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'candidates', 'templates', 'members'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'candidates', 'templates', 'members', 'privacy', 'audit'])
+  })
+
+  it('shows candidates to every role that reads them and the privacy settings only with privacy:manage', () => {
+    expect(visibleNav('interviewer').map((item) => item.id)).toContain('candidates')
+    expect(visibleNav('admin').map((item) => item.id)).toContain('privacy')
+    expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('privacy')
   })
 
   it('shows the jobs entry to anyone with job:read and to nobody without a role', () => {
@@ -66,8 +72,8 @@ describe('visibleNav', () => {
 describe('navSections', () => {
   it('groups the visible items and drops nothing the role may see', () => {
     expect(navSections('owner').map((section) => [section.id, section.items.map((item) => item.id)])).toEqual([
-      ['work', ['dashboard', 'jobs', 'templates']],
-      ['organization', ['members', 'audit']],
+      ['work', ['dashboard', 'jobs', 'candidates', 'templates']],
+      ['organization', ['members', 'privacy', 'audit']],
     ])
     expect(navSections(null).map((section) => section.id)).toEqual(['work', 'organization'])
   })
@@ -81,6 +87,8 @@ describe('activeNavId', () => {
     expect(activeNavId('/app/jobs/abc', items)).toBe('jobs')
     expect(activeNavId('/app/jobs/templates', items)).toBe('templates')
     expect(activeNavId('/app/settings/audit-log', items)).toBe('audit')
+    expect(activeNavId('/app/candidates/c1', items)).toBe('candidates')
+    expect(activeNavId('/app/settings/privacy', items)).toBe('privacy')
     expect(activeNavId('/elsewhere', items)).toBeNull()
   })
 })

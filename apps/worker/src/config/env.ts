@@ -1,3 +1,4 @@
+import { loadS3Config, type S3Config } from '@tt/providers';
 import { z } from 'zod';
 
 const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
@@ -6,9 +7,11 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/, error: 'must be a postgres:// URL' }),
+  /** Mastra `provider/model` for the CV structuring. Empty: only the plain text is extracted. */
+  FAST_MODEL: z.string().regex(/^[^/\s]+\/\S+$/, 'must look like provider/model').optional(),
 });
 
-export type WorkerEnv = Readonly<z.infer<typeof envSchema>>;
+export type WorkerEnv = Readonly<z.infer<typeof envSchema>> & { readonly s3: S3Config };
 
 /** `.env` files often contain `KEY=` for unset values: treat empty strings as absent. */
 const withoutEmptyStrings = (
@@ -26,6 +29,15 @@ const describeIssues = (issues: readonly z.core.$ZodIssue[], source: Readonly<Re
     })
     .join('; ');
 
+/** The error names the S3_* variables, never their values. */
+const parseS3 = (source: Readonly<Record<string, string | undefined>>): S3Config => {
+  try {
+    return loadS3Config(source);
+  } catch (error) {
+    throw new Error(`Invalid worker environment: ${error instanceof Error ? error.message : 'S3 configuration'}`, { cause: error });
+  }
+};
+
 /** Validates the process environment once at boot. Throws listing every missing or invalid variable. */
 export const loadEnv = (source: Readonly<Record<string, string | undefined>>): WorkerEnv => {
   const normalized = withoutEmptyStrings(source);
@@ -33,5 +45,5 @@ export const loadEnv = (source: Readonly<Record<string, string | undefined>>): W
   if (!result.success) {
     throw new Error(`Invalid worker environment: ${describeIssues(result.error.issues, normalized)}`);
   }
-  return Object.freeze(result.data);
+  return Object.freeze({ ...result.data, s3: parseS3(normalized) });
 };

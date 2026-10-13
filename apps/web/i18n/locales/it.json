@@ -32,7 +32,10 @@
     "sections": {
       "work": "Selezione",
       "organization": "Organizzazione"
-    }
+    },
+    "candidates": "Candidati",
+    "privacy": "Privacy",
+    "candidateCount": "{count} candidati"
   },
   "roles": {
     "owner": "Proprietario",
@@ -263,7 +266,11 @@
       "invitation": "Invito",
       "member": "Membro",
       "job": "Annuncio",
-      "job_template": "Modello"
+      "job_template": "Modello",
+      "privacy_notice": "Informativa privacy",
+      "application": "Candidatura",
+      "candidate": "Candidato",
+      "candidate_note": "Nota"
     },
     "empty": "Ancora nessuna azione registrata.",
     "loadFailed": "Non siamo riusciti a caricare il registro.",
@@ -304,6 +311,22 @@
       "job_template": {
         "created": "Ha salvato un modello di annuncio",
         "deleted": "Ha eliminato un modello di annuncio"
+      },
+      "privacy_notice": {
+        "published": "Ha pubblicato una versione dell'informativa privacy"
+      },
+      "application": {
+        "received": "Ha ricevuto una candidatura",
+        "moved": "Ha spostato una candidatura di fase",
+        "decided": "Ha registrato l'esito di una candidatura"
+      },
+      "candidate": {
+        "viewed": "Ha aperto la scheda di un candidato",
+        "updated": "Ha modificato un candidato",
+        "cv_downloaded": "Ha aperto o scaricato un CV"
+      },
+      "candidate_note": {
+        "created": "Ha scritto una nota su un candidato"
       }
     }
   },
@@ -344,7 +367,8 @@
     "forbidden": "Non hai il permesso di farlo",
     "notFound": "Non trovato",
     "tooManyRequests": "Troppe richieste, riprova tra poco",
-    "unreachable": "Il servizio non è raggiungibile in questo momento"
+    "unreachable": "Il servizio non è raggiungibile in questo momento",
+    "conflict": "L'operazione non è più possibile: qualcosa è cambiato nel frattempo"
   },
   "taxonomy": {
     "roleFamilies": {
@@ -538,7 +562,10 @@
     "errors": {
       "conflict": "L'annuncio è chiuso: non si può più modificare",
       "validationFailed": "L'annuncio non rispetta i requisiti di pubblicazione",
-      "loadFailed": "Non riusciamo a caricare l'annuncio."
+      "loadFailed": "Non riusciamo a caricare l'annuncio.",
+      "privacyNoticeRequired": "Per pubblicare serve l'informativa privacy dell'organizzazione: senza, nessuno potrebbe candidarsi.",
+      "privacyNoticeLink": "Scrivi l'informativa",
+      "privacyNoticeAskAdmin": "Chiedi a una persona amministratrice di pubblicarla."
     },
     "list": {
       "title": "Annunci",
@@ -928,5 +955,306 @@
     "genericBody": "Abbiamo registrato il problema. Riprova, o torna alla pagina iniziale.",
     "home": "Torna all'inizio",
     "code": "Errore {code}"
+  },
+  "pipeline": {
+    "tabs": {
+      "label": "Sezioni dell'annuncio",
+      "candidates": "Candidati",
+      "ad": "Annuncio"
+    },
+    "received": "Ricevute",
+    "receivedHint": "Nuove candidature, ancora da guardare",
+    "columnCount": "1 candidatura | {count} candidature",
+    "emptyColumn": "Nessuna candidatura in questa fase",
+    "emptyFiltered": "Nessun risultato in questa fase",
+    "stageSwitcher": "Fase",
+    "summary": "Aperte: {open} · Con esito: {decided}",
+    "search": "Cerca per nome, ruolo, città o tag",
+    "emptyPublished": "Ancora nessuna candidatura. Arriveranno dalla pagina pubblica dell'annuncio.",
+    "emptyNotPublished": "L'annuncio non è pubblicato: le candidature arrivano solo dagli annunci pubblicati.",
+    "responseMeta": "Risposta entro 1 giorno | Risposta entro {count} giorni",
+    "moveFailed": "Non siamo riusciti a spostare {name}",
+    "decideFailed": "Non siamo riusciti a registrare l'esito di {name}",
+    "card": {
+      "actions": "Azioni per {name}",
+      "open": "Apri la scheda",
+      "moveTo": "Sposta in…",
+      "here": "qui",
+      "decide": "Esito…",
+      "years": "1 anno di esperienza | {count} anni di esperienza",
+      "inStageSince": "Ultimo cambio di fase",
+      "notes": "1 nota | {count} note"
+    },
+    "keyboard": {
+      "hint": "Invio apre la scheda. Spazio prende la candidatura: frecce sinistra e destra per scegliere la fase, Spazio per lasciarla, Esc per annullare.",
+      "readOnlyHint": "Invio apre la scheda.",
+      "picked": "Candidatura di {name} presa, fase attuale: {stage}. Usa le frecce per scegliere la fase.",
+      "over": "{name}: fase scelta {stage}",
+      "dropped": "{name} spostata in {stage}",
+      "cancelled": "Spostamento di {name} annullato"
+    },
+    "outcomes": {
+      "title": "Esiti",
+      "hint": "Candidature chiuse: non si spostano più",
+      "empty": "Ancora nessun esito registrato."
+    }
+  },
+  "candidate": {
+    "outcomes": {
+      "hired": "Assunzione",
+      "not_selected": "Non selezionata",
+      "withdrawn": "Ritirata"
+    },
+    "status": {
+      "open": "In corso"
+    },
+    "tabs": {
+      "label": "Sezioni della scheda",
+      "profile": "Profilo",
+      "cv": "CV",
+      "notes": "Note"
+    },
+    "header": {
+      "stage": "Fase:",
+      "status": "Stato:"
+    },
+    "actions": {
+      "decide": "Esito",
+      "moveTo": "Sposta in",
+      "moveHint": "Nessun messaggio parte in automatico",
+      "moved": "Candidatura spostata",
+      "decided": "Esito registrato"
+    },
+    "decide": {
+      "title": "Registrare l'esito?",
+      "body": "La candidatura di {name} si chiude con l'esito: {outcome}. Dopo non si potrà più spostare. Nessun messaggio viene inviato in automatico.",
+      "confirm": "Registra l'esito"
+    },
+    "tags": {
+      "label": "Tag",
+      "remove": "Rimuovi il tag {tag}",
+      "add": "Aggiungi tag",
+      "placeholder": "nuovo tag",
+      "none": "Nessun tag"
+    },
+    "fields": {
+      "email": "Email",
+      "phone": "Telefono",
+      "linkedin": "LinkedIn",
+      "notGiven": "Non indicato",
+      "applications": "Candidatura | Candidature ({count})",
+      "appliedOn": "inviata il {date}",
+      "message": "Messaggio",
+      "showAll": "Mostra tutto",
+      "showLess": "Mostra meno",
+      "consent": "Consenso",
+      "consentVersion": "Informativa versione {version}, accettata il {date}",
+      "retention": "Conservazione dei dati",
+      "retentionUntil": "Fino al {date}"
+    },
+    "scopes": {
+      "selection": "Questa selezione",
+      "talent_pool": "Database candidati"
+    },
+    "retention": {
+      "ok": "In regola",
+      "soon": "Scade a breve",
+      "expired": "Scaduta"
+    },
+    "extraction": {
+      "title": "Dal CV",
+      "disclaimer": "Estrazione automatica: può contenere errori. Il CV originale, nella scheda CV, fa fede.",
+      "experiences": "Esperienze",
+      "education": "Formazione",
+      "skills": "Competenze",
+      "languages": "Lingue",
+      "fromText": "Ricavato dal solo testo del documento, senza modello linguistico.",
+      "states": {
+        "pending": "Stiamo leggendo il CV: i dati compariranno qui tra poco.",
+        "text_only": "Del CV abbiamo solo il testo, usato per la ricerca. Apri il CV per i dettagli.",
+        "failed": "Non siamo riusciti a leggere il CV in automatico. Il documento originale è nella scheda CV.",
+        "empty": "Dal CV non è emerso nulla da mostrare qui. Il documento originale è nella scheda CV.",
+        "done": "Dati estratti dal CV"
+      }
+    },
+    "cv": {
+      "download": "Scarica",
+      "previewTitle": "Anteprima di {name}",
+      "noPreview": "L'anteprima è disponibile solo per i PDF. Scarica il file per aprirlo."
+    },
+    "notes": {
+      "label": "Nuova nota",
+      "placeholder": "Scrivi una nota",
+      "press": "Premi",
+      "toWrite": "per scrivere",
+      "internal": "Le note sono interne: la persona candidata non le vede mai. Ctrl o Cmd + Invio per salvare.",
+      "about": "La nota riguarda",
+      "general": "Nota generale",
+      "save": "Aggiungi nota",
+      "saving": "Salvataggio…",
+      "saved": "Nota aggiunta",
+      "empty": "Ancora nessuna nota.",
+      "on": "Su: {job}"
+    },
+    "sheet": {
+      "title": "Scheda candidato",
+      "description": "Profilo, CV e note della persona candidata",
+      "fullPage": "Apri a pagina intera"
+    }
+  },
+  "candidates": {
+    "title": "Candidati",
+    "subtitle": "Le persone che si sono candidate in {organization}.",
+    "scopes": {
+      "label": "Chi mostrare",
+      "all": "Tutti",
+      "pool": "Database candidati"
+    },
+    "poolHint": "Solo chi ha accettato di restare nel database per posizioni future.",
+    "search": "Cerca per nome, email, tag o testo del CV",
+    "tagFilter": "Filtra per tag",
+    "clearTag": "Rimuovi il filtro {tag}",
+    "filterByTag": "Filtra per {tag}",
+    "talentPoolBadge": "Database",
+    "applications": "candidatura | candidature",
+    "keptUntil": "Dati conservati fino al",
+    "empty": "Ancora nessun candidato",
+    "emptyBody": "Arriveranno dalle pagine pubbliche dei tuoi annunci pubblicati.",
+    "emptyFiltered": "Nessun risultato",
+    "emptyFilteredBody": "Prova con altre parole o togli un filtro.",
+    "pagination": "Pagina {page} di {pages} · {total} candidati"
+  },
+  "privacy": {
+    "title": "Informativa privacy",
+    "subtitle": "Il testo che chi si candida legge prima di inviare i propri dati, con i tempi di conservazione. Ogni versione resta consultabile.",
+    "current": "Versione in uso",
+    "version": "Versione {version}",
+    "publishedOn": "pubblicata il {date}",
+    "retentionLine": "Conservazione: {selection} per la selezione, {pool} per il database candidati",
+    "none": "Nessuna informativa pubblicata. Finché manca non puoi pubblicare annunci e nessuno può candidarsi.",
+    "nextTitle": "Nuova versione ({version})",
+    "nextIntro": "Parte dal testo in uso. Le nuove candidature useranno questa versione; chi si è già candidato resta legato a quella che ha letto.",
+    "firstTitle": "Prima versione",
+    "firstIntro": "Abbiamo preparato un modello con il nome della tua organizzazione. Rileggilo con chi si occupa di privacy: il testo è responsabilità del titolare del trattamento.",
+    "fields": {
+      "language": "Lingua",
+      "languageHint": "Usa la lingua dei tuoi annunci.",
+      "contactEmail": "Email per la privacy",
+      "contactEmailHint": "Chi si candida scrive qui per vedere, correggere o cancellare i propri dati.",
+      "retention": "Per quanto tempo conservi i dati",
+      "selectionDays": "Solo questa selezione (giorni)",
+      "selectionHint": "Cioè {period} dalla candidatura.",
+      "talentPoolDays": "Database candidati (giorni)",
+      "talentPoolHint": "Cioè {period}, se la persona accetta di restare nel database.",
+      "retentionRange": "Da {min} a {max} giorni. Alla scadenza i dati vengono cancellati.",
+      "text": "Testo dell'informativa",
+      "textHint": "Testo semplice: una riga vuota separa i paragrafi."
+    },
+    "useTemplate": "Usa il modello",
+    "characters": "{count} caratteri",
+    "publish": "Pubblica la versione {version}",
+    "publishing": "Pubblicazione…",
+    "published": "Versione {version} pubblicata",
+    "confirmTitle": "Pubblicare la versione {version}?",
+    "confirmBody": "Ogni versione resta consultabile; le nuove candidature useranno questa.",
+    "confirm": "Pubblica",
+    "templateTitle": "Sostituire il testo con il modello?",
+    "templateBody": "Il testo scritto finora verrà sostituito dal modello nella lingua scelta.",
+    "templateConfirm": "Usa il modello",
+    "history": "Versioni pubblicate",
+    "active": "In uso",
+    "validation": {
+      "textMin": "Scrivi almeno 200 caratteri",
+      "textMax": "Il testo è troppo lungo",
+      "email": "Inserisci un indirizzo email valido",
+      "days": "Indica un numero di giorni tra 30 e 1825"
+    },
+    "banner": {
+      "title": "Manca l'informativa privacy",
+      "body": "Senza informativa non puoi pubblicare annunci e nessuno può candidarsi. Bastano pochi minuti: si parte da un modello.",
+      "action": "Scrivi l'informativa",
+      "dismiss": "Nascondi"
+    }
+  },
+  "apply": {
+    "title": "Candidati per questa posizione",
+    "intro": "Bastano i tuoi contatti e il CV. Nessun account da creare: {organization} ti risponde via email.",
+    "open": "Candidati",
+    "ctaHint": "Pochi dati, il tuo CV, nessun account.",
+    "notOpen": "Le candidature per questo annuncio non sono ancora aperte.",
+    "fields": {
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "email": "Email",
+      "emailHint": "Ti scriveremo qui per ogni aggiornamento.",
+      "phone": "Telefono",
+      "linkedin": "Profilo LinkedIn",
+      "message": "Messaggio",
+      "messageHint": "Qualcosa che il CV non dice.",
+      "optional": "(facoltativo)"
+    },
+    "cv": {
+      "label": "Curriculum",
+      "drop": "Trascina qui il tuo CV",
+      "hint": "PDF o DOCX, fino a 10 MB",
+      "choose": "Scegli un file",
+      "remove": "Rimuovi",
+      "removeNamed": "Rimuovi {name}",
+      "errors": {
+        "required": "Allega il tuo CV",
+        "empty": "Il file è vuoto",
+        "tooLarge": "Il file supera i 10 MB",
+        "unsupported": "Usa un file PDF o DOCX"
+      }
+    },
+    "consent": {
+      "legend": "Privacy e consenso",
+      "title": "I tuoi dati",
+      "summary": "{organization} usa i tuoi dati solo per valutare la candidatura. Qui sotto trovi l'informativa completa.",
+      "read": "Leggi l'informativa completa",
+      "version": "Versione {version}",
+      "rights": "Per vedere, correggere o cancellare i tuoi dati, o ritirare il consenso, scrivi a",
+      "selection": "Acconsento al trattamento dei miei dati per questa selezione.",
+      "required": "(obbligatorio)",
+      "selectionHint": "I dati restano per {period} dalla candidatura, poi vengono cancellati.",
+      "pool": "Tienimi nel database candidati per posizioni future.",
+      "optional": "(facoltativo)",
+      "poolHint": "In questo caso i dati restano per {period} e {organization} può ricontattarti per altre posizioni. Puoi ritirare il consenso quando vuoi.",
+      "changed": "L'informativa è stata aggiornata (versione {version}). Rileggila e conferma di nuovo il consenso."
+    },
+    "period": {
+      "years": "1 anno | {count} anni",
+      "months": "1 mese | {count} mesi",
+      "days": "1 giorno | {count} giorni"
+    },
+    "validation": {
+      "required": "Campo obbligatorio",
+      "nameMax": "Massimo {max} caratteri",
+      "email": "Inserisci un indirizzo email valido",
+      "phone": "Inserisci un numero di telefono valido",
+      "url": "Inserisci un indirizzo valido, ad esempio linkedin.com/in/nome",
+      "messageMax": "Massimo {max} caratteri",
+      "selection": "Serve il consenso per questa selezione: senza non possiamo valutare la candidatura."
+    },
+    "errors": {
+      "outdated": "L'informativa è cambiata mentre compilavi il modulo. Abbiamo caricato la nuova versione: rileggila e conferma di nuovo.",
+      "alreadyApplied": "Hai già una candidatura aperta per questa posizione: ti aggiorneremo su quella.",
+      "unsupportedFile": "Il CV deve essere un PDF o un DOCX valido.",
+      "tooLarge": "Il CV supera i 10 MB. Prova con un file più leggero.",
+      "tooMany": "Troppi invii in poco tempo. Riprova tra qualche minuto.",
+      "invalid": "Alcuni dati non sono validi. Controlla i campi e riprova.",
+      "closed": "Questa posizione non accetta più candidature.",
+      "unreachable": "Il servizio non è raggiungibile in questo momento. Riprova tra poco.",
+      "generic": "Qualcosa non ha funzionato. Riprova tra poco."
+    },
+    "submit": "Invia la candidatura",
+    "submitting": "Invio in corso…",
+    "noAccount": "Nessun account, nessuna password.",
+    "success": {
+      "title": "Grazie, {name}",
+      "received": "Abbiamo ricevuto la tua candidatura per {title} in {organization}.",
+      "commitment": "Riceverai una risposta entro 1 giorno dopo ogni fase. | Riceverai una risposta entro {count} giorni dopo ogni fase.",
+      "email": "Ti scriveremo a {email}."
+    }
   }
 }

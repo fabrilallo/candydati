@@ -19,6 +19,14 @@ export const AUDIT_ACTIONS = [
   'job.closed',
   'job_template.created',
   'job_template.deleted',
+  'privacy_notice.published',
+  'application.received',
+  'application.moved',
+  'application.decided',
+  'candidate.viewed',
+  'candidate.updated',
+  'candidate.cv_downloaded',
+  'candidate_note.created',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

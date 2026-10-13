@@ -18,7 +18,7 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   return allowed[0] ?? null
 }
 
-export type NavId = 'dashboard' | 'jobs' | 'templates' | 'members' | 'audit'
+export type NavId = 'dashboard' | 'jobs' | 'candidates' | 'templates' | 'members' | 'privacy' | 'audit'
 export type NavSectionId = 'work' | 'organization'
 
 export interface NavItem {
@@ -31,8 +31,10 @@ export interface NavItem {
 const NAV: readonly NavItem[] = [
   { id: 'dashboard', to: '/app', section: 'work' },
   { id: 'jobs', to: '/app/jobs', section: 'work', permission: 'job:read' },
+  { id: 'candidates', to: '/app/candidates', section: 'work', permission: 'candidate:read' },
   { id: 'templates', to: '/app/jobs/templates', section: 'work', permission: 'job_template:read' },
   { id: 'members', to: '/app/settings/members', section: 'organization' },
+  { id: 'privacy', to: '/app/settings/privacy', section: 'organization', permission: 'privacy:manage' },
   { id: 'audit', to: '/app/settings/audit-log', section: 'organization', permission: 'audit:read' },
 ]
 

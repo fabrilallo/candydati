@@ -13,6 +13,7 @@ import {
   type PublishedJobContent,
 } from '@tt/domain'
 import { z } from 'zod'
+import { publicPrivacyNoticeSchema, type PublicPrivacyNoticeDto } from './candidate-schemas'
 
 const isoDate = z.iso.datetime()
 
@@ -59,7 +60,11 @@ const publicSummarySchema = z.object({
 })
 
 export const publicCareersSchema = z.object({ organization: organizationSchema, jobs: z.array(publicSummarySchema) }) as unknown as z.ZodType<PublicCareersDto>
+/** The public ad page plus the notice a candidate reads before applying (Phase 2); `null` while there is none. */
+export type PublicJobPage = PublicJobPageDto & { readonly privacyNotice: PublicPrivacyNoticeDto | null }
 export const publicJobPageSchema = z.object({
   organization: organizationSchema,
   job: z.object({ slug: z.string(), content: publishedContentSchema, publishedAt: isoDate }),
-}) as unknown as z.ZodType<PublicJobPageDto>
+  // Tolerant while the api rolls out: a page without the field reads as "applications not open yet".
+  privacyNotice: publicPrivacyNoticeSchema.nullable().default(null),
+}) as unknown as z.ZodType<PublicJobPage>

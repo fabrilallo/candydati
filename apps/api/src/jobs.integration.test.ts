@@ -1,6 +1,7 @@
 import { completeJobContent, fixedQualityReport, throwingAdQualityAnalyzer } from '@tt/core/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { TestUser } from './testing/client.js';
+import { publishNotice } from './testing/privacy.js';
 import { createTestApp, uniqueEmail, type TestApp } from './testing/test-app.js';
 
 interface JobBody {
@@ -29,6 +30,7 @@ const full = () => completeJobContent({ title: 'Backend Developer' });
 async function team() {
   const owner = await newUser('owner').signUp();
   await owner.createOrganization('Acme');
+  await publishNotice(owner);
   const hm = await newUser('hm').signUp();
   const interviewer = await newUser('int').signUp();
   await hm.joinAs(owner, 'hiring_manager');
@@ -176,6 +178,7 @@ describe('quality scoring and publication', () => {
     try {
       const owner = await new TestUser(low.app, uniqueEmail('low'), 'Low').signUp();
       await owner.createOrganization('Low');
+      await publishNotice(owner);
       const id = (await owner.post<JobBody>('/api/v1/jobs', { content: full() })).body.data!.id;
       const published = await owner.post<{ quality: { belowThreshold: boolean } }>(`/api/v1/jobs/${id}/publish`);
       expect(published.status).toBe(200);
@@ -190,6 +193,7 @@ describe('quality scoring and publication', () => {
     try {
       const owner = await new TestUser(broken.app, uniqueEmail('brk'), 'Brk').signUp();
       await owner.createOrganization('Brk');
+      await publishNotice(owner);
       const id = (await owner.post<JobBody>('/api/v1/jobs', { content: full() })).body.data!.id;
       const published = await owner.post<{ job: JobBody; quality: unknown }>(`/api/v1/jobs/${id}/publish`);
       expect(published.status).toBe(200);

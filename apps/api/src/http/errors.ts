@@ -1,4 +1,4 @@
-import { ForbiddenError, isCoreError, type ErrorCode } from '@tt/core';
+import { ForbiddenError, isCoreError, ValidationError, type ErrorCode } from '@tt/core';
 
 export { ForbiddenError };
 
@@ -53,9 +53,24 @@ const CODE_BY_STATUS: Readonly<Record<number, string>> = {
   429: 'rate_limited',
 };
 
+/** File problems reported by core as validation issues on `cv` have their own statuses. */
+const CV_FAILURES: Readonly<Record<string, { readonly status: number; readonly code: string }>> = {
+  cv_too_large: { status: 413, code: 'payload_too_large' },
+  unsupported_file: { status: 415, code: 'unsupported_file' },
+};
+
+const cvFailure = (error: unknown): HttpFailure | null => {
+  if (!(error instanceof ValidationError)) return null;
+  const issue = error.issues.find((item) => item.path === 'cv' && item.message in CV_FAILURES);
+  const mapped = issue ? CV_FAILURES[issue.message] : undefined;
+  return issue && mapped ? { ...mapped, message: `cv: ${issue.message}`, log: false } : null;
+};
+
 /** Pure mapping from anything thrown to the status, code and safe message of the response. */
 export function toHttpFailure(error: unknown): HttpFailure {
   if (isCoreError(error)) {
+    const cv = cvFailure(error);
+    if (cv) return cv;
     const status = CORE_STATUS[error.code];
     if (status >= 500) return { ...INTERNAL, code: error.code, message: error.message };
     const issues = 'issues' in error && Array.isArray(error.issues) ? (error.issues as { path: string; message: string }[]) : [];

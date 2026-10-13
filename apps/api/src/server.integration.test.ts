@@ -1,3 +1,4 @@
+import { createInMemoryFileStorage, createInMemoryTaskQueue } from '@tt/core/testing';
 import { createDb } from '@tt/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildServer } from './server.js';
@@ -22,7 +23,7 @@ describe('GET /api/health', () => {
 
   it('answers 503 in the envelope when the database is unreachable', async () => {
     const handle = createDb(apiTestDatabaseUrl(), 1);
-    const app = await buildServer({ env: testEnv(), db: handle.db });
+    const app = await buildServer({ env: testEnv(), db: handle.db, files: createInMemoryFileStorage(), queue: createInMemoryTaskQueue() });
     await handle.close();
     const response = await app.inject({ method: 'GET', url: '/api/health' });
     expect(response.statusCode).toBe(503);
@@ -108,7 +109,7 @@ describe('error handling', () => {
 
   it('works with the default log email sender', async () => {
     const handle = createDb(apiTestDatabaseUrl(), 1);
-    const app = await buildServer({ env: testEnv(), db: handle.db });
+    const app = await buildServer({ env: testEnv(), db: handle.db, files: createInMemoryFileStorage(), queue: createInMemoryTaskQueue() });
     const owner = await new TestUser(app, uniqueEmail('log'), 'Log Owner').signUp();
     await owner.createOrganization('LogOrg');
     const reply = await owner.post('/api/auth/organization/invite-member', { email: uniqueEmail('x'), role: 'recruiter' });

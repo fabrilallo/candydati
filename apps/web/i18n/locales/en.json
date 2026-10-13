@@ -32,7 +32,10 @@
     "sections": {
       "work": "Hiring",
       "organization": "Organization"
-    }
+    },
+    "candidates": "Candidates",
+    "privacy": "Privacy",
+    "candidateCount": "{count} candidates"
   },
   "roles": {
     "owner": "Owner",
@@ -263,7 +266,11 @@
       "invitation": "Invitation",
       "member": "Member",
       "job": "Job ad",
-      "job_template": "Template"
+      "job_template": "Template",
+      "privacy_notice": "Privacy notice",
+      "application": "Application",
+      "candidate": "Candidate",
+      "candidate_note": "Note"
     },
     "empty": "No actions recorded yet.",
     "loadFailed": "We could not load the audit log.",
@@ -304,6 +311,22 @@
       "job_template": {
         "created": "Saved a job ad template",
         "deleted": "Deleted a job ad template"
+      },
+      "privacy_notice": {
+        "published": "Published a version of the privacy notice"
+      },
+      "application": {
+        "received": "Received an application",
+        "moved": "Moved an application to another stage",
+        "decided": "Recorded the outcome of an application"
+      },
+      "candidate": {
+        "viewed": "Opened a candidate profile",
+        "updated": "Updated a candidate",
+        "cv_downloaded": "Opened or downloaded a CV"
+      },
+      "candidate_note": {
+        "created": "Wrote a note on a candidate"
       }
     }
   },
@@ -344,7 +367,8 @@
     "forbidden": "You are not allowed to do that",
     "notFound": "Not found",
     "tooManyRequests": "Too many requests, try again shortly",
-    "unreachable": "The service is not reachable right now"
+    "unreachable": "The service is not reachable right now",
+    "conflict": "This is no longer possible: something changed in the meantime"
   },
   "taxonomy": {
     "roleFamilies": {
@@ -538,7 +562,10 @@
     "errors": {
       "conflict": "The ad is closed and can no longer be edited",
       "validationFailed": "The ad does not meet the publishing requirements",
-      "loadFailed": "We could not load the ad."
+      "loadFailed": "We could not load the ad.",
+      "privacyNoticeRequired": "Publishing needs the organization's privacy notice: without it nobody could apply.",
+      "privacyNoticeLink": "Write the notice",
+      "privacyNoticeAskAdmin": "Ask an admin to publish it."
     },
     "list": {
       "title": "Jobs",
@@ -928,5 +955,306 @@
     "genericBody": "We logged the problem. Try again, or go back to the start.",
     "home": "Back to the start",
     "code": "Error {code}"
+  },
+  "pipeline": {
+    "tabs": {
+      "label": "Job sections",
+      "candidates": "Candidates",
+      "ad": "Job ad"
+    },
+    "received": "Received",
+    "receivedHint": "New applications, not looked at yet",
+    "columnCount": "1 application | {count} applications",
+    "emptyColumn": "No applications in this stage",
+    "emptyFiltered": "No matches in this stage",
+    "stageSwitcher": "Stage",
+    "summary": "Open: {open} · Decided: {decided}",
+    "search": "Search by name, role, city or tag",
+    "emptyPublished": "No applications yet. They will come from the public page of the ad.",
+    "emptyNotPublished": "This ad is not published: applications only come in for published ads.",
+    "responseMeta": "Answer within 1 day | Answer within {count} days",
+    "moveFailed": "We could not move {name}",
+    "decideFailed": "We could not record the outcome for {name}",
+    "card": {
+      "actions": "Actions for {name}",
+      "open": "Open profile",
+      "moveTo": "Move to…",
+      "here": "here",
+      "decide": "Outcome…",
+      "years": "1 year of experience | {count} years of experience",
+      "inStageSince": "Last stage change",
+      "notes": "1 note | {count} notes"
+    },
+    "keyboard": {
+      "hint": "Enter opens the profile. Space picks the application up: left and right arrows choose the stage, Space drops it, Escape cancels.",
+      "readOnlyHint": "Enter opens the profile.",
+      "picked": "{name}'s application picked up, current stage: {stage}. Use the arrows to choose the stage.",
+      "over": "{name}: chosen stage {stage}",
+      "dropped": "{name} moved to {stage}",
+      "cancelled": "Move of {name} cancelled"
+    },
+    "outcomes": {
+      "title": "Outcomes",
+      "hint": "Closed applications: they no longer move",
+      "empty": "No outcome recorded yet."
+    }
+  },
+  "candidate": {
+    "outcomes": {
+      "hired": "Hired",
+      "not_selected": "Not selected",
+      "withdrawn": "Withdrawn"
+    },
+    "status": {
+      "open": "In progress"
+    },
+    "tabs": {
+      "label": "Profile sections",
+      "profile": "Profile",
+      "cv": "CV",
+      "notes": "Notes"
+    },
+    "header": {
+      "stage": "Stage:",
+      "status": "Status:"
+    },
+    "actions": {
+      "decide": "Outcome",
+      "moveTo": "Move to",
+      "moveHint": "No message is sent automatically",
+      "moved": "Application moved",
+      "decided": "Outcome recorded"
+    },
+    "decide": {
+      "title": "Record the outcome?",
+      "body": "{name}'s application closes with the outcome: {outcome}. It cannot be moved afterwards. No message is sent automatically.",
+      "confirm": "Record outcome"
+    },
+    "tags": {
+      "label": "Tags",
+      "remove": "Remove tag {tag}",
+      "add": "Add tag",
+      "placeholder": "new tag",
+      "none": "No tags"
+    },
+    "fields": {
+      "email": "Email",
+      "phone": "Phone",
+      "linkedin": "LinkedIn",
+      "notGiven": "Not given",
+      "applications": "Application | Applications ({count})",
+      "appliedOn": "sent on {date}",
+      "message": "Message",
+      "showAll": "Show all",
+      "showLess": "Show less",
+      "consent": "Consent",
+      "consentVersion": "Privacy notice version {version}, accepted on {date}",
+      "retention": "Data retention",
+      "retentionUntil": "Until {date}"
+    },
+    "scopes": {
+      "selection": "This selection",
+      "talent_pool": "Talent pool"
+    },
+    "retention": {
+      "ok": "Fine",
+      "soon": "Expires soon",
+      "expired": "Expired"
+    },
+    "extraction": {
+      "title": "From the CV",
+      "disclaimer": "Automatic extraction: it may contain mistakes. The original CV, in the CV tab, is the reference.",
+      "experiences": "Experience",
+      "education": "Education",
+      "skills": "Skills",
+      "languages": "Languages",
+      "fromText": "Read from the plain text of the document, without a language model.",
+      "states": {
+        "pending": "We are reading the CV: the data will show up here shortly.",
+        "text_only": "Only the text of the CV is available, used for search. Open the CV for the details.",
+        "failed": "We could not read the CV automatically. The original document is in the CV tab.",
+        "empty": "Nothing came out of the CV to show here. The original document is in the CV tab.",
+        "done": "Data extracted from the CV"
+      }
+    },
+    "cv": {
+      "download": "Download",
+      "previewTitle": "Preview of {name}",
+      "noPreview": "Previews are available for PDFs only. Download the file to open it."
+    },
+    "notes": {
+      "label": "New note",
+      "placeholder": "Write a note",
+      "press": "Press",
+      "toWrite": "to write",
+      "internal": "Notes are internal: the candidate never sees them. Ctrl or Cmd + Enter to save.",
+      "about": "The note is about",
+      "general": "General note",
+      "save": "Add note",
+      "saving": "Saving…",
+      "saved": "Note added",
+      "empty": "No notes yet.",
+      "on": "On: {job}"
+    },
+    "sheet": {
+      "title": "Candidate profile",
+      "description": "The candidate's profile, CV and notes",
+      "fullPage": "Open full page"
+    }
+  },
+  "candidates": {
+    "title": "Candidates",
+    "subtitle": "The people who applied to {organization}.",
+    "scopes": {
+      "label": "Who to show",
+      "all": "Everyone",
+      "pool": "Talent pool"
+    },
+    "poolHint": "Only people who agreed to be kept for future positions.",
+    "search": "Search by name, email, tag or CV text",
+    "tagFilter": "Filter by tag",
+    "clearTag": "Remove the {tag} filter",
+    "filterByTag": "Filter by {tag}",
+    "talentPoolBadge": "Pool",
+    "applications": "application | applications",
+    "keptUntil": "Data kept until",
+    "empty": "No candidates yet",
+    "emptyBody": "They will come from the public pages of your published ads.",
+    "emptyFiltered": "No results",
+    "emptyFilteredBody": "Try other words or remove a filter.",
+    "pagination": "Page {page} of {pages} · {total} candidates"
+  },
+  "privacy": {
+    "title": "Privacy notice",
+    "subtitle": "The text applicants read before sending their data, with how long it is kept. Every version stays readable.",
+    "current": "Current version",
+    "version": "Version {version}",
+    "publishedOn": "published on {date}",
+    "retentionLine": "Kept for {selection} for the selection, {pool} for the talent pool",
+    "none": "No notice published. Until there is one you cannot publish ads and nobody can apply.",
+    "nextTitle": "New version ({version})",
+    "nextIntro": "It starts from the current text. New applications will use this version; people who already applied stay bound to the one they read.",
+    "firstTitle": "First version",
+    "firstIntro": "We prepared a template with your organization name. Review it with whoever handles privacy: the text is the data controller’s responsibility.",
+    "fields": {
+      "language": "Language",
+      "languageHint": "Use the language of your ads.",
+      "contactEmail": "Privacy contact email",
+      "contactEmailHint": "Applicants write here to see, correct or delete their data.",
+      "retention": "How long you keep the data",
+      "selectionDays": "This selection only (days)",
+      "selectionHint": "That is {period} from the application.",
+      "talentPoolDays": "Talent pool (days)",
+      "talentPoolHint": "That is {period}, if the person agrees to stay in the pool.",
+      "retentionRange": "From {min} to {max} days. When the time is up the data is deleted.",
+      "text": "Notice text",
+      "textHint": "Plain text: a blank line separates paragraphs."
+    },
+    "useTemplate": "Use the template",
+    "characters": "{count} characters",
+    "publish": "Publish version {version}",
+    "publishing": "Publishing…",
+    "published": "Version {version} published",
+    "confirmTitle": "Publish version {version}?",
+    "confirmBody": "Every version stays readable; new applications will use this one.",
+    "confirm": "Publish",
+    "templateTitle": "Replace the text with the template?",
+    "templateBody": "The text written so far will be replaced by the template in the chosen language.",
+    "templateConfirm": "Use the template",
+    "history": "Published versions",
+    "active": "Current",
+    "validation": {
+      "textMin": "Write at least 200 characters",
+      "textMax": "The text is too long",
+      "email": "Enter a valid email address",
+      "days": "Enter a number of days between 30 and 1825"
+    },
+    "banner": {
+      "title": "The privacy notice is missing",
+      "body": "Without a notice you cannot publish ads and nobody can apply. It takes a few minutes: you start from a template.",
+      "action": "Write the notice",
+      "dismiss": "Dismiss"
+    }
+  },
+  "apply": {
+    "title": "Apply for this position",
+    "intro": "Your contact details and your CV are enough. No account to create: {organization} answers by email.",
+    "open": "Apply",
+    "ctaHint": "A few details, your CV, no account.",
+    "notOpen": "Applications for this ad are not open yet.",
+    "fields": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "emailHint": "We will write to you here with every update.",
+      "phone": "Phone",
+      "linkedin": "LinkedIn profile",
+      "message": "Message",
+      "messageHint": "Something your CV does not say.",
+      "optional": "(optional)"
+    },
+    "cv": {
+      "label": "CV",
+      "drop": "Drop your CV here",
+      "hint": "PDF or DOCX, up to 10 MB",
+      "choose": "Choose a file",
+      "remove": "Remove",
+      "removeNamed": "Remove {name}",
+      "errors": {
+        "required": "Attach your CV",
+        "empty": "The file is empty",
+        "tooLarge": "The file is larger than 10 MB",
+        "unsupported": "Use a PDF or DOCX file"
+      }
+    },
+    "consent": {
+      "legend": "Privacy and consent",
+      "title": "Your data",
+      "summary": "{organization} uses your data only to assess your application. The full notice is below.",
+      "read": "Read the full notice",
+      "version": "Version {version}",
+      "rights": "To see, correct or delete your data, or withdraw consent, write to",
+      "selection": "I agree to my data being processed for this selection.",
+      "required": "(required)",
+      "selectionHint": "The data is kept for {period} from the application, then deleted.",
+      "pool": "Keep me in the talent pool for future positions.",
+      "optional": "(optional)",
+      "poolHint": "In that case the data is kept for {period} and {organization} may contact you about other positions. You can withdraw consent at any time.",
+      "changed": "The privacy notice was updated (version {version}). Read it again and confirm your consent."
+    },
+    "period": {
+      "years": "1 year | {count} years",
+      "months": "1 month | {count} months",
+      "days": "1 day | {count} days"
+    },
+    "validation": {
+      "required": "Required",
+      "nameMax": "At most {max} characters",
+      "email": "Enter a valid email address",
+      "phone": "Enter a valid phone number",
+      "url": "Enter a valid address, for example linkedin.com/in/name",
+      "messageMax": "At most {max} characters",
+      "selection": "Consent for this selection is needed: without it we cannot assess the application."
+    },
+    "errors": {
+      "outdated": "The privacy notice changed while you were filling in the form. We loaded the new version: read it and confirm again.",
+      "alreadyApplied": "You already have an open application for this position: we will keep you posted on that one.",
+      "unsupportedFile": "The CV must be a valid PDF or DOCX.",
+      "tooLarge": "The CV is larger than 10 MB. Try a lighter file.",
+      "tooMany": "Too many submissions in a short time. Try again in a few minutes.",
+      "invalid": "Some details are not valid. Check the fields and try again.",
+      "closed": "This position no longer accepts applications.",
+      "unreachable": "The service cannot be reached right now. Try again shortly.",
+      "generic": "Something went wrong. Try again shortly."
+    },
+    "submit": "Send application",
+    "submitting": "Sending…",
+    "noAccount": "No account, no password.",
+    "success": {
+      "title": "Thank you, {name}",
+      "received": "We received your application for {title} at {organization}.",
+      "commitment": "You will hear back within 1 day after each stage. | You will hear back within {count} days after each stage.",
+      "email": "We will write to you at {email}."
+    }
   }
 }

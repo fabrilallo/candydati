@@ -18,8 +18,8 @@ interface StructuredAgent {
 async function loadAgent(model: string, system: string): Promise<StructuredAgent> {
   const { Agent } = await import('@mastra/core/agent');
   return new Agent({
-    id: 'ad-quality-analyzer',
-    name: 'Ad quality analyzer',
+    id: 'structured-generator',
+    name: 'Structured generator',
     instructions: system,
     model: model as `${string}/${string}`,
   }) as unknown as StructuredAgent;
@@ -27,7 +27,7 @@ async function loadAgent(model: string, system: string): Promise<StructuredAgent
 
 /**
  * `StructuredGenerator` on a Mastra agent: model string from env, no tools, no memory, low temperature, hard timeout.
- * The system prompt and the ad come from the caller untouched.
+ * The system prompt and the prompt come from the caller untouched.
  */
 export function createMastraGenerator(model: string): StructuredGenerator {
   return async ({ system, prompt, schema }) => {

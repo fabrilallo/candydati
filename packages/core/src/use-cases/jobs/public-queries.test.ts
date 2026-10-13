@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { NotFoundError, ValidationError } from '../../errors.js';
-import { buildJob, completeJobContent, createInMemoryJobRepository, createInMemoryOrganizationDirectory } from '../../testing/index.js';
+import {
+  buildJob,
+  buildPrivacyNotice,
+  completeJobContent,
+  createInMemoryJobRepository,
+  createInMemoryOrganizationDirectory,
+  createInMemoryPrivacyNoticeRepository,
+} from '../../testing/index.js';
 import { getPublicCareers } from './get-public-careers.js';
 import { getPublicJob } from './get-public-job.js';
 
@@ -10,6 +17,7 @@ const orgs = [
 ];
 const deps = () => ({
   organizations: createInMemoryOrganizationDirectory(orgs),
+  privacyNotices: createInMemoryPrivacyNoticeRepository([buildPrivacyNotice({ organizationId: 'org_a' })]),
   jobs: createInMemoryJobRepository([
     buildJob({ id: '1', slug: 'pub-old', organizationId: 'org_a', status: 'published', publishedAt: new Date(2026, 0, 1) }),
     buildJob({ id: '2', slug: 'pub-new', organizationId: 'org_a', status: 'published', publishedAt: new Date(2026, 0, 5) }),
@@ -48,6 +56,17 @@ describe('getPublicJob', () => {
     const result = await getPublicJob(deps(), { organizationSlug: 'acme', jobSlug: 'pub-new' });
     expect(result.job.slug).toBe('pub-new');
     expect(result.organization.slug).toBe('acme');
+  });
+
+  it('carries the active privacy notice of the organization, without internal ids', async () => {
+    const result = await getPublicJob(deps(), { organizationSlug: 'acme', jobSlug: 'pub-new' });
+    expect(result.privacyNotice).toMatchObject({ version: 1, language: 'it', contactEmail: 'privacy@acme.example' });
+    expect(JSON.stringify(result.privacyNotice)).not.toMatch(/org_a|notice_1|user_test/);
+  });
+
+  it('has no notice when the organization published none', async () => {
+    const result = await getPublicJob(deps(), { organizationSlug: 'beta', jobSlug: 'other' });
+    expect(result.privacyNotice).toBeNull();
   });
 
   it.each(['draft', 'closed', 'other', 'missing'])('does not reveal %s', async (jobSlug) => {

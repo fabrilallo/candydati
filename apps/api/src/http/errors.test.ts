@@ -17,6 +17,14 @@ describe('toHttpFailure', () => {
     expect(failure).toEqual({ status: 422, code: 'validation_failed', message: 'page: Too small', log: false });
   });
 
+  it('maps file problems on cv to 413 and 415, other cv issues stay 422, conflicts keep their message', () => {
+    expect(toHttpFailure(new ValidationError([{ path: 'cv', message: 'cv_too_large' }]))).toMatchObject({ status: 413, code: 'payload_too_large' });
+    expect(toHttpFailure(new ValidationError([{ path: 'cv', message: 'unsupported_file' }]))).toMatchObject({ status: 415, code: 'unsupported_file' });
+    expect(toHttpFailure(new ValidationError([{ path: 'cv', message: 'cv_empty' }])).status).toBe(422);
+    expect(toHttpFailure(new ValidationError([{ path: 'form', message: 'cv_too_large' }])).status).toBe(422);
+    expect(toHttpFailure(new ConflictError('already_applied'))).toMatchObject({ status: 409, code: 'conflict', message: 'already_applied' });
+  });
+
   it('falls back to the generic message for a validation error without issues', () => {
     expect(toHttpFailure(new ValidationError([])).message).toBe('The input is not valid.');
   });

@@ -4,8 +4,14 @@ import {
   createDrizzleJobTemplates,
   createDrizzleJobs,
   createDrizzleOrganizationDirectory,
+  createDrizzlePrivacyNotices,
   type AuditLogRepository,
+  type CandidateDeps,
+  type FileStorage,
   type JobDeps,
+  type PrivacyDeps,
+  type SubmitApplicationDeps,
+  type TaskQueue,
 } from '@tt/core';
 import type { AdQualityAnalyzer } from '@tt/domain';
 import { sql, type Db } from '@tt/db';
@@ -16,6 +22,7 @@ import type { EmailSender } from './auth/email-sender.js';
 import { findMemberRole } from './auth/member-role.js';
 import type { Env } from './config/env.js';
 import { createActorResolver } from './http/actor-resolver.js';
+import { createPhase2Deps } from './wiring/phase2-deps.js';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
 import type { Actor } from '@tt/core';
 
@@ -28,10 +35,15 @@ export interface RateLimitSettings {
   readonly publicMax?: number | undefined;
   /** Requests per minute per client on the ad quality analysis. */
   readonly qualityMax?: number | undefined;
+  /** Public applications allowed per client in `applyWindowMinutes`. */
+  readonly applyMax?: number | undefined;
+  readonly applyWindowMinutes?: number | undefined;
 }
 
 export const DEFAULT_PUBLIC_MAX = 120;
 export const DEFAULT_QUALITY_MAX = 20;
+export const DEFAULT_APPLY_MAX = 5;
+export const DEFAULT_APPLY_WINDOW_MINUTES = 10;
 export const DEFAULT_RATE_LIMIT: RateLimitSettings = { max: 300, authMax: 20, publicMax: DEFAULT_PUBLIC_MAX, qualityMax: DEFAULT_QUALITY_MAX };
 
 export interface AppContext {
@@ -43,6 +55,9 @@ export interface AppContext {
   readonly checkDatabase: () => Promise<void>;
   readonly rateLimit: RateLimitSettings;
   readonly jobDeps: JobDeps;
+  readonly candidateDeps: CandidateDeps;
+  readonly privacyDeps: PrivacyDeps;
+  readonly submitDeps: SubmitApplicationDeps;
 }
 
 export interface AppContextDeps {
@@ -51,9 +66,11 @@ export interface AppContextDeps {
   readonly emailSender: EmailSender;
   readonly rateLimit?: RateLimitSettings | undefined;
   readonly adQuality: AdQualityAnalyzer;
+  readonly files: FileStorage;
+  readonly queue: TaskQueue;
 }
 
-export function createAppContext({ env, db, emailSender, rateLimit, adQuality }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files, queue }: AppContextDeps): AppContext {
   const auditLog = createDrizzleAuditLog(db);
   const auth = createAuth({ env, db, auditLog, emailSender });
   const resolveFromHeaders = createActorResolver({
@@ -71,6 +88,7 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality }:
     auditLog,
     userNames: createUserNameLookup(db),
     resolveActor: (request) => resolveFromHeaders(fromNodeHeaders(request.headers)),
+    ...createPhase2Deps({ db, auditLog, files, queue }),
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
     rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
     jobDeps: {
@@ -78,6 +96,7 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality }:
       jobs: createDrizzleJobs(db),
       jobTemplates: createDrizzleJobTemplates(db),
       organizations: createDrizzleOrganizationDirectory(db),
+      privacyNotices: createDrizzlePrivacyNotices(db),
       adQuality,
       adQualityThreshold: env.platform.adQualityThreshold,
       newId: randomUUID,

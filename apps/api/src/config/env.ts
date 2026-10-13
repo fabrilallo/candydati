@@ -1,3 +1,4 @@
+import { loadS3Config, type S3Config } from '@tt/providers';
 import { loadPlatformConfig, type PlatformConfig } from '@tt/domain';
 import { z } from 'zod';
 
@@ -30,7 +31,7 @@ const envSchema = z.object({
   TRUSTED_ORIGINS: z.string().optional().transform(splitList).pipe(z.array(z.url())),
 });
 
-export type Env = Readonly<z.infer<typeof envSchema>> & { readonly platform: PlatformConfig };
+export type Env = Readonly<z.infer<typeof envSchema>> & { readonly platform: PlatformConfig; readonly s3: S3Config };
 
 type Source = Readonly<Record<string, string | undefined>>;
 
@@ -41,11 +42,20 @@ const withoutEmptyStrings = (source: Source): Source =>
 const describeIssues = (error: z.ZodError): string =>
   error.issues.map((issue) => `${issue.path.join('.') || 'env'}: ${issue.message}`).join('; ');
 
+/** The S3_* variables are required: CVs always go to object storage. The message names variables, never values. */
+function parseS3(clean: Source): S3Config {
+  try {
+    return loadS3Config(clean);
+  } catch (error) {
+    throw new Error(`Invalid environment: ${error instanceof Error ? error.message : 'S3 configuration'}`, { cause: error });
+  }
+}
+
 export function parseEnv(source: Source): Env {
   const clean = withoutEmptyStrings(source);
   const parsed = envSchema.safeParse(clean);
   if (!parsed.success) throw new Error(`Invalid environment: ${describeIssues(parsed.error)}`);
-  return Object.freeze({ ...parsed.data, platform: loadPlatformConfig(clean) });
+  return Object.freeze({ ...parsed.data, platform: loadPlatformConfig(clean), s3: parseS3(clean) });
 }
 
 export const loadEnv = (): Env => parseEnv(process.env);

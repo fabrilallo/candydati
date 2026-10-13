@@ -1,11 +1,11 @@
 import { mockNuxtImport, mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { DOMWrapper, flushPromises } from '@vue/test-utils'
-import { readBody } from 'h3'
+import { readBody, setResponseStatus } from 'h3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { completeContent, incompleteContent, makeAssessment, makeJob, ok, viewerWith } from '~~/test/fixtures/job-fixtures'
 import JobEditor from './JobEditor.vue'
 
-const state = vi.hoisted(() => ({ calls: [] as string[], assessment: null as unknown, bodies: {} as Record<string, unknown> }))
+const state = vi.hoisted(() => ({ calls: [] as string[], assessment: null as unknown, bodies: {} as Record<string, unknown>, noNotice: false }))
 const navigate = vi.hoisted(() => vi.fn())
 mockNuxtImport('navigateTo', () => navigate)
 
@@ -15,7 +15,14 @@ registerEndpoint('/api/v1/jobs/quality', { method: 'POST', handler: () => (state
 registerEndpoint('/api/v1/jobs/j1', { method: 'PUT', handler: () => (state.calls.push('update'), ok(job)) })
 registerEndpoint('/api/v1/jobs/j1/publish', {
   method: 'POST',
-  handler: () => (state.calls.push('publish'), ok({ job: makeJob({ status: 'published', publishedAt: '2026-10-13T11:00:00.000Z' }), quality: state.assessment })),
+  handler: (event) => {
+    state.calls.push('publish')
+    if (state.noNotice) {
+      setResponseStatus(event, 422)
+      return { success: false, data: null, error: { code: 'validation_failed', message: 'x', issues: [{ path: 'organization.privacyNotice', message: 'privacy_notice_required' }] } }
+    }
+    return ok({ job: makeJob({ status: 'published', publishedAt: '2026-10-13T11:00:00.000Z' }), quality: state.assessment })
+  },
 })
 registerEndpoint('/api/v1/jobs/j1/close', { method: 'POST', handler: () => (state.calls.push('close'), ok(makeJob({ status: 'closed', closedAt: '2026-10-14T10:00:00.000Z' }))) })
 registerEndpoint('/api/v1/job-templates', { method: 'POST', handler: async (e) => (state.calls.push('template'), (state.bodies.template = await readBody(e)), ok({ id: 't1', name: 'x', content: completeContent, updatedAt: '2026-10-13T10:00:00.000Z' })) })
@@ -37,6 +44,7 @@ beforeEach(() => {
   state.calls.length = 0
   state.assessment = makeAssessment(7.5)
   state.bodies = {}
+  state.noNotice = false
   navigate.mockReset()
   useViewer().viewer.value = viewerWith('owner')
 })
@@ -145,6 +153,23 @@ describe('JobEditor publish flow', () => {
     expect(wrapper.find('[data-testid="publish"]').exists()).toBe(false)
     expect(byTestId('published-dialog-url')?.textContent).toBe('http://localhost:3000/careers/acme/backend-developer-abc123')
     useState('job-just-published').value = null
+  })
+
+  it('explains a refusal for the missing privacy notice, with the way to write it', async () => {
+    state.assessment = makeAssessment(8)
+    state.noNotice = true
+    const wrapper = await mountEditor()
+    await wrapper.find('[data-testid="publish"]').trigger('click')
+    await settled(['quality', 'publish'])
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="privacy-required"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="privacy-required"]').text()).toContain("Per pubblicare serve l'informativa privacy")
+    expect(wrapper.find('[data-testid="privacy-required"] a').attributes('href')).toBe('/app/settings/privacy')
+  })
+
+  it('links the candidates of a saved ad from the header tabs', async () => {
+    const wrapper = await mountEditor()
+    expect(wrapper.find('[data-testid="tab-candidates"]').attributes('href')).toBe('/app/jobs/j1/candidates')
+    expect(wrapper.find('[data-testid="tab-ad"]').attributes('aria-current')).toBe('page')
   })
 
   it('asks for confirmation below the threshold and lets the user go back', async () => {

@@ -17,7 +17,14 @@ const sections = computed(() => navSections(role.value))
 const active = computed(() => activeNavId(route.path, visibleNav(role.value)))
 const canReadJobs = computed(() => can(role.value, 'job:read'))
 const { stats } = canReadJobs.value ? useJobStats() : { stats: computed(() => null) }
-const counts = computed<Partial<Record<NavId, number>>>(() => (stats.value ? { jobs: stats.value.statusCounts.published } : {}))
+const canReadCandidates = computed(() => can(role.value, 'candidate:read'))
+const { count: candidateCount } = canReadCandidates.value ? useCandidateCount() : { count: computed(() => null) }
+const counts = computed<Partial<Record<NavId, number>>>(() => ({
+  ...(stats.value ? { jobs: stats.value.statusCounts.published } : {}),
+  ...(candidateCount.value === null ? {} : { candidates: candidateCount.value }),
+}))
+/** What a screen reader hears for each count. */
+const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount', candidates: 'nav.candidateCount' }
 </script>
 
 <template>
@@ -42,7 +49,7 @@ const counts = computed<Partial<Record<NavId, number>>>(() => (stats.value ? { j
                 class="figure rounded-full bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground ring-1 ring-border"
                 :data-testid="`nav-count-${item.id}`"
               >
-                <span class="sr-only">{{ t('nav.publishedCount', { count: counts[item.id] }) }}</span>
+                <span class="sr-only">{{ t(COUNT_KEYS[item.id] ?? 'nav.publishedCount', { count: counts[item.id] }) }}</span>
                 <span aria-hidden="true">{{ counts[item.id] }}</span>
               </span>
             </NuxtLink>

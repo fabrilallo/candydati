@@ -93,5 +93,8 @@ export function createInMemoryOrganizationDirectory(organizations: readonly Publ
     async findBySlug(slug) {
       return organizations.find((o) => o.slug === slug) ?? null;
     },
+    async findById(id) {
+      return organizations.find((o) => o.id === id) ?? null;
+    },
   };
 }
