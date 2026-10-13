@@ -1,4 +1,4 @@
-import type { Application, Candidate, CandidateNote, CvExtractionRecord, CvMediaType, Job, PipelineStage } from '@tt/domain';
+import type { Application, Candidate, CandidateNote, CvExtractionRecord, CvMediaType, Job, PipelineStage, ResponseState } from '@tt/domain';
 
 /** What the use cases return: domain objects. The mappers in `mappers/candidate-dto.ts` turn them into DTOs. */
 export interface ApplicationCardView {
@@ -8,6 +8,8 @@ export interface ApplicationCardView {
   readonly noteCount: number;
   /** The stage of the application is no longer in the job's process (it was removed after the decision). */
   readonly stageRemoved: boolean;
+  /** At the time the view was built. */
+  readonly responseState: ResponseState;
 }
 
 /** `from` feeds the audit event. */
@@ -29,6 +31,7 @@ export interface CandidateApplicationView {
   readonly stages: readonly PipelineStage[];
   readonly extraction: CvExtractionRecord | null;
   readonly messageCount: number;
+  readonly responseState: ResponseState;
 }
 
 export interface NoteView {

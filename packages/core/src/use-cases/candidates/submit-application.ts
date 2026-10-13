@@ -1,6 +1,7 @@
 import {
   applicationFormSchema,
   CV_MAX_BYTES,
+  computeResponseDueAt,
   retentionExpiry,
   RECEIVED_STAGE_ID,
   type Application,
@@ -13,7 +14,9 @@ import { z } from 'zod';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import type { IntakeRepositories, SniffedCv, SubmitApplicationDeps } from '../../intake-ports.js';
 import { definePublicQuery, parseInput } from '../../use-case.js';
+import { enqueueAutomations } from '../automations/enqueue.js';
 import { queueReceipt } from '../messaging/receipt.js';
+import { recordEvent } from '../webhooks/record-event.js';
 
 export const CAREERS_PAGE_ACTOR_ID = 'careers_page';
 
@@ -62,6 +65,8 @@ interface Intake {
   readonly cvSize: number;
   readonly now: Date;
   readonly candidateId: string;
+  /** The promise to answer, from the job's declared response time. */
+  readonly responseDueAt: Date | null;
 }
 
 /** Same email in the organization is the same person: details are refreshed, talent-pool consent is a union. */
@@ -88,7 +93,7 @@ function mergeCandidate(existing: Candidate | null, intake: Intake, consent: Con
   };
 }
 
-async function storeApplication(repositories: IntakeRepositories, intake: Intake): Promise<string> {
+async function storeApplication(deps: SubmitApplicationDeps, repositories: IntakeRepositories, intake: Intake): Promise<string> {
   const { form, notice, now, organizationId } = intake;
   const consent: ConsentRecord = {
     privacyNoticeId: notice.id,
@@ -119,6 +124,8 @@ async function storeApplication(repositories: IntakeRepositories, intake: Intake
     updatedAt: now,
     stageChangedAt: now,
     closedAt: null,
+    responseDueAt: intake.responseDueAt,
+    respondedAt: null,
   };
   await repositories.applications.create(application);
   await repositories.extractions.upsert({
@@ -137,6 +144,10 @@ async function storeApplication(repositories: IntakeRepositories, intake: Intake
     target: { type: 'application', id: application.id },
     metadata: { jobId: intake.jobId, applicationId: application.id },
   });
+  await recordEvent({ outbox: repositories.outbox, newId: deps.newId, now: () => intake.now }, organizationId, 'application.received', {
+    applicationId: application.id,
+    jobId: intake.jobId,
+  });
   return candidate.id;
 }
 
@@ -144,7 +155,7 @@ async function storeApplication(repositories: IntakeRepositories, intake: Intake
 async function storeAtomically(deps: SubmitApplicationDeps, intake: Intake, bytes: Uint8Array): Promise<string> {
   await deps.files.put(intake.cvKey, bytes, intake.cv.mediaType);
   try {
-    return await deps.intake.run((repositories) => storeApplication(repositories, intake));
+    return await deps.intake.run((repositories) => storeApplication(deps, repositories, intake));
   } catch (error) {
     // The original failure is what matters; a failed cleanup must not hide it.
     await deps.files.delete(intake.cvKey).catch(() => undefined);
@@ -184,6 +195,7 @@ export const submitApplication = definePublicQuery<SubmitApplicationDeps, typeof
     if (!job) throw new NotFoundError('Job not found.');
     const notice = assertNoticeIsCurrent(await deps.privacyNotices.findActive(organization.id), form);
     const applicationId = deps.newId();
+    const now = deps.now();
     const intake: Intake = {
       organizationId: organization.id,
       applicationId,
@@ -193,11 +205,13 @@ export const submitApplication = definePublicQuery<SubmitApplicationDeps, typeof
       cv,
       cvKey: `organizations/${organization.id}/applications/${applicationId}/cv`,
       cvSize: input.cv.bytes.byteLength,
-      now: deps.now(),
+      now,
       candidateId: deps.newId(),
+      responseDueAt: computeResponseDueAt(now, job),
     };
     const candidateId = await storeAtomically(deps, intake, input.cv.bytes);
     await enqueueExtraction(deps, intake);
+    await enqueueAutomations(deps, organization.id, applicationId, RECEIVED_STAGE_ID);
     if (deps.receipts) {
       const candidate = { id: candidateId, firstName: form.firstName, lastName: form.lastName };
       await queueReceipt({ ...deps, receipts: deps.receipts }, { organization, job, applicationId, candidate });

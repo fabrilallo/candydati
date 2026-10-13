@@ -39,7 +39,7 @@ describe('candidate DTO mappers', () => {
   });
 
   it('maps an application card with extraction highlights, or nulls', () => {
-    const view = { application, candidate, extraction: buildExtraction(), noteCount: 3, stageRemoved: false };
+    const view = { application, candidate, extraction: buildExtraction(), noteCount: 3, stageRemoved: false, responseState: 'closed' as const };
     expect(toApplicationCardDto(view)).toEqual({
       id: 'app_1',
       jobId: 'job_1',
@@ -48,6 +48,9 @@ describe('candidate DTO mappers', () => {
       createdAt: '2026-01-01T00:00:00.000Z',
       stageChangedAt: '2026-01-01T00:00:00.000Z',
       closedAt: '2026-03-01T00:00:00.000Z',
+      responseDueAt: null,
+      respondedAt: null,
+      responseState: 'closed',
       noteCount: 3,
       stageRemoved: false,
       candidate: { id: 'cand_1', firstName: 'Ada', lastName: 'Lovelace', tags: ['go'], headline: 'Senior engineer', location: 'Milano', yearsOfExperience: 8 },
@@ -60,7 +63,7 @@ describe('candidate DTO mappers', () => {
 
   it('maps the pipeline', () => {
     const stages = pipelineStagesOf(job.content.process).map((stage, i) => ({ stage, count: i }));
-    const dto = toPipelineDto({ job, stages, cards: [{ application, candidate, extraction: null, noteCount: 0, stageRemoved: false }] });
+    const dto = toPipelineDto({ job, stages, cards: [{ application, candidate, extraction: null, noteCount: 0, stageRemoved: false, responseState: 'on_track' as const }] });
     expect(dto.job).toEqual({ id: 'job_1', title: 'Backend Developer', status: 'published' });
     expect(dto.stages.map((s) => [s.id, s.count])).toEqual([['received', 0], ['stage-0', 1], ['stage-1', 2]]);
     expect(dto.stages[0]?.declared).toBeNull();
@@ -68,21 +71,21 @@ describe('candidate DTO mappers', () => {
   });
 
   it('exposes stageRemoved on the card and on the candidate detail', () => {
-    const view = { application: buildApplication({ stageId: 'gone' }), candidate, extraction: null, noteCount: 0, stageRemoved: true };
+    const view = { application: buildApplication({ stageId: 'gone' }), candidate, extraction: null, noteCount: 0, stageRemoved: true, responseState: 'on_track' as const };
     expect(toApplicationCardDto(view).stageRemoved).toBe(true);
     const stages = pipelineStagesOf(job.content.process);
     const detail = toCandidateDetailDto({
       candidate,
       applications: [
-        { application: buildApplication({ stageId: 'gone' }), job, stages, extraction: null, messageCount: 0 },
-        { application: buildApplication({ stageId: 'stage-0' }), job, stages, extraction: null, messageCount: 0 },
-        { application: buildApplication({ stageId: 'received' }), job, stages, extraction: null, messageCount: 0 },
+        { application: buildApplication({ stageId: 'gone' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const },
+        { application: buildApplication({ stageId: 'stage-0' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const },
+        { application: buildApplication({ stageId: 'received' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const },
       ],
       notes: [],
     });
     expect(detail.applications.map((a) => a.stageRemoved)).toEqual([true, false, false]);
     expect(detail.applications.map((a) => a.messageCount)).toEqual([0, 0, 0]);
-    const counted = toCandidateDetailDto({ candidate, applications: [{ application, job, stages, extraction: null, messageCount: 4 }], notes: [] });
+    const counted = toCandidateDetailDto({ candidate, applications: [{ application, job, stages, extraction: null, messageCount: 4, responseState: 'on_track' as const }], notes: [] });
     expect(counted.applications[0]?.messageCount).toBe(4);
   });
 
@@ -117,7 +120,7 @@ describe('candidate DTO mappers', () => {
     const stages = pipelineStagesOf(job.content.process);
     const dto = toCandidateDetailDto({
       candidate,
-      applications: [{ application, job, stages, extraction: null, messageCount: 0 }],
+      applications: [{ application, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const }],
       notes: [{ note: buildNote(), authorName: 'Rita' }],
     });
     expect(dto.candidate).toEqual({

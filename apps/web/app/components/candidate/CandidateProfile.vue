@@ -49,6 +49,7 @@ const labelClass = 'flex items-center gap-2 text-sm text-muted-foreground'
               <NuxtLink :to="`/app/jobs/${app.job.id}/candidates`" class="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground hover:bg-muted">{{ app.job.title }}</NuxtLink>
               <span class="text-muted-foreground">{{ stageNameOf(app) }}</span>
               <Badge :variant="applicationStatus(app).tone">{{ t(applicationStatus(app).key) }}</Badge>
+              <ResponsePill :application="app" :now="now" />
               <span class="figure text-xs text-muted-foreground">{{ t('candidate.fields.appliedOn', { date: formatDate(app.createdAt, locale) }) }}</span>
             </li>
           </ul>

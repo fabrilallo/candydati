@@ -18,7 +18,7 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   return allowed[0] ?? null
 }
 
-export type NavId = 'dashboard' | 'jobs' | 'candidates' | 'templates' | 'members' | 'privacy' | 'email' | 'emailTemplates' | 'audit'
+export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'candidates' | 'templates' | 'members' | 'privacy' | 'email' | 'emailTemplates' | 'webhooks' | 'audit'
 export type NavSectionId = 'work' | 'organization'
 
 export interface NavItem {
@@ -30,6 +30,8 @@ export interface NavItem {
 
 const NAV: readonly NavItem[] = [
   { id: 'dashboard', to: '/app', section: 'work' },
+  { id: 'attention', to: '/app/attention', section: 'work', permission: 'candidate:read' },
+  { id: 'tasks', to: '/app/tasks', section: 'work', permission: 'task:read' },
   { id: 'jobs', to: '/app/jobs', section: 'work', permission: 'job:read' },
   { id: 'candidates', to: '/app/candidates', section: 'work', permission: 'candidate:read' },
   { id: 'templates', to: '/app/jobs/templates', section: 'work', permission: 'job_template:read' },
@@ -37,6 +39,7 @@ const NAV: readonly NavItem[] = [
   { id: 'privacy', to: '/app/settings/privacy', section: 'organization', permission: 'privacy:manage' },
   { id: 'email', to: '/app/settings/email', section: 'organization', permission: 'email_settings:manage' },
   { id: 'emailTemplates', to: '/app/settings/email-templates', section: 'organization', permission: 'email_template:manage' },
+  { id: 'webhooks', to: '/app/settings/webhooks', section: 'organization', permission: 'webhook:manage' },
   { id: 'audit', to: '/app/settings/audit-log', section: 'organization', permission: 'audit:read' },
 ]
 

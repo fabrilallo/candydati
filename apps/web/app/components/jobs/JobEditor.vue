@@ -61,8 +61,9 @@ const onLeave = (event: FocusEvent): void => {
   const leftGroup = group !== null && !(next !== null && group.contains(next))
   ed.touch([target.id, leftGroup ? group.id : ''].filter((id) => id !== ''))
 }
+/** Closes, or keeps (reopens) the close flow when the api says applications are still open. */
 const confirmClose = async (): Promise<void> => {
-  if (await ed.close()) closeOpen.value = false
+  closeOpen.value = !(await ed.close()) && (closeOpen.value || ed.openOnClose.value !== null)
 }
 const saveTemplate = async (name: string): Promise<void> => {
   if (await ed.saveTemplate(name)) templateOpen.value = false
@@ -164,7 +165,7 @@ const saveTemplate = async (name: string): Promise<void> => {
 
     <PublishConfirmDialog :open="ed.confirmOpen.value" :view="ed.quality.view.value" :pending="ed.busy.value === 'publish'" @cancel="ed.cancelPublish" @confirm="ed.confirmPublish" />
     <PublishedDialog :open="ed.publishedOpen.value" :path="publicPath" :url="publicUrl" @close="ed.dismissPublished" />
-    <ConfirmDialog v-model:open="closeOpen" :title="t('job.actions.closeTitle')" :body="t('job.actions.closeBody')" :confirm-label="ed.busy.value === 'close' ? t('job.actions.closing') : t('job.actions.closeConfirm')" :pending="ed.busy.value === 'close'" destructive :error-key="ed.errorKey.value" @confirm="confirmClose" />
+    <CloseJobFlow v-if="ed.job.value && ed.permissions.value.close" v-model:open="closeOpen" :job-id="ed.job.value.id" :closing="ed.busy.value === 'close'" :error-key="ed.errorKey.value" :blocked="ed.openOnClose.value" @close-job="confirmClose" />
     <SaveTemplateDialog v-model:open="templateOpen" :pending="ed.busy.value === 'template'" :error-key="ed.errorKey.value" @save="saveTemplate" />
   </div>
   </AppPage>

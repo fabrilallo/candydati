@@ -17,6 +17,18 @@ const inputSchema = z.object({
   lastAttempt: z.boolean().default(true),
 });
 
+/**
+ * A person's message that went out after the last stage change keeps the promise to answer: `respondedAt` is set and the
+ * deadline cleared until the next move. The automatic receipt (`system`) and a message written in an earlier stage do not.
+ */
+async function markResponded(deps: DeliverDeps, message: Message, sentAt: Date): Promise<void> {
+  if (message.sentBy === null || message.sentBy === SYSTEM_SENDER) return;
+  const application = await deps.applications.findById(message.organizationId, message.applicationId);
+  if (!application || application.outcome !== null || application.respondedAt !== null) return;
+  if (message.createdAt < application.stageChangedAt) return;
+  await deps.applications.save({ ...application, respondedAt: sentAt, responseDueAt: null });
+}
+
 const isPermanent = (error: unknown): boolean => (error as { permanent?: unknown } | null)?.permanent === true;
 
 async function recordOutcome(deps: DeliverDeps, actor: Actor, message: Message, done: Message): Promise<void> {
@@ -71,7 +83,9 @@ export const deliverMessage = defineUseCase<DeliverDeps, typeof inputSchema, Del
       await recordOutcome(deps, actor, message, { ...message, status: 'failed', error: permanent ? DELIVERY_REJECTED : DELIVERY_FAILED });
       return 'failed';
     }
-    await recordOutcome(deps, actor, message, { ...message, status: 'sent', sentAt: deps.now(), providerMessageId, error: null });
+    const sentAt = deps.now();
+    await recordOutcome(deps, actor, message, { ...message, status: 'sent', sentAt, providerMessageId, error: null });
+    await markResponded(deps, message, sentAt);
     return 'sent';
   },
 });

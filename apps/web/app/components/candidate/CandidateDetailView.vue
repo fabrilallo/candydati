@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FileTextIcon, MailIcon, MessageSquareTextIcon, UserRoundIcon } from '@lucide/vue'
+import { FileTextIcon, ListTodoIcon, MailIcon, MessageSquareTextIcon, UserRoundIcon } from '@lucide/vue'
 import type { EmailTemplateKind, Outcome } from '@tt/domain'
 import type { ApplicationCardDto } from '@/lib/candidate-schemas'
 import { applicationStatus, currentApplication, fullName, stageOf } from '@/lib/candidate-view'
@@ -33,7 +33,7 @@ const status = computed(() => (current.value ? applicationStatus(current.value) 
 const nowMs = useState('candidate-now', () => Date.now())
 const now = computed(() => new Date(nowMs.value))
 
-type Tab = 'profile' | 'cv' | 'notes' | 'messages'
+type Tab = 'profile' | 'cv' | 'notes' | 'messages' | 'tasks'
 const tab = ref<Tab>('profile')
 const canRead = computed(() => can(role.value, 'message:read'))
 const canSend = computed(() => can(role.value, 'message:send'))
@@ -42,6 +42,7 @@ const tabs = computed<readonly TabItem<Tab>[]>(() => [
   { value: 'cv', label: t('candidate.tabs.cv'), icon: FileTextIcon, testId: 'tab-cv' },
   { value: 'notes', label: t('candidate.tabs.notes'), icon: MessageSquareTextIcon, count: detail.value?.notes.length ?? null, testId: 'tab-notes' },
   ...(canRead.value ? [{ value: 'messages' as const, label: t('candidate.tabs.messages'), icon: MailIcon, count: messageTotal(detail.value?.applications ?? []), testId: 'tab-messages' }] : []),
+  ...(can(role.value, 'task:read') && current.value ? [{ value: 'tasks' as const, label: t('candidate.tabs.tasks'), icon: ListTodoIcon, testId: 'tab-tasks' }] : []),
 ])
 /** After an outcome: the matching template, proposed in the Messaggi tab, sent only if a person confirms. */
 const proposal = ref<{ readonly kind: EmailTemplateKind; readonly applicationId: string } | null>(null)
@@ -96,9 +97,10 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
               <NuxtLink :to="`/app/jobs/${current.job.id}/candidates`" class="font-medium text-primary underline-offset-4 hover:underline">{{ stageName(stage, t) }}</NuxtLink>
               <span class="text-muted-foreground">, {{ current.job.title }}</span>
             </p>
-            <p v-if="status" class="flex items-center gap-1.5 text-sm text-muted-foreground" data-testid="candidate-status">
+            <p v-if="status" class="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground" data-testid="candidate-status">
               {{ t('candidate.header.status') }}
               <span class="font-medium" :class="status.tone === 'success' ? 'text-success' : 'text-foreground'">{{ t(status.key) }}</span>
+              <ResponsePill v-if="current" :application="current" :now="now" class="ml-1" />
             </p>
           </div>
         </div>
@@ -142,6 +144,7 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
         @sent="c.messaged"
         @dismiss="proposal = null"
       />
+      <ApplicationTasks v-else-if="tab === 'tasks' && current" :key="current.id" :application-id="current.id" :job-id="current.job.id" />
     </template>
   </div>
 </template>

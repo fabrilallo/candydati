@@ -29,6 +29,9 @@ export const card = (id: string, stageId = 'received', overrides: Partial<Applic
   closedAt: null,
   noteCount: 0,
   stageRemoved: false,
+  responseDueAt: null,
+  respondedAt: null,
+  responseState: null,
   candidate: { id: `c-${id}`, firstName: 'Giulia', lastName: `Rossi ${id}`, tags: [], headline: 'Backend engineer', location: 'Milano', yearsOfExperience: 6 },
   ...overrides,
 })
@@ -83,6 +86,9 @@ export const detail = (overrides: Partial<CandidateDetailDto> = {}): CandidateDe
       retentionExpiresAt: '2028-10-13T10:00:00.000Z',
       cv: { fileName: 'giulia-rossi.pdf', mediaType: 'application/pdf', sizeBytes: 1_572_864 },
       messageCount: 2,
+      responseDueAt: null,
+      respondedAt: null,
+      responseState: null,
       extraction: {
         status: 'done',
         source: 'model',

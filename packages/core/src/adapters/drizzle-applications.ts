@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, schema } from '@tt/db';
+import { and, asc, desc, eq, isNotNull, isNull, lte, schema } from '@tt/db';
 import { CV_MEDIA_TYPES, type Application, type CvMediaType } from '@tt/domain';
 import type { ApplicationRepository } from '../candidate-ports.js';
 import { ConflictError } from '../errors.js';
@@ -29,6 +29,8 @@ export const toApplication = (row: Row): Application => ({
   updatedAt: row.updatedAt,
   stageChangedAt: row.stageChangedAt,
   closedAt: row.closedAt,
+  responseDueAt: row.responseDueAt,
+  respondedAt: row.respondedAt,
 });
 
 const toValues = (a: Application) => ({
@@ -50,6 +52,8 @@ const toValues = (a: Application) => ({
   updatedAt: a.updatedAt,
   stageChangedAt: a.stageChangedAt,
   closedAt: a.closedAt,
+  responseDueAt: a.responseDueAt,
+  respondedAt: a.respondedAt,
 });
 
 /** Postgres implementation. Every statement filters by `organization_id`. */
@@ -61,6 +65,9 @@ export function createDrizzleApplications(db: DbExecutor): ApplicationRepository
     const [row] = await db.select().from(application).where(where).limit(1);
     return row ? toApplication(row) : null;
   };
+  const awaitingFilter = (dueBefore: Date) => [isNull(application.outcome), isNull(application.respondedAt), isNotNull(application.responseDueAt), lte(application.responseDueAt, dueBefore)];
+  const awaiting = async (where: ReturnType<typeof and>) =>
+    (await db.select().from(application).where(where).orderBy(asc(application.responseDueAt), asc(application.id))).map(toApplication);
   return {
     async create(input) {
       try {
@@ -95,5 +102,7 @@ export function createDrizzleApplications(db: DbExecutor): ApplicationRepository
     listByJob: (organizationId, jobId) => list(and(eq(application.organizationId, organizationId), eq(application.jobId, jobId))),
     listByCandidate: (organizationId, candidateId) =>
       list(and(eq(application.organizationId, organizationId), eq(application.candidateId, candidateId))),
+    listAwaitingResponse: (organizationId, dueBefore) => awaiting(and(eq(application.organizationId, organizationId), ...awaitingFilter(dueBefore))),
+    listAwaitingResponseAcrossOrganizations: (dueBefore) => awaiting(and(...awaitingFilter(dueBefore))),
   };
 }

@@ -3,6 +3,7 @@ import type { ApplicationRepository, CandidateRepository, CvExtractionRepository
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { ReceiptDeps } from './messaging-ports.js';
 import type { AuditLogRepository } from './ports.js';
+import type { OutboxRepository } from './webhook-ports.js';
 
 /** Binary storage for CVs. Keys are chosen by core; `@tt/providers` implements it (local disk, S3/MinIO). */
 export interface FileStorage {
@@ -13,7 +14,7 @@ export interface FileStorage {
   delete(key: string): Promise<void>;
 }
 
-export const TASK_NAMES = ['cv.extract', 'email.send'] as const;
+export const TASK_NAMES = ['cv.extract', 'email.send', 'automation.run', 'webhook.deliver', 'deadlines.scan'] as const;
 export type TaskName = (typeof TASK_NAMES)[number];
 
 export interface CvExtractPayload {
@@ -26,9 +27,27 @@ export interface EmailSendPayload {
   readonly messageId: string;
 }
 
+/** Run the rules of `stageId` for an application that entered it. Checked again when it runs: the application may have moved on. */
+export interface AutomationRunPayload {
+  readonly organizationId: string;
+  readonly applicationId: string;
+  readonly stageId: string;
+}
+
+/** One delivery of one event to one endpoint. */
+export interface WebhookDeliverPayload {
+  readonly organizationId: string;
+  readonly eventId: string;
+  readonly endpointId: string;
+}
+
 export interface TaskPayloads {
   readonly 'cv.extract': CvExtractPayload;
   readonly 'email.send': EmailSendPayload;
+  readonly 'automation.run': AutomationRunPayload;
+  readonly 'webhook.deliver': WebhookDeliverPayload;
+  /** Scheduled hourly; no payload. */
+  readonly 'deadlines.scan': Readonly<Record<string, never>>;
 }
 
 /** A task as enqueued: the name decides the payload. */
@@ -64,6 +83,8 @@ export interface IntakeRepositories {
   readonly applications: ApplicationRepository;
   readonly extractions: CvExtractionRepository;
   readonly auditLog: AuditLogRepository;
+  /** The `application.received` event is written in the same transaction as the application. */
+  readonly outbox: OutboxRepository;
 }
 
 /** Runs `work` in ONE database transaction: if it throws, nothing it wrote remains. */

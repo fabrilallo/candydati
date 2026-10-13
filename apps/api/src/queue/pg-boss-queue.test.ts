@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createPgBossQueue, TASK_RETRY, type BossSender } from './pg-boss-queue.js';
+import { createPgBossQueue, TASK_RETRY, WEBHOOK_RETRY, type BossSender } from './pg-boss-queue.js';
 
 const fakeBoss = (id: string | null = 'job-1'): BossSender & { send: ReturnType<typeof vi.fn>; createQueue: ReturnType<typeof vi.fn> } => ({
   send: vi.fn(async () => id),
@@ -17,6 +17,13 @@ describe('createPgBossQueue', () => {
     expect(boss.createQueue).toHaveBeenCalledTimes(1);
     expect(boss.send).toHaveBeenCalledWith('cv.extract', payload, TASK_RETRY);
     expect(TASK_RETRY.retryLimit).toBeLessThanOrEqual(3);
+  });
+
+  it('retries webhook deliveries five times', async () => {
+    const boss = fakeBoss();
+    await createPgBossQueue(boss).enqueue('webhook.deliver', payload);
+    expect(boss.send).toHaveBeenCalledWith('webhook.deliver', payload, WEBHOOK_RETRY);
+    expect(WEBHOOK_RETRY.retryLimit).toBe(5);
   });
 
   it('fails when pg-boss drops the job', async () => {

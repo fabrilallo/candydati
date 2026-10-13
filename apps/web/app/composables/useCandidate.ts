@@ -12,7 +12,18 @@ type Busy = 'move' | 'decide' | 'tags' | 'note' | null
 const withCard = (detail: CandidateDetailDto, card: ApplicationCardDto): CandidateDetailDto => ({
   ...detail,
   applications: detail.applications.map((app) =>
-    app.id === card.id ? { ...app, stageId: card.stageId, outcome: card.outcome, stageChangedAt: card.stageChangedAt, closedAt: card.closedAt } : app,
+    app.id === card.id
+      ? {
+          ...app,
+          stageId: card.stageId,
+          outcome: card.outcome,
+          stageChangedAt: card.stageChangedAt,
+          closedAt: card.closedAt,
+          responseDueAt: card.responseDueAt,
+          respondedAt: card.respondedAt,
+          responseState: card.responseState,
+        }
+      : app,
   ),
 })
 

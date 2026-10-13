@@ -1,4 +1,4 @@
-import { pipelineStagesOf, type Application, type Candidate } from '@tt/domain';
+import { pipelineStagesOf, responseState, type Application, type Candidate } from '@tt/domain';
 import type { CandidateDeps } from '../../candidate-ports.js';
 import { NotFoundError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';
@@ -28,7 +28,7 @@ export async function loadCardView(deps: CandidateDeps, application: Application
     requireJob(deps, organizationId, application.jobId),
   ]);
   const stageRemoved = !pipelineStagesOf(job.content.process).some((stage) => stage.id === application.stageId);
-  return { application, candidate, extraction, noteCount: counts[application.id] ?? 0, stageRemoved };
+  return { application, candidate, extraction, noteCount: counts[application.id] ?? 0, stageRemoved, responseState: responseState(application, job, deps.now()) };
 }
 
 async function loadNotes(deps: CandidateDeps, candidate: Candidate): Promise<readonly NoteView[]> {
@@ -55,6 +55,7 @@ export async function loadCandidateDetail(deps: CandidateDeps, candidate: Candid
         stages: pipelineStagesOf(job.content.process),
         extraction: extractions.find((e) => e.applicationId === application.id) ?? null,
         messageCount: messageCounts[application.id] ?? 0,
+        responseState: responseState(application, job, deps.now()),
       };
     }),
     notes: await loadNotes(deps, candidate),

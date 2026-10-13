@@ -10,3 +10,4 @@ export { dropBirthAndAge, looksSensitive } from './cv/privacy-filter.js';
 export { createCvExtractor, type CvExtractor, type CvExtractorOptions, type CvExtractionResult } from './cv/extractor.js';
 export { createMastraGenerator, GENERATOR_TEMPERATURE, GENERATOR_TIMEOUT_MS } from './ai/structured-generator.js';
 export * from './email/index.js';
+export * from './http/index.js';

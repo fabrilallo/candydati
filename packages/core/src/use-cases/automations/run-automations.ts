@@ -1,0 +1,140 @@
+import { JOB_OWNER_ASSIGNEE, DAY_MS, type AutomationRule, type Job, type Task } from '@tt/domain';
+import { z } from 'zod';
+import type { SystemActor } from '../../actor.js';
+import { toAuditActor } from '../../actor.js';
+import type { AutomationRunDeps } from '../../automation-ports.js';
+import { defineUseCase } from '../../use-case.js';
+import { requireApplication } from '../candidates/shared.js';
+import { requireJob } from '../jobs/shared.js';
+import { resolveTemplate } from '../messaging/shared.js';
+import { sendMessage } from '../messaging/send-message.js';
+import { notifyTaskAssigned } from '../tasks/notify.js';
+import { assertMember } from '../tasks/tasks.js';
+
+const inputSchema = z.object({
+  organizationId: z.string().min(1),
+  applicationId: z.string().min(1),
+  stageId: z.string().min(1),
+});
+
+export type AutomationSkipReason = 'application_not_found' | 'decided' | 'stage_changed';
+
+export interface AutomationRunResult {
+  readonly executed: number;
+  readonly failed: number;
+  readonly skipped: AutomationSkipReason | null;
+}
+
+/** Messages go out in the name of the person who configured the rule: `sentBy = rule.createdBy`. */
+const ruleActor = (rule: AutomationRule): SystemActor => ({
+  type: 'system',
+  id: rule.createdBy,
+  onBehalfOfUserId: null,
+  organizationId: rule.organizationId,
+  // The least role that may send messages; the rule's creator needed more than that to create it.
+  role: 'recruiter',
+});
+
+async function sendTemplate(deps: AutomationRunDeps, rule: AutomationRule, job: Job, applicationId: string, templateId: string): Promise<void> {
+  const template = await resolveTemplate(deps, rule.organizationId, templateId, job.content.language);
+  if (!template) throw new Error('template_missing');
+  const result = await sendMessage(deps, ruleActor(rule), {
+    applicationIds: [applicationId],
+    templateId,
+    subject: template.subject,
+    body: template.body,
+  });
+  if (result.failed > 0) throw new Error('message_not_queued');
+}
+
+async function createTaskFor(
+  deps: AutomationRunDeps,
+  rule: AutomationRule,
+  job: Job,
+  applicationId: string,
+  action: { readonly title: string; readonly assignee: string; readonly dueInDays?: number | undefined },
+): Promise<void> {
+  const assigneeId = action.assignee === JOB_OWNER_ASSIGNEE ? job.createdBy : action.assignee;
+  await assertMember(deps, rule.organizationId, assigneeId);
+  const now = deps.now();
+  const task: Task = await deps.tasks.create({
+    id: deps.newId(),
+    organizationId: rule.organizationId,
+    applicationId,
+    jobId: job.id,
+    title: action.title,
+    assigneeId,
+    dueAt: action.dueInDays === undefined ? null : new Date(now.getTime() + action.dueInDays * DAY_MS),
+    createdBy: rule.createdBy,
+    createdAt: now,
+    completedAt: null,
+  });
+  await notifyTaskAssigned(deps, task);
+}
+
+async function execute(deps: AutomationRunDeps, rule: AutomationRule, job: Job, applicationId: string): Promise<void> {
+  const { action } = rule;
+  if (action.type === 'send_template') await sendTemplate(deps, rule, job, applicationId, action.templateId);
+  else await createTaskFor(deps, rule, job, applicationId, action);
+}
+
+/** The creator of the rule hears about it: the stage change is never undone, but nobody should wonder why nothing was sent. */
+async function notifyFailure(deps: AutomationRunDeps, rule: AutomationRule, applicationId: string): Promise<void> {
+  await deps.notifications.createIfAbsent(
+    {
+      id: deps.newId(),
+      organizationId: rule.organizationId,
+      userId: rule.createdBy,
+      kind: 'automation_failed',
+      applicationId,
+      jobId: rule.jobId,
+      taskId: null,
+      payload: { ruleId: rule.id, action: rule.action.type },
+      createdAt: deps.now(),
+      readAt: null,
+    },
+    `automation_failed:${rule.id}:${applicationId}:${rule.stageId}`,
+  );
+}
+
+/**
+ * Worker use case (system actor, task `automation.run`): runs the enabled rules of the stage the application just
+ * entered. Re-checks everything when it runs: an application that moved on, was decided or is gone is skipped. Rules run
+ * independently; a failing one notifies its creator (`automation_failed`) and never stops the others or undoes the
+ * move. There is no rule that moves or decides, so this can never do either (PLAN §1, principle 4).
+ */
+export const runAutomations = defineUseCase<AutomationRunDeps, typeof inputSchema, AutomationRunResult>({
+  name: 'runAutomations',
+  input: inputSchema,
+  organizationOf: (input) => input.organizationId,
+  permission: { skip: 'system job enqueued after a move or an intake; the organization scope still applies' },
+  audit: { skip: 'each rule execution is audited in the handler as automation.ran' },
+  handler: async ({ deps, actor, input }): Promise<AutomationRunResult> => {
+    const { organizationId } = input;
+    const application = await requireApplication(deps, organizationId, input.applicationId).catch(() => null);
+    if (!application) return { executed: 0, failed: 0, skipped: 'application_not_found' };
+    if (application.outcome !== null) return { executed: 0, failed: 0, skipped: 'decided' };
+    if (application.stageId !== input.stageId) return { executed: 0, failed: 0, skipped: 'stage_changed' };
+    const job = await requireJob(deps, organizationId, application.jobId);
+    const rules = await deps.rules.listEnabledByStage(organizationId, job.id, input.stageId);
+    let failed = 0;
+    for (const rule of rules) {
+      let ok = true;
+      try {
+        await execute(deps, rule, job, application.id);
+      } catch {
+        ok = false;
+        failed += 1;
+        await notifyFailure(deps, rule, application.id);
+      }
+      await deps.auditLog.append({
+        organizationId,
+        actor: toAuditActor(actor),
+        action: 'automation.ran',
+        target: { type: 'automation_rule', id: rule.id },
+        metadata: { applicationId: application.id, action: rule.action.type, ok },
+      });
+    }
+    return { executed: rules.length - failed, failed, skipped: null };
+  },
+});

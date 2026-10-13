@@ -1,6 +1,8 @@
 import type { AdQualityAnalyzer, Job, JobStatus, JobTemplate } from '@tt/domain';
 import type { PrivacyNoticeRepository } from './candidate-ports.js';
+import type { AutomationRuleRepository } from './automation-ports.js';
 import type { CoreDeps } from './ports.js';
+import type { OutboxRepository } from './webhook-ports.js';
 
 export interface JobListQuery {
   readonly organizationId: string;
@@ -81,6 +83,10 @@ export interface JobDeps extends CoreDeps {
   readonly organizations: OrganizationDirectory;
   /** Publishing a job requires an active privacy notice. */
   readonly privacyNotices: PrivacyNoticeRepository;
+  /** Removing a stage removes its automation rules. */
+  readonly automationRules: AutomationRuleRepository;
+  /** `job.published` and `job.closed` events for webhooks. */
+  readonly outbox: OutboxRepository;
   readonly adQuality: AdQualityAnalyzer;
   /** On the 0-10 scale; below it the ad is flagged, never blocked. */
   readonly adQualityThreshold: number;

@@ -1,5 +1,6 @@
 import { CONSENT_SCOPES, cvExtractionSchema, EXTRACTION_STATUSES, JOB_STATUSES, OUTCOMES, selectionStageSchema, SUPPORTED_LOCALES } from '@tt/domain'
 import { z } from 'zod'
+import { responseFields } from './phase4-contract'
 
 /**
  * Zod mirrors of the Phase 2 DTOs (docs: phase 2 contract). Every response of the candidate, pipeline and privacy
@@ -41,6 +42,8 @@ export const applicationCardSchema = z.object({
   noteCount: z.number().int().nonnegative(),
   /** The stage was removed from the job's process: shown as "stage removed". */
   stageRemoved: z.boolean().default(false),
+  /** Response countdown (phase 4 contract); null until the api sends it. */
+  ...responseFields,
   candidate: z.object({
     id: z.string(),
     firstName: z.string(),
@@ -108,6 +111,8 @@ export const candidateApplicationSchema = z.object({
   extraction: extractionSchema.nullable().default(null),
   /** Messages in the conversation (phase 3 contract). Unknown (null) when the api does not send it. */
   messageCount: z.number().int().nonnegative().nullable().default(null),
+  /** Response countdown (phase 4 contract); null until the api sends it. */
+  ...responseFields,
 })
 export type CandidateApplicationDto = z.infer<typeof candidateApplicationSchema>
 

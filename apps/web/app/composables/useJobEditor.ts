@@ -1,5 +1,6 @@
 import type { JobDto, JobTemplateDto } from '@tt/domain'
 import { toast } from 'vue-sonner'
+import { openApplicationsOf } from '@/lib/attention-api'
 import { AppError, errorKeyOf } from '@/lib/auth-errors'
 import { closeJob, createJob, createTemplate, publishJob, updateJob } from '@/lib/job-api'
 import { adoptStageIds, contentToForm, emptyForm, snapshotOf, validateForm } from '@/lib/job-form'
@@ -164,16 +165,20 @@ export const useJobEditor = (init: EditorInit) => {
     await goToSaved()
   }
 
+  /** Open applications the api reported when it refused the last close (`open_applications:<n>`), or null. */
+  const openOnClose = ref<number | null>(null)
   const close = async (): Promise<boolean> => {
     if (!job.value || !permissions.value.close) return false
     busy.value = 'close'
     errorKey.value = null
+    openOnClose.value = null
     try {
       job.value = await closeJob(api, job.value.id)
       toast.success(t('job.actions.closed'))
       return true
     } catch (error) {
-      return fail(error)
+      openOnClose.value = openApplicationsOf(error)
+      return openOnClose.value === null ? fail(error) : false
     } finally {
       busy.value = null
     }
@@ -222,6 +227,7 @@ export const useJobEditor = (init: EditorInit) => {
     confirmPublish,
     cancelPublish,
     close,
+    openOnClose,
     saveTemplate,
   }
 }

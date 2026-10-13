@@ -74,7 +74,7 @@ describe('application receipt', () => {
     const deps = empty();
     await submitApplication(deps, submission());
     expect(deps.messagingStore.read().messages).toHaveLength(0);
-    expect(deps.queue.jobs().map((j) => j.name)).toEqual(['cv.extract']);
+    expect(deps.queue.jobs().map((j) => j.name)).toEqual(['cv.extract', 'automation.run']);
   });
 
   it('never fails the application when the receipt cannot be stored', async () => {
@@ -87,7 +87,7 @@ describe('application receipt', () => {
     await expect(submitApplication({ ...deps, receipts: broken }, submission())).resolves.toEqual({ received: true });
     expect(deps.store.read().applications).toHaveLength(1);
     expect(onError).toHaveBeenCalledOnce();
-    expect(deps.queue.jobs().map((j) => j.name)).toEqual(['cv.extract']);
+    expect(deps.queue.jobs().map((j) => j.name)).toEqual(['cv.extract', 'automation.run']);
   });
 
   it('never fails the application when the template store or the queue breaks, and marks the receipt failed', async () => {

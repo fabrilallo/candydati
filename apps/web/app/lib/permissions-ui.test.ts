@@ -53,8 +53,14 @@ describe('defaultInviteRole', () => {
 
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
-    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'candidates', 'templates', 'members', 'emailTemplates'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'jobs', 'candidates', 'templates', 'members', 'privacy', 'email', 'emailTemplates', 'audit'])
+    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'candidates', 'templates', 'members', 'emailTemplates'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'candidates', 'templates', 'members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'audit'])
+  })
+
+  it('shows webhooks only with webhook:manage and the work queues to everyone who reads candidates', () => {
+    expect(visibleNav('admin').map((item) => item.id)).toContain('webhooks')
+    expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('webhooks')
+    expect(visibleNav('interviewer').map((item) => item.id)).toEqual(expect.arrayContaining(['attention', 'tasks']))
   })
 
   it('shows candidates to every role that reads them and the privacy settings only with privacy:manage', () => {
@@ -74,8 +80,8 @@ describe('visibleNav', () => {
 describe('navSections', () => {
   it('groups the visible items and drops nothing the role may see', () => {
     expect(navSections('owner').map((section) => [section.id, section.items.map((item) => item.id)])).toEqual([
-      ['work', ['dashboard', 'jobs', 'candidates', 'templates']],
-      ['organization', ['members', 'privacy', 'email', 'emailTemplates', 'audit']],
+      ['work', ['dashboard', 'attention', 'tasks', 'jobs', 'candidates', 'templates']],
+      ['organization', ['members', 'privacy', 'email', 'emailTemplates', 'webhooks', 'audit']],
     ])
     expect(navSections(null).map((section) => section.id)).toEqual(['work', 'organization'])
   })

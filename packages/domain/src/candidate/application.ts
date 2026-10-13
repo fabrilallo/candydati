@@ -104,6 +104,10 @@ export interface Application {
   readonly updatedAt: Date;
   readonly stageChangedAt: Date;
   readonly closedAt: Date | null;
+  /** The promise "we answer within N days": null once answered or decided, and for jobs with no declared response time. */
+  readonly responseDueAt: Date | null;
+  /** A person answered (message sent, move or decision) after the last stage change. Reset by a move. */
+  readonly respondedAt: Date | null;
 }
 
 export interface CandidateNote {

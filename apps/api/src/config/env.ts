@@ -14,12 +14,20 @@ const flag = z
   .optional()
   .transform((value) => !['false', '0', 'off', 'no'].includes((value ?? '').trim().toLowerCase()));
 
+/** Only an explicit `true` turns it on: private webhook targets are a development convenience, never a default. */
+const strictFlag = z
+  .string()
+  .optional()
+  .transform((value) => (value ?? '').trim().toLowerCase() === 'true');
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
   API_PORT: z.coerce.number().int().positive().default(4000),
   API_HOST: z.string().min(1).default('0.0.0.0'),
   RUN_MIGRATIONS: flag,
+  /** `WEBHOOKS_ALLOW_PRIVATE=true`: webhook URLs may be http://localhost and point at private addresses (development only). */
+  WEBHOOKS_ALLOW_PRIVATE: strictFlag,
   DATABASE_URL: z.string().min(1, 'is required'),
   BETTER_AUTH_SECRET: z.string().min(32, 'must be at least 32 characters'),
   /** The WEB origin: the browser reaches the api through the web app's /api/** proxy. */

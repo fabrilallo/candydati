@@ -8,7 +8,9 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/
  * The composer over the board, for the selected applications (or the one just decided, with its outcome template).
  * One email per person; the preview is rendered for the first; the confirmation says how many.
  */
-const props = withDefaults(defineProps<{ cards: readonly ApplicationCardDto[]; kind?: EmailTemplateKind | null }>(), { kind: null })
+/** What the composer needs of an application: its id and whom it writes to (a board card fits, so does an attention row). */
+type Recipient = Pick<ApplicationCardDto, 'id'> & { readonly candidate: Pick<ApplicationCardDto['candidate'], 'firstName' | 'lastName'> }
+const props = withDefaults(defineProps<{ cards: readonly Recipient[]; kind?: EmailTemplateKind | null }>(), { kind: null })
 const emit = defineEmits<{ close: []; sent: [count: number] }>()
 const { t } = useI18n()
 const open = computed(() => props.cards.length > 0)

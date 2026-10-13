@@ -1,0 +1,65 @@
+import { and, count, desc, eq, inArray, isNull, schema } from '@tt/db';
+import type { Notification } from '@tt/domain';
+import type { NotificationRepository } from '../automation-ports.js';
+import type { DbExecutor } from './db-executor.js';
+
+type Row = typeof schema.notification.$inferSelect;
+
+const toNotification = (row: Row): Notification => ({
+  id: row.id,
+  organizationId: row.organizationId,
+  userId: row.userId,
+  kind: row.kind,
+  applicationId: row.applicationId,
+  jobId: row.jobId,
+  taskId: row.taskId,
+  payload: row.payload,
+  createdAt: row.createdAt,
+  readAt: row.readAt,
+});
+
+/** Postgres implementation. Every statement filters by organization and user. */
+export function createDrizzleNotifications(db: DbExecutor): NotificationRepository {
+  const { notification } = schema;
+  const own = (organizationId: string, userId: string) => [eq(notification.organizationId, organizationId), eq(notification.userId, userId)];
+  return {
+    async createIfAbsent(value, dedupeKey) {
+      const [row] = await db
+        .insert(notification)
+        .values({ ...value, dedupeKey })
+        .onConflictDoNothing({ target: [notification.organizationId, notification.userId, notification.dedupeKey] })
+        .returning();
+      return row ? toNotification(row) : null;
+    },
+    async list(query) {
+      const where = and(...own(query.organizationId, query.userId), ...(query.unreadOnly ? [isNull(notification.readAt)] : []));
+      const [items, totals] = await Promise.all([
+        db
+          .select()
+          .from(notification)
+          .where(where)
+          .orderBy(desc(notification.createdAt), desc(notification.id))
+          .limit(query.limit)
+          .offset((query.page - 1) * query.limit),
+        db.select({ total: count() }).from(notification).where(where),
+      ]);
+      return { items: items.map(toNotification), total: totals[0]?.total ?? 0 };
+    },
+    async markRead(organizationId, userId, ids, at) {
+      if (ids !== undefined && ids.length === 0) return 0;
+      const rows = await db
+        .update(notification)
+        .set({ readAt: at })
+        .where(and(...own(organizationId, userId), isNull(notification.readAt), ...(ids ? [inArray(notification.id, [...ids])] : [])))
+        .returning({ id: notification.id });
+      return rows.length;
+    },
+    async unreadCount(organizationId, userId) {
+      const [row] = await db
+        .select({ total: count() })
+        .from(notification)
+        .where(and(...own(organizationId, userId), isNull(notification.readAt)));
+      return row?.total ?? 0;
+    },
+  };
+}

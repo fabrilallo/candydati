@@ -2,6 +2,7 @@ import { adQualityReportSchema, assess, checkPublishable, type AdQualityAssessme
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
 import type { JobDeps } from '../../job-ports.js';
+import { recordEvent } from '../webhooks/record-event.js';
 import { defineJobUseCase } from './define.js';
 import { issuesToValidationError, requireJob } from './shared.js';
 
@@ -50,6 +51,7 @@ export const publishJob = defineJobUseCase({
     const report = await tryAnalyze(deps, job);
     const now = deps.now();
     const saved = await deps.jobs.save({ ...job, status: 'published', quality: report, publishedAt: now, updatedAt: now });
+    await recordEvent(deps, saved.organizationId, 'job.published', { jobId: saved.id, slug: saved.slug });
     return { job: saved, quality: report ? assess(report, deps.adQualityThreshold) : null };
   },
 });

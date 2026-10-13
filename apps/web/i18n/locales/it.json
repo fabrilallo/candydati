@@ -36,7 +36,11 @@
     "privacy": "Privacy",
     "candidateCount": "{count} candidati",
     "email": "Email",
-    "emailTemplates": "Modelli email"
+    "emailTemplates": "Modelli email",
+    "attention": "Da gestire",
+    "tasks": "Le mie attività",
+    "webhooks": "Webhook",
+    "attentionCount": "{count} da gestire"
   },
   "roles": {
     "owner": "Proprietario",
@@ -338,6 +342,20 @@
       },
       "email_settings": {
         "updated": "Ha modificato le impostazioni email"
+      },
+      "task": {
+        "created": "Ha creato un'attività",
+        "completed": "Ha completato un'attività",
+        "reopened": "Ha riaperto un'attività"
+      },
+      "automation": {
+        "saved": "Ha salvato un'automazione",
+        "deleted": "Ha eliminato un'automazione",
+        "ran": "Un'automazione ha agito"
+      },
+      "webhook": {
+        "saved": "Ha salvato un webhook",
+        "deleted": "Ha eliminato un webhook"
       }
     }
   },
@@ -873,6 +891,15 @@
       "deleted": "Template eliminato",
       "loadFailed": "Non riusciamo a caricare i template.",
       "forbidden": "Non hai il permesso di vedere i template."
+    },
+    "close": {
+      "checking": "Controllo le candidature aperte",
+      "openTitle": "Una candidatura è ancora aperta | {count} candidature sono ancora aperte",
+      "openBody": "Un annuncio si chiude solo quando ogni candidato ha un esito. Puoi chiudere quelle aperte come Non selezionato: poi ti proponiamo il messaggio di esito, che invii o salti tu, e l'annuncio si chiude.",
+      "decideAll": "Chiudi le candidature aperte come Non selezionato",
+      "deciding": "Registro gli esiti",
+      "review": "Vai ai candidati",
+      "decided": "1 esito registrato | {count} esiti registrati"
     }
   },
   "public": {
@@ -976,7 +1003,8 @@
     "tabs": {
       "label": "Sezioni dell'annuncio",
       "candidates": "Candidati",
-      "ad": "Annuncio"
+      "ad": "Annuncio",
+      "automations": "Automazioni"
     },
     "received": "Ricevute",
     "receivedHint": "Nuove candidature, ancora da guardare",
@@ -1041,7 +1069,8 @@
       "profile": "Profilo",
       "cv": "CV",
       "notes": "Note",
-      "messages": "Messaggi"
+      "messages": "Messaggi",
+      "tasks": "Attività"
     },
     "header": {
       "stage": "Fase:",
@@ -1459,6 +1488,213 @@
       "lastName": "Rossi",
       "jobTitle": "Sviluppatrice backend",
       "stage": "Colloquio tecnico"
+    }
+  },
+  "response": {
+    "label": "Risposta al candidato",
+    "dueIn": "Risposta entro domani | Risposta entro {count} giorni",
+    "dueToday": "Scade oggi",
+    "overdueToday": "Scaduta oggi",
+    "overdue": "In ritardo di 1 giorno | In ritardo di {count} giorni",
+    "answered": "Risposto",
+    "dueAt": "Risposta promessa entro il {date}"
+  },
+  "attention": {
+    "title": "Da gestire",
+    "description": "Candidature che aspettano una risposta oltre la promessa fatta, o vicine a quel limite.",
+    "tabs": {
+      "label": "Stato della risposta",
+      "overdue": "In ritardo",
+      "due_soon": "In scadenza"
+    },
+    "stage": "Fase: {stage}",
+    "owner": "Responsabile: {name}",
+    "list": "Candidature da gestire",
+    "actions": {
+      "label": "Azioni per {name}",
+      "open": "Apri la scheda",
+      "message": "Scrivi",
+      "move": "Sposta in",
+      "loadingStages": "Carico le fasi"
+    },
+    "moved": "{name} è in {stage}",
+    "allDone": {
+      "title": "Ogni candidato ha la sua risposta",
+      "body": "Nessuna candidatura aspetta oltre il tempo promesso. Quando una scadenza si avvicina la trovi qui."
+    },
+    "empty": {
+      "overdue": "Nessuna candidatura in ritardo.",
+      "due_soon": "Nessuna candidatura in scadenza nei prossimi due giorni."
+    }
+  },
+  "notifications": {
+    "bell": "Notifiche",
+    "bellUnread": "Notifiche, 1 da leggere | Notifiche, {count} da leggere",
+    "title": "Notifiche",
+    "markAll": "Segna tutte come lette",
+    "unread": "Da leggere",
+    "empty": "Nessuna notifica. Qui arrivano le risposte in scadenza, le attività assegnate e le automazioni non riuscite.",
+    "loadFailed": "Non siamo riusciti a caricare le notifiche.",
+    "kinds": {
+      "response_due_soon": "Risposta in scadenza",
+      "response_overdue": "Risposta in ritardo",
+      "task_assigned": "Ti è stata assegnata un'attività",
+      "task_due": "Un'attività è in scadenza",
+      "job_close_blocked": "L'annuncio ha ancora candidature aperte",
+      "automation_failed": "Un'automazione non è riuscita",
+      "generic": "Nuova notifica"
+    }
+  },
+  "tasks": {
+    "title": "Le mie attività",
+    "description": "Quello che è assegnato a te, in ordine di scadenza.",
+    "groups": {
+      "overdue": "Scadute",
+      "today": "Oggi",
+      "upcoming": "Prossime",
+      "none": "Senza scadenza"
+    },
+    "fields": {
+      "title": "Attività",
+      "titlePlaceholder": "Es. Chiamare per il feedback",
+      "assignee": "Assegnata a",
+      "assigneePlaceholder": "Scegli una persona",
+      "due": "Scadenza",
+      "dueHint": "Facoltativa."
+    },
+    "add": "Aggiungi attività",
+    "adding": "Aggiungo",
+    "created": "Attività aggiunta",
+    "complete": "Segna come fatta: {title}",
+    "reopen": "Riapri: {title}",
+    "done": "Fatta",
+    "completed": "Attività completata",
+    "reopened": "Attività riaperta",
+    "dueOn": "Entro il {date}",
+    "assignedTo": "Per {name}",
+    "byAutomation": "Da un'automazione",
+    "empty": "Nessuna attività aperta. Quelle assegnate a te, da una persona o da un'automazione, compaiono qui.",
+    "emptyApplication": "Nessuna attività per questa candidatura.",
+    "loadFailed": "Non siamo riusciti a caricare le attività.",
+    "membersFailed": "Non siamo riusciti a caricare i membri dell'organizzazione.",
+    "errors": {
+      "titleRequired": "Scrivi cosa c'è da fare",
+      "titleTooLong": "Al massimo 200 caratteri",
+      "assigneeRequired": "Scegli a chi assegnarla",
+      "dueInvalid": "Data non valida"
+    }
+  },
+  "automations": {
+    "title": "Automazioni",
+    "when": "Quando una candidatura entra in {stage}",
+    "note": "Le automazioni non spostano e non decidono mai sui candidati: inviano un modello o creano un'attività. Un messaggio automatico risulta inviato da chi ha creato la regola, come se l'avesse inviato a mano.",
+    "add": "Aggiungi regola",
+    "edit": "Modifica",
+    "delete": "Elimina",
+    "toggle": "Regola attiva",
+    "paused": "In pausa",
+    "empty": "Nessuna regola per questa fase.",
+    "author": "Creata da {name}",
+    "loadFailed": "Non siamo riusciti a caricare le automazioni.",
+    "rule": {
+      "sendTemplate": "invia il modello «{template}»",
+      "sendMissingTemplate": "invia un modello che non esiste più",
+      "taskForOwner": "crea l'attività «{title}» per il responsabile dell'annuncio",
+      "taskForOwnerDue": "crea l'attività «{title}» per il responsabile dell'annuncio, da fare in giornata | crea l'attività «{title}» per il responsabile dell'annuncio, da fare entro 1 giorno | crea l'attività «{title}» per il responsabile dell'annuncio, da fare entro {count} giorni",
+      "taskForMember": "crea l'attività «{title}» per {member}",
+      "taskForMemberDue": "crea l'attività «{title}» per {member}, da fare in giornata | crea l'attività «{title}» per {member}, da fare entro 1 giorno | crea l'attività «{title}» per {member}, da fare entro {count} giorni"
+    },
+    "form": {
+      "addTitle": "Nuova regola: {stage}",
+      "editTitle": "Modifica la regola: {stage}",
+      "description": "Scatta ogni volta che una candidatura entra in questa fase.",
+      "action": "Cosa succede",
+      "actions": {
+        "send_template": "Invia un modello al candidato",
+        "create_task": "Crea un'attività"
+      },
+      "template": "Modello",
+      "templatePlaceholder": "Scegli un modello",
+      "taskTitle": "Attività",
+      "assignee": "Per chi",
+      "jobOwner": "Il responsabile dell'annuncio",
+      "dueInDays": "Da fare entro (giorni)",
+      "dueInDaysHint": "Vuoto: senza scadenza. 0: in giornata.",
+      "sendNote": "Il messaggio parte a nome tuo, come se l'avessi inviato tu.",
+      "save": "Salva la regola",
+      "saving": "Salvo"
+    },
+    "saved": "Regola salvata",
+    "deleted": "Regola eliminata",
+    "deleteTitle": "Eliminare la regola?",
+    "deleteBody": "Le candidature che entreranno nella fase non la attiveranno più. Quello che ha già fatto resta.",
+    "deleteConfirm": "Elimina la regola",
+    "errors": {
+      "templateRequired": "Scegli un modello",
+      "dueInDays": "Un numero intero da 0 a 90"
+    }
+  },
+  "webhooks": {
+    "title": "Webhook",
+    "description": "Avvisano i tuoi sistemi quando succede qualcosa nella selezione. Il contenuto porta solo identificativi, mai nomi o email: i dettagli si leggono dall'API.",
+    "add": "Aggiungi endpoint",
+    "fields": {
+      "url": "URL",
+      "urlHint": "Serve https. Riceve una richiesta POST in JSON.",
+      "events": "Eventi"
+    },
+    "events": {
+      "application_received": "Candidatura ricevuta",
+      "application_moved": "Candidatura spostata di fase",
+      "application_decided": "Esito registrato",
+      "job_published": "Annuncio pubblicato",
+      "job_closed": "Annuncio chiuso",
+      "ping": "Prova"
+    },
+    "create": "Crea endpoint",
+    "creating": "Creo",
+    "newTitle": "Nuovo endpoint",
+    "secret": {
+      "title": "Endpoint creato",
+      "label": "Segreto di firma",
+      "warning": "Copialo adesso: non lo mostreremo più. Se lo perdi, elimina l'endpoint e creane un altro.",
+      "copy": "Copia",
+      "copied": "Copiato",
+      "copyFailed": "Non siamo riusciti a copiare: selezionalo e copialo a mano.",
+      "done": "Ho copiato il segreto"
+    },
+    "toggle": "Endpoint attivo",
+    "paused": "In pausa",
+    "test": "Invia una prova",
+    "testSent": "Prova inviata: la trovi tra le consegne.",
+    "deliveries": "Consegne",
+    "hideDeliveries": "Nascondi le consegne",
+    "deliveriesEmpty": "Ancora nessuna consegna.",
+    "deliveriesFailed": "Non siamo riusciti a caricare le consegne.",
+    "attempt": "Tentativo {n}",
+    "noResponse": "Nessuna risposta",
+    "delete": "Elimina",
+    "deleteTitle": "Eliminare l'endpoint?",
+    "deleteBody": "{url} non riceverà più eventi e il suo segreto smette di valere.",
+    "deleteConfirm": "Elimina endpoint",
+    "deleted": "Endpoint eliminato",
+    "saved": "Endpoint aggiornato",
+    "empty": "Nessun endpoint. Aggiungine uno per ricevere gli eventi della selezione.",
+    "loadFailed": "Non siamo riusciti a caricare i webhook.",
+    "docs": {
+      "title": "Verificare la firma",
+      "body": "Ogni richiesta porta queste intestazioni. Calcola l'HMAC SHA-256 di timestamp, un punto e il corpo grezzo, con il segreto come chiave, e confrontalo con la firma. Scarta le richieste con un timestamp troppo vecchio.",
+      "event": "Tipo di evento, per esempio application.moved",
+      "delivery": "Identificativo della consegna, uguale in ogni tentativo",
+      "signature": "sha256= seguito dall'HMAC in esadecimale",
+      "timestamp": "Momento dell'invio, lo stesso usato nella firma",
+      "retries": "Una risposta 2xx entro 10 secondi conferma la consegna. Altrimenti riproviamo fino a 5 volte, con attese crescenti. I redirect non vengono seguiti."
+    },
+    "errors": {
+      "invalid_url": "Inserisci un URL valido",
+      "https_required": "Serve un indirizzo https",
+      "credentials_not_allowed": "Niente utente e password nell'URL",
+      "events": "Scegli almeno un evento"
     }
   }
 }

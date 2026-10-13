@@ -122,3 +122,11 @@ export function definePublicQuery<D, S extends z.ZodType, O>(definition: PublicQ
     definition.handler({ deps, input: parseInput(definition.input, rawInput) });
   return Object.defineProperty(run, 'name', { value: definition.name });
 }
+
+/**
+ * A job run by the platform itself over every organization (deadline scan, publishing of outbox events): there is no
+ * actor to authorize and no organization to scope the call to, so each repository call it makes carries the organization
+ * of the row it is working on. Validates the input; nothing else. Never expose it through HTTP, the agent or MCP.
+ */
+export const defineSystemJob = <D, S extends z.ZodType, O>(definition: PublicQueryDefinition<D, S, O>): PublicQuery<D, O> =>
+  definePublicQuery(definition);

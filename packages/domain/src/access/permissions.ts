@@ -21,6 +21,11 @@ export const STATEMENTS = {
   email_template: ['manage'],
   /** Sender name and own domain. */
   email_settings: ['manage'],
+  /** Follow-up tasks for candidates and jobs. */
+  task: ['read', 'manage'],
+  /** Per-stage rules. They can send a template or create a task, never move or decide. */
+  automation: ['manage'],
+  webhook: ['manage'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -52,6 +57,9 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     message: ['read', 'send'],
     email_template: ['manage'],
     email_settings: ['manage'],
+    task: ['read', 'manage'],
+    automation: ['manage'],
+    webhook: ['manage'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],
@@ -60,6 +68,8 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     candidate_note: ['create'],
     message: ['read', 'send'],
     email_template: ['manage'],
+    task: ['read', 'manage'],
+    automation: ['manage'],
   },
   /**
    * Writes and edits ads and moves candidates through the stages. Putting ads online, taking them down and deciding
@@ -71,8 +81,9 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     candidate: ['read', 'update', 'move'],
     candidate_note: ['create'],
     message: ['read'],
+    task: ['read', 'manage'],
   },
-  interviewer: { job: ['read'], candidate: ['read'], candidate_note: ['create'], message: ['read'] },
+  interviewer: { job: ['read'], candidate: ['read'], candidate_note: ['create'], message: ['read'], task: ['read'] },
 };
 
 export const PERMISSIONS: readonly Permission[] = (Object.keys(STATEMENTS) as Resource[]).flatMap((resource) =>

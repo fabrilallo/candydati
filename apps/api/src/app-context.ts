@@ -2,11 +2,17 @@ import { randomUUID } from 'node:crypto';
 import {
   createDrizzleApplicationCounts,
   createDrizzleAuditLog,
+  createDrizzleAutomationRules,
+  createDrizzleOutbox,
   createDrizzleJobTemplates,
   createDrizzleJobs,
   createDrizzleOrganizationDirectory,
   createDrizzlePrivacyNotices,
   type AuditLogRepository,
+  type AutomationRuleDeps,
+  type NotificationDeps,
+  type TaskDeps,
+  type WebhookDeps,
   type CandidateDeps,
   type EmailIdentity,
   type EmailSender as MessageSender,
@@ -29,6 +35,7 @@ import type { Env } from './config/env.js';
 import { createActorResolver } from './http/actor-resolver.js';
 import { createMessagingDeps } from './wiring/messaging-deps.js';
 import { createPhase2Deps } from './wiring/phase2-deps.js';
+import { createPhase4Deps } from './wiring/phase4-deps.js';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
 import type { Actor } from '@tt/core';
 
@@ -69,6 +76,10 @@ export interface AppContext {
   readonly submitDeps: SubmitApplicationDeps;
   readonly messagingDeps: MessagingDeps;
   readonly inboundDeps: InboundDeps;
+  readonly notificationDeps: NotificationDeps;
+  readonly taskDeps: TaskDeps;
+  readonly automationDeps: AutomationRuleDeps;
+  readonly webhookDeps: WebhookDeps;
 }
 
 export interface AppContextDeps {
@@ -104,6 +115,7 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     userNames: createUserNameLookup(db),
     resolveActor: (request) => resolveFromHeaders(fromNodeHeaders(request.headers)),
     ...createPhase2Deps({ db, auditLog, files, queue, receipts: messaging.receipts }),
+    ...createPhase4Deps({ db, auditLog, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     messagingDeps: messaging.messagingDeps,
     inboundDeps: messaging.inboundDeps,
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
@@ -115,6 +127,8 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
       applicationCounts: createDrizzleApplicationCounts(db),
       organizations: createDrizzleOrganizationDirectory(db),
       privacyNotices: createDrizzlePrivacyNotices(db),
+      automationRules: createDrizzleAutomationRules(db),
+      outbox: createDrizzleOutbox(db),
       adQuality,
       adQualityThreshold: env.platform.adQualityThreshold,
       newId: randomUUID,

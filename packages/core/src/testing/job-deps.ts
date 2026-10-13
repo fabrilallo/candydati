@@ -4,13 +4,23 @@ import { fakeAdQualityAnalyzer } from './job-fixtures.js';
 import { createCandidateStore, createInMemoryApplicationCounts } from './in-memory-candidates.js';
 import { createInMemoryPrivacyNoticeRepository } from './in-memory-privacy.js';
 import {
+  createInMemoryAutomationRules,
+  createInMemoryOutbox,
+  type InMemoryAutomationRules,
+  type InMemoryOutbox,
+} from './in-memory-automation.js';
+import {
   createInMemoryJobRepository,
   createInMemoryJobTemplateRepository,
   createInMemoryOrganizationDirectory,
 } from './in-memory-jobs.js';
 
 /** Fully in-memory `JobDeps` with a counter-based id generator and a fixed clock. */
-export type TestJobDeps = JobDeps & { readonly auditLog: InMemoryAuditLog };
+export type TestJobDeps = JobDeps & {
+  readonly auditLog: InMemoryAuditLog;
+  readonly outbox: InMemoryOutbox;
+  readonly automationRules: InMemoryAutomationRules;
+};
 
 export function createTestJobDeps(overrides: Partial<TestJobDeps> = {}): TestJobDeps {
   let counter = 0;
@@ -21,6 +31,8 @@ export function createTestJobDeps(overrides: Partial<TestJobDeps> = {}): TestJob
     organizations: createInMemoryOrganizationDirectory(),
     applicationCounts: createInMemoryApplicationCounts(createCandidateStore()),
     privacyNotices: createInMemoryPrivacyNoticeRepository(),
+    outbox: createInMemoryOutbox(),
+    automationRules: createInMemoryAutomationRules(),
     adQuality: fakeAdQualityAnalyzer(),
     adQualityThreshold: 6,
     newId: () => {

@@ -18,3 +18,8 @@ export * from './messaging/html.js';
 export * from './messaging/template.js';
 export * from './messaging/defaults.js';
 export * from './messaging/message.js';
+export * from './response/response-state.js';
+export * from './notification/notification.js';
+export * from './task/task.js';
+export * from './automation/automation.js';
+export * from './webhook/webhook.js';

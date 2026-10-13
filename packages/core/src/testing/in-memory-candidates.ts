@@ -12,6 +12,7 @@ import type {
 import type { OpenApplicationCounts } from '../job-ports.js';
 import type { ApplicationIntake, IntakeRepositories } from '../intake-ports.js';
 import type { AuditLogRepository } from '../ports.js';
+import type { OutboxRepository } from '../webhook-ports.js';
 
 /** The rows of the four candidate tables. Replaced wholesale (never mutated) so a snapshot is just a reference. */
 export interface CandidateStoreState {
@@ -95,8 +96,19 @@ export function createInMemoryApplicationRepository(store: CandidateStore): Appl
     async listByCandidate(organizationId, candidateId) {
       return newestFirst(inOrg(organizationId).filter((a) => a.candidateId === candidateId));
     },
+    async listAwaitingResponse(organizationId, dueBefore) {
+      return awaiting(inOrg(organizationId), dueBefore);
+    },
+    async listAwaitingResponseAcrossOrganizations(dueBefore) {
+      return awaiting(store.read().applications, dueBefore);
+    },
   };
 }
+
+const awaiting = (applications: readonly Application[], dueBefore: Date): readonly Application[] =>
+  applications
+    .filter((a) => a.outcome === null && a.respondedAt === null && a.responseDueAt !== null && a.responseDueAt <= dueBefore)
+    .toSorted((a, b) => (a.responseDueAt?.getTime() ?? 0) - (b.responseDueAt?.getTime() ?? 0));
 
 export function createInMemoryCandidateNoteRepository(store: CandidateStore): CandidateNoteRepository {
   const inOrg = (organizationId: string) => store.read().notes.filter((n) => n.organizationId === organizationId);
@@ -177,12 +189,13 @@ export const createInMemoryUserDirectory = (names: Readonly<Record<string, strin
 });
 
 /** Transaction by snapshot: on failure the store goes back to what it was when `run` started. */
-export function createInMemoryApplicationIntake(store: CandidateStore, auditLog: AuditLogRepository): ApplicationIntake {
+export function createInMemoryApplicationIntake(store: CandidateStore, auditLog: AuditLogRepository, outbox: OutboxRepository): ApplicationIntake {
   const repositories: IntakeRepositories = {
     candidates: createInMemoryCandidateRepository(store),
     applications: createInMemoryApplicationRepository(store),
     extractions: createInMemoryCvExtractionRepository(store),
     auditLog,
+    outbox,
   };
   return {
     async run(work) {

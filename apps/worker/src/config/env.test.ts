@@ -85,3 +85,13 @@ describe('loadEnv email', () => {
     expect(() => loadEnv({ ...base, EMAIL_PROVIDER: 'resend' })).toThrow(/RESEND_API_KEY/);
   });
 });
+
+describe('loadEnv webhooks', () => {
+  const base = { ...S3, DATABASE_URL: VALID_DATABASE_URL };
+
+  it('allows private webhook targets only on an explicit true', () => {
+    expect(loadEnv(base).WEBHOOKS_ALLOW_PRIVATE).toBe(false);
+    expect(loadEnv({ ...base, WEBHOOKS_ALLOW_PRIVATE: 'true' }).WEBHOOKS_ALLOW_PRIVATE).toBe(true);
+    expect(loadEnv({ ...base, WEBHOOKS_ALLOW_PRIVATE: 'yes' }).WEBHOOKS_ALLOW_PRIVATE).toBe(false);
+  });
+});

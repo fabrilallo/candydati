@@ -4,12 +4,14 @@ import { Button } from '@/components/ui/button'
 import type { Crumb } from '@/lib/crumbs'
 
 /**
- * Sticky bar on top of every app page: menu button (below lg), breadcrumbs, the page's secondary actions, then
- * language and theme. Actions drop to their own row on a phone so the breadcrumbs keep their room.
+ * Sticky bar on top of every app page: menu button (below lg), breadcrumbs, the page's secondary actions, then the
+ * notifications bell, language and theme. Actions drop to their own row on a phone so the breadcrumbs keep their room;
+ * the bell stays, language and theme move to the drawer.
  */
 defineProps<{ crumbs: readonly Crumb[] }>()
 const { t } = useI18n()
 const { drawerOpen } = useNavPanel()
+const { viewer } = useViewer()
 </script>
 
 <template>
@@ -19,9 +21,12 @@ const { drawerOpen } = useNavPanel()
         <MenuIcon class="size-5" aria-hidden="true" />
       </Button>
       <AppBreadcrumbs :crumbs="crumbs" class="flex-1" />
-      <div class="ml-auto flex items-center gap-0.5 max-sm:hidden" :class="$slots.actions ? 'order-3 border-l pl-2' : ''">
-        <LocaleSwitcher />
-        <ThemeToggle />
+      <div class="ml-auto flex items-center gap-0.5" :class="$slots.actions ? 'sm:order-3 sm:border-l sm:pl-2' : ''">
+        <NotificationBell v-if="viewer" />
+        <span class="flex items-center gap-0.5 max-sm:hidden">
+          <LocaleSwitcher />
+          <ThemeToggle />
+        </span>
       </div>
       <div v-if="$slots.actions" class="flex items-center gap-1.5 max-sm:order-4 max-sm:w-full max-sm:justify-end sm:order-2">
         <slot name="actions" />

@@ -22,6 +22,7 @@ export interface WorkerStopOptions {
 export interface WorkerBoss {
   createQueue(name: string): Promise<void>;
   work(name: string, options: { readonly includeMetadata: true }, handler: (jobs: WorkerJob[]) => Promise<void>): Promise<string>;
+  schedule(name: string, cron: string, data: object): Promise<void>;
   stop(options?: WorkerStopOptions): Promise<void>;
 }
 
@@ -58,7 +59,7 @@ const processJob = async (definition: QueueDefinition, job: WorkerJob, logger: L
     );
   }
   const jobLogger = logger.child({ queue: definition.name, jobId: job.id });
-  await definition.handle({ jobId: job.id, payload: parsed.data, logger: jobLogger, lastAttempt: isLastAttempt(job) });
+  await definition.handle({ jobId: job.id, payload: parsed.data, logger: jobLogger, lastAttempt: isLastAttempt(job), attempt: (job.retryCount ?? 0) + 1 });
 };
 
 const createBatchHandler =
@@ -87,6 +88,7 @@ export const startWorker = async ({ boss, logger, queues }: StartWorkerOptions):
   for (const definition of queues) {
     await boss.createQueue(definition.name);
     await boss.work(definition.name, { includeMetadata: true }, createBatchHandler(definition, logger));
+    if (definition.schedule) await boss.schedule(definition.name, definition.schedule.cron, definition.schedule.data);
   }
   logger.info({ queues: queues.map((definition) => definition.name) }, 'worker ready');
   return { stop: createStop(boss, logger) };

@@ -19,6 +19,7 @@ const createFakeBoss = () => {
       handlers.set(name, handler);
       return `${name}-worker`;
     }),
+    schedule: vi.fn(async () => undefined),
     stop: vi.fn(async () => undefined),
   };
   return { boss, handlers, created };
@@ -107,6 +108,16 @@ describe('startWorker', () => {
 
     expect(info).toHaveBeenCalledWith(expect.objectContaining({ queues: ['system.heartbeat'] }), 'worker ready');
     info.mockRestore();
+  });
+});
+
+describe('startWorker schedules', () => {
+  it('registers the cron of a scheduled queue after its handler, and only for those', async () => {
+    const { boss } = createFakeBoss();
+    const scheduled = defineQueue({ name: 'tick', payload: z.unknown(), schedule: { cron: '0 * * * *', data: {} }, handle: async () => undefined });
+    await startWorker({ boss, logger: silentLogger, queues: [countingQueue(), scheduled] });
+    expect(boss.schedule).toHaveBeenCalledTimes(1);
+    expect(boss.schedule).toHaveBeenCalledWith('tick', '0 * * * *', {});
   });
 });
 

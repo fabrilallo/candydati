@@ -75,6 +75,8 @@ export const buildApplication = (overrides: Partial<Application> = {}): Applicat
   updatedAt: DATE,
   stageChangedAt: DATE,
   closedAt: null,
+  responseDueAt: null,
+  respondedAt: null,
   ...overrides,
 });
 

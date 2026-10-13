@@ -33,6 +33,14 @@ export const AUDIT_ACTIONS = [
   'email_template.saved',
   'email_template.deleted',
   'email_settings.updated',
+  'task.created',
+  'task.completed',
+  'task.reopened',
+  'automation.saved',
+  'automation.deleted',
+  'automation.ran',
+  'webhook.saved',
+  'webhook.deleted',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

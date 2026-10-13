@@ -48,7 +48,10 @@ describe('submitApplication: success', () => {
     });
     expect(await deps.files.get(application?.cv.key ?? '')).toEqual(fakePdfBytes());
     expect(extractions[0]).toMatchObject({ applicationId: application?.id, status: 'pending' });
-    expect(deps.queue.jobs()).toEqual([{ name: 'cv.extract', payload: { organizationId: ORG_A, applicationId: application?.id } }]);
+    expect(deps.queue.jobs()).toEqual([
+      { name: 'cv.extract', payload: { organizationId: ORG_A, applicationId: application?.id } },
+      { name: 'automation.run', payload: { organizationId: ORG_A, applicationId: application?.id, stageId: 'received' } },
+    ]);
     const [event] = deps.auditLog.events();
     expect(event).toMatchObject({
       organizationId: ORG_A,

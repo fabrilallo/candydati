@@ -7,6 +7,8 @@ export interface JobContext<Payload> {
   readonly logger: Logger;
   /** True when pg-boss will not retry this job after a failure. */
   readonly lastAttempt: boolean;
+  /** 1-based: the retry count so far plus one. */
+  readonly attempt: number;
 }
 
 /**
@@ -16,6 +18,8 @@ export interface JobContext<Payload> {
 export interface QueueDefinition<Schema extends z.ZodType = z.ZodType> {
   readonly name: string;
   readonly payload: Schema;
+  /** Recurring job: pg-boss sends `data` to this queue on the cron (UTC, minute granularity). Registered once, idempotently. */
+  readonly schedule?: { readonly cron: string; readonly data: object };
   handle(job: JobContext<z.output<Schema>>): Promise<void>;
 }
 

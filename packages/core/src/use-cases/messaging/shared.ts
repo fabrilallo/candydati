@@ -6,6 +6,7 @@ import {
   type Candidate,
   type EmailSettings,
   type EmailTemplate,
+  type EmailTemplateKind,
   type Job,
   type Locale,
   type TemplateValues,
@@ -118,4 +119,25 @@ export async function requireApplicationInOrganization(
   const application = await deps.applications.findById(organizationId, id);
   if (!application) throw new NotFoundError('Application not found.');
   return application;
+}
+
+export interface ResolvedTemplate {
+  readonly subject: string;
+  readonly body: string;
+}
+
+/** A stored template by id, or a built-in default (`default:<kind>`, in the language of the ad). Null when it does not exist. */
+export async function resolveTemplate(
+  deps: Pick<MessagingDeps, 'templates'>,
+  organizationId: string,
+  templateId: string,
+  language: Locale,
+): Promise<ResolvedTemplate | null> {
+  if (templateId.startsWith(DEFAULT_TEMPLATE_PREFIX)) {
+    const kind = templateId.slice(DEFAULT_TEMPLATE_PREFIX.length) as EmailTemplateKind;
+    if (!isSingletonKind(kind) || !(SINGLETON_TEMPLATE_KINDS as readonly string[]).includes(kind)) return null;
+    const edited = await deps.templates.findByKind(organizationId, kind);
+    return edited ?? defaultEmailTemplate(kind, language);
+  }
+  return deps.templates.findById(organizationId, templateId);
 }

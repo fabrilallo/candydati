@@ -45,7 +45,7 @@ describe('the whole application story', () => {
     const applied = await w.submit(personForm({ email: 'giulia@example.com' }));
     expect(applied.statusCode).toBe(201);
     expect(JSON.parse(applied.body)).toEqual({ success: true, data: { received: true }, error: null });
-    expect(t.queue.jobs().map((j) => j.name).slice(-2)).toEqual(['cv.extract', 'email.send']);
+    expect(t.queue.jobs().map((j) => j.name).slice(-3)).toEqual(['cv.extract', 'automation.run', 'email.send']);
 
     const board = await pipelineOf(w);
     expect(board.stages[0]).toMatchObject({ id: 'received', count: 1 });

@@ -7,6 +7,7 @@ import type {
   Outcome,
   PipelineStage,
   PrivacyNotice,
+  ResponseState,
   SelectionStage,
 } from '@tt/domain';
 import type { CandidateSummary } from '../candidate-ports.js';
@@ -43,6 +44,10 @@ export interface ApplicationCardDto {
   readonly createdAt: string;
   readonly stageChangedAt: string;
   readonly closedAt: string | null;
+  /** Deadline of the promise to answer; null once answered or decided. */
+  readonly responseDueAt: string | null;
+  readonly respondedAt: string | null;
+  readonly responseState: ResponseState;
   readonly noteCount: number;
   /** True when the stage no longer exists in the job's process: show "stage removed". */
   readonly stageRemoved: boolean;
@@ -107,6 +112,9 @@ export interface CandidateDetailDto {
     readonly createdAt: string;
     readonly stageChangedAt: string;
     readonly closedAt: string | null;
+    readonly responseDueAt: string | null;
+    readonly respondedAt: string | null;
+    readonly responseState: ResponseState;
     readonly consent: { readonly privacyNoticeVersion: number; readonly scopes: readonly ConsentScope[]; readonly givenAt: string };
     readonly retentionExpiresAt: string;
     readonly cv: { readonly fileName: string; readonly mediaType: string; readonly sizeBytes: number };
@@ -145,6 +153,9 @@ export const toApplicationCardDto = (view: ApplicationCardView): ApplicationCard
     createdAt: iso(application.createdAt),
     stageChangedAt: iso(application.stageChangedAt),
     closedAt: isoOrNull(application.closedAt),
+    responseDueAt: isoOrNull(application.responseDueAt),
+    respondedAt: isoOrNull(application.respondedAt),
+    responseState: view.responseState,
     noteCount: view.noteCount,
     stageRemoved: view.stageRemoved,
     candidate: {
@@ -204,7 +215,7 @@ const toCandidateDto = (candidate: Candidate): CandidateDetailDto['candidate'] =
 
 export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetailDto => ({
   candidate: toCandidateDto(view.candidate),
-  applications: view.applications.map(({ application, job, stages, extraction, messageCount }) => ({
+  applications: view.applications.map(({ application, job, stages, extraction, messageCount, responseState }) => ({
     id: application.id,
     job: { id: job.id, title: job.content.title, slug: job.slug },
     stageId: application.stageId,
@@ -215,6 +226,9 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
     createdAt: iso(application.createdAt),
     stageChangedAt: iso(application.stageChangedAt),
     closedAt: isoOrNull(application.closedAt),
+    responseDueAt: isoOrNull(application.responseDueAt),
+    respondedAt: isoOrNull(application.respondedAt),
+    responseState,
     consent: {
       privacyNoticeVersion: application.consent.privacyNoticeVersion,
       scopes: application.consent.scopes,

@@ -22,13 +22,15 @@ const canReadJobs = computed(() => can(role.value, 'job:read'))
 const { stats } = canReadJobs.value ? useJobStats() : { stats: computed(() => null) }
 const canReadCandidates = computed(() => can(role.value, 'candidate:read'))
 const { count: candidateCount } = canReadCandidates.value ? useCandidateCount() : { count: computed(() => null) }
+const { count: attentionCount } = canReadCandidates.value ? useAttentionCount() : { count: computed(() => null) }
 const counts = computed<Partial<Record<NavId, number>>>(() => ({
   ...(stats.value ? { jobs: stats.value.statusCounts.published } : {}),
   ...(candidateCount.value === null ? {} : { candidates: candidateCount.value }),
+  ...(attentionCount.value === null ? {} : { attention: attentionCount.value }),
 }))
 const publicPath = computed(() => (viewer.value?.organization ? careersPath(viewer.value.organization.slug) : null))
 /** What a screen reader hears for each count. */
-const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount', candidates: 'nav.candidateCount' }
+const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount', candidates: 'nav.candidateCount', attention: 'nav.attentionCount' }
 </script>
 
 <template>

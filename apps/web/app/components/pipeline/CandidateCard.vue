@@ -105,7 +105,10 @@ const moreTags = computed(() => Math.max(0, props.card.candidate.tags.length - T
     </ul>
 
     <div class="flex items-center justify-between gap-3 border-t pt-3 text-xs text-muted-foreground">
-      <time :datetime="card.stageChangedAt" :title="t('pipeline.card.inStageSince')">{{ since }}</time>
+      <div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+        <time :datetime="card.stageChangedAt" :title="t('pipeline.card.inStageSince')">{{ since }}</time>
+        <ResponsePill :application="card" :now="now" />
+      </div>
       <span v-if="card.stageRemoved" class="rounded-full bg-muted px-2 py-0.5 font-medium" data-testid="card-stage-removed">{{ t('pipeline.stageRemoved') }}</span>
       <span v-if="card.noteCount > 0" class="inline-flex items-center gap-1" data-testid="card-notes">
         <MessageSquareTextIcon class="size-3.5" aria-hidden="true" />

@@ -1,4 +1,5 @@
-import type { FileStorage } from './intake-ports.js';
+import type { FileStorage, TaskQueue } from './intake-ports.js';
+import type { OutboxRepository } from './webhook-ports.js';
 import type {
   Application,
   Candidate,
@@ -43,6 +44,10 @@ export interface ApplicationRepository {
   listByJob(organizationId: string, jobId: string): Promise<readonly Application[]>;
   /** Newest first. */
   listByCandidate(organizationId: string, candidateId: string): Promise<readonly Application[]>;
+  /** Open applications with a deadline (`responseDueAt` not null, not answered) at or before `dueBefore`, earliest deadline first. */
+  listAwaitingResponse(organizationId: string, dueBefore: Date): Promise<readonly Application[]>;
+  /** Same, across every organization. Only for the system scan: it groups the result by organization itself. */
+  listAwaitingResponseAcrossOrganizations(dueBefore: Date): Promise<readonly Application[]>;
 }
 
 export interface CandidateNoteRepository {
@@ -106,6 +111,10 @@ export interface CandidateDeps extends CoreDeps {
   readonly candidateSearch: CandidateSearch;
   readonly users: UserDirectory;
   readonly files: FileStorage;
+  /** `automation.run` is enqueued after a move. A failure to enqueue never undoes the move. */
+  readonly queue: TaskQueue;
+  /** `application.moved` and `application.decided` events for webhooks. */
+  readonly outbox: OutboxRepository;
   readonly newId: () => string;
   readonly now: () => Date;
 }

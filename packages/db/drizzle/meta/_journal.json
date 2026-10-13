@@ -50,6 +50,13 @@
       "when": 1791903828642,
       "tag": "0006_messaging",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791905694608,
+      "tag": "0007_automations_deadlines",
+      "breakpoints": true
     }
   ]
 }

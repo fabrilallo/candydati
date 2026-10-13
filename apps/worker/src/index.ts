@@ -1,10 +1,17 @@
 import { createDb } from '@tt/db';
-import { createEmailProvider, createS3FileStorage } from '@tt/providers';
+import { createEmailProvider, createS3FileStorage, toEmailIdentity } from '@tt/providers';
 import { PgBoss } from 'pg-boss';
 import pino from 'pino';
 import { loadEnv } from './config/env.js';
 import { createDeliverDeps } from './email/deps.js';
-import { toEmailSender } from '@tt/providers';
+import { toEmailSender, toMessagingConfig } from '@tt/providers';
+import { createPhase4WorkerDeps } from './automation/deps.js';
+import { formatDigestFrom } from './deadlines/digest.js';
+import { createPgBossQueue } from './queue/pg-boss-queue.js';
+import { createAutomationRunQueue } from './queues/automation-run.js';
+import { createDeadlinesScanQueue } from './queues/deadlines-scan.js';
+import { createWebhookDeliverQueue } from './queues/webhook-deliver.js';
+import { createWebhookPublishQueue } from './queues/webhook-publish.js';
 import { createCvExtractionDeps } from './cv-extraction/deps.js';
 import { createCvExtractQueue } from './queues/cv-extract.js';
 import { createEmailSendQueue } from './queues/email-send.js';
@@ -47,9 +54,38 @@ const main = async (): Promise<void> => {
     fastModel: env.FAST_MODEL,
     onModelError: (reason) => logger.warn({ reason }, 'cv model failed, keeping the plain text'),
   });
-  const sender = toEmailSender(createEmailProvider(env.email, (line) => logger.info(line)));
+  const provider = createEmailProvider(env.email, (line) => logger.info(line));
+  const sender = toEmailSender(provider);
   const deliverDeps = createDeliverDeps({ db: database.db, sender, platform: env.platform, email: env.email });
-  const queues = [...QUEUE_DEFINITIONS, createCvExtractQueue(cvDeps), createEmailSendQueue(deliverDeps)];
+  const phase4 = createPhase4WorkerDeps({
+    db: database.db,
+    queue: createPgBossQueue(boss),
+    sender,
+    identity: toEmailIdentity(provider),
+    platform: env.platform,
+    email: env.email,
+    production: env.NODE_ENV === 'production',
+    allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE,
+  });
+  const messaging = toMessagingConfig(env.platform, env.email);
+  const queues = [
+    ...QUEUE_DEFINITIONS,
+    createCvExtractQueue(cvDeps),
+    createEmailSendQueue(deliverDeps),
+    createAutomationRunQueue(phase4.run),
+    createWebhookDeliverQueue(phase4.deliver),
+    createWebhookPublishQueue(phase4.publish),
+    createDeadlinesScanQueue({
+      scan: phase4.scan,
+      digest: {
+        sender,
+        from: formatDigestFrom(env.platform.name, `${messaging.emailFromLocal}@${messaging.emailDomain}`),
+        platformUrl: env.platform.url,
+        locale: env.platform.defaultLocale,
+      },
+      now: () => new Date(),
+    }),
+  ];
   const worker = await startWorker({ boss, logger, queues });
   for (const signal of SHUTDOWN_SIGNALS) {
     process.on(signal, () => void shutdown(signal, worker, database.close, logger));

@@ -1,12 +1,14 @@
-import { pipelineStagesOf } from '@tt/domain';
+import { computeResponseDueAt, pipelineStagesOf } from '@tt/domain';
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
+import { enqueueAutomations } from '../automations/enqueue.js';
 import { requireJob } from '../jobs/shared.js';
+import { recordEvent } from '../webhooks/record-event.js';
 import { defineCandidateUseCase } from './define.js';
 import { loadCardView, requireApplication } from './shared.js';
 import type { MoveApplicationResult } from './views.js';
 
-/** Between the stages of the job's declared process, only while the application is open. */
+/** Between the stages of the job's declared process, only while the application is open. Restarts the response clock. */
 export const moveApplication = defineCandidateUseCase({
   name: 'moveApplication',
   input: z.object({ applicationId: z.string().min(1), stageId: z.string().min(1) }),
@@ -25,7 +27,22 @@ export const moveApplication = defineCandidateUseCase({
     }
     if (application.stageId === input.stageId) throw new ValidationError([{ path: 'stageId', message: 'already_in_stage' }]);
     const now = deps.now();
-    const saved = await deps.applications.save({ ...application, stageId: input.stageId, stageChangedAt: now, updatedAt: now });
+    // A move starts a new stage and a new promise: the clock restarts and "answered" is reset.
+    const saved = await deps.applications.save({
+      ...application,
+      stageId: input.stageId,
+      stageChangedAt: now,
+      updatedAt: now,
+      responseDueAt: computeResponseDueAt(now, job),
+      respondedAt: null,
+    });
+    await recordEvent(deps, saved.organizationId, 'application.moved', {
+      applicationId: saved.id,
+      jobId: saved.jobId,
+      from: application.stageId,
+      to: saved.stageId,
+    });
+    await enqueueAutomations(deps, saved.organizationId, saved.id, saved.stageId);
     return { ...(await loadCardView(deps, saved)), from: application.stageId };
   },
 });

@@ -1,4 +1,4 @@
-import { pipelineStagesOf } from '@tt/domain';
+import { pipelineStagesOf, responseState } from '@tt/domain';
 import { z } from 'zod';
 import { requireJob } from '../jobs/shared.js';
 import { defineCandidateUseCase } from './define.js';
@@ -19,13 +19,16 @@ export const getPipeline = defineCandidateUseCase({
       deps.extractions.findByApplications(actor.organizationId, ids),
       deps.notes.countByApplication(actor.organizationId, ids),
     ]);
+    const now = deps.now();
     const pipeline = pipelineStagesOf(job.content.process);
     const cards = applications.flatMap((application) => {
       const candidate = candidates.find((c) => c.id === application.candidateId);
       if (!candidate) return [];
       const extraction = extractions.find((e) => e.applicationId === application.id) ?? null;
       const stageRemoved = !pipeline.some((stage) => stage.id === application.stageId);
-      return [{ application, candidate, extraction, noteCount: counts[application.id] ?? 0, stageRemoved }];
+      return [
+        { application, candidate, extraction, noteCount: counts[application.id] ?? 0, stageRemoved, responseState: responseState(application, job, now) },
+      ];
     });
     const stages = pipeline.map((stage) => ({
       stage,

@@ -86,6 +86,9 @@ export const application = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
     stageChangedAt: timestamp('stage_changed_at', { withTimezone: true }).defaultNow().notNull(),
     closedAt: timestamp('closed_at', { withTimezone: true }),
+    /** Deadline of the promise to answer; null once answered or decided. */
+    responseDueAt: timestamp('response_due_at', { withTimezone: true }),
+    respondedAt: timestamp('responded_at', { withTimezone: true }),
   },
   (table) => [
     // A candidate cannot have two OPEN applications to the same job; a decided one does not block a new one.
@@ -94,6 +97,10 @@ export const application = pgTable(
       .where(sql`${table.outcome} is null`),
     index('application_org_job_idx').on(table.organizationId, table.jobId),
     index('application_org_candidate_idx').on(table.organizationId, table.candidateId),
+    // Backs the deadline scan and the attention list: only open applications still waiting for an answer.
+    index('application_awaiting_response_idx')
+      .on(table.organizationId, table.responseDueAt)
+      .where(sql`${table.outcome} is null and ${table.responseDueAt} is not null`),
   ],
 );
 

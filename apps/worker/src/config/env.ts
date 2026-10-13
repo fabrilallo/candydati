@@ -4,11 +4,19 @@ import { z } from 'zod';
 
 const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
 
+/** Only an explicit `true` turns it on: private webhook targets are a development convenience. */
+const strictFlag = z
+  .string()
+  .optional()
+  .transform((value) => (value ?? '').trim().toLowerCase() === 'true');
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/, error: 'must be a postgres:// URL' }),
   /** Mastra `provider/model` for the CV structuring. Empty: only the plain text is extracted. */
+  /** `WEBHOOKS_ALLOW_PRIVATE=true`: the SSRF guard lets webhooks reach localhost and private addresses (development only). */
+  WEBHOOKS_ALLOW_PRIVATE: strictFlag,
   FAST_MODEL: z.string().regex(/^[^/\s]+\/\S+$/, 'must look like provider/model').optional(),
 });
 

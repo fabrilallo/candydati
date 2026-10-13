@@ -66,6 +66,8 @@ describe('permissions', () => {
       'candidate:move',
       'candidate_note:create',
       'message:read',
+      'task:read',
+      'task:manage',
     ]);
     expect(roleHasPermission('hiring_manager', 'message:send')).toBe(false);
     expect(roleHasPermission('hiring_manager', 'job:publish')).toBe(false);
@@ -75,7 +77,13 @@ describe('permissions', () => {
   });
 
   it('gives an interviewer read access to ads and candidates and note writing, and nothing else', () => {
-    expect(permissionsOf('interviewer')).toEqual(['job:read', 'candidate:read', 'candidate_note:create', 'message:read']);
+    expect(permissionsOf('interviewer')).toEqual([
+      'job:read',
+      'candidate:read',
+      'candidate_note:create',
+      'message:read',
+      'task:read',
+    ]);
   });
 
   it('lets owner, admin and recruiter send messages and manage templates; only owner and admin manage email settings', () => {
@@ -93,6 +101,24 @@ describe('permissions', () => {
     for (const role of ['hiring_manager', 'interviewer'] as const) {
       expect(permissionsOf(role).filter((p) => /^(message|email_template|email_settings):/.test(p))).toEqual(['message:read']);
     }
+  });
+
+  it('lets owner, admin, recruiter and hiring manager manage tasks; everyone with candidate:read reads them', () => {
+    for (const role of ['owner', 'admin', 'recruiter', 'hiring_manager'] as const) {
+      expect(roleHasPermission(role, 'task:manage')).toBe(true);
+    }
+    expect(roleHasPermission('interviewer', 'task:manage')).toBe(false);
+    for (const role of ROLES) {
+      expect(roleHasPermission(role, 'candidate:read')).toBe(roleHasPermission(role, 'task:read'));
+    }
+  });
+
+  it('lets owner, admin and recruiter manage automations; only owner and admin manage webhooks', () => {
+    for (const role of ['owner', 'admin', 'recruiter'] as const) expect(roleHasPermission(role, 'automation:manage')).toBe(true);
+    for (const role of ['hiring_manager', 'interviewer'] as const) expect(roleHasPermission(role, 'automation:manage')).toBe(false);
+    expect(roleHasPermission('owner', 'webhook:manage')).toBe(true);
+    expect(roleHasPermission('admin', 'webhook:manage')).toBe(true);
+    for (const role of ['recruiter', 'hiring_manager', 'interviewer'] as const) expect(roleHasPermission(role, 'webhook:manage')).toBe(false);
   });
 
   it('gives recruiters no administrative permission', () => {

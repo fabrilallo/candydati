@@ -36,7 +36,11 @@
     "privacy": "Privacy",
     "candidateCount": "{count} candidates",
     "email": "Email",
-    "emailTemplates": "Email templates"
+    "emailTemplates": "Email templates",
+    "attention": "Needs attention",
+    "tasks": "My tasks",
+    "webhooks": "Webhooks",
+    "attentionCount": "{count} need attention"
   },
   "roles": {
     "owner": "Owner",
@@ -338,6 +342,20 @@
       },
       "email_settings": {
         "updated": "Changed the email settings"
+      },
+      "task": {
+        "created": "Created a task",
+        "completed": "Completed a task",
+        "reopened": "Reopened a task"
+      },
+      "automation": {
+        "saved": "Saved an automation",
+        "deleted": "Deleted an automation",
+        "ran": "An automation acted"
+      },
+      "webhook": {
+        "saved": "Saved a webhook",
+        "deleted": "Deleted a webhook"
       }
     }
   },
@@ -873,6 +891,15 @@
       "deleted": "Template deleted",
       "loadFailed": "We could not load the templates.",
       "forbidden": "You do not have permission to see templates."
+    },
+    "close": {
+      "checking": "Checking open applications",
+      "openTitle": "One application is still open | {count} applications are still open",
+      "openBody": "A job closes only when every candidate has an outcome. You can close the open ones as Not selected: then we suggest the outcome message, which you send or skip, and the job closes.",
+      "decideAll": "Close open applications as Not selected",
+      "deciding": "Recording outcomes",
+      "review": "Go to candidates",
+      "decided": "1 outcome recorded | {count} outcomes recorded"
     }
   },
   "public": {
@@ -976,7 +1003,8 @@
     "tabs": {
       "label": "Job sections",
       "candidates": "Candidates",
-      "ad": "Job ad"
+      "ad": "Job ad",
+      "automations": "Automations"
     },
     "received": "Received",
     "receivedHint": "New applications, not looked at yet",
@@ -1041,7 +1069,8 @@
       "profile": "Profile",
       "cv": "CV",
       "notes": "Notes",
-      "messages": "Messages"
+      "messages": "Messages",
+      "tasks": "Tasks"
     },
     "header": {
       "stage": "Stage:",
@@ -1459,6 +1488,213 @@
       "lastName": "Rossi",
       "jobTitle": "Backend developer",
       "stage": "Technical interview"
+    }
+  },
+  "response": {
+    "label": "Answer to the candidate",
+    "dueIn": "Answer due tomorrow | Answer due in {count} days",
+    "dueToday": "Due today",
+    "overdueToday": "Overdue today",
+    "overdue": "1 day late | {count} days late",
+    "answered": "Answered",
+    "dueAt": "Answer promised by {date}"
+  },
+  "attention": {
+    "title": "Needs attention",
+    "description": "Applications waiting for an answer past the promised time, or close to it.",
+    "tabs": {
+      "label": "Answer status",
+      "overdue": "Overdue",
+      "due_soon": "Due soon"
+    },
+    "stage": "Stage: {stage}",
+    "owner": "Owner: {name}",
+    "list": "Applications that need attention",
+    "actions": {
+      "label": "Actions for {name}",
+      "open": "Open profile",
+      "message": "Write",
+      "move": "Move to",
+      "loadingStages": "Loading stages"
+    },
+    "moved": "{name} is in {stage}",
+    "allDone": {
+      "title": "Every candidate has their answer",
+      "body": "No application is waiting past the promised time. When a deadline gets close you will find it here."
+    },
+    "empty": {
+      "overdue": "No overdue applications.",
+      "due_soon": "No applications due in the next two days."
+    }
+  },
+  "notifications": {
+    "bell": "Notifications",
+    "bellUnread": "Notifications, 1 unread | Notifications, {count} unread",
+    "title": "Notifications",
+    "markAll": "Mark all as read",
+    "unread": "Unread",
+    "empty": "No notifications. Answers coming due, assigned tasks and failed automations show up here.",
+    "loadFailed": "We could not load the notifications.",
+    "kinds": {
+      "response_due_soon": "Answer due soon",
+      "response_overdue": "Answer overdue",
+      "task_assigned": "A task was assigned to you",
+      "task_due": "A task is due soon",
+      "job_close_blocked": "The job still has open applications",
+      "automation_failed": "An automation did not succeed",
+      "generic": "New notification"
+    }
+  },
+  "tasks": {
+    "title": "My tasks",
+    "description": "What is assigned to you, by due date.",
+    "groups": {
+      "overdue": "Overdue",
+      "today": "Today",
+      "upcoming": "Upcoming",
+      "none": "No due date"
+    },
+    "fields": {
+      "title": "Task",
+      "titlePlaceholder": "E.g. Call for feedback",
+      "assignee": "Assigned to",
+      "assigneePlaceholder": "Choose a person",
+      "due": "Due date",
+      "dueHint": "Optional."
+    },
+    "add": "Add task",
+    "adding": "Adding",
+    "created": "Task added",
+    "complete": "Mark as done: {title}",
+    "reopen": "Reopen: {title}",
+    "done": "Done",
+    "completed": "Task completed",
+    "reopened": "Task reopened",
+    "dueOn": "By {date}",
+    "assignedTo": "For {name}",
+    "byAutomation": "From an automation",
+    "empty": "No open tasks. Tasks assigned to you, by a person or by an automation, show up here.",
+    "emptyApplication": "No tasks for this application.",
+    "loadFailed": "We could not load the tasks.",
+    "membersFailed": "We could not load the members of the organization.",
+    "errors": {
+      "titleRequired": "Write what needs doing",
+      "titleTooLong": "At most 200 characters",
+      "assigneeRequired": "Choose who it is for",
+      "dueInvalid": "Invalid date"
+    }
+  },
+  "automations": {
+    "title": "Automations",
+    "when": "When an application enters {stage}",
+    "note": "Automations never move candidates or decide about them: they send a template or create a task. An automatic message counts as sent by whoever created the rule, as if they had sent it by hand.",
+    "add": "Add rule",
+    "edit": "Edit",
+    "delete": "Delete",
+    "toggle": "Rule active",
+    "paused": "Paused",
+    "empty": "No rules for this stage.",
+    "author": "Created by {name}",
+    "loadFailed": "We could not load the automations.",
+    "rule": {
+      "sendTemplate": "send the template «{template}»",
+      "sendMissingTemplate": "send a template that no longer exists",
+      "taskForOwner": "create the task «{title}» for the job owner",
+      "taskForOwnerDue": "create the task «{title}» for the job owner, due the same day | create the task «{title}» for the job owner, due within 1 day | create the task «{title}» for the job owner, due within {count} days",
+      "taskForMember": "create the task «{title}» for {member}",
+      "taskForMemberDue": "create the task «{title}» for {member}, due the same day | create the task «{title}» for {member}, due within 1 day | create the task «{title}» for {member}, due within {count} days"
+    },
+    "form": {
+      "addTitle": "New rule: {stage}",
+      "editTitle": "Edit the rule: {stage}",
+      "description": "It runs every time an application enters this stage.",
+      "action": "What happens",
+      "actions": {
+        "send_template": "Send a template to the candidate",
+        "create_task": "Create a task"
+      },
+      "template": "Template",
+      "templatePlaceholder": "Choose a template",
+      "taskTitle": "Task",
+      "assignee": "For whom",
+      "jobOwner": "The job owner",
+      "dueInDays": "Due within (days)",
+      "dueInDaysHint": "Empty: no due date. 0: the same day.",
+      "sendNote": "The message goes out in your name, as if you had sent it.",
+      "save": "Save rule",
+      "saving": "Saving"
+    },
+    "saved": "Rule saved",
+    "deleted": "Rule deleted",
+    "deleteTitle": "Delete the rule?",
+    "deleteBody": "Applications entering the stage will no longer trigger it. What it already did stays.",
+    "deleteConfirm": "Delete rule",
+    "errors": {
+      "templateRequired": "Choose a template",
+      "dueInDays": "A whole number from 0 to 90"
+    }
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "description": "They tell your systems when something happens in hiring. The payload carries ids only, never names or emails: details are read through the API.",
+    "add": "Add endpoint",
+    "fields": {
+      "url": "URL",
+      "urlHint": "https required. It receives a JSON POST request.",
+      "events": "Events"
+    },
+    "events": {
+      "application_received": "Application received",
+      "application_moved": "Application moved to another stage",
+      "application_decided": "Outcome recorded",
+      "job_published": "Job published",
+      "job_closed": "Job closed",
+      "ping": "Test"
+    },
+    "create": "Create endpoint",
+    "creating": "Creating",
+    "newTitle": "New endpoint",
+    "secret": {
+      "title": "Endpoint created",
+      "label": "Signing secret",
+      "warning": "Copy it now: we will not show it again. If you lose it, delete the endpoint and create a new one.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyFailed": "We could not copy it: select it and copy it by hand.",
+      "done": "I copied the secret"
+    },
+    "toggle": "Endpoint active",
+    "paused": "Paused",
+    "test": "Send a test",
+    "testSent": "Test sent: you will find it among the deliveries.",
+    "deliveries": "Deliveries",
+    "hideDeliveries": "Hide deliveries",
+    "deliveriesEmpty": "No deliveries yet.",
+    "deliveriesFailed": "We could not load the deliveries.",
+    "attempt": "Attempt {n}",
+    "noResponse": "No response",
+    "delete": "Delete",
+    "deleteTitle": "Delete the endpoint?",
+    "deleteBody": "{url} will no longer receive events and its secret stops working.",
+    "deleteConfirm": "Delete endpoint",
+    "deleted": "Endpoint deleted",
+    "saved": "Endpoint updated",
+    "empty": "No endpoints. Add one to receive hiring events.",
+    "loadFailed": "We could not load the webhooks.",
+    "docs": {
+      "title": "Verifying the signature",
+      "body": "Every request carries these headers. Compute the HMAC SHA-256 of the timestamp, a dot and the raw body, keyed with the secret, and compare it with the signature. Drop requests whose timestamp is too old.",
+      "event": "Event type, for example application.moved",
+      "delivery": "Delivery id, the same on every attempt",
+      "signature": "sha256= followed by the hex HMAC",
+      "timestamp": "When it was sent, the same value used in the signature",
+      "retries": "A 2xx answer within 10 seconds confirms the delivery. Otherwise we retry up to 5 times, waiting longer each time. Redirects are not followed."
+    },
+    "errors": {
+      "invalid_url": "Enter a valid URL",
+      "https_required": "An https address is required",
+      "credentials_not_allowed": "No user name or password in the URL",
+      "events": "Choose at least one event"
     }
   }
 }
