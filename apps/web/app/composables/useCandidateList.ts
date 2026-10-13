@@ -19,7 +19,7 @@ export const useCandidateList = () => {
   watch([debounced, talentPool, tag], () => {
     page.value = 1
   })
-  const { data, status, refresh } = useAsyncData(
+  const { data, status, refresh } = useFreshAsyncData(
     'candidates-list',
     () => loaded(() => listCandidates(request, { query: debounced.value, tag: tag.value, talentPool: talentPool.value, page: page.value, limit: CANDIDATE_PAGE_SIZE })),
     { watch: [debounced, talentPool, tag, page] },

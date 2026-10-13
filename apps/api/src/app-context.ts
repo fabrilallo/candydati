@@ -46,7 +46,7 @@ import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
 import { zipWriterFactory } from '@tt/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
 import type { Actor, ApiKeyDeps, DelegatedActor } from '@tt/core';
-import { authenticateApiKey } from '@tt/core';
+import { authenticateApiKey, withStorageErrors } from '@tt/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
 import { createApiKeyDeps } from './wiring/api-key-deps.js';
@@ -145,7 +145,8 @@ export interface AppContextDeps {
   readonly reportClock?: (() => Date) | undefined;
 }
 
-export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files, queue, sender, identity, onReceiptError, distributionChannels, reportClock }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, distributionChannels, reportClock }: AppContextDeps): AppContext {
+  const files = withStorageErrors(rawFiles);
   const auditLog = createDrizzleAuditLog(db);
   const auth = createAuth({ env, db, auditLog, emailSender });
   const messaging = createMessagingDeps({ env, db, auditLog, queue, sender, identity, onReceiptError });

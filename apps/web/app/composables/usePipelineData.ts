@@ -7,7 +7,7 @@ import { loaded } from '@/lib/job-api'
  */
 export const usePipelineData = (jobId: string) => {
   const request = useJobsApi()
-  const { data, status, refresh } = useAsyncData(`pipeline-${jobId}`, () => loaded(() => getPipeline(request, jobId)))
+  const { data, status, refresh } = useFreshAsyncData(`pipeline-${jobId}`, () => loaded(() => getPipeline(request, jobId)), { refetchOnFocus: true })
   return {
     pipeline: computed(() => data.value?.data ?? null),
     errorKey: computed(() => data.value?.errorKey ?? null),

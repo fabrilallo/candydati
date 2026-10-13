@@ -8,7 +8,7 @@ import type { AutomationRuleDto } from '@/lib/phase4-contract'
 export const useAutomations = (jobId: string) => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, refresh } = useAsyncData(`automations-${jobId}`, () => loaded(() => listRules(request, jobId)))
+  const { data, refresh } = useFreshAsyncData(`automations-${jobId}`, () => loaded(() => listRules(request, jobId)))
   const rules = ref<readonly AutomationRuleDto[] | null>(data.value?.data ?? null)
   watch(data, (fresh) => {
     rules.value = fresh?.data ?? null

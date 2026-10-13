@@ -12,7 +12,7 @@ const JOB_FILTER_LIMIT = 100
  */
 export const useReports = (period: Ref<Period>, jobId: Ref<string | null>) => {
   const request = useJobsApi()
-  const { data, status, refresh } = useAsyncData('reports', () => loaded(() => getReports(request, period.value, jobId.value)), { watch: [period, jobId] })
+  const { data, status, refresh } = useFreshAsyncData('reports', () => loaded(() => getReports(request, period.value, jobId.value)), { watch: [period, jobId] })
   return {
     report: computed(() => data.value?.data ?? null),
     errorKey: computed(() => data.value?.errorKey ?? null),
@@ -24,6 +24,6 @@ export const useReports = (period: Ref<Period>, jobId: Ref<string | null>) => {
 /** Options of the job filter. A failure leaves only "all ads": the reports still work without it. */
 export const useReportJobs = () => {
   const request = useJobsApi()
-  const { data } = useAsyncData('report-jobs', () => loaded(async () => reportJobOptions((await listJobs(request, null, 1, JOB_FILTER_LIMIT)).jobs)))
+  const { data } = useFreshAsyncData('report-jobs', () => loaded(async () => reportJobOptions((await listJobs(request, null, 1, JOB_FILTER_LIMIT)).jobs)))
   return computed<readonly ReportJobOption[]>(() => data.value?.data ?? [])
 }

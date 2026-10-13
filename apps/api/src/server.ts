@@ -122,7 +122,7 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerOpenApiRoute(app, ctx);
   registerApiKeyRoutes(app, ctx);
   registerMcpRoute(app, ctx);
-  registerAuthRoutes(app, ctx.auth, ctx.rateLimit.authMax, deps.signInLockout);
+  registerAuthRoutes(app, ctx.auth, ctx.rateLimit.authMax, ctx.rateLimit.max, deps.signInLockout);
   registerAuditLogRoutes(app, ctx);
   registerJobQualityRoute(app, ctx);
   registerJobRoutes(app, ctx);

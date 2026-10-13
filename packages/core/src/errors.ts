@@ -1,4 +1,4 @@
-export const ERROR_CODES = ['forbidden', 'not_found', 'validation_failed', 'conflict', 'rate_limited', 'audit_failed'] as const;
+export const ERROR_CODES = ['forbidden', 'not_found', 'validation_failed', 'conflict', 'rate_limited', 'audit_failed', 'storage_unavailable'] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
 /**
@@ -69,6 +69,15 @@ export class AuditWriteError extends CoreError {
 
   constructor(cause: unknown) {
     super('The action could not be recorded in the audit log.', { cause });
+  }
+}
+
+/** The file storage failed (down, timeout, credentials). Safe message; the original error stays in `cause` for the log. */
+export class StorageUnavailableError extends CoreError {
+  readonly code = 'storage_unavailable';
+
+  constructor(cause: unknown) {
+    super('File storage is temporarily unavailable. Please try again shortly.', { cause });
   }
 }
 

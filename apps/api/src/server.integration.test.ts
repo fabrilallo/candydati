@@ -83,6 +83,21 @@ describe('rate limiting', () => {
     }
   });
 
+  it('keeps session reads (every SSR page makes a few) out of the strict auth bucket', async () => {
+    const limited = await createTestApp({ rateLimit: { max: 100, authMax: 2 } });
+    try {
+      const reads: number[] = [];
+      for (let i = 0; i < 10; i += 1) reads.push((await limited.app.inject({ method: 'GET', url: '/api/auth/get-session' })).statusCode);
+      expect(reads.every((status) => status !== 429)).toBe(true);
+      // The strict bucket is untouched by the reads and still enforced.
+      const strict: number[] = [];
+      for (let i = 0; i < 3; i += 1) strict.push((await limited.app.inject({ method: 'GET', url: '/api/auth/ok' })).statusCode);
+      expect(strict).toEqual([200, 200, 429]);
+    } finally {
+      await limited.close();
+    }
+  });
+
   it('limits every other route too', async () => {
     const limited = await createTestApp({ rateLimit: { max: 2, authMax: 100 } });
     try {

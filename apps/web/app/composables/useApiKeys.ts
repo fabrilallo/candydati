@@ -8,7 +8,7 @@ import type { ApiKeyCreatedDto, ApiKeyDto } from '@/lib/phase6-contract'
 export const useApiKeys = () => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, refresh } = useAsyncData('api-keys', () => loaded(() => listApiKeys(request)))
+  const { data, refresh } = useFreshAsyncData('api-keys', () => loaded(() => listApiKeys(request)))
   const keys = ref<readonly ApiKeyDto[] | null>(data.value?.data ?? null)
   watch(data, (fresh) => {
     keys.value = fresh?.data ?? null

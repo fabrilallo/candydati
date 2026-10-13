@@ -20,7 +20,7 @@ const browserXhr = (): XhrLike => new XMLHttpRequest() as unknown as XhrLike
  */
 export const useImportUpload = (makeXhr: () => XhrLike = browserXhr) => {
   const request = useJobsApi()
-  const { data: jobsData } = useAsyncData('import-jobs', () => loaded(async () => (await listJobs(request, null, 1, JOBS_LIMIT)).jobs))
+  const { data: jobsData } = useFreshAsyncData('import-jobs', () => loaded(async () => (await listJobs(request, null, 1, JOBS_LIMIT)).jobs))
   const jobs = computed<readonly JobSummaryDto[]>(() => (jobsData.value?.data ?? []).filter((job) => job.status !== 'closed'))
   const jobsErrorKey = computed(() => jobsData.value?.errorKey ?? null)
 

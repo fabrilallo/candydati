@@ -8,7 +8,7 @@ import { listStaleJobs } from '@/lib/stale-jobs-api'
  */
 export const useStaleJobs = (enabled: Readonly<Ref<boolean>>) => {
   const request = useJobsApi()
-  const { data, status, refresh } = useAsyncData('stale-jobs', () => (enabled.value ? loaded(() => listStaleJobs(request)) : Promise.resolve(null)), {
+  const { data, status, refresh } = useFreshAsyncData('stale-jobs', () => (enabled.value ? loaded(() => listStaleJobs(request)) : Promise.resolve(null)), {
     watch: [enabled],
   })
   return {

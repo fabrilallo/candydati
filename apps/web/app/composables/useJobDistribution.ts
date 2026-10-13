@@ -7,7 +7,7 @@ import { loaded } from '@/lib/job-api'
 export const useJobDistribution = (jobId: string) => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, refresh } = useAsyncData(`job-distribution-${jobId}`, () => loaded(() => listJobChannels(request, jobId)))
+  const { data, refresh } = useFreshAsyncData(`job-distribution-${jobId}`, () => loaded(() => listJobChannels(request, jobId)))
   const syncing = ref(false)
 
   const sync = async (): Promise<void> => {

@@ -13,7 +13,7 @@ const id = String(route.params.id)
 const allowed = computed(() => can(viewer.value?.role ?? null, 'automation:manage'))
 
 // Same key and loader as the other job tabs, so switching tab reuses what is already there.
-const { data } = await useAsyncData(`job-${id}`, () => loaded(() => getJob(api, id)))
+const { data } = await useFreshAsyncData(`job-${id}`, () => loaded(() => getJob(api, id)))
 const job = computed(() => data.value?.data ?? null)
 const errorKey = computed(() => data.value?.errorKey ?? null)
 const title = computed(() => job.value?.content.title || t('job.editor.untitled'))

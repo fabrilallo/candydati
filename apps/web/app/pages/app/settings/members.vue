@@ -12,7 +12,7 @@ const api = useAuthApi()
 const { viewer } = useViewer()
 useSeoMeta({ title: () => t('members.title') })
 
-const { data, refresh } = await useAsyncData('organization-members', () => attempt(() => api.getFullOrganization()))
+const { data, refresh } = await useFreshAsyncData('organization-members', () => attempt(() => api.getFullOrganization()))
 const organization = computed(() => data.value?.data ?? null)
 const loadErrorKey = computed(() => data.value?.errorKey ?? null)
 const role = computed(() => viewer.value?.role ?? null)

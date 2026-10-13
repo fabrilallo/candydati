@@ -18,7 +18,7 @@ const LIMITED = { max: 100_000, authMax: 5 };
 const OUTSIDER = '203.0.113.9';
 
 const getSession = (t: TestApp, headers: Record<string, string>, remoteAddress = OUTSIDER) =>
-  t.app.inject({ method: 'GET', url: '/api/auth/get-session', remoteAddress, headers });
+  t.app.inject({ method: 'GET', url: '/api/auth/ok', remoteAddress, headers });
 
 describe('client address (H1: rate limit bypass through a spoofed IP)', () => {
   it('shares one limit between requests from the same socket, whatever X-Forwarded-For they claim', async () => {

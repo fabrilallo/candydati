@@ -8,6 +8,11 @@ import { runWithRequestHeaders } from './request-context.js';
 export const AUTH_PREFIX = '/api/auth';
 export const SIGN_IN_PATH = `${AUTH_PREFIX}/sign-in/email`;
 
+/** Cheap, read-only session lookups that every server-rendered page makes: they get their own, larger budget. */
+const SESSION_READ_PATHS: ReadonlySet<string> = new Set([`${AUTH_PREFIX}/get-session`, `${AUTH_PREFIX}/organization/list`, `${AUTH_PREFIX}/organization/get-full-organization`]);
+export const isSessionRead = (request: Pick<FastifyRequest, 'method' | 'url'>): boolean =>
+  request.method === 'GET' && SESSION_READ_PATHS.has(request.url.split('?')[0] ?? '');
+
 const toWebRequest = (request: FastifyRequest): Request => {
   const url = new URL(request.url, `${request.protocol}://${request.headers.host ?? 'localhost'}`);
   const hasBody = request.method !== 'GET' && request.method !== 'HEAD' && request.body !== undefined;
@@ -43,19 +48,26 @@ async function recordOutcome(lockout: SignInLockout, email: string, status: numb
 
 /**
  * Mounts Better Auth under /api/auth/*. `authMax`: requests per minute per client; sign-in and sign-up get a much
- * smaller budget than the rest of the api. `lockout` refuses sign-in for an account after repeated failures, whatever
+ * smaller budget than the rest of the api. Session reads (`readMax`, the general api budget) have a separate counter. `lockout` refuses sign-in for an account after repeated failures, whatever
  * the client address (the address can be spoofed or rotated; the account cannot).
  */
 export function registerAuthRoutes(
   app: FastifyInstance,
   auth: Auth,
   authMax: number,
+  readMax: number,
   lockout: SignInLockout = createInMemorySignInLockout(),
 ): void {
   app.route({
     method: ['GET', 'POST'],
     url: `${AUTH_PREFIX}/*`,
-    config: { rateLimit: { max: authMax, timeWindow: '1 minute' } },
+    config: {
+      rateLimit: {
+        max: (request: FastifyRequest) => (isSessionRead(request) ? readMax : authMax),
+        keyGenerator: (request: FastifyRequest) => (isSessionRead(request) ? `session-read:${request.ip}` : request.ip),
+        timeWindow: '1 minute',
+      },
+    },
     handler: async (request, reply) => {
       const signInEmail = signInEmailOf(request);
       const lockedForMs = signInEmail === null ? null : await lockout.lockedForMs(signInEmail);

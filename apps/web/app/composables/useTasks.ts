@@ -13,7 +13,7 @@ export const useTasks = (applicationId: string | null) => {
   const { t } = useI18n()
   const request = useJobsApi()
   const key = applicationId ? `tasks-application-${applicationId}` : 'tasks-mine'
-  const { data, status, refresh } = useAsyncData(key, () => loaded(() => (applicationId ? listApplicationTasks(request, applicationId) : listMyTasks(request))))
+  const { data, status, refresh } = useFreshAsyncData(key, () => loaded(() => (applicationId ? listApplicationTasks(request, applicationId) : listMyTasks(request))))
   const tasks = ref<readonly TaskDto[] | null>(data.value?.data ?? null)
   watch(data, (fresh) => {
     tasks.value = fresh?.data ?? null

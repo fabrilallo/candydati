@@ -21,7 +21,7 @@ export type WizardBusy = 'mapping' | 'items' | 'commit' | null
 export const useImportWizard = (batchId: string) => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, refresh } = useAsyncData(`import-${batchId}`, () => loaded(() => getImport(request, batchId)))
+  const { data, refresh } = useFreshAsyncData(`import-${batchId}`, () => loaded(() => getImport(request, batchId)))
   const detail = ref<ImportDetailDto | null>(data.value?.data ?? null)
   const step = ref<WizardStep>(detail.value ? wizardStep(detail.value.batch.status) : 'analysis')
   const mapping = ref<ImportMapping>(detail.value?.batch.mapping ?? emptyMapping())

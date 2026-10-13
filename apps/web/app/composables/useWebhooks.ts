@@ -8,7 +8,7 @@ import type { WebhookCreatedDto, WebhookEndpointDto } from '@/lib/phase4-contrac
 export const useWebhooks = () => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, refresh } = useAsyncData('webhooks', () => loaded(() => listWebhooks(request)))
+  const { data, refresh } = useFreshAsyncData('webhooks', () => loaded(() => listWebhooks(request)))
   const endpoints = ref<readonly WebhookEndpointDto[] | null>(data.value?.data ?? null)
   watch(data, (fresh) => {
     endpoints.value = fresh?.data ?? null

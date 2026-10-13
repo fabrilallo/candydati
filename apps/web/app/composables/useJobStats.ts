@@ -6,7 +6,7 @@ import { getJobStats, loaded } from '@/lib/job-api'
  */
 export const useJobStats = () => {
   const request = useJobsApi()
-  const { data, status, refresh } = useAsyncData('job-stats', () => loaded(() => getJobStats(request)))
+  const { data, status, refresh } = useFreshAsyncData('job-stats', () => loaded(() => getJobStats(request)))
   return {
     stats: computed(() => data.value?.data ?? null),
     errorKey: computed(() => data.value?.errorKey ?? null),

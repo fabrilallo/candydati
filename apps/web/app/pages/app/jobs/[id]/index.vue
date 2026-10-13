@@ -9,7 +9,7 @@ const { viewer } = useViewer()
 const api = useJobsApi()
 const id = String(route.params.id)
 
-const { data } = await useAsyncData(`job-${id}`, () => loaded(() => getJob(api, id)))
+const { data } = await useFreshAsyncData(`job-${id}`, () => loaded(() => getJob(api, id)))
 const job = computed(() => data.value?.data ?? null)
 const errorKey = computed(() => data.value?.errorKey ?? null)
 const allowed = computed(() => can(viewer.value?.role ?? null, 'job:read'))

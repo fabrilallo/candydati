@@ -13,7 +13,7 @@ export const EMAIL_TEMPLATES_KEY = 'email-templates'
 export const useEmailTemplates = () => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, status, refresh } = useAsyncData(EMAIL_TEMPLATES_KEY, () => loaded(() => listTemplates(request)))
+  const { data, status, refresh } = useFreshAsyncData(EMAIL_TEMPLATES_KEY, () => loaded(() => listTemplates(request)))
   const busy = ref(false)
   const saveErrorKey = ref<string | null>(null)
 

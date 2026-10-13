@@ -1,7 +1,4 @@
-import { buildAuthClient, type AuthClient } from '@/lib/auth-client'
-
-const onlyStrings = (headers: Readonly<Record<string, string | undefined>>): Record<string, string> =>
-  Object.fromEntries(Object.entries(headers).filter((entry): entry is [string, string] => typeof entry[1] === 'string'))
+import { buildAuthClient, ssrAuthHeaders, type AuthClient } from '@/lib/auth-client'
 
 /**
  * Better Auth client on the same origin: `/api/auth` is forwarded to the api, so the session cookie stays first-party.
@@ -12,8 +9,8 @@ const onlyStrings = (headers: Readonly<Record<string, string | undefined>>): Rec
  */
 export const useAuthClient = (): AuthClient => {
   if (import.meta.server) {
-    const config = useRuntimeConfig()
-    return buildAuthClient(config.apiInternalUrl, { ...onlyStrings(useRequestHeaders(['cookie'])), origin: config.public.siteUrl })
+    const { baseURL, headers } = useApiTransport()
+    return buildAuthClient(baseURL ?? '', ssrAuthHeaders(headers, useRuntimeConfig().public.siteUrl))
   }
   const app = useNuxtApp() as { _authClient?: AuthClient }
   app._authClient ??= buildAuthClient(window.location.origin)

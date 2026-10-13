@@ -9,7 +9,7 @@ export const useJobList = () => {
   const status = ref<JobStatus | null>(null)
   const page = ref(1)
   const request = useJobsApi()
-  const { data, status: fetchStatus, refresh } = useAsyncData('jobs-list', () => loaded(() => listJobs(request, status.value, page.value, JOB_PAGE_SIZE)), { watch: [status, page] })
+  const { data, status: fetchStatus, refresh } = useFreshAsyncData('jobs-list', () => loaded(() => listJobs(request, status.value, page.value, JOB_PAGE_SIZE)), { watch: [status, page] })
 
   const setStatus = (next: JobStatus | null): void => {
     status.value = next

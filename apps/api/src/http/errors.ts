@@ -19,6 +19,7 @@ export const CORE_STATUS: Readonly<Record<ErrorCode, number>> = {
   conflict: 409,
   rate_limited: 429,
   audit_failed: 500,
+  storage_unavailable: 503,
 };
 
 export interface HttpFailure {
@@ -73,7 +74,7 @@ export function toHttpFailure(error: unknown): HttpFailure {
     const cv = cvFailure(error);
     if (cv) return cv;
     const status = CORE_STATUS[error.code];
-    if (status >= 500) return { ...INTERNAL, code: error.code, message: error.message };
+    if (status >= 500) return { ...INTERNAL, status, code: error.code, message: error.message };
     const issues = 'issues' in error && Array.isArray(error.issues) ? (error.issues as { path: string; message: string }[]) : [];
     const detail = issues.map((issue) => `${issue.path || 'input'}: ${issue.message}`).join('; ');
     return { status, code: error.code, message: detail || error.message, log: false };

@@ -14,7 +14,7 @@ const w = useImportWizard(props.batchId)
 watch(w.step, (step) => emit('step', step), { immediate: true })
 const batch = computed(() => w.detail.value?.batch ?? null)
 
-const { data: pipeline } = useAsyncData(
+const { data: pipeline } = useFreshAsyncData(
   `import-${props.batchId}-stages`,
   () => (batch.value?.jobId ? loaded(() => getPipeline(request, batch.value?.jobId ?? '')) : Promise.resolve(null)),
   { watch: [() => batch.value?.jobId] },

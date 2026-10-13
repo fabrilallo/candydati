@@ -12,7 +12,7 @@ export const useJobInterviewers = (jobId: string) => {
   const { t } = useI18n()
   const request = useJobsApi()
   const team = useMembers()
-  const { data, refresh } = useAsyncData(`job-interviewers-${jobId}`, () => attempt(() => getInterviewers(request, jobId)))
+  const { data, refresh } = useFreshAsyncData(`job-interviewers-${jobId}`, () => attempt(() => getInterviewers(request, jobId)))
   const local = ref<InterviewersByStage | null>(null)
   const byStage = computed<InterviewersByStage>(() => local.value ?? data.value?.data ?? {})
   const saving = ref<string | null>(null)

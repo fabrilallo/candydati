@@ -10,7 +10,7 @@ import { can } from '@/lib/permissions-ui'
 const { t } = useI18n()
 const { viewer } = useViewer()
 const api = useJobsApi()
-const { data, status, refresh } = useAsyncData('job-templates', () => loaded(() => listTemplates(api)))
+const { data, status, refresh } = useFreshAsyncData('job-templates', () => loaded(() => listTemplates(api)))
 const nowMs = useState('templates-now', () => Date.now())
 const now = computed(() => new Date(nowMs.value))
 const templates = computed(() => data.value?.data ?? [])

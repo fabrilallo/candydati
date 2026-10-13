@@ -7,7 +7,7 @@ import { attempt } from '@/lib/load-result'
 export const useJobApproval = (jobId: string) => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, refresh } = useAsyncData(`job-approval-${jobId}`, () => attempt(() => getJobApproval(request, jobId)))
+  const { data, refresh } = useFreshAsyncData(`job-approval-${jobId}`, () => attempt(() => getJobApproval(request, jobId)))
   const asking = ref(false)
   const ask = async (reason: string): Promise<boolean> => {
     asking.value = true

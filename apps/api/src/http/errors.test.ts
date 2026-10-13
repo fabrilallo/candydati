@@ -61,3 +61,12 @@ describe('toHttpFailure', () => {
     },
   );
 });
+
+describe('storage_unavailable', () => {
+  it('maps to a logged 503 with the safe message, hiding the cause', async () => {
+    const { StorageUnavailableError } = await import('@tt/core');
+    const failure = toHttpFailure(new StorageUnavailableError(new Error('ECONNREFUSED 10.0.0.9')));
+    expect(failure).toMatchObject({ status: 503, code: 'storage_unavailable', log: true });
+    expect(failure.message).not.toContain('10.0.0.9');
+  });
+});

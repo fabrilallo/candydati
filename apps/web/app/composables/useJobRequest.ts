@@ -13,7 +13,7 @@ export const useJobRequest = (id: () => string) => {
   const request = useJobsApi()
   const assistant = useAssistant()
   const prefill = useAssistantPrefill()
-  const { data, refresh } = useAsyncData(() => `job-request-${id()}`, () => loaded(() => getJobRequest(request, id())), { watch: [id] })
+  const { data, refresh } = useFreshAsyncData(() => `job-request-${id()}`, () => loaded(() => getJobRequest(request, id())), { watch: [id] })
   const decided = ref<JobRequestDto | null>(null)
   watch(data, () => {
     decided.value = null

@@ -7,7 +7,7 @@ import { newestFirst } from '@/lib/job-request-view'
 /** The organization's hiring requests, newest first. */
 export const useJobRequests = () => {
   const request = useJobsApi()
-  const { data, refresh } = useAsyncData('job-requests', () => loaded(() => listJobRequests(request)))
+  const { data, refresh } = useFreshAsyncData('job-requests', () => loaded(() => listJobRequests(request)))
   return {
     items: computed(() => (data.value?.data ? newestFirst(data.value.data) : null)),
     errorKey: computed(() => data.value?.errorKey ?? null),
@@ -19,7 +19,7 @@ export const useJobRequests = () => {
 export const useApprovalSetting = () => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data } = useAsyncData('approval-setting', () => loaded(() => getApprovalSetting(request)))
+  const { data } = useFreshAsyncData('approval-setting', () => loaded(() => getApprovalSetting(request)))
   const override = ref<boolean | null>(null)
   const saving = ref(false)
   const value = computed(() => override.value ?? data.value?.data ?? null)

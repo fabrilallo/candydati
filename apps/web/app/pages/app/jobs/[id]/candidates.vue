@@ -15,7 +15,7 @@ const id = String(route.params.id)
 const allowed = computed(() => can(viewer.value?.role ?? null, 'candidate:read'))
 
 // Same key and loader as the ad page, so switching tab reuses what is already there.
-const { data } = await useAsyncData(`job-${id}`, () => loaded(() => getJob(api, id)))
+const { data } = await useFreshAsyncData(`job-${id}`, () => loaded(() => getJob(api, id)))
 const job = computed(() => data.value?.data ?? null)
 const title = computed(() => job.value?.content.title || t('job.editor.untitled'))
 const publicPath = computed(() => (job.value?.status === 'published' && viewer.value?.organization ? publicJobPath(viewer.value.organization.slug, job.value.slug) : null))

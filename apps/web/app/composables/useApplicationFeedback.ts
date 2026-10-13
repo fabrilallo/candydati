@@ -8,7 +8,7 @@ import type { FeedbackRequestInput } from '@/lib/phase9-contract'
 export const useApplicationFeedback = (applicationId: () => string) => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, status, refresh } = useAsyncData(`feedback-${applicationId()}`, () => loaded(() => listApplicationFeedback(request, applicationId())), { watch: [applicationId] })
+  const { data, status, refresh } = useFreshAsyncData(`feedback-${applicationId()}`, () => loaded(() => listApplicationFeedback(request, applicationId())), { watch: [applicationId] })
   const busy = ref(false)
   const sendErrorKey = ref<string | null>(null)
 

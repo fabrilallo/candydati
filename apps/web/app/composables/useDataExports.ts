@@ -18,7 +18,7 @@ const byNewest = (a: DataExportDto, b: DataExportDto): number => b.createdAt.loc
 export const useDataExports = () => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, refresh } = useAsyncData('data-exports', () => loaded(() => listDataExports(request)))
+  const { data, refresh } = useFreshAsyncData('data-exports', () => loaded(() => listDataExports(request)))
   // Polled or just-created lists override the first load; a computed (not a watcher) so the server render and hydration agree.
   const override = ref<readonly DataExportDto[] | null>(null)
   watch(data, () => {

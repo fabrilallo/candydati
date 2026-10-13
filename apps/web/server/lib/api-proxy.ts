@@ -1,4 +1,6 @@
-import { isIP } from 'node:net'
+import { clientIpOf, forwardedForHeader } from '../../app/lib/client-ip'
+
+export { clientIpOf }
 
 /**
  * Same-origin proxy from `/api/**` to the Fastify api. Pure: no h3, no runtime config, `fetch` injected, so it
@@ -65,26 +67,12 @@ export const isMcpPath = (pathWithQuery: string): boolean => /^\/mcp\/?(?:\?|$)/
 
 export const apiTarget = (apiOrigin: string, pathWithQuery: string): string => `${apiOrigin.replace(/\/+$/, '')}${pathWithQuery}`
 
-/** `::ffff:203.0.113.7` (an IPv4 peer seen on a dual-stack socket) is the same client as `203.0.113.7`. */
-const normalizeIp = (address: string | undefined): string | null => {
-  const value = address?.trim().replace(/^::ffff:/i, '') ?? ''
-  return value !== '' && isIP(value) !== 0 ? value : null
-}
-
-/**
- * The client IP the api rate-limits on: the socket address, or, only when the deploy says the web sits behind
- * Cloudflare, the `cf-connecting-ip` Cloudflare set. A header sent by an ordinary client is never used.
- */
-export const clientIpOf = (request: Pick<ProxyRequest, 'headers' | 'socketAddress' | 'trustCloudflare'>): string | null =>
-  (request.trustCloudflare ? normalizeIp(request.headers.get('cf-connecting-ip') ?? undefined) : null) ?? normalizeIp(request.socketAddress)
-
 export const upstreamRequestHeaders = (request: Pick<ProxyRequest, 'headers' | 'host' | 'protocol' | 'socketAddress' | 'trustCloudflare'>): Headers => {
   const out = new Headers()
   request.headers.forEach((value, name) => {
     if (!DROPPED_REQUEST_HEADERS.has(name) && !CLIENT_ADDRESS_HEADERS.includes(name)) out.set(name, value)
   })
-  const clientIp = clientIpOf(request)
-  if (clientIp) out.set('x-forwarded-for', clientIp)
+  for (const [name, value] of Object.entries(forwardedForHeader(request))) out.set(name, value)
   out.set('x-forwarded-host', request.host)
   out.set('x-forwarded-proto', request.protocol)
   return out

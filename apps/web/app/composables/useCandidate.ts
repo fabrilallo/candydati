@@ -34,7 +34,7 @@ const withCard = (detail: CandidateDetailDto, card: ApplicationCardDto): Candida
 export const useCandidate = (candidateId: MaybeRefOrGetter<string>) => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, status, refresh } = useAsyncData(() => `candidate-${toValue(candidateId)}`, () => loaded(() => getCandidate(request, toValue(candidateId))))
+  const { data, status, refresh } = useFreshAsyncData(() => `candidate-${toValue(candidateId)}`, () => loaded(() => getCandidate(request, toValue(candidateId))))
   const detail = ref<CandidateDetailDto | null>(data.value?.data ?? null)
   watch(data, (fresh) => {
     detail.value = fresh?.data ?? null

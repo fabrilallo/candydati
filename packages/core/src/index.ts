@@ -1,6 +1,7 @@
 export * from './actor.js';
 export * from './authorization.js';
 export * from './errors.js';
+export * from './storage-guard.js';
 export * from './ports.js';
 export * from './use-case.js';
 export * from './use-cases/list-audit-log.js';

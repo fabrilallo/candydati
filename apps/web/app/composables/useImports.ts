@@ -18,7 +18,7 @@ const byNewest = (a: ImportBatchDto, b: ImportBatchDto): number => b.createdAt.l
 export const useImports = () => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, refresh } = useAsyncData('imports', () => loaded(() => listImports(request)))
+  const { data, refresh } = useFreshAsyncData('imports', () => loaded(() => listImports(request)))
   // Polled lists override the first load; a computed (not a watcher) so the server render and hydration agree.
   const polled = ref<readonly ImportBatchDto[] | null>(null)
   watch(data, () => {
