@@ -2,8 +2,7 @@ import { useDebounceFn } from '@vueuse/core'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { previewMessage, sendMessages, unknownFromFailure } from '@/lib/message-api'
-import type { EmailTemplateDto, TemplatePreviewDto } from '@/lib/message-schemas'
-import { BULK_MESSAGE_MAX, EMAIL_TEMPLATE_BODY_MAX, EMAIL_TEMPLATE_SUBJECT_MAX, findUnknownVariables } from '@tt/domain'
+import { BULK_MESSAGE_MAX, EMAIL_TEMPLATE_BODY_MAX, EMAIL_TEMPLATE_SUBJECT_MAX, findUnknownVariables, type EmailTemplateDto, type TemplatePreviewDto } from '@tt/domain'
 
 /** Time without typing before the preview is asked again. */
 export const PREVIEW_DELAY_MS = 400

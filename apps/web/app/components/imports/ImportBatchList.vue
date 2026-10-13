@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { ImportBatchDto } from '@tt/domain'
 import { FileUpIcon, LoaderCircleIcon, Undo2Icon } from '@lucide/vue'
 import { formatDateTime } from '@/lib/format'
 import { batchFigures, batchTone, isWorking } from '@/lib/import-view'
-import type { ImportBatchDto } from '@/lib/phase8-contract'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -49,7 +49,7 @@ const resumable = (batch: ImportBatchDto): boolean => batch.status === 'ready' |
           </p>
           <p class="flex flex-wrap gap-x-2.5 gap-y-1 text-sm text-muted-foreground [&>*+*]:before:mr-2.5 [&>*+*]:before:text-input [&>*+*]:before:content-['|']">
             <span class="font-medium text-foreground">{{ batch.job?.title ?? t('imports.list.noJob') }}</span>
-            <span v-if="batch.author?.name">{{ t('imports.list.by', { name: batch.author.name }) }}</span>
+            <span v-if="batch.createdBy.name">{{ t('imports.list.by', { name: batch.createdBy.name }) }}</span>
             <span class="figure" data-testid="import-counts">
               <template v-if="batch.status === 'done' || batch.status === 'undone'">
                 {{ t('imports.list.created', { count: batchFigures(batch.counts).created }, batchFigures(batch.counts).created) }}, {{ t('imports.list.merged', { count: batch.counts.merged }, batch.counts.merged) }}<template v-if="batch.counts.skippedReconfirmed > 0">, {{ t('imports.list.reconfirmed', { count: batch.counts.skippedReconfirmed }, batch.counts.skippedReconfirmed) }}</template>

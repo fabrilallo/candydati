@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { JobRequestDto } from '@tt/domain'
 import { CheckIcon, ExternalLinkIcon, SparklesIcon, XIcon } from '@lucide/vue'
 import { formatDate, formatDateTime } from '@/lib/format'
-import { jobRequestAction, requestBudget } from '@/lib/job-request-view'
-import type { JobRequestDto } from '@/lib/phase9-contract'
+import { jobRequestAction, locationLine, noteOr, requestBudget } from '@/lib/job-request-view'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -29,20 +29,20 @@ const confirm = async (note: string): Promise<void> => {
 
 const none = computed(() => t('jobRequests.detail.none'))
 const team = useMembers()
-/** The api may send only the user id: the name comes from the team. */
-const personName = (person: { readonly id: string; readonly name: string | null } | null): string => person?.name ?? (person ? team.nameOf(person.id) : null) ?? none.value
+/** The api sends user ids: the name comes from the team. */
+const personName = (userId: string | null): string => (userId ? team.nameOf(userId) : null) ?? none.value
 const rows = (item: JobRequestDto): readonly (readonly [string, string])[] => [
   ['role', item.role ? t(`taxonomy.roles.${item.role}`) : none.value],
   ['reason', item.reason],
   ['headcount', String(item.headcount)],
   ['budget', requestBudget(item, locale.value) || none.value],
   ['workMode', item.workMode ? t(`taxonomy.workModes.${item.workMode}`) : none.value],
-  ['location', item.location ?? none.value],
+  ['location', locationLine(item.location) || none.value],
   ['desiredStart', item.desiredStart ? formatDate(item.desiredStart, locale.value) : none.value],
 ]
 const processRows = (item: JobRequestDto): readonly (readonly [string, string])[] => [
-  ['processNotes', item.processNotes ?? none.value],
-  ['interviewersNotes', item.interviewersNotes ?? none.value],
+  ['processNotes', noteOr(item.processNotes, none.value)],
+  ['interviewersNotes', noteOr(item.interviewersNotes, none.value)],
 ]
 </script>
 

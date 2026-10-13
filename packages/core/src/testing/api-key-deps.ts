@@ -8,6 +8,7 @@ import {
   type InMemoryApiKeys,
   type InMemoryMemberRoles,
 } from './in-memory-api-keys.js';
+import { createInMemoryTransaction } from './in-memory-transaction.js';
 
 export type TestApiKeyDeps = ApiKeyDeps & {
   readonly auditLog: InMemoryAuditLog;
@@ -28,6 +29,7 @@ export function createTestApiKeyDeps(overrides: Partial<TestApiKeyDeps> = {}): T
   let now = API_KEY_TEST_NOW.getTime();
   return {
     auditLog: createInMemoryAuditLog(),
+    transaction: createInMemoryTransaction(),
     apiKeys: createInMemoryApiKeys(),
     memberRoles: createInMemoryMemberRoles({
       [`${ORG_A}|user_test`]: 'owner',

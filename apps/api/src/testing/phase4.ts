@@ -1,16 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
-  createDrizzleApplications,
-  createDrizzleAuditLog,
-  createDrizzleAutomationRules,
-  createDrizzleMemberDirectory,
-  createDrizzleJobs,
-  createDrizzleNotifications,
-  createDrizzleOutbox,
-  createDrizzleResponsePromises,
-  createDrizzleTasks,
-  createDrizzleWebhookDeliveries,
-  createDrizzleWebhookEndpoints,
+  createDrizzleUnitOfWork,
   deliverWebhook,
   publishWebhookEvents,
   runAutomations,
@@ -32,21 +22,21 @@ import { createMessagingDeps } from '../wiring/messaging-deps.js';
 const systemActor = (organizationId: string): Actor => ({ type: 'system', id: 'test-worker', onBehalfOfUserId: null, organizationId, role: 'recruiter' });
 
 export function automationRunDeps(t: TestApp): AutomationRunDeps {
-  const { db } = t.handle;
-  const auditLog = createDrizzleAuditLog(db);
-  const { messagingDeps } = createMessagingDeps({ env: testEnv(), db, auditLog, queue: t.queue, sender: t.emailSender, identity: createFakeEmailIdentity(), onReceiptError: () => undefined });
-  return { ...messagingDeps, rules: createDrizzleAutomationRules(db), tasks: createDrizzleTasks(db), notifications: createDrizzleNotifications(db), queue: t.queue };
+  const uow = createDrizzleUnitOfWork(t.handle.db);
+  const r = uow.repositories;
+  const { messagingDeps } = createMessagingDeps({ env: testEnv(), uow, queue: t.queue, sender: t.emailSender, identity: createFakeEmailIdentity(), onReceiptError: () => undefined });
+  return { ...messagingDeps, rules: r.rules, executions: r.executions, tasks: r.tasks, notifications: r.notifications, queue: t.queue };
 }
 
 export function scanDeps(t: TestApp): ScanDeps {
-  const { db } = t.handle;
+  const r = createDrizzleUnitOfWork(t.handle.db).repositories;
   return {
-    applications: createDrizzleApplications(db),
-    jobs: createDrizzleJobs(db),
-    promises: createDrizzleResponsePromises(db),
-    tasks: createDrizzleTasks(db),
-    notifications: createDrizzleNotifications(db),
-    members: createDrizzleMemberDirectory(db),
+    applications: r.applications,
+    jobs: r.jobs,
+    promises: r.promises,
+    tasks: r.tasks,
+    notifications: r.notifications,
+    members: r.members,
     newId: randomUUID,
   };
 }
@@ -65,12 +55,14 @@ export async function drainAutomations(t: TestApp): Promise<number> {
 const drainedCount = new WeakMap<TestApp, number>();
 
 export function deliverDeps(t: TestApp, poster: HttpPoster, hostGuard: HostGuard = createHostGuard({ allowPrivate: false })): WebhookDeliverDeps {
-  const { db } = t.handle;
+  const uow = createDrizzleUnitOfWork(t.handle.db);
+  const r = uow.repositories;
   return {
-    auditLog: createDrizzleAuditLog(db),
-    endpoints: createDrizzleWebhookEndpoints(db),
-    deliveries: createDrizzleWebhookDeliveries(db),
-    outbox: createDrizzleOutbox(db),
+    auditLog: r.auditLog,
+    transaction: uow.transaction,
+    endpoints: r.endpoints,
+    deliveries: r.deliveries,
+    outbox: r.outbox,
     poster,
     hostGuard,
     newId: randomUUID,
@@ -79,8 +71,9 @@ export function deliverDeps(t: TestApp, poster: HttpPoster, hostGuard: HostGuard
 }
 
 export async function publishOutbox(t: TestApp): Promise<void> {
-  const { db } = t.handle;
-  await publishWebhookEvents({ endpoints: createDrizzleWebhookEndpoints(db), outbox: createDrizzleOutbox(db), queue: t.queue, now: () => new Date() }, {});
+  const uow = createDrizzleUnitOfWork(t.handle.db);
+  const r = uow.repositories;
+  await publishWebhookEvents({ endpoints: r.endpoints, outbox: r.outbox, queue: t.queue, transaction: uow.transaction, now: () => new Date() }, {});
 }
 
 export interface DeliveryJob {

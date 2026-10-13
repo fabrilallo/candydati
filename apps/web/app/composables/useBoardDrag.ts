@@ -1,6 +1,6 @@
+import type { ApplicationCardDto, StageRef } from '@tt/domain'
 import { usePreferredReducedMotion } from '@vueuse/core'
 import type { Ref } from 'vue'
-import type { ApplicationCardDto, StageRef } from '@/lib/candidate-schemas'
 import { adjacentStage } from '@/lib/pipeline-board'
 
 interface Grab {

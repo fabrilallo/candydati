@@ -1629,6 +1629,7 @@
     "system": "Sent automatically",
     "status": {
       "queued": "Queued",
+      "sending": "Sending",
       "sent": "Sent",
       "failed": "Not delivered",
       "received": "Received"
@@ -1842,7 +1843,6 @@
       "list": "Stale ads",
       "noActivity": "No activity for {count} days",
       "published": "Published on {date}",
-      "openApplications": "No open applications | One open application | {count} open applications",
       "open": "Open the ad",
       "close": "Close the ad",
       "empty": "No ad stale for more than {days} days"
@@ -2165,7 +2165,6 @@
       "retentionText": "{selection} for this selection only, {pool} for the talent pool, from the day of consent. Automatic erasure, files included.",
       "retentionMissing": "To be set: publish the privacy notice to set the periods.",
       "recipients": "Configured providers",
-      "providersEmpty": "No provider named in the configuration.",
       "measures": "Security measures",
       "measuresText": "Data separated by organization, permissions by role and by job, append-only activity log, automatic erasure at expiry.",
       "automated": "Automated decisions",
@@ -2174,12 +2173,9 @@
       "generated": "Filled in on {date}"
     },
     "providers": {
-      "hosting": "Hosting",
-      "database": "Database",
       "storage": "File storage",
       "email": "Email delivery",
-      "model": "Language model",
-      "monitoring": "Monitoring"
+      "model": "Language model"
     },
     "templatesTitle": "Templates to have reviewed by a lawyer",
     "templatesNote": "They live in the project repository. Complete and review them before use: they are not legal advice.",
@@ -2483,6 +2479,14 @@
         "running": "Analysing the quality",
         "done": "I analysed the quality"
       },
+      "list_jobs": {
+        "running": "Looking at the ads",
+        "done": "I looked at the ads"
+      },
+      "get_reports_summary": {
+        "running": "Reading the reports",
+        "done": "I read the reports"
+      },
       "get_pipeline_summary": {
         "running": "Looking at the pipeline",
         "done": "I looked at the pipeline"
@@ -2679,24 +2683,11 @@
     "analysis": {
       "title": "Analysis in progress",
       "body": "We read every CV and every row. You can close this page: the analysis goes on and you will find the import in the list.",
-      "progress": "{done} of {total}",
       "cvs": "CVs",
       "rows": "Table rows",
-      "ignored": "Ignored files",
-      "ignoredTitle": "Ignored files and why",
       "failed": "The analysis failed",
       "failedBody": "No candidate was created. Check the files and try a new import.",
       "back": "Back to imports"
-    },
-    "ignored": {
-      "unsupported": "unsupported format",
-      "unreadable": "unreadable or damaged",
-      "empty": "empty",
-      "tooLarge": "too large",
-      "duplicate": "same as another file",
-      "archive": "suspicious archive, too compressed or too large",
-      "encrypted": "password protected",
-      "other": "not usable"
     },
     "mapping": {
       "title": "Check the columns",
@@ -2895,7 +2886,7 @@
       "sending": "Sending…",
       "errors": {
         "recommendation_required": "Choose a recommendation for the next stage.",
-        "answers_required": "Write at least one answer.",
+        "answers_required": "Answer the required questions.",
         "answer_too_long": "An answer is too long: {max} characters at most."
       },
       "done": {

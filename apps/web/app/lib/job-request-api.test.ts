@@ -7,21 +7,22 @@ import { jobRequest } from '../../test/fixtures/job-request-fixtures'
 const ok = (data: unknown) => ({ status: 200, body: { success: true, data, error: null } })
 const NOW = '2026-10-13T10:00:00.000Z'
 const content = { title: 'Dev', language: 'it', salary: { currency: 'EUR', period: 'year' }, location: {}, process: [], summary: '', responsibilities: [], requirements: { mustHave: [], niceToHave: [] }, technologies: [], benefits: [], growth: '', workLifeBalance: '', culture: '' }
-const job = { id: 'j1', slug: 'dev-abc', status: 'draft', content, quality: null, publishIssues: [], createdAt: NOW, updatedAt: NOW, publishedAt: null, closedAt: null }
+const job = { id: 'j1', slug: 'dev-abc', status: 'draft', content, quality: null, publishIssues: [], complianceWarnings: [], createdAt: NOW, updatedAt: NOW, publishedAt: null, closedAt: null }
 const stub = (response: unknown) => vi.fn<JobApiRequest>().mockResolvedValue(response as never)
 
 describe('job request api', () => {
   it('lists and reads requests, parsing leniently', async () => {
-    const request = stub(ok([jobRequest('r1', { status: 'weird', role: 'nope' })]))
+    const request = stub(ok([jobRequest('r1')]))
     const [first] = await listJobRequests(request)
     expect(request).toHaveBeenCalledWith('/api/v1/job-requests', undefined)
-    expect(first).toMatchObject({ id: 'r1', status: 'submitted', role: null })
+    expect(first).toMatchObject({ id: 'r1', status: 'submitted', requestedBy: 'u2', location: { city: 'Milano' } })
+    await expect(listJobRequests(stub(ok([jobRequest('r1', { status: 'weird' })])))).rejects.toMatchObject({ code: 'invalid_response' })
     expect((await getJobRequest(stub(ok(jobRequest('r 2'))), 'r 2')).id).toBe('r 2')
   })
 
   it('creates a request with POST', async () => {
     const request = stub(ok(jobRequest('r1')))
-    await createJobRequest(request, { title: 'Dev', reason: 'x', headcount: 1, salaryMin: 1, salaryMax: 2, currency: 'EUR' })
+    await createJobRequest(request, { title: 'Dev', reason: 'x', headcount: 1, salaryMin: 1, salaryMax: 2, currency: 'EUR', language: 'en', location: {}, processNotes: '', interviewersNotes: '' })
     expect(request).toHaveBeenCalledWith('/api/v1/job-requests', expect.objectContaining({ method: 'POST' }))
   })
 

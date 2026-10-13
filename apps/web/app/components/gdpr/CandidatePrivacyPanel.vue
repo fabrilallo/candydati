@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { DownloadIcon, PencilLineIcon, Trash2Icon } from '@lucide/vue'
-import { isPlaceholderEmail, type CandidateCorrection, type ConsentScope, type Role } from '@tt/domain'
+import { isPlaceholderEmail, type CandidateCorrection, type ConsentScope, type Role, type CandidateApplicationDto, type CandidateDetailDto } from '@tt/domain'
 import type { EraseTarget } from '@/composables/useCandidateRights'
-import type { CandidateApplicationDto, CandidateDetailDto } from '@/lib/candidate-schemas'
 import { candidateExportUrl } from '@/lib/gdpr-api'
 import { withdrawConsequence } from '@/lib/gdpr-view'
 import { renewalDeadline } from '@/lib/import-view'

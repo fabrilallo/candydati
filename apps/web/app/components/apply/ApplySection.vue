@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import type { PublicPrivacyNoticeDto } from '@tt/domain'
 import { CircleCheckIcon } from '@lucide/vue'
-import type { PublicPrivacyNoticeDto } from '@/lib/candidate-schemas'
 import { Button } from '@/components/ui/button'
 
 /**

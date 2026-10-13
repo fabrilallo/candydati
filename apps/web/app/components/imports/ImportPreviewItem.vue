@@ -1,15 +1,15 @@
 <script setup lang="ts">
+import type { ImportItemView } from '@/lib/import-item-view'
 import { FileTextIcon, MailXIcon, Rows3Icon, UserCheckIcon } from '@lucide/vue'
 import { itemProblems } from '@/lib/import-preview'
 import { sourceText } from '@/lib/import-view'
 import { IMPORT_RECONFIRM_DAYS } from '@tt/domain'
-import type { ImportItemDto } from '@/lib/phase8-contract'
 
 /**
  * One proposed candidate: checkbox, name and contacts, confidence, sources (files and rows), and what to look at:
  * missing email, an existing candidate with different data. Dense but readable, one row per person.
  */
-const props = defineProps<{ item: ImportItemDto; included: boolean; disabled: boolean }>()
+const props = defineProps<{ item: ImportItemView; included: boolean; disabled: boolean }>()
 const emit = defineEmits<{ toggle: [include: boolean] }>()
 const { t } = useI18n()
 const name = computed(() => `${props.item.firstName} ${props.item.lastName}`.trim() || t('imports.preview.unnamed'))

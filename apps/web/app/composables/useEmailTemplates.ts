@@ -1,8 +1,8 @@
+import type { EmailTemplateDto } from '@tt/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { loaded } from '@/lib/job-api'
 import { createTemplate, deleteTemplate, listTemplates, updateTemplate, type TemplateInput } from '@/lib/message-api'
-import type { EmailTemplateDto } from '@/lib/message-schemas'
 
 export const EMAIL_TEMPLATES_KEY = 'email-templates'
 

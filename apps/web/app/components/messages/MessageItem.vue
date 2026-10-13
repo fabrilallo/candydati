@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { MessageDto } from '@tt/domain'
 import { TriangleAlertIcon } from '@lucide/vue'
 import { formatDateTime } from '@/lib/format'
-import type { MessageDto } from '@/lib/message-schemas'
 import { messageView } from '@/lib/message-view'
 import { Badge } from '@/components/ui/badge'
 

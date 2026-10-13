@@ -1,5 +1,4 @@
-import type { EmailTemplateDto, MessageDto } from './message-schemas'
-import { EMAIL_TEMPLATE_KINDS, SYSTEM_SENDER, type EmailTemplateKind, type MessageStatus, type Outcome, type TemplateVariable } from '@tt/domain'
+import { EMAIL_TEMPLATE_KINDS, SYSTEM_SENDER, type EmailTemplateKind, type MessageStatus, type Outcome, type TemplateVariable, type EmailTemplateDto, type MessageDto } from '@tt/domain'
 
 export type MessageTone = 'secondary' | 'success' | 'destructive'
 
@@ -25,7 +24,7 @@ export const deliveryErrorKey = (code: string | null): string =>
 
 const isSystem = (message: MessageDto): boolean => message.sentBy === null || message.sentBy.id === SYSTEM_SENDER
 
-const TONES: Readonly<Record<MessageStatus, MessageTone>> = { queued: 'secondary', sent: 'success', failed: 'destructive', received: 'secondary' }
+const TONES: Readonly<Record<MessageStatus, MessageTone>> = { queued: 'secondary', sending: 'secondary', sent: 'success', failed: 'destructive', received: 'secondary' }
 
 /** Pure: how one message is drawn in the conversation. */
 export const messageView = (message: MessageDto, candidateName: string): MessageView => {

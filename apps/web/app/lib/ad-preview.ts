@@ -1,7 +1,6 @@
-import { jobContentSchema, locationSchema, salarySchema, selectionStageSchema, type SelectionStage } from '@tt/domain'
+import { employmentSchema, jobContentSchema, locationSchema, salarySchema, selectionStageSchema, type Employment, type JobContent, type SelectionStage } from '@tt/domain'
 import { employmentToInput } from './employment-form'
 import type { JobForm, StageForm } from './job-form'
-import { employmentSchema, type Employment, type JobContent9 } from './phase9-contract'
 
 type Schema<T> = { safeParse: (value: unknown) => { success: true; data: T } | { success: false } }
 
@@ -33,7 +32,7 @@ const employmentOf = (form: JobForm): Employment | undefined => {
  * is not valid yet is simply left out (an empty title stays empty), so a half-written draft still renders and the
  * missing parts show up as gaps. Incomplete stages are not shown.
  */
-export const formToPreview = (form: JobForm): JobContent9 => {
+export const formToPreview = (form: JobForm): JobContent => {
   const remote = form.workMode === 'remote'
   const salary = valid(salarySchema, defined({ min: number(form.salaryMin), max: number(form.salaryMax), currency: form.currency, period: form.period }))
   const location = defined({
@@ -62,5 +61,5 @@ export const formToPreview = (form: JobForm): JobContent9 => {
     culture: form.culture.trim(),
     employment: employmentOf(form),
     protectedCategories: valid(shape.protectedCategories, text(form.protectedCategories)),
-  }) as JobContent9
+  }) as JobContent
 }

@@ -67,11 +67,35 @@ describe('runAutomations: send_template', () => {
     expect(deps.store.read().applications[0]).toMatchObject({ stageId: 'stage-0', outcome: null });
   });
 
-  it('counts a message that could not be queued as a failure', async () => {
+  it('marks a message whose delivery could not be queued after the commit as failed, never leaving it queued', async () => {
     const base = world({ rules: [sendRule()] });
     const deps = { ...base, queue: { enqueue: async () => Promise.reject(new Error('down')) } };
-    expect(await runAutomations(deps, worker, input())).toMatchObject({ failed: 1 });
-    expect(base.notifications.snapshot()[0]?.kind).toBe('automation_failed');
+    expect(await runAutomations(deps, worker, input())).toMatchObject({ executed: 1 });
+    expect(base.messagingStore.read().messages).toEqual([expect.objectContaining({ status: 'failed', error: 'queue_unavailable' })]);
+  });
+
+  it('runs each rule once per stage entry: a redelivered task does nothing again (#13)', async () => {
+    const deps = world({ rules: [sendRule(), buildAutomationRule({ id: 'rule_task' })] });
+    expect(await runAutomations(deps, worker, input())).toEqual({ executed: 2, failed: 0, skipped: null });
+    expect(await runAutomations(deps, worker, input())).toEqual({ executed: 0, failed: 0, skipped: null });
+    expect(deps.messagingStore.read().messages).toHaveLength(1);
+    expect(deps.tasks.snapshot()).toHaveLength(1);
+    expect(deps.queue.jobs().filter((job) => job.name === 'email.send')).toHaveLength(1);
+    expect(deps.auditLog.events().filter((e) => e.action === 'automation.ran')).toHaveLength(2);
+    // A new entry into the stage runs the rules again.
+    const [application] = deps.store.read().applications;
+    deps.store.write({ applications: [{ ...application!, stageChangedAt: new Date('2026-06-02T00:00:00Z') }] });
+    expect(await runAutomations(deps, worker, input())).toMatchObject({ executed: 2 });
+  });
+
+  it('leaves no trace of a run that failed half-way, so the retry runs it in full', async () => {
+    const base = world({ rules: [sendRule()] });
+    const broken = { ...base, auditLog: { ...base.auditLog, append: async () => Promise.reject(new Error('db down')) } };
+    await expect(runAutomations(broken, worker, input())).rejects.toThrow('db down');
+    expect(base.messagingStore.read().messages).toEqual([]);
+    expect(base.queue.jobs()).toEqual([]);
+    expect(await runAutomations(base, worker, input())).toMatchObject({ executed: 1 });
+    expect(base.messagingStore.read().messages).toHaveLength(1);
   });
 
   it('does not notify twice for the same failing rule and application', async () => {

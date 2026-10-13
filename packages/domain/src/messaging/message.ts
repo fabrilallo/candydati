@@ -3,7 +3,8 @@ import { z } from 'zod';
 export const MESSAGE_DIRECTIONS = ['outbound', 'inbound'] as const;
 export type MessageDirection = (typeof MESSAGE_DIRECTIONS)[number];
 
-export const MESSAGE_STATUSES = ['queued', 'sent', 'failed', 'received'] as const;
+/** `sending`: claimed by one delivery, so a second delivery of the same task never sends it again. */
+export const MESSAGE_STATUSES = ['queued', 'sending', 'sent', 'failed', 'received'] as const;
 export type MessageStatus = (typeof MESSAGE_STATUSES)[number];
 
 /** `sentBy` of messages the platform sends on its own (the application receipt). */

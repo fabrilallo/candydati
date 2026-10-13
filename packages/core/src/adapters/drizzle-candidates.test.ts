@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { createDb, schema, type DbHandle } from '@tt/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { ConflictError } from '../errors.js';
+import { ConflictError, NotFoundError } from '../errors.js';
 import {
   buildApplication,
   buildCandidate,
@@ -131,7 +131,7 @@ describe('createDrizzleApplications', () => {
     expect(await repo.create(first)).toEqual(first);
     expect(await repo.findOpen(orgA, job, c.id)).toEqual(first);
     const decided = { ...first, outcome: 'hired' as const, closedAt: new Date('2026-03-01T00:00:00Z') };
-    expect(await repo.save(decided)).toEqual(decided);
+    expect(await repo.transition(orgA, first.id, { stageId: first.stageId }, { outcome: 'hired', closedAt: decided.closedAt })).toEqual(decided);
     expect(await repo.findOpen(orgA, job, c.id)).toBeNull();
     const second = await repo.create(newApplication(orgA, job, c.id, { createdAt: new Date('2026-04-01T00:00:00Z') }));
     expect((await repo.listByJob(orgA, job)).map((a) => a.id)).toEqual([second.id, first.id]);
@@ -153,7 +153,32 @@ describe('createDrizzleApplications', () => {
     expect(await repo.findOpen(orgB, jobA, c.id)).toBeNull();
     expect(await repo.listByJob(orgB, jobA)).toEqual([]);
     expect(await repo.listByCandidate(orgB, c.id)).toEqual([]);
-    await expect(repo.save({ ...a, organizationId: orgB })).rejects.toThrow();
+    await expect(repo.transition(orgB, a.id, {}, { outcome: 'hired' })).rejects.toBeInstanceOf(ConflictError);
+    await expect(repo.update(orgB, a.id, { consentStatus: 'to_renew' })).rejects.toBeInstanceOf(NotFoundError);
+    expect(await repo.findById(orgA, a.id)).toMatchObject({ outcome: null, consentStatus: 'given' });
+  });
+
+  it('writes a state change only while the row is still open and in the expected stage (#1, #2)', async () => {
+    const c = await createDrizzleCandidates(handle.db).create(newCandidate(orgA));
+    const repo = createDrizzleApplications(handle.db);
+    const a = await repo.create(newApplication(orgA, jobA, c.id, { stageId: 'received' }));
+    await repo.transition(orgA, a.id, { stageId: 'received' }, { stageId: 'stage-1' });
+    // A move read in `received` arrives after another move: refused, the other one stays.
+    await expect(repo.transition(orgA, a.id, { stageId: 'received' }, { stageId: 'stage-2' })).rejects.toBeInstanceOf(ConflictError);
+    await repo.transition(orgA, a.id, {}, { outcome: 'not_selected' });
+    // A second decision, or a move after the decision: refused, the decision stays.
+    await expect(repo.transition(orgA, a.id, {}, { outcome: 'hired' })).rejects.toBeInstanceOf(ConflictError);
+    await expect(repo.transition(orgA, a.id, { stageId: 'stage-1' }, { stageId: 'stage-2', outcome: null })).rejects.toBeInstanceOf(ConflictError);
+    expect(await repo.findById(orgA, a.id)).toMatchObject({ stageId: 'stage-1', outcome: 'not_selected' });
+  });
+
+  it('updates consent columns without ever touching stage or outcome', async () => {
+    const c = await createDrizzleCandidates(handle.db).create(newCandidate(orgA));
+    const repo = createDrizzleApplications(handle.db);
+    const a = await repo.create(newApplication(orgA, jobA, c.id));
+    await repo.transition(orgA, a.id, {}, { outcome: 'hired' });
+    const updated = await repo.update(orgA, a.id, { consentStatus: 'to_renew', retentionExpiresAt: new Date('2030-01-01T00:00:00Z') });
+    expect(updated).toMatchObject({ outcome: 'hired', stageId: a.stageId, consentStatus: 'to_renew' });
   });
 });
 

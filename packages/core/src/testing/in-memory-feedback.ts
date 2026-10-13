@@ -1,6 +1,7 @@
 import type { FeedbackRequest, InterviewFeedback, StageInterviewer } from '@tt/domain';
 import { ConflictError } from '../errors.js';
 import type { FeedbackRequestRepository, InterviewFeedbackRepository, StageInterviewerRepository } from '../feedback-ports.js';
+import { cell } from './in-memory-transaction.js';
 
 export interface FeedbackStoreState {
   readonly interviewers: readonly StageInterviewer[];
@@ -15,11 +16,11 @@ export interface FeedbackStore {
 }
 
 export const createFeedbackStore = (initial: Partial<FeedbackStoreState> = {}): FeedbackStore => {
-  let state: FeedbackStoreState = { interviewers: [], requests: [], feedback: [], ...initial };
+  const state = cell<FeedbackStoreState>({ interviewers: [], requests: [], feedback: [], ...initial });
   return {
-    read: () => state,
+    read: () => state.get(),
     write: (next) => {
-      state = { ...state, ...next };
+      state.set({ ...state.get(), ...next });
     },
   };
 };
@@ -47,15 +48,26 @@ export function createInMemoryStageInterviewers(store: FeedbackStore): StageInte
 
 export function createInMemoryFeedbackRequests(store: FeedbackStore): FeedbackRequestRepository {
   const inOrg = (organizationId: string) => store.read().requests.filter((r) => r.organizationId === organizationId);
+  const replace = (next: FeedbackRequest): FeedbackRequest => {
+    store.write({ requests: store.read().requests.map((r) => (r.organizationId === next.organizationId && r.id === next.id ? next : r)) });
+    return next;
+  };
   return {
     async create(request) {
       if (store.read().requests.some((r) => r.tokenHash === request.tokenHash)) throw new ConflictError('Token already used.');
       store.write({ requests: [...store.read().requests, request] });
       return request;
     },
-    async save(request) {
-      store.write({ requests: store.read().requests.map((r) => (r.organizationId === request.organizationId && r.id === request.id ? request : r)) });
-      return request;
+    async markSubmitted(organizationId, id, submittedAt) {
+      const current = inOrg(organizationId).find((r) => r.id === id);
+      if (!current || current.submittedAt !== null) return false;
+      replace({ ...current, submittedAt });
+      return true;
+    },
+    async rotateToken(organizationId, id, expectedTokenHash, patch) {
+      const current = inOrg(organizationId).find((r) => r.id === id);
+      if (!current || current.submittedAt !== null || current.tokenHash !== expectedTokenHash) return null;
+      return replace({ ...current, ...patch });
     },
     async findById(organizationId, id) {
       return inOrg(organizationId).find((r) => r.id === id) ?? null;

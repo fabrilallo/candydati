@@ -1,0 +1,17 @@
+# Advisories ignored by `pnpm audit --prod --audit-level=high` in .github/workflows/security.yml.
+# One GHSA id per line. Every entry needs a comment saying why it is not exploitable here and a review date.
+# Remove an entry as soon as a patched version is reachable. Reviewed 2026-10-14 (all entries).
+
+# simple-git / @simple-git/argv-parser: pulled in only by @nuxt/devtools (apps/web > nuxt > @nuxt/devtools).
+# Devtools run in `nuxt dev` on a developer machine and are not in the production .output bundle.
+GHSA-v5rq-49vh-5v5c
+GHSA-x6jw-m9v5-85vh
+GHSA-g4wm-2vf7-vfgr
+GHSA-858h-whjf-mvg5
+
+# node-forge: apps/web > nuxt > nitropack > listhen (local HTTPS dev server). Not part of the production server.
+GHSA-86w9-cpqp-85rv
+
+# braces: apps/web > @nuxtjs/i18n > unplugin-vue-i18n > fast-glob > micromatch. Build-time glob expansion of our own
+# static paths; no untrusted input reaches it at runtime.
+GHSA-vfj7-8cjw-p6xm

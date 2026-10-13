@@ -11,6 +11,8 @@ const { viewer } = useViewer()
 const id = computed(() => String(route.params.id))
 /** A link from a notification or the attention list names the application to show first. */
 const applicationId = computed(() => (typeof route.query.application === 'string' ? route.query.application : null))
+/** Opened from a job's pipeline: the job, so a person still to reconfirm stays visible. */
+const viaJobId = computed(() => (typeof route.query.viaJobId === 'string' ? route.query.viaJobId : null))
 const allowed = computed(() => can(viewer.value?.role ?? null, 'candidate:read'))
 const canExport = computed(() => can(viewer.value?.role ?? null, 'candidate:export'))
 useSeoMeta({ title: () => t('candidate.sheet.title') })
@@ -28,7 +30,7 @@ const erased = async (candidateGone: boolean): Promise<void> => {
       </Button>
     </template>
     <div class="mx-auto grid w-full max-w-3xl">
-      <CandidateDetailView v-if="allowed" :key="id" :candidate-id="id" :application-id="applicationId" @erased="erased" />
+      <CandidateDetailView v-if="allowed" :key="id" :candidate-id="id" :application-id="applicationId" :via-job-id="viaJobId" @erased="erased" />
       <FormAlert v-else message-key="errors.forbidden" />
     </div>
   </AppPage>

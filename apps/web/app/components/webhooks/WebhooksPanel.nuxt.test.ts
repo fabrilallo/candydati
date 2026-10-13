@@ -26,8 +26,8 @@ registerEndpoint('/api/v1/webhooks/w1', async (event) => {
 registerEndpoint('/api/v1/webhooks/w1/test', { method: 'POST', handler: () => (state.tests += 1, ok({ queued: true })) })
 registerEndpoint('/api/v1/webhooks/w1/deliveries', () =>
   ok([
-    { id: 'd1', eventType: 'application.received', status: 'success', responseCode: 200, attempt: 1, error: null, createdAt: '2026-10-13T09:00:00.000Z' },
-    { id: 'd2', eventType: 'ping', status: 'failed', responseCode: null, attempt: 2, error: 'timeout', createdAt: '2026-10-13T10:00:00.000Z' },
+    { id: 'd1', eventId: 'ev1', eventType: 'application.received', status: 'success', responseCode: 200, attempt: 1, error: null, createdAt: '2026-10-13T09:00:00.000Z' },
+    { id: 'd2', eventId: 'ev2', eventType: 'ping', status: 'failed', responseCode: null, attempt: 2, error: 'timeout', createdAt: '2026-10-13T10:00:00.000Z' },
   ]),
 )
 

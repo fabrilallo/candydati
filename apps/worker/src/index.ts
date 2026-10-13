@@ -1,3 +1,4 @@
+import { createDrizzleUnitOfWork } from '@tt/core';
 import { createDb } from '@tt/db';
 import { createEmailProvider, createS3FileStorage, toEmailIdentity } from '@tt/providers';
 import { PgBoss } from 'pg-boss';
@@ -8,7 +9,7 @@ import { toEmailSender, toMessagingConfig } from '@tt/providers';
 import { createHrWorkerDeps } from './hr/deps.js';
 import { createPhase4WorkerDeps } from './automation/deps.js';
 import { formatDigestFrom } from './deadlines/digest.js';
-import { createPgBossQueue } from './queue/pg-boss-queue.js';
+import { createPgBossQueue } from '@tt/providers';
 import { createAutomationRunQueue } from './queues/automation-run.js';
 import { createDeadlinesScanQueue } from './queues/deadlines-scan.js';
 import { createDistributionWorkerDeps } from './distribution/deps.js';
@@ -56,10 +57,13 @@ const main = async (): Promise<void> => {
   await boss.start();
 
   const database = createDb(env.DATABASE_URL);
+  // The one composition root: every repository on the pool and the unit of work that rebinds them to a transaction.
+  const uow = createDrizzleUnitOfWork(database.db, (error) => logger.error({ err: error }, 'side effect after commit failed'));
+  const queue = createPgBossQueue(boss);
   const files = createS3FileStorage(env.s3);
   await files.ensureBucket();
   const cvDeps = createCvExtractionDeps({
-    db: database.db,
+    uow,
     files,
     fastModel: env.FAST_MODEL,
     modelDailyBudget: env.CV_MODEL_DAILY_BUDGET,
@@ -67,10 +71,10 @@ const main = async (): Promise<void> => {
   });
   const provider = createEmailProvider(env.email, (line) => logger.info(line));
   const sender = toEmailSender(provider);
-  const deliverDeps = createDeliverDeps({ db: database.db, sender, platform: env.platform, email: env.email });
+  const deliverDeps = createDeliverDeps({ uow, sender, platform: env.platform, email: env.email });
   const phase4 = createPhase4WorkerDeps({
-    db: database.db,
-    queue: createPgBossQueue(boss),
+    uow,
+    queue,
     sender,
     identity: toEmailIdentity(provider),
     platform: env.platform,
@@ -79,18 +83,18 @@ const main = async (): Promise<void> => {
     allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE,
   });
   const messaging = toMessagingConfig(env.platform, env.email);
-  const privacy = createPrivacyWorkerDeps({ db: database.db, files, queue: createPgBossQueue(boss) });
+  const privacy = createPrivacyWorkerDeps({ uow, files, queue });
   const imports = createImportWorkerDeps({
-    db: database.db,
+    uow,
     files,
-    queue: createPgBossQueue(boss),
+    queue,
     platform: env.platform,
     email: env.email,
     fastModel: env.FAST_MODEL,
     onModelError: (reason) => logger.warn({ reason }, 'cv model failed, keeping the plain text'),
     onMailError: (error) => logger.error({ err: error }, 'reconfirmation email not queued'),
   });
-  const hr = createHrWorkerDeps({ db: database.db, sender, config: messaging, onMailError: (error) => logger.error({ err: error }, 'feedback email not sent') });
+  const hr = createHrWorkerDeps({ uow, sender, config: messaging, onMailError: (error) => logger.error({ err: error }, 'feedback email not sent') });
   const digest = {
     sender,
     from: formatDigestFrom(env.platform.name, `${messaging.emailFromLocal}@${messaging.emailDomain}`),
@@ -104,7 +108,7 @@ const main = async (): Promise<void> => {
     createAutomationRunQueue(phase4.run),
     createWebhookDeliverQueue(phase4.deliver),
     createWebhookPublishQueue(phase4.publish),
-    createDistributionSyncQueue(createDistributionWorkerDeps({ db: database.db, platform: env.platform })),
+    createDistributionSyncQueue(createDistributionWorkerDeps({ uow, platform: env.platform })),
     createDeadlinesScanQueue({
       scan: phase4.scan,
       feedback: hr.feedback,

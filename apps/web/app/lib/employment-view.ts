@@ -1,5 +1,5 @@
 import type { Translate } from './ad-text'
-import type { Employment } from './phase9-contract'
+import type { Employment } from '@tt/domain'
 
 const intlLocale = (language: string): string => (language === 'it' ? 'it-IT' : 'en-GB')
 

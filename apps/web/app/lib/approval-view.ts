@@ -1,15 +1,8 @@
+import { APPROVAL_RULES, checkApproval, jobApprovalStatusSchema, salarySchema, type JobApprovalDto, type JobApprovalStatusDto } from '@tt/domain'
 import { z } from 'zod'
+import { jobApprovalPath, jobApprovalRequestPath } from './api-paths'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'
-import {
-  APPROVAL_RANGE_EXCEEDED,
-  APPROVAL_REQUIRED,
-  jobApprovalPath,
-  jobApprovalRequestPath,
-  jobApprovalStatusSchema,
-  type JobApprovalDto,
-  type JobApprovalStatusDto,
-} from './phase9-contract'
 
 export const getJobApproval = async (request: JobApiRequest, jobId: string): Promise<JobApprovalStatusDto> => (await callApi(request, jobApprovalPath(jobId), jobApprovalStatusSchema)).data
 
@@ -25,26 +18,39 @@ export const requestJobApproval = async (request: JobApiRequest, jobId: string, 
  */
 export type ApprovalState = 'off' | 'missing' | 'approved' | 'exceeded'
 
-const amount = (value: string): number | null => (/^\d+$/.test(value.trim()) ? Number(value.trim()) : null)
+const amount = (value: string): number | undefined => (/^\d+$/.test(value.trim()) && Number(value.trim()) > 0 ? Number(value.trim()) : undefined)
 
-export const approvalState = (requireApproval: boolean | null, approval: JobApprovalDto, salaryMin: string, salaryMax: string): ApprovalState => {
+/** The salary fields of the editor form, as typed. */
+export interface ApprovalSalaryForm {
+  readonly salaryMin: string
+  readonly salaryMax: string
+  readonly currency: string
+  readonly period: string
+}
+
+/** Who is told the approval status of an ad: the domain rule (`checkApproval`) decides, this only shapes its input. */
+export const approvalState = (requireApproval: boolean | null, approval: JobApprovalDto | null, form: ApprovalSalaryForm): ApprovalState => {
   if (requireApproval !== true) return 'off'
   if (approval === null) return 'missing'
-  const min = amount(salaryMin)
-  const max = amount(salaryMax)
-  const below = min !== null && min < approval.salaryMin
-  const above = max !== null && max > approval.salaryMax
-  return below || above ? 'exceeded' : 'approved'
+  const salary = salarySchema.safeParse({ min: amount(form.salaryMin), max: amount(form.salaryMax), currency: form.currency || undefined, period: form.period || undefined })
+  // A salary the form cannot yet express is not for approval to judge: the publication itself refuses it.
+  if (!salary.success) return 'approved'
+  return checkApproval(true, { ...approval, approvedAt: new Date(approval.approvedAt) }, salary.data) === null ? 'approved' : 'exceeded'
 }
 
 export const APPROVAL_ERROR_KEYS: readonly string[] = ['job.approval.errors.required', 'job.approval.errors.rangeExceeded']
 
+const APPROVAL_ERROR_KEY: Readonly<Record<(typeof APPROVAL_RULES)[number], string>> = {
+  approval_required: 'job.approval.errors.required',
+  approval_range_exceeded: 'job.approval.errors.rangeExceeded',
+}
+
 /** Pure: the translation key of a publish refusal about approval, or null for any other failure. */
 export const approvalErrorKey = (code: string | null, messages: readonly string[] = []): string | null => {
   const all = [code, ...messages]
-  if (all.includes(APPROVAL_RANGE_EXCEEDED)) return 'job.approval.errors.rangeExceeded'
-  if (all.includes(APPROVAL_REQUIRED)) return 'job.approval.errors.required'
-  return null
+  // Range first: a publish that is both refused for range and missing the approval reads as the more specific one.
+  const rule = [...APPROVAL_RULES].reverse().find((candidate) => all.includes(candidate))
+  return rule === undefined ? null : APPROVAL_ERROR_KEY[rule]
 }
 
 /** Where "Chiedi l'approvazione" leads: the request form, with the title of the ad already written. */

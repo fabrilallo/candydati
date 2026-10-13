@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { MailIcon, SendIcon } from '@lucide/vue'
 import { can } from '@/lib/permissions-ui'
-import type { DraftMessageOutput } from '@/lib/phase6-contract'
+import type { DraftMessageOutput } from '@tt/domain'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,7 +18,7 @@ const { viewer } = useViewer()
 const subject = ref(props.draft.subject)
 const body = ref(props.draft.body)
 const canSend = computed(() => can(viewer.value?.role ?? null, 'message:send'))
-const recipient = computed(() => props.draft.candidateName ?? t('assistant.draftMessage.thisCandidate'))
+const recipient = computed(() => t('assistant.draftMessage.thisCandidate'))
 const review = (): void => emit('review', { ...props.draft, subject: subject.value, body: body.value })
 </script>
 

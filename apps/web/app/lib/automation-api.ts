@@ -1,17 +1,17 @@
-import type { AutomationRuleInput } from '@tt/domain'
-import { z } from 'zod'
-import { callApi } from './api-call'
-import type { JobApiRequest } from './job-api'
 import {
   automationRuleSchema,
   webhookCreatedSchema,
   webhookDeliverySchema,
   webhookEndpointSchema,
   type AutomationRuleDto,
+  type AutomationRuleInput,
   type WebhookCreatedDto,
   type WebhookDeliveryDto,
   type WebhookEndpointDto,
-} from './phase4-contract'
+} from '@tt/domain'
+import { z } from 'zod'
+import { callApi } from './api-call'
+import type { JobApiRequest } from './job-api'
 
 /** Automations per stage of a job and webhooks of the organization (phase 4 contract, HTTP). */
 const id = (value: string): string => encodeURIComponent(value)

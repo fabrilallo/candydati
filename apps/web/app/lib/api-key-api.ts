@@ -1,10 +1,10 @@
-import type { Permission } from '@tt/domain'
+import { apiKeyCreatedSchema, apiKeySchema, type ApiKeyCreatedDto, type ApiKeyDto, type Permission } from '@tt/domain'
 import { z } from 'zod'
 import { ApiFailure, callApi, defaultFailureKey, type FailureInfo } from './api-call'
 import { AppError } from './auth-errors'
 import type { JobApiRequest } from './job-api'
 import { openApiDocumentSchema, type OpenApiDocument } from './openapi-reference'
-import { API_KEYS_PATH, apiKeyCreatedSchema, apiKeyPath, apiKeySchema, OPENAPI_PATH, type ApiKeyCreatedDto, type ApiKeyDto } from './phase6-contract'
+import { API_KEYS_PATH, apiKeyPath, OPENAPI_PATH } from './api-paths'
 
 /** API keys of the organization (`api_key:manage`) and the OpenAPI document (phase 6 contract). */
 export interface ApiKeyCreateInput {

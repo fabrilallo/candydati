@@ -54,7 +54,3 @@ export const splitHighlights = <P extends Phrase = VaguePhrase>(text: string, ph
   if (cursor < text.length) parts.push({ text: text.slice(cursor), phrase: null })
   return parts
 }
-
-/** Pure: the phrases that actually occur in one of `texts` (the others cannot be highlighted). */
-export const phrasesIn = (texts: readonly string[], phrases: readonly VaguePhrase[]): readonly VaguePhrase[] =>
-  phrases.filter((phrase) => texts.some((text) => matchesOf(text, phrase).length > 0))

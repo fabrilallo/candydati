@@ -19,13 +19,13 @@ if (import.meta.server) useResponseHeader('cache-control').value = 'private, no-
 
 const visitor = useVisitorTranslate()
 const consent = data.value?.kind === 'ok' ? data.value.data : null
-const x: Translate = consent ? await useAdTranslate(consent.notice.language) : visitor
+const x: Translate = consent ? await useAdTranslate(consent.privacyNotice.language) : visitor
 const failure = ref<ConsentFailure | null>(data.value?.kind === 'failed' ? data.value.failure : consent ? null : 'unavailable')
 const organization = consent?.organization.name ?? ''
 const title = consent ? x('reconfirm.metaTitle', { organization }) : visitor(`reconfirm.${failure.value ?? 'invalid'}.title`)
 
 useSeoMeta({ title, robots: 'noindex, nofollow' })
-useHead({ htmlAttrs: consent ? { lang: consent.notice.language } : {}, meta: [{ name: 'referrer', content: 'no-referrer' }] })
+useHead({ htmlAttrs: consent ? { lang: consent.privacyNotice.language } : {}, meta: [{ name: 'referrer', content: 'no-referrer' }] })
 </script>
 
 <template>
@@ -44,7 +44,7 @@ useHead({ htmlAttrs: consent ? { lang: consent.notice.language } : {}, meta: [{ 
       <div class="grid max-w-2xl gap-3 text-base text-pretty">
         <p data-testid="reconfirm-intro">{{ consent.job ? x('reconfirm.intro', { organization, job: consent.job.title }) : x('reconfirm.introNoJob', { organization }) }}</p>
         <p>{{ x('reconfirm.choice') }}</p>
-        <p v-if="consent.expiresAt" class="figure text-[0.9375rem] font-medium" data-testid="reconfirm-deadline">{{ x('reconfirm.deadline', { date: formatDate(consent.expiresAt, consent.notice.language) }) }}</p>
+        <p v-if="consent.expiresAt" class="figure text-[0.9375rem] font-medium" data-testid="reconfirm-deadline">{{ x('reconfirm.deadline', { date: formatDate(consent.expiresAt, consent.privacyNotice.language) }) }}</p>
       </div>
     </header>
     <ConsentReconfirm :token="token" :consent="consent" :x="x" @failed="failure = $event" />

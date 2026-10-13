@@ -3,7 +3,7 @@ import { JOB_ROLE_FAMILIES, WORK_MODES } from '@tt/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { createJobRequest } from '@/lib/job-request-api'
-import { requestFormFromTitle, toRequestInput, validateRequestForm, type JobRequestForm, type RequestFormErrors } from '@/lib/job-request-form'
+import { requestFormFromTitle, requestLanguage, toRequestInput, validateRequestForm, type JobRequestForm, type RequestFormErrors } from '@/lib/job-request-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -32,7 +32,7 @@ const submit = async (): Promise<void> => {
   pending.value = true
   errorKey.value = null
   try {
-    const created = await createJobRequest(request, toRequestInput(form.value))
+    const created = await createJobRequest(request, toRequestInput(form.value, requestLanguage(locale.value)))
     toast.success(t('jobRequests.form.sent'))
     await navigateTo(`/app/job-requests/${encodeURIComponent(created.id)}`)
   } catch (error) {

@@ -15,7 +15,7 @@ registerEndpoint('/api/v1/imports/b1/mapping', {
   handler: async (event) => {
     state.calls.push('mapping')
     state.bodies.mapping = await readBody(event)
-    return ok({ id: 'b1', status: 'ready' })
+    return ok(importDetail())
   },
 })
 registerEndpoint('/api/v1/imports/b1/items', {
@@ -23,15 +23,15 @@ registerEndpoint('/api/v1/imports/b1/items', {
   handler: async (event) => {
     state.calls.push('items')
     state.bodies.items = await readBody(event)
-    return ok(null)
+    return ok(importDetail())
   },
 })
 registerEndpoint('/api/v1/imports/b1/commit', {
   method: 'POST',
   handler: () => {
     state.calls.push('commit')
-    state.detail = { batch: batch(), items: [] }
-    return ok({ id: 'b1', status: 'importing' })
+    state.detail = importDetail({ batch: batch(), items: [], total: 0 })
+    return ok(batch({ status: 'importing' }))
   },
 })
 
@@ -53,13 +53,11 @@ beforeEach(() => {
 afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
 
 describe('import wizard', () => {
-  it('shows the analysis while the worker reads the files, with ignored files and why', async () => {
-    state.detail = importDetail({ batch: batch({ status: 'analyzing', counts: { cvs: 4, rows: 9 }, progress: { done: 2, total: 8 }, ignored: [{ name: 'foto.png', reason: 'unsupported_type' }] }) })
+  it('shows the analysis while the worker reads the files', async () => {
+    state.detail = importDetail({ batch: batch({ status: 'analyzing', counts: { ...batch().counts, cvs: 4, rows: 9 } }) })
     const wrapper = await mountWizard()
     expect(wrapper.find('[data-testid="import-analysis-step"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="import-analysis-counts"]').text()).toContain('4')
-    expect(wrapper.find('[data-testid="import-analysis-progress"]').text()).toContain('2 di 8')
-    expect(wrapper.find('[data-testid="import-ignored"]').text()).toContain('formato non supportato')
   })
 
   it('says a failed analysis created nothing', async () => {

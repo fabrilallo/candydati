@@ -2,7 +2,7 @@
 import { KeyRoundIcon } from '@lucide/vue'
 import { keyStatus, scopeLabelKey } from '@/lib/api-keys'
 import { formatDate } from '@/lib/format'
-import type { ApiKeyDto } from '@/lib/phase6-contract'
+import type { ApiKeyDto } from '@tt/domain'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 

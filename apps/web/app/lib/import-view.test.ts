@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { batchFigures, batchTone, isToRenew, renewalDeadline, consentRenewal, ignoredReasonKey, isWorking, progressPercent, sourceText, wizardStep } from './import-view'
+import { batchFigures, batchTone, isToRenew, renewalDeadline, consentRenewal, isWorking, sourceText, wizardStep } from './import-view'
 
 describe('batch status', () => {
   it('gives each status a tone and the wizard step it resumes at', () => {
@@ -23,21 +23,6 @@ describe('batch status', () => {
     expect(isWorking('ready')).toBe(false)
     expect(isWorking('done')).toBe(false)
   })
-
-  it('turns progress into a bounded percentage, null when unknown', () => {
-    expect(progressPercent({ done: 5, total: 20 })).toBe(25)
-    expect(progressPercent({ done: 30, total: 20 })).toBe(100)
-    expect(progressPercent({ done: 0, total: 0 })).toBeNull()
-    expect(progressPercent(null)).toBeNull()
-  })
-})
-
-describe('ignoredReasonKey', () => {
-  it('maps the known reasons and falls back to "other"', () => {
-    expect(ignoredReasonKey('unsupported_type')).toBe('imports.ignored.unsupported')
-    expect(ignoredReasonKey('unreadable')).toBe('imports.ignored.unreadable')
-    expect(ignoredReasonKey('something_new')).toBe('imports.ignored.other')
-  })
 })
 
 describe('sourceText', () => {
@@ -50,7 +35,7 @@ describe('sourceText', () => {
 
 describe('batchFigures', () => {
   it('splits imported into new and merged, and counts the excluded', () => {
-    const counts = { files: 3, cvs: 2, rows: 5, items: 10, included: 8, imported: 8, merged: 3, failed: 0, noEmail: 1, emailsQueued: 7, skippedReconfirmed: 0, erased: 0, ignored: 0 }
+    const counts = { files: 3, cvs: 2, rows: 5, items: 10, included: 8, imported: 8, merged: 3, failed: 0, noEmail: 1, emailsQueued: 7, skippedReconfirmed: 0, erased: 0 }
     expect(batchFigures(counts)).toEqual({ created: 5, merged: 3, excluded: 2 })
   })
 })
@@ -76,20 +61,15 @@ describe('consentRenewal', () => {
 })
 
 describe('renewal of a candidate', () => {
-  const app = (status: 'given' | 'to_renew', at: string, onConsent = false) => ({
-    consentStatus: onConsent ? ('given' as const) : status,
-    consent: { status: onConsent ? status : ('given' as const) },
-    retentionExpiresAt: at,
-  })
+  const app = (status: 'given' | 'to_renew', at: string) => ({ consent: { status }, retentionExpiresAt: at })
 
-  it('reads the status on the application or on its consent', () => {
+  it('reads the status on the consent of the application', () => {
     expect(isToRenew(app('to_renew', 'x'))).toBe(true)
-    expect(isToRenew(app('to_renew', 'x', true))).toBe(true)
     expect(isToRenew(app('given', 'x'))).toBe(false)
   })
 
   it('takes the earliest deadline among the applications to renew', () => {
-    expect(renewalDeadline([app('given', '2026-10-01T00:00:00.000Z'), app('to_renew', '2026-11-12T00:00:00.000Z'), app('to_renew', '2026-11-02T00:00:00.000Z', true)])).toBe('2026-11-02T00:00:00.000Z')
+    expect(renewalDeadline([app('given', '2026-10-01T00:00:00.000Z'), app('to_renew', '2026-11-12T00:00:00.000Z'), app('to_renew', '2026-11-02T00:00:00.000Z')])).toBe('2026-11-02T00:00:00.000Z')
     expect(renewalDeadline([app('given', '2026-10-01T00:00:00.000Z')])).toBeNull()
   })
 })

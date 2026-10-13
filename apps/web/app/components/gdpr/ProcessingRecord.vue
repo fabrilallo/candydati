@@ -2,7 +2,7 @@
 import { PrinterIcon } from '@lucide/vue'
 import { retentionCopy } from '@/lib/consent-copy'
 import { formatDate } from '@/lib/format'
-import { providerKey } from '@/lib/legal-docs'
+import { providerRows } from '@/lib/legal-docs'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -41,10 +41,7 @@ const rows = computed(() => {
     { id: 'automated', text: t('privacyDocs.register.automatedText') },
   ]
 })
-const providerLabel = (category: string): string => {
-  const key = providerKey(category)
-  return key ? t(key) : category
-}
+const providers = computed(() => (record.value ? providerRows(record.value.providers) : []))
 </script>
 
 <template>
@@ -61,8 +58,8 @@ const providerLabel = (category: string): string => {
           <p class="text-sm text-muted-foreground">{{ t('privacyDocs.register.subtitle') }}</p>
           <p class="figure text-xs text-muted-foreground">
             <span v-if="record.privacyNoticeVersion">{{ t('privacyDocs.register.notice', { version: record.privacyNoticeVersion }) }}</span>
-            <span v-if="record.privacyNoticeVersion && record.generatedAt">, </span>
-            <span v-if="record.generatedAt">{{ t('privacyDocs.register.generated', { date: formatDate(record.generatedAt, locale) }) }}</span>
+            <span v-if="record.privacyNoticeVersion">, </span>
+            <span>{{ t('privacyDocs.register.generated', { date: formatDate(record.generatedAt, locale) }) }}</span>
           </p>
         </div>
         <Button variant="outline" size="sm" class="record-print-button" data-testid="record-print" @click="print"><PrinterIcon aria-hidden="true" />{{ t('privacyDocs.print') }}</Button>
@@ -75,12 +72,11 @@ const providerLabel = (category: string): string => {
         <div class="grid gap-1 py-3 sm:grid-cols-[12rem_minmax(0,1fr)] sm:gap-4" data-testid="record-recipients">
           <dt class="text-sm text-muted-foreground">{{ t('privacyDocs.register.recipients') }}</dt>
           <dd class="text-sm">
-            <ul v-if="record.providers.length > 0" class="grid gap-1">
-              <li v-for="provider in record.providers" :key="`${provider.category}-${provider.name}`">
-                <span class="font-medium">{{ providerLabel(provider.category) }}</span>: {{ provider.name }}<template v-if="provider.detail">, {{ provider.detail }}</template>
+            <ul class="grid gap-1">
+              <li v-for="provider in providers" :key="provider.key">
+                <span class="font-medium">{{ t(provider.key) }}</span>: {{ provider.name }}
               </li>
             </ul>
-            <span v-else class="text-muted-foreground">{{ t('privacyDocs.register.providersEmpty') }}</span>
           </dd>
         </div>
       </dl>

@@ -1,6 +1,5 @@
-import { checkCompliance, checkPublishable, type ComplianceIssue, type JobContent, type JobRole, type PublishIssue, type SelectionStage } from '@tt/domain'
+import { checkCompliance, checkPublishable, jobContentSchema, type ComplianceIssue, type JobContent, type PublishIssue, type SelectionStage } from '@tt/domain'
 import { emptyEmployment, employmentToForm, employmentToInput, type EmploymentForm } from './employment-form'
-import { contentSchema9, type JobContent9 } from './phase9-contract'
 
 /** One stage as typed in the editor: numbers stay strings until the form is turned into content. */
 export interface StageForm {
@@ -86,7 +85,7 @@ const stageToForm = (stage: SelectionStage): StageForm => ({
   note: stage.note ?? '',
 })
 
-export const contentToForm = (content: JobContent9): JobForm => ({
+export const contentToForm = (content: JobContent): JobForm => ({
   title: content.title,
   language: content.language,
   role: content.role ?? '',
@@ -189,7 +188,7 @@ export const adoptStageIds = (form: JobForm, saved: JobContent): JobForm => {
 export type FieldErrors = Readonly<Record<string, string>>
 
 export type FormValidation =
-  | { readonly content: JobContent9; readonly errors: Readonly<Record<string, never>> }
+  | { readonly content: JobContent; readonly errors: Readonly<Record<string, never>> }
   | { readonly content: null; readonly errors: FieldErrors }
 
 const issueKey = (code: string, path: string): string => {
@@ -202,7 +201,7 @@ const employmentPath = (path: readonly string[]): string => (path[0] === 'employ
 
 /** Pure: the content the form describes, or the first translation key per field path. */
 export const validateForm = (form: JobForm): FormValidation => {
-  const parsed = contentSchema9.safeParse(formToInput(form))
+  const parsed = jobContentSchema.safeParse(formToInput(form))
   if (parsed.success) return { content: parsed.data, errors: {} }
   const errors = parsed.error.issues.reduce<Record<string, string>>((acc, issue) => {
     const path = issue.path.length > 1 && issue.path[0] === 'process' ? 'process' : employmentPath(issue.path.map(String))
@@ -211,8 +210,6 @@ export const validateForm = (form: JobForm): FormValidation => {
   }, {})
   return { content: null, errors }
 }
-
-export const roleOrNull = (value: string): JobRole | null => (value === '' ? null : (value as JobRole))
 
 // --- immutable list helpers -------------------------------------------------------------------------------
 

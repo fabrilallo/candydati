@@ -12,6 +12,7 @@ import type {
   MessagingConfig,
   OutboundEmail,
 } from '../messaging-ports.js';
+import { cell } from './in-memory-transaction.js';
 
 export interface MessagingStoreState {
   readonly templates: readonly EmailTemplate[];
@@ -27,11 +28,11 @@ export interface MessagingStore {
 }
 
 export const createMessagingStore = (initial: Partial<MessagingStoreState> = {}): MessagingStore => {
-  let state: MessagingStoreState = { templates: [], settings: [], conversations: [], messages: [], ...initial };
+  const state = cell<MessagingStoreState>({ templates: [], settings: [], conversations: [], messages: [], ...initial });
   return {
-    read: () => state,
+    read: () => state.get(),
     write: (next) => {
-      state = { ...state, ...next };
+      state.set({ ...state.get(), ...next });
     },
   };
 };
@@ -108,9 +109,12 @@ export function createInMemoryMessageRepository(store: MessagingStore): MessageR
       store.write({ messages: [...store.read().messages, message] });
       return message;
     },
-    async save(message) {
-      store.write({ messages: store.read().messages.map((m) => (m.organizationId === message.organizationId && m.id === message.id ? message : m)) });
-      return message;
+    async transition(organizationId, id, from, patch) {
+      const current = inOrg(organizationId).find((m) => m.id === id);
+      if (!current || current.status !== from) return null;
+      const next = { ...current, ...patch };
+      store.write({ messages: store.read().messages.map((m) => (m.organizationId === organizationId && m.id === id ? next : m)) });
+      return next;
     },
     async findById(organizationId, id) {
       return inOrg(organizationId).find((m) => m.id === id) ?? null;

@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, isNull, schema, type Db } from '@tt/db';
+import { and, asc, eq, gt, isNull, schema } from '@tt/db';
 import type { FeedbackRequest, InterviewFeedback, StageInterviewer } from '@tt/domain';
 import { ConflictError } from '../errors.js';
 import type { FeedbackRequestRepository, InterviewFeedbackRepository, StageInterviewerRepository } from '../feedback-ports.js';
@@ -9,7 +9,7 @@ const toRequest = (row: typeof schema.feedbackRequest.$inferSelect): FeedbackReq
 const toFeedback = (row: typeof schema.interviewFeedback.$inferSelect): InterviewFeedback => ({ ...row });
 
 /** Postgres implementation. Every statement filters by `organization_id`, except the lookup by the hash of a secret. */
-export function createDrizzleStageInterviewers(db: Db): StageInterviewerRepository {
+export function createDrizzleStageInterviewers(db: DbExecutor): StageInterviewerRepository {
   const { jobStageInterviewer: table } = schema;
   const ofJob = (organizationId: string, jobId: string) => [eq(table.organizationId, organizationId), eq(table.jobId, jobId)];
   return {
@@ -43,11 +43,21 @@ export function createDrizzleFeedbackRequests(db: DbExecutor): FeedbackRequestRe
         throw error;
       }
     },
-    async save(request) {
-      const { id, organizationId, ...values } = request;
-      const [row] = await db.update(table).set(values).where(and(eq(table.organizationId, organizationId), eq(table.id, id))).returning();
-      if (!row) throw new Error('feedback_request not found');
-      return toRequest(row);
+    async markSubmitted(organizationId, id, submittedAt) {
+      const rows = await db
+        .update(table)
+        .set({ submittedAt })
+        .where(and(eq(table.organizationId, organizationId), eq(table.id, id), isNull(table.submittedAt)))
+        .returning({ id: table.id });
+      return rows.length > 0;
+    },
+    async rotateToken(organizationId, id, expectedTokenHash, patch) {
+      const [row] = await db
+        .update(table)
+        .set(patch)
+        .where(and(eq(table.organizationId, organizationId), eq(table.id, id), isNull(table.submittedAt), eq(table.tokenHash, expectedTokenHash)))
+        .returning();
+      return row ? toRequest(row) : null;
     },
     async findById(organizationId, id) {
       const [row] = await db.select().from(table).where(and(eq(table.organizationId, organizationId), eq(table.id, id))).limit(1);

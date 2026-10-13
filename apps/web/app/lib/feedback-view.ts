@@ -1,18 +1,25 @@
-import { FEEDBACK_ANSWER_MAX, INTERVIEWER_NAME_MAX } from '@tt/domain'
-import { z } from 'zod'
 import {
-  FEEDBACK_RECOMMENDATIONS,
+  checkAnswers,
+  FEEDBACK_ANSWER_MAX,
+  FEEDBACK_TEMPLATES,
+  INTERVIEWER_NAME_MAX,
+  STAGE_TYPES,
   type FeedbackRecommendation,
   type FeedbackRequestDto,
-  type FeedbackRequestInput,
   type FeedbackSubmission,
-} from './phase9-contract'
+  type InterviewerInput,
+  type StageType,
+} from '@tt/domain'
+import { z } from 'zod'
 
 /** Pure helpers of the interview feedback screens (phase 9): no score anywhere, only words and an opinion. */
-export const isRecommendation = (value: unknown): value is FeedbackRecommendation =>
-  typeof value === 'string' && (FEEDBACK_RECOMMENDATIONS as readonly string[]).includes(value)
-
 export const recommendationKey = (recommendation: FeedbackRecommendation): string => `feedback.recommendation.${recommendation}`
+
+/** Body of `POST /applications/:id/feedback/request`: the current stage and its interviewers when both are omitted. */
+export interface FeedbackRequestInput {
+  readonly stageId?: string
+  readonly interviewer?: InterviewerInput
+}
 
 export interface GroupedRequests {
   readonly pending: readonly FeedbackRequestDto[]
@@ -20,11 +27,11 @@ export interface GroupedRequests {
   readonly submitted: readonly FeedbackRequestDto[]
 }
 
-/** Requests by state; an expired link counts as overdue (nothing arrived and the link no longer works). */
+/** Requests by status; an expired link counts as overdue (nothing arrived and the link no longer works). */
 export const groupRequests = (requests: readonly FeedbackRequestDto[]): GroupedRequests => ({
-  pending: requests.filter((request) => request.state === 'pending'),
-  overdue: requests.filter((request) => request.state === 'overdue' || request.state === 'expired'),
-  submitted: requests.filter((request) => request.state === 'submitted'),
+  pending: requests.filter((request) => request.status === 'pending'),
+  overdue: requests.filter((request) => request.status === 'expired'),
+  submitted: requests.filter((request) => request.status === 'submitted'),
 })
 
 export type SubmitIssue = 'recommendation_required' | 'answers_required' | 'answer_too_long'
@@ -36,12 +43,24 @@ export interface SubmitCheck {
   readonly tooLong: readonly string[]
 }
 
-/** Whether the form can be sent: a recommendation, at least one answer with words, no answer over the limit. */
-export const checkSubmission = (answers: Readonly<Record<string, string>>, recommendation: FeedbackRecommendation | null): SubmitCheck => {
+/**
+ * The stage type behind a form: the public page sends the questions, not the type, and the domain rules
+ * (`checkAnswers`) are keyed by the type. The questions come from the type's template, so their ids identify it.
+ */
+const stageTypeOf = (questionIds: readonly string[]): StageType | undefined => {
+  const key = [...questionIds].sort().join('|')
+  return STAGE_TYPES.find((type) => FEEDBACK_TEMPLATES[type].map((question) => question.id).sort().join('|') === key)
+}
+
+/** Whether the form can be sent: a recommendation, the required questions answered (domain rule), no answer over the limit. */
+export const checkSubmission = (questionIds: readonly string[], answers: Readonly<Record<string, string>>, recommendation: FeedbackRecommendation | null): SubmitCheck => {
   const tooLong = Object.entries(answers).filter(([, value]) => value.trim().length > FEEDBACK_ANSWER_MAX).map(([id]) => id)
+  const type = stageTypeOf(questionIds)
+  // A form whose questions match no template is the fallback one (stage removed): it has no stage type.
+  const rules = checkAnswers(type ?? null, answers)
   const issues: SubmitIssue[] = [
     ...(recommendation === null ? (['recommendation_required'] as const) : []),
-    ...(Object.values(answers).some((value) => value.trim() !== '') ? [] : (['answers_required'] as const)),
+    ...(rules.issues.some((issue) => issue.message === 'required') ? (['answers_required'] as const) : []),
     ...(tooLong.length > 0 ? (['answer_too_long'] as const) : []),
   ]
   return { ok: issues.length === 0, issues, tooLong }

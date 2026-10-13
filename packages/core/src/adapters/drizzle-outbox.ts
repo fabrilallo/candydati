@@ -20,7 +20,13 @@ export function createDrizzleOutbox(db: DbExecutor): OutboxRepository {
       return row ?? null;
     },
     listUnpublished: (limit) =>
-      db.select().from(outboxEvent).where(isNull(outboxEvent.publishedAt)).orderBy(asc(outboxEvent.occurredAt), asc(outboxEvent.id)).limit(limit),
+      db
+        .select()
+        .from(outboxEvent)
+        .where(isNull(outboxEvent.publishedAt))
+        .orderBy(asc(outboxEvent.occurredAt), asc(outboxEvent.id))
+        .limit(limit)
+        .for('update', { skipLocked: true }),
     async markPublished(organizationId, id, at) {
       await db
         .update(outboxEvent)

@@ -1,7 +1,6 @@
-import type { Locale, PrivacyNoticeInput } from '@tt/domain'
+import type { PrivacyNoticeDto, Locale, PrivacyNoticeInput  } from '@tt/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
-import type { PrivacyNoticeDto } from '@/lib/candidate-schemas'
 import { loaded } from '@/lib/job-api'
 import { getActivePrivacyNotice, getPrivacyTemplate, listPrivacyVersions, publishPrivacyNotice } from '@/lib/privacy-api'
 

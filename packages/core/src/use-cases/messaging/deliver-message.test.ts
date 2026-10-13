@@ -32,6 +32,7 @@ describe('deliverMessage', () => {
         text: 'Hello <b>Ada</b>\n\nSee https://x.it',
         html: '<p>Hello &lt;b&gt;Ada&lt;/b&gt;</p>\n<p>See <a href="https://x.it" rel="noopener noreferrer">https://x.it</a></p>',
         headers: {},
+        idempotencyKey: 'msg_1',
       },
     ]);
     expect(deps.messagingStore.read().messages[0]).toMatchObject({ status: 'sent', providerMessageId: 'provider-1', sentAt: deps.now(), error: null });
@@ -122,6 +123,42 @@ describe('deliverMessage', () => {
     expect(await run(deps)).toBe('failed');
     expect(deps.messagingStore.read().messages[0]?.error).toBe('recipient_missing');
     expect(deps.sender.sent()).toHaveLength(0);
+  });
+
+  it('sends once when the same task is delivered twice at the same time (#12)', async () => {
+    const deps = world();
+    const results = await Promise.all([run(deps), run(deps)]);
+    expect(results.toSorted()).toEqual(['sent', 'skipped']);
+    expect(deps.sender.sent()).toHaveLength(1);
+    expect(deps.auditLog.events().filter((e) => e.action === 'message.sent')).toHaveLength(1);
+  });
+
+  it('does not send again when the outcome could not be recorded after the provider accepted it (#12)', async () => {
+    const deps = world();
+    const broken = { ...deps, auditLog: { ...deps.auditLog, append: async () => Promise.reject(new Error('db down')) } };
+    expect(await rejection(run(broken))).toBeInstanceOf(Error);
+    expect(deps.sender.sent()).toHaveLength(1);
+    expect(deps.messagingStore.read().messages[0]?.status).toBe('sending');
+    // Another task at the same time leaves the claim alone.
+    expect(await run(deps)).toBe('skipped');
+    // The retry finds the claim of an attempt that never finished: SMTP cannot drop a repeated send, so it is not resent.
+    expect(await run(deps, { attempt: 2 })).toBe('failed');
+    expect(deps.sender.sent()).toHaveLength(1);
+    expect(deps.messagingStore.read().messages[0]).toMatchObject({ status: 'failed', error: 'delivery_unconfirmed' });
+  });
+
+  it('resends an unconfirmed claim with the same idempotency key when the provider drops repeats', async () => {
+    const sender = Object.assign(createFakeEmailSender(), { deduplicates: true });
+    const deps = world({ messagingOverrides: { sender } });
+    deps.messagingStore.write({ messages: [queued({ status: 'sending' })] });
+    expect(await run(deps, { attempt: 2 })).toBe('sent');
+    expect(sender.sent().map((email) => email.idempotencyKey)).toEqual(['msg_1']);
+  });
+
+  it('puts a transiently failed claim back so the retry can take it', async () => {
+    const deps = world({ messagingOverrides: { sender: createFakeEmailSender(new Error('smtp 451')) } });
+    expect(await rejection(run(deps, { lastAttempt: false }))).toBeInstanceOf(Error);
+    expect(deps.messagingStore.read().messages[0]?.status).toBe('queued');
   });
 
   it('does not touch a message of another organization', async () => {

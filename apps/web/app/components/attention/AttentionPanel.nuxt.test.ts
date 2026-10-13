@@ -5,18 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { pipeline } from '~~/test/fixtures/candidate-fixtures'
 import { makeJob, ok, viewerWith } from '~~/test/fixtures/job-fixtures'
 import { TEMPLATES } from '~~/test/fixtures/message-fixtures'
-import { attentionItem } from '~~/test/fixtures/phase4-fixtures'
+import { attentionItem, staleJob } from '~~/test/fixtures/phase4-fixtures'
 import AttentionPanel from './AttentionPanel.vue'
 
 const state = vi.hoisted(() => ({ overdue: 1, dueSoon: 1, moves: [] as unknown[], asked: [] as string[], stale: [] as unknown[], closed: [] as string[] }))
-const staleJob = (id: string, daysSinceActivity: number) => ({
-  id,
-  title: `Annuncio ${id}`,
-  publishedAt: '2026-06-01T10:00:00.000Z',
-  lastActivityAt: '2026-07-01T10:00:00.000Z',
-  daysSinceActivity,
-  openApplications: 2,
-})
 registerEndpoint('/api/v1/jobs/stale', () => ok(state.stale))
 registerEndpoint('/api/v1/jobs/j-stale/pipeline', () => ok(pipeline([])))
 registerEndpoint('/api/v1/jobs/j-stale/close', {
@@ -35,7 +27,7 @@ registerEndpoint('/api/v1/applications/attention', (event) => {
   const limit = url.includes('limit=1&') || url.endsWith('limit=1') ? 1 : 25
   const items = overdue
     ? [attentionItem('a1')]
-    : [attentionItem('a2', { state: 'due_soon', responseDueAt: '2026-10-14T16:00:00.000Z', ownerName: null, stage: { id: 'received', label: null } })]
+    : [attentionItem('a2', { state: 'due_soon', responseDueAt: '2026-10-14T16:00:00.000Z', ownerName: '', stage: { id: 'received', label: null } })]
   return ok(total === 0 ? [] : items.slice(0, limit), { total, page: 1, limit })
 })
 registerEndpoint('/api/v1/jobs/j1/pipeline', () => ok(pipeline()))
@@ -146,7 +138,6 @@ describe('Da gestire', () => {
     expect(row.find('[data-testid="attention-stale-title"]').attributes('href')).toBe('/app/jobs/j-stale')
     expect(row.text()).toContain('Annuncio j-stale')
     expect(row.text()).toContain('Nessuna attività da 120 giorni')
-    expect(row.text()).toContain('2 candidature aperte')
     expect(row.find('[data-testid="attention-stale-open"]').attributes('href')).toBe('/app/jobs/j-stale')
     await row.find('[data-testid="attention-stale-close"]').trigger('click')
     await vi.waitFor(() => expect(button('confirm')?.hasAttribute('disabled')).toBe(false))

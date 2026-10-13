@@ -1,19 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
 import {
-  createDrizzleApplications,
-  createDrizzleCandidates,
-  createDrizzleFeedbackRequests,
-  createDrizzleInterviewFeedback,
-  createDrizzleJobApprovals,
-  createDrizzleJobRequests,
-  createDrizzleJobs,
-  createDrizzleMemberDirectory,
-  createDrizzleNotifications,
-  createDrizzleOrganizationDirectory,
-  createDrizzleOrganizationSettings,
-  createDrizzleStageInterviewers,
-  createDrizzleStaleJobs,
-  type AuditLogRepository,
+  type DrizzleUnitOfWork,
   type FeedbackDeps,
   type FeedbackRecords,
   type FeedbackStageEntryParts,
@@ -26,7 +13,6 @@ import {
   type PublicFeedbackDeps,
   type StaleJobDeps,
 } from '@tt/core';
-import type { Db } from '@tt/db';
 import { newConversationToken } from '@tt/providers';
 
 export interface HrWiring {
@@ -42,8 +28,7 @@ export interface HrWiring {
 }
 
 export interface HrInputs {
-  readonly db: Db;
-  readonly auditLog: AuditLogRepository;
+  readonly uow: DrizzleUnitOfWork;
   readonly files: FileStorage;
   readonly sender: EmailSender;
   readonly config: MessagingConfig;
@@ -53,17 +38,12 @@ export interface HrInputs {
 export const hashSecret = (secret: string): string => createHash('sha256').update(secret).digest('hex');
 
 /** Feedback without login, job requests with approval and stale ads on Postgres; the sender is injected. */
-export function createHrDeps({ db, auditLog, files, sender, config, onFeedbackMailError }: HrInputs): HrWiring {
-  const jobs = createDrizzleJobs(db);
-  const candidates = createDrizzleCandidates(db);
-  const applications = createDrizzleApplications(db);
-  const organizations = createDrizzleOrganizationDirectory(db);
-  const members = createDrizzleMemberDirectory(db);
-  const feedbackRecords: FeedbackRecords = { feedbackRequests: createDrizzleFeedbackRequests(db), interviewFeedback: createDrizzleInterviewFeedback(db) };
-  const stageInterviewers = createDrizzleStageInterviewers(db);
+export function createHrDeps({ uow, files, sender, config, onFeedbackMailError }: HrInputs): HrWiring {
+  const r = uow.repositories;
+  const core = { auditLog: r.auditLog, transaction: uow.transaction };
+  const { jobs, candidates, applications, organizations, members, stageInterviewers, approvals, organizationSettings } = r;
+  const feedbackRecords: FeedbackRecords = { feedbackRequests: r.feedbackRequests, interviewFeedback: r.interviewFeedback };
   const clock = { newId: randomUUID, now: () => new Date() };
-  const approvals = createDrizzleJobApprovals(db);
-  const organizationSettings = createDrizzleOrganizationSettings(db);
   const stageEntry: FeedbackStageEntryParts = {
     ...feedbackRecords,
     sender,
@@ -80,9 +60,9 @@ export function createHrDeps({ db, auditLog, files, sender, config, onFeedbackMa
     feedbackRecords,
     approvals,
     organizationSettings,
-    feedbackDeps: { auditLog, jobs, candidates, applications, files, ...stageEntry, ...clock },
-    publicFeedbackDeps: { auditLog, jobs, candidates, applications, organizations, files, ...feedbackRecords, hash: hashSecret, ...clock },
-    jobRequestDeps: { auditLog, jobs, approvals, organizationSettings, members, notifications: createDrizzleNotifications(db), jobRequests: createDrizzleJobRequests(db), ...clock },
-    staleJobDeps: { auditLog, staleJobs: createDrizzleStaleJobs(db), now: clock.now },
+    feedbackDeps: { ...core, jobs, candidates, applications, files, ...stageEntry, ...clock },
+    publicFeedbackDeps: { ...core, jobs, candidates, applications, organizations, files, ...feedbackRecords, hash: hashSecret, ...clock },
+    jobRequestDeps: { ...core, jobs, approvals, organizationSettings, members, notifications: r.notifications, jobRequests: r.jobRequests, ...clock },
+    staleJobDeps: { ...core, staleJobs: r.staleJobs, now: clock.now },
   };
 }

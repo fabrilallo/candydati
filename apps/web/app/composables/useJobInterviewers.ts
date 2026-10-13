@@ -2,7 +2,7 @@ import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { getInterviewers, putInterviewers, type InterviewersByStage, type MemberOption } from '@/lib/interviewers'
 import { attempt } from '@/lib/load-result'
-import type { InterviewerDto } from '@/lib/phase9-contract'
+import type { InterviewerDto } from '@tt/domain'
 
 /**
  * Who conducts each stage of a job ("Chi fa il colloquio"), shared by the editor and Automazioni. A change is saved at

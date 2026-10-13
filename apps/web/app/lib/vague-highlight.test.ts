@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { phrasesIn, splitHighlights } from './vague-highlight'
+import { splitHighlights } from './vague-highlight'
 
 const phrase = (text: string) => ({ text, category: 'salary_transparency' as const, suggestion: `riscrivi ${text}` })
 
@@ -28,12 +28,5 @@ describe('splitHighlights', () => {
 
   it('ignores blank phrases and treats regex characters literally', () => {
     expect(splitHighlights('costo (circa) 10$', [phrase('  '), phrase('(circa)')]).map((part) => part.text)).toEqual(['costo ', '(circa)', ' 10$'])
-  })
-})
-
-describe('phrasesIn', () => {
-  it('keeps only the phrases found in some text of the ad', () => {
-    const found = phrasesIn(['Stipendio competitivo', 'altro'], [phrase('stipendio competitivo'), phrase('assente')])
-    expect(found.map((item) => item.text)).toEqual(['stipendio competitivo'])
   })
 })

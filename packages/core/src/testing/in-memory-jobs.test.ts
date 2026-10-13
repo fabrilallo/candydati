@@ -17,9 +17,11 @@ describe('in-memory job repositories', () => {
     expect(repo.snapshot()).toHaveLength(2);
   });
 
-  it('saves only inside the organization', async () => {
+  it('writes only inside the organization and only from the expected status', async () => {
     const repo = createInMemoryJobRepository([buildJob({ id: '1', organizationId: 'a' })]);
-    await repo.save(buildJob({ id: '1', organizationId: 'b', status: 'closed' }));
+    await expect(repo.transition('b', '1', 'draft', { status: 'closed', closedAt: new Date(), updatedAt: new Date() })).rejects.toThrow();
+    await expect(repo.updateContent('a', '1', 'published', { content: buildJob().content, updatedAt: new Date() })).rejects.toThrow();
+    expect(await repo.lock('a', '1', 'update')).toMatchObject({ status: 'draft' });
     expect((await repo.findById('a', '1'))?.status).toBe('draft');
   });
 

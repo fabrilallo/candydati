@@ -1,5 +1,4 @@
-import { JOB_ROLES } from '@tt/domain'
-import type { JobRequestInput } from './phase9-contract'
+import { DEFAULT_LOCALE, HEADCOUNT_MAX, JOB_ROLES, SUPPORTED_LOCALES, type JobRequestInput, type JobRole, type Locale } from '@tt/domain'
 
 /** Form state: every field is a string until the form is turned into the wire input. Updates are `{ ...form, ...patch }`. */
 export interface JobRequestForm {
@@ -19,7 +18,6 @@ export interface JobRequestForm {
 
 export type RequestFormErrors = Partial<Record<keyof JobRequestForm, string>>
 
-export const HEADCOUNT_MAX = 100
 const DATE = /^\d{4}-\d{2}-\d{2}$/
 const err = (field: string): string => `jobRequests.errors.${field}`
 
@@ -63,18 +61,22 @@ export const validateRequestForm = (form: JobRequestForm): RequestFormErrors => 
 
 const optional = (key: string, value: string): Record<string, string> => (value.trim() === '' ? {} : { [key]: value.trim() })
 
+/** The language the drafts of the request are written in: the language of the screen when the platform supports it. */
+export const requestLanguage = (uiLocale: string): Locale => SUPPORTED_LOCALES.find((candidate) => candidate === uiLocale) ?? DEFAULT_LOCALE
+
 /** Pure: the body of `POST /job-requests`. Call only when `validateRequestForm` returned no errors. */
-export const toRequestInput = (form: JobRequestForm): JobRequestInput => ({
+export const toRequestInput = (form: JobRequestForm, language: Locale): JobRequestInput => ({
   title: form.title.trim(),
-  role: form.role,
+  role: form.role as JobRole,
   reason: form.reason.trim(),
   headcount: Number(form.headcount),
   salaryMin: Number(form.salaryMin),
   salaryMax: Number(form.salaryMax),
-  currency: form.currency,
+  currency: form.currency as JobRequestInput['currency'],
+  language,
+  processNotes: form.processNotes.trim(),
+  interviewersNotes: form.interviewersNotes.trim(),
+  location: form.location.trim() === '' ? {} : { city: form.location.trim() },
   ...optional('workMode', form.workMode),
-  ...(form.location.trim() === '' ? {} : { location: { city: form.location.trim() } }),
   ...optional('desiredStart', form.desiredStart),
-  ...optional('processNotes', form.processNotes),
-  ...optional('interviewersNotes', form.interviewersNotes),
 })

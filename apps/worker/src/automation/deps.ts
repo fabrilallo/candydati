@@ -1,23 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
-  createDrizzleApplications,
-  createDrizzleAuditLog,
-  createDrizzleAutomationRules,
-  createDrizzleCandidates,
-  createDrizzleConversations,
-  createDrizzleEmailSettings,
-  createDrizzleEmailTemplates,
-  createDrizzleJobs,
-  createDrizzleMemberDirectory,
-  createDrizzleMessages,
-  createDrizzleNotifications,
-  createDrizzleOrganizationDirectory,
-  createDrizzleOutbox,
-  createDrizzleResponsePromises,
-  createDrizzleTasks,
-  createDrizzleUserDirectory,
-  createDrizzleWebhookDeliveries,
-  createDrizzleWebhookEndpoints,
+  type DrizzleUnitOfWork,
   type AutomationRunDeps,
   type EmailIdentity,
   type EmailSender,
@@ -26,12 +9,11 @@ import {
   type WebhookDeliverDeps,
   type WebhookPublishDeps,
 } from '@tt/core';
-import type { Db } from '@tt/db';
 import type { PlatformConfig } from '@tt/domain';
 import { createHostGuard, createHttpPoster, newConversationToken, toMessagingConfig, type EmailConfig } from '@tt/providers';
 
 export interface AutomationWiring {
-  readonly db: Db;
+  readonly uow: DrizzleUnitOfWork;
   readonly queue: TaskQueue;
   readonly sender: EmailSender;
   readonly identity: EmailIdentity;
@@ -50,49 +32,44 @@ export interface Phase4WorkerDeps {
 
 /** Drizzle repositories for the Phase 4 jobs; the queue, the email sender and the identity are injected. */
 export function createPhase4WorkerDeps(wiring: AutomationWiring): Phase4WorkerDeps {
-  const { db, queue } = wiring;
+  const { uow, queue } = wiring;
+  const r = uow.repositories;
+  const core = { auditLog: r.auditLog, transaction: uow.transaction };
   const clock = { newId: randomUUID, now: () => new Date() };
-  const auditLog = createDrizzleAuditLog(db);
-  const jobs = createDrizzleJobs(db);
-  const applications = createDrizzleApplications(db);
-  const notifications = createDrizzleNotifications(db);
-  const tasks = createDrizzleTasks(db);
-  const endpoints = createDrizzleWebhookEndpoints(db);
-  const outbox = createDrizzleOutbox(db);
-  const promises = createDrizzleResponsePromises(db);
   return {
     run: {
-      auditLog,
-      jobs,
-      organizations: createDrizzleOrganizationDirectory(db),
-      candidates: createDrizzleCandidates(db),
-      applications,
-      users: createDrizzleUserDirectory(db),
-      templates: createDrizzleEmailTemplates(db),
-      settings: createDrizzleEmailSettings(db),
-      conversations: createDrizzleConversations(db),
-      messages: createDrizzleMessages(db),
-      promises,
+      ...core,
+      jobs: r.jobs,
+      organizations: r.organizations,
+      candidates: r.candidates,
+      applications: r.applications,
+      users: r.users,
+      templates: r.templates,
+      settings: r.settings,
+      conversations: r.conversations,
+      messages: r.messages,
+      promises: r.promises,
       queue,
       identity: wiring.identity,
       sender: wiring.sender,
       config: toMessagingConfig(wiring.platform, wiring.email),
       newToken: newConversationToken,
-      rules: createDrizzleAutomationRules(db),
-      tasks,
-      notifications,
+      rules: r.rules,
+      executions: r.executions,
+      tasks: r.tasks,
+      notifications: r.notifications,
       ...clock,
     },
     deliver: {
-      auditLog,
-      endpoints,
-      deliveries: createDrizzleWebhookDeliveries(db),
-      outbox,
+      ...core,
+      endpoints: r.endpoints,
+      deliveries: r.deliveries,
+      outbox: r.outbox,
       poster: createHttpPoster({ timeoutMs: 10_000, allowPrivate: wiring.allowPrivateWebhooks }),
       hostGuard: createHostGuard({ allowPrivate: wiring.allowPrivateWebhooks, production: wiring.production }),
       ...clock,
     },
-    publish: { endpoints, outbox, queue, now: clock.now },
-    scan: { applications, jobs, promises, tasks, notifications, members: createDrizzleMemberDirectory(db), newId: clock.newId },
+    publish: { endpoints: r.endpoints, outbox: r.outbox, queue, transaction: uow.transaction, now: clock.now },
+    scan: { applications: r.applications, jobs: r.jobs, promises: r.promises, tasks: r.tasks, notifications: r.notifications, members: r.members, newId: clock.newId },
   };
 }

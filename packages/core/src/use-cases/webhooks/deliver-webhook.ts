@@ -56,6 +56,8 @@ export const deliverWebhook = defineUseCase<WebhookDeliverDeps, typeof inputSche
       deps.outbox.findById(organizationId, input.eventId),
     ]);
     if (!endpoint || !event || !endpoint.enabled || !subscribes(endpoint, event.type)) return 'skipped';
+    // At most one success per (event, endpoint): a repeated task after a delivered attempt posts nothing.
+    if (await deps.deliveries.hasSucceeded(organizationId, endpoint.id, event.id)) return 'skipped';
     const base = { organizationId, endpointId: endpoint.id, eventId: event.id, eventType: event.type, attempt: input.attempt };
     if (!(await deps.hostGuard.isAllowed(endpoint.url))) {
       await log(deps, { ...base, status: 'failed', responseCode: null, error: 'host_blocked' });

@@ -7,6 +7,8 @@ export interface EmailMessage {
   readonly html?: string | undefined;
   /** Extra headers, e.g. `Auto-Submitted`, `References`, `In-Reply-To`. The caller decides which. */
   readonly headers?: Readonly<Record<string, string>> | undefined;
+  /** Sent to providers that support it (Resend): a repeated request with the same key sends nothing new. */
+  readonly idempotencyKey?: string | undefined;
 }
 
 export type DomainVerification = 'verified' | 'pending' | 'failed' | 'unsupported';
@@ -24,6 +26,8 @@ export interface DomainStatus {
 
 export interface EmailProvider {
   send(message: EmailMessage): Promise<{ readonly providerMessageId: string }>;
+  /** True when `send` honours `idempotencyKey`. */
+  readonly deduplicates?: boolean;
   domainStatus(domain: string): Promise<DomainStatus>;
 }
 

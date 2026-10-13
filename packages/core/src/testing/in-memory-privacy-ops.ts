@@ -6,6 +6,7 @@ import type { InMemoryNotifications, InMemoryOutbox, InMemoryTasks, InMemoryWebh
 import type { MessagingStore } from './in-memory-messaging.js';
 import type { ImportStore } from './in-memory-imports.js';
 import type { FeedbackStore } from './in-memory-feedback.js';
+import { cell } from './in-memory-transaction.js';
 
 export interface ErasureWorld {
   readonly store: CandidateStore;
@@ -89,19 +90,19 @@ export interface InMemoryRetentionRuns extends RetentionRunRepository {
 }
 
 export function createInMemoryRetentionRuns(initial: readonly RetentionRun[] = []): InMemoryRetentionRuns {
-  let rows: readonly RetentionRun[] = [...initial];
+  const rows = cell<readonly RetentionRun[]>([...initial]);
   return {
     async create(run) {
-      rows = [...rows, run];
+      rows.set([...rows.get(), run]);
       return run;
     },
     async listRecent(organizationId, limit) {
-      return rows
+      return rows.get()
         .filter((r) => r.organizationId === organizationId)
         .toSorted((a, b) => b.startedAt.getTime() - a.startedAt.getTime())
         .slice(0, limit);
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
   };
 }
 
@@ -110,15 +111,15 @@ export interface InMemoryDataExports extends DataExportRepository {
 }
 
 export function createInMemoryDataExports(initial: readonly DataExport[] = []): InMemoryDataExports {
-  let rows: readonly DataExport[] = [...initial];
-  const inOrg = (organizationId: string) => rows.filter((r) => r.organizationId === organizationId);
+  const rows = cell<readonly DataExport[]>([...initial]);
+  const inOrg = (organizationId: string) => rows.get().filter((r) => r.organizationId === organizationId);
   return {
     async create(value) {
-      rows = [...rows, value];
+      rows.set([...rows.get(), value]);
       return value;
     },
     async save(value) {
-      rows = rows.map((r) => (r.organizationId === value.organizationId && r.id === value.id ? value : r));
+      rows.set(rows.get().map((r) => (r.organizationId === value.organizationId && r.id === value.id ? value : r)));
       return value;
     },
     async findById(organizationId, id) {
@@ -128,14 +129,14 @@ export function createInMemoryDataExports(initial: readonly DataExport[] = []): 
       return inOrg(organizationId).toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     },
     async listExpiredAcrossOrganizations(now) {
-      return rows.filter((r) => r.expiresAt <= now);
+      return rows.get().filter((r) => r.expiresAt <= now);
     },
     async delete(organizationId, id) {
       const exists = inOrg(organizationId).some((r) => r.id === id);
-      rows = rows.filter((r) => !(r.organizationId === organizationId && r.id === id));
+      rows.set(rows.get().filter((r) => !(r.organizationId === organizationId && r.id === id)));
       return exists;
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
   };
 }
 

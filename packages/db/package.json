@@ -2,10 +2,20 @@
   "name": "@tt/db",
   "version": "0.1.0",
   "private": true,
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=24"
+  },
   "type": "module",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" },
-    "./schema": { "types": "./dist/schema/index.d.ts", "import": "./dist/schema/index.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schema": {
+      "types": "./dist/schema/index.d.ts",
+      "import": "./dist/schema/index.js"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -18,7 +28,11 @@
     "migrate": "drizzle-kit migrate",
     "studio": "drizzle-kit studio"
   },
-  "dependencies": { "@tt/domain": "workspace:*", "drizzle-orm": "0.45.2", "pg": "8.23.0" },
+  "dependencies": {
+    "@tt/domain": "workspace:*",
+    "drizzle-orm": "0.45.2",
+    "pg": "8.23.0"
+  },
   "devDependencies": {
     "@types/node": "26.4.1",
     "@types/pg": "8.23.1",

@@ -1,0 +1,61 @@
+name: Security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "43 5 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secret-scan:
+    name: secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out (full history)
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      # Organization-owned repositories need a free GITLEAKS_LICENSE secret (https://gitleaks.io); personal ones do not.
+      - name: Scan for secrets
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  audit:
+    name: dependency audit (production)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # Fails on high or critical advisories in production dependencies.
+      # Dev-only chains are out of scope (--prod). Advisories judged not exploitable here are listed, with a reason and
+      # a review date, in .github/audit-allowlist.txt (one GHSA id per line, "#" starts a comment).
+      - name: Audit production dependencies
+        run: |
+          ignores=()
+          while read -r id; do
+            [ -n "$id" ] && ignores+=(--ignore "$id")
+          done < <(sed -e 's/#.*//' -e 's/[[:space:]]//g' .github/audit-allowlist.txt | grep -v '^$' || true)
+          pnpm audit --prod --audit-level=high "${ignores[@]}"

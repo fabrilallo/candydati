@@ -36,8 +36,7 @@ afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
 describe('public feedback form', () => {
   it('shows the questions, three radio choices and no score', async () => {
     const wrapper = await mountForm()
-    expect(wrapper.findAll('textarea').length).toBe(2)
-    expect(wrapper.text()).toContain('Fatti, non impressioni.')
+    expect(wrapper.findAll('textarea').length).toBe(3)
     expect(wrapper.text()).toContain('La tua indicazione per la prossima fase')
     expect(wrapper.text()).toContain('non una decisione')
     const radios = wrapper.findAll('[role="radio"]')
@@ -51,25 +50,27 @@ describe('public feedback form', () => {
     await wrapper.find('[data-testid="feedback-form"]').trigger('submit')
     await vi.waitFor(() => expect(wrapper.find('[data-testid="feedback-issues"]').exists()).toBe(true))
     expect(wrapper.find('[data-testid="feedback-issues"]').text()).toContain('Scegli un')
-    expect(wrapper.find('[data-testid="feedback-issues"]').text()).toContain('almeno una risposta')
+    expect(wrapper.find('[data-testid="feedback-issues"]').text()).toContain('domande obbligatorie')
     expect(state.bodies).toEqual([])
   })
 
   it('selects with the keyboard semantics and sends trimmed answers', async () => {
     const wrapper = await mountForm()
     await wrapper.find('[data-testid="answer-tech_shown"]').setValue('  Postgres solido  ')
+    await wrapper.find('[data-testid="answer-tech_open"]').setValue('Sistemi distribuiti')
     await wrapper.find('[data-testid="recommendation-discuss"]').trigger('click')
     expect(wrapper.find('[data-testid="recommendation-discuss"]').attributes('aria-checked')).toBe('true')
     await wrapper.find('[data-testid="recommendation-discuss"]').trigger('keydown', { key: 'ArrowRight' })
     expect(wrapper.find('[data-testid="recommendation-proceed"]').attributes('aria-checked')).toBe('true')
     await wrapper.find('[data-testid="feedback-form"]').trigger('submit')
     await vi.waitFor(() => expect(wrapper.find('[data-testid="feedback-done"]').exists()).toBe(true))
-    expect(state.bodies).toEqual([{ answers: { tech_shown: 'Postgres solido' }, recommendation: 'proceed' }])
+    expect(state.bodies).toEqual([{ answers: { tech_shown: 'Postgres solido', tech_open: 'Sistemi distribuiti' }, recommendation: 'proceed' }])
     expect(wrapper.text()).toContain('feedback inviato')
   })
 
   it('emits a failure when the link was used meanwhile, and keeps the form on a server error', async () => {
     const wrapper = await mountForm()
+    await wrapper.find('[data-testid="answer-tech_shown"]').setValue('Postgres solido')
     await wrapper.find('[data-testid="answer-tech_open"]').setValue('Sistemi distribuiti')
     await wrapper.find('[data-testid="recommendation-proceed"]').trigger('click')
     state.status = 409

@@ -1,20 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
-  createDrizzleApplicationIntake,
-  createDrizzleApplications,
-  createDrizzleCandidateNotes,
-  createDrizzleCandidateSearch,
-  createDrizzleCandidates,
-  createDrizzleCvExtractions,
-  createDrizzleJobs,
-  createDrizzleMessages,
-  createDrizzleOutbox,
-  createDrizzleOrganizationDirectory,
-  createDrizzleResponsePromises,
-  createDrizzleStageEvents,
-  createDrizzlePrivacyNotices,
-  createDrizzleUserDirectory,
-  type AuditLogRepository,
+  type DrizzleUnitOfWork,
   type CandidateDeps,
   type FeedbackStageEntryParts,
   type FileStorage,
@@ -23,7 +9,6 @@ import {
   type SubmitApplicationDeps,
   type TaskQueue,
 } from '@tt/core';
-import type { Db } from '@tt/db';
 import { sniffCv } from '@tt/providers';
 
 export interface Phase2Deps {
@@ -33,45 +18,44 @@ export interface Phase2Deps {
 }
 
 export interface Phase2Inputs {
-  readonly db: Db;
-  readonly auditLog: AuditLogRepository;
+  readonly uow: DrizzleUnitOfWork;
   readonly files: FileStorage;
   readonly queue: TaskQueue;
   readonly receipts: ReceiptDeps;
   readonly feedback: FeedbackStageEntryParts;
 }
 
-/** Candidates, privacy notices and the public application: Drizzle repositories, injected storage and queue. */
-export function createPhase2Deps({ db, auditLog, files, queue, receipts, feedback }: Phase2Inputs): Phase2Deps {
-  const jobs = createDrizzleJobs(db);
-  const organizations = createDrizzleOrganizationDirectory(db);
-  const privacyNotices = createDrizzlePrivacyNotices(db);
+/** Candidates, privacy notices and the public application: the shared repositories, injected storage and queue. */
+export function createPhase2Deps({ uow, files, queue, receipts, feedback }: Phase2Inputs): Phase2Deps {
+  const r = uow.repositories;
+  const core = { auditLog: r.auditLog, transaction: uow.transaction };
+  const { jobs, organizations, privacyNotices } = r;
   const clock = { newId: randomUUID, now: () => new Date() };
   return {
     candidateDeps: {
-      auditLog,
+      ...core,
       jobs,
-      candidates: createDrizzleCandidates(db),
-      applications: createDrizzleApplications(db),
-      notes: createDrizzleCandidateNotes(db),
-      extractions: createDrizzleCvExtractions(db),
-      candidateSearch: createDrizzleCandidateSearch(db),
-      users: createDrizzleUserDirectory(db),
+      candidates: r.candidates,
+      applications: r.applications,
+      notes: r.notes,
+      extractions: r.extractions,
+      candidateSearch: r.candidateSearch,
+      users: r.users,
       files,
-      messages: createDrizzleMessages(db),
-      stageEvents: createDrizzleStageEvents(db),
-      promises: createDrizzleResponsePromises(db),
+      messages: r.messages,
+      stageEvents: r.stageEvents,
+      promises: r.promises,
       queue,
       feedback,
-      outbox: createDrizzleOutbox(db),
+      outbox: r.outbox,
       ...clock,
     },
-    privacyDeps: { auditLog, privacyNotices, organizations, ...clock },
+    privacyDeps: { ...core, privacyNotices, organizations, ...clock },
     submitDeps: {
       organizations,
       jobs,
       privacyNotices,
-      intake: createDrizzleApplicationIntake(db),
+      intake: r.intake,
       files,
       queue,
       receipts,

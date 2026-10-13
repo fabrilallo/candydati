@@ -8,6 +8,7 @@ import {
   createInMemoryApplicationCounts,
   createInMemoryJobRepository,
   createTestJobDeps,
+  agentActor,
   userActor,
 } from '../../testing/index.js';
 import { updateJob } from './update-job.js';
@@ -80,6 +81,41 @@ describe('updateJob', () => {
     await expect(
       updateJob(deps, userActor({ role: 'interviewer', organizationId: 'org_a' }), { jobId: job.id, content: { title: 'x' } }),
     ).rejects.toBeInstanceOf(ForbiddenError);
+  });
+});
+
+describe('updateJob guards', () => {
+  it('lets the assistant edit drafts only, whatever adapter calls it (#26)', async () => {
+    const assistant = agentActor({ role: 'recruiter', organizationId: 'org_a', onBehalfOfUserId: 'user_test' });
+    const draft = seeded();
+    await expect(updateJob(draft.deps, assistant, { jobId: draft.job.id, content: { title: 'By the assistant' } })).resolves.toMatchObject({ status: 'draft' });
+    const live = seeded({ status: 'published', publishedAt: new Date('2026-05-01T00:00:00Z') });
+    await expect(updateJob(live.deps, assistant, { jobId: live.job.id, content: completeJobContent({ title: 'Live' }) })).rejects.toBeInstanceOf(ForbiddenError);
+    expect((await live.deps.jobs.findById('org_a', live.job.id))?.content.title).toBe('Backend Developer');
+  });
+
+  it('refuses an edit that arrives after the job was published or closed meanwhile (#4, #26)', async () => {
+    const { job, deps } = seeded();
+    const stale = { ...deps, jobs: { ...deps.jobs, findById: async () => job } };
+    await deps.jobs.transition('org_a', job.id, 'draft', { status: 'published', quality: null, publishedAt: deps.now(), updatedAt: deps.now() });
+    await expect(updateJob(stale, actor, { jobId: job.id, content: { title: 'Late' } })).rejects.toBeInstanceOf(ConflictError);
+    expect(await deps.jobs.findById('org_a', job.id)).toMatchObject({ status: 'published', content: { title: 'Backend Developer' } });
+  });
+
+  it('keeps a published job inside its approved budget when approval is required, comparing yearly amounts (#7)', async () => {
+    const { job, deps } = seeded({ status: 'published', publishedAt: new Date('2026-05-01T00:00:00Z') });
+    await deps.organizationSettings.setRequireApproval('org_a', true);
+    await deps.approvals.set('org_a', job.id, { approvedBy: 'admin', approvedAt: deps.now(), salaryMin: 40000, salaryMax: 50000, currency: 'EUR' });
+    const salary = (max: number, period: 'year' | 'month') => completeJobContent({ title: 'Backend Developer', salary: { min: Math.round(max * 0.8), max, currency: 'EUR', period } });
+    const beyond = await updateJob(deps, actor, { jobId: job.id, content: salary(90000, 'year') }).catch((e: unknown) => e);
+    expect(beyond).toBeInstanceOf(ValidationError);
+    expect((beyond as ValidationError).issues).toEqual([{ path: 'approval', message: 'approval_range_exceeded' }]);
+    await expect(updateJob(deps, actor, { jobId: job.id, content: salary(10000, 'month') })).rejects.toBeInstanceOf(ValidationError);
+    await expect(updateJob(deps, actor, { jobId: job.id, content: salary(4000, 'month') })).resolves.toMatchObject({ content: { salary: { max: 4000, period: 'month' } } });
+    // A draft is checked when it is published, not while it is written.
+    const draft = seeded();
+    await draft.deps.organizationSettings.setRequireApproval('org_a', true);
+    await expect(updateJob(draft.deps, actor, { jobId: draft.job.id, content: salary(90000, 'year') })).resolves.toBeDefined();
   });
 });
 

@@ -3,6 +3,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { AuditWriteError, ForbiddenError, ValidationError } from './errors.js';
 import { defineUseCase } from './use-case.js';
 import { agentActor, createInMemoryAuditLog, failingAuditLog, userActor } from './testing/index.js';
+import { createInMemoryTransaction } from './testing/in-memory-transaction.js';
+
+const tx = createInMemoryTransaction();
 
 const renameOrg = defineUseCase({
   name: 'renameOrganization',
@@ -35,7 +38,7 @@ describe('defineUseCase', () => {
 
   it('runs the handler and writes exactly one audit event on success', async () => {
     const auditLog = createInMemoryAuditLog();
-    const result = await renameOrg({ auditLog }, admin, valid);
+    const result = await renameOrg({ auditLog, transaction: tx }, admin, valid);
     expect(result).toEqual({ previous: 'Old', name: 'New' });
     const events = auditLog.events();
     expect(events).toHaveLength(1);
@@ -50,13 +53,13 @@ describe('defineUseCase', () => {
 
   it('records an agent with the user it acts for', async () => {
     const auditLog = createInMemoryAuditLog();
-    await renameOrg({ auditLog }, agentActor({ role: 'admin', organizationId: 'o1', onBehalfOfUserId: 'u9' }), valid);
+    await renameOrg({ auditLog, transaction: tx }, agentActor({ role: 'admin', organizationId: 'o1', onBehalfOfUserId: 'u9' }), valid);
     expect(auditLog.events()[0]!.actor).toMatchObject({ type: 'agent', onBehalfOfUserId: 'u9' });
   });
 
   it('rejects invalid input before the handler, with no audit event', async () => {
     const auditLog = createInMemoryAuditLog();
-    const promise = renameOrg({ auditLog }, admin, { organizationId: 'o1', name: '' });
+    const promise = renameOrg({ auditLog, transaction: tx }, admin, { organizationId: 'o1', name: '' });
     await expect(promise).rejects.toBeInstanceOf(ValidationError);
     await expect(promise).rejects.toMatchObject({ issues: [{ path: 'name' }] });
     expect(auditLog.events()).toHaveLength(0);
@@ -64,7 +67,7 @@ describe('defineUseCase', () => {
 
   it('denies a role without the permission, with no audit event', async () => {
     const auditLog = createInMemoryAuditLog();
-    await expect(renameOrg({ auditLog }, userActor({ role: 'recruiter', organizationId: 'o1' }), valid)).rejects.toBeInstanceOf(
+    await expect(renameOrg({ auditLog, transaction: tx }, userActor({ role: 'recruiter', organizationId: 'o1' }), valid)).rejects.toBeInstanceOf(
       ForbiddenError,
     );
     expect(auditLog.events()).toHaveLength(0);
@@ -73,7 +76,7 @@ describe('defineUseCase', () => {
   it('denies cross-organization access', async () => {
     const auditLog = createInMemoryAuditLog();
     const owner = userActor({ role: 'owner', organizationId: 'other' });
-    await expect(renameOrg({ auditLog }, owner, valid)).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(renameOrg({ auditLog, transaction: tx }, owner, valid)).rejects.toBeInstanceOf(ForbiddenError);
     expect(auditLog.events()).toHaveLength(0);
   });
 
@@ -88,14 +91,14 @@ describe('defineUseCase', () => {
       },
     });
     const auditLog = createInMemoryAuditLog();
-    await expect(failing({ auditLog }, admin, {})).rejects.toThrow('handler failed');
+    await expect(failing({ auditLog, transaction: tx }, admin, {})).rejects.toThrow('handler failed');
     expect(auditLog.events()).toHaveLength(0);
   });
 
   it('does not report success when the audit append fails', async () => {
     const cause = new Error('db down');
     const auditLog = failingAuditLog(cause);
-    const error = await renameOrg({ auditLog }, admin, valid).catch((e: unknown) => e);
+    const error = await renameOrg({ auditLog, transaction: tx }, admin, valid).catch((e: unknown) => e);
     expect(error).toBeInstanceOf(AuditWriteError);
     expect((error as AuditWriteError).cause).toBe(cause);
   });
@@ -103,13 +106,13 @@ describe('defineUseCase', () => {
   it('lets an explicitly read-only use case skip the audit', async () => {
     const auditLog = createInMemoryAuditLog();
     const append = vi.spyOn(auditLog, 'append');
-    expect(await peek({ auditLog }, admin, {})).toBe('value');
+    expect(await peek({ auditLog, transaction: tx }, admin, {})).toBe('value');
     expect(append).not.toHaveBeenCalled();
   });
 
   it('still authorizes an audit-free use case', async () => {
     const auditLog = createInMemoryAuditLog();
-    await expect(peek({ auditLog }, userActor({ role: 'recruiter' }), {})).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(peek({ auditLog, transaction: tx }, userActor({ role: 'recruiter' }), {})).rejects.toBeInstanceOf(ForbiddenError);
   });
 
   it('supports an explicit permission opt-out, still scoped to the organization', async () => {
@@ -122,9 +125,9 @@ describe('defineUseCase', () => {
       handler: async () => 1,
     });
     const auditLog = createInMemoryAuditLog();
-    expect(await open({ auditLog }, userActor({ role: 'interviewer', organizationId: 'o1' }), { organizationId: 'o1' })).toBe(1);
+    expect(await open({ auditLog, transaction: tx }, userActor({ role: 'interviewer', organizationId: 'o1' }), { organizationId: 'o1' })).toBe(1);
     await expect(
-      open({ auditLog }, userActor({ role: 'interviewer', organizationId: 'o1' }), { organizationId: 'o2' }),
+      open({ auditLog, transaction: tx }, userActor({ role: 'interviewer', organizationId: 'o1' }), { organizationId: 'o2' }),
     ).rejects.toBeInstanceOf(ForbiddenError);
     expect(open.meta.permission).toBeNull();
   });
@@ -133,7 +136,7 @@ describe('defineUseCase', () => {
     const auditLog = createInMemoryAuditLog();
     const raw = Object.freeze({ organizationId: 'o1', name: 'New' });
     const frozenActor = Object.freeze({ ...admin });
-    await expect(renameOrg({ auditLog }, frozenActor, raw)).resolves.toBeDefined();
+    await expect(renameOrg({ auditLog, transaction: tx }, frozenActor, raw)).resolves.toBeDefined();
     expect(raw).toEqual(valid);
   });
 
@@ -146,7 +149,7 @@ describe('defineUseCase', () => {
       handler: async () => null,
     });
     const auditLog = createInMemoryAuditLog();
-    await bare({ auditLog }, admin, {});
+    await bare({ auditLog, transaction: tx }, admin, {});
     expect(auditLog.events()[0]!.metadata).toEqual({});
   });
 
@@ -159,7 +162,7 @@ describe('defineUseCase', () => {
       handler: async () => null,
     });
     const auditLog = createInMemoryAuditLog();
-    await selfAudited({ auditLog }, admin, {});
+    await selfAudited({ auditLog, transaction: tx }, admin, {});
     expect(auditLog.events()).toHaveLength(0);
   });
 });

@@ -2,7 +2,7 @@
 
 Nome in codice di un ATS open source e agentico. Il nome del prodotto NON è deciso: mai scriverlo nel codice,
 si legge da `loadPlatformConfig` (`@tt/domain`), alimentato da `PLATFORM_*` / `NUXT_PUBLIC_PLATFORM_*`.
-Piano e fasi: `docs/PLAN.md`.
+Principi e perimetro: `docs/PRODUCT.md`. Design system: `docs/DESIGN-SYSTEM.md`. Architettura: `docs/ARCHITECTURE.md`.
 
 ## Layout
 - `apps/api`      Fastify + Better Auth (plugin organization) + agente Mastra + server MCP.

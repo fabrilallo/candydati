@@ -1,6 +1,5 @@
 import type { PublishIssue } from '@tt/domain'
-import { fieldIdOf } from './job-issues'
-import { isComplianceRule } from './phase9-contract'
+import { fieldIdOf, isComplianceRule } from './job-issues'
 
 /** Where a missing §5.1 element shows up in the ad preview. Ordered like the form. */
 export const GAP_SLOTS = ['title', 'role', 'seniority', 'contractType', 'salary', 'workMode', 'place', 'process', 'responseDays', 'responsibilities', 'mustHave'] as const

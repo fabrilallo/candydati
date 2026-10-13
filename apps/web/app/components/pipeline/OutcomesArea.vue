@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import type { ApplicationCardDto, StageRef } from '@tt/domain'
 import { ChevronDownIcon } from '@lucide/vue'
-import type { ApplicationCardDto, StageRef } from '@/lib/candidate-schemas'
 import type { OutcomeGroup } from '@/lib/pipeline-board'
 
 /** Decided applications, out of the columns: collapsed by default, grouped by outcome, read-only. */

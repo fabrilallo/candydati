@@ -1,7 +1,8 @@
+import { importBatchRefSchema } from '@tt/domain'
+import { IMPORTS_PATH } from '@/lib/api-paths'
 import { ApiFailure, defaultFailureKey, type FailureInfo } from './api-call'
 import { AppError } from './auth-errors'
 import { pathOf, type PickedFile } from './import-files'
-import { batchRefSchema, IMPORTS_PATH } from './phase8-contract'
 
 /**
  * `POST /api/v1/imports` with upload progress: `fetch` cannot report it, so this goes through `XMLHttpRequest`
@@ -57,7 +58,7 @@ export const readUploadResponse = (status: number, text: string): { readonly id:
     throw new ApiFailure(failure.code === 'too_large' || status === 413 ? 'imports.files.errors.tooLargeServer' : defaultFailureKey(failure), failure)
   }
   const data = typeof body === 'object' && body !== null ? (body as { data?: unknown }).data : undefined
-  const parsed = batchRefSchema.safeParse(data)
+  const parsed = importBatchRefSchema.safeParse(data)
   if (!parsed.success) throw new AppError('errors.generic', 'invalid_response')
   return parsed.data
 }

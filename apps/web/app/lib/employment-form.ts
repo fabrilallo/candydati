@@ -1,4 +1,4 @@
-import type { Employment } from './phase9-contract'
+import type { Employment } from '@tt/domain'
 
 /** "Contratto e benefit" as typed in the editor: numbers stay strings until the form becomes content. */
 export interface EmploymentForm {

@@ -56,6 +56,21 @@ export function createDrizzleWebhookDeliveries(db: DbExecutor): WebhookDeliveryR
       await db.insert(webhookDelivery).values(delivery);
       return delivery;
     },
+    async hasSucceeded(organizationId, endpointId, eventId) {
+      const rows = await db
+        .select({ id: webhookDelivery.id })
+        .from(webhookDelivery)
+        .where(
+          and(
+            eq(webhookDelivery.organizationId, organizationId),
+            eq(webhookDelivery.endpointId, endpointId),
+            eq(webhookDelivery.eventId, eventId),
+            eq(webhookDelivery.status, 'success'),
+          ),
+        )
+        .limit(1);
+      return rows.length > 0;
+    },
     listByEndpoint: (organizationId, endpointId, limit) =>
       db
         .select()

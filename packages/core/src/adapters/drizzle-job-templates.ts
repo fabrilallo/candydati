@@ -1,4 +1,5 @@
-import { and, desc, eq, schema, type Db } from '@tt/db';
+import { and, desc, eq, schema } from '@tt/db';
+import type { DbExecutor } from './db-executor.js';
 import { jobContentSchema, type JobTemplate } from '@tt/domain';
 import type { JobTemplateRepository } from '../job-ports.js';
 
@@ -15,7 +16,7 @@ const toTemplate = (row: Row): JobTemplate => ({
 });
 
 /** Postgres implementation. Every statement filters by `organization_id`. */
-export function createDrizzleJobTemplates(db: Db): JobTemplateRepository {
+export function createDrizzleJobTemplates(db: DbExecutor): JobTemplateRepository {
   const { jobTemplate } = schema;
   const scoped = (organizationId: string, id: string) =>
     and(eq(jobTemplate.organizationId, organizationId), eq(jobTemplate.id, id));

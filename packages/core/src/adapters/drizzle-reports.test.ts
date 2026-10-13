@@ -15,6 +15,7 @@ import { createDrizzleCandidates } from './drizzle-candidates.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
 import { createDrizzleResponsePromises, createDrizzleStageEvents } from './drizzle-report-history.js';
 import { createDrizzleReports } from './drizzle-reports.js';
+import { createDrizzleTransaction } from './drizzle-repositories.js';
 
 let handle: DbHandle;
 const query = { from: REPORT_FROM, to: REPORT_TO };
@@ -36,6 +37,7 @@ const repositories = (): DatasetRepositories => ({
 
 const deps = (): ReportDeps => ({
   auditLog: createDrizzleAuditLog(handle.db),
+  transaction: createDrizzleTransaction(handle.db),
   jobs: createDrizzleJobs(handle.db),
   reports: createDrizzleReports(handle.db),
   now: () => REPORT_NOW,

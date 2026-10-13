@@ -5,7 +5,7 @@ import { errorKeyOf } from '@/lib/auth-errors'
 import { listNotifications, markRead } from '@/lib/inbox-api'
 import { notificationContext, notificationLink, notificationText, unreadLabel } from '@/lib/inbox-view'
 import { relativeTime } from '@/lib/job-list-view'
-import type { NotificationDto } from '@/lib/phase4-contract'
+import type { NotificationDto } from '@tt/domain'
 import { Button } from '@/components/ui/button'
 import { NuxtLink } from '#components'
 

@@ -35,9 +35,6 @@ export const scopeGroups = (role: Role | null): readonly ScopeGroup[] => {
   return [...grouped, other].filter((group) => group.scopes.length > 0)
 }
 
-/** What no key can do, in plain words (the picker explains why instead of listing raw permissions). */
-export const withheldAreas = ['decisions', 'messages', 'administration'] as const
-
 export const scopeLabelKey = (scope: Permission): string => `apiKeys.scope.${scope.replace(':', '.')}`
 
 export const toggleScope = (scopes: readonly Permission[], scope: Permission): readonly Permission[] =>

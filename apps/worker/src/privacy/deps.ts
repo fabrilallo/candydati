@@ -1,27 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import {
-  createDrizzleApplications,
-  createDrizzleCandidateNotes,
-  createDrizzleCandidateSearch,
-  createDrizzleCandidates,
-  createDrizzleCvExtractions,
-  createDrizzleDataExports,
-  createDrizzleErasure,
-  createDrizzleFeedbackRequests,
-  createDrizzleInterviewFeedback,
-  createDrizzleAuditLog,
-  createDrizzleJobs,
-  createDrizzleMemberDirectory,
-  createDrizzleMessages,
-  createDrizzleNotifications,
-  createDrizzleOrganizationDirectory,
-  createDrizzleRetentionRuns,
+  type DrizzleUnitOfWork,
   type FileStorage,
   type OrganizationExportDeps,
   type RetentionDeps,
   type TaskQueue,
 } from '@tt/core';
-import type { Db } from '@tt/db';
 import { zipWriterFactory } from '@tt/providers';
 
 export interface PrivacyWorkerDeps {
@@ -30,43 +14,42 @@ export interface PrivacyWorkerDeps {
 }
 
 export interface PrivacyWiring {
-  readonly db: Db;
+  readonly uow: DrizzleUnitOfWork;
   readonly files: FileStorage;
   readonly queue: TaskQueue;
 }
 
 /** Retention and organization export on Postgres and S3. */
-export function createPrivacyWorkerDeps({ db, files, queue }: PrivacyWiring): PrivacyWorkerDeps {
+export function createPrivacyWorkerDeps({ uow, files, queue }: PrivacyWiring): PrivacyWorkerDeps {
+  const r = uow.repositories;
   const clock = { newId: randomUUID, now: () => new Date() };
-  const jobs = createDrizzleJobs(db);
-  const applications = createDrizzleApplications(db);
-  const dataExports = createDrizzleDataExports(db);
   return {
     retention: {
-      applications,
-      erasure: createDrizzleErasure(db),
+      applications: r.applications,
+      erasure: r.erasure,
       files,
       queue,
-      jobs,
-      notifications: createDrizzleNotifications(db),
-      members: createDrizzleMemberDirectory(db),
-      retentionRuns: createDrizzleRetentionRuns(db),
-      dataExports,
+      jobs: r.jobs,
+      notifications: r.notifications,
+      members: r.members,
+      retentionRuns: r.retentionRuns,
+      dataExports: r.dataExports,
       ...clock,
     },
     organizationExport: {
-      auditLog: createDrizzleAuditLog(db),
-      dataExports,
-      organizations: createDrizzleOrganizationDirectory(db),
-      jobs,
-      candidates: createDrizzleCandidates(db),
-      candidateSearch: createDrizzleCandidateSearch(db),
-      applications,
-      notes: createDrizzleCandidateNotes(db),
-      extractions: createDrizzleCvExtractions(db),
-      messages: createDrizzleMessages(db),
-      feedbackRequests: createDrizzleFeedbackRequests(db),
-      interviewFeedback: createDrizzleInterviewFeedback(db),
+      auditLog: r.auditLog,
+      transaction: uow.transaction,
+      dataExports: r.dataExports,
+      organizations: r.organizations,
+      jobs: r.jobs,
+      candidates: r.candidates,
+      candidateSearch: r.candidateSearch,
+      applications: r.applications,
+      notes: r.notes,
+      extractions: r.extractions,
+      messages: r.messages,
+      feedbackRequests: r.feedbackRequests,
+      interviewFeedback: r.interviewFeedback,
       files,
       queue,
       zip: zipWriterFactory,

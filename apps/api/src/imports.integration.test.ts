@@ -99,11 +99,12 @@ describe('import: full flow', () => {
     expect(applications.every((card) => card.consentStatus === 'to_renew')).toBe(true);
     expect(await searchTotal(w)).toBe(0);
     const anna = applications.find((card) => card.candidate.firstName === 'Anna')!;
-    // Detail opens from the pipeline with or without the hint, and a wrong job still hides the person.
-    const detail = await w.owner.get<{ candidate: { consentStatus: string }; applications: unknown[] }>(`/api/v1/candidates/${anna.candidate.id}`);
+    // Detail opens only from the pipeline of the import job (the hint); without it, or with a wrong job, the person is
+    // hidden: the api adds no hint of its own (#9).
+    const detail = await w.owner.get<{ candidate: { consentStatus: string }; applications: unknown[] }>(`/api/v1/candidates/${anna.candidate.id}?viaJobId=${w.job.id}`);
     expect(detail.status).toBe(200);
     expect(detail.body.data).toMatchObject({ candidate: { consentStatus: 'to_renew' } });
-    expect((await w.owner.get(`/api/v1/candidates/${anna.candidate.id}?viaJobId=${w.job.id}`)).status).toBe(200);
+    expect((await w.owner.get(`/api/v1/candidates/${anna.candidate.id}`)).status).toBe(404);
     expect((await w.owner.get(`/api/v1/candidates/${anna.candidate.id}?viaJobId=other_job`)).status).toBe(404);
     const stranger = await createWorld(t, 'Elsewhere');
     expect((await stranger.owner.get(`/api/v1/candidates/${anna.candidate.id}`)).status).toBe(404);

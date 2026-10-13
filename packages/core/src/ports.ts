@@ -1,4 +1,5 @@
 import type { AuditAction, AuditEvent, NewAuditEvent } from '@tt/domain';
+import type { TransactionalDeps } from './transaction.js';
 
 export interface AuditLogQuery {
   readonly organizationId: string;
@@ -21,6 +22,7 @@ export interface AuditLogRepository {
   list(query: AuditLogQuery): Promise<AuditLogPage>;
 }
 
-export interface CoreDeps {
+/** Every use case can open a unit of work: its writes, the audit event and the outbox events commit together. */
+export interface CoreDeps extends TransactionalDeps {
   readonly auditLog: AuditLogRepository;
 }

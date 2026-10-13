@@ -1,18 +1,10 @@
+import { applicationFeedbackSchema, publicFeedbackSchema, type ApplicationFeedbackDto, type FeedbackSubmission, type PublicFeedbackDto } from '@tt/domain'
 import { z } from 'zod'
+import { applicationFeedbackPath, publicFeedbackPath, requestFeedbackPath } from './api-paths'
 import { callApi } from './api-call'
 import { consentFailure, type ConsentFailure } from './import-api'
 import type { JobApiRequest } from './job-api'
-import {
-  applicationFeedbackPath,
-  applicationFeedbackSchema,
-  publicFeedbackPath,
-  publicFeedbackSchema,
-  requestFeedbackPath,
-  type ApplicationFeedbackDto,
-  type FeedbackRequestInput,
-  type FeedbackSubmission,
-  type PublicFeedbackDto,
-} from './phase9-contract'
+import type { FeedbackRequestInput } from './feedback-view'
 
 /** Interview feedback over HTTP (phase 9 contract, section C): the public form by token and the candidate tab. */
 export type FeedbackFailure = ConsentFailure

@@ -26,7 +26,7 @@ registerEndpoint('/api/v1/messages', {
   handler: async (event) => {
     const body = await readBody<{ applicationIds: string[] }>(event)
     state.sends.push(body)
-    return ok({ queued: body.applicationIds.length })
+    return ok({ queued: body.applicationIds.length, failed: 0 })
   },
 })
 registerEndpoint('/api/v1/applications/a4/decide', {

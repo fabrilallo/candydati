@@ -4,7 +4,7 @@ import type { JobDto } from '@tt/domain'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
-import { feedUrl, hasRegisteredChannels, jobRows, publicJobApiUrl, safeExternalUrl, statusLabelKey, statusTone } from '@/lib/distribution-view'
+import { feedUrl, hasRegisteredChannels, jobRows, publicJobApiUrl, safeExternalUrl, rowStatusLabelKey, statusTone } from '@/lib/distribution-view'
 import { formatDateTime } from '@/lib/format'
 
 /** The "Distribuzione" tab: where this ad is published, with the status of each channel and a new sync. */
@@ -17,7 +17,6 @@ const org = computed(() => viewer.value?.organization?.slug ?? '')
 const rows = computed(() =>
   jobRows({
     channels: distribution.channels.value ?? [],
-    published: props.job.status === 'published',
     feedUrl: feedUrl(config.public.siteUrl, org.value),
     apiUrl: props.job.status === 'published' && props.job.slug ? publicJobApiUrl(config.public.siteUrl, org.value, props.job.slug) : null,
   }),
@@ -46,7 +45,7 @@ const registered = computed(() => hasRegisteredChannels(rows.value))
         <li v-for="row in rows" :key="row.id" class="grid gap-3 px-5 py-4 sm:px-6" data-testid="distribution-row" :data-channel="row.id">
           <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
             <p class="min-w-0 flex-1 text-sm font-medium">{{ row.labelKey ? t(row.labelKey) : row.label }}</p>
-            <Badge v-if="row.status" :variant="statusTone(row.status)" :data-status="row.status">{{ t(statusLabelKey(row.status)) }}</Badge>
+            <Badge v-if="row.status" :variant="statusTone(row.status)" :data-status="row.status">{{ t(rowStatusLabelKey(row) ?? '') }}</Badge>
             <span v-if="row.updatedAt" class="figure text-xs text-muted-foreground">{{ t('distribution.job.updated', { date: formatDateTime(row.updatedAt, locale) }) }}</span>
             <a
               v-if="safeExternalUrl(row.url)"

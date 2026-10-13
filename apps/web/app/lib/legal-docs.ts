@@ -1,3 +1,4 @@
+import type { ProcessingRecordDto } from '@tt/domain'
 /** The templates in the repository (`docs/legal/`), with the translation key of their one-line description. */
 export const LEGAL_DOCUMENTS = [
   { path: 'docs/legal/README.md', key: 'readme' },
@@ -23,7 +24,15 @@ export const legalDocLink = (path: string, sourceUrl: string | undefined): strin
   }
 }
 
-const PROVIDER_CATEGORIES: ReadonlySet<string> = new Set(['hosting', 'database', 'storage', 'email', 'model', 'monitoring'])
+export interface ProviderRow {
+  /** Translation key of the category. */
+  readonly key: string
+  readonly name: string
+}
 
-/** Pure: translation key of a provider category; null for one the web does not know (shown as sent). */
-export const providerKey = (category: string): string | null => (PROVIDER_CATEGORIES.has(category) ? `privacyDocs.providers.${category}` : null)
+/** Pure: the providers the instance is configured with (the model only when `AGENT_MODEL` is set). */
+export const providerRows = (providers: ProcessingRecordDto['providers']): readonly ProviderRow[] => [
+  { key: 'privacyDocs.providers.storage', name: providers.storage },
+  { key: 'privacyDocs.providers.email', name: providers.email },
+  ...(providers.model === null ? [] : [{ key: 'privacyDocs.providers.model', name: providers.model }]),
+]

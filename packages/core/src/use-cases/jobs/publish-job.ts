@@ -1,10 +1,10 @@
-import { adQualityReportSchema, assess, checkApproval, checkPublishable, type AdQualityAssessment, type AdQualityReport, type Job } from '@tt/domain';
+import { adQualityReportSchema, assess, checkPublishable, type AdQualityAssessment, type AdQualityReport, type Job } from '@tt/domain';
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
 import type { JobDeps } from '../../job-ports.js';
 import { recordEvent } from '../webhooks/record-event.js';
 import { defineJobUseCase } from './define.js';
-import { issuesToValidationError, requireJob } from './shared.js';
+import { approvalIssueOf, issuesToValidationError, requireJob } from './shared.js';
 
 const PRIVACY_NOTICE_PATH = 'organization.privacyNotice';
 const APPROVAL_PATH = 'approval';
@@ -43,8 +43,7 @@ export const publishJob = defineJobUseCase({
     if (job.status !== 'draft') throw new ConflictError('Only a draft can be published.');
     const issues = checkPublishable(job.content);
     const notice = await deps.privacyNotices.findActive(actor.organizationId);
-    const [settings, approval] = await Promise.all([deps.organizationSettings.get(actor.organizationId), deps.approvals.find(actor.organizationId, job.id)]);
-    const approvalIssue = checkApproval(settings.requireApproval, approval, job.content.salary);
+    const approvalIssue = await approvalIssueOf(deps, job.organizationId, job.id, job.content);
     if (issues.length > 0 || !notice || approvalIssue !== null) {
       throw new ValidationError([
         ...issuesToValidationError(issues).issues,
@@ -54,7 +53,7 @@ export const publishJob = defineJobUseCase({
     }
     const report = await tryAnalyze(deps, job);
     const now = deps.now();
-    const saved = await deps.jobs.save({ ...job, status: 'published', quality: report, publishedAt: now, updatedAt: now });
+    const saved = await deps.jobs.transition(job.organizationId, job.id, 'draft', { status: 'published', quality: report, publishedAt: now, updatedAt: now });
     await recordEvent(deps, saved.organizationId, 'job.published', { jobId: saved.id, slug: saved.slug });
     return { job: saved, quality: report ? assess(report, deps.adQualityThreshold) : null };
   },

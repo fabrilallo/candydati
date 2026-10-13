@@ -1,6 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import type { PublishedJobContent } from '@tt/domain'
-import type { PublicJobPage } from '@/lib/job-api-schemas'
+import type { PublishedJobContent, PublicJobPage  } from '@tt/domain'
 import { publicNotice } from '~~/test/fixtures/candidate-fixtures'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { completeContent } from '~~/test/fixtures/job-fixtures'

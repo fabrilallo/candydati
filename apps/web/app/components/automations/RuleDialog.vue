@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { AUTOMATION_ACTIONS, JOB_OWNER_ASSIGNEE, MAX_DUE_IN_DAYS, TASK_TITLE_MAX } from '@tt/domain'
+import { type AutomationRuleDto, AUTOMATION_ACTIONS, JOB_OWNER_ASSIGNEE, MAX_DUE_IN_DAYS, TASK_TITLE_MAX, type EmailTemplateDto    } from '@tt/domain';
 import type { MemberRow } from '@/lib/auth-api'
 import type { RuleInput } from '@/lib/automation-api'
 import { EMPTY_RULE_FORM, ruleToForm, validateRuleForm, type RuleForm, type RuleFormErrors } from '@/lib/automation-view'
-import type { EmailTemplateDto } from '@/lib/message-schemas'
-import type { AutomationRuleDto } from '@/lib/phase4-contract'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'

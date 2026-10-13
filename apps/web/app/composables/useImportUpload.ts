@@ -1,11 +1,9 @@
-import type { JobSummaryDto } from '@tt/domain'
+import { type JobSummaryDto, IMPORT_LIMITS, type StageRef  } from '@tt/domain'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { getPipeline } from '@/lib/candidate-api'
-import type { StageRef } from '@/lib/candidate-schemas'
 import { checkImportFiles, mergeFiles, pathOf } from '@/lib/import-files'
 import { uploadImport, type XhrLike } from '@/lib/import-upload'
 import { listJobs, loaded } from '@/lib/job-api'
-import { IMPORT_LIMITS } from '@tt/domain'
 
 const JOBS_LIMIT = 100
 

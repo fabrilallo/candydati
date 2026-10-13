@@ -40,9 +40,20 @@ export const scanFeedbackReminders = defineSystemJob<FeedbackStageEntryDeps, z.Z
         const context = await loadRequestContext(deps, request.organizationId, request.applicationId, request.stageId);
         if (!context) continue;
         const secret = deps.newToken();
-        const updated = await deps.feedbackRequests.save({ ...request, tokenHash: deps.hash(secret), remindersSent: request.remindersSent + 1, lastReminderAt: now });
+        const tokenHash = deps.hash(secret);
+        // Guarded on the old link and on "still empty": a submission or another scan that got there first wins.
+        const updated = await deps.feedbackRequests.rotateToken(request.organizationId, request.id, request.tokenHash, {
+          tokenHash,
+          remindersSent: request.remindersSent + 1,
+          lastReminderAt: now,
+        });
+        if (!updated) continue;
         if (!(await sendRequestEmail(deps, context, updated, secret, true))) {
-          await deps.feedbackRequests.save(request);
+          await deps.feedbackRequests.rotateToken(request.organizationId, request.id, tokenHash, {
+            tokenHash: request.tokenHash,
+            remindersSent: request.remindersSent,
+            lastReminderAt: request.lastReminderAt,
+          });
           failed += 1;
           continue;
         }

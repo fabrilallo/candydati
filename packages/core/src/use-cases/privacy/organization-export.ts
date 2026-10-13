@@ -21,6 +21,7 @@ export const requestOrganizationExport = defineExportUseCase({
     target: (_input, result: DataExport) => ({ type: 'data_export', id: result.id }),
     metadata: () => ({ step: 'requested' }),
   },
+  transaction: { skip: 'the request row must be committed before its task is queued, and a queue failure must reach the caller' },
   handler: async ({ deps, actor }): Promise<DataExport> => {
     const now = deps.now();
     const created = await deps.dataExports.create({

@@ -1,9 +1,10 @@
 import type { TaskQueue } from '../../intake-ports.js';
 
 /**
- * Called after the change that brought the application into `stageId` has committed. A failure to enqueue is swallowed:
- * the move or the application stays, only the automation of that stage is lost (the same call is how a reconciliation
- * would re-run it). `runAutomations` re-checks the application when it runs.
+ * For the change that brought the application into `stageId`. Inside a unit of work the task is sent after the commit
+ * (the worker must find the new stage) and a failure goes to the transaction's error sink; outside one, a failure to
+ * enqueue is swallowed. Either way the move or the application stays, only the automation of that stage is lost.
+ * `runAutomations` re-checks the application when it runs, and runs each rule once per stage entry.
  */
 export async function enqueueAutomations(
   deps: { readonly queue: TaskQueue },

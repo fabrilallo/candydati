@@ -84,8 +84,14 @@ describe('feedback requests and feedback on Postgres', () => {
     expect(await repo.findById(org, created.id)).toEqual(created);
     expect(await repo.findById(await insertOrg(), created.id)).toBeNull();
     await expect(repo.create(request(org, jobId, applicationId, { tokenHash: created.tokenHash }))).rejects.toBeInstanceOf(ConflictError);
-    const saved = await repo.save({ ...created, remindersSent: 1, lastReminderAt: NOW });
-    expect(saved).toMatchObject({ remindersSent: 1, lastReminderAt: NOW });
+    const saved = await repo.rotateToken(org, created.id, created.tokenHash, { tokenHash: 'rotated', remindersSent: 1, lastReminderAt: NOW });
+    expect(saved).toMatchObject({ tokenHash: 'rotated', remindersSent: 1, lastReminderAt: NOW });
+    // Guarded on the link it replaces and on "still empty": a stale scan or a submitted request is left alone.
+    expect(await repo.rotateToken(org, created.id, created.tokenHash, { tokenHash: 'again', remindersSent: 2, lastReminderAt: NOW })).toBeNull();
+    expect(await repo.markSubmitted(org, created.id, NOW)).toBe(true);
+    expect(await repo.markSubmitted(org, created.id, NOW)).toBe(false);
+    expect(await repo.rotateToken(org, created.id, 'rotated', { tokenHash: 'late', remindersSent: 2, lastReminderAt: NOW })).toBeNull();
+    expect(await repo.findById(org, created.id)).toMatchObject({ tokenHash: 'rotated', submittedAt: NOW });
     expect((await repo.listByApplication(org, applicationId)).map((r) => r.id)).toEqual([created.id]);
     expect(await repo.listByApplication(await insertOrg(), applicationId)).toEqual([]);
   });
@@ -165,7 +171,7 @@ describe('job requests, settings and approvals on Postgres', () => {
     expect(await repo.setRequireApproval(org, false, NOW)).toEqual({ requireApproval: false });
   });
 
-  it('stores the approval apart from the job: saving the job neither wipes nor forges it', async () => {
+  it('stores the approval apart from the job: editing the job neither wipes nor forges it', async () => {
     const org = await insertOrg();
     const other = await insertOrg();
     const jobId = await insertJob(org);
@@ -178,7 +184,7 @@ describe('job requests, settings and approvals on Postgres', () => {
     await approvals.set(other, jobId, { ...approval, salaryMax: 1 });
     expect(await approvals.find(org, jobId)).toEqual(approval);
     const job = (await jobs.findById(org, jobId))!;
-    await jobs.save({ ...job, updatedAt: new Date(NOW.getTime() + 1000) });
+    await jobs.updateContent(org, jobId, job.status, { content: job.content, updatedAt: new Date(NOW.getTime() + 1000) });
     expect(await approvals.find(org, jobId)).toEqual(approval);
     await approvals.set(org, jobId, { ...approval, salaryMax: 60000 });
     expect((await approvals.find(org, jobId))?.salaryMax).toBe(60000);

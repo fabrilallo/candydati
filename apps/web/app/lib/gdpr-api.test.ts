@@ -63,39 +63,26 @@ describe('candidate rights api', () => {
 })
 
 describe('retention and exports api', () => {
-  it('reads the retention overview, with the name in any of the contract spellings', async () => {
-    const raw = {
-      upcoming: [
-        { applicationId: 'a1', candidateId: 'c1', jobTitle: 'Backend', retentionExpiresAt: '2026-10-25T10:00:00.000Z', candidate: { id: 'c1', firstName: 'Marta', lastName: 'Verdi' } },
-        { applicationId: 'a2', candidate: { id: 'c2', firstName: 'Luca', lastName: 'Neri' }, jobTitle: 'Design', retentionExpiresAt: '2026-10-26T10:00:00.000Z' },
-        { applicationId: 'a3', candidateId: 'c3', firstName: 'Anna', lastName: 'Bianchi', jobTitle: 'Ops', retentionExpiresAt: '2026-10-27T10:00:00.000Z' },
-        { applicationId: 'a4', candidateId: 'c4', jobTitle: 'Ops', retentionExpiresAt: '2026-10-27T10:00:00.000Z' },
-        ...retentionOverview().upcoming,
-      ],
-      lastRuns: [{ id: 'r1', startedAt: '2026-10-13T01:00:00.000Z', warned: 1, erased: 0 }],
-    }
-    const overview = await getRetentionOverview(send(ok(raw)))
-    expect(overview.upcoming.map((item) => item.candidateName)).toEqual(['Marta Verdi', 'Luca Neri', 'Anna Bianchi', null, 'Marta Verdi', 'Luca Neri'])
-    expect(overview.upcoming[1]?.candidateId).toBe('c2')
-    expect(overview.lastRuns[0]?.finishedAt).toBeNull()
+  it('reads the retention overview as the api sends it', async () => {
+    const overview = await getRetentionOverview(send(ok(retentionOverview())))
+    expect(overview.upcoming.map((item) => item.candidateName)).toEqual(['Marta Verdi', 'Luca Neri'])
+    expect(overview.lastRuns[0]).toMatchObject({ id: 'r1', warned: 2, erased: 1 })
+    await expect(getRetentionOverview(send(ok({ upcoming: [{ applicationId: 'a1' }], lastRuns: [] })))).rejects.toMatchObject({ code: 'invalid_response' })
   })
 
   it('lists, creates and reads the exports', async () => {
-    expect((await listDataExports(send(ok([dataExport('e1', { sizeBytes: undefined as never, completedAt: undefined as never })]))))[0]?.sizeBytes).toBeNull()
+    expect((await listDataExports(send(ok([dataExport('e1', { sizeBytes: null, completedAt: null })]))))[0]?.sizeBytes).toBeNull()
     const create = send(ok({ id: 'e2', status: 'pending' }))
     expect(await createDataExport(create)).toEqual({ id: 'e2', status: 'pending' })
     expect(create.mock.calls[0]).toEqual(['/api/v1/exports', { method: 'POST', body: {} }])
   })
 
-  it('reads the processing record, providers as a list or as a record', async () => {
-    expect((await getProcessingRecord(send(ok(processingRecord())))).providers).toHaveLength(2)
-    const asRecord = await getProcessingRecord(send(ok({ organization: { name: 'Acme' }, providers: { hosting: 'Hetzner', email: null, model: 'mistral/small' } })))
-    expect(asRecord.providers).toEqual([
-      { category: 'hosting', name: 'Hetzner', detail: null },
-      { category: 'model', name: 'mistral/small', detail: null },
-    ])
-    expect(asRecord.retentionDays).toBeNull()
-    const withKind = await getProcessingRecord(send(ok({ organization: { name: 'Acme' }, providers: [{ kind: 'storage', name: 'MinIO' }] })))
-    expect(withKind.providers).toEqual([{ category: 'storage', name: 'MinIO', detail: null }])
+  it('reads the processing record: the configured providers, the model only when set', async () => {
+    const record = await getProcessingRecord(send(ok(processingRecord())))
+    expect(record.providers).toEqual({ storage: 's3', email: 'smtp', model: 'mistral/mistral-small' })
+    const bare = await getProcessingRecord(send(ok(processingRecord({ retentionDays: null, providers: { storage: 'local', email: 'resend', model: null } }))))
+    expect(bare.retentionDays).toBeNull()
+    expect(bare.providers.model).toBeNull()
+    await expect(getProcessingRecord(send(ok({ organization: { name: 'Acme' }, providers: [] })))).rejects.toMatchObject({ code: 'invalid_response' })
   })
 })

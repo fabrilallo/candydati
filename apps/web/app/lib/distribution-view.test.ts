@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { curlExample, feedUrl, hasRegisteredChannels, jobRows, llmsUrl, publicApiUrl, publicJobApiUrl, safeExternalUrl, sitemapUrl, statusLabelKey, statusTone } from './distribution-view'
-import { distributionOverviewSchema, jobDistributionSchema } from './phase7-contract'
+import { distributionOverviewSchema, jobDistributionSchema } from '@tt/domain'
+import { curlExample, feedUrl, hasRegisteredChannels, jobRows, llmsUrl, publicApiUrl, publicJobApiUrl, rowStatusLabelKey, safeExternalUrl, sitemapUrl, statusLabelKey, statusTone } from './distribution-view'
 
 const SITE = 'https://ats.example.com/'
 
@@ -21,45 +21,47 @@ describe('public urls', () => {
 
 describe('status mapping', () => {
   it('maps every status to a tone and a label key', () => {
-    expect(statusTone('feed')).toBe('success')
+    expect(statusTone('published')).toBe('success')
     expect(statusTone('pending')).toBe('warning')
     expect(statusTone('failed')).toBe('destructive')
     expect(statusTone('removed')).toBe('outline')
     expect(statusLabelKey('failed')).toBe('distribution.status.failed')
   })
 
-  it('treats an unknown status as pending', () => {
-    const [row] = jobDistributionSchema.parse([{ channelId: 'x', status: 'weird' }])
-    expect(row?.status).toBe('pending')
+  it('labels the built-in feed row "in the feed" while published, any other row by its status', () => {
+    expect(rowStatusLabelKey({ status: 'published', builtIn: true })).toBe('distribution.status.feed')
+    expect(rowStatusLabelKey({ status: 'published', builtIn: false })).toBe('distribution.status.published')
+    expect(rowStatusLabelKey({ status: 'removed', builtIn: true })).toBe('distribution.status.removed')
+    expect(rowStatusLabelKey({ status: null, builtIn: false })).toBeNull()
   })
 })
 
 describe('jobRows', () => {
   const base = { feedUrl: 'f', apiUrl: 'a' }
+  const feedRow = { channelId: 'feed', label: 'Feed XML', status: 'published', url: null, error: null, updatedAt: '2026-10-13T10:00:00.000Z' } as const
+  const board = { channelId: 'board', label: 'Board', status: 'failed', error: 'timeout', url: 'https://board.example/1', updatedAt: null } as const
+
   it('shows the feed row and the public api row when no channel is registered', () => {
-    const rows = jobRows({ ...base, channels: [], published: true })
-    expect(rows.map((row) => [row.id, row.status])).toEqual([['feed', 'feed'], ['api', null]])
+    const rows = jobRows({ ...base, channels: [feedRow] })
+    expect(rows.map((row) => [row.id, row.status])).toEqual([['feed', 'published'], ['api', null]])
     expect(hasRegisteredChannels(rows)).toBe(false)
   })
 
-  it('computes the feed as removed while the job is not published', () => {
-    expect(jobRows({ ...base, channels: [], published: false })[0]?.status).toBe('removed')
+  it('takes the feed status from the row the api sent', () => {
+    expect(jobRows({ ...base, channels: [{ ...feedRow, status: 'removed' }] })[0]?.status).toBe('removed')
+    expect(jobRows({ ...base, channels: [] })[0]?.status).toBeNull()
   })
 
-  it('prefers the feed row the api sent and lists registered channels between feed and api', () => {
-    const channels = jobDistributionSchema.parse([
-      { channelId: 'feed', label: 'Feed XML', status: 'published', updatedAt: '2026-10-13T10:00:00Z' },
-      { channelId: 'board', label: 'Board', status: 'failed', error: 'timeout', url: 'https://board.example/1' },
-    ])
-    const rows = jobRows({ ...base, channels, published: true })
+  it('lists registered channels between feed and api', () => {
+    const rows = jobRows({ ...base, channels: jobDistributionSchema.parse([feedRow, board]) })
     expect(rows.map((row) => row.id)).toEqual(['feed', 'board', 'api'])
-    expect(rows[0]?.status).toBe('feed')
-    expect(rows[1]).toMatchObject({ syncable: true, error: 'timeout', label: 'Board' })
+    expect(rows[0]).toMatchObject({ builtIn: true, updatedAt: feedRow.updatedAt })
+    expect(rows[1]).toMatchObject({ syncable: true, error: 'timeout', label: 'Board', builtIn: false })
     expect(hasRegisteredChannels(rows)).toBe(true)
   })
 
   it('leaves the api row out without a slug', () => {
-    expect(jobRows({ feedUrl: 'f', apiUrl: null, channels: [], published: true }).map((row) => row.id)).toEqual(['feed'])
+    expect(jobRows({ feedUrl: 'f', apiUrl: null, channels: [feedRow] }).map((row) => row.id)).toEqual(['feed'])
   })
 })
 
@@ -73,8 +75,7 @@ describe('safeExternalUrl', () => {
 })
 
 describe('overview schema', () => {
-  it('accepts a bare list or an object, defaulting to no channels', () => {
-    expect(distributionOverviewSchema.parse([{ id: 'a', label: 'A' }]).channels[0]).toMatchObject({ channelId: 'a', enabled: true, builtIn: false })
-    expect(distributionOverviewSchema.parse({}).channels).toEqual([])
+  it('needs the feed and llms.txt urls', () => {
+    expect(distributionOverviewSchema.safeParse({ channels: [] }).success).toBe(false)
   })
 })

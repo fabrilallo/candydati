@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { AppError } from './auth-errors'
 import type { JobApiRequest } from './job-api'
-import { hasAnyJob, loadJobCounts } from './job-counts'
+import { loadJobCounts } from './job-counts'
 
 const page = (total: number) => ({ status: 200, body: { success: true, data: [], error: null, meta: { total, page: 1, limit: 1 } } })
 
@@ -28,12 +28,5 @@ describe('loadJobCounts', () => {
     const [a, b] = await Promise.all([loadJobCounts(request), loadJobCounts(request)])
     expect(a).toEqual(b)
     expect(a).not.toBe(b)
-  })
-})
-
-describe('hasAnyJob', () => {
-  it('is true only when at least one job exists', () => {
-    expect(hasAnyJob({ draft: 0, published: 0, closed: 0, total: 0 })).toBe(false)
-    expect(hasAnyJob({ draft: 0, published: 0, closed: 1, total: 1 })).toBe(true)
   })
 })

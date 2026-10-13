@@ -2,7 +2,7 @@ import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { listApplicationFeedback, requestFeedback } from '@/lib/feedback-api'
 import { loaded } from '@/lib/job-api'
-import type { FeedbackRequestInput } from '@/lib/phase9-contract'
+import type { FeedbackRequestInput } from '@/lib/feedback-view'
 
 /** Requests and submitted feedback of one application (phase 9), plus the manual "ask for feedback" call. */
 export const useApplicationFeedback = (applicationId: () => string) => {

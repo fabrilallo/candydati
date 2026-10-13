@@ -1,11 +1,10 @@
+import type { JobRequestDto } from '@tt/domain'
 import { toast } from 'vue-sonner'
-import { callApi } from '@/lib/api-call'
+import { getAgentStatus } from '@/lib/agent-api'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { loaded } from '@/lib/job-api'
 import { approveJobRequest, convertJobRequest, getJobRequest, rejectJobRequest } from '@/lib/job-request-api'
 import { requestSummary } from '@/lib/job-request-view'
-import { AGENT_STATUS_PATH, agentStatusSchema } from '@/lib/phase6-contract'
-import type { JobRequestDto } from '@/lib/phase9-contract'
 
 /** One hiring request and what can be done to it: decide, make the ad, make the ad and hand it to the assistant. */
 export const useJobRequest = (id: () => string) => {
@@ -25,7 +24,7 @@ export const useJobRequest = (id: () => string) => {
 
   const checkAssistant = async (): Promise<void> => {
     try {
-      assistantEnabled.value = (await callApi(request, AGENT_STATUS_PATH, agentStatusSchema)).data.enabled
+      assistantEnabled.value = (await getAgentStatus(request)).enabled
     } catch {
       assistantEnabled.value = false
     }

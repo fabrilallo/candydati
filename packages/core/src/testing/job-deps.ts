@@ -15,6 +15,7 @@ import {
   createInMemoryJobTemplateRepository,
   createInMemoryOrganizationDirectory,
 } from './in-memory-jobs.js';
+import { createInMemoryTransaction } from './in-memory-transaction.js';
 
 /** Fully in-memory `JobDeps` with a counter-based id generator and a fixed clock. */
 export type TestJobDeps = JobDeps & {
@@ -27,6 +28,7 @@ export function createTestJobDeps(overrides: Partial<TestJobDeps> = {}): TestJob
   let counter = 0;
   return {
     auditLog: createInMemoryAuditLog(),
+    transaction: createInMemoryTransaction(),
     jobs: createInMemoryJobRepository(),
     jobTemplates: createInMemoryJobTemplateRepository(),
     organizations: createInMemoryOrganizationDirectory(),

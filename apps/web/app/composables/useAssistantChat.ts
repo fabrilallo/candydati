@@ -1,9 +1,9 @@
 import { useChat } from '@ai-sdk/vue'
 import { DefaultChatTransport, type UIMessage } from 'ai'
-import { callApi } from '@/lib/api-call'
+import { getAgentStatus } from '@/lib/agent-api'
 import { isAgentNotConfigured } from '@/lib/assistant-parts'
 import { toWirePage, type PageContext } from '@/lib/page-context'
-import { AGENT_CHAT_PATH, AGENT_STATUS_PATH, agentStatusSchema } from '@/lib/phase6-contract'
+import { AGENT_CHAT_PATH } from '@/lib/api-paths'
 
 const BUSY: ReadonlySet<string> = new Set(['submitted', 'streaming'])
 
@@ -35,7 +35,7 @@ export const useAssistantChat = (page: () => PageContext) => {
   const checkStatus = async (): Promise<void> => {
     if (configured.value !== null) return
     try {
-      configured.value = (await callApi(request, AGENT_STATUS_PATH, agentStatusSchema)).data.enabled
+      configured.value = (await getAgentStatus(request)).enabled
     } catch {
       // No status route (yet) or a transient failure: let the first message find out.
     }

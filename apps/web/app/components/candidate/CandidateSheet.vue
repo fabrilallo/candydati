@@ -1,13 +1,14 @@
 <script setup lang="ts">
+import type { ApplicationCardDto } from '@tt/domain'
 import { Maximize2Icon } from '@lucide/vue'
-import type { ApplicationCardDto } from '@/lib/candidate-schemas'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 
 /** The candidate profile as a wide side panel over the board, with the way to the full page. */
-defineProps<{ candidateId: string | null; applicationId?: string | null }>()
+const props = defineProps<{ candidateId: string | null; applicationId?: string | null; viaJobId?: string | null }>()
 const emit = defineEmits<{ close: []; card: [card: ApplicationCardDto]; noted: [applicationId: string | null]; erased: [candidateGone: boolean] }>()
 const { t } = useI18n()
+const fullPage = computed(() => (props.viaJobId ? `/app/candidates/${props.candidateId}?viaJobId=${encodeURIComponent(props.viaJobId)}` : `/app/candidates/${props.candidateId}`))
 </script>
 
 <template>
@@ -17,11 +18,11 @@ const { t } = useI18n()
         <SheetTitle class="min-w-0 flex-1 truncate text-sm font-medium">{{ t('candidate.sheet.title') }}</SheetTitle>
         <SheetDescription class="sr-only">{{ t('candidate.sheet.description') }}</SheetDescription>
         <Button v-if="candidateId" as-child variant="ghost" size="sm">
-          <NuxtLink :to="`/app/candidates/${candidateId}`" data-testid="open-full-page"><Maximize2Icon aria-hidden="true" />{{ t('candidate.sheet.fullPage') }}</NuxtLink>
+          <NuxtLink :to="fullPage" data-testid="open-full-page"><Maximize2Icon aria-hidden="true" />{{ t('candidate.sheet.fullPage') }}</NuxtLink>
         </Button>
       </div>
       <div class="px-5 py-6 sm:px-6">
-        <CandidateDetailView v-if="candidateId" :key="candidateId" :candidate-id="candidateId" :application-id="applicationId ?? null" heading="h2" @card="emit('card', $event)" @noted="emit('noted', $event)" @erased="emit('erased', $event)" />
+        <CandidateDetailView v-if="candidateId" :key="candidateId" :candidate-id="candidateId" :application-id="applicationId ?? null" :via-job-id="viaJobId ?? null" heading="h2" @card="emit('card', $event)" @noted="emit('noted', $event)" @erased="emit('erased', $event)" />
       </div>
     </SheetContent>
   </Sheet>

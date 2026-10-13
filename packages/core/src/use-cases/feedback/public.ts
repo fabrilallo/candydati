@@ -16,6 +16,7 @@ import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import type { PublicFeedbackDeps } from '../../feedback-ports.js';
 import { definePublicFeedbackQuery } from './define.js';
 import { FEEDBACK_PAGE_ACTOR, stageContextOf } from './shared.js';
+import { inTransaction } from '../../transaction.js';
 
 const tokenInput = z.object({ token: z.string().min(16).max(200) });
 const NOT_VALID = 'This link is not valid.';
@@ -138,8 +139,10 @@ export const submitFeedback = definePublicFeedbackQuery({
     const checked = checkAnswers(stage.declared?.type ?? null, input.answers);
     if (checked.issues.length > 0) throw new ValidationError(checked.issues.map((issue) => ({ path: issue.path, message: issue.message })));
     const submittedAt = deps.now();
-    // The unique request id decides a race between two submissions of the same link.
-    await deps.interviewFeedback.create({
+    return inTransaction(deps, async (tx) => {
+      // Single use: the guarded mark and the unique request id both decide a race between two submissions of the link.
+      if (!(await tx.feedbackRequests.markSubmitted(request.organizationId, request.id, submittedAt))) throw new ConflictError('already_submitted');
+      await tx.interviewFeedback.create({
       id: deps.newId(),
       organizationId: request.organizationId,
       applicationId: application.id,
@@ -148,16 +151,16 @@ export const submitFeedback = definePublicFeedbackQuery({
       interviewerName: request.interviewerName,
       answers: checked.answers,
       recommendation: input.recommendation,
-      submittedAt,
+        submittedAt,
+      });
+      await tx.auditLog.append({
+        organizationId: request.organizationId,
+        actor: FEEDBACK_PAGE_ACTOR,
+        action: 'feedback.submitted',
+        target: { type: 'feedback_request', id: request.id },
+        metadata: { applicationId: application.id, stageId: request.stageId, recommendation: input.recommendation },
+      });
+      return { submittedAt };
     });
-    await deps.feedbackRequests.save({ ...request, submittedAt });
-    await deps.auditLog.append({
-      organizationId: request.organizationId,
-      actor: FEEDBACK_PAGE_ACTOR,
-      action: 'feedback.submitted',
-      target: { type: 'feedback_request', id: request.id },
-      metadata: { applicationId: application.id, stageId: request.stageId, recommendation: input.recommendation },
-    });
-    return { submittedAt };
   },
 });

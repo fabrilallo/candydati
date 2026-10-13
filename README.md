@@ -1,14 +1,82 @@
 # team-tracker
 
+> **Codename.** The product name is not decided yet; it is read from configuration (`PLATFORM_*`), never hard-coded.
+
+SPDX-License-Identifier: AGPL-3.0-only
+
+An open source, agentic applicant tracking system (ATS) on the **candidate's side**.
+
+- **Salary range in clear.** A job ad without a range cannot be published.
+- **Declared selection process.** Stages, who runs them, duration and response time are visible before applying.
+- **No application without an outcome.** Every candidate always gets an answer; a job with open applications cannot be closed.
+- **No automated decisions.** The assistant works on the process. It never ranks, scores or rejects people.
+- **Agentic-ready.** Everything in the UI is available through a REST API (OpenAPI) and an MCP server.
+- **GDPR by design.** Versioned consent, retention and automatic erasure, data subject rights, full export in open formats.
+
+Status: pre-1.0 (see the [changelog](CHANGELOG.md)). What the product is and its principles: [docs/PRODUCT.md](docs/PRODUCT.md).
+
+<!-- Screenshots: add images here (e.g. docs/images/pipeline.png), made from your own instance. -->
+
+## Quickstart (development)
+
+Requirements: Node 24, pnpm 10 (`corepack enable`), Docker with Compose v2.
+
+```bash
+cp .env.example .env
+pnpm install
+pnpm infra:up       # Postgres :5434, MinIO :9000
+pnpm db:migrate
+pnpm dev            # web http://localhost:3000, api http://localhost:4100
+```
+
+Locally, emails go to Mailpit (http://localhost:8025). Checks: `pnpm lint`, `pnpm typecheck`, `pnpm test`.
+
+## Self-hosting
+
+```bash
+cp .env.example .env     # set PLATFORM_URL and the secrets
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+The first account you register creates your organization. Required variables, networking, reverse proxy and
+upgrade notes are in the [section below](#self-hosting-in-dettaglio) (Italian; variable names and commands are the same).
+
+## Documentation
+
+- [Architecture](docs/ARCHITECTURE.md) and [decision records](docs/adr/README.md)
+- [Contributing](CONTRIBUTING.md), [Code of Conduct](CODE_OF_CONDUCT.md), [Security policy](SECURITY.md)
+- [Product](docs/PRODUCT.md): principles, scope, job ad standard, agent and GDPR approach
+- [Design system](docs/DESIGN-SYSTEM.md)
+- [Public data schemas](docs/schema/README.md), [legal templates](docs/legal/README.md) (Italian, need legal review)
+
+## Author
+
+Created and maintained by **Fabrizio Lallo** (fabrizio.lallo95@gmail.com), founder of
+[TechCompenso](https://techcompenso.com) and [XCompenso](https://xcompenso.com), and creator of
+[FuffAnnuncio](https://www.fuffannuncio.com) and [Riccometro](https://www.riccometro.it). The job ad quality analysis in
+this project is derived from FuffAnnuncio.
+
+## License
+
+[GNU AGPL v3](LICENSE) (`AGPL-3.0-only`). If you run a modified version as a network service, you must offer its
+source to its users.
+
+---
+
+# Italiano
+
 Nome in codice di un ATS open source e agentico, dalla parte del candidato: RAL in chiaro obbligatoria, processo di selezione dichiarato, nessuna candidatura senza esito.
 
 Il nome del prodotto non è deciso e non va scritto nel codice.
 
-- Piano: [`docs/PLAN.md`](docs/PLAN.md)
-- Stato: Fase 0 (fondamenta) e Fase 1 (annuncio e standard) fatte: organizzazioni, ruoli, inviti, registro delle azioni; editor dell'annuncio con blocco della pubblicazione, punteggio di qualità, template, pagina carriere pubblica con JSON-LD; Fase 2 (candidatura e pipeline): form senza registrazione con consenso versionato e CV, estrazione del CV, pipeline a fasi, scheda candidato, note, ricerca; Fase 3 (comunicazione): email a nome dell'azienda, risposte agganciate alla candidatura, template, invio massivo, messaggi di esito. In locale le email finiscono in Mailpit (http://localhost:8025). Fase 4 (automazioni e scadenze): conto alla rovescia sulla risposta promessa, vista Da gestire, notifiche e riepiloghi, attività, automazioni per fase, webhook firmati, chiusura dell'annuncio vincolata agli esiti. Fase 5 (GDPR): cancellazione automatica alla scadenza con avviso, diritti dell'interessato dalla scheda candidato, export del candidato e dell'organizzazione, modelli dei documenti in docs/legal. Fase 6 (agentic-ready): chiavi API con ambiti, OpenAPI su /api/v1/openapi.json, server MCP su /mcp, assistente interno senza memoria sul server, test avversariali con `pnpm --filter @tt/api eval:agent`. Fase 7 (distribuzione): feed XML, llms.txt e sitemap per organizzazione sotto /careers/{org}/, API pubblica di sola lettura, interfaccia per i canali di distribuzione. Fase 8 (import): ZIP o cartelle di CV, CSV, Excel ed export di Notion, con abbinamento, anteprima, consenso da rinnovare via email e annullamento dell'intero import. Fase 9 (strumenti per l'HR): conformità dell'annuncio al diritto italiano, CCNL e benefit strutturati, feedback dei colloqui senza login, richieste di apertura con approvazione, annunci fermi. Fase 10 (report): tempo di assunzione e copertura, passaggi tra le fasi, provenienza, tempi di risposta rispettati, export CSV.
+- Prodotto (in inglese): [`docs/PRODUCT.md`](docs/PRODUCT.md); design system: [`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md)
+- Cosa fa: annunci con RAL e processo obbligatori e conformi al diritto italiano, pagina carriere con dati strutturati e feed, candidature senza registrazione con consenso versionato, pipeline a fasi, comunicazione con i candidati, scadenze e automazioni, GDPR completo (conservazione, diritti, export), import di CV e fogli di calcolo, feedback dei colloqui senza login, report, API pubblica, server MCP e assistente. Dettagli in [`docs/PRODUCT.md`](docs/PRODUCT.md).
+- Autore: **Fabrizio Lallo** (fabrizio.lallo95@gmail.com), fondatore di [TechCompenso](https://techcompenso.com) e
+  [XCompenso](https://xcompenso.com), creatore di [FuffAnnuncio](https://www.fuffannuncio.com) e
+  [Riccometro](https://www.riccometro.it).
 - Avvio in locale: `cp .env.example .env`, `pnpm install`, `pnpm infra:up`, `pnpm dev` (web su :3000, api su :4100).
 
-## Self-hosting
+## Self-hosting in dettaglio
 
 Uno stack completo (Postgres 17, MinIO, api, worker, web) con un solo comando. Serve Docker con Compose v2.
 

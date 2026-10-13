@@ -9,21 +9,22 @@ import type {
 } from '../job-request-ports.js';
 import type { CandidateStore } from './in-memory-candidates.js';
 import type { InMemoryJobRepository } from './in-memory-jobs.js';
+import { cell } from './in-memory-transaction.js';
 
 export interface InMemoryJobRequests extends JobRequestRepository {
   snapshot(): readonly JobRequest[];
 }
 
 export function createInMemoryJobRequests(initial: readonly JobRequest[] = []): InMemoryJobRequests {
-  let rows: readonly JobRequest[] = [...initial];
-  const inOrg = (organizationId: string) => rows.filter((r) => r.organizationId === organizationId);
+  const rows = cell<readonly JobRequest[]>([...initial]);
+  const inOrg = (organizationId: string) => rows.get().filter((r) => r.organizationId === organizationId);
   return {
     async create(request) {
-      rows = [...rows, request];
+      rows.set([...rows.get(), request]);
       return request;
     },
     async save(request) {
-      rows = rows.map((r) => (r.organizationId === request.organizationId && r.id === request.id ? request : r));
+      rows.set(rows.get().map((r) => (r.organizationId === request.organizationId && r.id === request.id ? request : r)));
       return request;
     },
     async findById(organizationId, id) {
@@ -39,19 +40,19 @@ export function createInMemoryJobRequests(initial: readonly JobRequest[] = []): 
     async findOpenForJob(organizationId, jobId) {
       return inOrg(organizationId).find((r) => r.jobId === jobId && r.status === 'submitted') ?? null;
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
   };
 }
 
 export function createInMemoryOrganizationSettings(initial: Readonly<Record<string, OrganizationSettings>> = {}): OrganizationSettingsRepository {
-  let rows: Readonly<Record<string, OrganizationSettings>> = { ...initial };
+  const rows = cell<Readonly<Record<string, OrganizationSettings>>>({ ...initial });
   return {
     async get(organizationId) {
-      return rows[organizationId] ?? { requireApproval: false };
+      return rows.get()[organizationId] ?? { requireApproval: false };
     },
     async setRequireApproval(organizationId, value) {
       const next = { requireApproval: value };
-      rows = { ...rows, [organizationId]: next };
+      rows.set({ ...rows.get(), [organizationId]: next });
       return next;
     },
   };
@@ -62,16 +63,16 @@ export interface InMemoryJobApprovals extends JobApprovalRepository {
 }
 
 export function createInMemoryJobApprovals(): InMemoryJobApprovals {
-  let rows = new Map<string, JobApproval>();
+  const rows = cell(new Map<string, JobApproval>());
   const key = (organizationId: string, jobId: string) => `${organizationId}\u0000${jobId}`;
   return {
     async find(organizationId, jobId) {
-      return rows.get(key(organizationId, jobId)) ?? null;
+      return rows.get().get(key(organizationId, jobId)) ?? null;
     },
     async set(organizationId, jobId, approval) {
-      rows = new Map(rows).set(key(organizationId, jobId), approval);
+      rows.set(new Map(rows.get()).set(key(organizationId, jobId), approval));
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
   };
 }
 

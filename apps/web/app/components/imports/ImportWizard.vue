@@ -39,7 +39,7 @@ const jobTitle = computed(() => batch.value?.job?.title ?? pipeline.value?.data?
       v-else-if="w.step.value === 'mapping'"
       :headers="w.detail.value.batch.headers"
       :mapping="w.mapping.value"
-      :samples="w.detail.value.batch.columnSamples"
+      :samples="w.detail.value.batch.columnSamples ?? {}"
       :changed="w.changedMapping.value"
       :pending="w.busy.value !== null"
       @set="w.setField"

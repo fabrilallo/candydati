@@ -79,7 +79,7 @@ describe('scanStaleJobs', () => {
     const deps = world();
     await scanStaleJobs(deps, { now: NOW });
     const job = await deps.jobs.findById(ORG_A, 'stale');
-    await deps.jobs.save({ ...job!, updatedAt: new Date(NOW.getTime() + 10 * DAY) });
+    await deps.jobs.updateContent(ORG_A, 'stale', job!.status, { content: job!.content, updatedAt: new Date(NOW.getTime() + 10 * DAY) });
     expect((await scanStaleJobs(deps, { now: new Date(NOW.getTime() + 50 * DAY) })).digests).toEqual([]);
     const second = await scanStaleJobs(deps, { now: new Date(NOW.getTime() + 100 * DAY) });
     expect(second.digests).toHaveLength(1);

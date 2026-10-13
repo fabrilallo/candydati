@@ -18,6 +18,7 @@ import {
 } from '@tt/domain';
 import type { FeedbackMailParts, FeedbackStageEntryDeps } from '../../feedback-ports.js';
 import type { PublicOrganization } from '../../job-ports.js';
+import { afterCommitOrNow, type TransactionalDeps } from '../../transaction.js';
 import { formatFrom, senderIdentity, stageName } from '../messaging/shared.js';
 
 export const FEEDBACK_PAGE_ACTOR_ID = 'feedback_page';
@@ -117,7 +118,7 @@ export async function sendRequestEmail(
 
 /** Creates the request with a fresh secret, audits it and sends the link. The audit event carries ids only. */
 export async function issueRequest(
-  deps: FeedbackStageEntryDeps,
+  deps: FeedbackStageEntryDeps & Partial<TransactionalDeps>,
   context: RequestContext,
   target: FeedbackTarget,
   by: { readonly requestedBy: string; readonly actor: AuditActor },
@@ -149,7 +150,8 @@ export async function issueRequest(
     target: { type: 'feedback_request', id: request.id },
     metadata: { applicationId: request.applicationId, stageId: request.stageId, interviewerKind: request.interviewerKind },
   });
-  await sendRequestEmail(deps, context, request, secret, false);
+  // Inside a transaction the link is emailed after the commit: never a link to a request that was rolled back.
+  await afterCommitOrNow(deps, async () => void (await sendRequestEmail(deps, context, request, secret, false)));
   return request;
 }
 

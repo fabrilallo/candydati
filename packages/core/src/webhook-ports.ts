@@ -1,12 +1,17 @@
 import type { OutboxEvent, WebhookDelivery, WebhookEndpoint, WebhookEventType } from '@tt/domain';
 import type { TaskQueue } from './intake-ports.js';
 import type { CoreDeps } from './ports.js';
+import type { TransactionalDeps } from './transaction.js';
 
 /** Events are appended in the same transaction as the change; a worker publishes them. */
 export interface OutboxRepository {
   append(event: OutboxEvent): Promise<OutboxEvent>;
   findById(organizationId: string, id: string): Promise<OutboxEvent | null>;
-  /** Oldest first, across organizations: only for the system job that publishes. */
+  /**
+   * Oldest first, across organizations: only for the system job that publishes. Inside a transaction the rows are
+   * claimed (`FOR UPDATE SKIP LOCKED`): a second publisher running at the same time skips them instead of fanning them
+   * out again.
+   */
   listUnpublished(limit: number): Promise<readonly OutboxEvent[]>;
   markPublished(organizationId: string, id: string, at: Date): Promise<void>;
 }
@@ -26,6 +31,8 @@ export interface WebhookEndpointRepository {
 
 export interface WebhookDeliveryRepository {
   append(delivery: WebhookDelivery): Promise<WebhookDelivery>;
+  /** True when this event already reached this endpoint (a 2xx was logged): a repeated task does not post it again. */
+  hasSucceeded(organizationId: string, endpointId: string, eventId: string): Promise<boolean>;
   /** Newest first. */
   listByEndpoint(organizationId: string, endpointId: string, limit: number): Promise<readonly WebhookDelivery[]>;
 }
@@ -66,7 +73,7 @@ export interface WebhookDeps extends CoreDeps {
   readonly now: () => Date;
 }
 
-export interface WebhookPublishDeps {
+export interface WebhookPublishDeps extends TransactionalDeps {
   readonly endpoints: WebhookEndpointRepository;
   readonly outbox: OutboxRepository;
   readonly queue: TaskQueue;

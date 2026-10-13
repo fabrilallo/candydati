@@ -1,7 +1,6 @@
-import type { Locale, PrivacyNoticeInput } from '@tt/domain'
+import { type Locale, type PrivacyNoticeInput, privacyNoticeSchema, privacyTemplateSchema, type PrivacyNoticeDto    } from '@tt/domain';
 import { z } from 'zod'
 import { callApi } from './api-call'
-import { privacyNoticeSchema, privacyTemplateSchema, type PrivacyNoticeDto } from './candidate-schemas'
 import type { JobApiRequest } from './job-api'
 
 const BASE = '/api/v1/privacy-notice'

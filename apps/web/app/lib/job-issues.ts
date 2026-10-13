@@ -1,4 +1,7 @@
-import type { PublishIssue, PublishRule } from '@tt/domain'
+import { COMPLIANCE_BLOCKING_RULES, type ComplianceBlockingRule, type PublishIssue, type PublishRule } from '@tt/domain'
+
+/** A publish issue about the wording of the ad (not a missing element): blocks publication, but is fixed in place. */
+export const isComplianceRule = (rule: string): rule is ComplianceBlockingRule => (COMPLIANCE_BLOCKING_RULES as readonly string[]).includes(rule)
 
 /** Id of the form control (or fieldset) that holds the content path, e.g. `salary.max` -> `job-field-salary-max`. */
 export const fieldIdOf = (path: string): string => `job-field-${path.replace(/\./g, '-')}`

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { ConsentStatus } from '@tt/domain'
 import { RefreshCwIcon } from '@lucide/vue'
 import { consentRenewal } from '@/lib/import-view'
-import type { ConsentStatus } from '@/lib/phase8-contract'
 import { Badge } from '@/components/ui/badge'
 
 /**

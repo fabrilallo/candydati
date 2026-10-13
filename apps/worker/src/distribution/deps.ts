@@ -1,30 +1,27 @@
 import {
   createDistributionRegistry,
-  createDrizzleAuditLog,
-  createDrizzleDistributionSettings,
-  createDrizzleJobDistributions,
-  createDrizzleJobs,
-  createDrizzleOrganizationDirectory,
+  type DrizzleUnitOfWork,
   type DistributionChannel,
   type DistributionDeps,
 } from '@tt/core';
-import type { Db } from '@tt/db';
 import type { PlatformConfig } from '@tt/domain';
 
 export interface DistributionWiring {
-  readonly db: Db;
+  readonly uow: DrizzleUnitOfWork;
   readonly platform: PlatformConfig;
   /** Channels beyond the built-in feed. The open source distribution registers none; a hosted one passes its own. */
   readonly channels?: readonly DistributionChannel[] | undefined;
 }
 
-export function createDistributionWorkerDeps({ db, platform, channels = [] }: DistributionWiring): DistributionDeps {
+export function createDistributionWorkerDeps({ uow, platform, channels = [] }: DistributionWiring): DistributionDeps {
+  const r = uow.repositories;
   return {
-    auditLog: createDrizzleAuditLog(db),
-    jobs: createDrizzleJobs(db),
-    organizations: createDrizzleOrganizationDirectory(db),
-    distributions: createDrizzleJobDistributions(db),
-    distributionSettings: createDrizzleDistributionSettings(db),
+    auditLog: r.auditLog,
+    transaction: uow.transaction,
+    jobs: r.jobs,
+    organizations: r.organizations,
+    distributions: r.distributions,
+    distributionSettings: r.distributionSettings,
     registry: createDistributionRegistry(channels),
     publicBaseUrl: platform.url,
     now: () => new Date(),

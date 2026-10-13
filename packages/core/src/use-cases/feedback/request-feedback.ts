@@ -21,6 +21,7 @@ export const requestFeedback = defineFeedbackUseCase({
   }),
   permission: 'feedback:manage',
   audit: { skip: 'every request is audited as feedback.requested inside, one event per interviewer' },
+  transaction: 'required',
   handler: async ({ deps, actor, input }): Promise<readonly FeedbackRequestView[]> => {
     const application = await requireApplication(deps, actor.organizationId, input.applicationId);
     const stageId = input.stageId ?? application.stageId;

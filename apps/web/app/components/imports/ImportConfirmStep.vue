@@ -1,15 +1,15 @@
 <script setup lang="ts">
+import type { ImportItemView } from '@/lib/import-item-view'
 import { MailXIcon } from '@lucide/vue'
 import { previewSummary, type Selection } from '@/lib/import-preview'
 import { IMPORT_RECONFIRM_DAYS } from '@tt/domain'
-import type { ImportItemDto } from '@/lib/phase8-contract'
 import { Button } from '@/components/ui/button'
 
 /**
  * Step 5 "Conferma": how many new, merged and excluded, where they go, and the consent rule in four plain sentences.
  * The import starts only from here.
  */
-const props = defineProps<{ items: readonly ImportItemDto[]; selection: Selection; jobTitle: string | null; stageName: string | null; pending: boolean }>()
+const props = defineProps<{ items: readonly ImportItemView[]; selection: Selection; jobTitle: string | null; stageName: string | null; pending: boolean }>()
 const emit = defineEmits<{ back: []; confirm: [] }>()
 const { t } = useI18n()
 const summary = computed(() => previewSummary(props.items, props.selection))

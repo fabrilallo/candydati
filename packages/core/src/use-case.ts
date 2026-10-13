@@ -4,6 +4,7 @@ import { toAuditActor, type Actor } from './actor.js';
 import { assertSameOrganization, authorize } from './authorization.js';
 import { AuditWriteError, ValidationError } from './errors.js';
 import type { CoreDeps } from './ports.js';
+import { inTransaction } from './transaction.js';
 
 /** Explicit opt-out: the reason is mandatory so that skipping is visible in the definition. */
 export interface Skip {
@@ -35,6 +36,11 @@ export interface UseCaseDefinition<D extends CoreDeps, S extends z.ZodType, O> {
   readonly organizationOf?: (input: z.output<S>) => string;
   /** An audit event, or `{ skip: reason }` for read-only use cases. */
   readonly audit: AuditSpec<z.output<S>, O> | Skip;
+  /**
+   * Audited use cases run in one transaction by default; a use case that skips the audit but writes says `'required'`.
+   * `{ skip: reason }` for one that must not hold a transaction (long external calls; it opens its own when needed).
+   */
+  readonly transaction?: 'required' | Skip | undefined;
   readonly handler: (context: HandlerContext<D, z.output<S>>) => Promise<O>;
 }
 
@@ -79,13 +85,15 @@ async function appendAudit<D extends CoreDeps, I, O>(
   }
 }
 
+const isTransactional = <D extends CoreDeps, S extends z.ZodType, O>(definition: UseCaseDefinition<D, S, O>): boolean =>
+  definition.transaction === undefined ? !isSkip(definition.audit) : definition.transaction === 'required';
+
 /**
- * The only way to write a use case. Order: validate input, authorize, run handler, append audit event.
+ * The only way to write a use case. Order: validate input, authorize, then in ONE transaction run the handler and append
+ * the audit event; after the commit, the side effects it registered (queued tasks, emails) run.
  *
- * If the handler throws, nothing is audited and the error propagates. If the audit append fails after the
- * handler succeeded, `AuditWriteError` is thrown: the caller never sees a success for an unlogged action.
- * The mutation itself is not rolled back here; adapters that need atomicity pass deps whose handler writes
- * and `auditLog.append` share one database transaction.
+ * If the handler throws, nothing is audited and every write is rolled back. If the audit append fails,
+ * `AuditWriteError` is thrown and the handler's writes are rolled back with it: no unlogged action, no half-done one.
  */
 export function defineUseCase<D extends CoreDeps, S extends z.ZodType, O>(
   definition: UseCaseDefinition<D, S, O>,
@@ -95,9 +103,13 @@ export function defineUseCase<D extends CoreDeps, S extends z.ZodType, O>(
     const organizationId = definition.organizationOf?.(input) ?? actor.organizationId;
     if (isSkip(definition.permission)) assertSameOrganization(actor, organizationId);
     else authorize(actor, definition.permission, organizationId);
-    const result = await definition.handler({ deps, actor, input });
-    if (!isSkip(definition.audit)) await appendAudit(deps, actor, definition.audit, organizationId, input, result);
-    return result;
+    const audit = definition.audit;
+    const execute = async (bound: D): Promise<O> => {
+      const result = await definition.handler({ deps: bound, actor, input });
+      if (!isSkip(audit)) await appendAudit(bound, actor, audit, organizationId, input, result);
+      return result;
+    };
+    return isTransactional(definition) ? inTransaction(deps, execute) : execute(deps);
   };
   const meta: UseCaseMeta = {
     name: definition.name,

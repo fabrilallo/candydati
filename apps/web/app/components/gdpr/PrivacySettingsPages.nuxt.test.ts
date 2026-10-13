@@ -121,12 +121,13 @@ describe('privacy documents', () => {
   })
 
   it('says what is missing instead of inventing it', async () => {
-    state.record = processingRecord({ organization: { name: 'Acme', contactEmail: null }, retentionDays: null, providers: [] })
+    state.record = processingRecord({ organization: { name: 'Acme', contactEmail: null }, retentionDays: null, providers: { storage: 'local', email: 'resend', model: null } })
     const wrapper = await mountSuspended(PrivacyDocuments)
     mounted.push(wrapper)
     await vi.waitFor(() => expect(wrapper.find('[data-testid="processing-record"]').exists()).toBe(true))
     expect(wrapper.find('[data-testid="record-contact"]').text()).toContain('Non indicato')
     expect(wrapper.find('[data-testid="record-retention"]').text()).toContain('Da definire')
-    expect(wrapper.find('[data-testid="record-recipients"]').text()).toContain('Nessun fornitore')
+    expect(wrapper.find('[data-testid="record-recipients"]').text()).toContain('Archiviazione dei file: local')
+    expect(wrapper.find('[data-testid="record-recipients"]').text()).not.toContain('modello')
   })
 })

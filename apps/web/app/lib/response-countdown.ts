@@ -1,4 +1,5 @@
 import { DUE_SOON_HOURS, type Outcome, type ResponseState } from '@tt/domain'
+import { displayTimeZone } from './format'
 
 /** What the countdown needs of an application (a board card or an application of the candidate detail). */
 export interface ResponseInput {
@@ -22,14 +23,14 @@ export interface Countdown {
 const DAY_MS = 86_400_000
 const HOUR_MS = 3_600_000
 
-const dayNumber = (date: Date, timeZone?: string): number => {
-  const parts = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', ...(timeZone ? { timeZone } : {}) }).formatToParts(date)
+const dayNumber = (date: Date, timeZone: string): number => {
+  const parts = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone }).formatToParts(date)
   const part = (type: string): number => Number(parts.find((item) => item.type === type)?.value)
   return Date.UTC(part('year'), part('month') - 1, part('day')) / DAY_MS
 }
 
-/** Pure: calendar days from `from` to `to` in a time zone (the runtime one when omitted). Negative backwards. */
-export const calendarDays = (from: Date, to: Date, timeZone?: string): number => dayNumber(to, timeZone) - dayNumber(from, timeZone)
+/** Pure: calendar days from `from` to `to` in a time zone (the display zone of `format.ts` when omitted). Negative backwards. */
+export const calendarDays = (from: Date, to: Date, timeZone: string = displayTimeZone()): number => dayNumber(to, timeZone) - dayNumber(from, timeZone)
 
 const parse = (iso: string | null): Date | null => {
   if (iso === null) return null
@@ -57,7 +58,7 @@ const TONES: Readonly<Record<'on_track' | 'due_soon' | 'overdue', CountdownTone>
  * Pure: the wording of the countdown pill. Days are calendar days ("Scade oggi" means today on the calendar), so
  * the pill never says "entro 0 giorni". Null when there is nothing to show (closed, or no deadline known).
  */
-export const responseCountdown = (input: ResponseInput, now: Date, timeZone?: string): Countdown | null => {
+export const responseCountdown = (input: ResponseInput, now: Date, timeZone: string = displayTimeZone()): Countdown | null => {
   const state = effectiveResponseState(input, now)
   if (state === null || state === 'closed') return null
   if (state === 'answered') return { state, tone: 'quiet', key: 'response.answered', count: 0 }

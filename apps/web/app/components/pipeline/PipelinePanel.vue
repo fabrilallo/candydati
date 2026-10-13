@@ -1,7 +1,6 @@
 <script setup lang="ts">
+import type { ApplicationCardDto, EmailTemplateKind, Outcome  } from '@tt/domain'
 import { ListChecksIcon, SearchIcon } from '@lucide/vue'
-import type { EmailTemplateKind, Outcome } from '@tt/domain'
-import type { ApplicationCardDto } from '@/lib/candidate-schemas'
 import { fullName } from '@/lib/candidate-view'
 import { outcomeTemplateKind } from '@/lib/message-view'
 import { can } from '@/lib/permissions-ui'
@@ -150,6 +149,6 @@ const openCard = (card: ApplicationCardDto): void => {
       @confirm="confirmDecide"
     />
     <BulkComposerSheet :cards="composing?.cards ?? []" :kind="composing?.kind ?? null" @close="composing = null" @sent="sent" />
-    <CandidateSheet :candidate-id="opened?.candidateId ?? null" :application-id="opened?.applicationId ?? null" @close="opened = null" @card="pl.accept" @noted="(id) => id && pl.noted(id)" @erased="erasedFromSheet" />
+    <CandidateSheet :candidate-id="opened?.candidateId ?? null" :application-id="opened?.applicationId ?? null" :via-job-id="jobId" @close="opened = null" @card="pl.accept" @noted="(id) => id && pl.noted(id)" @erased="erasedFromSheet" />
   </div>
 </template>

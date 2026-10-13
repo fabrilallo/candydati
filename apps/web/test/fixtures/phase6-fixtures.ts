@@ -1,11 +1,11 @@
 /** Wire shapes of the Phase 6 contract (API keys, OpenAPI, agent), as the api is expected to send them. */
 export const apiKey = (id: string, overrides: Record<string, unknown> = {}) => ({
   id,
-  organizationId: 'o1',
   name: 'Integrazione CI',
   prefix: 'Ab12Cd34',
   scopes: ['job:read', 'job:create'],
-  createdBy: { id: 'u1', name: 'Ada Lovelace' },
+  createdBy: 'u1',
+  createdByName: 'Ada Lovelace',
   createdAt: '2026-10-01T09:00:00.000Z',
   lastUsedAt: '2026-10-12T15:30:00.000Z',
   expiresAt: null,

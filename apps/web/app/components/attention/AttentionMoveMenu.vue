@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { StageRef } from '@tt/domain'
 import { ArrowRightLeftIcon } from '@lucide/vue'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { getPipeline } from '@/lib/candidate-api'
-import type { StageRef } from '@/lib/candidate-schemas'
 import { stageName, stageTone } from '@/lib/pipeline-board'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'

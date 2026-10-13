@@ -1,10 +1,10 @@
+import { publicConsentSchema } from '@tt/domain'
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { readBody, setResponseStatus } from 'h3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ok } from '~~/test/fixtures/job-fixtures'
 import { publicConsent } from '~~/test/fixtures/phase8-fixtures'
-import { publicConsentSchema } from '@/lib/phase8-contract'
 import { card } from '~~/test/fixtures/candidate-fixtures'
 import CandidateCard from '../pipeline/CandidateCard.vue'
 import ConsentReconfirm from './ConsentReconfirm.vue'
@@ -15,12 +15,13 @@ const state = vi.hoisted(() => ({ bodies: [] as unknown[], status: 200 }))
 registerEndpoint('/api/v1/public/consent/tok', {
   method: 'POST',
   handler: async (event) => {
-    state.bodies.push(await readBody(event))
+    const body = await readBody<{ decline?: boolean }>(event)
+    state.bodies.push(body)
     if (state.status !== 200) {
       setResponseStatus(event, state.status)
       return { success: false, data: null, error: { code: 'gone', message: 'gone' } }
     }
-    return ok({ status: 'given' })
+    return ok({ status: body.decline ? 'declined' : 'reconfirmed' })
   },
 })
 

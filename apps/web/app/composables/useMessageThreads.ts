@@ -1,6 +1,6 @@
+import type { MessageDto } from '@tt/domain'
 import { attempt } from '@/lib/load-result'
 import { listMessages } from '@/lib/message-api'
-import type { MessageDto } from '@/lib/message-schemas'
 import { threadOf } from '@/lib/message-view'
 
 export type ThreadState = { readonly status: 'loading' } | { readonly status: 'ready'; readonly messages: readonly MessageDto[] } | { readonly status: 'error'; readonly errorKey: string }

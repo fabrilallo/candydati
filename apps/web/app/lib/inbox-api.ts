@@ -1,8 +1,7 @@
-import type { PageMeta } from '@tt/domain'
+import { notificationSchema, taskSchema, unreadCountSchema, type NotificationDto, type PageMeta, type TaskDto } from '@tt/domain'
 import { z } from 'zod'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'
-import { notificationSchema, taskSchema, unreadCountSchema, type NotificationDto, type TaskDto } from './phase4-contract'
 
 /** Notifications and tasks: what the platform asks of the signed-in person (phase 4 contract, HTTP). */
 const id = (value: string): string => encodeURIComponent(value)

@@ -1,18 +1,7 @@
+import { type EmailTemplateKind, emailSettingsSchema, emailTemplateSchema, messageSchema, sendResultSchema, templatePreviewSchema, type EmailSettingsDto, type EmailTemplateDto, type MessageDto, type TemplatePreviewDto    } from '@tt/domain';
 import { z } from 'zod'
 import { ApiFailure, callApi, defaultFailureKey, type FailureKey } from './api-call'
 import type { JobApiRequest } from './job-api'
-import type { EmailTemplateKind } from '@tt/domain'
-import {
-  emailSettingsSchema,
-  emailTemplateSchema,
-  messageSchema,
-  queuedSchema,
-  templatePreviewSchema,
-  type EmailSettingsDto,
-  type EmailTemplateDto,
-  type MessageDto,
-  type TemplatePreviewDto,
-} from './message-schemas'
 
 const id = (value: string): string => encodeURIComponent(value)
 const TEMPLATES = '/api/v1/email-templates'
@@ -58,7 +47,7 @@ export const sendMessages = async (request: JobApiRequest, draft: MessageDraft):
     await callApi(
       request,
       '/api/v1/messages',
-      queuedSchema,
+      sendResultSchema,
       { method: 'POST', body: { applicationIds: draft.applicationIds, subject: draft.subject, body: draft.body, ...(draft.templateId ? { templateId: draft.templateId } : {}) } },
       sendFailureKey,
     )

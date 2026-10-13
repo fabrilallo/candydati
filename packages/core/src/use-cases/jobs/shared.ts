@@ -1,5 +1,7 @@
 import {
   assignStageIds,
+  checkApproval,
+  type ApprovalRule,
   checkPublishable,
   DuplicateStageIdError,
   pipelineStagesOf,
@@ -62,4 +64,15 @@ export async function assertNoOpenStageRemoved(
   if (blocked.length > 0) {
     throw new ValidationError(blocked.map((stage) => ({ path: 'process', message: `stage_has_open_applications:${stage.id}` })));
   }
+}
+
+/** Null when the organization does not require approval or the ad's salary stays inside the approved budget. */
+export async function approvalIssueOf(
+  deps: Pick<JobDeps, 'organizationSettings' | 'approvals'>,
+  organizationId: string,
+  jobId: string,
+  content: JobContent,
+): Promise<ApprovalRule | null> {
+  const [settings, approval] = await Promise.all([deps.organizationSettings.get(organizationId), deps.approvals.find(organizationId, jobId)]);
+  return checkApproval(settings.requireApproval, approval, content.salary);
 }

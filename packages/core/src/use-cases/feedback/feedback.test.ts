@@ -346,6 +346,19 @@ describe('reminders', () => {
     await expect(getFeedbackRequest({ ...other.deps, now: () => at(2 * DAY) }, { token: other.secret })).resolves.toBeDefined();
   });
 
+  it('never overwrites a submission that lands while the reminder is being prepared (#18)', async () => {
+    const { deps, secret } = await asked();
+    // The scan reads the open requests, then the interviewer submits before the reminder is written.
+    const list = async (now: Date) => {
+      const open = await deps.feedbackRequests.listOpenAcrossOrganizations(now);
+      await submitFeedback({ ...deps, now: () => at(DAY) }, { token: secret, ...GOOD });
+      return open;
+    };
+    const racing = { ...deps, feedbackRequests: { ...deps.feedbackRequests, listOpenAcrossOrganizations: list } };
+    expect(await scanFeedbackReminders(racing, { now: at(2 * DAY) })).toEqual({ reminded: 1, failed: 0 });
+    expect(deps.feedbackStore.read().requests.filter((r) => r.submittedAt !== null)).toEqual([expect.objectContaining({ remindersSent: 0, submittedAt: at(DAY) })]);
+  });
+
   it('reports a failing store and goes on', async () => {
     const { deps } = await asked();
     const errors: unknown[] = [];

@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { InfoIcon, PlusIcon } from '@lucide/vue'
-import { pipelineStagesOf, type JobDto } from '@tt/domain'
+import { type AutomationRuleDto, pipelineStagesOf, type JobDto    } from '@tt/domain';
 import type { RuleInput } from '@/lib/automation-api'
 import { describeRule, rulesByStage } from '@/lib/automation-view'
 import { can } from '@/lib/permissions-ui'
-import type { AutomationRuleDto } from '@/lib/phase4-contract'
 import { stageName, stageTone } from '@/lib/pipeline-board'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -54,7 +53,7 @@ const deleteOpen = computed({
 const confirmDelete = async (): Promise<void> => {
   if (deleting.value && (await automations.remove(deleting.value))) deleting.value = null
 }
-const authorOf = (rule: AutomationRuleDto): string | null => rule.createdBy.name ?? team.nameOf(rule.createdBy.id)
+const authorOf = (rule: AutomationRuleDto): string | null => team.nameOf(rule.createdBy)
 </script>
 
 <template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { FEEDBACK_RECOMMENDATIONS, type FeedbackRecommendation } from '@/lib/phase9-contract'
+import { FEEDBACK_RECOMMENDATIONS, type FeedbackRecommendation } from '@tt/domain'
 import type { Translate } from '@/lib/ad-text'
 import { cn } from '@/lib/utils'
 

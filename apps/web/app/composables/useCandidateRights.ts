@@ -1,8 +1,7 @@
-import type { CandidateCorrection, ConsentScope } from '@tt/domain'
+import type { CandidateDetailDto, CandidateCorrection, ConsentScope  } from '@tt/domain'
 import type { MaybeRefOrGetter } from 'vue'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
-import type { CandidateDetailDto } from '@/lib/candidate-schemas'
 import { correctCandidate, eraseApplication, eraseCandidate, isEmailConflict, withdrawConsent, type WithdrawResult } from '@/lib/gdpr-api'
 
 type Busy = 'correct' | 'withdraw' | 'erase' | null

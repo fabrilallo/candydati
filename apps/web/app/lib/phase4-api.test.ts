@@ -48,9 +48,11 @@ describe('attention api', () => {
 const callFailing = (response: { status: number; body: unknown }) => decideApplications(send(response), ['a1'], 'hired').catch((caught: unknown) => caught)
 
 describe('notifications and tasks api', () => {
-  it('reads the unread count under either field name', async () => {
+  it('reads the unread count', async () => {
     expect(await unreadCount(send(ok({ count: 3 })))).toBe(3)
-    expect(await unreadCount(send(ok({ unread: 7 })))).toBe(7)
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    await expect(unreadCount(send(ok({ unread: 7 })))).rejects.toMatchObject({ code: 'invalid_response' })
+    spy.mockRestore()
   })
 
   it('lists notifications, unread only when asked, and marks them read', async () => {
@@ -82,17 +84,15 @@ describe('notifications and tasks api', () => {
     expect(request.mock.calls.slice(2).map((call) => call[0])).toEqual(['/api/v1/tasks/t1/complete', '/api/v1/tasks/t1/reopen'])
   })
 
-  it('reads the assignee as the api sends it, as a person', async () => {
-    const { assigneeId: _id, assigneeName: _name, ...rest } = task('t1')
-    const [fromApi] = await listMyTasks(send(ok([{ ...rest, assignee: { id: 'u7', name: 'Elena' } }])))
-    expect([fromApi?.assigneeId, fromApi?.assigneeName]).toEqual(['u7', 'Elena'])
-    const [odd] = await listMyTasks(send(ok([{ ...task('t2'), assignee: 'u1' }])))
-    expect(odd?.assigneeId).toBe('u1')
+  it('reads the task as the api sends it: the assignee as a person, the author as an id', async () => {
+    const [fromApi] = await listMyTasks(send(ok([task('t1', { assignee: { id: 'u7', name: 'Elena' }, createdBy: 'u9' })])))
+    expect(fromApi?.assignee).toEqual({ id: 'u7', name: 'Elena' })
+    expect(fromApi?.createdBy).toBe('u9')
   })
 
-  it('accepts the author as an id or as a person', async () => {
-    const [fromId] = await listMyTasks(send(ok([{ ...task('t1'), createdBy: 'u9' }])))
-    expect(fromId?.createdBy).toEqual({ id: 'u9', name: null })
+  it('refuses a task without its assignee', async () => {
+    const { assignee: _assignee, ...rest } = task('t1')
+    await expect(listMyTasks(send(ok([rest])))).rejects.toMatchObject({ code: 'invalid_response' })
   })
 })
 
@@ -135,8 +135,8 @@ describe('automations and webhooks api', () => {
       ['/api/v1/webhooks/w1/test', 'POST'],
       ['/api/v1/webhooks/w1', 'DELETE'],
     ])
-    const base = { id: 'd1', status: 'success', responseCode: 200, attempt: 1, error: null, createdAt: '2026-10-13T10:00:00.000Z' }
-    const deliveries = await listDeliveries(send(ok([{ ...base, eventType: 'ping' }, { ...base, event: 'job.closed' }, base])), 'w1')
-    expect(deliveries.map((item) => item.eventType)).toEqual(['ping', 'job.closed', null])
+    const base = { id: 'd1', eventId: 'ev1', status: 'success', responseCode: 200, attempt: 1, error: null, createdAt: '2026-10-13T10:00:00.000Z' }
+    const deliveries = await listDeliveries(send(ok([{ ...base, eventType: 'ping' }, { ...base, eventType: 'job.closed', status: 'failed' }])), 'w1')
+    expect(deliveries.map((item) => [item.eventType, item.status])).toEqual([['ping', 'success'], ['job.closed', 'failed']])
   })
 })

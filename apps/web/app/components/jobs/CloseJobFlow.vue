@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { BULK_MESSAGE_MAX } from '@tt/domain'
+import { BULK_MESSAGE_MAX, type ApplicationCardDto } from '@tt/domain'
 import { toast } from 'vue-sonner'
 import { decideApplications } from '@/lib/attention-api'
 import { errorKeyOf } from '@/lib/auth-errors'
-import type { ApplicationCardDto } from '@/lib/candidate-schemas'
 import { can } from '@/lib/permissions-ui'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'

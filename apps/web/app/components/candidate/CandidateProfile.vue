@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import type { CandidateApplicationDto, CandidateDetailDto } from '@tt/domain'
 import { BriefcaseIcon, CalendarClockIcon, LinkIcon, MailIcon, MessageSquareQuoteIcon, PhoneIcon, ShieldCheckIcon } from '@lucide/vue'
-import type { CandidateApplicationDto, CandidateDetailDto } from '@/lib/candidate-schemas'
 import { applicationStatus, retentionState, stageOf } from '@/lib/candidate-view'
 import { formatDate } from '@/lib/format'
 import { isToRenew } from '@/lib/import-view'

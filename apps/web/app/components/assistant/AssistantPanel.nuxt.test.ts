@@ -12,7 +12,7 @@ const sse = (chunks: readonly unknown[]): Response =>
     headers: { 'content-type': 'text/event-stream', 'x-vercel-ai-ui-message-stream': 'v1' },
   })
 
-const draft = { applicationId: 'a1', candidate: { firstName: 'Giulia', lastName: 'Neri' }, subject: 'Grazie, Giulia', body: 'Ciao Giulia, ti scriviamo entro venerdì.' }
+const draft = { status: 'draft_not_sent', applicationId: 'a1', subject: 'Grazie, Giulia', body: 'Ciao Giulia, ti scriviamo entro venerdì.', unknownVariables: [] }
 const turn = [
   { type: 'start', messageId: 'r1' },
   { type: 'start-step' },
@@ -29,10 +29,10 @@ const turn = [
   { type: 'finish' },
 ]
 
-registerEndpoint('/api/v1/agent/status', () => ok({ enabled: state.enabled }))
+registerEndpoint('/api/v1/agent/status', () => ok({ enabled: state.enabled, model: state.enabled ? 'mistral/small' : null }))
 registerEndpoint('/api/v1/agent/chat', async (event) => {
   state.bodies.push(await readBody(event))
-  if (state.chatStatus !== 200) return new Response(JSON.stringify({ success: false, data: null, error: { code: 'agent_not_configured', message: 'off' } }), { status: state.chatStatus })
+  if (state.chatStatus !== 200) return new Response(JSON.stringify({ success: false, data: null, error: { code: 'agent_disabled', message: 'off' } }), { status: state.chatStatus })
   return sse(turn)
 })
 registerEndpoint('/api/v1/email-templates', () => ok([]))
@@ -90,7 +90,7 @@ describe('assistant panel', () => {
     expect(panel?.querySelector('strong')?.textContent).toBe('bozza')
     expect(panel?.querySelector('b')).toBeNull()
     expect(panel?.textContent).toContain('<b>niente html</b>')
-    expect(byTestId('draft-message-card')?.textContent).toContain('Bozza per Giulia Neri')
+    expect(byTestId('draft-message-card')?.textContent).toContain('Bozza per questa persona')
 
     const subject = byTestId<HTMLInputElement>('draft-subject')
     if (!subject) throw new Error('no subject')
@@ -102,8 +102,7 @@ describe('assistant panel', () => {
     expect(useAssistant().open.value).toBe(false)
     expect(byTestId<HTMLInputElement>('composer-subject')?.value).toBe('Grazie davvero')
     expect(byTestId<HTMLTextAreaElement>('composer-body')?.value).toBe(draft.body)
-    expect(byTestId('bulk-recipient-list')?.textContent).toContain('Giulia Neri')
-  })
+    expect(byTestId('bulk-recipient-list')?.textContent).toContain('questa persona')  })
 
   it('starts over: clears the conversation and sends only the new messages', async () => {
     await mountPanel()
@@ -144,6 +143,6 @@ describe('assistant panel', () => {
     await vi.waitFor(() => expect(byTestId('assistant-off')).not.toBeNull())
     expect(byTestId('assistant-off')?.textContent).not.toContain('AGENT_MODEL')
     expect(byTestId('assistant-error')).toBeNull()
-    registerEndpoint('/api/v1/agent/status', () => ok({ enabled: state.enabled }))
+    registerEndpoint('/api/v1/agent/status', () => ok({ enabled: state.enabled, model: state.enabled ? 'mistral/small' : null }))
   })
 })

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { EmailTemplateDto } from '@tt/domain'
 import { PlusIcon } from '@lucide/vue'
 import type { TemplateInput } from '@/lib/message-api'
-import type { EmailTemplateDto } from '@/lib/message-schemas'
 import { templateGroups } from '@/lib/message-view'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'

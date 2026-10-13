@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import type { CandidateApplicationDto } from '@tt/domain'
 import { MessageSquarePlusIcon } from '@lucide/vue'
-import type { CandidateApplicationDto } from '@/lib/candidate-schemas'
 import { feedbackStageName, groupRequests } from '@/lib/feedback-view'
 import { formatDate } from '@/lib/format'
 import { stageName } from '@/lib/pipeline-board'
@@ -50,12 +50,12 @@ const ask = async (input: Parameters<typeof fb.ask>[0]): Promise<void> => {
         <ul class="grid gap-2">
           <li v-for="request in entry.items" :key="request.id" class="grid gap-0.5 rounded-lg border bg-card px-4 py-3" data-testid="feedback-request">
             <p class="text-[0.9375rem] font-medium">
-              {{ request.interviewer.name }}
-              <span v-if="request.interviewer.kind === 'external'" class="text-xs font-normal text-muted-foreground">({{ t('feedback.tab.request.external') }})</span>
+              {{ request.interviewerName }}
+              <span v-if="request.interviewerKind === 'external'" class="text-xs font-normal text-muted-foreground">({{ t('feedback.tab.request.external') }})</span>
             </p>
             <p class="figure text-sm text-muted-foreground">
-              {{ t('feedback.tab.request.stage', { stage: nameOf(request.stageId, request.stageLabel) }) }} · {{ t('feedback.tab.request.asked', { date: formatDate(request.requestedAt, locale) }) }}
-              <template v-if="request.state === 'expired'"> · {{ t('feedback.tab.request.expired') }}</template>
+              {{ t('feedback.tab.request.stage', { stage: nameOf(request.stageId, request.stageLabel) }) }} · {{ t('feedback.tab.request.asked', { date: formatDate(request.createdAt, locale) }) }}
+              <template v-if="request.status === 'expired'"> · {{ t('feedback.tab.request.expired') }}</template>
               <template v-else-if="request.expiresAt"> · {{ t('feedback.tab.request.expires', { date: formatDate(request.expiresAt, locale) }) }}</template>
             </p>
           </li>

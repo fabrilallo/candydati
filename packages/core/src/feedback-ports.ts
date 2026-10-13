@@ -15,10 +15,20 @@ export interface StageInterviewerRepository {
   replaceForJob(organizationId: string, jobId: string, interviewers: readonly StageInterviewer[]): Promise<void>;
 }
 
+export type FeedbackTokenPatch = Pick<FeedbackRequest, 'tokenHash' | 'remindersSent' | 'lastReminderAt'>;
+
 export interface FeedbackRequestRepository {
   create(request: FeedbackRequest): Promise<FeedbackRequest>;
-  /** Full replace by (organizationId, id). */
-  save(request: FeedbackRequest): Promise<FeedbackRequest>;
+  /**
+   * Single use: stores the submission time only while the request is still empty. False when another submission got
+   * there first; nothing is written.
+   */
+  markSubmitted(organizationId: string, id: string, submittedAt: Date): Promise<boolean>;
+  /**
+   * A reminder's new link (or putting the old one back): written only while the request is still empty and still has
+   * `expectedTokenHash`. Null otherwise (submitted or reminded meanwhile): nothing is written.
+   */
+  rotateToken(organizationId: string, id: string, expectedTokenHash: string, patch: FeedbackTokenPatch): Promise<FeedbackRequest | null>;
   findById(organizationId: string, id: string): Promise<FeedbackRequest | null>;
   /** By the hash of the secret, across organizations: the secret is what says which organization the link belongs to. */
   findByTokenHash(tokenHash: string): Promise<FeedbackRequest | null>;
@@ -75,4 +85,4 @@ export type FeedbackStageEntryDeps = FeedbackStageEntryParts &
 
 /** The public form: a visitor with a link, no session. */
 export type PublicFeedbackDeps = FeedbackRecords &
-  Pick<FeedbackDeps, 'auditLog' | 'jobs' | 'candidates' | 'applications' | 'organizations' | 'files' | 'newId' | 'hash' | 'now'>;
+  Pick<FeedbackDeps, 'auditLog' | 'transaction' | 'jobs' | 'candidates' | 'applications' | 'organizations' | 'files' | 'newId' | 'hash' | 'now'>;

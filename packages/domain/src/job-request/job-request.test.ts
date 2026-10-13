@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { checkApproval, jobContentFromRequest, jobRequestInputSchema, type JobApproval, type JobRequest } from './job-request.js';
+import { checkApproval, jobContentFromRequest, jobRequestInputSchema, toYearly, type JobApproval, type JobRequest } from './job-request.js';
 
 const approval: JobApproval = { approvedBy: 'u', approvedAt: new Date(), salaryMin: 40000, salaryMax: 50000, currency: 'EUR' };
 const valid = { title: 'Backend Developer', reason: 'Growth', salaryMin: 40000, salaryMax: 50000 };
@@ -29,6 +29,14 @@ describe('checkApproval', () => {
     expect(checkApproval(true, approval, { min: 30000, max: 45000, currency: 'EUR' })).toBeNull();
     expect(checkApproval(true, approval, salary(50001))).toBe('approval_range_exceeded');
     expect(checkApproval(true, approval, salary(45000, 'USD'))).toBe('approval_range_exceeded');
+  });
+  it('compares the yearly amount whatever the period of the ad', () => {
+    expect(checkApproval(true, approval, { min: 3000, max: 4000, currency: 'EUR', period: 'month' })).toBeNull();
+    expect(checkApproval(true, approval, { min: 9000, max: 10000, currency: 'EUR', period: 'month' })).toBe('approval_range_exceeded');
+    expect(checkApproval(true, approval, { min: 20, max: 30, currency: 'EUR', period: 'hour' })).toBe('approval_range_exceeded');
+    expect(checkApproval(true, approval, { min: 150, max: 200, currency: 'EUR', period: 'day' })).toBeNull();
+    expect(toYearly(1000, 'month')).toBe(12000);
+    expect(toYearly(1000)).toBe(1000);
   });
 });
 

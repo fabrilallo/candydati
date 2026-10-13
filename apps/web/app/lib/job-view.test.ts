@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { translatorFor } from '~~/test/fixtures/ad-translate'
-import { absoluteUrl, careersPath, formatDuration, placeLine, publicJobPath, salaryLine, salaryRange, statusTone, workLine } from './job-view'
+import { absoluteUrl, careersPath, formatDuration, placeLine, publicJobPath, salaryLine, salaryRange, statusTone } from './job-view'
 
 const salary = { min: 45000, max: 60000, currency: 'EUR' as const, period: 'year' as const }
 
@@ -39,11 +39,6 @@ describe('places and urls', () => {
     expect(placeLine({ workMode: 'hybrid', location: { country: 'IT', city: 'Milano' } }, 'it')).toBe('Milano, Italia')
     expect(placeLine({ workMode: 'remote', location: { country: 'IT', city: 'Milano' } }, 'it')).toBe('Italia')
     expect(placeLine({ workMode: undefined, location: {} }, 'it')).toBe('')
-  })
-
-  it('joins work mode and place', () => {
-    expect(workLine({ workMode: 'hybrid', location: { country: 'DE', city: 'Berlin' } }, 'en', translatorFor('en'))).toBe('Hybrid · Berlin, Germany')
-    expect(workLine({ workMode: undefined, location: {} }, 'en', translatorFor('en'))).toBe('')
   })
 
   it('builds stable path urls and absolute urls', () => {

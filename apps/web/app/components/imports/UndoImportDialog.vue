@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { ImportBatchDto } from '@tt/domain'
 import { CheckIcon, Trash2Icon } from '@lucide/vue'
 import { formatDateTime } from '@/lib/format'
 import { batchFigures } from '@/lib/import-view'
-import type { ImportBatchDto } from '@/lib/phase8-contract'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 

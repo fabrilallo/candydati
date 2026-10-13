@@ -35,6 +35,7 @@ export const createImportBatch = defineImportUseCase({
     target: (_input, result: ImportBatch) => ({ type: 'import_batch', id: result.id }),
     metadata: (input, result: ImportBatch) => ({ jobId: input.jobId, stageId: input.stageId, files: result.counts.files }),
   },
+  transaction: { skip: 'uploads the files first (long), then commits the batch before its analysis is queued' },
   handler: async ({ deps, actor, input }): Promise<ImportBatch> => {
     const { organizationId } = actor;
     const job = await requireJob(deps, organizationId, input.jobId);

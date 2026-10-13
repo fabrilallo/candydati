@@ -1,9 +1,8 @@
-import type { Outcome, PageMeta } from '@tt/domain'
+import { attentionItemSchema, decidedSchema, OPEN_APPLICATIONS_PREFIX, type AttentionItemDto, type Outcome, type PageMeta } from '@tt/domain'
 import { z } from 'zod'
 import { ApiFailure, callApi } from './api-call'
 import { AppError } from './auth-errors'
 import type { JobApiRequest } from './job-api'
-import { attentionItemSchema, decidedSchema, OPEN_APPLICATIONS_PREFIX, type AttentionItemDto } from './phase4-contract'
 
 export const ATTENTION_PAGE_SIZE = 25
 export type AttentionState = 'overdue' | 'due_soon'

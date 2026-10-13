@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { CircleCheckIcon, LoaderCircleIcon } from '@lucide/vue'
-import { FEEDBACK_ANSWER_MAX } from '@tt/domain'
+import { FEEDBACK_ANSWER_MAX, type FeedbackRecommendation, type PublicFeedbackDto } from '@tt/domain'
 import type { Translate } from '@/lib/ad-text'
 import { buildSubmission, checkSubmission, type SubmitIssue } from '@/lib/feedback-view'
 import { feedbackFailure, submitPublicFeedback, type FeedbackFailure } from '@/lib/feedback-api'
 import { formatDate } from '@/lib/format'
-import type { FeedbackRecommendation, PublicFeedbackDto } from '@/lib/phase9-contract'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 
@@ -32,7 +31,7 @@ const issueText = (issue: SubmitIssue): string => props.x(`feedback.public.error
 
 const submit = async (): Promise<void> => {
   errorKey.value = null
-  const check = checkSubmission(answers.value, recommendation.value)
+  const check = checkSubmission(ids.value, answers.value, recommendation.value)
   issues.value = check.issues
   tooLong.value = check.tooLong
   if (!check.ok || recommendation.value === null) return
@@ -57,7 +56,7 @@ const submit = async (): Promise<void> => {
     <h2 id="feedback-done" tabindex="-1" class="flex items-center gap-2 text-lg font-semibold tracking-tight outline-none">
       <CircleCheckIcon class="size-5 text-success" aria-hidden="true" />{{ x('feedback.public.done.title') }}
     </h2>
-    <p class="text-[0.9375rem] text-pretty text-muted-foreground">{{ x('feedback.public.done.body', { organization: feedback.organization.name }) }}</p>
+    <p class="text-[0.9375rem] text-pretty text-muted-foreground">{{ x('feedback.public.done.body', { organization: feedback.organizationName }) }}</p>
   </div>
 
   <form v-else class="grid gap-8" novalidate :aria-busy="pending" data-testid="feedback-form" @submit.prevent="submit">
@@ -71,12 +70,10 @@ const submit = async (): Promise<void> => {
           class="min-h-36 text-base md:text-base"
           :placeholder="x('feedback.public.answerPlaceholder')"
           :aria-invalid="tooLong.includes(question.id) || undefined"
-          :aria-describedby="question.hint ? `h-${question.id}` : undefined"
           :disabled="pending"
           :data-testid="`answer-${question.id}`"
           @update:model-value="setAnswer(question.id, $event)"
         />
-        <p v-if="question.hint" :id="`h-${question.id}`" class="text-sm text-muted-foreground">{{ question.hint }}</p>
       </div>
     </section>
 

@@ -1,8 +1,8 @@
+import type { EmailSettingsDto } from '@tt/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { loaded } from '@/lib/job-api'
 import { getEmailSettings, updateEmailSettings, verifyEmailDomain, type EmailSettingsInput } from '@/lib/message-api'
-import type { EmailSettingsDto } from '@/lib/message-schemas'
 
 /** The sending identity of the organization (`email_settings:manage`): read, save, ask the provider to check DNS. */
 export const useEmailSettings = () => {

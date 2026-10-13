@@ -40,12 +40,12 @@ function isTransientStatus(status: number): boolean {
 export function createResendEmailProvider(options: ResendOptions): EmailProvider {
   const doFetch: FetchLike = options.fetch ?? ((input, init) => fetch(input, init));
 
-  async function call(method: string, path: string, body?: unknown): Promise<unknown> {
+  async function call(method: string, path: string, body?: unknown, extraHeaders: Readonly<Record<string, string>> = {}): Promise<unknown> {
     let response: Response;
     try {
       response = await doFetch(`${BASE_URL}${path}`, {
         method,
-        headers: { authorization: `Bearer ${options.apiKey}`, 'content-type': 'application/json' },
+        headers: { authorization: `Bearer ${options.apiKey}`, 'content-type': 'application/json', ...extraHeaders },
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       });
     } catch {
@@ -63,6 +63,7 @@ export function createResendEmailProvider(options: ResendOptions): EmailProvider
   }
 
   return {
+    deduplicates: true,
     async send(message) {
       const headers = buildHeaders(message);
       const payload = {
@@ -74,7 +75,8 @@ export function createResendEmailProvider(options: ResendOptions): EmailProvider
         ...(message.replyTo ? { reply_to: message.replyTo } : {}),
         ...(Object.keys(headers).length > 0 ? { headers } : {}),
       };
-      const parsed = sendResponse.safeParse(await call('POST', '/emails', payload));
+      const idempotency = message.idempotencyKey ? { 'Idempotency-Key': message.idempotencyKey } : {};
+      const parsed = sendResponse.safeParse(await call('POST', '/emails', payload, idempotency));
       if (!parsed.success) throw new EmailSendError('Unexpected Resend response', false);
       return { providerMessageId: parsed.data.id };
     },

@@ -12,7 +12,7 @@ registerEndpoint('/api/v1/imports/b1/undo', {
   handler: () => {
     state.undone.push('b1')
     state.batches = [batch({ status: 'undone', undoneAt: '2026-10-13T10:00:00.000Z' })]
-    return ok({ removed: 7, kept: 2 })
+    return ok({ batch: batch({ status: 'undone' }), erased: 7, skippedReconfirmed: 2, failed: 0 })
   },
 })
 
@@ -25,7 +25,7 @@ const mountList = async () => {
 }
 
 beforeEach(() => {
-  state.batches = [batch(), batch({ id: 'b2', status: 'ready', job: { id: 'j2', title: 'Product designer' }, jobId: 'j2', createdBy: { id: 'u2', name: 'Marco Gialli' }, importedAt: null, counts: { items: 4 } })]
+  state.batches = [batch(), batch({ id: 'b2', status: 'ready', job: { id: 'j2', title: 'Product designer' }, jobId: 'j2', createdBy: { id: 'u2', name: 'Marco Gialli' }, importedAt: null, counts: { ...batch().counts, items: 4, included: 4, imported: 0, merged: 0 } })]
   state.undone = []
   clearNuxtData()
   useViewer().viewer.value = viewerWith('recruiter')

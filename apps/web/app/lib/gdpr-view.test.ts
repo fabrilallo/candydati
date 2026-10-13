@@ -54,7 +54,7 @@ describe('withdrawConsequence', () => {
 })
 
 describe('exportState', () => {
-  const base = { id: 'e1', sizeBytes: null, createdAt: '2026-10-13T09:00:00.000Z', completedAt: null, expiresAt: null }
+  const base = { id: 'e1', sizeBytes: null, createdAt: '2026-10-13T09:00:00.000Z', completedAt: null, expiresAt: '2026-10-20T09:00:00.000Z' }
 
   it('maps the api status to preparing, ready, expired or failed', () => {
     expect(exportState({ ...base, status: 'pending' }, NOW)).toEqual({ state: 'preparing', key: 'dataExport.status.preparing', tone: 'secondary' })
@@ -114,8 +114,8 @@ describe('correction', () => {
 describe('sortUpcoming', () => {
   it('soonest first, without touching the input', () => {
     const items = [
-      { applicationId: 'a2', candidateId: 'c2', jobId: null, jobTitle: 'B', candidateName: null, retentionExpiresAt: '2026-11-01T00:00:00.000Z' },
-      { applicationId: 'a1', candidateId: 'c1', jobId: null, jobTitle: 'A', candidateName: null, retentionExpiresAt: '2026-10-20T00:00:00.000Z' },
+      { applicationId: 'a2', candidateId: 'c2', jobTitle: 'B', candidateName: 'Bianca', retentionExpiresAt: '2026-11-01T00:00:00.000Z' },
+      { applicationId: 'a1', candidateId: 'c1', jobTitle: 'A', candidateName: 'Anna', retentionExpiresAt: '2026-10-20T00:00:00.000Z' },
     ]
     expect(sortUpcoming(items).map((item) => item.applicationId)).toEqual(['a1', 'a2'])
     expect(items[0]?.applicationId).toBe('a2')

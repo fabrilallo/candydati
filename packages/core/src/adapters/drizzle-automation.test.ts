@@ -22,7 +22,7 @@ import {
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { createDrizzleApplicationIntake } from './drizzle-application-intake.js';
 import { createDrizzleApplications } from './drizzle-applications.js';
-import { createDrizzleAutomationRules } from './drizzle-automation-rules.js';
+import { createDrizzleAutomationExecutions, createDrizzleAutomationRules } from './drizzle-automation-rules.js';
 import { createDrizzleCandidates } from './drizzle-candidates.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
 import { createDrizzleMemberDirectory } from './drizzle-members.js';
@@ -76,9 +76,9 @@ describe('applications: response columns and awaiting queries', () => {
     expect(all).toEqual(expect.arrayContaining([a.applicationId, b.applicationId]));
     expect(all.indexOf(b.applicationId)).toBeLessThan(all.indexOf(a.applicationId));
     if (!stored) throw new Error('missing');
-    await repo.save({ ...stored, respondedAt: D('2026-06-01T12:00:00Z'), responseDueAt: null });
+    await repo.transition(a.org, stored.id, { stageId: stored.stageId }, { respondedAt: D('2026-06-01T12:00:00Z'), responseDueAt: null });
     expect(await repo.listAwaitingResponse(a.org, D('2030-01-01T00:00:00Z'))).toEqual([]);
-    await repo.save({ ...stored, outcome: 'hired', closedAt: new Date(), respondedAt: null });
+    await repo.transition(a.org, stored.id, {}, { outcome: 'hired', closedAt: new Date(), respondedAt: null });
     expect(await repo.listAwaitingResponse(a.org, D('2030-01-01T00:00:00Z'))).toEqual([]);
   });
 });
@@ -165,6 +165,37 @@ describe('createDrizzleAutomationRules', () => {
     expect(await repo.delete(other.org, off.id)).toBe(false);
     expect(await repo.delete(w.org, off.id)).toBe(true);
     expect(await repo.delete(w.org, off.id)).toBe(false);
+  });
+
+  it('claims a rule run once per stage entry, even for two transactions at the same time (#13)', async () => {
+    const w = await insertWorld();
+    const rule = buildAutomationRule({ id: randomUUID(), organizationId: w.org, jobId: w.jobId });
+    await createDrizzleAutomationRules(handle.db).create(rule);
+    const entry = (stageEnteredAt: Date) => ({
+      id: randomUUID(),
+      organizationId: w.org,
+      ruleId: rule.id,
+      applicationId: w.applicationId,
+      stageId: 'stage-0',
+      stageEnteredAt,
+      createdAt: new Date(),
+    });
+    const first = D('2026-06-01T00:00:00Z');
+    const claimInTx = () => handle.db.transaction((tx) => createDrizzleAutomationExecutions(tx).claim(entry(first)));
+    expect((await Promise.all([claimInTx(), claimInTx()])).toSorted()).toEqual([false, true]);
+    const repo = createDrizzleAutomationExecutions(handle.db);
+    expect(await repo.claim(entry(first))).toBe(false);
+    // A new entry into the same stage is a new run.
+    expect(await repo.claim(entry(D('2026-06-02T00:00:00Z')))).toBe(true);
+    // A rolled back run leaves no claim behind.
+    const again = entry(D('2026-06-03T00:00:00Z'));
+    await expect(
+      handle.db.transaction(async (tx) => {
+        await createDrizzleAutomationExecutions(tx).claim(again);
+        throw new Error('rule failed');
+      }),
+    ).rejects.toThrow('rule failed');
+    expect(await repo.claim({ ...again, id: randomUUID() })).toBe(true);
   });
 
   it('fails loudly on a corrupted config instead of running it', async () => {

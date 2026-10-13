@@ -7,7 +7,9 @@ import {
 } from '@tt/domain';
 import { z } from 'zod';
 import { ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
-import type { MessagingDeps } from '../../messaging-ports.js';
+import type { TaskQueue } from '../../intake-ports.js';
+import type { MessageRepository, MessagingDeps } from '../../messaging-ports.js';
+import { baseDeps, type TransactionalDeps } from '../../transaction.js';
 import { requireJob } from '../jobs/shared.js';
 import { requireCandidate } from '../candidates/shared.js';
 import { defineMessagingUseCase } from './define.js';
@@ -17,15 +19,26 @@ import type { SendMessageResult } from './views.js';
 
 const QUEUE_FAILED = 'queue_unavailable';
 
-/** Stores the message as `failed` when its delivery task could not be queued, so it never stays `queued` forever. */
-export async function enqueueDelivery(deps: Pick<MessagingDeps, 'queue' | 'messages'>, message: Message): Promise<boolean> {
+async function enqueueNow(queue: TaskQueue, messages: MessageRepository, message: Message): Promise<boolean> {
   try {
-    await deps.queue.enqueue('email.send', { organizationId: message.organizationId, messageId: message.id });
+    await queue.enqueue('email.send', { organizationId: message.organizationId, messageId: message.id }, { singletonKey: message.id });
     return true;
   } catch {
-    await deps.messages.save({ ...message, status: 'failed', error: QUEUE_FAILED });
+    await messages.transition(message.organizationId, message.id, 'queued', { status: 'failed', error: QUEUE_FAILED });
     return false;
   }
+}
+
+/**
+ * Queues the delivery of a stored message, once per message. When the task cannot be queued the message is stored as
+ * `failed`, so it never stays `queued` forever. Inside a transaction this happens after the commit (the worker must
+ * find the row), and the answer is optimistic: a failure then shows on the message itself.
+ */
+export async function enqueueDelivery(deps: Pick<MessagingDeps, 'queue' | 'messages'> & Partial<TransactionalDeps>, message: Message): Promise<boolean> {
+  if (!deps.afterCommit) return enqueueNow(deps.queue, deps.messages, message);
+  const base = baseDeps(deps);
+  deps.afterCommit(async () => void (await enqueueNow(base.queue, base.messages, message)));
+  return true;
 }
 
 async function assertTemplateExists(deps: MessagingDeps, organizationId: string, templateId: string): Promise<void> {
@@ -48,6 +61,7 @@ export const sendMessage = defineMessagingUseCase({
   }),
   permission: 'message:send',
   audit: { skip: 'each message is audited by deliverMessage (message.sent / message.failed) with the user in `sentBy`' },
+  transaction: { skip: 'each message is stored before its delivery is queued, so the worker always finds it; recipients are independent' },
   handler: async ({ deps, actor, input }): Promise<SendMessageResult> => {
     if (actor.type === 'agent') throw new ForbiddenError('The agent never sends messages to candidates.');
     const { organizationId } = actor;

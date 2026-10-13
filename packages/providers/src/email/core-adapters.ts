@@ -9,6 +9,7 @@ const TOKEN_BYTES = 20;
 
 /** The core port: a permanent provider error carries `permanent: true` so the worker does not retry it. */
 export const toEmailSender = (provider: EmailProvider): EmailSender => ({
+  deduplicates: provider.deduplicates === true,
   async send(email) {
     try {
       return await provider.send({
@@ -19,6 +20,7 @@ export const toEmailSender = (provider: EmailProvider): EmailSender => ({
         text: email.text,
         html: email.html,
         headers: email.headers,
+        idempotencyKey: email.idempotencyKey,
       });
     } catch (error) {
       if (error instanceof EmailSendError) throw Object.assign(new Error(error.message), { permanent: !error.transient });

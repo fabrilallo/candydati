@@ -1,6 +1,8 @@
 import type { AutomationRule, Notification, OutboxEvent, Task, WebhookDelivery, WebhookEndpoint } from '@tt/domain';
 import { ConflictError } from '../errors.js';
 import type {
+  AutomationExecution,
+  AutomationExecutionRepository,
   AutomationRuleRepository,
   Member,
   MemberDirectory,
@@ -16,6 +18,7 @@ import type {
   WebhookDeliveryRepository,
   WebhookEndpointRepository,
 } from '../webhook-ports.js';
+import { cell } from './in-memory-transaction.js';
 
 const sameKey = (a: { organizationId: string; id: string }, b: { organizationId: string; id: string }) =>
   a.organizationId === b.organizationId && a.id === b.id;
@@ -29,15 +32,15 @@ export interface InMemoryNotifications extends NotificationRepository {
 }
 
 export function createInMemoryNotifications(initial: readonly Notification[] = []): InMemoryNotifications {
-  let rows: readonly Notification[] = [...initial];
-  let keys: ReadonlySet<string> = new Set();
-  const own = (organizationId: string, userId: string) => rows.filter((n) => n.organizationId === organizationId && n.userId === userId);
+  const rows = cell<readonly Notification[]>([...initial]);
+  const keys = cell<ReadonlySet<string>>(new Set());
+  const own = (organizationId: string, userId: string) => rows.get().filter((n) => n.organizationId === organizationId && n.userId === userId);
   return {
     async createIfAbsent(notification, dedupeKey) {
       const key = `${notification.organizationId}|${notification.userId}|${dedupeKey}`;
-      if (keys.has(key)) return null;
-      keys = new Set([...keys, key]);
-      rows = [...rows, notification];
+      if (keys.get().has(key)) return null;
+      keys.set(new Set([...keys.get(), key]));
+      rows.set([...rows.get(), notification]);
       return notification;
     },
     async list(query) {
@@ -48,15 +51,15 @@ export function createInMemoryNotifications(initial: readonly Notification[] = [
     async markRead(organizationId, userId, ids, at) {
       const targets = own(organizationId, userId).filter((n) => n.readAt === null && (ids === undefined || ids.includes(n.id)));
       const targetIds = new Set(targets.map((n) => n.id));
-      rows = rows.map((n) => (targetIds.has(n.id) && n.organizationId === organizationId ? { ...n, readAt: at } : n));
+      rows.set(rows.get().map((n) => (targetIds.has(n.id) && n.organizationId === organizationId ? { ...n, readAt: at } : n)));
       return targets.length;
     },
     async unreadCount(organizationId, userId) {
       return own(organizationId, userId).filter((n) => n.readAt === null).length;
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
     purge(doomed) {
-      rows = rows.filter((n) => !doomed(n));
+      rows.set(rows.get().filter((n) => !doomed(n)));
     },
   };
 }
@@ -72,15 +75,15 @@ const taskOrder = (a: Task, b: Task): number =>
   b.createdAt.getTime() - a.createdAt.getTime();
 
 export function createInMemoryTasks(initial: readonly Task[] = []): InMemoryTasks {
-  let rows: readonly Task[] = [...initial];
-  const inOrg = (organizationId: string) => rows.filter((t) => t.organizationId === organizationId);
+  const rows = cell<readonly Task[]>([...initial]);
+  const inOrg = (organizationId: string) => rows.get().filter((t) => t.organizationId === organizationId);
   return {
     async create(task) {
-      rows = [...rows, task];
+      rows.set([...rows.get(), task]);
       return task;
     },
     async save(task) {
-      rows = rows.map((t) => (sameKey(t, task) ? task : t));
+      rows.set(rows.get().map((t) => (sameKey(t, task) ? task : t)));
       return task;
     },
     async findById(organizationId, id) {
@@ -97,11 +100,11 @@ export function createInMemoryTasks(initial: readonly Task[] = []): InMemoryTask
       return inOrg(organizationId).filter((t) => t.applicationId === applicationId).toSorted(taskOrder);
     },
     async listOpenDueAcrossOrganizations(dueBefore) {
-      return rows.filter((t) => t.completedAt === null && t.dueAt !== null && t.dueAt <= dueBefore);
+      return rows.get().filter((t) => t.completedAt === null && t.dueAt !== null && t.dueAt <= dueBefore);
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
     purge(doomed) {
-      rows = rows.filter((t) => !doomed(t));
+      rows.set(rows.get().filter((t) => !doomed(t)));
     },
   };
 }
@@ -110,17 +113,34 @@ export interface InMemoryAutomationRules extends AutomationRuleRepository {
   snapshot(): readonly AutomationRule[];
 }
 
+export interface InMemoryAutomationExecutions extends AutomationExecutionRepository {
+  snapshot(): readonly AutomationExecution[];
+}
+
+export function createInMemoryAutomationExecutions(): InMemoryAutomationExecutions {
+  const rows = cell<readonly AutomationExecution[]>([]);
+  const entryOf = (e: AutomationExecution) => `${e.ruleId}|${e.applicationId}|${e.stageId}|${e.stageEnteredAt.toISOString()}`;
+  return {
+    async claim(execution) {
+      if (rows.get().some((row) => entryOf(row) === entryOf(execution))) return false;
+      rows.set([...rows.get(), execution]);
+      return true;
+    },
+    snapshot: () => rows.get(),
+  };
+}
+
 export function createInMemoryAutomationRules(initial: readonly AutomationRule[] = []): InMemoryAutomationRules {
-  let rows: readonly AutomationRule[] = [...initial];
-  const inOrg = (organizationId: string) => rows.filter((r) => r.organizationId === organizationId);
+  const rows = cell<readonly AutomationRule[]>([...initial]);
+  const inOrg = (organizationId: string) => rows.get().filter((r) => r.organizationId === organizationId);
   const oldestFirst = (items: readonly AutomationRule[]) => items.toSorted((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
   return {
     async create(rule) {
-      rows = [...rows, rule];
+      rows.set([...rows.get(), rule]);
       return rule;
     },
     async save(rule) {
-      rows = rows.map((r) => (sameKey(r, rule) ? rule : r));
+      rows.set(rows.get().map((r) => (sameKey(r, rule) ? rule : r)));
       return rule;
     },
     async findById(organizationId, id) {
@@ -134,15 +154,15 @@ export function createInMemoryAutomationRules(initial: readonly AutomationRule[]
     },
     async delete(organizationId, id) {
       const exists = inOrg(organizationId).some((r) => r.id === id);
-      rows = rows.filter((r) => !(r.organizationId === organizationId && r.id === id));
+      rows.set(rows.get().filter((r) => !(r.organizationId === organizationId && r.id === id)));
       return exists;
     },
     async deleteByStages(organizationId, jobId, stageIds) {
       const doomed = inOrg(organizationId).filter((r) => r.jobId === jobId && stageIds.includes(r.stageId));
-      rows = rows.filter((r) => !doomed.includes(r));
+      rows.set(rows.get().filter((r) => !doomed.includes(r)));
       return doomed.length;
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
   };
 }
 
@@ -158,25 +178,25 @@ export interface InMemoryOutbox extends OutboxRepository {
 }
 
 export function createInMemoryOutbox(initial: readonly OutboxEvent[] = []): InMemoryOutbox {
-  let rows: readonly OutboxEvent[] = [...initial];
+  const rows = cell<readonly OutboxEvent[]>([...initial]);
   return {
     async append(event) {
-      if (rows.some((e) => sameKey(e, event))) throw new ConflictError('Event already stored.');
-      rows = [...rows, event];
+      if (rows.get().some((e) => sameKey(e, event))) throw new ConflictError('Event already stored.');
+      rows.set([...rows.get(), event]);
       return event;
     },
     async findById(organizationId, id) {
-      return rows.find((e) => e.organizationId === organizationId && e.id === id) ?? null;
+      return rows.get().find((e) => e.organizationId === organizationId && e.id === id) ?? null;
     },
     async listUnpublished(limit) {
-      return rows.filter((e) => e.publishedAt === null).slice(0, limit);
+      return rows.get().filter((e) => e.publishedAt === null).slice(0, limit);
     },
     async markPublished(organizationId, id, at) {
-      rows = rows.map((e) => (e.organizationId === organizationId && e.id === id ? { ...e, publishedAt: at } : e));
+      rows.set(rows.get().map((e) => (e.organizationId === organizationId && e.id === id ? { ...e, publishedAt: at } : e)));
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
     purge(doomed) {
-      rows = rows.filter((e) => !doomed(e));
+      rows.set(rows.get().filter((e) => !doomed(e)));
     },
   };
 }
@@ -186,15 +206,15 @@ export interface InMemoryWebhookEndpoints extends WebhookEndpointRepository {
 }
 
 export function createInMemoryWebhookEndpoints(initial: readonly WebhookEndpoint[] = []): InMemoryWebhookEndpoints {
-  let rows: readonly WebhookEndpoint[] = [...initial];
-  const inOrg = (organizationId: string) => rows.filter((e) => e.organizationId === organizationId);
+  const rows = cell<readonly WebhookEndpoint[]>([...initial]);
+  const inOrg = (organizationId: string) => rows.get().filter((e) => e.organizationId === organizationId);
   return {
     async create(endpoint) {
-      rows = [...rows, endpoint];
+      rows.set([...rows.get(), endpoint]);
       return endpoint;
     },
     async save(endpoint) {
-      rows = rows.map((e) => (sameKey(e, endpoint) ? endpoint : e));
+      rows.set(rows.get().map((e) => (sameKey(e, endpoint) ? endpoint : e)));
       return endpoint;
     },
     async findById(organizationId, id) {
@@ -208,10 +228,10 @@ export function createInMemoryWebhookEndpoints(initial: readonly WebhookEndpoint
     },
     async delete(organizationId, id) {
       const exists = inOrg(organizationId).some((e) => e.id === id);
-      rows = rows.filter((e) => !(e.organizationId === organizationId && e.id === id));
+      rows.set(rows.get().filter((e) => !(e.organizationId === organizationId && e.id === id)));
       return exists;
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
   };
 }
 
@@ -221,18 +241,21 @@ export interface InMemoryWebhookDeliveries extends WebhookDeliveryRepository {
 }
 
 export function createInMemoryWebhookDeliveries(): InMemoryWebhookDeliveries {
-  let rows: readonly WebhookDelivery[] = [];
+  const rows = cell<readonly WebhookDelivery[]>([]);
   return {
     async append(delivery) {
-      rows = [...rows, delivery];
+      rows.set([...rows.get(), delivery]);
       return delivery;
     },
-    async listByEndpoint(organizationId, endpointId, limit) {
-      return newestFirst(rows.filter((d) => d.organizationId === organizationId && d.endpointId === endpointId)).slice(0, limit);
+    async hasSucceeded(organizationId, endpointId, eventId) {
+      return rows.get().some((d) => d.organizationId === organizationId && d.endpointId === endpointId && d.eventId === eventId && d.status === 'success');
     },
-    snapshot: () => rows,
+    async listByEndpoint(organizationId, endpointId, limit) {
+      return newestFirst(rows.get().filter((d) => d.organizationId === organizationId && d.endpointId === endpointId)).slice(0, limit);
+    },
+    snapshot: () => rows.get(),
     purge(doomed) {
-      rows = rows.filter((d) => !doomed(d));
+      rows.set(rows.get().filter((d) => !doomed(d)));
     },
   };
 }

@@ -1,6 +1,5 @@
-import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, ROLES } from '@tt/domain'
+import { isValidOrganizationSlug, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, ROLES } from '@tt/domain'
 import { z } from 'zod'
-import { isValidSlug } from './slug'
 
 /**
  * Form schemas. Messages are translation keys (resolved by the UI with `t`), so validation stays
@@ -25,7 +24,7 @@ export type SignupInput = z.infer<typeof signupSchema>
 
 export const createOrganizationSchema = z.object({
   name: z.string().trim().min(2, 'validation.nameMin').max(80, 'validation.nameMax'),
-  slug: z.string().refine(isValidSlug, 'validation.slug'),
+  slug: z.string().refine(isValidOrganizationSlug, 'validation.slug'),
 })
 export type CreateOrganizationInput = z.infer<typeof createOrganizationSchema>
 

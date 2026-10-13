@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import type { PublicConsentDto } from '@tt/domain'
 import { CircleCheckIcon, LoaderCircleIcon, Trash2Icon } from '@lucide/vue'
 import type { Translate } from '@/lib/ad-text'
 import { answerConsent, consentAnswer, consentFailure, type ConsentFailure } from '@/lib/import-api'
-import type { PublicConsentDto } from '@/lib/phase8-contract'
 import { Button } from '@/components/ui/button'
 
 /**
@@ -59,12 +59,12 @@ watch(selection, (value) => {
       <Trash2Icon v-else class="size-5 text-muted-foreground" aria-hidden="true" />
       {{ x(`reconfirm.${outcome === 'given' ? 'done' : 'erased'}.title`) }}
     </h2>
-    <p class="text-[0.9375rem] text-pretty text-muted-foreground">{{ x(`reconfirm.${outcome === 'given' ? 'done' : 'erased'}.body`, { organization, email: consent.notice.contactEmail }) }}</p>
+    <p class="text-[0.9375rem] text-pretty text-muted-foreground">{{ x(`reconfirm.${outcome === 'given' ? 'done' : 'erased'}.body`, { organization, email: consent.privacyNotice.contactEmail }) }}</p>
   </div>
 
   <form v-else class="grid gap-6" novalidate :aria-busy="pending !== null" data-testid="reconfirm-form" @submit.prevent="send('confirm')">
     <ConsentBlock
-      :notice="consent.notice"
+      :notice="consent.privacyNotice"
       :organization="organization"
       :selection="selection"
       :talent-pool="talentPool"

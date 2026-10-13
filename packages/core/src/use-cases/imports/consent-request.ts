@@ -4,6 +4,7 @@ import type { ConsentDeps, ConsentToken } from '../../import-ports.js';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import { definePublicQuery } from '../../use-case.js';
 import { eraseCandidateData } from '../privacy/erase-candidate-data.js';
+import { inTransaction } from '../../transaction.js';
 
 export const CONSENT_PAGE_ACTOR_ID = 'consent_page';
 const SYSTEM_ACTOR = { type: 'system', id: CONSENT_PAGE_ACTOR_ID, onBehalfOfUserId: null } as const;
@@ -63,7 +64,11 @@ const answerInput = tokenInput.extend({
   decline: z.boolean().optional(),
 });
 
-async function reconfirm(deps: ConsentDeps, { token, application }: Resolved, scopes: readonly ConsentScope[], version: number | undefined): Promise<void> {
+/** One transaction: the token is spent only together with the consent, the candidate and the audit event. */
+const reconfirm = (deps: ConsentDeps, resolved: Resolved, scopes: readonly ConsentScope[], version: number | undefined): Promise<void> =>
+  inTransaction(deps, (tx) => reconfirmIn(tx, resolved, scopes, version));
+
+async function reconfirmIn(deps: ConsentDeps, { token, application }: Resolved, scopes: readonly ConsentScope[], version: number | undefined): Promise<void> {
   if (!scopes.includes('selection')) throw new ValidationError([{ path: 'scopes', message: 'selection_consent_required' }]);
   const notice = await deps.privacyNotices.findActive(token.organizationId);
   if (!notice) throw new ConflictError('no_privacy_notice');
@@ -72,7 +77,7 @@ async function reconfirm(deps: ConsentDeps, { token, application }: Resolved, sc
   // Single use: only one concurrent answer wins.
   if (!(await deps.consentTokens.markUsed(token.tokenHash, now))) throw new ConflictError('already_answered');
   const consent = { privacyNoticeId: notice.id, privacyNoticeVersion: notice.version, scopes: [...new Set(scopes)], givenAt: now };
-  await deps.applications.save({ ...application, consent, consentStatus: 'given', retentionExpiresAt: retentionExpiry(consent, notice), updatedAt: now });
+  await deps.applications.update(token.organizationId, application.id, { consent, consentStatus: 'given', retentionExpiresAt: retentionExpiry(consent, notice), updatedAt: now });
   const candidate = await deps.candidates.findById(token.organizationId, application.candidateId);
   if (candidate) {
     const all = await deps.applications.listByCandidate(token.organizationId, candidate.id);

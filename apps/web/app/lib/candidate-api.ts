@@ -1,19 +1,7 @@
-import type { Outcome, PageMeta } from '@tt/domain'
+import { type Outcome, type PageMeta, applicationCardSchema, candidateDetailSchema, candidateSummarySchema, noteSchema, pipelineSchema, type ApplicationCardDto, type CandidateDetailDto, type CandidateSummaryDto, type NoteDto, type PipelineDto    } from '@tt/domain';
 import { z } from 'zod'
 import { callApi } from './api-call'
 import { AppError } from './auth-errors'
-import {
-  applicationCardSchema,
-  candidateDetailSchema,
-  candidateSummarySchema,
-  noteSchema,
-  pipelineSchema,
-  type ApplicationCardDto,
-  type CandidateDetailDto,
-  type CandidateSummaryDto,
-  type NoteDto,
-  type PipelineDto,
-} from './candidate-schemas'
 import type { JobApiRequest } from './job-api'
 
 export const CANDIDATE_PAGE_SIZE = 20
@@ -60,9 +48,13 @@ export const listCandidates = async (request: JobApiRequest, filters: CandidateF
   return { candidates: data, meta }
 }
 
+/** Profile address; `viaJobId` is the pipeline it is opened from (a person still to reconfirm is visible only there). */
+export const candidateUrl = (candidateId: string, viaJobId: string | null = null): string =>
+  `/api/v1/candidates/${id(candidateId)}${viaJobId ? `?viaJobId=${id(viaJobId)}` : ''}`
+
 /** Opening a profile is audited by the api (`candidate.viewed`). */
-export const getCandidate = async (request: JobApiRequest, candidateId: string): Promise<CandidateDetailDto> =>
-  (await callApi(request, `/api/v1/candidates/${id(candidateId)}`, candidateDetailSchema)).data
+export const getCandidate = async (request: JobApiRequest, candidateId: string, viaJobId: string | null = null): Promise<CandidateDetailDto> =>
+  (await callApi(request, candidateUrl(candidateId, viaJobId), candidateDetailSchema)).data
 
 export const updateCandidateTags = async (request: JobApiRequest, candidateId: string, tags: readonly string[]): Promise<CandidateDetailDto> =>
   (await callApi(request, `/api/v1/candidates/${id(candidateId)}`, candidateDetailSchema, { method: 'PATCH', body: { tags } })).data

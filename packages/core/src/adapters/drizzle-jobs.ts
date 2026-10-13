@@ -1,7 +1,8 @@
-import { and, count, desc, eq, schema, type Db } from '@tt/db';
+import { and, count, desc, eq, schema } from '@tt/db';
 import { adQualityReportSchema, jobContentSchema, type Job } from '@tt/domain';
 import { ConflictError } from '../errors.js';
 import type { JobListQuery, JobRepository } from '../job-ports.js';
+import { isUniqueViolation, type DbExecutor } from './db-executor.js';
 import { countJobsByStatus, jobWeeklyActivity } from './drizzle-job-stats.js';
 
 type Row = typeof schema.job.$inferSelect;
@@ -36,14 +37,8 @@ const toValues = (job: Job) => ({
   closedAt: job.closedAt,
 });
 
-const UNIQUE_VIOLATION = '23505';
-const isUniqueViolation = (error: unknown): boolean => {
-  const cause = (error as { cause?: { code?: string } } | null)?.cause;
-  return (error as { code?: string } | null)?.code === UNIQUE_VIOLATION || cause?.code === UNIQUE_VIOLATION;
-};
-
 /** Postgres implementation. Every statement filters by `organization_id`. */
-export function createDrizzleJobs(db: Db): JobRepository {
+export function createDrizzleJobs(db: DbExecutor): JobRepository {
   const { job } = schema;
   const one = async (where: ReturnType<typeof and>): Promise<Job | null> => {
     const [row] = await db.select().from(job).where(where).limit(1);
@@ -63,14 +58,33 @@ export function createDrizzleJobs(db: Db): JobRepository {
 
     findById: (organizationId, id) => one(and(eq(job.organizationId, organizationId), eq(job.id, id))),
 
-    async save(input) {
-      const { id, organizationId, ...values } = toValues(input);
+    async lock(organizationId, id, mode) {
+      const [row] = await db
+        .select()
+        .from(job)
+        .where(and(eq(job.organizationId, organizationId), eq(job.id, id)))
+        .limit(1)
+        .for(mode);
+      return row ? toJob(row) : null;
+    },
+
+    async updateContent(organizationId, id, expectedStatus, patch) {
       const [row] = await db
         .update(job)
-        .set(values)
-        .where(and(eq(job.organizationId, organizationId), eq(job.id, id)))
+        .set({ content: patch.content, title: patch.content.title, updatedAt: patch.updatedAt })
+        .where(and(eq(job.organizationId, organizationId), eq(job.id, id), eq(job.status, expectedStatus)))
         .returning();
-      if (!row) throw new Error('job not found for save');
+      if (!row) throw new ConflictError('The job changed meanwhile.');
+      return toJob(row);
+    },
+
+    async transition(organizationId, id, from, patch) {
+      const [row] = await db
+        .update(job)
+        .set(patch)
+        .where(and(eq(job.organizationId, organizationId), eq(job.id, id), eq(job.status, from)))
+        .returning();
+      if (!row) throw new ConflictError('The job changed meanwhile.');
       return toJob(row);
     },
 

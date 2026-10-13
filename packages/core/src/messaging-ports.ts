@@ -6,6 +6,7 @@ import type {
   EmailTemplateKind,
   Locale,
   Message,
+  MessageStatus,
 } from '@tt/domain';
 import type { ApplicationRepository, CandidateRepository, UserDirectory } from './candidate-ports.js';
 import type { TaskQueue } from './intake-ports.js';
@@ -49,11 +50,16 @@ export interface ConversationRepository {
   ensure(conversation: Conversation): Promise<Conversation>;
 }
 
+export type MessagePatch = Partial<Pick<Message, 'status' | 'sentAt' | 'providerMessageId' | 'error'>>;
+
 export interface MessageRepository {
   /** @throws ConflictError when `inboundMessageId` already exists in the organization. */
   create(message: Message): Promise<Message>;
-  /** Full replace by (organizationId, id). */
-  save(message: Message): Promise<Message>;
+  /**
+   * Status change guarded on the current status, column by column (`queued → sending` is the claim of one delivery).
+   * Null when the message is not `from` any more: someone else changed it, nothing is written.
+   */
+  transition(organizationId: string, id: string, from: MessageStatus, patch: MessagePatch): Promise<Message | null>;
   findById(organizationId: string, id: string): Promise<Message | null>;
   findByInboundMessageId(organizationId: string, inboundMessageId: string): Promise<Message | null>;
   /** Oldest first. */
@@ -84,6 +90,8 @@ export interface OutboundEmail {
   readonly text: string;
   readonly html: string;
   readonly headers: Readonly<Record<string, string>>;
+  /** Same key, same email: a provider that supports it sends a repeated request only once. */
+  readonly idempotencyKey?: string | undefined;
 }
 
 /**
@@ -92,6 +100,8 @@ export interface OutboundEmail {
  */
 export interface EmailSender {
   send(email: OutboundEmail): Promise<{ readonly providerMessageId: string }>;
+  /** True when the provider honours `idempotencyKey`: resending after an unconfirmed attempt cannot duplicate the email. */
+  readonly deduplicates?: boolean | undefined;
 }
 
 /** Instance configuration, from `PLATFORM_*` and `EMAIL_*` env. */
@@ -140,10 +150,10 @@ export interface ReceiptDeps
 
 export type DeliverDeps = Pick<
   MessagingDeps,
-  'auditLog' | 'organizations' | 'candidates' | 'applications' | 'settings' | 'conversations' | 'messages' | 'promises' | 'sender' | 'config' | 'newToken' | 'now'
+  'auditLog' | 'transaction' | 'organizations' | 'candidates' | 'applications' | 'settings' | 'conversations' | 'messages' | 'promises' | 'sender' | 'config' | 'newToken' | 'now'
 >;
 
 export type InboundDeps = Pick<
   MessagingDeps,
-  'auditLog' | 'candidates' | 'applications' | 'conversations' | 'messages' | 'newId' | 'now'
+  'auditLog' | 'transaction' | 'candidates' | 'applications' | 'conversations' | 'messages' | 'newId' | 'now'
 >;

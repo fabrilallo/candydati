@@ -1,7 +1,7 @@
 import { and, asc, count, desc, eq, gte, isNotNull, isNull, lte, schema } from '@tt/db';
 import { CV_MEDIA_TYPES, type Application, type CvMediaType } from '@tt/domain';
 import type { ApplicationRepository } from '../candidate-ports.js';
-import { ConflictError } from '../errors.js';
+import { ConflictError, NotFoundError } from '../errors.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';
 
 type Row = typeof schema.application.$inferSelect;
@@ -87,14 +87,29 @@ export function createDrizzleApplications(db: DbExecutor): ApplicationRepository
         throw error;
       }
     },
-    async save(input) {
-      const { id, organizationId, ...values } = toValues(input);
+    async transition(organizationId, id, expected, patch) {
       const [row] = await db
         .update(application)
-        .set(values)
+        .set(patch)
+        .where(
+          and(
+            eq(application.organizationId, organizationId),
+            eq(application.id, id),
+            isNull(application.outcome),
+            ...(expected.stageId === undefined ? [] : [eq(application.stageId, expected.stageId)]),
+          ),
+        )
+        .returning();
+      if (!row) throw new ConflictError('The application changed meanwhile.');
+      return toApplication(row);
+    },
+    async update(organizationId, id, patch) {
+      const [row] = await db
+        .update(application)
+        .set(patch)
         .where(and(eq(application.organizationId, organizationId), eq(application.id, id)))
         .returning();
-      if (!row) throw new Error('application not found for save');
+      if (!row) throw new NotFoundError('Application not found.');
       return toApplication(row);
     },
     findById: (organizationId, id) => one(and(eq(application.organizationId, organizationId), eq(application.id, id))),

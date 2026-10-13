@@ -4,7 +4,6 @@ import type { JobDto, JobTemplateDto } from '@tt/domain'
 import { gapList } from '@/lib/ad-gaps'
 import { APPROVAL_ERROR_KEYS, approvalState } from '@/lib/approval-view'
 import { complianceMarks } from '@/lib/compliance-view'
-import type { JobDto9 } from '@/lib/phase9-contract'
 import { formToPreview } from '@/lib/ad-preview'
 import { saveStateOf } from '@/lib/editor-inputs'
 import { focusField } from '@/lib/focus-field'
@@ -38,9 +37,9 @@ const closeOpen = ref(false)
 const interviewers = props.job && can(viewer.value?.role ?? null, 'feedback:manage') ? useJobInterviewers(props.job.id) : null
 /** Approval of the ad, only shown when the organization asks for it. A new ad has none until it is saved. */
 const jobApproval = props.job ? useJobApproval(props.job.id) : null
-const approval = computed(() => jobApproval?.status.value?.approval ?? (ed.job.value as JobDto9 | null)?.approval ?? null)
+const approval = computed(() => jobApproval?.status.value?.approval ?? null)
 const requireApproval = computed(() => jobApproval?.status.value?.requireApproval ?? null)
-const approvalNow = computed(() => (ed.status.value === 'draft' ? approvalState(requireApproval.value, approval.value, ed.form.value.salaryMin, ed.form.value.salaryMax) : 'off'))
+const approvalNow = computed(() => (ed.status.value === 'draft' ? approvalState(requireApproval.value, approval.value, ed.form.value) : 'off'))
 const askApproval = async (reason: string, done: (ok: boolean) => void): Promise<void> => done(jobApproval ? await jobApproval.ask(reason) : false)
 const refusedKey = computed(() => (ed.errorKey.value !== null && APPROVAL_ERROR_KEYS.includes(ed.errorKey.value) ? ed.errorKey.value : null))
 watch(refusedKey, (key) => {
@@ -151,7 +150,6 @@ const saveTemplate = async (name: string): Promise<void> => {
         :state="approvalNow"
         :approval="approval"
         :title="ed.form.value.title"
-        :currency="ed.form.value.currency"
         :language="locale"
         :refused-key="refusedKey"
         :can-ask="jobApproval !== null"

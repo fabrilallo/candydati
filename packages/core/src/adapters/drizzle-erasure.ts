@@ -1,4 +1,4 @@
-import { and, eq, inArray, schema, sql, type Db } from '@tt/db';
+import { and, eq, inArray, schema, sql } from '@tt/db';
 import type { ErasureStore, ErasureTransaction } from '../privacy-ports.js';
 import type { DbExecutor } from './db-executor.js';
 import { createDrizzleAuditLog } from './drizzle-audit-log.js';
@@ -61,7 +61,7 @@ export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
 }
 
 /** One Postgres transaction for the deletions, the audit event and the outbox event: all of it or none of it. */
-export function createDrizzleErasure(db: Db): ErasureTransaction {
+export function createDrizzleErasure(db: DbExecutor): ErasureTransaction {
   return {
     run: (work) =>
       db.transaction((tx) => work({ store: createDrizzleErasureStore(tx), auditLog: createDrizzleAuditLog(tx), outbox: createDrizzleOutbox(tx) })),

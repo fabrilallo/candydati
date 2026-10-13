@@ -1,0 +1,35 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Security problem? Do not file it here, see SECURITY.md. Never paste real candidate data or secrets.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: And what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment
+      options: [Local dev, Self-hosted (docker compose), Other]
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Remove personal data first.

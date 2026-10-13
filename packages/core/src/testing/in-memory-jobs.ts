@@ -7,6 +7,7 @@ import type {
   OrganizationDirectory,
   PublicOrganization,
 } from '../job-ports.js';
+import { cell } from './in-memory-transaction.js';
 
 const byDateDesc = (field: 'updatedAt' | 'publishedAt') => (a: Job, b: Job) =>
   (b[field]?.getTime() ?? 0) - (a[field]?.getTime() ?? 0);
@@ -16,20 +17,33 @@ export interface InMemoryJobRepository extends JobRepository {
 }
 
 export function createInMemoryJobRepository(initial: readonly Job[] = []): InMemoryJobRepository {
-  let rows: readonly Job[] = [...initial];
-  const inOrg = (organizationId: string) => rows.filter((j) => j.organizationId === organizationId);
+  const rows = cell<readonly Job[]>([...initial]);
+  const inOrg = (organizationId: string) => rows.get().filter((j) => j.organizationId === organizationId);
+  const replace = (job: Job): Job => {
+    rows.set(rows.get().map((j) => (j.organizationId === job.organizationId && j.id === job.id ? job : j)));
+    return job;
+  };
   return {
     async create(job) {
       if (inOrg(job.organizationId).some((j) => j.slug === job.slug)) throw new ConflictError('Slug already used.');
-      rows = [...rows, job];
+      rows.set([...rows.get(), job]);
       return job;
     },
     async findById(organizationId, id) {
       return inOrg(organizationId).find((j) => j.id === id) ?? null;
     },
-    async save(job) {
-      rows = rows.map((j) => (j.organizationId === job.organizationId && j.id === job.id ? job : j));
-      return job;
+    async lock(organizationId, id) {
+      return inOrg(organizationId).find((j) => j.id === id) ?? null;
+    },
+    async updateContent(organizationId, id, expectedStatus, patch) {
+      const current = inOrg(organizationId).find((j) => j.id === id);
+      if (!current || current.status !== expectedStatus) throw new ConflictError('The job changed meanwhile.');
+      return replace({ ...current, ...patch });
+    },
+    async transition(organizationId, id, from, patch) {
+      const current = inOrg(organizationId).find((j) => j.id === id);
+      if (!current || current.status !== from) throw new ConflictError('The job changed meanwhile.');
+      return replace({ ...current, ...patch });
     },
     async list(query) {
       const matching = inOrg(query.organizationId)
@@ -63,26 +77,26 @@ export function createInMemoryJobRepository(initial: readonly Job[] = []): InMem
         .filter((j) => j.status === status)
         .toSorted(byDateDesc('updatedAt'));
     },
-    snapshot: () => [...rows],
+    snapshot: () => [...rows.get()],
   };
 }
 
 export function createInMemoryJobTemplateRepository(initial: readonly JobTemplate[] = []): JobTemplateRepository {
-  let rows: readonly JobTemplate[] = [...initial];
+  const rows = cell<readonly JobTemplate[]>([...initial]);
   return {
     async create(template) {
-      rows = [...rows, template];
+      rows.set([...rows.get(), template]);
       return template;
     },
     async list(organizationId) {
-      return rows.filter((t) => t.organizationId === organizationId);
+      return rows.get().filter((t) => t.organizationId === organizationId);
     },
     async findById(organizationId, id) {
-      return rows.find((t) => t.organizationId === organizationId && t.id === id) ?? null;
+      return rows.get().find((t) => t.organizationId === organizationId && t.id === id) ?? null;
     },
     async delete(organizationId, id) {
-      const exists = rows.some((t) => t.organizationId === organizationId && t.id === id);
-      rows = rows.filter((t) => !(t.organizationId === organizationId && t.id === id));
+      const exists = rows.get().some((t) => t.organizationId === organizationId && t.id === id);
+      rows.set(rows.get().filter((t) => !(t.organizationId === organizationId && t.id === id)));
       return exists;
     },
   };

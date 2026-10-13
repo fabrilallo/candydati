@@ -1,18 +1,7 @@
-import type { CandidateCorrection, ConsentScope, DataExportStatus } from '@tt/domain'
+import { type CandidateCorrection, type ConsentScope, type DataExportStatus, candidateDetailSchema, type CandidateDetailDto, dataExportCreatedSchema, dataExportSchema, erasedSchema, processingRecordSchema, retentionOverviewSchema, type DataExportDto, type ProcessingRecordDto, type RetentionOverviewDto    } from '@tt/domain';
 import { z } from 'zod'
 import { ApiFailure, callApi } from './api-call'
-import { candidateDetailSchema, type CandidateDetailDto } from './candidate-schemas'
 import type { JobApiRequest } from './job-api'
-import {
-  dataExportCreatedSchema,
-  dataExportSchema,
-  erasedSchema,
-  processingRecordSchema,
-  retentionOverviewSchema,
-  type DataExportDto,
-  type ProcessingRecordDto,
-  type RetentionOverviewDto,
-} from './phase5-contract'
 
 /** Candidate rights, retention and organization exports (phase 5 contract, "HTTP"). */
 const id = (value: string): string => encodeURIComponent(value)

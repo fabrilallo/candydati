@@ -34,10 +34,7 @@ const detailValue = (key: string, value: string): string => {
         <span data-testid="audit-action" class="text-foreground">{{ t(actionLabelKey(event.action)) }}</span>
       </p>
       <p class="figure col-start-2 text-xs leading-6 text-muted-foreground sm:col-start-3 sm:row-start-1 sm:text-right">
-        <ClientOnly>
-          <time :datetime="event.occurredAt">{{ formatDateTime(event.occurredAt, locale) }}</time>
-          <template #fallback><time :datetime="event.occurredAt">{{ formatDateTime(event.occurredAt, locale, 'UTC') }}</time></template>
-        </ClientOnly>
+        <time :datetime="event.occurredAt">{{ formatDateTime(event.occurredAt, locale) }}</time>
       </p>
       <div class="col-start-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground sm:col-span-2">
         <span class="inline-flex items-center gap-1.5">

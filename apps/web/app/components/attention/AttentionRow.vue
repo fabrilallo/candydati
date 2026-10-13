@@ -1,9 +1,8 @@
 <script setup lang="ts">
+import type { StageRef, AttentionItemDto  } from '@tt/domain'
 import { MailIcon, PanelRightOpenIcon } from '@lucide/vue'
-import type { StageRef } from '@/lib/candidate-schemas'
 import { fullName } from '@/lib/candidate-view'
 import { formatDate } from '@/lib/format'
-import type { AttentionItemDto } from '@/lib/phase4-contract'
 import { Button } from '@/components/ui/button'
 
 /** One application waiting for an answer: who, which job and stage, when it is due, who owns it, and what to do. */

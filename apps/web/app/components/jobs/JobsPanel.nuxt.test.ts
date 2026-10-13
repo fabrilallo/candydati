@@ -3,6 +3,7 @@ import { flushPromises } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { NOW, ok, viewerWith } from '~~/test/fixtures/job-fixtures'
 import JobsPanel from './JobsPanel.vue'
+import { staleJob } from '~~/test/fixtures/phase4-fixtures'
 
 const state = vi.hoisted(() => ({ urls: [] as string[], total: 41, empty: false, stale: [] as unknown[] }))
 registerEndpoint('/api/v1/jobs/stale', () => ok(state.stale))
@@ -20,14 +21,6 @@ const summary = (id: string, status: string, title = `Annuncio ${id}`) => ({
   belowThreshold: status === 'closed',
   updatedAt: NOW,
   publishedAt: null,
-})
-const staleJob = (id: string, daysSinceActivity: number) => ({
-  id,
-  title: `Annuncio ${id}`,
-  publishedAt: null,
-  lastActivityAt: NOW,
-  daysSinceActivity,
-  openApplications: 0,
 })
 registerEndpoint('/api/v1/jobs', (event) => {
   const params = new URL(event.node.req.url ?? '', 'http://x').searchParams

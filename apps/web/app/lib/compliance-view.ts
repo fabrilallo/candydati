@@ -1,8 +1,7 @@
-import type { PublishIssue } from '@tt/domain'
+import type { ComplianceIssue, PublishIssue } from '@tt/domain'
 import { fixesFor, type ComplianceFix } from './compliance-fix'
-import { fieldIdOf } from './job-issues'
+import { fieldIdOf, isComplianceRule } from './job-issues'
 import type { JobForm } from './job-form'
-import { isComplianceRule, type ComplianceIssue } from './phase9-contract'
 
 /** A compliance finding as the editor shows it: what, where, why, and the one-click fixes. */
 export interface ComplianceItem {

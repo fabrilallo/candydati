@@ -1,0 +1,7 @@
+# Maintainers who review changes to these paths.
+# GitHub reads this file from the repository root, .github/ or docs/.
+*                      @fabrilallo
+/packages/domain/src/access/  @fabrilallo
+/docs/legal/           @fabrilallo
+/.github/              @fabrilallo
+/SECURITY.md           @fabrilallo

@@ -27,6 +27,16 @@ describe('toEmailSender', () => {
     expect(await toEmailSender(provider).send(email)).toEqual({ providerMessageId: 'p1' });
     expect(sent[0]).toMatchObject({ to: ['c@x.it'], replyTo: 'r@x.it' });
   });
+
+  it('carries the idempotency key and says whether the provider honours it', async () => {
+    const sent: unknown[] = [];
+    const provider: EmailProvider = { deduplicates: true, send: async (m) => (sent.push(m), { providerMessageId: 'p1' }), domainStatus: async () => ({ status: 'unsupported', records: [] }) };
+    const sender = toEmailSender(provider);
+    expect(sender.deduplicates).toBe(true);
+    await sender.send({ ...email, idempotencyKey: 'msg_1' });
+    expect(sent[0]).toMatchObject({ idempotencyKey: 'msg_1' });
+    expect(toEmailSender(providerFailing(new Error('x'))).deduplicates).toBe(false);
+  });
 });
 
 describe('newConversationToken', () => {

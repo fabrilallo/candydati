@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { DnsRecordDto } from '@tt/domain'
 import { CheckIcon, CopyIcon } from '@lucide/vue'
 import { toast } from 'vue-sonner'
-import type { DnsRecordDto } from '@/lib/message-schemas'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 

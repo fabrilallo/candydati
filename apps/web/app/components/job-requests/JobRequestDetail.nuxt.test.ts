@@ -1,4 +1,4 @@
-import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
+import { mockNuxtImport, mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { readBody } from 'h3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -8,7 +8,7 @@ import JobRequestDetail from './JobRequestDetail.vue'
 
 const NOW = '2026-10-13T10:00:00.000Z'
 const content = { title: 'Dev', language: 'it', salary: { currency: 'EUR', period: 'year' }, location: {}, process: [], summary: '', responsibilities: [], requirements: { mustHave: [], niceToHave: [] }, technologies: [], benefits: [], growth: '', workLifeBalance: '', culture: '' }
-const job = { id: 'j1', slug: 'dev-abc', status: 'draft', content, quality: null, publishIssues: [], createdAt: NOW, updatedAt: NOW, publishedAt: null, closedAt: null }
+const job = { id: 'j1', slug: 'dev-abc', status: 'draft', content, quality: null, publishIssues: [], complianceWarnings: [], createdAt: NOW, updatedAt: NOW, publishedAt: null, closedAt: null }
 
 const state = vi.hoisted(() => ({ calls: [] as { path: string; body: unknown }[], agent: false }))
 const mock = (id: string, status: string) => {
@@ -18,7 +18,7 @@ const mock = (id: string, status: string) => {
       method: 'POST',
       handler: async (event) => {
         state.calls.push({ path: action, body: await readBody(event) })
-        return ok(jobRequest(id, { status: action === 'approve' ? 'approved' : 'rejected', decidedAt: NOW, decidedBy: { id: 'u1', name: 'Ada' }, decisionNote: 'ok' }))
+        return ok(jobRequest(id, { status: action === 'approve' ? 'approved' : 'rejected', decidedAt: NOW, decidedBy: 'u1', decisionNote: 'ok' }))
       },
     })
   }
@@ -26,7 +26,10 @@ const mock = (id: string, status: string) => {
 }
 mock('s1', 'submitted')
 mock('a1', 'approved')
-registerEndpoint('/api/v1/agent/status', () => ok({ enabled: state.agent }))
+registerEndpoint('/api/v1/agent/status', () => ok({ enabled: state.agent, model: state.agent ? 'mistral/small' : null }))
+mockNuxtImport('useAuthApi', () => () => ({
+  getFullOrganization: async () => ({ id: 'o1', name: 'Acme', slug: 'acme', members: [{ id: 'm2', userId: 'u2', role: 'hiring_manager', name: 'Marta Neri', email: 'marta@example.com' }], invitations: [] }),
+}))
 
 const mounted: { unmount: () => void }[] = []
 const byTestId = <T extends HTMLElement = HTMLElement>(testId: string) => document.body.querySelector<T>(`[data-testid="${testId}"]`)

@@ -52,6 +52,8 @@ export default defineNuxtConfig({
       siteUrl: 'http://localhost:3000',
       platformName: '',
       platformDefaultLocale: DEFAULT_LOCALE,
+      /** Time zone dates are shown in, on the server and in the browser (`NUXT_PUBLIC_TIME_ZONE`, an IANA name). */
+      timeZone: 'Europe/Rome',
       /** Where the repository files can be browsed (`NUXT_PUBLIC_SOURCE_URL`, e.g. `https://…/blob/main`); empty = paths as text. */
       sourceUrl: '',
     },

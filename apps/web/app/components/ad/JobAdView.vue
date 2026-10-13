@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { PublishIssue, VaguePhrase } from '@tt/domain'
+import type { PublishIssue, VaguePhrase, JobContent  } from '@tt/domain'
 import { gapsBySlot } from '@/lib/ad-gaps'
 import type { ComplianceFix } from '@/lib/compliance-fix'
 import type { ComplianceMark } from '@/lib/compliance-view'
-import type { JobContent9 } from '@/lib/phase9-contract'
 import type { AdMode } from '@/composables/useAdView'
 
 /**
@@ -13,7 +12,7 @@ import type { AdMode } from '@/composables/useAdView'
  */
 const props = withDefaults(
   defineProps<{
-    content: JobContent9
+    content: JobContent
     organization: { readonly name: string; readonly logo: string | null }
     mode: AdMode
     publishedAt?: string | null

@@ -2,6 +2,10 @@
   "name": "@tt/worker",
   "version": "0.1.0",
   "private": true,
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=24"
+  },
   "type": "module",
   "scripts": {
     "dev": "tsx watch --env-file=../../.env src/index.ts",

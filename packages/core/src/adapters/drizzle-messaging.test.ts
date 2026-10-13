@@ -35,6 +35,7 @@ import { createDrizzleJobs } from './drizzle-jobs.js';
 import { createDrizzleMessages } from './drizzle-messages.js';
 import { createDrizzleOrganizationDirectory } from './drizzle-organizations.js';
 import { createDrizzlePrivacyNotices } from './drizzle-privacy-notices.js';
+import { createDrizzleTransaction } from './drizzle-repositories.js';
 
 let handle: DbHandle;
 
@@ -146,7 +147,7 @@ describe('createDrizzleConversations', () => {
 });
 
 describe('createDrizzleMessages', () => {
-  it('creates, saves, finds, lists oldest first and counts per application, isolating organizations', async () => {
+  it('creates, claims, finds, lists oldest first and counts per application, isolating organizations', async () => {
     const repo = createDrizzleMessages(handle.db);
     const w = await insertWorld();
     const other = await insertWorld();
@@ -160,10 +161,13 @@ describe('createDrizzleMessages', () => {
     expect(await repo.countByApplication(other.org, [w.applicationId])).toEqual({ [w.applicationId]: 0 });
     expect(await repo.countByApplication(w.org, [])).toEqual({});
     const sent = { ...m1, status: 'sent' as const, sentAt: new Date('2026-01-02'), providerMessageId: 'p1' };
-    expect(await repo.save(sent)).toEqual(sent);
+    // queued → sending is the claim: only one of two deliveries gets it (#12).
+    expect(await repo.transition(w.org, m1.id, 'queued', { status: 'sending' })).toMatchObject({ status: 'sending' });
+    expect(await repo.transition(w.org, m1.id, 'queued', { status: 'sending' })).toBeNull();
+    expect(await repo.transition(w.org, m1.id, 'sending', { status: 'sent', sentAt: sent.sentAt, providerMessageId: 'p1' })).toEqual(sent);
     expect(await repo.findById(w.org, m1.id)).toEqual(sent);
     expect(await repo.findById(other.org, m1.id)).toBeNull();
-    await expect(repo.save({ ...sent, organizationId: other.org })).rejects.toThrow();
+    expect(await repo.transition(other.org, m1.id, 'sent', { status: 'failed' })).toBeNull();
     expect((await repo.findById(w.org, m1.id))?.status).toBe('sent');
   });
 
@@ -215,14 +219,14 @@ describe('messaging flow on Postgres', () => {
     const candidates = createDrizzleCandidates(handle.db);
     const applications = createDrizzleApplications(handle.db);
     const auditLog = createDrizzleAuditLog(handle.db);
-    const deliverDeps = { auditLog, organizations: createDrizzleOrganizationDirectory(handle.db), candidates, applications, settings: createDrizzleEmailSettings(handle.db), conversations, messages, sender, config: testMessagingConfig, newToken, now: () => new Date() };
+    const deliverDeps = { auditLog, transaction: createDrizzleTransaction(handle.db), organizations: createDrizzleOrganizationDirectory(handle.db), candidates, applications, settings: createDrizzleEmailSettings(handle.db), conversations, messages, sender, config: testMessagingConfig, newToken, now: () => new Date() };
     expect(await deliverMessage(deliverDeps, systemActor({ organizationId: org }), { organizationId: org, messageId: email?.payload.messageId })).toBe('sent');
     const [sent] = sender.sent();
     const token = /reply\+([a-z2-7]+)@/.exec(sent?.replyTo ?? '')?.[1];
     expect(token).toBeDefined();
 
     const reply = { to: [sent?.replyTo ?? ''], from: 'Ada <ada@example.com>', subject: 'Re', text: 'Eccomi', messageId: '<r1>', receivedAt: new Date() };
-    const deps = { auditLog, candidates, applications, conversations, messages, newId: randomUUID, now: () => new Date() };
+    const deps = { auditLog, transaction: createDrizzleTransaction(handle.db), candidates, applications, conversations, messages, newId: randomUUID, now: () => new Date() };
     expect(await receiveInboundEmail(deps, reply)).toEqual({ stored: true });
     expect(await receiveInboundEmail(deps, reply)).toMatchObject({ stored: false, reason: 'duplicate' });
     const application = (await applications.listByJob(org, job.id))[0];

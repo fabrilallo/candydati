@@ -77,7 +77,7 @@ describe('runDistributionSync', () => {
     expect(deps.channel.calls().map((call) => call.kind)).toEqual(['publish', 'update']);
     expect(deps.channel.calls()[1]).toMatchObject({ previous: { externalId: 'ext-backend-developer-abc123', url: 'https://board.test/backend-developer-abc123' } });
     const job = (await deps.jobs.findById(DISTRIBUTION_ORG, 'job_1'))!;
-    await deps.jobs.save({ ...job, status: 'closed', closedAt: deps.now() });
+    await deps.jobs.transition(job.organizationId, job.id, job.status, { status: 'closed', closedAt: deps.now(), updatedAt: deps.now() });
     expect(await sync(deps)).toEqual({ published: 0, removed: 1, failed: 0, skipped: null });
     expect(deps.channel.calls().at(-1)).toMatchObject({ kind: 'remove', removal: { jobId: 'job_1', externalId: 'ext-backend-developer-abc123' } });
     expect(deps.distributions.snapshot()[0]).toMatchObject({ status: 'removed', error: null, externalId: 'ext-backend-developer-abc123' });
@@ -115,7 +115,7 @@ describe('runDistributionSync', () => {
     const deps = await world();
     await sync(deps);
     const job = (await deps.jobs.findById(DISTRIBUTION_ORG, 'job_1'))!;
-    await deps.jobs.save({ ...job, status: 'closed' });
+    await deps.jobs.transition(job.organizationId, job.id, job.status, { status: 'closed', closedAt: deps.now(), updatedAt: deps.now() });
     deps.channel.fail('board down');
     expect(await sync(deps)).toMatchObject({ failed: 1 });
     expect(deps.distributions.snapshot()[0]).toMatchObject({ status: 'failed', error: 'board down', externalId: 'ext-backend-developer-abc123' });
@@ -146,7 +146,7 @@ describe('runDistributionSync', () => {
     deps.channel.fail('down');
     await sync(deps);
     const job = (await deps.jobs.findById(DISTRIBUTION_ORG, 'job_1'))!;
-    await deps.jobs.save({ ...job, status: 'closed' });
+    await deps.jobs.transition(job.organizationId, job.id, job.status, { status: 'closed', closedAt: deps.now(), updatedAt: deps.now() });
     deps.channel.succeed();
     expect(await sync(deps)).toMatchObject({ removed: 1, failed: 0 });
     expect(deps.channel.calls().map((call) => call.kind)).toEqual(['publish']);

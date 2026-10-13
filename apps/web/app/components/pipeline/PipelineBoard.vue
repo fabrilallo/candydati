@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { Outcome } from '@tt/domain'
-import type { ApplicationCardDto, StageRef } from '@/lib/candidate-schemas'
+import type { ApplicationCardDto, StageRef, Outcome  } from '@tt/domain'
 import { fullName } from '@/lib/candidate-view'
 import { stageName as nameOfStage, type Board } from '@/lib/pipeline-board'
 import { NativeSelect } from '@/components/ui/native-select'

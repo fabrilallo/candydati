@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { UIMessage } from 'ai'
 import { assistantItems } from '@/lib/assistant-parts'
-import type { DraftMessageOutput } from '@/lib/phase6-contract'
+import type { DraftMessageOutput } from '@tt/domain'
 
 /** One turn: the person's words in a bubble, the assistant's as text, steps and draft cards. */
 const props = defineProps<{ message: UIMessage }>()

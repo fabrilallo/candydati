@@ -34,7 +34,7 @@ describe('messages', () => {
   })
 
   it('sends one draft to many applications, with the template only when chosen', async () => {
-    const request = send(ok({ queued: 2 }))
+    const request = send(ok({ queued: 2, failed: 0 }))
     expect(await sendMessages(request, { applicationIds: ['a1', 'a2'], templateId: 't-no', subject: 'S', body: 'B' })).toBe(2)
     expect(request.mock.calls[0]).toEqual(['/api/v1/messages', { method: 'POST', body: { applicationIds: ['a1', 'a2'], subject: 'S', body: 'B', templateId: 't-no' } }])
     await sendMessages(request, { applicationIds: ['a1'], templateId: null, subject: 'S', body: 'B' })

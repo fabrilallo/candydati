@@ -1,24 +1,12 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import {
-  createDrizzleApplications,
-  createDrizzleAutomationRules,
-  createDrizzleCandidates,
-  createDrizzleEmailTemplates,
-  createDrizzleJobs,
-  createDrizzleNotifications,
-  createDrizzleOutbox,
-  createDrizzleTasks,
-  createDrizzleUserDirectory,
-  createDrizzleWebhookDeliveries,
-  createDrizzleWebhookEndpoints,
-  type AuditLogRepository,
+  type DrizzleUnitOfWork,
   type AutomationRuleDeps,
   type NotificationDeps,
   type TaskDeps,
   type TaskQueue,
   type WebhookDeps,
 } from '@tt/core';
-import type { Db } from '@tt/db';
 import { WEBHOOK_SECRET_PREFIX } from '@tt/domain';
 
 export interface Phase4Deps {
@@ -29,8 +17,7 @@ export interface Phase4Deps {
 }
 
 export interface Phase4Inputs {
-  readonly db: Db;
-  readonly auditLog: AuditLogRepository;
+  readonly uow: DrizzleUnitOfWork;
   readonly queue: TaskQueue;
   readonly allowPrivateWebhooks: boolean;
 }
@@ -41,22 +28,20 @@ const SECRET_BYTES = 32;
 export const newWebhookSecret = (): string => `${WEBHOOK_SECRET_PREFIX}${randomBytes(SECRET_BYTES).toString('base64url')}`;
 
 /** Notifications, tasks, automation rules and webhooks on Postgres. */
-export function createPhase4Deps({ db, auditLog, queue, allowPrivateWebhooks }: Phase4Inputs): Phase4Deps {
-  const jobs = createDrizzleJobs(db);
-  const applications = createDrizzleApplications(db);
-  const candidates = createDrizzleCandidates(db);
-  const notifications = createDrizzleNotifications(db);
-  const users = createDrizzleUserDirectory(db);
+export function createPhase4Deps({ uow, queue, allowPrivateWebhooks }: Phase4Inputs): Phase4Deps {
+  const r = uow.repositories;
+  const core = { auditLog: r.auditLog, transaction: uow.transaction };
+  const { jobs, applications, candidates, notifications, users } = r;
   const clock = { newId: randomUUID, now: () => new Date() };
   return {
-    notificationDeps: { auditLog, notifications, applications, candidates, jobs, now: clock.now },
-    taskDeps: { auditLog, tasks: createDrizzleTasks(db), notifications, applications, candidates, jobs, users, ...clock },
-    automationDeps: { auditLog, rules: createDrizzleAutomationRules(db), jobs, templates: createDrizzleEmailTemplates(db), users, ...clock },
+    notificationDeps: { ...core, notifications, applications, candidates, jobs, now: clock.now },
+    taskDeps: { ...core, tasks: r.tasks, notifications, applications, candidates, jobs, users, ...clock },
+    automationDeps: { ...core, rules: r.rules, jobs, templates: r.templates, users, ...clock },
     webhookDeps: {
-      auditLog,
-      endpoints: createDrizzleWebhookEndpoints(db),
-      deliveries: createDrizzleWebhookDeliveries(db),
-      outbox: createDrizzleOutbox(db),
+      ...core,
+      endpoints: r.endpoints,
+      deliveries: r.deliveries,
+      outbox: r.outbox,
       queue,
       allowPrivateWebhooks,
       newSecret: newWebhookSecret,

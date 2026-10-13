@@ -13,7 +13,7 @@ export interface BulkDecisionResult {
 /**
  * The same decision for many applications (closing a job: "Non selezionato" for everyone still open). Everything is
  * checked before anything is written, so one decided or foreign id refuses the whole batch. One
- * `application.decided` audit event per application, like the single decision.
+ * `application.decided` audit event per application, like the single decision. One transaction: all of them or none.
  */
 export const decideApplications = defineCandidateUseCase({
   name: 'decideApplications',
@@ -23,6 +23,7 @@ export const decideApplications = defineCandidateUseCase({
   }),
   permission: 'candidate:decide',
   audit: { skip: 'one application.decided event per application, appended by the handler' },
+  transaction: 'required',
   handler: async ({ deps, actor, input }): Promise<BulkDecisionResult> => {
     const ids = [...new Set(input.applicationIds)];
     const applications = await Promise.all(ids.map((id) => requireApplication(deps, actor.organizationId, id)));

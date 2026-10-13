@@ -24,7 +24,7 @@ const roleLabel = (raw: string | null): string => {
       </span>
       <div class="grid min-w-0 flex-1 leading-tight">
         <p class="truncate text-sm font-medium">{{ invitation.email }}</p>
-        <p class="figure text-sm text-muted-foreground">{{ t('members.expires', { date: formatDate(invitation.expiresAt, locale, 'UTC') }) }}</p>
+        <p class="figure text-sm text-muted-foreground">{{ t('members.expires', { date: formatDate(invitation.expiresAt, locale) }) }}</p>
       </div>
       <Badge variant="outline" class="shrink-0">{{ roleLabel(invitation.role) }}</Badge>
       <Button

@@ -1,4 +1,4 @@
-import { createInMemoryAuditLog, failingAuditLog, type InMemoryAuditLog } from '@tt/core/testing';
+import { createInMemoryAuditLog, createInMemoryTransaction, failingAuditLog, type InMemoryAuditLog } from '@tt/core/testing';
 import { describe, expect, it } from 'vitest';
 import { createAuditHooks, type ActorLookups } from './audit-hooks.js';
 
@@ -12,7 +12,7 @@ const lookups = (currentUserId: string | null): ActorLookups => ({
 
 const setup = (currentUserId: string | null = 'owner1', auditLog: InMemoryAuditLog = createInMemoryAuditLog()) => ({
   auditLog,
-  hooks: createAuditHooks({ auditLog, lookups: lookups(currentUserId) }),
+  hooks: createAuditHooks({ core: { auditLog, transaction: createInMemoryTransaction() }, lookups: lookups(currentUserId) }),
 });
 
 const member = (overrides: Record<string, unknown> = {}) => ({

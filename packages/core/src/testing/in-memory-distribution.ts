@@ -7,27 +7,28 @@ import type {
   DistributionSettingRepository,
   JobDistributionRepository,
 } from '../distribution-ports.js';
+import { cell } from './in-memory-transaction.js';
 
 export interface InMemoryJobDistributions extends JobDistributionRepository {
   snapshot(): readonly JobDistribution[];
 }
 
 export function createInMemoryJobDistributions(initial: readonly JobDistribution[] = []): InMemoryJobDistributions {
-  let rows: readonly JobDistribution[] = [...initial];
+  const rows = cell<readonly JobDistribution[]>([...initial]);
   const same = (a: JobDistribution, b: Pick<JobDistribution, 'organizationId' | 'jobId' | 'channelId'>) =>
     a.organizationId === b.organizationId && a.jobId === b.jobId && a.channelId === b.channelId;
   return {
     async listByJob(organizationId, jobId) {
-      return rows.filter((row) => row.organizationId === organizationId && row.jobId === jobId).toSorted((a, b) => a.channelId.localeCompare(b.channelId));
+      return rows.get().filter((row) => row.organizationId === organizationId && row.jobId === jobId).toSorted((a, b) => a.channelId.localeCompare(b.channelId));
     },
     async find(organizationId, jobId, channelId) {
-      return rows.find((row) => same(row, { organizationId, jobId, channelId })) ?? null;
+      return rows.get().find((row) => same(row, { organizationId, jobId, channelId })) ?? null;
     },
     async save(distribution) {
-      rows = [...rows.filter((row) => !same(row, distribution)), distribution];
+      rows.set([...rows.get().filter((row) => !same(row, distribution)), distribution]);
       return distribution;
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
   };
 }
 
@@ -36,16 +37,16 @@ export interface InMemoryDistributionSettings extends DistributionSettingReposit
 }
 
 export function createInMemoryDistributionSettings(initial: readonly DistributionSetting[] = []): InMemoryDistributionSettings {
-  let rows: readonly DistributionSetting[] = [...initial];
+  const rows = cell<readonly DistributionSetting[]>([...initial]);
   return {
     async list(organizationId) {
-      return rows.filter((row) => row.organizationId === organizationId);
+      return rows.get().filter((row) => row.organizationId === organizationId);
     },
     async save(setting) {
-      rows = [...rows.filter((row) => !(row.organizationId === setting.organizationId && row.channelId === setting.channelId)), setting];
+      rows.set([...rows.get().filter((row) => !(row.organizationId === setting.organizationId && row.channelId === setting.channelId)), setting]);
       return setting;
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
   };
 }
 

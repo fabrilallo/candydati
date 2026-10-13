@@ -1,13 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
-  createDrizzleApplications,
-  createDrizzleAuditLog,
-  createDrizzleDataExports,
-  createDrizzleErasure,
-  createDrizzleJobs,
-  createDrizzleMemberDirectory,
-  createDrizzleNotifications,
-  createDrizzleRetentionRuns,
+  createDrizzleUnitOfWork,
   type RetentionDeps,
 } from '@tt/core';
 import { eq, schema } from '@tt/db';
@@ -78,21 +71,21 @@ export async function setRetention(t: TestApp, applicationId: string, at: Date):
 
 /** What the worker's `retention.run` uses, against the test database and the app's storage and queue. */
 export function retentionDeps(t: TestApp): RetentionDeps {
-  const { db } = t.handle;
+  const r = createDrizzleUnitOfWork(t.handle.db).repositories;
   return {
-    applications: createDrizzleApplications(db),
-    erasure: createDrizzleErasure(db),
+    applications: r.applications,
+    erasure: r.erasure,
     files: t.files,
     queue: t.queue,
-    jobs: createDrizzleJobs(db),
-    notifications: createDrizzleNotifications(db),
-    members: createDrizzleMemberDirectory(db),
-    retentionRuns: createDrizzleRetentionRuns(db),
-    dataExports: createDrizzleDataExports(db),
+    jobs: r.jobs,
+    notifications: r.notifications,
+    members: r.members,
+    retentionRuns: r.retentionRuns,
+    dataExports: r.dataExports,
     newId: randomUUID,
     now: () => new Date(),
   };
 }
 
 /** What the worker's `organization.export` uses. */
-export const exportDeps = (t: TestApp) => createExportDeps({ db: t.handle.db, auditLog: createDrizzleAuditLog(t.handle.db), files: t.files, queue: t.queue, zip: zipWriterFactory });
+export const exportDeps = (t: TestApp) => createExportDeps({ uow: createDrizzleUnitOfWork(t.handle.db), files: t.files, queue: t.queue, zip: zipWriterFactory });

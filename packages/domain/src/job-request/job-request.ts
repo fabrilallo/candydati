@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { SUPPORTED_LOCALES } from '../platform/config.js';
 import { JOB_TITLE_MAX, JOB_TEXT_MAX, type JobContentInput, locationSchema } from '../job/content.js';
-import { JOB_ROLES, SALARY_CURRENCIES, SENIORITY_LEVELS, WORK_MODES } from '../job/taxonomy.js';
+import { JOB_ROLES, SALARY_CURRENCIES, SENIORITY_LEVELS, WORK_MODES, type SalaryPeriod } from '../job/taxonomy.js';
 
 export const JOB_REQUEST_STATUSES = ['submitted', 'approved', 'rejected', 'converted'] as const;
 export type JobRequestStatus = (typeof JOB_REQUEST_STATUSES)[number];
@@ -63,18 +63,30 @@ interface SalaryLike {
   readonly min?: number | undefined;
   readonly max?: number | undefined;
   readonly currency: string;
+  /** Absent: yearly. */
+  readonly period?: SalaryPeriod | undefined;
 }
 
 /**
+ * How many of each period make a year, to compare an ad's salary with an annual budget: 12 months, 220 working days,
+ * 1760 working hours (220 days of 8 hours).
+ */
+export const PERIODS_PER_YEAR: Readonly<Record<SalaryPeriod, number>> = { year: 1, month: 12, day: 220, hour: 1760 };
+
+/** The gross annual amount of `amount` paid every `period`. */
+export const toYearly = (amount: number, period: SalaryPeriod = 'year'): number => amount * PERIODS_PER_YEAR[period];
+
+/**
  * `null` when the job may be published. Approval off: always null. Approval on: an approval must exist and the ad's
- * salary may not go beyond the approved maximum (a lower range stays inside the budget); another currency is beyond.
+ * salary, made yearly, may not go beyond the approved (annual) maximum (a lower range stays inside the budget); another
+ * currency is beyond.
  */
 export function checkApproval(requireApproval: boolean, approval: JobApproval | null, salary: SalaryLike): ApprovalRule | null {
   if (!requireApproval) return null;
   if (approval === null) return 'approval_required';
   if (salary.currency !== approval.currency) return 'approval_range_exceeded';
   const top = salary.max ?? salary.min;
-  return top !== undefined && top > approval.salaryMax ? 'approval_range_exceeded' : null;
+  return top !== undefined && toYearly(top, salary.period) > approval.salaryMax ? 'approval_range_exceeded' : null;
 }
 
 /** Draft content made from a request: only what the request really knows; the rest is for the hiring manager and the assistant. */

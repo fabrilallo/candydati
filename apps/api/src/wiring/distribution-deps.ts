@@ -1,18 +1,12 @@
 import {
   createDistributionRegistry,
-  createDrizzleDistributionSettings,
-  createDrizzleJobDistributions,
-  createDrizzleJobs,
-  createDrizzleOrganizationDirectory,
-  type AuditLogRepository,
+  type DrizzleUnitOfWork,
   type DistributionChannel,
   type DistributionDeps,
 } from '@tt/core';
-import type { Db } from '@tt/db';
 
 export interface DistributionInputs {
-  readonly db: Db;
-  readonly auditLog: AuditLogRepository;
+  readonly uow: DrizzleUnitOfWork;
   /** Public site URL (`PLATFORM_URL`). */
   readonly publicBaseUrl: string;
   /** Hosted deployments register their channels here; the open source default is none. */
@@ -20,13 +14,15 @@ export interface DistributionInputs {
 }
 
 /** Distribution on Postgres. The registry is built (and validated) once, at startup. */
-export function createDistributionDeps({ db, auditLog, publicBaseUrl, channels = [] }: DistributionInputs): DistributionDeps {
+export function createDistributionDeps({ uow, publicBaseUrl, channels = [] }: DistributionInputs): DistributionDeps {
+  const r = uow.repositories;
   return {
-    auditLog,
-    jobs: createDrizzleJobs(db),
-    organizations: createDrizzleOrganizationDirectory(db),
-    distributions: createDrizzleJobDistributions(db),
-    distributionSettings: createDrizzleDistributionSettings(db),
+    auditLog: r.auditLog,
+    transaction: uow.transaction,
+    jobs: r.jobs,
+    organizations: r.organizations,
+    distributions: r.distributions,
+    distributionSettings: r.distributionSettings,
     registry: createDistributionRegistry(channels),
     publicBaseUrl,
     now: () => new Date(),

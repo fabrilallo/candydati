@@ -1,4 +1,4 @@
-import { recordAuditEvent, type Actor, type AuditLogRepository } from '@tt/core';
+import { recordAuditEvent, type Actor, type CoreDeps } from '@tt/core';
 import { isRole, type AuditAction, type AuditTarget, type Role } from '@tt/domain';
 
 /** Who is acting. Both lookups are answered from the request that triggered the hook. */
@@ -10,7 +10,7 @@ export interface ActorLookups {
 }
 
 export interface AuditHookDeps {
-  readonly auditLog: AuditLogRepository;
+  readonly core: CoreDeps;
   readonly lookups: ActorLookups;
 }
 
@@ -62,8 +62,8 @@ interface Recorded {
  * Better Auth organization hooks that write the audit trail through core's `recordAuditEvent`.
  * Each hook records the action of its own name; accepting an invitation also records the resulting member.
  */
-export function createAuditHooks({ auditLog, lookups }: AuditHookDeps) {
-  const record = (actor: Actor, event: Recorded): Promise<unknown> => recordAuditEvent({ auditLog }, actor, event);
+export function createAuditHooks({ core, lookups }: AuditHookDeps) {
+  const record = (actor: Actor, event: Recorded): Promise<unknown> => recordAuditEvent(core, actor, event);
 
   const log = (actor: Actor, action: RecordableAction, target: AuditTarget, metadata: Record<string, unknown> = {}) =>
     record(actor, { organizationId: actor.organizationId, action, target, metadata });

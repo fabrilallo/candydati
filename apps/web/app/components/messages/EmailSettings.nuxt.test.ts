@@ -1,10 +1,10 @@
+import type { EmailSettingsDto } from '@tt/domain'
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { readBody } from 'h3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ok, viewerWith } from '~~/test/fixtures/job-fixtures'
 import { settings } from '~~/test/fixtures/message-fixtures'
-import type { EmailSettingsDto } from '../../lib/message-schemas'
 import EmailSettingsPanel from './EmailSettingsPanel.vue'
 
 const RECORDS = [

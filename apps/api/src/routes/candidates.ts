@@ -26,10 +26,6 @@ const withoutUndefined = (input: Readonly<Record<string, unknown>>): Record<stri
 /** Search, profile, tags and notes. Opening a profile is audited by the use case. */
 export function registerCandidateRoutes(app: FastifyInstance, ctx: AppContext): void {
   const deps = ctx.candidateDeps;
-  // Opening a person from the pipeline of their job: the job of their own application waiting for reconfirmation.
-  // Only a hint; `getCandidate` still checks the permission and the organization.
-  const pendingJobOf = async (organizationId: string, id: string): Promise<string | undefined> =>
-    (await deps.applications.listByCandidate(organizationId, id)).find((application) => application.consentStatus === 'to_renew')?.jobId;
   const candidateId = (request: Parameters<typeof paramOf>[0]) => paramOf(request, 'id');
 
   app.get('/api/v1/candidates', async (request) => {
@@ -38,11 +34,11 @@ export function registerCandidateRoutes(app: FastifyInstance, ctx: AppContext): 
   });
 
   // `viaJobId`: a candidate still to reconfirm is reachable only from the pipeline of the job they were imported into.
+  // The client says which pipeline it comes from; the visibility rule itself lives in core.
   app.get('/api/v1/candidates/:id', async (request) => {
     const actor = await ctx.resolveActor(request);
-    const id = candidateId(request);
-    const viaJobId = queryOf(request).viaJobId ?? (await pendingJobOf(actor.organizationId, id));
-    return ok(toCandidateDetailDto(await getCandidate(deps, actor, withoutUndefined({ candidateId: id, viaJobId }))));
+    const viaJobId = queryOf(request).viaJobId;
+    return ok(toCandidateDetailDto(await getCandidate(deps, actor, withoutUndefined({ candidateId: candidateId(request), viaJobId }))));
   });
 
   app.patch('/api/v1/candidates/:id', async (request) => {

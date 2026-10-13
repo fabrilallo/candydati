@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { approxMinutes, salaryFigure, salaryLabelKey, totalMinutes } from '@/lib/ad-facts'
 import { employmentFacts } from '@/lib/employment-view'
-import type { JobContent9 } from '@/lib/phase9-contract'
+import type { JobContent } from '@tt/domain'
 import { formatDuration, placeLine } from '@/lib/job-view'
 
 /**
  * The transparency band, right under the title: the salary as the headline figure, the process and the response
  * commitment beside it, then the quieter facts (contract, level, work mode, place). One divided panel, not cards.
  */
-const props = defineProps<{ content: JobContent9 }>()
+const props = defineProps<{ content: JobContent }>()
 const ad = useAdContext()
 
 const salary = computed(() => salaryFigure(props.content.salary, ad.value.language))

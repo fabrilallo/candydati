@@ -2,7 +2,7 @@
 import { getOpenApiSpec } from '@/lib/api-key-api'
 import { loaded } from '@/lib/job-api'
 import { referenceGroups } from '@/lib/openapi-reference'
-import { OPENAPI_PATH } from '@/lib/phase6-contract'
+import { OPENAPI_PATH } from '@/lib/api-paths'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 

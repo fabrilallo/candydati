@@ -1,9 +1,8 @@
-import type { Outcome } from '@tt/domain'
+import type { ApplicationCardDto, CandidateDetailDto, Outcome  } from '@tt/domain'
 import type { MaybeRefOrGetter } from 'vue'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { addNote, decideApplication, getCandidate, moveApplication, updateCandidateTags } from '@/lib/candidate-api'
-import type { ApplicationCardDto, CandidateDetailDto } from '@/lib/candidate-schemas'
 import { loaded } from '@/lib/job-api'
 
 type Busy = 'move' | 'decide' | 'tags' | 'note' | null
@@ -31,10 +30,13 @@ const withCard = (detail: CandidateDetailDto, card: ApplicationCardDto): Candida
  * One candidate profile (audited by the api on every read) and what can be done on it: move, decide, tags, notes.
  * Each action returns what changed so a board behind the sheet can follow.
  */
-export const useCandidate = (candidateId: MaybeRefOrGetter<string>) => {
+export const useCandidate = (candidateId: MaybeRefOrGetter<string>, viaJobId: MaybeRefOrGetter<string | null> = null) => {
   const { t } = useI18n()
   const request = useJobsApi()
-  const { data, status, refresh } = useFreshAsyncData(() => `candidate-${toValue(candidateId)}`, () => loaded(() => getCandidate(request, toValue(candidateId))))
+  const { data, status, refresh } = useFreshAsyncData(
+    () => `candidate-${toValue(candidateId)}-${toValue(viaJobId) ?? ''}`,
+    () => loaded(() => getCandidate(request, toValue(candidateId), toValue(viaJobId))),
+  )
   const detail = ref<CandidateDetailDto | null>(data.value?.data ?? null)
   watch(data, (fresh) => {
     detail.value = fresh?.data ?? null

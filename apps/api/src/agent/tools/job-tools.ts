@@ -1,5 +1,5 @@
 import { createTool } from '@mastra/core/tools';
-import { analyzeJobAd, authorize, getJob, listJobTemplates, listJobs, updateJob, ValidationError, type JobDeps } from '@tt/core';
+import { analyzeJobAd, authorize, ConflictError, getJob, listJobTemplates, listJobs, updateJob, ValidationError, type JobDeps } from '@tt/core';
 import { checkPublishable, JOB_STATUSES, jobContentSchema, type Job } from '@tt/domain';
 import { z } from 'zod';
 import { BRIEF_MAX, type JobDrafter } from '../job-drafter.js';
@@ -70,9 +70,15 @@ export const createUpdateJobDraftTool = (deps: JobDeps) =>
     execute: async (input, context) =>
       runTool(async () => {
         const { actor } = readAgentIdentity(context?.requestContext);
-        const job = await getJob(deps, actor, { jobId: input.jobId });
-        if (job.status !== 'draft') return refusal('not_a_draft', 'Only drafts can be changed by the assistant; a person edits published ads.');
-        const saved = await updateJob(deps, actor, input);
+        const notDraft = () => refusal('not_a_draft', 'Only drafts can be changed by the assistant; a person edits published ads.');
+        // Only a friendly early answer: the rule itself is core's (updateJob refuses an agent on a non-draft, and the
+        // write is guarded on the status it read, so a publish in between is a conflict, never an overwrite).
+        if ((await getJob(deps, actor, { jobId: input.jobId })).status !== 'draft') return notDraft();
+        const saved = await updateJob(deps, actor, input).catch((error: unknown) => {
+          if (error instanceof ConflictError) return null;
+          throw error;
+        });
+        if (!saved) return notDraft();
         return { saved: true, ...jobSummary(saved), publishIssues: checkPublishable(saved.content) };
       }),
   });

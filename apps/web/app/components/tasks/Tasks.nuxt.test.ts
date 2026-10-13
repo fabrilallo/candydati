@@ -24,12 +24,12 @@ const { api, state } = vi.hoisted(() => ({
 }))
 mockNuxtImport('useAuthApi', () => () => api)
 
-registerEndpoint('/api/v1/applications/a1/tasks', () => ok([task('t1', { assigneeId: 'u2', assigneeName: null })]))
+registerEndpoint('/api/v1/applications/a1/tasks', () => ok([task('t1', { assignee: { id: 'u2', name: 'Bruno' } })]))
 registerEndpoint('/api/v1/tasks', async (event) => {
   if (event.method !== 'POST') return ok(mine)
   const body = await readBody<{ title: string; assigneeId: string }>(event)
   state.created.push(body)
-  return ok(task('t9', { title: body.title, assigneeId: body.assigneeId, assigneeName: null, dueAt: null }))
+  return ok(task('t9', { title: body.title, assignee: { id: body.assigneeId, name: 'Bruno' }, dueAt: null }))
 })
 registerEndpoint('/api/v1/tasks/t1/complete', { method: 'POST', handler: () => (state.toggles.push('complete'), ok(task('t1', { completedAt: '2026-10-13T11:00:00.000Z' }))) })
 registerEndpoint('/api/v1/tasks/t1/reopen', { method: 'POST', handler: () => (state.toggles.push('reopen'), ok(task('t1'))) })
@@ -37,7 +37,7 @@ registerEndpoint('/api/v1/tasks/t1/reopen', { method: 'POST', handler: () => (st
 const mine = vi.hoisted(() => [] as ReturnType<typeof task>[])
 mine.push(
   task('later', { title: 'Preparare la proposta', dueAt: '2026-10-20T16:00:00.000Z' }),
-  task('none', { title: 'Aggiornare le note', dueAt: null, candidate: null, job: null, jobTitle: 'Data engineer' }),
+  task('none', { title: 'Aggiornare le note', dueAt: null, candidate: null, jobTitle: 'Data engineer' }),
   task('late', { title: 'Richiamare Giulia', dueAt: '2026-10-11T16:00:00.000Z' }),
   task('today', { title: 'Inviare il test', dueAt: '2026-10-13T16:00:00.000Z' }),
 )
@@ -53,7 +53,7 @@ beforeEach(() => {
 afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
 
 describe('tasks of an application', () => {
-  it('lists the tasks with the assignee name from the members, and adds one', async () => {
+  it('lists the tasks with the assignee name the api sends, and adds one', async () => {
     const wrapper = await mountSuspended(ApplicationTasks, { props: { applicationId: 'a1', jobId: 'j1' } })
     mounted.push(wrapper)
     await vi.waitFor(() => expect(wrapper.findAll('[data-testid="task-item"]').length).toBe(1))

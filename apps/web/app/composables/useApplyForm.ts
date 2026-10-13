@@ -1,8 +1,8 @@
+import type { PublicPrivacyNoticeDto } from '@tt/domain'
 import type { Ref } from 'vue'
 import { ApiFailure } from '@/lib/api-call'
 import { applicationOrigin } from '@/lib/application-origin'
 import { emptyApplyValues, needsNoticeReload, submitApplication, toApplicationForm, type ApplyErrors, type ApplyValues } from '@/lib/application-form'
-import type { PublicPrivacyNoticeDto } from '@/lib/candidate-schemas'
 import { checkCvFile } from '@/lib/cv-file'
 import { fetchPublicJob } from '@/lib/job-api'
 

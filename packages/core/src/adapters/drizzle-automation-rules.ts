@@ -1,6 +1,6 @@
 import { and, asc, eq, inArray, schema } from '@tt/db';
 import { automationActionSchema, type AutomationRule } from '@tt/domain';
-import type { AutomationRuleRepository } from '../automation-ports.js';
+import type { AutomationExecutionRepository, AutomationRuleRepository } from '../automation-ports.js';
 import type { DbExecutor } from './db-executor.js';
 
 type Row = typeof schema.automationRule.$inferSelect;
@@ -79,6 +79,17 @@ export function createDrizzleAutomationRules(db: DbExecutor): AutomationRuleRepo
         .where(and(inOrg(organizationId), eq(automationRule.jobId, jobId), inArray(automationRule.stageId, [...stageIds])))
         .returning({ id: automationRule.id });
       return rows.length;
+    },
+  };
+}
+
+/** Postgres implementation: the unique entry index decides, `ON CONFLICT DO NOTHING` says who was first. */
+export function createDrizzleAutomationExecutions(db: DbExecutor): AutomationExecutionRepository {
+  const { automationExecution } = schema;
+  return {
+    async claim(execution) {
+      const rows = await db.insert(automationExecution).values(execution).onConflictDoNothing().returning({ id: automationExecution.id });
+      return rows.length > 0;
     },
   };
 }

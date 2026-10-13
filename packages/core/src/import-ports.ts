@@ -1,4 +1,4 @@
-import type { ImportAnalysis, ImportBatch, ImportConfidence, ImportItem, ImportItemStatus } from '@tt/domain';
+import type { ImportAnalysis, ImportBatch, ImportConfidence, ImportCounts, ImportItem, ImportItemStatus, ImportStatus } from '@tt/domain';
 import type {
   ApplicationRepository,
   CandidateNoteRepository,
@@ -14,9 +14,18 @@ import type { ErasureDeps } from './privacy-ports.js';
 
 export interface ImportBatchRepository {
   create(batch: ImportBatch): Promise<ImportBatch>;
-  /** Full replace by (organizationId, id). */
+  /** Full replace by (organizationId, id), for edits that are not a status change (mapping, items, analysis results). */
   save(batch: ImportBatch): Promise<ImportBatch>;
+  /**
+   * Status change from `from` (compare-and-set), with the other fields in `patch`.
+   * @throws ConflictError when the batch is not `from` any more: of two concurrent changes only one is written.
+   */
+  transition(organizationId: string, id: string, from: ImportStatus, patch: Partial<Omit<ImportBatch, 'id' | 'organizationId'>>): Promise<ImportBatch>;
+  /** Adds `delta` to the stored counts in one statement: what a chunk of the commit wrote survives a crash of the next. */
+  addCounts(organizationId: string, id: string, delta: Partial<Pick<ImportCounts, 'imported' | 'merged' | 'failed' | 'emailsQueued'>>): Promise<void>;
   findById(organizationId: string, id: string): Promise<ImportBatch | null>;
+  /** Locks the batch row until the transaction ends (`FOR UPDATE`): two runs of the commit write one chunk at a time. */
+  lock(organizationId: string, id: string): Promise<ImportBatch | null>;
   /** Newest first. */
   list(organizationId: string): Promise<readonly ImportBatch[]>;
 }
@@ -40,7 +49,8 @@ export interface ImportItemRepository {
   listAll(organizationId: string, batchId: string): Promise<readonly ImportItem[]>;
   /** Items not found in the batch are ignored. */
   setIncluded(organizationId: string, batchId: string, changes: readonly { readonly itemId: string; readonly included: boolean }[]): Promise<void>;
-  setStatus(organizationId: string, itemId: string, status: ImportItemStatus, error: string | null): Promise<void>;
+  /** From `pending` only: false when the item was already imported or failed (by another run of the commit). */
+  setStatus(organizationId: string, itemId: string, status: ImportItemStatus, error: string | null): Promise<boolean>;
   /** Deletes the items of the batch. */
   deleteByBatch(organizationId: string, batchId: string): Promise<void>;
 }
@@ -87,6 +97,9 @@ export interface ImportDeps extends CoreDeps {
 
 /** The repositories that take part in ONE chunk of a commit. */
 export interface ImportCommitRepositories {
+  /** To lock the target job (share) and refuse a closed one inside the chunk's transaction. */
+  readonly jobs: JobRepository;
+  readonly imports: ImportBatchRepository;
   readonly candidates: CandidateRepository;
   readonly applications: ApplicationRepository;
   readonly extractions: CvExtractionRepository;

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { EyeIcon } from '@lucide/vue'
-import type { PublishIssue, VaguePhrase } from '@tt/domain'
+import type { PublishIssue, VaguePhrase, JobContent  } from '@tt/domain'
 import type { ComplianceFix } from '@/lib/compliance-fix'
 import type { ComplianceMark } from '@/lib/compliance-view'
-import type { JobContent9 } from '@/lib/phase9-contract'
 
 /** Right pane of the editor: the live candidate view, updated as you type (local state, no network). */
 defineProps<{
-  content: JobContent9
+  content: JobContent
   organization: { readonly name: string; readonly logo: string | null }
   issues: readonly PublishIssue[]
   phrases: readonly VaguePhrase[]

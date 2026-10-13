@@ -46,10 +46,6 @@ export const placeLine = ({ workMode, location }: Place, language: string): stri
   return [city, country].filter((part) => part !== '').join(', ')
 }
 
-/** `Ibrido · Milano, Italia`. */
-export const workLine = (place: Place, language: string, tr: Translate): string =>
-  [place.workMode ? tr(`taxonomy.workModes.${place.workMode}`) : '', placeLine(place, language)].filter((part) => part !== '').join(' · ')
-
 export const publicJobPath = (orgSlug: string, jobSlug: string): string => `/careers/${encodeURIComponent(orgSlug)}/${encodeURIComponent(jobSlug)}`
 export const careersPath = (orgSlug: string): string => `/careers/${encodeURIComponent(orgSlug)}`
 export const absoluteUrl = (siteUrl: string, path: string): string => `${siteUrl.replace(/\/+$/, '')}${path}`

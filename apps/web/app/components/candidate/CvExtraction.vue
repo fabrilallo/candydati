@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import type { ExtractionDto } from '@tt/domain'
 import { SparklesIcon } from '@lucide/vue'
-import type { ExtractionDto } from '@/lib/candidate-schemas'
 import { extractionView } from '@/lib/extraction-view'
 
 /**

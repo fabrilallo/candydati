@@ -15,8 +15,8 @@ import type { ApplicationCardView } from './views.js';
 export async function closeApplication(deps: CandidateDeps, application: Application, outcome: Outcome, actorType: ActorType): Promise<Application> {
   if (application.outcome !== null) throw new ConflictError('The application is already decided.');
   const now = deps.now();
-  const saved = await deps.applications.save({
-    ...application,
+  // `outcome IS NULL` in the same statement: of two concurrent decisions exactly one writes, the other is a ConflictError.
+  const saved = await deps.applications.transition(application.organizationId, application.id, {}, {
     outcome,
     closedAt: now,
     updatedAt: now,

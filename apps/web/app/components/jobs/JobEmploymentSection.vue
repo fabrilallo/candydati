@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input'
 import { currencySymbol } from '@/lib/ad-facts'
 import { toggleBenefit } from '@/lib/employment-form'
 import type { FieldErrors, JobForm } from '@/lib/job-form'
-import { CCNL_IDS, EXTRA_BENEFITS, MEAL_VOUCHER_TYPES, MONTHLY_PAYMENTS_MAX, MONTHLY_PAYMENTS_MIN, PROTECTED_CATEGORIES } from '@/lib/phase9-contract'
+import { CCNL_IDS, EXTRA_BENEFITS, MEAL_VOUCHER_TYPES, MONTHLY_PAYMENTS_MAX, MONTHLY_PAYMENTS_MIN, PROTECTED_CATEGORIES } from '@tt/domain'
 
 /**
  * "Contratto e benefit": the CCNL and level, monthly payments, meal vouchers, welfare, bonus and the usual benefits as

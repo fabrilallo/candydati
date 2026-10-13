@@ -55,7 +55,7 @@ describe('distribution.sync', () => {
     await deps.jobs.create(published);
     const queue = createDistributionSyncQueue(deps);
     await queue.handle(run(false));
-    await deps.jobs.save({ ...published, status: 'closed', closedAt: new Date() });
+    await deps.jobs.transition(published.organizationId, published.id, 'published', { status: 'closed', closedAt: new Date(), updatedAt: new Date() });
     await queue.handle(run(false));
     expect(deps.distributions.snapshot()[0]?.status).toBe('removed');
     await expect(queue.handle({ ...run(false), payload: { organizationId: DISTRIBUTION_ORG, jobId: 'gone' } })).resolves.toBeUndefined();

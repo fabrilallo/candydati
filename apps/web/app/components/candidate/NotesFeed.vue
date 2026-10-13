@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core'
-import { NOTE_MAX } from '@tt/domain'
-import type { CandidateApplicationDto, NoteDto } from '@/lib/candidate-schemas'
+import { NOTE_MAX, type CandidateApplicationDto, type NoteDto } from '@tt/domain'
 import { formatDateTime } from '@/lib/format'
 import { Button } from '@/components/ui/button'
 import { NativeSelect } from '@/components/ui/native-select'

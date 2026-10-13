@@ -1,7 +1,6 @@
+import type { EmailSettingsDto, DomainStatus  } from '@tt/domain'
 import { z } from 'zod'
 import type { EmailSettingsInput } from './message-api'
-import type { EmailSettingsDto } from './message-schemas'
-import type { DomainStatus } from '@tt/domain'
 
 export type SettingsTone = 'success' | 'warning' | 'destructive' | 'secondary' | 'outline'
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { emptyRequestForm, requestFormFromTitle, toRequestInput, validateRequestForm, type JobRequestForm } from './job-request-form'
+import { emptyRequestForm, requestFormFromTitle, requestLanguage, toRequestInput, validateRequestForm, type JobRequestForm } from './job-request-form'
 
 const valid: JobRequestForm = { ...emptyRequestForm(), title: 'Backend developer', role: 'backend_developer', reason: 'Servono due persone.', headcount: '2', salaryMin: '45000', salaryMax: '60000' }
 
@@ -47,13 +47,34 @@ describe('job request form', () => {
   })
 
   it('turns the form into the wire input, leaving empty optionals out', () => {
-    expect(toRequestInput(valid)).toEqual({ title: 'Backend developer', role: 'backend_developer', reason: 'Servono due persone.', headcount: 2, salaryMin: 45000, salaryMax: 60000, currency: 'EUR' })
-    expect(toRequestInput({ ...valid, workMode: 'hybrid', location: ' Milano ', desiredStart: '2026-12-01', processNotes: ' due colloqui ', interviewersNotes: 'Marta' })).toMatchObject({
+    expect(toRequestInput(valid, 'it')).toEqual({
+      title: 'Backend developer',
+      role: 'backend_developer',
+      reason: 'Servono due persone.',
+      headcount: 2,
+      salaryMin: 45000,
+      salaryMax: 60000,
+      currency: 'EUR',
+      language: 'it',
+      location: {},
+      processNotes: '',
+      interviewersNotes: '',
+    })
+    expect(toRequestInput({ ...valid, workMode: 'hybrid', location: ' Milano ', desiredStart: '2026-12-01', processNotes: ' due colloqui ', interviewersNotes: 'Marta' }, 'en')).toMatchObject({
+      language: 'en',
       workMode: 'hybrid',
       location: { city: 'Milano' },
       desiredStart: '2026-12-01',
       processNotes: 'due colloqui',
       interviewersNotes: 'Marta',
     })
+  })
+})
+
+describe('requestLanguage', () => {
+  it('sends the screen language the platform supports, the default otherwise', () => {
+    expect(requestLanguage('en')).toBe('en')
+    expect(requestLanguage('it')).toBe('it')
+    expect(requestLanguage('de')).toBe('it')
   })
 })

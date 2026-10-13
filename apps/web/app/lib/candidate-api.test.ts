@@ -5,6 +5,7 @@ import {
   candidatesUrl,
   cvUrl,
   decideApplication,
+  candidateUrl,
   getCandidate,
   getPipeline,
   listCandidates,
@@ -54,11 +55,22 @@ describe('candidate calls', () => {
     await expect(listCandidates(send(ok([])), { query: '', tag: null, talentPool: false, page: 1 })).rejects.toMatchObject({ key: 'errors.generic' })
   })
 
-  it('reads a profile, tolerating a missing extraction record', async () => {
+  it('reads a profile with its extraction record, and refuses one without it', async () => {
+    const result = await getCandidate(send(ok(detail())), 'c1')
+    expect(result.applications[0]?.extraction).toMatchObject({ status: 'done', source: 'model' })
     const value = detail()
     const withoutExtraction = { ...value, applications: value.applications.map(({ extraction: _ignored, ...rest }) => rest) }
-    const result = await getCandidate(send(ok(withoutExtraction)), 'c1')
-    expect(result.applications[0]?.extraction).toBeNull()
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    await expect(getCandidate(send(ok(withoutExtraction)), 'c1')).rejects.toMatchObject({ code: 'invalid_response' })
+    spy.mockRestore()
+  })
+
+  it('names the pipeline a profile is opened from, so a person still to reconfirm can be shown there', async () => {
+    expect(candidateUrl('c 1')).toBe('/api/v1/candidates/c%201')
+    expect(candidateUrl('c1', 'job/1')).toBe('/api/v1/candidates/c1?viaJobId=job%2F1')
+    const get = send(ok(detail()))
+    await getCandidate(get, 'c1', 'job_1')
+    expect(get.mock.calls[0]?.[0]).toBe('/api/v1/candidates/c1?viaJobId=job_1')
   })
 
   it('updates tags and adds notes', async () => {

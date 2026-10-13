@@ -43,7 +43,7 @@ export function seedImportWorld(options: ImportSeedOptions = {}): TestImportDeps
     importItems: createInMemoryImportItems(importStore),
     importAnalyses: createInMemoryImportAnalyses(importStore),
     consentTokens: createInMemoryConsentTokens(importStore),
-    commit: createInMemoryImportCommit(world.store, importStore),
+    commit: createInMemoryImportCommit(world.store, importStore, world.jobs),
     mail: world,
     newSecret: () => {
       secrets += 1;

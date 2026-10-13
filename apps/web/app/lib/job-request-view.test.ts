@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { jobRequestSchema } from './phase9-contract'
-import { jobRequestAction, canDecide, canConvert, newestFirst, requestBudget, requestStatusTone, requestSummary, requestsEmptyKey } from './job-request-view'
+import { jobRequestSchema } from '@tt/domain'
+import { jobRequestAction, canDecide, canConvert, locationLine, newestFirst, noteOr, requestBudget, requestStatusTone, requestSummary, requestsEmptyKey } from './job-request-view'
 import { jobRequest } from '../../test/fixtures/job-request-fixtures'
 
 const dto = (over: Record<string, unknown> = {}) => jobRequestSchema.parse(jobRequest('r1', over))
@@ -47,8 +47,16 @@ describe('job request view', () => {
 
   it('formats the budget', () => {
     expect(requestBudget(dto(), 'it')).toMatch(/45\.000.*60\.000/)
-    expect(requestBudget(dto({ salaryMin: null, salaryMax: null }), 'it')).toBe('')
-    expect(requestBudget(dto({ salaryMin: 50000, salaryMax: null }), 'it')).toMatch(/50\.000/)
+    expect(requestBudget(dto({ salaryMin: 50000, salaryMax: 50000 }), 'it')).toMatch(/^50\.000/)
+    expect(requestBudget(dto({ salaryMin: 50000, salaryMax: 50000 }), 'it')).not.toContain('-')
+  })
+
+  it('writes the location as one line, empty when nothing was filled in', () => {
+    expect(locationLine({ city: 'Milano', country: 'IT' })).toBe('Milano, IT')
+    expect(locationLine({ city: 'Milano' })).toBe('Milano')
+    expect(locationLine({})).toBe('')
+    expect(noteOr('  ', '-')).toBe('-')
+    expect(noteOr('Colloquio', '-')).toBe('Colloquio')
   })
 
   it('picks the empty state by what the person can do', () => {
@@ -59,7 +67,7 @@ describe('job request view', () => {
 
   it('summarizes only what was filled in, for the assistant', () => {
     const tr = (key: string, params?: Record<string, unknown>) => (params ? `${key}=${String(params.label)}|${String(params.value)}` : key)
-    const text = requestSummary(dto({ location: null, desiredStart: null, processNotes: null, interviewersNotes: null }), tr, 'it')
+    const text = requestSummary(dto({ location: {}, desiredStart: undefined, processNotes: '', interviewersNotes: '' }), tr, 'it')
     expect(text.split('\n').map((line) => line.slice(0, 40))).toHaveLength(6)
     expect(text).toContain('jobRequests.fields.title|Backend developer')
     expect(text).toContain('jobRequests.fields.role|taxonomy.roles.backend_developer')

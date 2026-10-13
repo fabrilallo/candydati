@@ -1,10 +1,10 @@
+import type { ImportBatchDto } from '@tt/domain'
 import { useDocumentVisibility, useIntervalFn } from '@vueuse/core'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { listImports, undoImport } from '@/lib/import-api'
 import { isWorking } from '@/lib/import-view'
 import { loaded } from '@/lib/job-api'
-import type { ImportBatchDto } from '@/lib/phase8-contract'
 
 /** How often the list is asked again while a batch is being analyzed or imported. */
 export const IMPORTS_POLL_MS = 5_000
@@ -49,7 +49,7 @@ export const useImports = () => {
     undoing.value = batchId
     try {
       const result = await undoImport(request, batchId)
-      toast.success(result.kept > 0 ? t('imports.undo.doneKept', { count: result.kept }, result.kept) : t('imports.undo.done'))
+      toast.success(result.skippedReconfirmed > 0 ? t('imports.undo.doneKept', { count: result.skippedReconfirmed }, result.skippedReconfirmed) : t('imports.undo.done'))
       await poll()
       return true
     } catch (error) {

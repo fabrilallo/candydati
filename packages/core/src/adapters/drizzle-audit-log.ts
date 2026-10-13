@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { and, count, desc, eq, schema, type Db } from '@tt/db';
+import type { DbExecutor } from './db-executor.js';
+import { and, count, desc, eq, schema, sql } from '@tt/db';
 import { auditEventSchema, newAuditEventSchema, type AuditEvent, type NewAuditEvent } from '@tt/domain';
 import type { AuditLogPage, AuditLogQuery, AuditLogRepository } from '../ports.js';
 
@@ -17,7 +18,7 @@ const toEvent = (row: Row): AuditEvent =>
   });
 
 /** Postgres implementation of the append-only audit log. Every read is filtered by `organization_id`. */
-export function createDrizzleAuditLog(db: Db): AuditLogRepository {
+export function createDrizzleAuditLog(db: DbExecutor): AuditLogRepository {
   const { auditLog } = schema;
   return {
     async append(input: NewAuditEvent): Promise<AuditEvent> {
@@ -34,6 +35,8 @@ export function createDrizzleAuditLog(db: Db): AuditLogRepository {
           targetType: event.target.type,
           targetId: event.target.id,
           metadata: event.metadata,
+          // Not `now()`: inside one transaction it is the same instant for every event, and their order would be lost.
+          occurredAt: sql`clock_timestamp()`,
         })
         .returning();
       if (!row) throw new Error('audit_log insert returned no row');

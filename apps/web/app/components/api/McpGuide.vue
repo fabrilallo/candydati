@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { mcpConfigSnippet, mcpEndpoint } from '@/lib/api-keys'
-import { MCP_TOOLS } from '@/lib/phase6-contract'
+import { MCP_TOOL_NAMES } from '@tt/domain'
 
 /** How to connect an external agent: the endpoint, a config block for MCP clients, and what each tool does. */
 const { t } = useI18n()
@@ -36,7 +36,7 @@ const snippet = computed(() => mcpConfigSnippet({ serverName: platform.value.nam
       <div class="grid gap-2">
         <p class="text-sm font-medium">{{ t('mcp.toolsTitle') }}</p>
         <dl class="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[13rem_minmax(0,1fr)]" data-testid="mcp-tools">
-          <template v-for="tool in MCP_TOOLS" :key="tool">
+          <template v-for="tool in MCP_TOOL_NAMES" :key="tool">
             <dt><code class="font-mono text-xs">{{ tool }}</code></dt>
             <dd class="text-muted-foreground max-sm:mb-1">{{ t(`mcp.tools.${tool}`) }}</dd>
           </template>

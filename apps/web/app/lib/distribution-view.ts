@@ -1,5 +1,4 @@
-import { careersUrl, feedUrl, llmsTxtUrl } from '@tt/domain'
-import { FEED_CHANNEL_IDS, type DistributionStatus, type JobChannelDto } from './phase7-contract'
+import { careersUrl, FEED_CHANNEL_ID, feedUrl, llmsTxtUrl, type DistributionStatus, type JobDistributionDto } from '@tt/domain'
 
 /** Public machine-readable addresses of an organization. Pure: the site URL is passed in, never read here. */
 const trimmed = (siteUrl: string): string => siteUrl.replace(/\/+$/, '')
@@ -15,7 +14,6 @@ export const curlExample = (url: string): string => `curl -H 'Accept: applicatio
 export type StatusTone = 'success' | 'secondary' | 'outline' | 'warning' | 'destructive'
 
 const TONES: Readonly<Record<DistributionStatus, StatusTone>> = {
-  feed: 'success',
   published: 'success',
   pending: 'warning',
   failed: 'destructive',
@@ -24,6 +22,9 @@ const TONES: Readonly<Record<DistributionStatus, StatusTone>> = {
 
 export const statusTone = (status: DistributionStatus): StatusTone => TONES[status]
 export const statusLabelKey = (status: DistributionStatus): string => `distribution.status.${status}`
+/** The feed is computed from the job, so "published" reads "in the XML feed" there. */
+export const rowStatusLabelKey = (row: Pick<ChannelRow, 'status' | 'builtIn'>): string | null =>
+  row.status === null ? null : row.builtIn && row.status === 'published' ? 'distribution.status.feed' : statusLabelKey(row.status)
 
 export interface ChannelRow {
   readonly id: string
@@ -36,18 +37,16 @@ export interface ChannelRow {
   readonly updatedAt: string | null
   /** Only registered channels can be synced again. */
   readonly syncable: boolean
+  /** The XML feed row: computed, always on. */
+  readonly builtIn: boolean
   /** Copyable address (feed and public API rows). */
   readonly copyUrl: string | null
 }
 
-export const isFeedChannel = (row: Pick<JobChannelDto, 'channelId' | 'status'>): boolean => FEED_CHANNEL_IDS.includes(row.channelId) || row.status === 'feed'
-
-/** The feed has no external state: published means "in the feed". */
-const feedStatus = (status: DistributionStatus): DistributionStatus => (status === 'published' ? 'feed' : status)
+export const isFeedChannel = (row: Pick<JobDistributionDto, 'channelId'>): boolean => row.channelId === FEED_CHANNEL_ID
 
 export interface RowsInput {
-  readonly channels: readonly JobChannelDto[]
-  readonly published: boolean
+  readonly channels: readonly JobDistributionDto[]
   readonly feedUrl: string
   /** Null while the job has no slug yet. */
   readonly apiUrl: string | null
@@ -55,35 +54,37 @@ export interface RowsInput {
 
 /**
  * Rows of the "Distribuzione" tab: the built-in feed first, then the registered channels, then the public API.
- * The feed row is computed from the job state when the api did not send it ("Nel feed XML" only while published).
+ * The api always sends the feed row (computed from the job state); a missing one shows no status.
  */
 export const jobRows = (input: RowsInput): readonly ChannelRow[] => {
   const sent = input.channels.find(isFeedChannel)
   const feed: ChannelRow = {
-    id: 'feed',
+    id: FEED_CHANNEL_ID,
     label: null,
     labelKey: 'distribution.feed.label',
-    status: sent ? feedStatus(sent.status) : input.published ? 'feed' : 'removed',
+    status: sent?.status ?? null,
     url: null,
     error: null,
     updatedAt: sent?.updatedAt ?? null,
     syncable: false,
+    builtIn: true,
     copyUrl: input.feedUrl,
   }
   const registered: readonly ChannelRow[] = input.channels
     .filter((channel) => !isFeedChannel(channel))
     .map((channel) => ({
       id: channel.channelId,
-      label: channel.label || channel.channelId,
+      label: channel.label,
       labelKey: null,
       status: channel.status,
       url: channel.url,
       error: channel.error,
       updatedAt: channel.updatedAt,
       syncable: true,
+      builtIn: false,
       copyUrl: null,
     }))
-  const api: ChannelRow = { id: 'api', label: null, labelKey: 'distribution.api.label', status: null, url: null, error: null, updatedAt: null, syncable: false, copyUrl: input.apiUrl }
+  const api: ChannelRow = { id: 'api', label: null, labelKey: 'distribution.api.label', status: null, url: null, error: null, updatedAt: null, syncable: false, builtIn: false, copyUrl: input.apiUrl }
   return [feed, ...registered, ...(input.apiUrl ? [api] : [])]
 }
 

@@ -8,6 +8,7 @@ import { fakeAdQualityAnalyzer } from './job-fixtures.js';
 import {
   createFakeHostGuard,
   createFakeHttpPoster,
+  createInMemoryAutomationExecutions,
   createInMemoryAutomationRules,
   createInMemoryMemberDirectory,
   createInMemoryNotifications,
@@ -74,6 +75,7 @@ export function seedAutomationWorld(options: AutomationSeedOptions = {}): TestAu
     tasks: createInMemoryTasks(options.tasks),
     rules,
     automationRules: rules,
+    executions: createInMemoryAutomationExecutions(),
     members: createInMemoryMemberDirectory(members),
     endpoints: createInMemoryWebhookEndpoints(options.endpoints),
     deliveries: createInMemoryWebhookDeliveries(),

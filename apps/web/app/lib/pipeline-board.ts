@@ -1,5 +1,4 @@
-import { OUTCOMES, RECEIVED_STAGE_ID, type Outcome, type StageType } from '@tt/domain'
-import type { ApplicationCardDto, PipelineDto, StageRef } from './candidate-schemas'
+import { OUTCOMES, RECEIVED_STAGE_ID, type Outcome, type StageType, type ApplicationCardDto, type PipelineDto, type StageRef } from '@tt/domain'
 
 export interface BoardColumn extends StageRef {
   readonly cards: readonly ApplicationCardDto[]

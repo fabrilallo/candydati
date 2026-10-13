@@ -117,9 +117,30 @@ export interface ScanDeps {
   readonly newId: () => string;
 }
 
+/** One run of a rule for one entry of an application into a stage. */
+export interface AutomationExecution {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly ruleId: string;
+  readonly applicationId: string;
+  readonly stageId: string;
+  /** When the application entered the stage (`stageChangedAt`): each entry runs a rule once. */
+  readonly stageEnteredAt: Date;
+  readonly createdAt: Date;
+}
+
+export interface AutomationExecutionRepository {
+  /**
+   * Records the run unless this rule already ran for this entry. False when it did: the caller does nothing. Inside the
+   * transaction of what the rule does, so a failed run leaves no record and is tried again.
+   */
+  claim(execution: AutomationExecution): Promise<boolean>;
+}
+
 /** `runAutomations`: sends through the normal messaging path, so it needs everything messaging needs. */
 export type AutomationRunDeps = MessagingDeps & {
   readonly rules: AutomationRuleRepository;
+  readonly executions: AutomationExecutionRepository;
   readonly tasks: TaskRepository;
   readonly notifications: NotificationRepository;
   readonly queue: TaskQueue;

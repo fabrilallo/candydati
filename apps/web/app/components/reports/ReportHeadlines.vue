@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ReportsView } from '@/lib/phase10-contract'
+import type { ReportsView } from '@tt/domain'
 import { formatDaysValue, formatRate, headlines, NO_VALUE } from '@/lib/report-view'
 
 /** The four figures that matter most, in one divided panel: each with its basis and one plain sentence. */

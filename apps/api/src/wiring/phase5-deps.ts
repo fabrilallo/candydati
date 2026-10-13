@@ -1,20 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
-  createDrizzleApplications,
-  createDrizzleCandidateNotes,
-  createDrizzleCandidateSearch,
-  createDrizzleCandidates,
-  createDrizzleCvExtractions,
-  createDrizzleDataExports,
-  createDrizzleErasure,
-  createDrizzleFeedbackRequests,
-  createDrizzleInterviewFeedback,
-  createDrizzleJobs,
-  createDrizzleMessages,
-  createDrizzleOrganizationDirectory,
-  createDrizzlePrivacyNotices,
-  createDrizzleRetentionRuns,
-  type AuditLogRepository,
+  type DrizzleUnitOfWork,
   type CandidateDeps,
   type CandidateRightsDeps,
   type ConfiguredProviders,
@@ -25,7 +11,6 @@ import {
   type TaskQueue,
   type ZipWriterFactory,
 } from '@tt/core';
-import type { Db } from '@tt/db';
 
 export interface Phase5Deps {
   /** Export, correction, erasure and consent withdrawal of one candidate. */
@@ -35,8 +20,7 @@ export interface Phase5Deps {
 }
 
 export interface Phase5Inputs {
-  readonly db: Db;
-  readonly auditLog: AuditLogRepository;
+  readonly uow: DrizzleUnitOfWork;
   readonly files: FileStorage;
   readonly queue: TaskQueue;
   readonly candidateDeps: CandidateDeps;
@@ -45,22 +29,24 @@ export interface Phase5Inputs {
   readonly feedbackRecords: FeedbackRecords;
 }
 
-export type ExportInputs = Pick<Phase5Inputs, 'db' | 'auditLog' | 'files' | 'queue' | 'zip'> & Partial<Pick<Phase5Inputs, 'feedbackRecords'>>;
+export type ExportInputs = Pick<Phase5Inputs, 'uow' | 'files' | 'queue' | 'zip'> & Partial<Pick<Phase5Inputs, 'feedbackRecords'>>;
 
 /** What the request and the worker task of the organization export need. */
-export function createExportDeps({ db, auditLog, files, queue, zip, feedbackRecords }: ExportInputs): OrganizationExportDeps {
+export function createExportDeps({ uow, files, queue, zip, feedbackRecords }: ExportInputs): OrganizationExportDeps {
+  const r = uow.repositories;
   return {
-    ...(feedbackRecords ?? { feedbackRequests: createDrizzleFeedbackRequests(db), interviewFeedback: createDrizzleInterviewFeedback(db) }),
-    auditLog,
-    dataExports: createDrizzleDataExports(db),
-    organizations: createDrizzleOrganizationDirectory(db),
-    jobs: createDrizzleJobs(db),
-    candidates: createDrizzleCandidates(db),
-    candidateSearch: createDrizzleCandidateSearch(db),
-    applications: createDrizzleApplications(db),
-    notes: createDrizzleCandidateNotes(db),
-    extractions: createDrizzleCvExtractions(db),
-    messages: createDrizzleMessages(db),
+    ...(feedbackRecords ?? { feedbackRequests: r.feedbackRequests, interviewFeedback: r.interviewFeedback }),
+    auditLog: r.auditLog,
+    transaction: uow.transaction,
+    dataExports: r.dataExports,
+    organizations: r.organizations,
+    jobs: r.jobs,
+    candidates: r.candidates,
+    candidateSearch: r.candidateSearch,
+    applications: r.applications,
+    notes: r.notes,
+    extractions: r.extractions,
+    messages: r.messages,
     files,
     queue,
     zip,
@@ -70,17 +56,22 @@ export function createExportDeps({ db, auditLog, files, queue, zip, feedbackReco
 }
 
 /** Candidate rights, organization export and the privacy overview on Postgres. */
-export function createPhase5Deps({ db, auditLog, files, queue, candidateDeps, providers, zip, feedbackRecords }: Phase5Inputs): Phase5Deps {
-  const jobs = createDrizzleJobs(db);
-  const applications = createDrizzleApplications(db);
-  const candidates = createDrizzleCandidates(db);
-  const organizations = createDrizzleOrganizationDirectory(db);
-  const privacyNotices = createDrizzlePrivacyNotices(db);
-  const retentionRuns = createDrizzleRetentionRuns(db);
-  const clock = { newId: randomUUID, now: () => new Date() };
+export function createPhase5Deps({ uow, files, queue, candidateDeps, providers, zip, feedbackRecords }: Phase5Inputs): Phase5Deps {
+  const r = uow.repositories;
+  const core = { auditLog: r.auditLog, transaction: uow.transaction };
   return {
-    rightsDeps: { ...candidateDeps, ...feedbackRecords, privacyNotices, erasure: createDrizzleErasure(db) },
-    exportDeps: createExportDeps({ db, auditLog, files, queue, zip, feedbackRecords }),
-    overviewDeps: { auditLog, applications, candidates, jobs, organizations, privacyNotices, retentionRuns, providers, now: clock.now },
+    rightsDeps: { ...candidateDeps, ...feedbackRecords, privacyNotices: r.privacyNotices, erasure: r.erasure },
+    exportDeps: createExportDeps({ uow, files, queue, zip, feedbackRecords }),
+    overviewDeps: {
+      ...core,
+      applications: r.applications,
+      candidates: r.candidates,
+      jobs: r.jobs,
+      organizations: r.organizations,
+      privacyNotices: r.privacyNotices,
+      retentionRuns: r.retentionRuns,
+      providers,
+      now: () => new Date(),
+    },
   };
 }

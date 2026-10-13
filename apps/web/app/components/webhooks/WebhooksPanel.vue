@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PlusIcon } from '@lucide/vue'
 import type { WebhookInput } from '@/lib/automation-api'
-import type { WebhookEndpointDto } from '@/lib/phase4-contract'
+import type { WebhookEndpointDto } from '@tt/domain'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 

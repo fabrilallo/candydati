@@ -1,4 +1,4 @@
-import type { ApplicationCardDto, CandidateDetailDto, CandidateSummaryDto, NoteDto, PipelineDto, PrivacyNoticeDto, PublicPrivacyNoticeDto } from '../../app/lib/candidate-schemas'
+import type { ApplicationCardDto, CandidateDetailDto, CandidateSummaryDto, NoteDto, PipelineDto, PrivacyNoticeDto, PublicPrivacyNoticeDto } from '@tt/domain'
 
 export const T0 = '2026-10-13T10:00:00.000Z'
 export const PRIVACY_TEXT = `${'Titolare del trattamento: Acme. '.repeat(5)}\n\nI tuoi dati servono solo per la selezione. ${'Puoi chiedere accesso e cancellazione. '.repeat(3)}`
@@ -31,11 +31,11 @@ export const card = (id: string, stageId = 'received', overrides: Partial<Applic
   stageRemoved: false,
   responseDueAt: null,
   respondedAt: null,
-  responseState: null,
-  candidate: { id: `c-${id}`, firstName: 'Giulia', lastName: `Rossi ${id}`, tags: [], headline: 'Backend engineer', location: 'Milano', yearsOfExperience: 6, consentStatus: 'given', importBatchId: null },
+  responseState: 'on_track',
+  candidate: { id: `c-${id}`, firstName: 'Giulia', lastName: `Rossi ${id}`, tags: [], headline: 'Backend engineer', location: 'Milano', yearsOfExperience: 6 },
   consentStatus: 'given',
   importBatchId: null,
-  retentionExpiresAt: null,
+  retentionExpiresAt: '2028-10-13T10:00:00.000Z',
   ...overrides,
 })
 
@@ -88,14 +88,13 @@ export const detail = (overrides: Partial<CandidateDetailDto> = {}): CandidateDe
       stageChangedAt: T0,
       closedAt: null,
       consent: { status: 'given', privacyNoticeVersion: 3, scopes: ['selection', 'talent_pool'], givenAt: T0 },
-      consentStatus: 'given',
       importBatchId: null,
       retentionExpiresAt: '2028-10-13T10:00:00.000Z',
       cv: { fileName: 'giulia-rossi.pdf', mediaType: 'application/pdf', sizeBytes: 1_572_864 },
       messageCount: 2,
       responseDueAt: null,
       respondedAt: null,
-      responseState: null,
+      responseState: 'on_track',
       extraction: {
         status: 'done',
         source: 'model',

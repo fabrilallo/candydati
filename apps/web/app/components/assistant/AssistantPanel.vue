@@ -2,7 +2,7 @@
 import { useEventListener } from '@vueuse/core'
 import { BotIcon, RotateCcwIcon, ShieldCheckIcon } from '@lucide/vue'
 import { isAssistantShortcut, pageContextOf, suggestionKeys } from '@/lib/page-context'
-import type { DraftMessageOutput } from '@/lib/phase6-contract'
+import type { DraftMessageOutput } from '@tt/domain'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 
@@ -59,7 +59,7 @@ const reset = async (): Promise<void> => {
 /** "Rivedi e invia": the person's composer takes over; the conversation comes back when it closes. */
 const reviewing = ref<DraftMessageOutput | null>(null)
 const reviewCards = computed(() =>
-  reviewing.value ? [{ id: reviewing.value.applicationId, candidate: { firstName: reviewing.value.candidateName ?? t('assistant.draftMessage.thisCandidate'), lastName: '' } }] : [],
+  reviewing.value ? [{ id: reviewing.value.applicationId, candidate: { firstName: t('assistant.draftMessage.thisCandidate'), lastName: '' } }] : [],
 )
 const review = (draft: DraftMessageOutput): void => {
   reviewing.value = draft

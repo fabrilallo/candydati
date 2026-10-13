@@ -1,6 +1,6 @@
 import { MACHINE_FORBIDDEN_PERMISSIONS, PERMISSIONS } from '@tt/domain'
 import { describe, expect, it } from 'vitest'
-import { expiryDate, keyStatus, mcpConfigSnippet, mcpEndpoint, scopeGroups, scopeLabelKey, toggleScope, validateKeyForm, withheldAreas } from './api-keys'
+import { expiryDate, keyStatus, mcpConfigSnippet, mcpEndpoint, scopeGroups, scopeLabelKey, toggleScope, validateKeyForm } from './api-keys'
 
 const NOW = new Date('2026-10-13T10:00:00.000Z')
 
@@ -26,12 +26,6 @@ describe('scopeGroups', () => {
 
   it('offers nothing without a role', () => {
     expect(scopeGroups(null)).toEqual([])
-  })
-})
-
-describe('withheldAreas', () => {
-  it('names the three kinds of power that stay with a person', () => {
-    expect(withheldAreas).toEqual(['decisions', 'messages', 'administration'])
   })
 })
 

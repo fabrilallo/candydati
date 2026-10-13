@@ -1629,6 +1629,7 @@
     "system": "Inviato in automatico",
     "status": {
       "queued": "In coda",
+      "sending": "In invio",
       "sent": "Inviato",
       "failed": "Non consegnato",
       "received": "Ricevuto"
@@ -1842,7 +1843,6 @@
       "list": "Annunci fermi",
       "noActivity": "Nessuna attività da {count} giorni",
       "published": "Pubblicato il {date}",
-      "openApplications": "Nessuna candidatura aperta | Una candidatura aperta | {count} candidature aperte",
       "open": "Apri l'annuncio",
       "close": "Chiudi l'annuncio",
       "empty": "Nessun annuncio fermo da più di {days} giorni"
@@ -2165,7 +2165,6 @@
       "retentionText": "{selection} per la sola selezione, {pool} per il database candidati, dal giorno del consenso. Cancellazione automatica, file compresi.",
       "retentionMissing": "Da definire: pubblica l'informativa per fissare le durate.",
       "recipients": "Fornitori configurati",
-      "providersEmpty": "Nessun fornitore indicato nella configurazione.",
       "measures": "Misure di sicurezza",
       "measuresText": "Dati separati per organizzazione, permessi per ruolo e per annuncio, registro delle azioni non modificabile, cancellazione automatica alla scadenza.",
       "automated": "Decisioni automatizzate",
@@ -2174,12 +2173,9 @@
       "generated": "Compilato il {date}"
     },
     "providers": {
-      "hosting": "Hosting",
-      "database": "Database",
       "storage": "Archiviazione dei file",
       "email": "Invio email",
-      "model": "Modello linguistico",
-      "monitoring": "Monitoraggio"
+      "model": "Modello linguistico"
     },
     "templatesTitle": "Modelli da far rivedere a un legale",
     "templatesNote": "Sono nel repository del progetto. Vanno completati e rivisti prima dell'uso: non sono consulenza legale.",
@@ -2483,6 +2479,14 @@
         "running": "Analizzo la qualità",
         "done": "Ho analizzato la qualità"
       },
+      "list_jobs": {
+        "running": "Guardo gli annunci",
+        "done": "Ho guardato gli annunci"
+      },
+      "get_reports_summary": {
+        "running": "Leggo i report",
+        "done": "Ho letto i report"
+      },
       "get_pipeline_summary": {
         "running": "Guardo la pipeline",
         "done": "Ho guardato la pipeline"
@@ -2679,24 +2683,11 @@
     "analysis": {
       "title": "Analisi in corso",
       "body": "Leggiamo ogni CV e ogni riga. Puoi chiudere questa pagina: l'analisi continua e ritrovi l'import nella lista.",
-      "progress": "{done} di {total}",
       "cvs": "CV",
       "rows": "Righe di tabella",
-      "ignored": "File ignorati",
-      "ignoredTitle": "File ignorati e perché",
       "failed": "L'analisi non è riuscita",
       "failedBody": "Nessun candidato è stato creato. Controlla i file e prova con un nuovo import.",
       "back": "Torna agli import"
-    },
-    "ignored": {
-      "unsupported": "formato non supportato",
-      "unreadable": "illeggibile o danneggiato",
-      "empty": "vuoto",
-      "tooLarge": "troppo grande",
-      "duplicate": "uguale a un altro file",
-      "archive": "archivio sospetto, troppo compresso o troppo grande",
-      "encrypted": "protetto da password",
-      "other": "non utilizzabile"
     },
     "mapping": {
       "title": "Controlla le colonne",
@@ -2895,7 +2886,7 @@
       "sending": "Invio…",
       "errors": {
         "recommendation_required": "Scegli un'indicazione per la prossima fase.",
-        "answers_required": "Scrivi almeno una risposta.",
+        "answers_required": "Rispondi alle domande obbligatorie.",
         "answer_too_long": "Una risposta è troppo lunga: al massimo {max} caratteri."
       },
       "done": {

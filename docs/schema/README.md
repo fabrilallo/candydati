@@ -1,8 +1,8 @@
 # Schema pubblici
 
-- `job-content.v1.json`: schema JSON (draft 2020-12) del contenuto di un annuncio di lavoro, versione 1 (PLAN §5.3).
+- `job-content.v1.json`: schema JSON (draft 2020-12) del contenuto di un annuncio di lavoro, versione 1 (PRODUCT.md §4.4).
   Descrive solo la forma dei dati; è lo stesso schema Zod usato da API, feed, import ed export.
-- `candidate-export.v1.json`: schema JSON del file `candidate.json` dell'export di un candidato e dell'export dell'organizzazione (PLAN §7): anagrafica, candidature con consensi, messaggi, estrazione dal CV e note. Le date sono stringhe ISO 8601; i CV originali sono nello ZIP accanto al file e vi si fa riferimento con `applications[].cv.path`. Si rigenera con lo stesso comando.
+- `candidate-export.v1.json`: schema JSON del file `candidate.json` dell'export di un candidato e dell'export dell'organizzazione (PRODUCT.md §6): anagrafica, candidature con consensi, messaggi, estrazione dal CV e note. Le date sono stringhe ISO 8601; i CV originali sono nello ZIP accanto al file e vi si fa riferimento con `applications[].cv.path`. Si rigenera con lo stesso comando.
 - Le regole di pubblicazione del §5.1 (ruolo, RAL, modalità di lavoro, fasi, responsabilità, requisiti) non sono nel file:
   le applica `checkPublishable` di `@tt/domain` sopra la forma.
 - Per rigenerarlo dopo una modifica allo schema: `pnpm --filter @tt/domain schema` (compila e scrive questo file).

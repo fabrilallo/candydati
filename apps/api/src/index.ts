@@ -2,7 +2,7 @@ import { createDb, runMigrations } from '@tt/db';
 import { createS3FileStorage } from '@tt/providers';
 import { PgBoss } from 'pg-boss';
 import { loadEnv } from './config/env.js';
-import { createPgBossQueue } from './queue/pg-boss-queue.js';
+import { createPgBossQueue } from '@tt/providers';
 import { buildServer } from './server.js';
 
 const PG_BOSS_SCHEMA = 'pgboss';

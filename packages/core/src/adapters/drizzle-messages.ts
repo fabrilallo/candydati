@@ -19,14 +19,13 @@ export function createDrizzleMessages(db: DbExecutor): MessageRepository {
         throw error;
       }
     },
-    async save(value) {
+    async transition(organizationId, id, from, patch) {
       const [row] = await db
         .update(message)
-        .set(value)
-        .where(and(eq(message.organizationId, value.organizationId), eq(message.id, value.id)))
+        .set(patch)
+        .where(and(eq(message.organizationId, organizationId), eq(message.id, id), eq(message.status, from)))
         .returning();
-      if (!row) throw new Error('message not found');
-      return row;
+      return row ?? null;
     },
     findById: (organizationId, id) => one(and(eq(message.organizationId, organizationId), eq(message.id, id))),
     findByInboundMessageId: (organizationId, inboundMessageId) =>

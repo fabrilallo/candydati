@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ConflictError } from '../errors.js';
 import { createInMemoryOutbox } from './in-memory-automation.js';
+import { createInMemoryJobRepository } from './in-memory-jobs.js';
 import {
   buildApplication,
   buildCandidate,
@@ -52,7 +53,7 @@ describe('in-memory candidate repositories', () => {
 
   it('roll back the whole intake transaction when the work throws', async () => {
     const store = createCandidateStore();
-    const intake = createInMemoryApplicationIntake(store, createInMemoryAuditLog(), createInMemoryOutbox());
+    const intake = createInMemoryApplicationIntake(store, createInMemoryAuditLog(), createInMemoryOutbox(), createInMemoryJobRepository());
     await expect(
       intake.run(async (repositories) => {
         await repositories.candidates.create(buildCandidate());

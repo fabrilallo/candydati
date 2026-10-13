@@ -1,8 +1,10 @@
-import { computeResponseDueAt, pipelineStagesOf } from '@tt/domain';
+import { computeResponseDueAt, pipelineStagesOf, type Application } from '@tt/domain';
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
 import { enqueueAutomations } from '../automations/enqueue.js';
-import { toAuditActor } from '../../actor.js';
+import { toAuditActor, type Actor } from '../../actor.js';
+import type { CandidateDeps } from '../../candidate-ports.js';
+import { afterCommitOrNow, baseDeps } from '../../transaction.js';
 import { trackStageEntry } from '../reports/tracking.js';
 import { requestFeedbackOnStageEntry } from '../feedback/request-on-stage-entry.js';
 import { requireJob } from '../jobs/shared.js';
@@ -10,6 +12,25 @@ import { recordEvent } from '../webhooks/record-event.js';
 import { defineCandidateUseCase } from './define.js';
 import { loadCardView, requireApplication } from './shared.js';
 import type { MoveApplicationResult } from './views.js';
+
+/** After the commit, with the dependencies outside the transaction: emails to interviewers never go out for a rolled back move. */
+async function requestFeedbackAfterCommit(deps: CandidateDeps, application: Application, actor: Actor): Promise<void> {
+  const base = baseDeps(deps);
+  const feedback = base.feedback;
+  if (!feedback) return;
+  await afterCommitOrNow(deps, async () => {
+    await requestFeedbackOnStageEntry(
+      { ...base, ...feedback },
+      {
+        organizationId: application.organizationId,
+        applicationId: application.id,
+        stageId: application.stageId,
+        actor: toAuditActor(actor),
+        requestedBy: actor.onBehalfOfUserId ?? actor.id ?? 'system',
+      },
+    );
+  });
+}
 
 /** Between the stages of the job's declared process, only while the application is open. Restarts the response clock. */
 export const moveApplication = defineCandidateUseCase({
@@ -30,9 +51,9 @@ export const moveApplication = defineCandidateUseCase({
     }
     if (application.stageId === input.stageId) throw new ValidationError([{ path: 'stageId', message: 'already_in_stage' }]);
     const now = deps.now();
-    // A move starts a new stage and a new promise: the clock restarts and "answered" is reset.
-    const saved = await deps.applications.save({
-      ...application,
+    // A move starts a new stage and a new promise: the clock restarts and "answered" is reset. Guarded on the stage it
+    // was read in: a concurrent decision or move wins and this one is refused, never written over it.
+    const saved = await deps.applications.transition(actor.organizationId, application.id, { stageId: application.stageId }, {
       stageId: input.stageId,
       stageChangedAt: now,
       updatedAt: now,
@@ -47,18 +68,7 @@ export const moveApplication = defineCandidateUseCase({
       to: saved.stageId,
     });
     await enqueueAutomations(deps, saved.organizationId, saved.id, saved.stageId);
-    if (deps.feedback) {
-      await requestFeedbackOnStageEntry(
-        { ...deps, ...deps.feedback },
-        {
-          organizationId: saved.organizationId,
-          applicationId: saved.id,
-          stageId: saved.stageId,
-          actor: toAuditActor(actor),
-          requestedBy: actor.onBehalfOfUserId ?? actor.id ?? 'system',
-        },
-      );
-    }
+    await requestFeedbackAfterCommit(deps, saved, actor);
     return { ...(await loadCardView(deps, saved)), from: application.stageId };
   },
 });

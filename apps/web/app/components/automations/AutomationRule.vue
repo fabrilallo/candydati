@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PencilIcon, Trash2Icon } from '@lucide/vue'
 import type { RuleWords } from '@/lib/automation-view'
-import type { AutomationRuleDto } from '@/lib/phase4-contract'
+import type { AutomationRuleDto } from '@tt/domain'
 import { Button } from '@/components/ui/button'
 
 /** One rule as a sentence, its author, a switch to pause it, edit and delete. */

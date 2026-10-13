@@ -1,15 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import {
-  createDrizzleApplicationCounts,
-  createDrizzleAuditLog,
-  createDrizzleAutomationRules,
-  createDrizzleOutbox,
-  createDrizzleJobTemplates,
-  createDrizzleJobs,
-  createDrizzleOrganizationDirectory,
-  createDrizzlePrivacyNotices,
-  createDrizzleReports,
+  createDrizzleUnitOfWork,
+  type DrizzleUnitOfWork,
   type AuditLogRepository,
+  type CoreDeps,
   type ReportDeps,
   type AutomationRuleDeps,
   type NotificationDeps,
@@ -91,6 +85,8 @@ export interface AppContext {
   readonly env: Env;
   readonly auth: Auth;
   readonly auditLog: AuditLogRepository;
+  /** The audit log and the unit of work: what a use case with no other dependency needs. */
+  readonly core: CoreDeps;
   readonly userNames: UserNameLookup;
   /** Bearer API key when present (cookies ignored), otherwise the session. */
   readonly resolveActor: (request: FastifyRequest) => Promise<Actor>;
@@ -139,17 +135,22 @@ export interface AppContextDeps {
   readonly sender: MessageSender;
   readonly identity: EmailIdentity;
   readonly onReceiptError: (error: unknown) => void;
+  /** A side effect that failed after its transaction committed (a task not queued). Defaults to `onReceiptError`. */
+  readonly onAfterCommitError?: ((error: unknown) => void) | undefined;
   /** Distribution channels beyond the built-in feed: none by default, hosted deployments register theirs. */
   readonly distributionChannels?: readonly DistributionChannel[] | undefined;
   /** "Now" of the reports (open and overdue promises, job age). The real clock unless a test fixes it. */
   readonly reportClock?: (() => Date) | undefined;
 }
 
-export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, distributionChannels, reportClock }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, reportClock }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
-  const auditLog = createDrizzleAuditLog(db);
-  const auth = createAuth({ env, db, auditLog, emailSender });
-  const messaging = createMessagingDeps({ env, db, auditLog, queue, sender, identity, onReceiptError });
+  // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
+  const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError);
+  const { auditLog } = uow.repositories;
+  const core: CoreDeps = { auditLog, transaction: uow.transaction };
+  const auth = createAuth({ env, db, core, emailSender });
+  const messaging = createMessagingDeps({ env, uow, queue, sender, identity, onReceiptError });
   const resolveFromHeaders = createActorResolver({
     getSession: async (headers) => {
       const result = await auth.api.getSession({ headers });
@@ -159,7 +160,7 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     },
     findRole: (userId, organizationId) => findMemberRole(db, userId, organizationId),
   });
-  const apiKeyDeps = createApiKeyDeps(db, auditLog);
+  const apiKeyDeps = createApiKeyDeps(uow);
   const limits = rateLimit ?? DEFAULT_RATE_LIMIT;
   const actors = createRequestActors({
     session: async (request) => resolveFromHeaders(fromNodeHeaders(request.headers)),
@@ -167,28 +168,28 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     limiter: createKeyRateLimiter({ max: limits.apiKeyMax ?? env.API_KEY_RATE_LIMIT ?? DEFAULT_API_KEY_MAX, windowMs: 60_000 }),
   });
   const hr = createHrDeps({
-    db,
-    auditLog,
+    uow,
     files,
     sender,
     config: toMessagingConfig(env.platform, env.email),
     onFeedbackMailError: (error) => onReceiptError(error),
   });
-  const phase2 = createPhase2Deps({ db, auditLog, files, queue, receipts: messaging.receipts, feedback: hr.stageEntry });
-  const phase5 = createPhase5Deps({ db, auditLog, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipWriterFactory, feedbackRecords: hr.feedbackRecords });
-  const jobDeps = createJobDeps(db, auditLog, adQuality, env.platform.adQualityThreshold, hr);
-  const distributionDeps = createDistributionDeps({ db, auditLog, publicBaseUrl: env.platform.url, channels: distributionChannels });
+  const phase2 = createPhase2Deps({ uow, files, queue, receipts: messaging.receipts, feedback: hr.stageEntry });
+  const phase5 = createPhase5Deps({ uow, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipWriterFactory, feedbackRecords: hr.feedbackRecords });
+  const jobDeps = createJobDeps(uow, adQuality, env.platform.adQualityThreshold);
+  const distributionDeps = createDistributionDeps({ uow, publicBaseUrl: env.platform.url, channels: distributionChannels });
   return {
     env,
     auth,
     auditLog,
+    core,
     userNames: createUserNameLookup(db),
     ...actors,
     apiKeyDeps,
     ...phase2,
     ...phase5,
-    ...createImportDeps({ db, auditLog, files, queue }),
-    ...createPhase4Deps({ db, auditLog, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
+    ...createImportDeps({ uow, files, queue }),
+    ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     submitDeps: {
       ...phase2.submitDeps,
       dailyCaps: {
@@ -206,24 +207,26 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
     rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
     jobDeps,
-    reportDeps: { auditLog, jobs: jobDeps.jobs, reports: createDrizzleReports(db), now: reportClock ?? (() => new Date()) },
+    reportDeps: { auditLog, transaction: uow.transaction, jobs: jobDeps.jobs, reports: uow.repositories.reports, now: reportClock ?? (() => new Date()) },
     distributionDeps,
     publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
   };
 }
 
-function createJobDeps(db: Db, auditLog: AuditLogRepository, adQuality: AdQualityAnalyzer, adQualityThreshold: number, hr: Pick<HrWiring, 'approvals' | 'organizationSettings'>): JobDeps {
+function createJobDeps(uow: DrizzleUnitOfWork, adQuality: AdQualityAnalyzer, adQualityThreshold: number): JobDeps {
+  const r = uow.repositories;
   return {
-    auditLog,
-    jobs: createDrizzleJobs(db),
-    jobTemplates: createDrizzleJobTemplates(db),
-    applicationCounts: createDrizzleApplicationCounts(db),
-    organizations: createDrizzleOrganizationDirectory(db),
-    privacyNotices: createDrizzlePrivacyNotices(db),
-    automationRules: createDrizzleAutomationRules(db),
-    outbox: createDrizzleOutbox(db),
-    approvals: hr.approvals,
-    organizationSettings: hr.organizationSettings,
+    auditLog: r.auditLog,
+    transaction: uow.transaction,
+    jobs: r.jobs,
+    jobTemplates: r.jobTemplates,
+    applicationCounts: r.applicationCounts,
+    organizations: r.organizations,
+    privacyNotices: r.privacyNotices,
+    automationRules: r.automationRules,
+    outbox: r.outbox,
+    approvals: r.approvals,
+    organizationSettings: r.organizationSettings,
     adQuality,
     adQualityThreshold,
     newId: randomUUID,

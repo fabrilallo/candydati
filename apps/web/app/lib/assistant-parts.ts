@@ -1,4 +1,4 @@
-import { AGENT_NOT_CONFIGURED_CODES, draftJobOutputSchema, draftMessageOutputSchema, isAgentTool, type DraftJobOutput, type DraftMessageOutput } from './phase6-contract'
+import { AGENT_DISABLED_CODE, draftJobOutputSchema, draftMessageOutputSchema, isAgentToolName, type DraftJobOutput, type DraftMessageOutput } from '@tt/domain'
 
 /**
  * From the parts of an AI SDK UI message to what the assistant panel shows: text, compact tool steps ("Ho letto
@@ -99,7 +99,7 @@ export const assistantItems = (message: MessageLike): readonly AssistantItem[] =
 
 export const stepLabelKey = (step: Step): string => {
   if (step.state === 'failed') return 'assistant.steps.failed'
-  return `assistant.steps.${isAgentTool(step.tool) ? step.tool : 'generic'}.${step.state}`
+  return `assistant.steps.${isAgentToolName(step.tool) ? step.tool : 'generic'}.${step.state}`
 }
 
 const codeIn = (text: string): string | null => {
@@ -115,5 +115,5 @@ const codeIn = (text: string): string | null => {
 export const isAgentNotConfigured = (error: unknown): boolean => {
   if (!(error instanceof Error)) return false
   const code = codeIn(error.message) ?? error.message.trim()
-  return AGENT_NOT_CONFIGURED_CODES.includes(code)
+  return code === AGENT_DISABLED_CODE
 }

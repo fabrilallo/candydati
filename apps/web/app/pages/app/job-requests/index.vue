@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ClipboardListIcon, PlusIcon } from '@lucide/vue'
-import { canPhase9 } from '@/lib/phase9-contract'
 import { can } from '@/lib/permissions-ui'
 import { Button } from '@/components/ui/button'
 
@@ -19,7 +18,7 @@ const role = computed(() => viewer.value?.role ?? null)
           <Button v-if="can(role, 'job:create')" as-child><NuxtLink to="/app/job-requests/new"><PlusIcon aria-hidden="true" />{{ t('jobRequests.new') }}</NuxtLink></Button>
         </template>
       </PageHeader>
-      <ApprovalSetting v-if="canPhase9(role, 'job:approve')" />
+      <ApprovalSetting v-if="can(role, 'job:approve')" />
       <JobRequestList />
     </div>
   </AppPage>

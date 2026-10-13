@@ -22,7 +22,7 @@ import {
 
 const NOW = '2026-10-13T10:00:00.000Z'
 const content = { title: 'Dev', language: 'it', salary: { currency: 'EUR', period: 'year' }, location: {}, process: [], summary: '', responsibilities: [], requirements: { mustHave: [], niceToHave: [] }, technologies: [], benefits: [], growth: '', workLifeBalance: '', culture: '' }
-const job = { id: 'j1', slug: 'dev-abc', status: 'draft', content, quality: null, publishIssues: [{ path: 'role', rule: 'required' }], createdAt: NOW, updatedAt: NOW, publishedAt: null, closedAt: null }
+const job = { id: 'j1', slug: 'dev-abc', status: 'draft', content, quality: null, publishIssues: [{ path: 'role', rule: 'required' }], complianceWarnings: [], createdAt: NOW, updatedAt: NOW, publishedAt: null, closedAt: null }
 const scores = Object.fromEntries(['selection_process', 'role_requirements', 'work_mode', 'salary_transparency', 'benefits', 'growth', 'work_life_balance', 'responsibilities_clarity', 'culture', 'technologies'].map((k) => [k, 0.5]))
 const assessment = { report: { scores, total: 5, vaguePhrases: [], improvements: ['x'], source: 'rules' }, threshold: 6, belowThreshold: true }
 
@@ -149,10 +149,10 @@ describe('public pages', () => {
   })
 
   it('validates the job page and refuses content that is not publishable', async () => {
-    const page = await fetchPublicJob(send(ok({ organization, job: { slug: 'dev', content: published, publishedAt: NOW, updatedAt: NOW } })), 'acme', 'dev')
+    const page = await fetchPublicJob(send(ok({ organization, job: { slug: 'dev', content: published, publishedAt: NOW, updatedAt: NOW }, privacyNotice: null })), 'acme', 'dev')
     expect(page.job.content.salary.min).toBe(40000)
     const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    await expect(fetchPublicJob(send(ok({ organization, job: { slug: 'dev', content, publishedAt: NOW, updatedAt: NOW } })), 'acme', 'dev')).rejects.toMatchObject({ code: 'invalid_response' })
+    await expect(fetchPublicJob(send(ok({ organization, job: { slug: 'dev', content, publishedAt: NOW, updatedAt: NOW }, privacyNotice: null })), 'acme', 'dev')).rejects.toMatchObject({ code: 'invalid_response' })
     spy.mockRestore()
   })
 

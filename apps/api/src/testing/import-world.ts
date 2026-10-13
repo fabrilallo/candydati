@@ -1,17 +1,7 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import {
   commitImport,
-  createDrizzleApplications,
-  createDrizzleAuditLog,
-  createDrizzleCandidates,
-  createDrizzleConversations,
-  createDrizzleImportAnalyses,
-  createDrizzleImportBatches,
-  createDrizzleImportCommit,
-  createDrizzleImportItems,
-  createDrizzleJobs,
-  createDrizzleMessages,
-  createDrizzleOrganizationDirectory,
+  createDrizzleUnitOfWork,
   type ImportCommitDeps,
 } from '@tt/core';
 import { newConversationToken, runImportAnalysis, sniffCv, toMessagingConfig } from '@tt/providers';
@@ -23,24 +13,26 @@ import type { TestUser } from './client.js';
 
 /** What the worker does for the import tasks, driven by hand against the test database and the in-memory queue. */
 export function importWorkerDeps(t: TestApp): ImportCommitDeps {
-  const { db } = t.handle;
+  const uow = createDrizzleUnitOfWork(t.handle.db);
+  const r = uow.repositories;
   const env = testEnv();
   return {
-    auditLog: createDrizzleAuditLog(db),
-    jobs: createDrizzleJobs(db),
-    candidates: createDrizzleCandidates(db),
-    applications: createDrizzleApplications(db),
-    imports: createDrizzleImportBatches(db),
-    importItems: createDrizzleImportItems(db),
-    importAnalyses: createDrizzleImportAnalyses(db),
+    auditLog: r.auditLog,
+    transaction: uow.transaction,
+    jobs: r.jobs,
+    candidates: r.candidates,
+    applications: r.applications,
+    imports: r.imports,
+    importItems: r.importItems,
+    importAnalyses: r.importAnalyses,
     files: t.files,
     queue: t.queue,
     newId: randomUUID,
     now: () => new Date(),
-    commit: createDrizzleImportCommit(db),
-    organizations: createDrizzleOrganizationDirectory(db),
+    commit: r.commit,
+    organizations: r.organizations,
     cvSniffer: sniffCv,
-    mail: { conversations: createDrizzleConversations(db), messages: createDrizzleMessages(db), config: toMessagingConfig(env.platform, env.email), newToken: newConversationToken },
+    mail: { conversations: r.conversations, messages: r.messages, config: toMessagingConfig(env.platform, env.email), newToken: newConversationToken },
     newSecret: () => randomBytes(24).toString('base64url'),
     hash: (secret) => createHash('sha256').update(secret).digest('hex'),
   };

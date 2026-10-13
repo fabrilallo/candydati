@@ -1,4 +1,4 @@
-import type { AuditLogRepository } from '@tt/core';
+import type { CoreDeps } from '@tt/core';
 import type { Db } from '@tt/db';
 import { schema } from '@tt/db';
 import { CREATOR_ROLE, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@tt/domain';
@@ -18,7 +18,8 @@ export const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
 export interface AuthDependencies {
   readonly env: Env;
   readonly db: Db;
-  readonly auditLog: AuditLogRepository;
+  /** Audit log and unit of work for the organization hooks. */
+  readonly core: CoreDeps;
   readonly emailSender: EmailSender;
 }
 
@@ -26,7 +27,7 @@ export interface AuthDependencies {
  * Email + password, organizations with the domain's roles, and an audit event for every organization action.
  * The auth base URL is the WEB origin: the browser reaches this api through the web app's /api/** proxy.
  */
-export function createAuth({ env, db, auditLog, emailSender }: AuthDependencies) {
+export function createAuth({ env, db, core, emailSender }: AuthDependencies) {
   const { ac, roles } = buildAccessControl();
   // The hooks need the session of the request being served, which only exists once `auth` is built.
   let resolveSessionUser: SessionUserResolver = async () => null;
@@ -58,7 +59,7 @@ export function createAuth({ env, db, auditLog, emailSender }: AuthDependencies)
             role: data.role,
             acceptUrl: acceptInvitationUrl(env.platform.url, data.id),
           }),
-        organizationHooks: { ...roleGuardHooks, ...createAuditHooks({ auditLog, lookups }) },
+        organizationHooks: { ...roleGuardHooks, ...createAuditHooks({ core, lookups }) },
       }),
     ],
   });

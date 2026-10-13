@@ -18,11 +18,11 @@ if (import.meta.server) useResponseHeader('cache-control').value = 'private, no-
 
 const visitor = useVisitorTranslate()
 const feedback = data.value?.kind === 'ok' ? data.value.data : null
-const x: Translate = feedback ? await useAdTranslate(feedback.language as 'it' | 'en') : visitor
+const x: Translate = feedback ? await useAdTranslate(feedback.language) : visitor
 // A link already used shows the same page as a second submission: nothing more to write.
-const failure = ref<FeedbackFailure | null>(data.value?.kind === 'failed' ? data.value.failure : feedback ? (feedback.submitted ? 'used' : null) : 'unavailable')
+const failure = ref<FeedbackFailure | null>(data.value?.kind === 'failed' ? data.value.failure : feedback ? (feedback.submission !== null ? 'used' : null) : 'unavailable')
 const candidate = feedback ? `${feedback.candidate.firstName} ${feedback.candidate.lastName}`.trim() : ''
-const stageName = feedback ? (feedback.stage.label ?? (feedback.stage.type ? x(`taxonomy.stageTypes.${feedback.stage.type}`) : '')) : ''
+const stageName = feedback?.stage.label ?? ''
 const title = feedback ? x('feedback.public.metaTitle', { candidate }) : visitor(`feedback.public.${failure.value ?? 'invalid'}.title`)
 
 useSeoMeta({ title, robots: 'noindex, nofollow' })
@@ -38,15 +38,15 @@ useHead({ htmlAttrs: feedback ? { lang: feedback.language } : {}, meta: [{ name:
   <article v-else-if="feedback" class="grid max-w-2xl gap-8" data-testid="feedback-page">
     <header class="grid gap-4">
       <div class="flex items-center gap-3">
-        <span class="grid size-10 place-items-center rounded-lg bg-accent text-sm font-semibold tracking-tight text-accent-foreground" aria-hidden="true">{{ initials(feedback.organization.name) }}</span>
-        <p class="text-[0.9375rem] font-medium">{{ feedback.organization.name }}</p>
+        <span class="grid size-10 place-items-center rounded-lg bg-accent text-sm font-semibold tracking-tight text-accent-foreground" aria-hidden="true">{{ initials(feedback.organizationName) }}</span>
+        <p class="text-[0.9375rem] font-medium">{{ feedback.organizationName }}</p>
       </div>
       <h1 class="text-[1.75rem] leading-tight font-semibold tracking-tight sm:text-3xl">{{ x('feedback.public.title') }}</h1>
       <p v-if="feedback.interviewerName" class="text-base">{{ x('feedback.public.hello', { name: feedback.interviewerName }) }}</p>
-      <p class="text-base text-pretty" data-testid="feedback-intro">{{ x('feedback.public.intro', { organization: feedback.organization.name, candidate, job: feedback.job.title }) }}</p>
+      <p class="text-base text-pretty" data-testid="feedback-intro">{{ x('feedback.public.intro', { organization: feedback.organizationName, candidate, job: feedback.jobTitle }) }}</p>
       <dl class="grid gap-3 rounded-xl border bg-card p-4 text-[0.9375rem]">
         <div class="grid gap-0.5"><dt class="text-sm text-muted-foreground">{{ x('feedback.public.candidate') }}</dt><dd class="font-medium" data-testid="feedback-candidate">{{ candidate }}</dd></div>
-        <div class="grid gap-0.5"><dt class="text-sm text-muted-foreground">{{ x('feedback.public.job') }}</dt><dd class="font-medium" data-testid="feedback-job">{{ feedback.job.title }}</dd></div>
+        <div class="grid gap-0.5"><dt class="text-sm text-muted-foreground">{{ x('feedback.public.job') }}</dt><dd class="font-medium" data-testid="feedback-job">{{ feedback.jobTitle }}</dd></div>
         <div v-if="stageName" class="grid gap-0.5"><dt class="text-sm text-muted-foreground">{{ x('feedback.public.stage') }}</dt><dd class="font-medium" data-testid="feedback-stage">{{ stageName }}</dd></div>
         <div v-if="feedback.stage.note" class="grid gap-0.5"><dt class="text-sm text-muted-foreground">{{ x('feedback.public.stageNote') }}</dt><dd class="text-pretty" data-testid="feedback-stage-note">{{ feedback.stage.note }}</dd></div>
       </dl>

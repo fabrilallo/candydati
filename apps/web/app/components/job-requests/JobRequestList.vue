@@ -11,6 +11,7 @@ const { t, locale } = useI18n()
 const { viewer } = useViewer()
 const role = computed(() => viewer.value?.role ?? null)
 const requests = useJobRequests()
+const team = useMembers()
 const emptyKey = computed(() => requestsEmptyKey(role.value))
 </script>
 
@@ -38,7 +39,7 @@ const emptyKey = computed(() => requestsEmptyKey(role.value))
             <JobRequestStatusPill :status="item.status" />
           </p>
           <p class="flex flex-wrap gap-x-2.5 gap-y-1 text-sm text-muted-foreground [&>*+*]:before:mr-2.5 [&>*+*]:before:text-input [&>*+*]:before:content-['|']">
-            <span v-if="item.requestedBy?.name">{{ t('jobRequests.list.by', { name: item.requestedBy.name }) }}</span>
+            <span v-if="team.nameOf(item.requestedBy)">{{ t('jobRequests.list.by', { name: team.nameOf(item.requestedBy) }) }}</span>
             <span class="figure">{{ formatDate(item.createdAt, locale) }}</span>
             <span class="figure">{{ t('jobRequests.list.headcount', { count: item.headcount }, item.headcount) }}</span>
             <span v-if="requestBudget(item, locale)" class="figure">{{ requestBudget(item, locale) }}</span>

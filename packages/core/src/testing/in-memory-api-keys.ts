@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { ApiKey, Role } from '@tt/domain';
 import type { ApiKeyRepository, MemberRoleLookup } from '../api-key-ports.js';
+import { cell } from './in-memory-transaction.js';
 
 export interface InMemoryApiKeys extends ApiKeyRepository {
   snapshot(): readonly ApiKey[];
@@ -9,13 +10,13 @@ export interface InMemoryApiKeys extends ApiKeyRepository {
 }
 
 export function createInMemoryApiKeys(initial: readonly ApiKey[] = []): InMemoryApiKeys {
-  let rows: readonly ApiKey[] = [...initial];
+  const rows = cell<readonly ApiKey[]>([...initial]);
   const replace = (key: ApiKey) => {
-    rows = rows.map((row) => (row.organizationId === key.organizationId && row.id === key.id ? key : row));
+    rows.set(rows.get().map((row) => (row.organizationId === key.organizationId && row.id === key.id ? key : row)));
   };
   return {
     async create(key) {
-      rows = [...rows, key];
+      rows.set([...rows.get(), key]);
       return key;
     },
     async save(key) {
@@ -23,18 +24,18 @@ export function createInMemoryApiKeys(initial: readonly ApiKey[] = []): InMemory
       return key;
     },
     async findById(organizationId, id) {
-      return rows.find((row) => row.organizationId === organizationId && row.id === id) ?? null;
+      return rows.get().find((row) => row.organizationId === organizationId && row.id === id) ?? null;
     },
     async findByPrefix(prefix) {
-      return rows.find((row) => row.prefix === prefix) ?? null;
+      return rows.get().find((row) => row.prefix === prefix) ?? null;
     },
     async list(organizationId) {
-      return rows.filter((row) => row.organizationId === organizationId).toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+      return rows.get().filter((row) => row.organizationId === organizationId).toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     },
     async touch(organizationId, id, at) {
-      rows = rows.map((row) => (row.organizationId === organizationId && row.id === id ? { ...row, lastUsedAt: at } : row));
+      rows.set(rows.get().map((row) => (row.organizationId === organizationId && row.id === id ? { ...row, lastUsedAt: at } : row)));
     },
-    snapshot: () => rows,
+    snapshot: () => rows.get(),
     overwrite: replace,
   };
 }

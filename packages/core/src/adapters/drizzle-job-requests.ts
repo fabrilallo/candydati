@@ -1,4 +1,4 @@
-import { and, count, desc, eq, schema, sql, type Db } from '@tt/db';
+import { and, count, desc, eq, schema, sql } from '@tt/db';
 import type { JobApproval, JobRequest } from '@tt/domain';
 import type {
   JobApprovalRepository,
@@ -137,7 +137,7 @@ export function createDrizzleJobApprovals(db: DbExecutor): JobApprovalRepository
  * The last activity of a published job: the latest of its own publication and update and of its applications' creation,
  * stage change and closing (a move or a decision).
  */
-export function createDrizzleStaleJobs(db: Db): StaleJobRepository {
+export function createDrizzleStaleJobs(db: DbExecutor): StaleJobRepository {
   const jobs = createDrizzleJobs(db);
   return {
     async listStale(cutoff, organizationId) {

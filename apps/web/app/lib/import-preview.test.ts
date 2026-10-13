@@ -1,8 +1,8 @@
+import type { ImportItemView } from '@/lib/import-item-view'
 import { describe, expect, it } from 'vitest'
 import { confidenceCounts, filterItems, initialSelection, itemProblems, previewSummary, selectionChanges, setByConfidence, toggleItem } from './import-preview'
-import type { ImportItemDto } from './phase8-contract'
 
-const item = (id: string, over: Partial<ImportItemDto> = {}): ImportItemDto => ({
+const item = (id: string, over: Partial<ImportItemView> = {}): ImportItemView => ({
   id,
   included: true,
   confidence: 'high',

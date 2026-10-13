@@ -16,7 +16,7 @@ const roleLine = computed(() => {
   return [
     props.role ? x(`taxonomy.roles.${props.role}`) : '',
     props.seniority ? x(`taxonomy.seniority.${props.seniority}`) : '',
-    props.publishedAt ? x('public.published', { date: formatDate(props.publishedAt, language, 'UTC') }) : '',
+    props.publishedAt ? x('public.published', { date: formatDate(props.publishedAt, language) }) : '',
   ].filter((part) => part !== '')
 })
 </script>

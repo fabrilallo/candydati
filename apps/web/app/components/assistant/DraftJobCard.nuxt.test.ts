@@ -25,7 +25,7 @@ const Candidate = defineComponent({
 })
 
 const mounted: { unmount: () => void }[] = []
-const draft = { content: completeContent, jobId: null }
+const draft = { proposal: completeContent, saved: false as const, publishIssues: [] }
 beforeEach(() => {
   form.value = emptyForm('it')
   readOnly.value = false

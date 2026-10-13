@@ -1,21 +1,10 @@
 import { z } from 'zod'
 import { callApi } from './api-call'
-import { jobSchema } from './job-api-schemas'
 import type { JobApiRequest } from './job-api'
-import {
-  APPROVAL_SETTINGS_PATH,
-  approvalSettingsSchema,
-  approveJobRequestPath,
-  convertJobRequestPath,
-  JOB_REQUESTS_PATH,
-  jobRequestPath,
-  jobRequestSchema,
-  rejectJobRequestPath,
-  type JobRequestDto,
-  type JobRequestInput,
-} from './phase9-contract'
+import { approvalSettingsSchema, jobRequestSchema, jobSchema, type JobRequestDto, type JobRequestInput } from '@tt/domain'
+import { APPROVAL_SETTINGS_PATH, approveJobRequestPath, convertJobRequestPath, JOB_REQUESTS_PATH, jobRequestPath, rejectJobRequestPath } from './api-paths'
 
-/** Job requests and the approval setting (phase 9 contract D, HTTP). */
+/** Job requests and the approval setting. */
 export const listJobRequests = async (request: JobApiRequest): Promise<readonly JobRequestDto[]> => (await callApi(request, JOB_REQUESTS_PATH, z.array(jobRequestSchema))).data
 
 export const getJobRequest = async (request: JobApiRequest, id: string): Promise<JobRequestDto> => (await callApi(request, jobRequestPath(id), jobRequestSchema)).data

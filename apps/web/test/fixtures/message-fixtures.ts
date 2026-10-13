@@ -1,4 +1,4 @@
-import type { EmailSettingsDto, EmailTemplateDto, MessageDto } from '../../app/lib/message-schemas'
+import type { EmailSettingsDto, EmailTemplateDto, MessageDto } from '@tt/domain'
 
 export const message = (id: string, overrides: Partial<MessageDto> = {}): MessageDto => ({
   id,

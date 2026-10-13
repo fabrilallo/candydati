@@ -1,5 +1,4 @@
-import { rate as rateOf, REPORT_MIN_SAMPLE, type FunnelStageDto, type FunnelStageType, type Rate, type ReportsDto } from '@tt/domain'
-import type { ReportsView } from './phase10-contract'
+import { type ReportsView, rate as rateOf, REPORT_MIN_SAMPLE, type FunnelStageDto, type FunnelStageType, type Rate, type ReportsDto    } from '@tt/domain';
 
 /** Pure view models of the reports page. Every rate travels with its denominator; nothing here invents a figure. */
 

@@ -3,7 +3,7 @@ import { errorKeyOf } from '@/lib/auth-errors'
 import { listDeliveries } from '@/lib/automation-api'
 import { deliveryTone } from '@/lib/automation-view'
 import { formatDateTime } from '@/lib/format'
-import type { WebhookDeliveryDto } from '@/lib/phase4-contract'
+import type { WebhookDeliveryDto } from '@tt/domain'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -23,8 +23,8 @@ const load = async (): Promise<void> => {
 }
 onMounted(load)
 watch(() => props.reloadKey, load)
-const BADGES = { success: 'success', destructive: 'destructive', neutral: 'secondary' } as const
-const eventLabel = (event: string | null): string => (event ? t(`webhooks.events.${event.replace('.', '_')}`) : '')
+const BADGES = { success: 'success', destructive: 'destructive' } as const
+const eventLabel = (event: string): string => t(`webhooks.events.${event.replace('.', '_')}`)
 </script>
 
 <template>
@@ -35,7 +35,7 @@ const eventLabel = (event: string | null): string => (event ? t(`webhooks.events
     <ul v-else class="grid gap-2">
       <li v-for="delivery in deliveries" :key="delivery.id" class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm" data-testid="webhook-delivery">
         <Badge :variant="BADGES[deliveryTone(delivery)]" class="figure">{{ delivery.responseCode ?? delivery.error ?? t('webhooks.noResponse') }}</Badge>
-        <span class="min-w-0 flex-1 truncate">{{ eventLabel(delivery.eventType) }} <code v-if="delivery.eventType" class="font-mono text-xs text-muted-foreground">{{ delivery.eventType }}</code></span>
+        <span class="min-w-0 flex-1 truncate">{{ eventLabel(delivery.eventType) }} <code class="font-mono text-xs text-muted-foreground">{{ delivery.eventType }}</code></span>
         <span class="figure text-xs text-muted-foreground">{{ t('webhooks.attempt', { n: delivery.attempt }) }}</span>
         <time class="figure text-xs text-muted-foreground" :datetime="delivery.createdAt">{{ formatDateTime(delivery.createdAt, locale) }}</time>
       </li>

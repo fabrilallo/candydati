@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowDownIcon, ArrowLeftIcon } from '@lucide/vue'
-import type { PublicJobPage } from '@/lib/job-api-schemas'
+import type { PublicJobPage } from '@tt/domain'
 import { careersPath } from '@/lib/job-view'
 import { Button } from '@/components/ui/button'
 

@@ -1,9 +1,8 @@
-import type { DataExportDto, ProcessingRecordDto, RetentionOverviewDto, RetentionRunDto, RetentionUpcomingDto } from '../../app/lib/phase5-contract'
+import type { DataExportDto, ProcessingRecordDto, RetentionOverviewDto, RetentionRunDto, RetentionUpcomingDto } from '@tt/domain'
 
 export const upcoming = (id: string, overrides: Partial<RetentionUpcomingDto> = {}): RetentionUpcomingDto => ({
   applicationId: id,
   candidateId: `c-${id}`,
-  jobId: 'j1',
   jobTitle: 'Backend developer',
   candidateName: 'Marta Verdi',
   retentionExpiresAt: '2026-10-25T10:00:00.000Z',
@@ -13,7 +12,6 @@ export const upcoming = (id: string, overrides: Partial<RetentionUpcomingDto> = 
 export const run = (id: string, overrides: Partial<RetentionRunDto> = {}): RetentionRunDto => ({
   id,
   startedAt: '2026-10-13T01:00:00.000Z',
-  finishedAt: '2026-10-13T01:00:05.000Z',
   warned: 2,
   erased: 1,
   ...overrides,
@@ -39,10 +37,7 @@ export const processingRecord = (overrides: Partial<ProcessingRecordDto> = {}): 
   organization: { name: 'Acme', contactEmail: 'privacy@acme.test' },
   privacyNoticeVersion: 3,
   retentionDays: { selection: 365, talent_pool: 730 },
-  providers: [
-    { category: 'hosting', name: 'Hetzner', detail: null },
-    { category: 'model', name: 'mistral/mistral-small', detail: null },
-  ],
+  providers: { storage: 's3', email: 'smtp', model: 'mistral/mistral-small' },
   generatedAt: '2026-10-13T10:00:00.000Z',
   ...overrides,
 })

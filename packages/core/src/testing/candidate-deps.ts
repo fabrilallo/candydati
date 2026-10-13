@@ -27,6 +27,7 @@ import { createInMemoryJobRepository, createInMemoryOrganizationDirectory } from
 import { createInMemoryPrivacyNoticeRepository } from './in-memory-privacy.js';
 import { createInMemoryOutbox, type InMemoryOutbox } from './in-memory-automation.js';
 import { createInMemoryMessageRepository, createMessagingStore, type MessagingStore } from './in-memory-messaging.js';
+import { createInMemoryTransaction } from './in-memory-transaction.js';
 
 /** Everything the Phase 2 use cases may ask for, fully in memory, with a counter-based id generator and a fixed clock. */
 export type TestCandidateDeps = CandidateDeps &
@@ -49,16 +50,18 @@ export function createTestCandidateDeps(overrides: Partial<TestCandidateDeps> = 
   const auditLog = overrides.auditLog ?? createInMemoryAuditLog();
   const messagingStore = overrides.messagingStore ?? createMessagingStore();
   const outbox = overrides.outbox ?? createInMemoryOutbox();
+  const jobs = overrides.jobs ?? createInMemoryJobRepository();
   return {
     auditLog,
     store,
+    transaction: createInMemoryTransaction(),
     messagingStore,
     outbox,
     messages: createInMemoryMessageRepository(messagingStore),
     stageEvents: createInMemoryStageEvents(store),
     promises: createInMemoryResponsePromises(store),
     reports: createInMemoryReports(store),
-    jobs: createInMemoryJobRepository(),
+    jobs,
     organizations: createInMemoryOrganizationDirectory(),
     privacyNotices: createInMemoryPrivacyNoticeRepository(),
     candidates: createInMemoryCandidateRepository(store),
@@ -67,7 +70,7 @@ export function createTestCandidateDeps(overrides: Partial<TestCandidateDeps> = 
     extractions: createInMemoryCvExtractionRepository(store),
     candidateSearch: createInMemoryCandidateSearch(store),
     users: createInMemoryUserDirectory(),
-    intake: createInMemoryApplicationIntake(store, auditLog, outbox),
+    intake: createInMemoryApplicationIntake(store, auditLog, outbox, jobs),
     files: createInMemoryFileStorage(),
     queue: createInMemoryTaskQueue(),
     cvSniffer: fakeCvSniffer,

@@ -37,7 +37,7 @@ const groups = computed(() => groupTasks(tasks.tasks.value ?? [], now.value))
           :task="task"
           :now="now"
           :assignee-name="null"
-          :can-toggle="canManage || task.assigneeId === viewer?.user.id"
+          :can-toggle="canManage || task.assignee.id === viewer?.user.id"
           :busy="tasks.busy.value === task.id"
           show-context
           @toggle="tasks.toggle(task)"

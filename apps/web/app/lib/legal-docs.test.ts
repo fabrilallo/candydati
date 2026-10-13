@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { LEGAL_DOCUMENTS, legalDocLink, providerKey } from './legal-docs'
+import { LEGAL_DOCUMENTS, legalDocLink, providerRows } from './legal-docs'
 
 describe('legal documents', () => {
   it('lists the templates of docs/legal as repository paths', () => {
@@ -15,8 +15,11 @@ describe('legal documents', () => {
     expect(legalDocLink('docs/legal/dpa.md', 'not a url')).toBeNull()
   })
 
-  it('names known provider categories and keeps the others readable', () => {
-    expect(providerKey('model')).toBe('privacyDocs.providers.model')
-    expect(providerKey('crm')).toBeNull()
+  it('lists the configured providers and leaves the model out when none is set', () => {
+    expect(providerRows({ storage: 's3', email: 'smtp', model: null })).toEqual([
+      { key: 'privacyDocs.providers.storage', name: 's3' },
+      { key: 'privacyDocs.providers.email', name: 'smtp' },
+    ])
+    expect(providerRows({ storage: 'local', email: 'resend', model: 'mistral/small' }).at(-1)).toEqual({ key: 'privacyDocs.providers.model', name: 'mistral/small' })
   })
 })

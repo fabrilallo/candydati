@@ -108,6 +108,9 @@ async function storeApplication(deps: SubmitApplicationDeps, repositories: Intak
     givenAt: now,
   };
   const retentionExpiresAt = retentionExpiry(consent, notice);
+  // Re-checked under a share lock: a close waits for this application (and then counts it), or wins and this is refused.
+  const job = await repositories.jobs.lock(organizationId, intake.jobId, 'share');
+  if (!job || job.status !== 'published') throw new NotFoundError('Job not found.');
   const existing = await repositories.candidates.findByEmail(organizationId, form.email);
   if (existing && (await repositories.applications.findOpen(organizationId, intake.jobId, existing.id))) {
     throw new ConflictError('already_applied');

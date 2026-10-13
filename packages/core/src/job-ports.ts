@@ -28,12 +28,36 @@ export interface WeeklyActivity {
 }
 
 /** Every method takes the organization id and filters by it: there is no query without it. */
+export type JobLockMode = 'share' | 'update';
+
+export interface JobContentPatch {
+  readonly content: Job['content'];
+  readonly updatedAt: Date;
+}
+
+export type JobTransition =
+  | { readonly status: 'published'; readonly quality: Job['quality']; readonly publishedAt: Date; readonly updatedAt: Date }
+  | { readonly status: 'closed'; readonly closedAt: Date; readonly updatedAt: Date };
+
 export interface JobRepository {
   /** @throws ConflictError when the slug is already used in the organization. */
   create(job: Job): Promise<Job>;
   findById(organizationId: string, id: string): Promise<Job | null>;
-  /** Full replace by (organizationId, id). */
-  save(job: Job): Promise<Job>;
+  /**
+   * Locks the row until the transaction ends (`FOR SHARE` while an application is added to the job, `FOR UPDATE` while
+   * its status changes), so the two never interleave. Outside a transaction it is a plain read. Null when missing.
+   */
+  lock(organizationId: string, id: string, mode: JobLockMode): Promise<Job | null>;
+  /**
+   * New content, never a new status: written only while the job is still `expectedStatus`.
+   * @throws ConflictError when the status changed meanwhile (published, closed): nothing is written.
+   */
+  updateContent(organizationId: string, id: string, expectedStatus: JobStatus, patch: JobContentPatch): Promise<Job>;
+  /**
+   * The only way a status changes: from `from` to the status in `patch`.
+   * @throws ConflictError when the job is not `from` any more: nothing is written.
+   */
+  transition(organizationId: string, id: string, from: JobStatus, patch: JobTransition): Promise<Job>;
   /** Newest `updatedAt` first. */
   list(query: JobListQuery): Promise<{ readonly items: readonly Job[]; readonly total: number }>;
   /** Published only, newest `publishedAt` first. */

@@ -36,21 +36,17 @@ describe('assistantItems', () => {
   })
 
   it('turns a finished draft_message into a draft card after its step', () => {
-    const output = { applicationId: 'a1', candidate: { firstName: 'Giulia', lastName: 'Neri' }, subject: 'Grazie', body: 'Ciao {{candidate.firstName}}' }
+    const output = { status: 'draft_not_sent', applicationId: 'a1', subject: 'Grazie', body: 'Ciao {{candidate.firstName}}', unknownVariables: [] }
     const items = assistantItems(message([tool('draft_message', 'output-available', output)]))
     expect(items).toEqual([
       { kind: 'steps', steps: [{ id: 'call-draft_message', tool: 'draft_message', state: 'done' }] },
-      { kind: 'draft_message', id: 'call-draft_message', draft: { applicationId: 'a1', candidateName: 'Giulia Neri', subject: 'Grazie', body: 'Ciao {{candidate.firstName}}', templateId: null } },
+      { kind: 'draft_message', id: 'call-draft_message', draft: output },
     ])
   })
 
-  it('turns a finished draft_job_content into a proposal card, wrapped or bare', () => {
-    const [, wrapped] = assistantItems(message([tool('draft_job_content', 'output-available', { content: completeContent, jobId: 'j1' })]))
-    expect(wrapped).toMatchObject({ kind: 'draft_job', draft: { jobId: 'j1', content: { title: 'Backend developer' } } })
-    const [, api] = assistantItems(message([tool('draft_job_content', 'output-available', { proposal: completeContent, saved: false, publishIssues: [] })]))
-    expect(api).toMatchObject({ kind: 'draft_job', draft: { jobId: null, content: { title: 'Backend developer' } } })
-    const [, bare] = assistantItems(message([tool('draft_job_content', 'output-available', { title: 'Data engineer' })]))
-    expect(bare).toMatchObject({ kind: 'draft_job', draft: { jobId: null, content: { title: 'Data engineer', process: [] } } })
+  it('turns a finished draft_job_content into a proposal card', () => {
+    const [, card] = assistantItems(message([tool('draft_job_content', 'output-available', { proposal: completeContent, saved: false, publishIssues: [] })]))
+    expect(card).toMatchObject({ kind: 'draft_job', draft: { saved: false, proposal: { title: 'Backend developer' } } })
   })
 
   it('shows a draft whose output does not validate only as a failed step', () => {
@@ -82,14 +78,14 @@ describe('stepLabelKey', () => {
 
 describe('isAgentNotConfigured', () => {
   it('recognises the api saying no model is configured', () => {
-    expect(isAgentNotConfigured(new Error(JSON.stringify({ success: false, data: null, error: { code: 'agent_not_configured', message: 'x' } })))).toBe(true)
-    expect(isAgentNotConfigured(new Error('{"error":{"code":"agent_disabled"}}'))).toBe(true)
-    expect(isAgentNotConfigured(new Error('agent_not_configured'))).toBe(true)
+    expect(isAgentNotConfigured(new Error(JSON.stringify({ success: false, data: null, error: { code: 'agent_disabled', message: 'x' } })))).toBe(true)
+    expect(isAgentNotConfigured(new Error('agent_disabled'))).toBe(true)
   })
   it('is false for anything else', () => {
     expect(isAgentNotConfigured(new Error('{"error":{"code":"forbidden"}}'))).toBe(false)
     expect(isAgentNotConfigured(new Error('Failed to fetch'))).toBe(false)
     expect(isAgentNotConfigured(undefined)).toBe(false)
-    expect(isAgentNotConfigured('agent_not_configured')).toBe(false)
+    expect(isAgentNotConfigured('agent_disabled')).toBe(false)
+    expect(isAgentNotConfigured(new Error('agent_not_configured'))).toBe(false)
   })
 })

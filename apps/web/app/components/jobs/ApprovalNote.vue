@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { salaryFigure } from '@/lib/ad-facts'
 import { APPROVAL_REASON_MAX, approvalRequestPath, type ApprovalState } from '@/lib/approval-view'
 import { formatDate } from '@/lib/format'
-import type { JobApprovalDto } from '@/lib/phase9-contract'
+import type { JobApprovalDto } from '@tt/domain'
 
 /**
  * Where the ad stands with approval, when the organization asks for it: approved (by whom, which range), missing (with
@@ -14,9 +14,8 @@ import type { JobApprovalDto } from '@/lib/phase9-contract'
  */
 const props = defineProps<{
   state: ApprovalState
-  approval: JobApprovalDto
+  approval: JobApprovalDto | null
   title: string
-  currency: string
   language: string
   refusedKey?: string | null
   canAsk?: boolean
@@ -25,8 +24,8 @@ const props = defineProps<{
 const emit = defineEmits<{ ask: [reason: string, done: (ok: boolean) => void] }>()
 const { t, locale } = useI18n()
 const team = useMembers()
-const approver = computed(() => props.approval?.approvedBy?.name ?? (props.approval?.approvedBy ? team.nameOf(props.approval.approvedBy.id) : null) ?? t('job.approval.someone'))
-const range = computed(() => (props.approval ? salaryFigure({ min: props.approval.salaryMin, max: props.approval.salaryMax, currency: props.currency as 'EUR', period: 'year' }, props.language) : null))
+const approver = computed(() => (props.approval ? team.nameOf(props.approval.approvedBy) : null) ?? t('job.approval.someone'))
+const range = computed(() => (props.approval ? salaryFigure({ min: props.approval.salaryMin, max: props.approval.salaryMax, currency: props.approval.currency, period: 'year' }, props.language) : null))
 const requestPath = computed(() => approvalRequestPath(props.title))
 const tone = computed(() => (props.refusedKey || props.state === 'exceeded' ? 'warning' : props.state === 'approved' ? 'success' : 'muted'))
 const needsAsk = computed(() => props.state === 'missing' || props.state === 'exceeded' || Boolean(props.refusedKey))

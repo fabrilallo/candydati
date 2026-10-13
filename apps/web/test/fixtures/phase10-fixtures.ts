@@ -1,4 +1,7 @@
-import { rate, type ReportsDto } from '@tt/domain'
+import { rate, type ReportKey, type ReportsDto } from '@tt/domain'
+
+/** The report as the web reads it: the api answer plus the sections that failed validation (none here). */
+export type ReportsFixture = ReportsDto & { readonly invalid: readonly ReportKey[] }
 
 const NO_OUTCOMES = { hired: 0, not_selected: 0, withdrawn: 0 }
 
@@ -6,7 +9,8 @@ const NO_OUTCOMES = { hired: 0, not_selected: 0, withdrawn: 0 }
  * A report with every section filled: four hires over two jobs, a funnel of four stages (given out of order), four
  * sources (one too small for a rate), and 50 closed response promises (47 kept).
  */
-export const reportsFixture = (overrides: Partial<ReportsDto> = {}): ReportsDto => ({
+export const reportsFixture = (overrides: Partial<ReportsDto> = {}): ReportsFixture => ({
+  invalid: [],
   generatedAt: '2026-10-13T10:00:00.000Z',
   period: { from: '2026-09-14T00:00:00.000Z', to: '2026-10-13T23:59:59.999Z' },
   jobId: null,
@@ -65,7 +69,7 @@ export const reportsFixture = (overrides: Partial<ReportsDto> = {}): ReportsDto 
 })
 
 /** Nothing happened in the period. */
-export const emptyReportsFixture = (): ReportsDto =>
+export const emptyReportsFixture = (): ReportsFixture =>
   reportsFixture({
     timeToHire: { overall: { count: 0, median: null, p75: null }, byJob: [] },
     timeToFill: { overall: { count: 0, median: null, p75: null }, items: [] },

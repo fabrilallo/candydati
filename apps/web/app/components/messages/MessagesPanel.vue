@@ -1,7 +1,6 @@
 <script setup lang="ts">
+import type { CandidateApplicationDto, EmailTemplateKind  } from '@tt/domain'
 import { MailCheckIcon } from '@lucide/vue'
-import type { CandidateApplicationDto } from '@/lib/candidate-schemas'
-import type { EmailTemplateKind } from '@tt/domain'
 import type { ThreadState } from '@/composables/useMessageThreads'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'

@@ -39,11 +39,33 @@ export interface CandidateRepository {
   findByEmails(organizationId: string, emails: readonly string[]): Promise<readonly Candidate[]>;
 }
 
+/** What a guarded transition expects of the row: open, and in `stageId` when given. */
+export interface ApplicationExpectation {
+  readonly stageId?: string | undefined;
+}
+
+/** The columns a state change may write. */
+export type ApplicationPatch = Partial<
+  Pick<Application, 'stageId' | 'outcome' | 'stageChangedAt' | 'updatedAt' | 'closedAt' | 'responseDueAt' | 'respondedAt'>
+>;
+
+/** The columns a plain update may write: never stage or outcome. */
+export type ApplicationDataPatch = Partial<Pick<Application, 'consent' | 'consentStatus' | 'retentionExpiresAt' | 'updatedAt'>>;
+
 export interface ApplicationRepository {
   /** @throws ConflictError when the candidate already has an OPEN application for the same job. */
   create(application: Application): Promise<Application>;
-  /** Full replace by (organizationId, id). */
-  save(application: Application): Promise<Application>;
+  /**
+   * State change of an OPEN application, column by column: only the fields in `patch` are written, and only while the
+   * row is still open (and, with `expected.stageId`, still in that stage).
+   * @throws ConflictError when another change got there first (decided, moved): nothing is written.
+   */
+  transition(organizationId: string, id: string, expected: ApplicationExpectation, patch: ApplicationPatch): Promise<Application>;
+  /**
+   * Column-targeted write that is not a state change (consent, retention): never touches stage or outcome.
+   * @throws NotFoundError when the application does not exist.
+   */
+  update(organizationId: string, id: string, patch: ApplicationDataPatch): Promise<Application>;
   findById(organizationId: string, id: string): Promise<Application | null>;
   /** The open application (outcome null) of the candidate for the job, if any. */
   findOpen(organizationId: string, jobId: string, candidateId: string): Promise<Application | null>;

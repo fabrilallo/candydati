@@ -1,3 +1,5 @@
+import type { ImportConfidence, ImportMapping, ImportField } from '@tt/domain'
+import type { ImportDetail } from '@/lib/import-item-view'
 import { useDocumentVisibility, useIntervalFn } from '@vueuse/core'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
@@ -6,7 +8,6 @@ import { emptyMapping, mappingChanged, setHeaderField } from '@/lib/import-mappi
 import { initialSelection, selectionChanges, setByConfidence, toggleItem, type PreviewFilters, type Selection } from '@/lib/import-preview'
 import { isWorking, wizardStep, type WizardStep } from '@/lib/import-view'
 import { loaded } from '@/lib/job-api'
-import type { Confidence, ImportDetailDto, ImportMapping, MappingField } from '@/lib/phase8-contract'
 
 /** How often a batch is asked again while the worker analyzes or imports it. */
 export const IMPORT_POLL_MS = 3_000
@@ -22,7 +23,7 @@ export const useImportWizard = (batchId: string) => {
   const { t } = useI18n()
   const request = useJobsApi()
   const { data, refresh } = useFreshAsyncData(`import-${batchId}`, () => loaded(() => getImport(request, batchId)))
-  const detail = ref<ImportDetailDto | null>(data.value?.data ?? null)
+  const detail = ref<ImportDetail | null>(data.value?.data ?? null)
   const step = ref<WizardStep>(detail.value ? wizardStep(detail.value.batch.status) : 'analysis')
   const mapping = ref<ImportMapping>(detail.value?.batch.mapping ?? emptyMapping())
   const selection = ref<Selection>(initialSelection(detail.value?.items ?? []))
@@ -30,9 +31,9 @@ export const useImportWizard = (batchId: string) => {
   const busy = ref<WizardBusy>(null)
   /** Where a batch that becomes ready again goes: the preview after a new mapping, "Colonne" otherwise. */
   const resumeAt = ref<WizardStep | null>(null)
-  const stepFor = (status: ImportDetailDto['batch']['status']): WizardStep => (status === 'ready' && resumeAt.value ? resumeAt.value : wizardStep(status))
+  const stepFor = (status: ImportDetail['batch']['status']): WizardStep => (status === 'ready' && resumeAt.value ? resumeAt.value : wizardStep(status))
 
-  const adopt = (fresh: ImportDetailDto, nextStep?: WizardStep): void => {
+  const adopt = (fresh: ImportDetail, nextStep?: WizardStep): void => {
     const wasWorking = detail.value ? isWorking(detail.value.batch.status) : true
     detail.value = fresh
     mapping.value = fresh.batch.mapping ?? emptyMapping()
@@ -86,7 +87,7 @@ export const useImportWizard = (batchId: string) => {
       }
       resumeAt.value = 'preview'
       const saved = await saveMapping(request, batchId, mapping.value)
-      if (detail.value) detail.value = { ...detail.value, batch: { ...detail.value.batch, status: saved.status as ImportDetailDto['batch']['status'] } }
+      if (detail.value) detail.value = { ...detail.value, batch: { ...detail.value.batch, status: saved.status } }
       await reload(isWorking(detail.value?.batch.status ?? 'ready') ? 'analysis' : 'preview')
     })
 
@@ -105,7 +106,7 @@ export const useImportWizard = (batchId: string) => {
   const commit = (): Promise<void> =>
     run('commit', async () => {
       const saved = await commitImport(request, batchId)
-      if (detail.value) detail.value = { ...detail.value, batch: { ...detail.value.batch, status: saved.status as ImportDetailDto['batch']['status'] } }
+      if (detail.value) detail.value = { ...detail.value, batch: { ...detail.value.batch, status: saved.status } }
       step.value = 'result'
       await reload('result')
     })
@@ -120,7 +121,7 @@ export const useImportWizard = (batchId: string) => {
     busy: computed(() => busy.value),
     changedMapping,
     refresh,
-    setField: (header: string, field: MappingField | null): void => {
+    setField: (header: string, field: ImportField | null): void => {
       mapping.value = setHeaderField(mapping.value, header, field)
     },
     resetMapping: (): void => {
@@ -129,7 +130,7 @@ export const useImportWizard = (batchId: string) => {
     toggle: (id: string, include: boolean): void => {
       selection.value = toggleItem(selection.value, id, include)
     },
-    bulk: (confidence: Confidence, include: boolean): void => {
+    bulk: (confidence: ImportConfidence, include: boolean): void => {
       selection.value = setByConfidence(selection.value, detail.value?.items ?? [], confidence, include)
     },
     applyMapping,

@@ -2,10 +2,10 @@
 import { CheckIcon, PlusIcon } from '@lucide/vue'
 import { optionalHints, type OptionalKey } from '@/lib/ad-gaps'
 import { employmentBenefits } from '@/lib/employment-view'
-import type { JobContent9 } from '@/lib/phase9-contract'
+import type { JobContent } from '@tt/domain'
 
 /** The role: introduction, what you will do, requirements split in two, technologies as tags, benefits. */
-const props = defineProps<{ content: JobContent9 }>()
+const props = defineProps<{ content: JobContent }>()
 const ad = useAdContext()
 const id = useId()
 

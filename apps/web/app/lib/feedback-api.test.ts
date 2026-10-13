@@ -5,19 +5,33 @@ import type { JobApiRequest } from './job-api'
 
 const ok = (data: unknown) => ({ status: 200, body: { success: true, data } })
 const fail = (status: number, code: string) => ({ status, body: { success: false, error: { code, message: 'x' } } })
+/** `PublicFeedbackView` as the api sends it. */
 const form = {
-  organization: { name: 'Acme' },
+  organizationName: 'Acme',
+  language: 'it',
+  interviewerName: 'Paolo',
   candidate: { firstName: 'Ada', lastName: 'Lovelace' },
-  job: { title: 'Backend' },
-  stage: { label: null, type: 'technical_interview', note: null },
-  questions: [{ id: 'q1', label: 'Cosa?' }],
+  jobTitle: 'Backend',
+  stage: { label: 'Colloquio tecnico', note: null },
+  questions: [{ id: 'q1', label: 'Cosa?', required: true }],
+  recommendations: ['proceed', 'do_not_proceed', 'discuss'],
+  hasCv: false,
+  expiresAt: '2026-10-20T10:00:00.000Z',
+  submission: null,
 }
 
 describe('feedback api', () => {
-  it('loads the public form with defaults', async () => {
+  it('loads the public form as the api sends it', async () => {
     const request: JobApiRequest = async () => ok(form)
     const load = await loadPublicFeedback(request, 'tok')
-    expect(load).toMatchObject({ kind: 'ok', data: { language: 'it', hasCv: false, questions: [{ id: 'q1', hint: null }] } })
+    expect(load).toMatchObject({ kind: 'ok', data: { language: 'it', hasCv: false, organizationName: 'Acme', questions: [{ id: 'q1', required: true }] } })
+  })
+
+  it('treats a form the api could not have sent as unavailable', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const load = await loadPublicFeedback(async () => ok({ ...form, questions: undefined }), 'tok')
+    expect(load).toMatchObject({ kind: 'failed', failure: 'unavailable' })
+    spy.mockRestore()
   })
 
   it.each([

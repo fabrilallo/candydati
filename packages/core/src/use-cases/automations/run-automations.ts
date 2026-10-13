@@ -1,4 +1,4 @@
-import { JOB_OWNER_ASSIGNEE, DAY_MS, type AutomationRule, type Job, type Task } from '@tt/domain';
+import { JOB_OWNER_ASSIGNEE, DAY_MS, type Application, type AutomationRule, type Job, type Task } from '@tt/domain';
 import { z } from 'zod';
 import type { SystemActor } from '../../actor.js';
 import { toAuditActor } from '../../actor.js';
@@ -97,11 +97,26 @@ async function notifyFailure(deps: AutomationRunDeps, rule: AutomationRule, appl
   );
 }
 
+/** True when this rule had not run yet for this entry of the application into the stage: the run is now claimed. */
+const claimRun = (deps: AutomationRunDeps, rule: AutomationRule, application: Application): Promise<boolean> =>
+  deps.executions.claim({
+    id: deps.newId(),
+    organizationId: rule.organizationId,
+    ruleId: rule.id,
+    applicationId: application.id,
+    stageId: application.stageId,
+    stageEnteredAt: application.stageChangedAt,
+    createdAt: deps.now(),
+  });
+
 /**
  * Worker use case (system actor, task `automation.run`): runs the enabled rules of the stage the application just
  * entered. Re-checks everything when it runs: an application that moved on, was decided or is gone is skipped. Rules run
  * independently; a failing one notifies its creator (`automation_failed`) and never stops the others or undoes the
  * move. There is no rule that moves or decides, so this can never do either (PLAN §1, principle 4).
+ *
+ * Idempotent: each rule records its run for this stage entry in the same transaction as what it does, so a redelivered
+ * task finds the record and neither sends the template nor creates the task again.
  */
 export const runAutomations = defineUseCase<AutomationRunDeps, typeof inputSchema, AutomationRunResult>({
   name: 'runAutomations',
@@ -109,6 +124,7 @@ export const runAutomations = defineUseCase<AutomationRunDeps, typeof inputSchem
   organizationOf: (input) => input.organizationId,
   permission: { skip: 'system job enqueued after a move or an intake; the organization scope still applies' },
   audit: { skip: 'each rule execution is audited in the handler as automation.ran' },
+  transaction: 'required',
   handler: async ({ deps, actor, input }): Promise<AutomationRunResult> => {
     const { organizationId } = input;
     const application = await requireApplication(deps, organizationId, input.applicationId).catch(() => null);
@@ -117,11 +133,14 @@ export const runAutomations = defineUseCase<AutomationRunDeps, typeof inputSchem
     if (application.stageId !== input.stageId) return { executed: 0, failed: 0, skipped: 'stage_changed' };
     const job = await requireJob(deps, organizationId, application.jobId);
     const rules = await deps.rules.listEnabledByStage(organizationId, job.id, input.stageId);
+    let executed = 0;
     let failed = 0;
     for (const rule of rules) {
+      if (!(await claimRun(deps, rule, application))) continue;
       let ok = true;
       try {
         await execute(deps, rule, job, application.id);
+        executed += 1;
       } catch {
         ok = false;
         failed += 1;
@@ -135,6 +154,6 @@ export const runAutomations = defineUseCase<AutomationRunDeps, typeof inputSchem
         metadata: { applicationId: application.id, action: rule.action.type, ok },
       });
     }
-    return { executed: rules.length - failed, failed, skipped: null };
+    return { executed, failed, skipped: null };
   },
 });

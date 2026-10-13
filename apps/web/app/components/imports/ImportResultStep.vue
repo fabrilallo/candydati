@@ -1,14 +1,13 @@
 <script setup lang="ts">
+import type { ImportBatchDto } from '@tt/domain'
 import { CircleCheckIcon, LoaderCircleIcon, Undo2Icon } from '@lucide/vue'
 import { formatDateTime } from '@/lib/format'
-import { batchFigures, progressPercent } from '@/lib/import-view'
-import type { ImportBatchDto } from '@/lib/phase8-contract'
+import { batchFigures } from '@/lib/import-view'
 import { Button } from '@/components/ui/button'
 
-/** After "Importa": progress while the worker creates the candidates, then the result with the way to the pipeline. */
+/** After "Importa": a notice while the worker creates the candidates, then the result with the way to the pipeline. */
 const props = defineProps<{ batch: ImportBatchDto }>()
 const { t, locale } = useI18n()
-const percent = computed(() => progressPercent(props.batch.progress))
 const pipeline = computed(() => (props.batch.jobId ? `/app/jobs/${encodeURIComponent(props.batch.jobId)}/candidates` : null))
 const lines = computed(() => {
   const figures = batchFigures(props.batch.counts)
@@ -27,9 +26,6 @@ const lines = computed(() => {
         <LoaderCircleIcon class="size-4 animate-spin text-muted-foreground motion-reduce:animate-none" aria-hidden="true" />{{ t('imports.result.importing') }}
       </h2>
       <p class="text-sm text-muted-foreground">{{ t('imports.result.importingBody') }}</p>
-      <div v-if="percent !== null" class="h-1.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
-        <div class="h-full rounded-full bg-primary transition-[width] duration-300 ease-snap" :style="{ width: `${percent}%` }" />
-      </div>
     </div>
 
     <div v-else-if="batch.status === 'undone'" class="grid gap-2 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6">

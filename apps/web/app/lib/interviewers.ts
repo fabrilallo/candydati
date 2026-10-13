@@ -1,8 +1,8 @@
-import { INTERVIEWERS_PER_STAGE_MAX, interviewerInputSchema } from '@tt/domain'
+import { INTERVIEWERS_PER_STAGE_MAX, interviewerInputSchema, stageInterviewersSchema, type InterviewerDto, type InterviewerInput } from '@tt/domain'
 import { z } from 'zod'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'
-import { jobInterviewersPath, stageInterviewersSchema, type InterviewerDto, type InterviewerInput } from './phase9-contract'
+import { jobInterviewersPath } from './api-paths'
 
 /** Who conducts each stage of a job, by stage id. Stages without anyone are simply absent. */
 export type InterviewersByStage = Readonly<Record<string, readonly InterviewerDto[]>>

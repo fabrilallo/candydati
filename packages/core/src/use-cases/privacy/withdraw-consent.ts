@@ -39,7 +39,7 @@ async function withdrawTalentPool(deps: Deps, organizationId: string, candidateI
     const notice = await noticeOf(deps, organizationId, application);
     const consent = { ...application.consent, scopes };
     const retentionExpiresAt = notice ? retentionExpiry(consent, notice) : application.retentionExpiresAt;
-    updated.push(await deps.applications.save({ ...application, consent, retentionExpiresAt, updatedAt: now }));
+    updated.push(await deps.applications.update(organizationId, application.id, { consent, retentionExpiresAt, updatedAt: now }));
   }
   const retention = updated.reduce<Date | null>((max, a) => (max && max > a.retentionExpiresAt ? max : a.retentionExpiresAt), null);
   const saved = await deps.candidates.save({ ...candidate, talentPool: false, retentionExpiresAt: retention ?? candidate.retentionExpiresAt, updatedAt: now });

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { requestStatusTone } from '@/lib/job-request-view'
-import type { JobRequestStatus } from '@/lib/phase9-contract'
+import type { JobRequestStatus } from '@tt/domain'
 import { Badge } from '@/components/ui/badge'
 
 defineProps<{ status: JobRequestStatus }>()

@@ -1,10 +1,10 @@
+import type { DataExportDto } from '@tt/domain'
 import { useDocumentVisibility, useIntervalFn } from '@vueuse/core'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { createDataExport, listDataExports } from '@/lib/gdpr-api'
 import { hasPreparing } from '@/lib/gdpr-view'
 import { loaded } from '@/lib/job-api'
-import type { DataExportDto } from '@/lib/phase5-contract'
 
 /** How often the list is asked again while an export is being prepared. */
 export const EXPORT_POLL_MS = 5_000
@@ -50,7 +50,7 @@ export const useDataExports = () => {
     try {
       const created = await createDataExport(request)
       const now = new Date().toISOString()
-      const placeholder: DataExportDto = { id: created.id, status: created.status, sizeBytes: null, createdAt: now, completedAt: null, expiresAt: null }
+      const placeholder: DataExportDto = { id: created.id, status: created.status, sizeBytes: null, createdAt: now, completedAt: null, expiresAt: now }
       override.value = [placeholder, ...(items.value ?? []).filter((item) => item.id !== created.id)]
       toast.success(t('dataExport.created'))
     } catch (error) {

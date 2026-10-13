@@ -5,7 +5,7 @@ import { errorKeyOf } from '@/lib/auth-errors'
 import { formatDate } from '@/lib/format'
 import { closeJob } from '@/lib/job-api'
 import { can } from '@/lib/permissions-ui'
-import { STALE_JOB_DAYS, type StaleJobDto } from '@/lib/phase9-contract'
+import { STALE_JOB_DAYS, type StaleJobDto } from '@tt/domain'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -20,13 +20,14 @@ const request = useJobsApi()
 const { viewer } = useViewer()
 const canClose = computed(() => can(viewer.value?.role ?? null, 'job:close'))
 
-const target = ref<StaleJobDto | null>(null)
+type StaleJob = StaleJobDto['job']
+const target = ref<StaleJob | null>(null)
 const closeOpen = ref(false)
 const closing = ref(false)
 const closeErrorKey = ref<string | null>(null)
 const blocked = ref<number | null>(null)
 
-const choose = (job: StaleJobDto): void => {
+const choose = (job: StaleJob): void => {
   target.value = job
   closeErrorKey.value = null
   blocked.value = null
@@ -72,7 +73,7 @@ const confirmClose = async (): Promise<void> => {
     </p>
     <ul v-else :class="['divide-y overflow-hidden rounded-xl border bg-card shadow-xs', loading ? 'opacity-60 transition-opacity' : '']" :aria-label="t('attention.stale.list')" :aria-busy="loading">
       <li
-        v-for="job in jobs"
+        v-for="{ job, daysIdle } in jobs"
         :key="job.id"
         class="grid gap-3 px-5 py-4 sm:px-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
         data-testid="attention-stale-row"
@@ -82,11 +83,8 @@ const confirmClose = async (): Promise<void> => {
           <h3 class="text-[0.9375rem] font-medium leading-snug">
             <NuxtLink :to="`/app/jobs/${encodeURIComponent(job.id)}`" class="block truncate hover:underline" data-testid="attention-stale-title">{{ job.title }}</NuxtLink>
           </h3>
-          <p class="text-sm font-medium tabular-nums" data-testid="attention-stale-idle">{{ t('attention.stale.noActivity', { count: job.daysSinceActivity }) }}</p>
-          <p class="text-xs text-muted-foreground">
-            <span v-if="job.publishedAt">{{ t('attention.stale.published', { date: formatDate(job.publishedAt, locale) }) }} · </span>
-            <span class="tabular-nums">{{ t('attention.stale.openApplications', { count: job.openApplications }, job.openApplications) }}</span>
-          </p>
+          <p class="text-sm font-medium tabular-nums" data-testid="attention-stale-idle">{{ t('attention.stale.noActivity', { count: daysIdle }) }}</p>
+          <p v-if="job.publishedAt" class="text-xs text-muted-foreground">{{ t('attention.stale.published', { date: formatDate(job.publishedAt, locale) }) }}</p>
         </div>
         <div class="flex flex-wrap items-center gap-2 md:justify-end">
           <Button as-child variant="outline" size="sm"><NuxtLink :to="`/app/jobs/${encodeURIComponent(job.id)}`" data-testid="attention-stale-open">{{ t('attention.stale.open') }}</NuxtLink></Button>

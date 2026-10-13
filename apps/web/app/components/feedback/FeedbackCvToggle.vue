@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ChevronDownIcon, FileTextIcon } from '@lucide/vue'
 import type { Translate } from '@/lib/ad-text'
-import { publicFeedbackCvPath } from '@/lib/phase9-contract'
+import { publicFeedbackCvPath } from '@/lib/api-paths'
 
 /** The CV behind a toggle, so on a phone the form stays first; the PDF loads only once opened. */
 const props = defineProps<{ token: string; name: string; x: Translate }>()

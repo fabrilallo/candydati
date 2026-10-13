@@ -34,11 +34,11 @@ const job = makeJob({
 registerEndpoint('/api/v1/email-templates', () => ok([template('t-update', { name: 'Aggiornamento sulla fase', kind: 'stage_update' })]))
 registerEndpoint('/api/v1/jobs/j1/automations', async (event) => {
   if (event.method !== 'POST') {
-    return ok([rule('r1', { stageId: 'tech' }), rule('r2', { stageId: 'tech', action: taskAction('Prepara il colloquio', 'job_owner', 2), createdAt: '2026-10-14T10:00:00.000Z' })])
+    return ok([rule('r1', { stageId: 'tech', createdBy: 'u2' }), rule('r2', { stageId: 'tech', action: taskAction('Prepara il colloquio', 'job_owner', 2), createdAt: '2026-10-14T10:00:00.000Z' })])
   }
   const body = await readBody<{ stageId: string; action: never }>(event)
   state.posts.push(body)
-  return ok(rule('r9', { stageId: body.stageId, action: body.action, createdBy: { id: 'u1', name: null } }))
+  return ok(rule('r9', { stageId: body.stageId, action: body.action, createdBy: 'u1' }))
 })
 registerEndpoint('/api/v1/automations/r1', async (event) => {
   if (event.method === 'DELETE') {
@@ -77,7 +77,7 @@ describe('automations per stage', () => {
     ])
     await vi.waitFor(() => expect(wrapper.find('[data-rule-id="r1"] [data-testid="rule-sentence"]').text()).toBe('invia il modello «Aggiornamento sulla fase»'))
     expect(wrapper.find('[data-rule-id="r2"] [data-testid="rule-sentence"]').text()).toBe("crea l'attività «Prepara il colloquio» per il responsabile dell'annuncio, da fare entro 2 giorni")
-    expect(wrapper.find('[data-rule-id="r1"]').text()).toContain('Creata da Ada')
+    expect(wrapper.find('[data-rule-id="r1"]').text()).toContain('Creata da Bruno')
     expect(wrapper.find('[data-testid="automations-note"]').text()).toContain('non spostano e non decidono mai')
   })
 

@@ -1,12 +1,10 @@
 <script setup lang="ts">
+import type { ApplicationCardDto, EmailTemplateKind, Outcome  } from '@tt/domain'
 import { FileTextIcon, ListTodoIcon, MailIcon, MessagesSquareIcon, MessageSquareTextIcon, ShieldCheckIcon, UserRoundIcon } from '@lucide/vue'
-import type { EmailTemplateKind, Outcome } from '@tt/domain'
-import type { ApplicationCardDto } from '@/lib/candidate-schemas'
 import { applicationStatus, currentApplication, fullName, stageOf } from '@/lib/candidate-view'
 import { renewalDeadline } from '@/lib/import-view'
 import { messageTotal, outcomeTemplateKind } from '@/lib/message-view'
 import { can } from '@/lib/permissions-ui'
-import { canPhase9 } from '@/lib/phase9-contract'
 import { stageName } from '@/lib/pipeline-board'
 import type { TabItem } from '@/lib/tabs'
 import { Button } from '@/components/ui/button'
@@ -16,12 +14,13 @@ import { Skeleton } from '@/components/ui/skeleton'
  * The candidate profile (docs/DESIGN.md "Scheda candidato"), shared by the side sheet of the board and the full page:
  * header with stage and status and the actions on the current application, tags, then Profilo, CV and Note.
  */
-const props = withDefaults(defineProps<{ candidateId: string; applicationId?: string | null; heading?: 'h1' | 'h2' }>(), { applicationId: null, heading: 'h1' })
+/** `viaJobId`: the pipeline the profile is opened from, so a person still to reconfirm can be shown there. */
+const props = withDefaults(defineProps<{ candidateId: string; applicationId?: string | null; viaJobId?: string | null; heading?: 'h1' | 'h2' }>(), { applicationId: null, viaJobId: null, heading: 'h1' })
 const emit = defineEmits<{ card: [card: ApplicationCardDto]; noted: [applicationId: string | null]; erased: [candidateGone: boolean] }>()
 const { t } = useI18n()
 const { viewer } = useViewer()
 const role = computed(() => viewer.value?.role ?? null)
-const c = useCandidate(() => props.candidateId)
+const c = useCandidate(() => props.candidateId, () => props.viaJobId)
 const detail = c.detail
 /** The application opened from a board wins; otherwise the newest open one. */
 const current = computed(() => {
@@ -48,7 +47,7 @@ const tabs = computed<readonly TabItem<Tab>[]>(() => [
   { value: 'notes', label: t('candidate.tabs.notes'), icon: MessageSquareTextIcon, count: detail.value?.notes.length ?? null, testId: 'tab-notes' },
   ...(canRead.value ? [{ value: 'messages' as const, label: t('candidate.tabs.messages'), icon: MailIcon, count: messageTotal(detail.value?.applications ?? []), testId: 'tab-messages' }] : []),
   ...(can(role.value, 'task:read') && current.value ? [{ value: 'tasks' as const, label: t('candidate.tabs.tasks'), icon: ListTodoIcon, testId: 'tab-tasks' }] : []),
-  ...(canPhase9(role.value, 'feedback:read') && current.value ? [{ value: 'feedback' as const, label: t('candidate.tabs.feedback'), icon: MessagesSquareIcon, testId: 'tab-feedback' }] : []),
+  ...(can(role.value, 'feedback:read') && current.value ? [{ value: 'feedback' as const, label: t('candidate.tabs.feedback'), icon: MessagesSquareIcon, testId: 'tab-feedback' }] : []),
   ...(canPrivacy.value ? [{ value: 'privacy' as const, label: t('candidate.tabs.privacy'), icon: ShieldCheckIcon, testId: 'tab-privacy' }] : []),
 ])
 /** One application erased while others stay: the profile is read again; the whole candidate gone: the parent leaves. */
@@ -158,7 +157,7 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
         @dismiss="proposal = null"
       />
       <ApplicationTasks v-else-if="tab === 'tasks' && current" :key="current.id" :application-id="current.id" :job-id="current.job.id" />
-      <FeedbackPanel v-else-if="tab === 'feedback' && current" :key="current.id" :application="current" :can-manage="canPhase9(role, 'feedback:manage')" />
+      <FeedbackPanel v-else-if="tab === 'feedback' && current" :key="current.id" :application="current" :can-manage="can(role, 'feedback:manage')" />
       <CandidatePrivacyPanel v-else-if="tab === 'privacy'" :detail="detail" :name="name" :now="now" :role="role" @updated="c.replace" @erased="erased" />
     </template>
   </div>

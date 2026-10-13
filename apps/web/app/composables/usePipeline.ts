@@ -1,48 +1,31 @@
-import type { Outcome } from '@tt/domain'
+import type { ApplicationCardDto, PipelineDto, Outcome  } from '@tt/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { decideApplication, moveApplication } from '@/lib/candidate-api'
-import type { ApplicationCardDto, PipelineDto } from '@/lib/candidate-schemas'
 import { fullName } from '@/lib/candidate-view'
-import { decideCard, moveCard, replaceCard } from '@/lib/pipeline-board'
+import { createOptimisticBoard } from '@/lib/optimistic-board'
+import { decideCard, moveCard } from '@/lib/pipeline-board'
 
 /**
  * The board of a job: the api pipeline plus local optimistic changes. A move or a decision shows at once; if the api
- * refuses it, the card goes back where it was and a toast says why. Nothing here sends messages to candidates.
+ * refuses it, that change (and only that one) is dropped and a toast says why; overlapping moves of a card are sent
+ * in order. Nothing here sends messages to candidates.
  */
 export const usePipeline = (jobId: string) => {
   const { t } = useI18n()
   const request = useJobsApi()
   const source = usePipelineData(jobId)
-  const pipeline = ref<PipelineDto | null>(source.pipeline.value)
-  watch(source.pipeline, (fresh) => {
-    pipeline.value = fresh
+  const snapshot = shallowRef<{ pipeline: PipelineDto | null; pending: ReadonlySet<string> }>({ pipeline: null, pending: new Set() })
+  const board = createOptimisticBoard(() => {
+    snapshot.value = { pipeline: board.view(), pending: board.pending() }
   })
-  const pending = ref<ReadonlySet<string>>(new Set())
-
-  const setPending = (id: string, on: boolean): void => {
-    pending.value = on ? new Set([...pending.value, id]) : new Set([...pending.value].filter((item) => item !== id))
-  }
+  board.setBase(source.pipeline.value)
+  watch(source.pipeline, (fresh) => board.setBase(fresh))
 
   const apply = async (id: string, change: (current: PipelineDto) => PipelineDto, send: () => Promise<ApplicationCardDto>, failKey: string): Promise<boolean> => {
-    const current = pipeline.value
-    const before = current?.applications.find((card) => card.id === id)
-    if (!current || !before) return false
-    const next = change(current)
-    if (next === current) return false
-    pipeline.value = next
-    setPending(id, true)
-    try {
-      const fresh = await send()
-      if (pipeline.value) pipeline.value = replaceCard(pipeline.value, fresh)
-      return true
-    } catch (error) {
-      if (pipeline.value) pipeline.value = replaceCard(pipeline.value, before)
-      toast.error(t(failKey, { name: fullName(before.candidate) }), { description: t(errorKeyOf(error)) })
-      return false
-    } finally {
-      setPending(id, false)
-    }
+    const outcome = await board.run(id, change, send)
+    if (outcome.status === 'failed') toast.error(t(failKey, { name: fullName(outcome.card.candidate) }), { description: t(errorKeyOf(outcome.error)) })
+    return outcome.status === 'done'
   }
 
   const move = (id: string, stageId: string): Promise<boolean> =>
@@ -52,13 +35,21 @@ export const usePipeline = (jobId: string) => {
     apply(id, (current) => decideCard(current, id, outcome, new Date().toISOString()), () => decideApplication(request, id, outcome), 'pipeline.decideFailed')
 
   /** A change made elsewhere (the candidate sheet) lands on the board without a reload. */
-  const accept = (card: ApplicationCardDto): void => {
-    if (pipeline.value) pipeline.value = replaceCard(pipeline.value, card)
-  }
+  const accept = (card: ApplicationCardDto): void => board.accept(card)
   const noted = (id: string): void => {
-    const card = pipeline.value?.applications.find((item) => item.id === id)
+    const card = board.view()?.applications.find((item) => item.id === id)
     if (card) accept({ ...card, noteCount: card.noteCount + 1 })
   }
 
-  return { pipeline: computed(() => pipeline.value), pending: computed(() => pending.value), errorKey: source.errorKey, loading: source.loading, refresh: source.refresh, move, decide, accept, noted }
+  return {
+    pipeline: computed(() => snapshot.value.pipeline),
+    pending: computed(() => snapshot.value.pending),
+    errorKey: source.errorKey,
+    loading: source.loading,
+    refresh: source.refresh,
+    move,
+    decide,
+    accept,
+    noted,
+  }
 }

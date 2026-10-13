@@ -1,7 +1,7 @@
-import type { JobStatus } from '@tt/domain'
+import { type JobStatus, reportsSchema, type ReportsView  } from '@tt/domain'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'
-import { REPORTS_CSV_PATH, REPORTS_PATH, reportsSchema, type ReportsView } from './phase10-contract'
+import { REPORTS_CSV_PATH, REPORTS_PATH } from './api-paths'
 import { reportsQuery, type Period } from './report-period'
 
 /** Aggregates of the period (and job), validated section by section: an invalid section is `null`, never a zero. */

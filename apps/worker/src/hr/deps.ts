@@ -1,22 +1,11 @@
 import { createHash, randomUUID } from 'node:crypto';
 import {
-  createDrizzleApplications,
-  createDrizzleAuditLog,
-  createDrizzleCandidates,
-  createDrizzleFeedbackRequests,
-  createDrizzleInterviewFeedback,
-  createDrizzleJobs,
-  createDrizzleMemberDirectory,
-  createDrizzleNotifications,
-  createDrizzleOrganizationDirectory,
-  createDrizzleStageInterviewers,
-  createDrizzleStaleJobs,
+  type DrizzleUnitOfWork,
   type EmailSender,
   type FeedbackStageEntryDeps,
   type MessagingConfig,
   type StaleScanDeps,
 } from '@tt/core';
-import type { Db } from '@tt/db';
 import { newConversationToken } from '@tt/providers';
 
 export interface HrWorkerDeps {
@@ -25,28 +14,27 @@ export interface HrWorkerDeps {
 }
 
 export interface HrWiring {
-  readonly db: Db;
+  readonly uow: DrizzleUnitOfWork;
   readonly sender: EmailSender;
   readonly config: MessagingConfig;
   readonly onMailError: (error: unknown) => void;
 }
 
 /** What the hourly scan needs for feedback reminders and stale ads, on Postgres; the sender is injected. */
-export function createHrWorkerDeps({ db, sender, config, onMailError }: HrWiring): HrWorkerDeps {
-  const members = createDrizzleMemberDirectory(db);
-  const jobs = createDrizzleJobs(db);
+export function createHrWorkerDeps({ uow, sender, config, onMailError }: HrWiring): HrWorkerDeps {
+  const r = uow.repositories;
   const clock = { newId: randomUUID, now: () => new Date() };
   return {
     feedback: {
-      auditLog: createDrizzleAuditLog(db),
-      jobs,
-      candidates: createDrizzleCandidates(db),
-      applications: createDrizzleApplications(db),
-      organizations: createDrizzleOrganizationDirectory(db),
-      members,
-      stageInterviewers: createDrizzleStageInterviewers(db),
-      feedbackRequests: createDrizzleFeedbackRequests(db),
-      interviewFeedback: createDrizzleInterviewFeedback(db),
+      auditLog: r.auditLog,
+      jobs: r.jobs,
+      candidates: r.candidates,
+      applications: r.applications,
+      organizations: r.organizations,
+      members: r.members,
+      stageInterviewers: r.stageInterviewers,
+      feedbackRequests: r.feedbackRequests,
+      interviewFeedback: r.interviewFeedback,
       sender,
       config,
       newToken: newConversationToken,
@@ -54,6 +42,6 @@ export function createHrWorkerDeps({ db, sender, config, onMailError }: HrWiring
       onError: onMailError,
       ...clock,
     },
-    stale: { staleJobs: createDrizzleStaleJobs(db), jobs, notifications: createDrizzleNotifications(db), members, newId: clock.newId },
+    stale: { staleJobs: r.staleJobs, jobs: r.jobs, notifications: r.notifications, members: r.members, newId: clock.newId },
   };
 }

@@ -30,6 +30,7 @@ import { createDrizzleNotifications } from './drizzle-notifications.js';
 import { createDrizzlePrivacyNotices } from './drizzle-privacy-notices.js';
 import { createDrizzleDataExports, createDrizzleRetentionRuns } from './drizzle-privacy.js';
 import { ConflictError } from '../errors.js';
+import { createDrizzleTransaction } from './drizzle-repositories.js';
 
 let handle: DbHandle;
 const NOW = new Date('2026-06-01T00:00:00Z');
@@ -127,6 +128,7 @@ async function buildWorld(): Promise<World> {
 
 const depsFor = (world: World, overrides: Partial<CandidateRightsDeps> = {}): CandidateRightsDeps => ({
   auditLog: createDrizzleAuditLog(handle.db),
+  transaction: createDrizzleTransaction(handle.db),
   jobs: createDrizzleJobs(handle.db),
   candidates: createDrizzleCandidates(handle.db),
   applications: createDrizzleApplications(handle.db),
@@ -257,12 +259,12 @@ describe('Postgres adapters of the privacy ports', () => {
     const applications = createDrizzleApplications(handle.db);
     const [first] = world.applicationIds as [string];
     const current = (await applications.findById(world.org, first))!;
-    await applications.save({ ...current, retentionExpiresAt: new Date('2020-01-01T00:00:00Z') });
+    await applications.update(current.organizationId, current.id, { retentionExpiresAt: new Date('2020-01-01T00:00:00Z') });
     const mine = await applications.listRetentionExpiringBefore(world.org, new Date('2021-01-01T00:00:00Z'));
     expect(mine.map((a) => a.id)).toEqual([first]);
     expect(await applications.listRetentionExpiringBefore(await insertOrg(), new Date('2099-01-01T00:00:00Z'))).toEqual([]);
     expect((await applications.listRetentionExpiringAcrossOrganizations(new Date('2021-01-01T00:00:00Z'))).map((a) => a.id)).toContain(first);
-    await applications.save({ ...current, retentionExpiresAt: current.retentionExpiresAt });
+    await applications.update(current.organizationId, current.id, { retentionExpiresAt: current.retentionExpiresAt });
   });
 
   it('stores retention runs and data exports, isolated per organization', async () => {
@@ -294,7 +296,7 @@ describe('Postgres adapters of the privacy ports', () => {
     const applications = createDrizzleApplications(handle.db);
     for (const id of world.applicationIds) {
       const current = (await applications.findById(world.org, id))!;
-      await applications.save({ ...current, retentionExpiresAt: new Date('2000-01-01T00:00:00Z') });
+      await applications.update(current.organizationId, current.id, { retentionExpiresAt: new Date('2000-01-01T00:00:00Z') });
     }
     const base = depsFor(world);
     const notifications = createDrizzleNotifications(handle.db);

@@ -3,7 +3,7 @@ import { CircleCheckBigIcon, CircleIcon, CalendarClockIcon, UserRoundIcon } from
 import { fullName } from '@/lib/candidate-view'
 import { formatDate } from '@/lib/format'
 import { taskGroup } from '@/lib/inbox-view'
-import type { TaskDto } from '@/lib/phase4-contract'
+import type { TaskDto } from '@tt/domain'
 
 /** One task: a round toggle (done or open), the title, due date, assignee and, in "Le mie attività", whose task it is. */
 const props = defineProps<{ task: TaskDto; now: Date; assigneeName: string | null; canToggle: boolean; busy?: boolean; showContext?: boolean }>()
@@ -11,7 +11,7 @@ const emit = defineEmits<{ toggle: [] }>()
 const { t, locale } = useI18n()
 const done = computed(() => props.task.completedAt !== null)
 const late = computed(() => !done.value && taskGroup(props.task, props.now) === 'overdue')
-const jobTitle = computed(() => props.task.job?.title ?? props.task.jobTitle)
+const jobTitle = computed(() => props.task.jobTitle)
 const contextLink = computed(() => (props.task.candidate ? `/app/candidates/${encodeURIComponent(props.task.candidate.id)}${props.task.applicationId ? `?application=${encodeURIComponent(props.task.applicationId)}` : ''}` : null))
 </script>
 

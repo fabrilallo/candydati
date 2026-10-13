@@ -40,6 +40,15 @@ describe('resend provider', () => {
       headers: { 'Auto-Submitted': 'auto-generated', 'In-Reply-To': '<m@x>' },
     });
   });
+  it('sends the idempotency key as a header, so a repeated delivery is dropped by Resend', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(json({ id: 'r' }));
+    const provider = createResendEmailProvider({ apiKey: 'k', fetch: fetchMock });
+    expect(provider.deduplicates).toBe(true);
+    await provider.send({ ...message, idempotencyKey: 'msg_1' });
+    const init = (fetchMock.mock.calls[0] as [string, RequestInit])[1];
+    expect((init.headers as Record<string, string>)['Idempotency-Key']).toBe('msg_1');
+    expect(JSON.parse(String(init.body))).not.toHaveProperty('idempotencyKey');
+  });
   it('omits optional fields', async () => {
     const fetchMock = vi.fn().mockResolvedValue(json({ id: 'r' }));
     await createResendEmailProvider({ apiKey: 'k', fetch: fetchMock }).send(message);

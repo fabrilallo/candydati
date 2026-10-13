@@ -1,26 +1,15 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import {
-  createDrizzleApplications,
-  createDrizzleAuditLog,
-  createDrizzleCandidates,
-  createDrizzleConversations,
-  createDrizzleImportAnalyses,
-  createDrizzleImportBatches,
-  createDrizzleImportCommit,
-  createDrizzleImportItems,
-  createDrizzleJobs,
-  createDrizzleMessages,
-  createDrizzleOrganizationDirectory,
+  type DrizzleUnitOfWork,
   type FileStorage,
   type ImportCommitDeps,
   type TaskQueue,
 } from '@tt/core';
-import type { Db } from '@tt/db';
 import type { PlatformConfig } from '@tt/domain';
 import { createCvExtractor, createMastraGenerator, newConversationToken, sniffCv, toMessagingConfig, type CvExtractor, type EmailConfig, type ImportAnalysisDeps } from '@tt/providers';
 
 export interface ImportWorkerWiring {
-  readonly db: Db;
+  readonly uow: DrizzleUnitOfWork;
   readonly files: FileStorage;
   readonly queue: TaskQueue;
   readonly platform: PlatformConfig;
@@ -44,13 +33,13 @@ export const newConsentSecret = (): string => randomBytes(24).toString('base64ur
 export const hashConsentSecret = (secret: string): string => createHash('sha256').update(secret).digest('hex');
 
 /** Drizzle repositories and S3 for the import tasks. The model extractor exists only when `FAST_MODEL` is set. */
-export function createImportWorkerDeps({ db, files, queue, platform, email, fastModel, onModelError, onMailError }: ImportWorkerWiring): ImportWorkerDeps {
-  const candidates = createDrizzleCandidates(db);
+export function createImportWorkerDeps({ uow, files, queue, platform, email, fastModel, onModelError, onMailError }: ImportWorkerWiring): ImportWorkerDeps {
+  const r = uow.repositories;
   const analysis: ImportAnalysisDeps = {
-    imports: createDrizzleImportBatches(db),
-    importItems: createDrizzleImportItems(db),
-    importAnalyses: createDrizzleImportAnalyses(db),
-    candidates,
+    imports: r.imports,
+    importItems: r.importItems,
+    importAnalyses: r.importAnalyses,
+    candidates: r.candidates,
     files,
     queue,
     newId: randomUUID,
@@ -63,13 +52,14 @@ export function createImportWorkerDeps({ db, files, queue, platform, email, fast
       : null,
     commit: {
       ...analysis,
-      auditLog: createDrizzleAuditLog(db),
-      jobs: createDrizzleJobs(db),
-      applications: createDrizzleApplications(db),
-      commit: createDrizzleImportCommit(db),
-      organizations: createDrizzleOrganizationDirectory(db),
+      auditLog: r.auditLog,
+      transaction: uow.transaction,
+      jobs: r.jobs,
+      applications: r.applications,
+      commit: r.commit,
+      organizations: r.organizations,
       cvSniffer: sniffCv,
-      mail: { conversations: createDrizzleConversations(db), messages: createDrizzleMessages(db), config: toMessagingConfig(platform, email), newToken: newConversationToken },
+      mail: { conversations: r.conversations, messages: r.messages, config: toMessagingConfig(platform, email), newToken: newConversationToken },
       newSecret: newConsentSecret,
       hash: hashConsentSecret,
       onMailError,

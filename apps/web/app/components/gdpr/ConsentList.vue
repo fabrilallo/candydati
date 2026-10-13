@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { ConsentScope } from '@tt/domain'
-import type { CandidateApplicationDto } from '@/lib/candidate-schemas'
+import type { CandidateApplicationDto, ConsentScope  } from '@tt/domain'
 import { formatDate } from '@/lib/format'
 import { retentionDaysLeft } from '@/lib/gdpr-view'
 import { isToRenew } from '@/lib/import-view'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { ImportItemView } from '@/lib/import-item-view'
 import { confidenceCounts, filterItems, PROBLEM_FILTERS, type ConfidenceFilter, type PreviewFilters, type ProblemFilter, type Selection } from '@/lib/import-preview'
-import { IMPORT_CONFIDENCES as CONFIDENCES } from '@tt/domain'
-import type { Confidence, ImportItemDto } from '@/lib/phase8-contract'
+import { IMPORT_CONFIDENCES as CONFIDENCES, type ImportConfidence } from '@tt/domain'
 import { Button } from '@/components/ui/button'
 import { NativeSelect } from '@/components/ui/native-select'
 
@@ -9,8 +9,8 @@ import { NativeSelect } from '@/components/ui/native-select'
  * Step 4 "Anteprima": the proposed candidates with confidence, sources and problems; include or exclude one by one or
  * every item of one confidence at once; filters by confidence and problem. All client state until "Continua".
  */
-const props = defineProps<{ items: readonly ImportItemDto[]; selection: Selection; filters: PreviewFilters; pending: boolean }>()
-const emit = defineEmits<{ 'update:filters': [filters: PreviewFilters]; toggle: [id: string, include: boolean]; bulk: [confidence: Confidence, include: boolean]; back: []; next: [] }>()
+const props = defineProps<{ items: readonly ImportItemView[]; selection: Selection; filters: PreviewFilters; pending: boolean }>()
+const emit = defineEmits<{ 'update:filters': [filters: PreviewFilters]; toggle: [id: string, include: boolean]; bulk: [confidence: ImportConfidence, include: boolean]; back: []; next: [] }>()
 const { t } = useI18n()
 const shown = computed(() => filterItems(props.items, props.selection, props.filters))
 const counts = computed(() => confidenceCounts(props.items))

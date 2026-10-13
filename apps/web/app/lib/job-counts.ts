@@ -11,4 +11,3 @@ export const loadJobCounts = async (request: JobApiRequest): Promise<JobCounts> 
   return { ...byStatus, total: totals.reduce((sum, [, count]) => sum + count, 0) }
 }
 
-export const hasAnyJob = (counts: JobCounts): boolean => counts.total > 0

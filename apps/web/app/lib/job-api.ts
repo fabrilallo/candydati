@@ -1,31 +1,29 @@
-import type {
-  AdQualityAssessment,
-  JobContent,
-  JobDto,
-  JobStatsDto,
-  JobStatus,
-  JobSummaryDto,
-  JobTemplateDto,
-  PageMeta,
-  PublicCareersDto,
-  PublishIssue,
-  PublishJobResultDto,
-} from '@tt/domain'
-import { jobStatsDtoSchema } from '@tt/domain'
-import { z } from 'zod'
-import { approvalErrorKey } from './approval-view'
-import { AppError, authErrorKey, errorKeyOf } from './auth-errors'
 import {
+  type AdQualityAssessment,
+  type JobContent,
+  type JobDto,
+  type JobStatsDto,
+  type JobStatus,
+  type JobSummaryDto,
+  type JobTemplateDto,
+  type PageMeta,
+  type PublicCareersDto,
+  type PublishIssue,
+  type PublishJobResultDto,
   deletedSchema,
   jobSchema,
+  jobStatsDtoSchema,
   jobSummarySchema,
   publicCareersSchema,
   publicJobPageSchema,
   publishResultSchema,
   qualityResultSchema,
   templateSchema,
-  type PublicJobPage,
-} from './job-api-schemas'
+  type PublicJobPage
+} from '@tt/domain'
+import { z } from 'zod'
+import { approvalErrorKey } from './approval-view'
+import { AppError, authErrorKey, errorKeyOf } from './auth-errors'
 
 export const JOB_PAGE_SIZE = 20
 export const PRIVACY_NOTICE_REQUIRED = 'privacy_notice_required'

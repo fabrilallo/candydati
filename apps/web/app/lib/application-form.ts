@@ -1,6 +1,5 @@
-import { applicationFormSchema, type ApplicationForm, type ConsentScope } from '@tt/domain'
+import { applicationFormSchema, type ApplicationForm, type ConsentScope, receivedSchema } from '@tt/domain'
 import { ApiFailure, callApi, type FailureInfo } from './api-call'
-import { receivedSchema } from './candidate-schemas'
 import type { JobApiRequest } from './job-api'
 
 /** What the candidate types and ticks on the public form. Strings stay strings until the payload is built. */

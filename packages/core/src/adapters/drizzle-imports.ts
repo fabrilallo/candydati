@@ -1,6 +1,7 @@
 import { and, asc, desc, eq, inArray, isNull, schema, sql } from '@tt/db';
 import type { ImportAnalysis, ImportBatch, ImportItem } from '@tt/domain';
 import type { ConsentTokenRepository, ImportAnalysisRepository, ImportBatchRepository, ImportItemRepository } from '../import-ports.js';
+import { ConflictError } from '../errors.js';
 import type { DbExecutor } from './db-executor.js';
 
 type BatchRow = typeof schema.importBatch.$inferSelect;
@@ -50,8 +51,34 @@ export function createDrizzleImportBatches(db: DbExecutor): ImportBatchRepositor
       if (!row) throw new Error('import_batch not found for save');
       return toBatch(row);
     },
+    async transition(organizationId, id, from, patch) {
+      const [row] = await db
+        .update(importBatch)
+        .set(patch)
+        .where(and(eq(importBatch.organizationId, organizationId), eq(importBatch.id, id), eq(importBatch.status, from)))
+        .returning();
+      if (!row) throw new ConflictError('import_changed');
+      return toBatch(row);
+    },
+    async addCounts(organizationId, id, delta) {
+      const entries = Object.entries(delta).filter(([, value]) => value !== undefined && value !== 0);
+      if (entries.length === 0) return;
+      // One statement: each count is read and incremented under the row lock, so concurrent chunks never lose one.
+      const increments = entries.map(([key, value]) => sql`jsonb_build_object(${key}::text, coalesce((${importBatch.counts} ->> ${key}::text)::int, 0) + ${value ?? 0}::int)`);
+      const merged = increments.reduce((all, next) => sql`${all} || ${next}`, sql`${importBatch.counts}`);
+      await db.update(importBatch).set({ counts: merged }).where(and(eq(importBatch.organizationId, organizationId), eq(importBatch.id, id)));
+    },
     async findById(organizationId, id) {
       const [row] = await db.select().from(importBatch).where(and(eq(importBatch.organizationId, organizationId), eq(importBatch.id, id))).limit(1);
+      return row ? toBatch(row) : null;
+    },
+    async lock(organizationId, id) {
+      const [row] = await db
+        .select()
+        .from(importBatch)
+        .where(and(eq(importBatch.organizationId, organizationId), eq(importBatch.id, id)))
+        .limit(1)
+        .for('update');
       return row ? toBatch(row) : null;
     },
     async list(organizationId) {
@@ -89,7 +116,12 @@ export function createDrizzleImportItems(db: DbExecutor): ImportItemRepository {
       }
     },
     async setStatus(organizationId, itemId, status, error) {
-      await db.update(importItem).set({ status, error }).where(and(eq(importItem.organizationId, organizationId), eq(importItem.id, itemId)));
+      const rows = await db
+        .update(importItem)
+        .set({ status, error })
+        .where(and(eq(importItem.organizationId, organizationId), eq(importItem.id, itemId), eq(importItem.status, 'pending')))
+        .returning({ id: importItem.id });
+      return rows.length > 0;
     },
     async deleteByBatch(organizationId, batchId) {
       await db.delete(importItem).where(inBatch(organizationId, batchId));

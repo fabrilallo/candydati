@@ -3,7 +3,7 @@ import { FilePenLineIcon } from '@lucide/vue'
 import { salaryFigure } from '@/lib/ad-facts'
 import { proposalFacts } from '@/lib/job-proposal'
 import { can } from '@/lib/permissions-ui'
-import type { DraftJobOutput } from '@/lib/phase6-contract'
+import type { DraftJobOutput } from '@tt/domain'
 import { Button } from '@/components/ui/button'
 
 /**
@@ -15,14 +15,14 @@ const emit = defineEmits<{ apply: [] }>()
 const { t, locale } = useI18n()
 const { viewer } = useViewer()
 const assistant = useAssistant()
-const facts = computed(() => proposalFacts(props.draft.content))
-const salary = computed(() => (facts.value.salary ? salaryFigure(props.draft.content.salary, locale.value) : null))
+const facts = computed(() => proposalFacts(props.draft.proposal))
+const salary = computed(() => (facts.value.salary ? salaryFigure(props.draft.proposal.salary, locale.value) : null))
 const canCreate = computed(() => can(viewer.value?.role ?? null, 'job:create'))
 const applied = ref(false)
 
 const apply = async (): Promise<void> => {
   const onEditor = assistant.editorReady.value
-  assistant.proposeJob(props.draft.content)
+  assistant.proposeJob(props.draft.proposal)
   applied.value = true
   emit('apply')
   if (!onEditor) await navigateTo('/app/jobs/new')

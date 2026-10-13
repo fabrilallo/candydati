@@ -1,3 +1,4 @@
+export * from './in-memory-transaction.js';
 export * from './actors.js';
 export * from './in-memory-audit-log.js';
 export * from './in-memory-jobs.js';

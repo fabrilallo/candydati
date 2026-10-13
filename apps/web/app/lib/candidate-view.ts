@@ -1,5 +1,4 @@
-import { TAG_MAX, TAGS_PER_CANDIDATE_MAX } from '@tt/domain'
-import type { CandidateApplicationDto, StageRef } from './candidate-schemas'
+import { TAG_MAX, TAGS_PER_CANDIDATE_MAX, type CandidateApplicationDto, type StageRef } from '@tt/domain'
 
 export const fullName = (person: { readonly firstName: string; readonly lastName: string }): string => `${person.firstName.trim()} ${person.lastName.trim()}`.trim()
 

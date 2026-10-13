@@ -1,26 +1,11 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { createDb, schema, type DbHandle } from '@tt/db';
-import { importFileKey, type ParsedImportCvInput } from '@tt/domain';
+import { createDb, type DbHandle } from '@tt/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { ImportCommitDeps, ImportUndoDeps, ConsentDeps } from '../import-ports.js';
-import type { RetentionDeps } from '../privacy-ports.js';
-import {
-  buildApplication,
-  buildCandidate,
-  buildJob,
-  buildPrivacyNotice,
-  createInMemoryFileStorage,
-  createInMemoryTaskQueue,
-  fakeCvSniffer,
-  fakePdfBytes,
-  testMessagingConfig,
-  userActor,
-} from '../testing/index.js';
+import { buildApplication, buildCandidate, fakePdfBytes } from '../testing/index.js';
+import { buildImportWorld, newPerson, readyBatch, recruiterOf, runCommit, type Person, type World } from '../testing/import-postgres.js';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
-import { recordImportAnalysis, startImportAnalysis } from '../use-cases/imports/analyze.js';
 import { commitImport } from '../use-cases/imports/commit-import.js';
 import { answerConsentRequest } from '../use-cases/imports/consent-request.js';
-import { createImportBatch } from '../use-cases/imports/create-import-batch.js';
 import { requestImportCommit } from '../use-cases/imports/request-commit.js';
 import { undoImport } from '../use-cases/imports/undo-import.js';
 import { getCandidate } from '../use-cases/candidates/get-candidate.js';
@@ -32,18 +17,11 @@ import { createDrizzleAuditLog } from './drizzle-audit-log.js';
 import { createDrizzleCandidateNotes } from './drizzle-candidate-notes.js';
 import { createDrizzleCandidateSearch } from './drizzle-candidate-search.js';
 import { createDrizzleCandidates } from './drizzle-candidates.js';
-import { createDrizzleConversations } from './drizzle-conversations.js';
 import { createDrizzleCvExtractions } from './drizzle-cv-extractions.js';
-import { createDrizzleErasure } from './drizzle-erasure.js';
-import { createDrizzleImportCommit } from './drizzle-import-commit.js';
 import { createDrizzleConsentTokens, createDrizzleImportAnalyses, createDrizzleImportBatches, createDrizzleImportItems } from './drizzle-imports.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
-import { createDrizzleMemberDirectory } from './drizzle-members.js';
 import { createDrizzleMessages } from './drizzle-messages.js';
-import { createDrizzleNotifications } from './drizzle-notifications.js';
-import { createDrizzleOrganizationDirectory } from './drizzle-organizations.js';
-import { createDrizzlePrivacyNotices } from './drizzle-privacy-notices.js';
-import { createDrizzleDataExports, createDrizzleRetentionRuns } from './drizzle-privacy.js';
+import { createDrizzleTransaction } from './drizzle-repositories.js';
 
 let handle: DbHandle;
 const DAY = 24 * 3600 * 1000;
@@ -57,89 +35,7 @@ afterAll(async () => {
   await handle.close();
 });
 
-interface World {
-  readonly org: string;
-  readonly jobId: string;
-  readonly otherJobId: string;
-  readonly files: ReturnType<typeof createInMemoryFileStorage>;
-  readonly queue: ReturnType<typeof createInMemoryTaskQueue>;
-  readonly deps: ImportCommitDeps & ImportUndoDeps & ConsentDeps & RetentionDeps;
-  readonly now: { current: Date };
-}
-
-async function buildWorld(): Promise<World> {
-  const org = randomUUID();
-  await handle.db.insert(schema.organization).values({ id: org, name: `Org ${org}`, slug: org, createdAt: new Date() });
-  const jobs = createDrizzleJobs(handle.db);
-  const jobId = randomUUID();
-  const otherJobId = randomUUID();
-  for (const id of [jobId, otherJobId]) await jobs.create(buildJob({ id, slug: id, organizationId: org, status: 'published', publishedAt: NOW }));
-  await createDrizzlePrivacyNotices(handle.db).create(buildPrivacyNotice({ id: randomUUID(), organizationId: org, version: 1 }));
-  const files = createInMemoryFileStorage();
-  const queue = createInMemoryTaskQueue();
-  const now = { current: NOW };
-  const db = handle.db;
-  const deps = {
-    auditLog: createDrizzleAuditLog(db),
-    jobs,
-    candidates: createDrizzleCandidates(db),
-    applications: createDrizzleApplications(db),
-    imports: createDrizzleImportBatches(db),
-    importItems: createDrizzleImportItems(db),
-    importAnalyses: createDrizzleImportAnalyses(db),
-    consentTokens: createDrizzleConsentTokens(db),
-    commit: createDrizzleImportCommit(db),
-    organizations: createDrizzleOrganizationDirectory(db),
-    privacyNotices: createDrizzlePrivacyNotices(db),
-    erasure: createDrizzleErasure(db),
-    mail: { conversations: createDrizzleConversations(db), messages: createDrizzleMessages(db), config: testMessagingConfig, newToken: () => randomUUID().replaceAll('-', '') },
-    notifications: createDrizzleNotifications(db),
-    members: createDrizzleMemberDirectory(db),
-    retentionRuns: createDrizzleRetentionRuns(db),
-    dataExports: createDrizzleDataExports(db),
-    cvSniffer: fakeCvSniffer,
-    files,
-    queue,
-    newId: () => randomUUID(),
-    newSecret: () => `${randomUUID().replaceAll('-', '')}${randomUUID().replaceAll('-', '')}`,
-    hash,
-    now: () => now.current,
-  } as unknown as World['deps'];
-  return { org, jobId, otherJobId, files, queue, deps, now };
-}
-
-const recruiterOf = (org: string) => userActor({ id: 'user_rec', organizationId: org, role: 'recruiter' });
-
-interface Person {
-  readonly first: string;
-  readonly last: string;
-  readonly email: string;
-}
-const newPerson = (): Person => {
-  const unique = randomUUID().slice(0, 8);
-  return { first: `Zelda${unique}`, last: `Quuxington${unique}`, email: `zelda.${unique}@example.org` };
-};
-
-/** Creates, analyses and returns a ready batch for these people (CV + row each), playing the worker. */
-async function readyBatch(world: World, people: readonly Person[], jobId = world.jobId): Promise<string> {
-  const { deps, org } = world;
-  const batch = await createImportBatch(deps, recruiterOf(org), { jobId, stageId: 'received', files: [{ fileName: 'import.zip', bytes: fakePdfBytes() }] });
-  await startImportAnalysis(deps, { organizationId: org, batchId: batch.id });
-  const cvs: ParsedImportCvInput[] = [];
-  for (const person of people) {
-    const key = importFileKey(org, batch.id, `cv/${person.last}.pdf`);
-    await world.files.put(key, fakePdfBytes(), 'application/pdf');
-    cvs.push({ fileName: `${person.last}.pdf`, key, text: `CV of ${person.first} ${person.last}`, extraction: null, name: `${person.first} ${person.last}`, email: person.email });
-  }
-  const rows = people.map((p, index) => ({ index: index + 2, cells: { Nome: p.first, Cognome: p.last, Email: p.email, Note: `Note on ${p.first}`, Telefono: '+39 347 0001112' } }));
-  await recordImportAnalysis(deps, { organizationId: org, batchId: batch.id, headers: ['Nome', 'Cognome', 'Email', 'Note', 'Telefono'], cvs, rows });
-  return batch.id;
-}
-
-async function runCommit(world: World, batchId: string): Promise<void> {
-  await requestImportCommit(world.deps, recruiterOf(world.org), { batchId });
-  await commitImport(world.deps, { organizationId: world.org, batchId });
-}
+const buildWorld = (): Promise<World> => buildImportWorld(handle, NOW);
 
 /** Every table of the schema except `audit_log`: how many rows mention any of the needles anywhere in the row. */
 async function leftovers(needles: readonly string[]): Promise<Record<string, number>> {
@@ -275,12 +171,12 @@ describe('import on Postgres', () => {
     await runCommit(world, batchId);
     const search = createDrizzleCandidateSearch(handle.db);
     const actor = recruiterOf(world.org);
-    const searchDeps = { auditLog: createDrizzleAuditLog(handle.db), candidateSearch: search } as never;
+    const searchDeps = { auditLog: createDrizzleAuditLog(handle.db), transaction: createDrizzleTransaction(handle.db), candidateSearch: search } as never;
     expect((await search.search({ organizationId: world.org, page: 1, limit: 10 })).items.map((i) => i.candidate.id)).toEqual([visible.id]);
     expect((await search.search({ organizationId: world.org, query: person.last, page: 1, limit: 10 })).total).toBe(0);
     expect((await searchCandidates(searchDeps, actor, { query: person.first })).total).toBe(0);
     const { person: imported, application } = await applicationOf(world.org, person.email);
-    const profileDeps = { auditLog: createDrizzleAuditLog(handle.db), candidates: createDrizzleCandidates(handle.db), applications: createDrizzleApplications(handle.db), extractions: createDrizzleCvExtractions(handle.db), messages: createDrizzleMessages(handle.db), jobs: createDrizzleJobs(handle.db), notes: createDrizzleCandidateNotes(handle.db), users: { namesOf: async () => ({}) }, now: () => NOW } as never;
+    const profileDeps = { auditLog: createDrizzleAuditLog(handle.db), transaction: createDrizzleTransaction(handle.db), candidates: createDrizzleCandidates(handle.db), applications: createDrizzleApplications(handle.db), extractions: createDrizzleCvExtractions(handle.db), messages: createDrizzleMessages(handle.db), jobs: createDrizzleJobs(handle.db), notes: createDrizzleCandidateNotes(handle.db), users: { namesOf: async () => ({}) }, now: () => NOW } as never;
     await expect(getCandidate(profileDeps, actor, { candidateId: imported!.id })).rejects.toBeInstanceOf(NotFoundError);
     await expect(getCandidate(profileDeps, actor, { candidateId: imported!.id, viaJobId: world.otherJobId })).rejects.toBeInstanceOf(NotFoundError);
     expect((await getCandidate(profileDeps, actor, { candidateId: imported!.id, viaJobId: world.jobId })).applications).toHaveLength(1);

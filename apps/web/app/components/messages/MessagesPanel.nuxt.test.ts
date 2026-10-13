@@ -33,7 +33,7 @@ registerEndpoint('/api/v1/messages', {
     state.sends.push(body)
     if (state.refuse) return (setResponseStatus(event, 422), { success: false, data: null, error: { code: 'validation_failed', message: 'x', issues: [{ path: 'body', message: 'unknown_variable:job.bonus' }] } })
     state.messages = [...state.messages, message('m9', { status: 'queued', sentAt: null, subject: 'Nuovo' })]
-    return ok({ queued: 1 })
+    return ok({ queued: 1, failed: 0 })
   },
 })
 registerEndpoint('/api/v1/applications/a1/decide', {

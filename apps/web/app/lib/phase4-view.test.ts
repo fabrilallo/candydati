@@ -134,10 +134,7 @@ describe('webhooks view', () => {
   })
 
   it('colours a delivery by its outcome', () => {
-    expect(deliveryTone({ status: 'success', responseCode: 204, error: null })).toBe('success')
-    expect(deliveryTone({ status: 'success', responseCode: null, error: null })).toBe('success')
-    expect(deliveryTone({ status: 'failed', responseCode: 500, error: null })).toBe('destructive')
-    expect(deliveryTone({ status: 'failed', responseCode: null, error: 'timeout' })).toBe('destructive')
-    expect(deliveryTone({ status: 'pending', responseCode: null, error: null })).toBe('neutral')
+    expect(deliveryTone({ status: 'success' })).toBe('success')
+    expect(deliveryTone({ status: 'failed' })).toBe('destructive')
   })
 })

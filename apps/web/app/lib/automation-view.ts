@@ -1,6 +1,5 @@
-import { checkWebhookUrl, JOB_OWNER_ASSIGNEE, MAX_DUE_IN_DAYS, TASK_TITLE_MAX, WEBHOOK_EVENT_TYPES, type AutomationActionType } from '@tt/domain'
+import { type AutomationRuleDto, type WebhookDeliveryDto, checkWebhookUrl, JOB_OWNER_ASSIGNEE, MAX_DUE_IN_DAYS, TASK_TITLE_MAX, WEBHOOK_EVENT_TYPES, type AutomationActionType    } from '@tt/domain';
 import type { RuleInput } from './automation-api'
-import type { AutomationRuleDto, WebhookDeliveryDto } from './phase4-contract'
 
 /** Pure: the rules of each stage, in the order of the stages and then of creation. Rules of unknown stages are left out. */
 export const rulesByStage = (rules: readonly AutomationRuleDto[], stageIds: readonly string[]): Readonly<Record<string, readonly AutomationRuleDto[]>> =>
@@ -91,11 +90,7 @@ export const validateWebhookForm = (form: WebhookForm): Partial<Record<keyof Web
   }
 }
 
-export type DeliveryTone = 'success' | 'destructive' | 'neutral'
+export type DeliveryTone = 'success' | 'destructive'
 
-/** Pure: 2xx is delivered, a failure or another code is an error, anything else is still on its way. */
-export const deliveryTone = (delivery: Pick<WebhookDeliveryDto, 'status' | 'responseCode' | 'error'>): DeliveryTone => {
-  if (delivery.responseCode !== null) return delivery.responseCode >= 200 && delivery.responseCode < 300 ? 'success' : 'destructive'
-  if (delivery.status === 'success') return 'success'
-  return delivery.status === 'failed' || delivery.error ? 'destructive' : 'neutral'
-}
+/** Pure: a delivery either reached the endpoint with a 2xx (`success`) or it did not (`failed`). */
+export const deliveryTone = (delivery: Pick<WebhookDeliveryDto, 'status'>): DeliveryTone => (delivery.status === 'success' ? 'success' : 'destructive')

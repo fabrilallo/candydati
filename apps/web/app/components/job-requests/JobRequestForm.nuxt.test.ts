@@ -61,6 +61,6 @@ describe('job request form', () => {
     await wrapper.find('#req-salary-max').setValue('60000')
     await wrapper.find('[data-testid="request-form"]').trigger('submit')
     await vi.waitFor(() => expect(state.posted).toHaveLength(1))
-    expect(state.posted[0]).toEqual({ title: 'Backend developer', role: 'backend_developer', reason: 'Il team ha perso due persone.', headcount: 2, salaryMin: 45000, salaryMax: 60000, currency: 'EUR' })
+    expect(state.posted[0]).toEqual({ title: 'Backend developer', role: 'backend_developer', reason: 'Il team ha perso due persone.', headcount: 2, salaryMin: 45000, salaryMax: 60000, currency: 'EUR', language: 'it', location: {}, processNotes: '', interviewersNotes: '' })
   })
 })

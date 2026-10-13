@@ -63,22 +63,38 @@ describe('createDrizzleJobs', () => {
     expect((await jobs.list({ organizationId: orgB, page: 1, limit: 100 })).items.map((j) => j.id)).not.toContain(mine.id);
   });
 
-  it('does not save across organizations', async () => {
+  it('does not write across organizations', async () => {
     const jobs = createDrizzleJobs(handle.db);
     const mine = newJob(orgA);
     await jobs.create(mine);
-    await expect(jobs.save({ ...mine, organizationId: orgB, content: completeJobContent({ title: 'Hijack' }) })).rejects.toThrow();
-    expect((await jobs.findById(orgA, mine.id))?.content.title).toBe('Backend Developer');
+    await expect(jobs.updateContent(orgB, mine.id, 'draft', { content: completeJobContent({ title: 'Hijack' }), updatedAt: new Date() })).rejects.toBeInstanceOf(ConflictError);
+    await expect(jobs.transition(orgB, mine.id, 'draft', { status: 'published', quality: null, publishedAt: new Date(), updatedAt: new Date() })).rejects.toBeInstanceOf(ConflictError);
+    expect(await jobs.findById(orgA, mine.id)).toMatchObject({ status: 'draft', content: { title: 'Backend Developer' } });
   });
 
-  it('saves a full replacement and keeps the title column in sync', async () => {
+  it('updates the content and the title column, never the status, and only in the expected status (#4)', async () => {
+    const jobs = createDrizzleJobs(handle.db);
+    const mine = newJob(orgA, { status: 'published', publishedAt: new Date() });
+    await jobs.create(mine);
+    const saved = await jobs.updateContent(orgA, mine.id, 'published', { content: completeJobContent({ title: 'Renamed' }), updatedAt: new Date() });
+    expect(saved).toMatchObject({ status: 'published', content: { title: 'Renamed' } });
+    const { rows } = await handle.pool.query('select title from job where id = $1', [mine.id]);
+    expect(rows[0]?.title).toBe('Renamed');
+    await jobs.transition(orgA, mine.id, 'published', { status: 'closed', closedAt: new Date(), updatedAt: new Date() });
+    // An edit read while published arrives after the close: refused, the job stays closed.
+    await expect(jobs.updateContent(orgA, mine.id, 'published', { content: completeJobContent({ title: 'Late' }), updatedAt: new Date() })).rejects.toBeInstanceOf(ConflictError);
+    await expect(jobs.transition(orgA, mine.id, 'published', { status: 'closed', closedAt: new Date(), updatedAt: new Date() })).rejects.toBeInstanceOf(ConflictError);
+    expect(await jobs.findById(orgA, mine.id)).toMatchObject({ status: 'closed', content: { title: 'Renamed' } });
+  });
+
+  it('locks the row inside a transaction and reads it outside one', async () => {
     const jobs = createDrizzleJobs(handle.db);
     const mine = newJob(orgA);
     await jobs.create(mine);
-    const saved = await jobs.save({ ...mine, status: 'closed', closedAt: new Date(), content: completeJobContent({ title: 'Renamed' }) });
-    expect(saved).toMatchObject({ status: 'closed', content: { title: 'Renamed' } });
-    const { rows } = await handle.pool.query('select title from job where id = $1', [mine.id]);
-    expect(rows[0]?.title).toBe('Renamed');
+    expect(await jobs.lock(orgA, mine.id, 'share')).toMatchObject({ id: mine.id });
+    expect(await jobs.lock(orgB, mine.id, 'update')).toBeNull();
+    const locked = await handle.db.transaction((tx) => createDrizzleJobs(tx).lock(orgA, mine.id, 'update'));
+    expect(locked?.id).toBe(mine.id);
   });
 
   it('lists newest updatedAt first, filtered and paginated', async () => {

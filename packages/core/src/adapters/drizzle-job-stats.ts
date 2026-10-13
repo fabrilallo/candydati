@@ -1,4 +1,5 @@
-import { and, asc, count, eq, gte, schema, sql, type Db, type SQL } from '@tt/db';
+import { and, asc, count, eq, gte, schema, sql, type SQL } from '@tt/db';
+import type { DbExecutor } from './db-executor.js';
 import { JOB_STATUSES, type JobStatus } from '@tt/domain';
 import type { WeeklyActivity, WeeklyCount } from '../job-ports.js';
 
@@ -11,7 +12,7 @@ type TimestampColumn = typeof job.createdAt | typeof job.publishedAt;
 const weekOf = (column: TimestampColumn): SQL<string> =>
   sql<string>`to_char(date_trunc('week', ${column} AT TIME ZONE 'UTC'), 'YYYY-MM-DD')`;
 
-export async function countJobsByStatus(db: Db, organizationId: string): Promise<Record<JobStatus, number>> {
+export async function countJobsByStatus(db: DbExecutor, organizationId: string): Promise<Record<JobStatus, number>> {
   const rows = await db
     .select({ status: job.status, total: count() })
     .from(job)
@@ -21,7 +22,7 @@ export async function countJobsByStatus(db: Db, organizationId: string): Promise
   return Object.fromEntries(JOB_STATUSES.map((status) => [status, totals.get(status) ?? 0])) as Record<JobStatus, number>;
 }
 
-async function weeklyCounts(db: Db, organizationId: string, column: TimestampColumn, since: Date): Promise<readonly WeeklyCount[]> {
+async function weeklyCounts(db: DbExecutor, organizationId: string, column: TimestampColumn, since: Date): Promise<readonly WeeklyCount[]> {
   const week = weekOf(column);
   return db
     .select({ week, count: count() })
@@ -31,7 +32,7 @@ async function weeklyCounts(db: Db, organizationId: string, column: TimestampCol
     .orderBy(asc(week));
 }
 
-export async function jobWeeklyActivity(db: Db, organizationId: string, since: Date): Promise<WeeklyActivity> {
+export async function jobWeeklyActivity(db: DbExecutor, organizationId: string, since: Date): Promise<WeeklyActivity> {
   const [created, published] = await Promise.all([
     weeklyCounts(db, organizationId, job.createdAt, since),
     weeklyCounts(db, organizationId, job.publishedAt, since),

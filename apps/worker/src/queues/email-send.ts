@@ -25,8 +25,8 @@ export const createEmailSendQueue = (deps: DeliverDeps): QueueDefinition<typeof 
   defineQueue({
     name: EMAIL_SEND_QUEUE,
     payload: emailSendPayload,
-    handle: async ({ jobId, payload, logger, lastAttempt }) => {
-      const result = await deliverMessage(deps, systemActorFor(payload.organizationId), { ...payload, lastAttempt });
+    handle: async ({ jobId, payload, logger, lastAttempt, attempt }) => {
+      const result = await deliverMessage(deps, systemActorFor(payload.organizationId), { ...payload, lastAttempt, attempt });
       logger.info({ jobId, messageId: payload.messageId, result }, 'email delivery finished');
     },
   });

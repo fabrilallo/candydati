@@ -2,7 +2,7 @@ import type { CvMediaType } from '@tt/domain';
 import type { ApplicationRepository, CandidateRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { ReceiptDeps } from './messaging-ports.js';
-import type { AuditLogRepository } from './ports.js';
+import type { AuditLogRepository, CoreDeps } from './ports.js';
 import type { StageEventRepository, ResponsePromiseRepository } from './report-ports.js';
 import type { OutboxRepository } from './webhook-ports.js';
 
@@ -98,8 +98,16 @@ export interface TaskPayloads {
 export type QueuedTask = { readonly [N in TaskName]: { readonly name: N; readonly payload: TaskPayloads[N] } }[TaskName];
 
 /** Background jobs (pg-boss in production). The payload carries ids only, never personal data. */
+export interface EnqueueOptions {
+  /**
+   * At most one task per (name, key) is ever queued: a second enqueue with the same key is accepted and dropped. For
+   * work that must not run twice (one commit per import batch, one delivery per message or per event and endpoint).
+   */
+  readonly singletonKey?: string | undefined;
+}
+
 export interface TaskQueue {
-  enqueue<N extends TaskName>(name: N, payload: TaskPayloads[N]): Promise<void>;
+  enqueue<N extends TaskName>(name: N, payload: TaskPayloads[N], options?: EnqueueOptions): Promise<void>;
 }
 
 export interface SniffedCv {
@@ -123,6 +131,8 @@ export interface CvModelExtractor {
 
 /** The repositories that take part in the single intake transaction. */
 export interface IntakeRepositories {
+  /** The job is share-locked and re-read inside the transaction: it cannot close while the application goes in. */
+  readonly jobs: JobRepository;
   readonly candidates: CandidateRepository;
   readonly applications: ApplicationRepository;
   readonly extractions: CvExtractionRepository;
@@ -162,8 +172,7 @@ export interface SubmitApplicationDeps {
   readonly now: () => Date;
 }
 
-export interface CvExtractionDeps {
-  readonly auditLog: AuditLogRepository;
+export interface CvExtractionDeps extends CoreDeps {
   readonly applications: ApplicationRepository;
   readonly extractions: CvExtractionRepository;
   readonly files: FileStorage;

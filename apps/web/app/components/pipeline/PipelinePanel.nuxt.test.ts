@@ -155,10 +155,10 @@ describe('PipelinePanel', () => {
     expect(document.body.querySelector('[data-testid="card-decide"]')).toBeNull()
   })
 
-  it('opens the candidate in a side sheet with the way to the full page', async () => {
+  it('opens the candidate in a side sheet with the way to the full page, both from this pipeline (a person to reconfirm stays visible)', async () => {
     const wrapper = await mountPanel()
     await nameButton(wrapper, 'a1').trigger('click')
     await vi.waitFor(() => expect(document.body.querySelector('[data-testid="candidate-name"]')?.textContent).toBe('Giulia Rossi'))
-    expect(document.body.querySelector('[data-testid="open-full-page"]')?.getAttribute('href')).toBe('/app/candidates/c-a1')
+    expect(document.body.querySelector('[data-testid="open-full-page"]')?.getAttribute('href')).toBe('/app/candidates/c-a1?viaJobId=j1')
   })
 })

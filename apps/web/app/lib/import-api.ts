@@ -1,62 +1,41 @@
-import { IMPORT_ITEMS_PAGE_MAX, IMPORT_LIMITS } from '@tt/domain'
+import { toImportDetail, type ImportDetail, type ItemsInput } from '@/lib/import-item-view'
+import { importCommitPath, importItemsPath, importMappingPath, importPath, IMPORTS_PATH, importUndoPath, publicConsentPath } from '@/lib/api-paths'
+import { IMPORT_ITEMS_PAGE_MAX, IMPORT_LIMITS, consentAnswerSchema, importBatchSchema, importBatchPageSchema, publicConsentSchema, undoImportSchema, type ImportBatchDto, type ImportMapping, type PublicConsentDto, type UndoImportDto } from '@tt/domain'
 import { z } from 'zod'
 import { ApiFailure, callApi } from './api-call'
 import type { JobApiRequest } from './job-api'
-import {
-  batchRefSchema,
-  consentAnswerSchema,
-  importBatchSchema,
-  importCommitPath,
-  importDetailSchema,
-  importItemsPath,
-  importMappingPath,
-  importPath,
-  IMPORTS_PATH,
-  importUndoPath,
-  publicConsentPath,
-  publicConsentSchema,
-  undoResultSchema,
-  type ImportBatchDto,
-  type ImportDetailDto,
-  type ImportMapping,
-  type ItemsInput,
-  type PublicConsentDto,
-  type UndoResultDto,
-} from './phase8-contract'
 
 /** Import batches and the public reconfirmation (phase 8 contract, "HTTP"). Upload is in `import-upload.ts`. */
 export const ITEMS_PAGE = IMPORT_ITEMS_PAGE_MAX
 const MAX_PAGES = Math.ceil(IMPORT_LIMITS.maxRows / IMPORT_ITEMS_PAGE_MAX) + 1
 
-const batchRef = batchRefSchema
-export type BatchRef = z.output<typeof batchRef>
-
 export const listImports = async (request: JobApiRequest): Promise<readonly ImportBatchDto[]> => (await callApi(request, IMPORTS_PATH, z.array(importBatchSchema))).data
 
 /** The batch with every preview item: the preview filters on the client, so all pages are read (bounded by the row limit). */
-export const getImport = async (request: JobApiRequest, batchId: string): Promise<ImportDetailDto> => {
-  const first = await callApi(request, `${importPath(batchId)}?page=1&limit=${ITEMS_PAGE}`, importDetailSchema)
-  const total = first.meta?.total ?? first.data.total ?? first.data.items.length
+export const getImport = async (request: JobApiRequest, batchId: string): Promise<ImportDetail> => {
+  const first = await callApi(request, `${importPath(batchId)}?page=1&limit=${ITEMS_PAGE}`, importBatchPageSchema)
+  const total = first.data.total
   const pages = Math.min(MAX_PAGES, Math.ceil(total / ITEMS_PAGE))
-  if (pages <= 1) return first.data
+  if (pages <= 1) return toImportDetail(first.data)
   const rest = await Promise.all(
-    Array.from({ length: pages - 1 }, (_, index) => callApi(request, `${importPath(batchId)}?page=${index + 2}&limit=${ITEMS_PAGE}`, importDetailSchema)),
+    Array.from({ length: pages - 1 }, (_, index) => callApi(request, `${importPath(batchId)}?page=${index + 2}&limit=${ITEMS_PAGE}`, importBatchPageSchema)),
   )
-  return { ...first.data, items: [...first.data.items, ...rest.flatMap((page) => page.data.items)] }
+  return toImportDetail({ batch: first.data.batch, items: [...first.data.items, ...rest.flatMap((page) => page.data.items)] })
 }
 
-export const saveMapping = async (request: JobApiRequest, batchId: string, input: ImportMapping): Promise<BatchRef> =>
-  (await callApi(request, importMappingPath(batchId), batchRef, { method: 'PUT', body: input })).data
+/** The answer is the batch with its first page of items; the wizard reloads, so only the batch is returned. */
+export const saveMapping = async (request: JobApiRequest, batchId: string, input: ImportMapping): Promise<ImportBatchDto> =>
+  (await callApi(request, importMappingPath(batchId), importBatchPageSchema, { method: 'PUT', body: input })).data.batch
 
 export const saveItems = async (request: JobApiRequest, batchId: string, input: ItemsInput): Promise<void> => {
-  await callApi(request, importItemsPath(batchId), z.unknown(), { method: 'PUT', body: input })
+  await callApi(request, importItemsPath(batchId), importBatchPageSchema, { method: 'PUT', body: input })
 }
 
-export const commitImport = async (request: JobApiRequest, batchId: string): Promise<BatchRef> =>
-  (await callApi(request, importCommitPath(batchId), batchRef, { method: 'POST', body: {} })).data
+export const commitImport = async (request: JobApiRequest, batchId: string): Promise<ImportBatchDto> =>
+  (await callApi(request, importCommitPath(batchId), importBatchSchema, { method: 'POST', body: {} })).data
 
-export const undoImport = async (request: JobApiRequest, batchId: string): Promise<UndoResultDto> =>
-  (await callApi(request, importUndoPath(batchId), undoResultSchema, { method: 'POST', body: {} })).data
+export const undoImport = async (request: JobApiRequest, batchId: string): Promise<UndoImportDto> =>
+  (await callApi(request, importUndoPath(batchId), undoImportSchema, { method: 'POST', body: {} })).data
 
 export type ConsentFailure = 'invalid' | 'expired' | 'used' | 'rateLimited' | 'unavailable'
 

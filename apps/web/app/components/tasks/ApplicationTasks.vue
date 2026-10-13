@@ -35,8 +35,8 @@ const add = async (value: { title: string; assigneeId: string; dueAt: string | n
         :key="task.id"
         :task="task"
         :now="now"
-        :assignee-name="task.assigneeName ?? team.nameOf(task.assigneeId)"
-        :can-toggle="canManage || task.assigneeId === viewer?.user.id"
+        :assignee-name="task.assignee.name"
+        :can-toggle="canManage || task.assignee.id === viewer?.user.id"
         :busy="tasks.busy.value === task.id"
         @toggle="tasks.toggle(task)"
       />

@@ -1,43 +1,51 @@
 import { describe, expect, it } from 'vitest'
-import { buildSubmission, checkRequestForm, checkSubmission, feedbackStageName, groupRequests, isRecommendation, recommendationKey } from './feedback-view'
-import type { FeedbackRequestDto } from './phase9-contract'
+import { buildSubmission, checkRequestForm, checkSubmission, feedbackStageName, groupRequests, recommendationKey } from './feedback-view'
+import { FEEDBACK_TEMPLATES, type FeedbackRequestDto } from '@tt/domain'
 
-const req = (id: string, state: FeedbackRequestDto['state']): FeedbackRequestDto => ({
+const req = (id: string, status: FeedbackRequestDto['status']): FeedbackRequestDto => ({
   id,
+  applicationId: 'a',
   stageId: 's',
-  stageLabel: null,
-  interviewer: { kind: 'external', userId: null, email: null, name: 'Ada' },
-  state,
-  requestedAt: '2026-10-01T10:00:00.000Z',
-  expiresAt: null,
+  stageLabel: 'Tecnico',
+  interviewerKind: 'external',
+  interviewerName: 'Ada',
+  status,
+  remindersSent: 0,
+  createdAt: '2026-10-01T10:00:00.000Z',
+  expiresAt: '2026-10-15T10:00:00.000Z',
   submittedAt: null,
 })
 
+const technical = FEEDBACK_TEMPLATES.technical_interview.map((question) => question.id)
+
 describe('feedback view', () => {
-  it('groups requests by state, expired among the overdue', () => {
-    const grouped = groupRequests([req('a', 'pending'), req('b', 'overdue'), req('c', 'expired'), req('d', 'submitted')])
+  it('groups requests by status, expired ones as overdue', () => {
+    const grouped = groupRequests([req('a', 'pending'), req('c', 'expired'), req('d', 'submitted')])
     expect(grouped.pending.map((r) => r.id)).toEqual(['a'])
-    expect(grouped.overdue.map((r) => r.id)).toEqual(['b', 'c'])
+    expect(grouped.overdue.map((r) => r.id)).toEqual(['c'])
     expect(grouped.submitted.map((r) => r.id)).toEqual(['d'])
   })
 
-  it('names recommendations by key and recognises them', () => {
+  it('names recommendations by key', () => {
     expect(recommendationKey('do_not_proceed')).toBe('feedback.recommendation.do_not_proceed')
-    expect(isRecommendation('discuss')).toBe(true)
-    expect(isRecommendation('score')).toBe(false)
-    expect(isRecommendation(3)).toBe(false)
   })
 
-  it('needs a recommendation and one answer with words', () => {
-    expect(checkSubmission({ a: '  ' }, null).issues).toEqual(['recommendation_required', 'answers_required'])
-    expect(checkSubmission({ a: 'ok' }, 'proceed')).toMatchObject({ ok: true, issues: [] })
-    expect(checkSubmission({}, 'discuss').issues).toEqual(['answers_required'])
+  it('needs a recommendation and the required questions, as the domain does', () => {
+    expect(checkSubmission(technical, { tech_shown: '  ' }, null).issues).toEqual(['recommendation_required', 'answers_required'])
+    expect(checkSubmission(technical, { tech_shown: 'ok' }, 'proceed').issues).toEqual(['answers_required'])
+    expect(checkSubmission(technical, { tech_shown: 'ok', tech_open: 'more' }, 'proceed')).toMatchObject({ ok: true, issues: [] })
+    expect(checkSubmission(technical, {}, 'discuss').issues).toEqual(['answers_required'])
+  })
+
+  it('checks the fallback form of a stage that no longer exists', () => {
+    expect(checkSubmission(['general_shown', 'general_open'], { general_shown: 'x' }, 'discuss').ok).toBe(false)
+    expect(checkSubmission(['general_shown', 'general_open'], { general_shown: 'x', general_open: 'y' }, 'discuss').ok).toBe(true)
   })
 
   it('refuses answers over the limit', () => {
-    const check = checkSubmission({ a: 'x'.repeat(2001), b: 'ok' }, 'proceed')
+    const check = checkSubmission(technical, { tech_shown: 'x'.repeat(2001), tech_open: 'ok' }, 'proceed')
     expect(check.ok).toBe(false)
-    expect(check.tooLong).toEqual(['a'])
+    expect(check.tooLong).toEqual(['tech_shown'])
     expect(check.issues).toEqual(['answer_too_long'])
   })
 

@@ -88,7 +88,7 @@ describe('getReports on the seeded dataset (in memory)', () => {
   it('never mixes organizations: another organization sees only its own numbers', async () => {
     const { deps, ids } = await seeded();
     const otherIds = await seedReportDataset(deps, ORG_B, 'b');
-    await deps.applications.save({ ...(await deps.applications.findById(ORG_B, 'b-a6'))!, origin: 'only-in-b' });
+    deps.store.write({ applications: deps.store.read().applications.map((a) => (a.organizationId === ORG_B && a.id === 'b-a6' ? { ...a, origin: 'only-in-b' } : a)) });
     expect(await getReports(deps, owner, query)).toEqual(expectedReports(ids));
     const other = await getReports(deps, userActor({ role: 'owner', organizationId: ORG_B }), query);
     expect(other).toEqual({ ...expectedReports(otherIds), sources: expect.any(Array) });

@@ -2,20 +2,26 @@ import { describe, expect, it } from 'vitest'
 import { approvalErrorKey, approvalRequestPath, approvalState, getJobApproval, requestJobApproval } from './approval-view'
 import type { JobApiRequest } from './job-api'
 
-const approval = { approvedBy: { id: 'u1', name: 'Elena' }, approvedAt: '2026-10-10T09:00:00.000Z', salaryMin: 40000, salaryMax: 50000, requestId: null }
+const approval = { approvedBy: 'u1', approvedAt: '2026-10-10T09:00:00.000Z', salaryMin: 40000, salaryMax: 50000, currency: 'EUR' as const }
+const form = (salaryMin: string, salaryMax: string, currency = 'EUR', period = 'year') => ({ salaryMin, salaryMax, currency, period })
 
 describe('approval of an ad', () => {
   it('is off when the organization does not ask for it, or while the setting is unknown', () => {
-    expect(approvalState(false, null, '', '')).toBe('off')
-    expect(approvalState(null, null, '', '')).toBe('off')
+    expect(approvalState(false, null, form('', ''))).toBe('off')
+    expect(approvalState(null, null, form('', ''))).toBe('off')
   })
 
-  it('is missing, approved, or exceeded by the salary in the form', () => {
-    expect(approvalState(true, null, '40000', '50000')).toBe('missing')
-    expect(approvalState(true, approval, '40000', '50000')).toBe('approved')
-    expect(approvalState(true, approval, '', '')).toBe('approved')
-    expect(approvalState(true, approval, '38000', '50000')).toBe('exceeded')
-    expect(approvalState(true, approval, '40000', '55000')).toBe('exceeded')
+  it('is missing, approved, or exceeded by the salary in the form (the domain rule decides)', () => {
+    expect(approvalState(true, null, form('40000', '50000'))).toBe('missing')
+    expect(approvalState(true, approval, form('40000', '50000'))).toBe('approved')
+    expect(approvalState(true, approval, form('', ''))).toBe('approved')
+    expect(approvalState(true, approval, form('40000', '55000'))).toBe('exceeded')
+    // A lower range stays inside the budget: the editor agrees with what publish accepts.
+    expect(approvalState(true, approval, form('38000', '50000'))).toBe('approved')
+    // Another currency is beyond the approval, and a monthly pay is compared by year.
+    expect(approvalState(true, approval, form('40000', '50000', 'USD'))).toBe('exceeded')
+    expect(approvalState(true, approval, form('3000', '4000', 'EUR', 'month'))).toBe('approved')
+    expect(approvalState(true, approval, form('9000', '10000', 'EUR', 'month'))).toBe('exceeded')
   })
 
   it('explains the publish refusals, by code or by issue message', () => {
@@ -36,10 +42,10 @@ describe('approval api', () => {
     const calls: unknown[] = []
     const request: JobApiRequest = async (url, init) => {
       calls.push({ url, init })
-      return { status: 200, body: { success: true, data: { requireApproval: true, approval: { ...approval, approvedBy: 'u1' }, publishable: true } } }
+      return { status: 200, body: { success: true, data: { requireApproval: true, approval, publishable: true } } }
     }
     const status = await getJobApproval(request, 'j1')
-    expect(status.approval?.approvedBy).toEqual({ id: 'u1', name: null })
+    expect(status.approval?.approvedBy).toBe('u1')
     await requestJobApproval(request, 'j1', ' Serve entro gennaio ')
     expect(calls).toEqual([
       { url: '/api/v1/jobs/j1/approval', init: undefined },

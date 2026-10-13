@@ -1,5 +1,5 @@
 import type { Application, Candidate, CandidateNote, CvExtractionRecord, ResponsePromise, StageEvent } from '@tt/domain';
-import { ConflictError } from '../errors.js';
+import { ConflictError, NotFoundError } from '../errors.js';
 import type {
   ApplicationRepository,
   CandidateNoteRepository,
@@ -9,11 +9,12 @@ import type {
   CvExtractionRepository,
   UserDirectory,
 } from '../candidate-ports.js';
-import type { OpenApplicationCounts } from '../job-ports.js';
+import type { JobRepository, OpenApplicationCounts } from '../job-ports.js';
 import type { ApplicationIntake, IntakeRepositories } from '../intake-ports.js';
 import type { AuditLogRepository } from '../ports.js';
 import type { OutboxRepository } from '../webhook-ports.js';
 import { createInMemoryResponsePromises, createInMemoryStageEvents } from './in-memory-reports.js';
+import { cell } from './in-memory-transaction.js';
 
 /** The rows of the four candidate tables. Replaced wholesale (never mutated) so a snapshot is just a reference. */
 export interface CandidateStoreState {
@@ -31,11 +32,11 @@ export interface CandidateStore {
 }
 
 export const createCandidateStore = (initial: Partial<CandidateStoreState> = {}): CandidateStore => {
-  let state: CandidateStoreState = { candidates: [], applications: [], notes: [], extractions: [], stageEvents: [], promises: [], ...initial };
+  const state = cell<CandidateStoreState>({ candidates: [], applications: [], notes: [], extractions: [], stageEvents: [], promises: [], ...initial });
   return {
-    read: () => state,
+    read: () => state.get(),
     write: (next) => {
-      state = { ...state, ...next };
+      state.set({ ...state.get(), ...next });
     },
   };
 };
@@ -82,6 +83,10 @@ export function createInMemoryApplicationRepository(store: CandidateStore): Appl
   const inOrg = (organizationId: string) => store.read().applications.filter((a) => a.organizationId === organizationId);
   const findOpen = (organizationId: string, jobId: string, candidateId: string) =>
     inOrg(organizationId).find((a) => a.jobId === jobId && a.candidateId === candidateId && a.outcome === null) ?? null;
+  const replace = (next: Application): Application => {
+    store.write({ applications: store.read().applications.map((a) => (sameKey(a, next) ? next : a)) });
+    return next;
+  };
   return {
     async create(application) {
       if (application.outcome === null && findOpen(application.organizationId, application.jobId, application.candidateId)) {
@@ -90,9 +95,17 @@ export function createInMemoryApplicationRepository(store: CandidateStore): Appl
       store.write({ applications: [...store.read().applications, application] });
       return application;
     },
-    async save(application) {
-      store.write({ applications: store.read().applications.map((a) => (sameKey(a, application) ? application : a)) });
-      return application;
+    async transition(organizationId, id, expected, patch) {
+      const current = inOrg(organizationId).find((a) => a.id === id);
+      if (!current || current.outcome !== null || (expected.stageId !== undefined && current.stageId !== expected.stageId)) {
+        throw new ConflictError('The application changed meanwhile.');
+      }
+      return replace({ ...current, ...patch });
+    },
+    async update(organizationId, id, patch) {
+      const current = inOrg(organizationId).find((a) => a.id === id);
+      if (!current) throw new NotFoundError('Application not found.');
+      return replace({ ...current, ...patch });
     },
     async findById(organizationId, id) {
       return inOrg(organizationId).find((a) => a.id === id) ?? null;
@@ -221,8 +234,9 @@ export const createInMemoryUserDirectory = (names: Readonly<Record<string, strin
 });
 
 /** Transaction by snapshot: on failure the store goes back to what it was when `run` started. */
-export function createInMemoryApplicationIntake(store: CandidateStore, auditLog: AuditLogRepository, outbox: OutboxRepository): ApplicationIntake {
+export function createInMemoryApplicationIntake(store: CandidateStore, auditLog: AuditLogRepository, outbox: OutboxRepository, jobs: JobRepository): ApplicationIntake {
   const repositories: IntakeRepositories = {
+    jobs,
     candidates: createInMemoryCandidateRepository(store),
     applications: createInMemoryApplicationRepository(store),
     extractions: createInMemoryCvExtractionRepository(store),
