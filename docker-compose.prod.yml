@@ -1,8 +1,8 @@
 # Self-hosting: the whole stack (postgres, minio, api, worker, web) in one command.
 #   cp .env.example .env   # then set the required values (see README, Self-hosting section)
 #   docker compose -f docker-compose.prod.yml up -d --build
-# With development mail (Mailpit): add --profile mail and EMAIL_PROVIDER=smtp.
-# Only "web" is published on the host (WEB_PORT); api, worker, postgres and minio stay on the internal network.
+# With development mail (Mailpit): add --profile mail and EMAIL_PROVIDER=smtp. With scheduled backups: --profile backup.
+# Only "web" is published on the host (WEB_BIND:WEB_PORT); api, worker, postgres and minio stay on the internal network.
 # The stack refuses to start with the example secrets, an http PLATFORM_URL or EMAIL_PROVIDER=log (config-check).
 # Variables are read from the .env in the current folder; internal service addresses are fixed here and override
 # the development ones (localhost) found in .env.
@@ -48,6 +48,11 @@ x-app-env: &app-env
   CV_MODEL_DAILY_BUDGET: ${CV_MODEL_DAILY_BUDGET:-1000}
   IMPORT_STALE_DAYS: ${IMPORT_STALE_DAYS:-7}
   DELIVERY_LOG_RETENTION_DAYS: ${DELIVERY_LOG_RETENTION_DAYS:-30}
+  # Observability, all optional and off when empty (docs/OPERATIONS.md): nothing is sent anywhere by default.
+  METRICS_TOKEN: ${METRICS_TOKEN:-}
+  SENTRY_DSN: ${SENTRY_DSN:-}
+  SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-}
+  SENTRY_RELEASE: ${SENTRY_RELEASE:-${TT_VERSION:-}}
 
 name: ${COMPOSE_PROJECT_NAME:-team-tracker-prod}
 
@@ -160,7 +165,16 @@ services:
       api: { condition: service_healthy }
     environment:
       <<: *app-env
+      # Health server of the worker (/health, /ready, /metrics): internal network only, never published.
+      WORKER_PORT: ${WORKER_PORT:-4001}
+      WORKER_HOST: ${WORKER_HOST:-0.0.0.0}
     networks: [internal]
+    healthcheck:
+      test: ["CMD", "node", "-e", "const p=process.env.WORKER_PORT||4001;if(p==='0')process.exit(0);fetch('http://127.0.0.1:'+p+'/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   web:
     build:
@@ -184,11 +198,55 @@ services:
       NUXT_API_TIMEOUT_MS: ${NUXT_API_TIMEOUT_MS:-300000}
       NUXT_TRUST_CLOUDFLARE: ${NUXT_TRUST_CLOUDFLARE:-false}
       NUXT_PUBLIC_TURNSTILE_SITE_KEY: ${NUXT_PUBLIC_TURNSTILE_SITE_KEY:-}
+      NUXT_SENTRY_DSN: ${NUXT_SENTRY_DSN:-}
     ports:
-      - "${WEB_PORT:-3000}:3000"
+      # WEB_BIND=127.0.0.1 when a reverse proxy on the same host (Caddy, nginx, Traefik) is the only way in.
+      - "${WEB_BIND:-0.0.0.0}:${WEB_PORT:-3000}:3000"
     networks:
       internal:
         ipv4_address: ${TT_WEB_IP:-172.31.77.10}
+
+  # Scheduled pg_dump (custom format) with retention, optionally uploaded to S3 (docs/OPERATIONS.md, Backups):
+  #   docker compose -f docker-compose.prod.yml --profile backup up -d
+  # One backup now: docker compose -f docker-compose.prod.yml --profile backup run --rm backup backup.sh once
+  backup:
+    profiles: [backup]
+    build: { context: ./docker, dockerfile: backup.Dockerfile }
+    image: team-tracker-backup:${TT_VERSION:-local}
+    restart: unless-stopped
+    command: ["backup.sh", "loop"]
+    depends_on:
+      # The api applies the migrations and creates the bucket: the first backup (at start) is then a real one.
+      api: { condition: service_healthy }
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-tt}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-team_tracker}
+      BACKUP_AT: ${BACKUP_AT:-02:30}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
+      BACKUP_ENCRYPTION_PASSPHRASE: ${BACKUP_ENCRYPTION_PASSPHRASE:-}
+      # Upload: to the platform's MinIO by default (a second copy on the same disk: point BACKUP_S3_* at another provider).
+      BACKUP_UPLOAD: ${BACKUP_UPLOAD:-true}
+      BACKUP_S3_ENDPOINT: ${BACKUP_S3_ENDPOINT:-http://minio:9000}
+      BACKUP_S3_REGION: ${BACKUP_S3_REGION:-${S3_REGION:-us-east-1}}
+      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-${S3_BUCKET:-team-tracker}}
+      BACKUP_S3_ACCESS_KEY: ${BACKUP_S3_ACCESS_KEY:-${S3_ACCESS_KEY:-}}
+      BACKUP_S3_SECRET_KEY: ${BACKUP_S3_SECRET_KEY:-${S3_SECRET_KEY:-}}
+      BACKUP_S3_PREFIX: ${BACKUP_S3_PREFIX:-backups/}
+      BACKUP_S3_PATH_STYLE: ${BACKUP_S3_PATH_STYLE:-true}
+      # AES256 (S3 managed keys) or aws:kms; empty = none. MinIO needs a KMS configured before it accepts it.
+      BACKUP_S3_SSE: ${BACKUP_S3_SSE:-}
+    volumes:
+      - backups:/backups
+    networks: [internal]
+    healthcheck:
+      # A successful backup in the last 26 hours (the first one runs at start).
+      test: ["CMD-SHELL", "find /backups/last-success -mmin -1560 2>/dev/null | grep -q ."]
+      interval: 5m
+      timeout: 10s
+      retries: 1
+      start_period: 10m
 
 networks:
   internal:
@@ -199,3 +257,4 @@ networks:
 volumes:
   pgdata:
   miniodata:
+  backups:

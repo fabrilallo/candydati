@@ -1,6 +1,5 @@
-import type { JobContent, SelectionStage } from '@tt/domain'
+import type { JobContent } from '@tt/domain'
 import type { Translate } from './ad-text'
-import { formatDuration } from './job-view'
 
 const intlLocale = (language: string): string => (language === 'it' ? 'it-IT' : 'en-GB')
 
@@ -33,26 +32,9 @@ export const salaryFigure = (salary: JobContent['salary'], language: string): st
 export const salaryLabelKey = (period: JobContent['salary']['period']): string =>
   period === 'year' ? 'public.facts.ral' : `taxonomy.salaryPeriodsGross.${period}`
 
-export const totalMinutes = (process: readonly Pick<SelectionStage, 'durationMinutes'>[]): number =>
-  process.reduce((sum, stage) => sum + stage.durationMinutes, 0)
-
-const HOUR = 60
-const DAY = 24 * HOUR
-const roundTo = (value: number, step: number): number => Math.round(value / step) * step
-
-/** A time a candidate can plan around: 5 minutes under an hour, quarters of an hour under a day, then days. */
-export const approxMinutes = (minutes: number): number => {
-  if (minutes < HOUR) return roundTo(minutes, 5)
-  if (minutes < DAY) return roundTo(minutes, 15)
-  return roundTo(minutes, DAY)
-}
-
-/** `3 fasi, circa 3 h`, in the language of `tr`. Empty without stages. */
-export const processSummaryText = (process: readonly Pick<SelectionStage, 'durationMinutes'>[], tr: Translate): string => {
-  if (process.length === 0) return ''
-  const about = tr('public.facts.about', { duration: formatDuration(approxMinutes(totalMinutes(process)), tr) })
-  return `${tr('public.facts.stages', { count: process.length })}, ${about}`
-}
+/** `3 fasi`, in the language of `tr`: the count only, a total time is not promised. Empty without stages. */
+export const processSummaryText = (process: readonly unknown[], tr: Translate): string =>
+  process.length === 0 ? '' : tr('public.facts.stages', { count: process.length })
 
 /** `entro 5 giorni`. Empty when the commitment is not set. */
 export const responseText = (days: number | undefined, tr: Translate): string => (days === undefined ? '' : tr('public.facts.within', { count: days }))

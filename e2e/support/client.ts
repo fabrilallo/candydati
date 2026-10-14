@@ -9,7 +9,7 @@ const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout
 
 /** A dev api restarts when its files change: a refused connection is retried for a few seconds before it is reported. */
 const fetchWithRetry = async (route: Route, options: Parameters<Route['fetch']>[0]): Promise<APIResponse> => {
-  const attempts = 8;
+  const attempts = 30;
   for (let attempt = 1; ; attempt += 1) {
     try {
       return await route.fetch(options);

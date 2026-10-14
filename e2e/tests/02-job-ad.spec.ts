@@ -55,7 +55,7 @@ test('publishing is blocked until the ad is complete and lawful, then it shows o
   await expect(pub.getByTestId('job-facts')).toContainText(/45\.000/);
   await expect(pub.getByTestId('job-facts')).toContainText(/60\.000/);
   await expect(pub.getByTestId('job-stage')).toHaveCount(2);
-  await expect(pub.getByTestId('job-response-time')).toBeVisible();
+  await expect(pub.getByTestId('job-response-time')).toHaveCount(0);
   await expect(pub.getByTestId('apply-cta')).toBeVisible();
   await closeClient(visitor.context);
 

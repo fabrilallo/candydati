@@ -17,6 +17,14 @@ describe('buildSecurityHeaders', () => {
     expect(csp).toContain("default-src 'self'")
   })
 
+  it('allows careers videos: own media files and exactly the YouTube and Vimeo players as frames', () => {
+    const csp = buildSecurityHeaders(base)['content-security-policy']!
+    expect(csp).toContain("media-src 'self';")
+    expect(csp).toContain("frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com;")
+    expect(csp).not.toMatch(/frame-src[^;]*\*/)
+    expect(csp).not.toMatch(/media-src[^;]*https:/)
+  })
+
   it('allows only https and data images (logos), nothing for plain http', () => {
     const csp = buildSecurityHeaders(base)['content-security-policy']!
     expect(csp).toMatch(/img-src 'self' data: https:/)

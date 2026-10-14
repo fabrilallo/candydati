@@ -33,6 +33,17 @@ export function createInMemoryFileStorage(initial: Readonly<Record<string, Uint8
         sizeBytes: bytes.byteLength,
       };
     },
+    async getRange(key, start, end) {
+      const bytes = files[key];
+      if (!bytes) throw Object.assign(new Error(`No such file: ${key}`), { name: 'FileNotFoundError' });
+      const part = bytes.subarray(start, end + 1);
+      return {
+        stream: (async function* () {
+          yield part;
+        })(),
+        sizeBytes: part.byteLength,
+      };
+    },
     async get(key) {
       const bytes = files[key];
       if (!bytes) throw Object.assign(new Error(`No such file: ${key}`), { name: 'FileNotFoundError' });

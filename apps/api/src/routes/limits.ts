@@ -33,3 +33,12 @@ export const DEFAULT_FEEDBACK_MAX = 30;
 
 /** The public interview feedback page: the token is the only credential, so guessing must be slow. */
 export const feedbackRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.feedbackMax ?? DEFAULT_FEEDBACK_MAX);
+
+export const DEFAULT_CAREERS_MEDIA_MAX = 30;
+export const DEFAULT_PUBLIC_MEDIA_MAX = 600;
+
+/** An upload is decoded and re-encoded (CPU): a few per minute and client. */
+export const careersMediaRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.careersMediaMax ?? DEFAULT_CAREERS_MEDIA_MAX);
+
+/** A careers page loads many images (several widths each) and range requests of a video: far more than a JSON page. */
+export const publicMediaRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.publicMediaMax ?? DEFAULT_PUBLIC_MEDIA_MAX);

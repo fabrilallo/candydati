@@ -138,7 +138,8 @@ const isTimeout = (error: unknown, timedOut: () => boolean): boolean => timedOut
 const failureResponse = (request: ProxyRequest, error: unknown, timedOut: boolean): Response => {
   if (error instanceof BodyTooLargeError || (error instanceof Error && error.cause instanceof BodyTooLargeError)) return jsonError(413, BODY_TOO_LARGE)
   const path = request.pathWithQuery.split('?')[0]
-  const message = error instanceof Error ? error.message : String(error)
+  const cause = error instanceof Error && error.cause instanceof Error ? `: ${error.cause.message}` : ''
+  const message = `${error instanceof Error ? error.message : String(error)}${cause}`
   if (timedOut) {
     console.error('[api-proxy] api timeout', { method: request.method, path })
     return jsonError(504, API_TIMEOUT)
@@ -172,6 +173,9 @@ export const proxyToApi = async (apiOrigin: string, request: ProxyRequest, fetch
       body,
       ...(body instanceof ReadableStream ? { duplex: 'half' } : {}),
       redirect: 'manual',
+      // The proxy forwards the client's own Cookie and Authorization headers. With the default credentials mode, fetch
+      // fails any 401 answer to a streamed body ("expected non-null body source"), which broke every failed sign-in.
+      credentials: 'omit',
       signal: controller.signal,
     })
     return new Response(upstream.body, { status: upstream.status, statusText: upstream.statusText, headers: downstreamResponseHeaders(upstream.headers) })

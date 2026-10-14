@@ -35,14 +35,15 @@ const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount',
 
 <template>
   <div class="flex h-full flex-col gap-5 px-3 pt-4 pb-3">
-    <NuxtLink to="/app" class="flex items-center gap-2.5 px-2 pt-1">
+    <NuxtLink to="/app" class="flex shrink-0 items-center gap-2.5 px-2 pt-1">
       <span class="grid size-7 shrink-0 place-items-center rounded-[8px] bg-primary text-xs font-bold text-primary-foreground shadow-sm" aria-hidden="true">
         {{ platform.name.charAt(0).toUpperCase() }}
       </span>
       <span class="truncate text-[0.9375rem] font-semibold tracking-tight">{{ platform.name }}</span>
     </NuxtLink>
     <OrgSwitcher v-if="viewer?.organization" :organization="viewer.organization" :role-label="roleLabel" />
-    <nav :aria-label="t('nav.main')" class="grid flex-1 content-start gap-5">
+    <!-- min-h-0 + overflow: with every item (owners) the menu is taller than a short screen; it scrolls, the footer stays. -->
+    <nav :aria-label="t('nav.main')" class="-mx-1 grid min-h-0 flex-1 content-start gap-5 overflow-y-auto overscroll-contain px-1">
       <section v-for="section in sections" :key="section.id" :aria-labelledby="`nav-${section.id}`" class="grid gap-1">
         <h2 :id="`nav-${section.id}`" class="px-2.5 pb-1 text-xs font-medium text-muted-foreground">{{ t(`nav.sections.${section.id}`) }}</h2>
         <ul class="grid gap-0.5">
@@ -68,7 +69,7 @@ const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount',
         </ul>
       </section>
     </nav>
-    <div class="grid gap-2 border-t pt-3">
+    <div class="grid shrink-0 gap-2 border-t pt-3" data-testid="nav-footer">
       <a
         v-if="publicPath"
         :href="publicPath"

@@ -35,6 +35,9 @@ import {
   privacyNoticeSchema,
   webhookDeliverySchema,
   webhookEndpointSchema,
+  careersMediaAssetSchema,
+  careersPageEditorSchema,
+  publicCareersPageSchema,
 } from '@tt/domain';
 import { auditEventSchema } from './schemas-admin.js';
 
@@ -82,5 +85,8 @@ export const COMPONENT_SCHEMAS = {
   DataExport: dataExportSchema,
   Notification: notificationSchema,
   AuditEvent: auditEventSchema,
+  CareersPageEditor: careersPageEditorSchema,
+  CareersMediaAsset: careersMediaAssetSchema,
+  PublicCareersPage: publicCareersPageSchema,
 } as const;
 export type ComponentName = keyof typeof COMPONENT_SCHEMAS;

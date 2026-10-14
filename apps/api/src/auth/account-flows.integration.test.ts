@@ -123,6 +123,26 @@ describe('SIGNUP_MODE=invite_only (M5)', () => {
     });
     expect((await post(inviteOnly, '/api/auth/sign-up/email', { email: email.toUpperCase(), password: PASSWORD, name: 'Welcome' })).statusCode).toBe(200);
   });
+
+  it('confirms the address only while the invitation that admitted it is still pending', async () => {
+    const [{ id: userId }] = await inviteOnly.handle.db.select({ id: schema.user.id }).from(schema.user).limit(1);
+    const [{ id: organizationId }] = await inviteOnly.handle.db.select({ id: schema.organization.id }).from(schema.organization).limit(1);
+    const email = uniqueEmail('withdrawn');
+    const invitationId = `inv-${Math.random().toString(36).slice(2)}`;
+    await inviteOnly.handle.db.insert(schema.invitation).values({ id: invitationId, organizationId: organizationId!, email, role: 'recruiter', status: 'pending', expiresAt: new Date(Date.now() + 60_000), inviterId: userId! });
+    expect((await post(inviteOnly, '/api/auth/sign-up/email', { email, password: PASSWORD, name: 'Withdrawn' })).statusCode).toBe(200);
+    const link = pathOf(inviteOnly.mailbox.linkFor(email, 'verify_email'));
+
+    await inviteOnly.handle.db.update(schema.invitation).set({ status: 'canceled' }).where(eq(schema.invitation.id, invitationId));
+    const refused = await inviteOnly.app.inject({ method: 'GET', url: link, headers: { origin: WEB_ORIGIN } });
+    expect(refused.statusCode).toBe(403);
+    expect(refused.json()).toMatchObject({ code: 'SIGNUP_INVITE_ONLY' });
+    const [account] = await inviteOnly.handle.db.select({ emailVerified: schema.user.emailVerified }).from(schema.user).where(eq(schema.user.email, email));
+    expect(account).toEqual({ emailVerified: false });
+
+    await inviteOnly.handle.db.update(schema.invitation).set({ status: 'pending' }).where(eq(schema.invitation.id, invitationId));
+    expect((await inviteOnly.app.inject({ method: 'GET', url: link, headers: { origin: WEB_ORIGIN } })).statusCode).toBe(302);
+  });
 });
 
 describe('two-factor authentication (optional, enforced per organization)', () => {

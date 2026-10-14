@@ -101,6 +101,33 @@ describe('downstream response headers', () => {
 })
 
 describe('proxyToApi', () => {
+  it('forwards Range and hands a 206 with its media headers back untouched', async () => {
+    const upstream = new Response('bytes', {
+      status: 206,
+      headers: {
+        'content-type': 'video/mp4',
+        'content-range': 'bytes 10-14/1000',
+        'accept-ranges': 'bytes',
+        'cache-control': 'public, max-age=31536000, immutable',
+        'content-security-policy': "default-src 'none'; sandbox",
+        'cross-origin-resource-policy': 'same-site',
+      },
+    })
+    const fetchImpl = fakeFetch(upstream)
+    const headers = new Headers({ range: 'bytes=10-14', host: 'app.example.com' })
+    const response = await proxyToApi(API, request({ pathWithQuery: '/api/v1/public/organizations/acme/careers-media/1/a.mp4', headers }), fetchImpl)
+    expect(new Headers(fetchImpl.mock.calls[0]![1].headers).get('range')).toBe('bytes=10-14')
+    expect(response.status).toBe(206)
+    expect(await response.text()).toBe('bytes')
+    for (const [name, value] of upstream.headers) expect(response.headers.get(name), name).toBe(value)
+  })
+
+  it('hands a 416 and its content-range back as they are', async () => {
+    const upstream = new Response('{}', { status: 416, headers: { 'content-range': 'bytes */1000' } })
+    const response = await proxyToApi(API, request({ headers: new Headers({ range: 'bytes=5000-' }) }), fakeFetch(upstream))
+    expect(response.status).toBe(416)
+    expect(response.headers.get('content-range')).toBe('bytes */1000')
+  })
   it('does not follow redirects: the 302 and its cookies reach the browser', async () => {
     const upstream = new Response(null, { status: 302, headers: [['location', '/dashboard'], ['set-cookie', 'a=1; Path=/'], ['set-cookie', 'b=2; Path=/']] })
     const fetchImpl = fakeFetch(upstream)

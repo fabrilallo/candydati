@@ -31,6 +31,14 @@ Phases 0 to 10 of the roadmap are implemented. Nothing has been released yet.
 - **HR tools (phase 9):** Italian-law compliance checks on ads, structured CCNL and benefits, interview feedback without
   login, job opening requests with approval, stale job alerts.
 - **Reports (phase 10):** time to hire, stage conversion, source, response times, CSV export.
+- **Careers page builder:** owners and admins compose the public careers page from sections (hero with image or
+  muted looping video, text, image and text, gallery, video with a click-to-load YouTube/Vimeo facade, values, numbers,
+  testimonials, open positions, links), pick an accent (checked for WCAG AA contrast), a heading font and a corner
+  style, preview it live at desktop and phone width, save drafts and publish (`Settings / Careers page`). Uploaded images
+  are checked by their bytes and re-encoded to WebP in three widths without metadata; videos up to 60 MB are served with
+  byte ranges. Organizations that never published keep the previous page (name and open positions). Only the media of the published
+  page are public; drafts are protected by a revision number against concurrent edits; the organization export includes
+  the page and its media. Migrations `0026` and `0027`.
 - Self-hosting stack (`docker-compose.prod.yml`), CI, end-to-end tests.
 
 ### Security
@@ -65,6 +73,23 @@ Phases 0 to 10 of the roadmap are implemented. Nothing has been released yet.
 - **Quality gates:** file size (400 lines) and function size (50 lines) enforced by ESLint with no temporary exceptions,
   import boundaries between packages, generated environment reference (`docs/ENVIRONMENT.md`), OpenAPI documents every
   route (two-way test), coverage of web components, end-to-end tests in CI.
+
+### Upgrade notes
+
+- **API keys without an expiry (migration 0023).** Every such key gets its creation date plus 90 days, so a key created
+  more than 90 days ago **stops working as soon as the migration runs**. To give those keys a grace period, run this
+  before upgrading (the migration leaves keys that already have an expiry alone), then replace them in time:
+
+  ```sql
+  UPDATE api_key SET expires_at = now() + interval '30 days'
+  WHERE expires_at IS NULL AND created_at < now() - interval '90 days';
+  ```
+- **`ORGANIZATION_CREATION=one_per_user` (migration 0025)** now counts organizations an account created, not the ones
+  it owns. Every account that owns an organization at upgrade time counts as having created one, including owners who
+  were promoted rather than creating it. An account that created an organization cannot create another even after
+  handing the owner role over.
+- **First owner (migration 0025).** The bootstrap owner is recorded from the confirmed account of the claimed address.
+  `ORGANIZATION_CREATION=instance_admins` now uses it instead of the oldest confirmed account.
 
 ### Fixed
 

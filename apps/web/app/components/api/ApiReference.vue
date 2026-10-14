@@ -32,11 +32,11 @@ const envelope = `{ "success": true, "data": { … }, "error": null }
     <div class="grid gap-3 text-sm sm:grid-cols-2">
       <div class="grid content-start gap-2">
         <p class="font-medium">{{ t('apiReference.auth') }}</p>
-        <pre class="overflow-x-auto rounded-lg border bg-muted px-4 py-3 font-mono text-xs"><code>{{ example }}</code></pre>
+        <pre tabindex="0" class="overflow-x-auto rounded-lg border bg-muted px-4 py-3 font-mono text-xs"><code>{{ example }}</code></pre>
       </div>
       <div class="grid content-start gap-2">
         <p class="font-medium">{{ t('apiReference.envelope') }}</p>
-        <pre class="overflow-x-auto rounded-lg border bg-muted px-4 py-3 font-mono text-xs leading-relaxed"><code>{{ envelope }}</code></pre>
+        <pre tabindex="0" class="overflow-x-auto rounded-lg border bg-muted px-4 py-3 font-mono text-xs leading-relaxed"><code>{{ envelope }}</code></pre>
       </div>
     </div>
     <div v-if="data?.errorKey" class="grid gap-3">

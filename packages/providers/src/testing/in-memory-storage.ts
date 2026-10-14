@@ -34,6 +34,17 @@ export function createInMemoryFileStorage(): FileStorage & { readonly keys: () =
         sizeBytes: copy.byteLength,
       };
     },
+    async getRange(key, start, end) {
+      const found = files.get(assertStorageKey(key));
+      if (!found) throw new FileNotFoundError(key);
+      const part = new Uint8Array(found.subarray(start, end + 1));
+      return {
+        stream: (async function* () {
+          yield part;
+        })(),
+        sizeBytes: part.byteLength,
+      };
+    },
     async get(key) {
       const found = files.get(assertStorageKey(key));
       if (!found) throw new FileNotFoundError(key);

@@ -60,3 +60,16 @@ Schema changes are Drizzle migrations in `packages/db/drizzle`. Generate with `p
 - **0021** adds `application.submitted_contact` and nulls stored `candidate.linkedin_url` values that are not http(s)
   addresses and `organization.logo` values that are not https ones (stored XSS and tracking-pixel hardening). The two
   `UPDATE`s write only the offending rows; on a very large `candidate` table the scan itself is the only cost.
+- **0023** gives every API key without an expiry `created_at + 90 days` (never more than a year from now), whatever
+  `API_KEY_DEFAULT_TTL_DAYS` says. **A key created more than 90 days before the upgrade stops working the moment the
+  migration runs.** It only touches keys whose `expires_at` is null, so a grace period is set before upgrading, not by
+  editing the migration: see the upgrade notes in `CHANGELOG.md`.
+- **0025** creates `organization_creation_quota` and adds `instance_bootstrap.owner_user_id`. It backfills one quota row
+  per account that is an owner today (its earliest owned organization), so `one_per_user` keeps refusing them, and the
+  bootstrap owner from the confirmed account of the claimed address. Both are bounded by the number of owners.
+- **0026** creates `careers_page` (one row per organization: the draft and the published document, jsonb validated by
+  `careersPageDocumentSchema` on write and read) and `careers_media` (images and videos of the careers page, primary key
+  `(organization_id, id)`, a `kind` check, widths and default description). New tables only: no backfill, no lock on
+  existing tables. An organization without a row gets the default page.
+- **0027** adds `careers_page.revision` (integer, constant default 0, no rewrite): the optimistic lock of the careers
+  page editor.

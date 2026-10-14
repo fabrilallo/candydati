@@ -4,8 +4,11 @@ import type { SelectionStage } from '@tt/domain'
 import { processSummaryText } from '@/lib/ad-facts'
 import { formatDuration } from '@/lib/job-view'
 
-/** The selection process as a sequence the candidate can plan around, ending with the response commitment. */
-const props = defineProps<{ process: readonly SelectionStage[]; responseDays: number | undefined }>()
+/**
+ * The selection process as a sequence the candidate can plan around. The response time is not shown to candidates;
+ * the editor's preview still flags it when missing, because publishing needs it.
+ */
+const props = defineProps<{ process: readonly SelectionStage[] }>()
 const ad = useAdContext()
 const summary = computed(() => processSummaryText(props.process, ad.value.x))
 const id = useId()
@@ -36,14 +39,13 @@ const id = useId()
           <p v-if="stage.note" class="text-sm leading-relaxed"><VagueText :text="stage.note" /></p>
         </div>
       </li>
-      <li class="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-4" data-testid="job-response-time">
+      <li v-if="ad.gaps.responseDays" class="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-4" data-testid="job-response-time">
         <span class="grid size-8 place-items-center rounded-full bg-foreground text-background" aria-hidden="true">
           <MailCheckIcon class="size-4" />
         </span>
         <div class="grid gap-1 pt-1">
           <component :is="ad.heading(2)" class="text-[0.9375rem] font-medium">{{ ad.x('public.responseTime') }}</component>
-          <p v-if="responseDays !== undefined" class="text-sm text-muted-foreground">{{ ad.x('public.responseValue', { count: responseDays }) }}</p>
-          <AdGap v-if="ad.gaps.responseDays" :gap="ad.gaps.responseDays" size="sm" />
+          <AdGap :gap="ad.gaps.responseDays" size="sm" />
         </div>
       </li>
     </ol>

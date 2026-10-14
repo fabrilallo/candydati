@@ -26,9 +26,12 @@ ENV NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE=$NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE
 COPY . .
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm install --frozen-lockfile --offline
 RUN pnpm exec turbo run build --filter=@tt/api --filter=@tt/worker --filter=@tt/web
-# Production dependencies of each service only.
-RUN pnpm --filter @tt/api deploy --prod --legacy /out/api \
- && pnpm --filter @tt/worker deploy --prod --legacy /out/worker \
+# Production dependencies of each service only, at the versions of the lockfile. The 7-day
+# minimumReleaseAge gate applies when new versions enter the lockfile (pnpm add, update), not here: `deploy --legacy` re-checks
+# every package against the clock, so a lockfile updated last week would otherwise stop building.
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm --config.minimum-release-age=0 --filter @tt/api deploy --prod --legacy --frozen-lockfile /out/api \
+ && pnpm --config.minimum-release-age=0 --filter @tt/worker deploy --prod --legacy --frozen-lockfile /out/worker \
  && rm -rf /out/api/src /out/api/eval /out/worker/src
 
 # ---------- shared runtime ----------
@@ -48,7 +51,11 @@ CMD ["node", "dist/index.js"]
 FROM runtime AS worker
 COPY --from=build --chown=node:node /out/worker /app
 USER node
-# The worker opens no port: health is the process being alive; it restarts with restart: unless-stopped.
+# Health server on WORKER_PORT (default 4001, never published): /health is the process answering, /ready adds the database
+# and the registered queues, /metrics needs METRICS_TOKEN. WORKER_PORT=0 turns it off (then the healthcheck always passes).
+ENV WORKER_PORT=4001
+HEALTHCHECK --interval=15s --timeout=5s --start-period=40s --retries=5 \
+  CMD node -e "const p=process.env.WORKER_PORT||4001;if(p==='0')process.exit(0);fetch('http://127.0.0.1:'+p+'/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
 CMD ["node", "dist/index.js"]
 
 FROM runtime AS web
@@ -57,5 +64,5 @@ USER node
 ENV HOST=0.0.0.0 PORT=3000
 EXPOSE 3000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=20s --retries=5 \
-  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/healthz').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
 CMD ["node", "server/index.mjs"]

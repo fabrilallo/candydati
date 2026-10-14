@@ -62,3 +62,65 @@ describe('forwardToApi (real http, fake api)', () => {
     expect((await fetch(`${webUrl}/other`)).status).toBe(404)
   })
 })
+
+describe('forwardToApi with bodies and non-2xx answers (real http, fake api)', () => {
+  let api: Server
+  let web: Server
+  let webUrl = ''
+  let seen: { method?: string; type?: string; cookie?: string; body: string } = { body: '' }
+
+  beforeEach(async () => {
+    seen = { body: '' }
+    api = createServer((request, response) => {
+      const chunks: Buffer[] = []
+      request.on('data', (chunk: Buffer) => chunks.push(chunk))
+      request.on('end', () => {
+        seen = { method: request.method, type: request.headers['content-type'], cookie: request.headers.cookie, body: Buffer.concat(chunks).toString('latin1') }
+        const status = Number(new URL(request.url ?? '/', 'http://x').searchParams.get('status') ?? 200)
+        response.statusCode = status
+        response.setHeader('content-type', 'application/json')
+        response.end(JSON.stringify({ status }))
+      })
+    })
+    const apiUrl = await listen(api)
+    const config = { apiInternalUrl: apiUrl, trustCloudflare: false, apiMaxBodyBytes: 1_000_000, apiTimeoutMs: 5000, public: { siteUrl: 'https://jobs.example.com' } }
+    vi.stubGlobal('useRuntimeConfig', () => config)
+    web = createServer(toNodeListener(createApp().use(forwardToApi(isApiPath))))
+    webUrl = await listen(web)
+  })
+
+  afterEach(async () => {
+    vi.unstubAllGlobals()
+    await close(web)
+    await close(api)
+  })
+
+  it('forwards a JSON POST and the 401 the api answers (a failed sign-in) instead of a 502', async () => {
+    const response = await fetch(`${webUrl}/api/auth/sign-in/email?status=401`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: 'a=b' },
+      body: JSON.stringify({ email: 'a@b.co', password: 'x' }),
+    })
+    expect(response.status).toBe(401)
+    expect(seen).toMatchObject({ method: 'POST', type: 'application/json', cookie: 'a=b', body: '{"email":"a@b.co","password":"x"}' })
+  })
+
+  it.each(['PUT', 'PATCH', 'DELETE'])('forwards a %s with a body, whatever the status', async (method) => {
+    for (const status of [200, 204, 400, 403, 404, 409, 500]) {
+      const response = await fetch(`${webUrl}/api/v1/x?status=${status}`, { method, headers: { 'content-type': 'application/json' }, body: '{"k":1}' })
+      expect(response.status).toBe(status)
+      expect(seen).toMatchObject({ method, body: '{"k":1}' })
+    }
+  })
+
+  it('forwards a multipart upload byte for byte, binary included', async () => {
+    const form = new FormData()
+    form.set('name', 'cv')
+    form.set('file', new Blob([new Uint8Array([0, 255, 10, 13, 128])], { type: 'application/pdf' }), 'cv.pdf')
+    const response = await fetch(`${webUrl}/api/v1/upload?status=401`, { method: 'POST', body: form })
+    expect(response.status).toBe(401)
+    expect(seen.type).toMatch(/^multipart\/form-data; boundary=/)
+    expect(seen.body).toContain('name="file"; filename="cv.pdf"')
+    expect(seen.body).toContain(String.fromCharCode(0, 255, 10, 13, 128))
+  })
+})

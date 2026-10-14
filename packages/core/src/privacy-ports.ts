@@ -1,3 +1,4 @@
+import type { CareersMediaRepository, CareersPageRepository } from './careers-ports.js';
 import type { JobTeamRepository } from './job-team-ports.js';
 import type { ConsentStatus, DataExport, RetentionRun } from '@tt/domain';
 import type { ApplicationRepository, CandidateRepository, CandidateSearch, CandidateNoteRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
@@ -150,6 +151,9 @@ export interface OrganizationExportDeps extends CoreDeps, FeedbackRecords {
   readonly files: FileStorage;
   readonly queue: TaskQueue;
   readonly zip: ZipStreamFactory;
+  /** The careers page (draft and published) and its media files are part of the organization's data. */
+  readonly careersPages: CareersPageRepository;
+  readonly careersMedia: CareersMediaRepository;
   readonly newId: () => string;
   readonly now: () => Date;
 }

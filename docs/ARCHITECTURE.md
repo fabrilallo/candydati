@@ -22,6 +22,82 @@ e2e/          Playwright flows
 Dependency direction: `apps/*` -> `core` -> `domain`; `core` -> `db`; `providers` implement ports defined in `core`.
 `domain` depends on nothing.
 
+## Diagrams
+
+### System overview
+
+```mermaid
+flowchart LR
+  subgraph clients[Clients]
+    rec[Recruiters]
+    cand[Candidates]
+    agents[External agents]
+  end
+  web["web<br/>Nuxt SSR + proxy"]
+  subgraph api[api · Fastify]
+    rest[REST + OpenAPI]
+    auth[Better Auth]
+    mcp[MCP server]
+    asst[Assistant]
+  end
+  core["core use cases<br/>permissions · audit<br/>transactions · org scoping"]
+  subgraph pg[Postgres 17]
+    data[(Data)]
+    audit[(audit_log)]
+    outbox[(outbox_event)]
+    boss[(pg-boss queues)]
+  end
+  worker["worker<br/>CV extraction · emails · automations<br/>webhooks · retention · imports · exports"]
+  s3[(S3 storage)]
+  mail[Email provider]
+  llm["LLM provider<br/>via Mastra"]
+  hooks[Webhook consumers]
+
+  rec & cand --> web
+  agents -->|API key| web
+  web -->|"/api/** and /mcp"| api
+  rest & auth & mcp & asst --> core
+  core --> data & audit & outbox & boss
+  core --> s3
+  asst --> llm
+  boss --> worker
+  outbox --> worker
+  worker --> data
+  worker --> s3
+  worker --> mail
+  worker --> llm
+  worker -->|signed| hooks
+```
+
+### Life of an application
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor C as Candidate
+  participant W as web
+  participant A as api
+  participant K as core
+  participant P as Postgres
+  participant Q as worker
+  actor R as Recruiter
+  participant X as Webhook consumer
+  C->>W: Apply (form, CV, consent)
+  W->>A: POST public application
+  A->>K: intake use case
+  K->>P: One transaction: candidate, application, consent, audit_log, outbox_event
+  A-->>C: Confirmation
+  K-)P: After commit: queue cv.extract
+  P-)Q: pg-boss delivers the job
+  Q->>P: Store extracted data next to the original CV
+  R->>A: Move to next stage
+  A->>K: Permission check, update, audit_log, outbox_event
+  K->>P: Same transaction, then queue email
+  P-)Q: Outbox publisher and email.send
+  Q-)C: Stage email
+  Q-)X: Signed webhook
+```
+
 ## Request flow
 
 ```
@@ -79,9 +155,14 @@ Better Auth (`apps/api/src/auth/create-auth.ts`) runs email + password with thes
   production) accepts an address only with a pending invitation, plus the first owner of an instance with no confirmed
   account (`apps/api/src/auth/signup-policy.ts`). In production that bootstrap needs the one-time `BOOTSTRAP_TOKEN`
   (`x-bootstrap-token` header, the `/signup?setup` field); the claim is taken under an advisory lock in
-  `instance_bootstrap` and lapses after 24 hours unconfirmed.
+  `instance_bootstrap` and lapses after 24 hours unconfirmed. Confirming the address (`beforeEmailVerification`)
+  checks the rule again: an invited address, or the holder of the live claim, whose id becomes
+  `instance_bootstrap.owner_user_id` (the first owner of `ORGANIZATION_CREATION=instance_admins`).
 - **Organization creation** is an instance setting (`ORGANIZATION_CREATION`, Better Auth `allowUserToCreateOrganization`,
-  `auth/organization-creation.ts`): one per person by default with `invite_only`, or only the instance admins.
+  `auth/organization-creation.ts`): one organization ever created per account by default with `invite_only`, or only
+  the instance admins. `one_per_user` is enforced by `organization_creation_quota`: `beforeCreateOrganization` claims
+  the account's row with `INSERT ... ON CONFLICT` (one of concurrent creations wins), `afterCreateOrganization` records
+  the organization; a claim whose creation failed lapses after 5 minutes.
 - **Invitations** are emailed through the configured EmailProvider (it/en) and accepted only by a confirmed account
   whose address is the invited one. The accept link is never logged.
 - **Password reset**: `POST /api/auth/request-password-reset` always answers the same; the emailed token works once
@@ -224,4 +305,5 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 | Privacy | `privacy_notice`, `consent_token`, `data_export`, `retention_run` |
 | Import | `import_batch`, `import_item`, `import_analysis` |
 | HR tools | `feedback_request`, `interview_feedback` |
+| Careers page | `careers_page` (draft and published document), `careers_media` (images re-encoded as WebP, videos) |
 | Audit | `audit_log` (append-only, enforced by triggers) |

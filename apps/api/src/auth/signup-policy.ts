@@ -31,6 +31,11 @@ export interface SignupLookups {
    * other address holds a live claim. Serialised: of concurrent claims exactly one wins.
    */
   claimBootstrap(email: string, now: Date): Promise<boolean>;
+  /**
+   * Records this account as the first owner, when it holds the live bootstrap claim and the instance still has no
+   * confirmed account. False otherwise: a lapsed claim, or one another address took over. Serialised with the claims.
+   */
+  confirmBootstrapOwner(user: { readonly id: string; readonly email: string }, now: Date): Promise<boolean>;
 }
 
 const digest = (value: string): Buffer => createHash('sha256').update(value).digest();
@@ -55,6 +60,31 @@ export async function signupAllowed(policy: SignupPolicy, email: string, present
   return lookups.claimBootstrap(normalized, now);
 }
 
+/**
+ * Whether an account in `invite_only` mode may confirm its address: the sign-up rule checked again, because a claim
+ * can lapse or be taken over between the sign-up and the click on the link. An address with a pending invitation, or
+ * the holder of the live bootstrap claim, which becomes the first owner of the instance.
+ */
+export async function verificationAllowed(policy: SignupPolicy, user: { readonly id: string; readonly email: string }, lookups: SignupLookups, now: Date): Promise<boolean> {
+  if (policy.mode === 'open') return true;
+  const email = normalizeEmail(user.email);
+  if (await lookups.hasPendingInvitation(email, now)) return true;
+  return lookups.confirmBootstrapOwner({ id: user.id, email }, now);
+}
+
+const table = schema.instanceBootstrap;
+type Transaction = Parameters<Parameters<Db['transaction']>[0]>[0];
+const live = (claim: { readonly claimedAt: Date }, now: Date): boolean => now.getTime() - claim.claimedAt.getTime() < BOOTSTRAP_CLAIM_TTL_MS;
+
+/** Takes the bootstrap lock for the transaction: `closed` once a confirmed account exists, else the claim (if any). */
+const lockBootstrap = async (tx: Transaction): Promise<'closed' | typeof table.$inferSelect | null> => {
+  await tx.execute(sql`select pg_advisory_xact_lock(${BOOTSTRAP_LOCK_KEY})`);
+  const confirmed = await tx.execute(sql`select 1 from "user" where email_verified = true limit 1`);
+  if (confirmed.rows.length > 0) return 'closed';
+  const [claim] = await tx.select().from(table).where(eq(table.slot, BOOTSTRAP_SLOT)).limit(1);
+  return claim ?? null;
+};
+
 export const createSignupLookups = (db: Db): SignupLookups => ({
   async hasPendingInvitation(email, now) {
     const rows = await db
@@ -66,13 +96,16 @@ export const createSignupLookups = (db: Db): SignupLookups => ({
   },
   claimBootstrap: (email, now) =>
     db.transaction(async (tx) => {
-      await tx.execute(sql`select pg_advisory_xact_lock(${BOOTSTRAP_LOCK_KEY})`);
-      const confirmed = await tx.execute(sql`select 1 from "user" where email_verified = true limit 1`);
-      if (confirmed.rows.length > 0) return false;
-      const table = schema.instanceBootstrap;
-      const [claim] = await tx.select().from(table).where(eq(table.slot, BOOTSTRAP_SLOT)).limit(1);
-      if (claim && claim.email !== email && now.getTime() - claim.claimedAt.getTime() < BOOTSTRAP_CLAIM_TTL_MS) return false;
-      await tx.insert(table).values({ slot: BOOTSTRAP_SLOT, email, claimedAt: now }).onConflictDoUpdate({ target: table.slot, set: { email, claimedAt: now } });
+      const state = await lockBootstrap(tx);
+      if (state === 'closed' || (state && state.email !== email && live(state, now))) return false;
+      await tx.insert(table).values({ slot: BOOTSTRAP_SLOT, email, claimedAt: now }).onConflictDoUpdate({ target: table.slot, set: { email, claimedAt: now, ownerUserId: null } });
+      return true;
+    }),
+  confirmBootstrapOwner: (user, now) =>
+    db.transaction(async (tx) => {
+      const state = await lockBootstrap(tx);
+      if (state === 'closed' || !state || state.email !== user.email || state.ownerUserId !== null || !live(state, now)) return false;
+      await tx.update(table).set({ ownerUserId: user.id }).where(eq(table.slot, BOOTSTRAP_SLOT));
       return true;
     }),
 });
@@ -85,5 +118,15 @@ export const signupPolicyCheck = (policy: SignupPolicy, lookups: SignupLookups, 
     if (typeof email !== 'string') return; // Better Auth validates the body and answers 400
     const token = ctx.headers?.get(BOOTSTRAP_TOKEN_HEADER) ?? null;
     if (await signupAllowed(policy, email, token, lookups, now())) return;
+    throw new APIError('FORBIDDEN', { code: SIGNUP_INVITE_ONLY, message: 'Accounts on this instance are created by invitation only.' });
+  };
+
+/**
+ * Better Auth's `emailVerification.beforeEmailVerification`: runs before the address is marked as confirmed, and a
+ * refusal leaves the account unconfirmed (so without a session).
+ */
+export const emailVerificationCheck = (policy: SignupPolicy, lookups: SignupLookups, now: () => Date = () => new Date()) =>
+  async (user: { readonly id: string; readonly email: string }): Promise<void> => {
+    if (await verificationAllowed(policy, user, lookups, now())) return;
     throw new APIError('FORBIDDEN', { code: SIGNUP_INVITE_ONLY, message: 'Accounts on this instance are created by invitation only.' });
   };

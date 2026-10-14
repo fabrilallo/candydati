@@ -15,6 +15,8 @@ export interface FileStorage {
   /** @throws FileNotFoundError when the key does not exist. */
   getStream(key: string): Promise<StoredStream>;
   delete(key: string): Promise<void>;
+  /** Bytes `start` to `end` (inclusive), for video seeking. @throws FileNotFoundError when the key does not exist. */
+  getRange?(key: string, start: number, end: number): Promise<StoredStream>;
 }
 
 export class FileNotFoundError extends Error {

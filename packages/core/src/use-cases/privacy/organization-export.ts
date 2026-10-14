@@ -4,6 +4,7 @@ import { NotFoundError, ConflictError } from '../../errors.js';
 import type { OrganizationExportDeps } from '../../privacy-ports.js';
 import { defineSystemJob, defineUseCase, type UseCase, type UseCaseDefinition } from '../../use-case.js';
 import { buildCandidateExport } from './build-candidate-export.js';
+import { writeCareersPage } from './careers-export.js';
 
 const PAGE = 100;
 
@@ -86,6 +87,7 @@ organization.json  the organization
 jobs/              one file per job ad, in the job-content schema (docs/schema/job-content.v1.json)
 candidates/        one file per candidate, in the candidate-export schema (docs/schema/candidate-export.v1.json)
 files/             the original CV files, referenced by applications[].cv.path in the candidate files
+careers/           the careers page (page.json: draft and published document), its media library (media.json) and files
 `;
 
 const json = (value: unknown): Uint8Array => new TextEncoder().encode(`${JSON.stringify(value, null, 2)}\n`);
@@ -146,6 +148,7 @@ export const buildOrganizationExport = defineSystemJob<OrganizationExportDeps, z
       await zip.add('organization.json', json({ schemaVersion: 1, exportedAt: now.toISOString(), organization: { id: organizationId, name: organization?.name ?? null, slug: organization?.slug ?? null } }));
       await writeJobs(deps, organizationId, (path, bytes) => zip.add(path, bytes));
       await writeCandidates(deps, organizationId, now, (path, bytes) => zip.add(path, bytes));
+      await writeCareersPage(deps, organizationId, (path, bytes) => zip.add(path, bytes));
       await zip.finish();
       const sizeBytes = await upload;
       return await deps.dataExports.save({ ...request, status: 'ready', sizeBytes, completedAt: deps.now() });

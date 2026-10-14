@@ -24,6 +24,8 @@ export const MACHINE_FORBIDDEN_PERMISSIONS: readonly Permission[] = PERMISSIONS.
       'job:approve',
       // Who sees which candidates is an access decision: it stays with a person.
       'job_team:manage',
+      // What the organization says publicly about itself, under its name: a person decides it.
+      'careers_page:manage',
     ].includes(permission),
 );
 

@@ -1,3 +1,5 @@
+import { EXTERNAL_VIDEO_ORIGINS } from '@tt/domain'
+
 /**
  * Security headers of the web app. Pure: the middleware and the Nitro plugin call these, and the tests exercise them
  * without a server.
@@ -53,8 +55,10 @@ const contentSecurityPolicy = (input: SecurityHeaderInput): string => {
     ['img-src', "'self'", 'data:', 'https:'],
     ['font-src', "'self'", 'data:'],
     ['connect-src', ...connect],
-    // The CV viewer is a same-origin frame served by the api.
-    ['frame-src', "'self'", ...(turnstile ? [TURNSTILE] : [])],
+    // Careers page videos are files of the api, served through the same-origin proxy.
+    ['media-src', "'self'"],
+    // The CV viewer is a same-origin frame served by the api; a careers page may embed a YouTube or Vimeo video (after a click).
+    ['frame-src', "'self'", ...EXTERNAL_VIDEO_ORIGINS, ...(turnstile ? [TURNSTILE] : [])],
     ['worker-src', "'self'", 'blob:'],
     ['manifest-src', "'self'"],
     ['object-src', "'none'"],

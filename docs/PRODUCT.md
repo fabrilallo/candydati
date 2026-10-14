@@ -55,7 +55,7 @@ The code is open. A complete export in an open, documented format is available a
 | Area | What it covers |
 |---|---|
 | Job ad | Structured editor, mandatory standard (§4), quality score, templates |
-| Careers page | Open positions list, ad page, application form with no registration. Deliberately minimal, not a site builder |
+| Careers page | Open positions list, ad page, application form with no registration, and a section-based page builder (§3.4) |
 | Pipeline | Stages per ad, candidate profile, notes, tags, search across the candidate database. The original CV is always viewable next to the data extracted from it |
 | Communication | Templates, single and bulk sends, inbound email attached to the candidate, outcome messages |
 | Automation | Triggers per stage, response deadlines, reminders. No trigger decides about a candidate |
@@ -76,11 +76,42 @@ HR tools in more detail:
 
 ### 3.2 Out of scope by choice
 
-Advanced career site builder, automatic CV screening or ranking, email campaigns to candidates, on-site chat, onboarding, automatic "match" scores.
+A free-form career site builder (custom HTML, CSS or scripts, arbitrary layouts, several pages), automatic CV screening or ranking, email campaigns to candidates, on-site chat, onboarding, automatic "match" scores.
 
 ### 3.3 Deferred
 
 Scorecards and interview kits. Restricted stages (feedback and notes of a stage visible only to owners, admins and the hiring manager, §6.2). Interview scheduling through an integration with a scheduling service rather than a proprietary calendar sync. Dedicated importers for individual ATS products.
+
+### 3.4 Careers page builder
+
+Owners and admins (`careers_page:manage`; never an API key or the assistant) shape the public careers page of their
+organization in `Settings / Careers page`. The page is a document of ordered sections, not free HTML:
+
+- **Sections:** hero (headline, subheadline, call to action that scrolls to the positions, background none, image or a
+  muted looping video with a poster, dark scrim of at least 40% over media), text, image and text, gallery (2 to 9 images,
+  each with its own description), video (an upload, or a YouTube/Vimeo link), values or perks (3 to 8, icons from a
+  curated set), numbers (2 to 4 big figures), testimonials (1 to 6), links (http/https only) and the open positions,
+  which are always there exactly once. Every section can be hidden; at most one hero, always first.
+- **Theme:** one accent colour (refused when no text reaches WCAG AA 4.5:1 on it; the text colours of the page are
+  derived from it for the light and the dark theme), a heading font from a small self-hosted set (Geist, Fraunces,
+  Bricolage Grotesque, Newsreader) and soft or sharp corners. Nothing else is configurable.
+- **Languages:** every text is optional per language (Italian, English); a visitor reading another language sees the
+  page's default language.
+- **Draft and publication:** the editor saves a draft, validated like the published page and carrying a revision
+  number (a save or publication over a version someone else saved meanwhile is refused, never overwritten), shows a live
+  preview of the real public components at desktop and phone width, and publishes on request. Until something is published, visitors
+  see the default page: the organization's name and the open positions.
+- **Media:** images (JPEG, PNG, WebP, AVIF, up to 8 MB) and videos (MP4, WebM, up to 60 MB) are recognised by their
+  bytes, never by name. Images are decoded and re-encoded as WebP in 640, 1280 and 1920 pixel widths, which drops every
+  metadata block (EXIF, GPS). They are referenced by id, never by a URL from the browser, and served from our own origin: to
+  visitors only the files of the published page (with immutable caching), to the editor everything else after a
+  permission check. A file used by the draft or the published page cannot be deleted. 200 files per organization.
+- **Privacy:** an external video is a facade until the visitor clicks; only then the player loads from
+  youtube-nocookie.com or Vimeo with `dnt=1`. The server never fetches an address typed by a user.
+- **Organization data:** the export of the organization contains the draft, the published page, the media list and
+  the media files. The page holds no candidate data, so retention and erasure of candidates do not touch it.
+- **Transparency stays:** the positions list keeps salary and the number of stages in evidence and never shows the
+  response time or a total process duration.
 
 ## 4. The job ad standard
 
@@ -98,7 +129,7 @@ No model is involved. Without these fields the ad stays a draft.
 | Contract type | Value from the list |
 | Work mode | Remote, hybrid or on site. For hybrid or on site: location and days on site |
 | Selection process | Ordered list of stages, each with type, duration and who runs it |
-| Response time | Days within which a candidate hears back after each stage |
+| Response time | Days within which a candidate hears back after each stage. A commitment the team keeps (deadlines and reminders) and restated to the applicant after applying; not shown on the public ad |
 | Responsibilities | At least three items |
 | Requirements | Required and preferred kept separate |
 

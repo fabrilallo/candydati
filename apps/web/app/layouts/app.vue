@@ -18,7 +18,7 @@ watch(() => route.fullPath, () => {
   <div class="min-h-dvh bg-sidebar lg:flex">
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:shadow-md">{{ t('common.skipToContent') }}</a>
     <aside class="hidden shrink-0 lg:sticky lg:top-0 lg:flex lg:h-dvh" :aria-label="t('nav.sidebar')">
-      <div id="nav-panel" class="w-64" data-testid="nav-panel">
+      <div id="nav-panel" class="h-full w-64" data-testid="nav-panel">
         <AppNavPanel />
       </div>
     </aside>

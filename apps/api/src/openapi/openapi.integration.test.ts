@@ -121,6 +121,8 @@ describe('OpenAPI document', () => {
     const publicPaths = Object.keys(doc.paths).filter((path) => path.startsWith('/api/v1/public/organizations') && !path.endsWith('/applications'));
     expect(publicPaths.toSorted()).toEqual([
       '/api/v1/public/organizations/{orgSlug}',
+      '/api/v1/public/organizations/{orgSlug}/careers-media/{mediaId}/{fileName}',
+      '/api/v1/public/organizations/{orgSlug}/careers-page',
       '/api/v1/public/organizations/{orgSlug}/feed',
       '/api/v1/public/organizations/{orgSlug}/jobs',
       '/api/v1/public/organizations/{orgSlug}/jobs/{jobSlug}',

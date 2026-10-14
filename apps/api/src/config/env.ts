@@ -1,10 +1,10 @@
 import { loadEmailConfig, loadS3Config, type EmailConfig, type S3Config } from '@tt/providers';
-import { API_KEY_MAX_TTL_DAYS, loadPlatformConfig, productionIssues, type PlatformConfig } from '@tt/domain';
+import { API_KEY_MAX_TTL_DAYS, loadObservabilityConfig, loadPlatformConfig, productionIssues, type ObservabilityConfig, type PlatformConfig } from '@tt/domain';
 import { z } from 'zod';
 import { parseTrustProxy } from './trust-proxy.js';
 
 export const SIGNUP_MODES = ['open', 'invite_only'] as const;
-/** Who may create an organization: anyone, each person once (default when invite only), or the instance admins. */
+/** Who may create an organization: anyone, each account once (default when invite only), or the instance admins. */
 export const ORGANIZATION_CREATION_MODES = ['open', 'one_per_user', 'instance_admins'] as const;
 
 const splitList = (value: string | undefined): readonly string[] =>
@@ -80,8 +80,8 @@ const envSchema = z.object({
    */
   BOOTSTRAP_TOKEN: z.string().trim().min(32, 'must be at least 32 characters').optional(),
   /**
-   * `open`: any confirmed account creates organizations. `one_per_user`: a person who already owns one cannot create
-   * another (default when SIGNUP_MODE=invite_only). `instance_admins`: only the first owner and INSTANCE_ADMIN_EMAILS.
+   * `open`: any confirmed account creates organizations. `one_per_user`: one organization ever created per account
+   * (default when SIGNUP_MODE=invite_only). `instance_admins`: only the first owner and INSTANCE_ADMIN_EMAILS.
    */
   ORGANIZATION_CREATION: z.enum(ORGANIZATION_CREATION_MODES).optional(),
   /** Addresses allowed to create organizations when ORGANIZATION_CREATION=instance_admins (comma-separated). */
@@ -107,7 +107,7 @@ const envSchema = z.object({
 export type SignupMode = (typeof SIGNUP_MODES)[number];
 export type OrganizationCreationMode = (typeof ORGANIZATION_CREATION_MODES)[number];
 
-export type Env = Readonly<Omit<z.infer<typeof envSchema>, 'SIGNUP_MODE' | 'ORGANIZATION_CREATION'>> & { readonly SIGNUP_MODE: SignupMode; readonly ORGANIZATION_CREATION: OrganizationCreationMode } & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig };
+export type Env = Readonly<Omit<z.infer<typeof envSchema>, 'SIGNUP_MODE' | 'ORGANIZATION_CREATION'>> & { readonly SIGNUP_MODE: SignupMode; readonly ORGANIZATION_CREATION: OrganizationCreationMode } & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig; readonly observability: ObservabilityConfig };
 
 type Source = Readonly<Record<string, string | undefined>>;
 
@@ -136,6 +136,15 @@ function parseEmail(clean: Source, production: boolean): EmailConfig {
   }
 }
 
+/** Optional: names the variable, never the value. */
+function parseObservability(clean: Source): ObservabilityConfig {
+  try {
+    return loadObservabilityConfig(clean);
+  } catch (error) {
+    throw new Error(`Invalid environment: ${error instanceof Error ? error.message : 'observability configuration'}`, { cause: error });
+  }
+}
+
 export function parseEnv(source: Source): Env {
   const clean = withoutEmptyStrings(source);
   const parsed = envSchema.safeParse(clean);
@@ -150,6 +159,7 @@ export function parseEnv(source: Source): Env {
     ORGANIZATION_CREATION: parsed.data.ORGANIZATION_CREATION ?? (signupMode === 'invite_only' ? 'one_per_user' : 'open'),
     platform: loadPlatformConfig(clean), s3: parseS3(clean),
     email: parseEmail(clean, production),
+    observability: parseObservability(clean),
   });
 }
 

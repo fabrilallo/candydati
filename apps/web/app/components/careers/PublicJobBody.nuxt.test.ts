@@ -17,15 +17,15 @@ describe('PublicJobBody', () => {
     await useNuxtApp().$i18n.loadLocaleMessages('en')
   })
 
-  it('puts the salary range, process and response time first, then the quieter facts', async () => {
+  it('puts the salary range and the number of stages first, then the quieter facts, with no times', async () => {
     const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
     const facts = Object.fromEntries(wrapper.findAll('[data-fact]').map((node) => [node.attributes('data-fact'), node.text()]))
-    expect(Object.keys(facts)).toEqual(['salary', 'process', 'response', 'contract', 'seniority', 'workMode', 'location'])
+    expect(Object.keys(facts)).toEqual(['salary', 'process', 'contract', 'seniority', 'workMode', 'location'])
     expect(facts.salary).toContain('RAL lorda')
     expect(facts.salary).toContain('45.000 - 60.000 €')
     expect(facts.process).toContain('2 fasi')
-    expect(facts.process).toContain('circa 2 h')
-    expect(facts.response).toContain('entro 5 giorni')
+    expect(facts.process).not.toContain('circa')
+    expect(wrapper.find('[data-testid="job-facts"]').text()).not.toContain('entro 5 giorni')
     expect(facts.contract).toContain('Tempo indeterminato')
     expect(facts.workMode).toContain('Ibrido')
     expect(facts.workMode).toContain('2 giorni a settimana in sede')
@@ -39,7 +39,7 @@ describe('PublicJobBody', () => {
     expect(salary).toContain('3.000 - 3.500 €')
   })
 
-  it('lists the selection process in order with duration and who conducts it, plus the response time', async () => {
+  it('lists the selection process in order with duration and who conducts it, without the response time', async () => {
     const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
     const stages = wrapper.findAll('[data-testid="job-stage"]').map((node) => node.text())
     expect(stages).toHaveLength(2)
@@ -50,9 +50,9 @@ describe('PublicJobBody', () => {
     expect(stages[1]).toContain('1 h 30 min')
     expect(stages[1]).toContain('Con: Responsabile tecnico')
     expect(stages[1]).toContain('Pair su un problema reale')
-    expect(wrapper.find('[data-testid="process-summary"]').text()).toBe('2 fasi, circa 2 h')
+    expect(wrapper.find('[data-testid="process-summary"]').text()).toBe('2 fasi')
     expect(wrapper.find('[data-testid="job-process"] ol').exists()).toBe(true)
-    expect(wrapper.find('[data-testid="job-response-time"]').text()).toContain('entro 5 giorni')
+    expect(wrapper.find('[data-testid="job-response-time"]').exists()).toBe(false)
   })
 
   it('names a stage by its title when it has one, otherwise by its type', async () => {
@@ -94,7 +94,7 @@ describe('PublicJobBody', () => {
     expect(wrapper.find('[data-testid="job-ad"]').attributes('lang')).toBe('en')
     expect(wrapper.text()).toContain('Selection process')
     expect(wrapper.text()).toContain('What you will do')
-    expect(wrapper.text()).toContain('You will hear back within 5 days after each stage.')
+    expect(wrapper.find('[data-fact="process"]').text()).toContain('2 stages')
     expect(wrapper.find('[data-fact="salary"]').text()).toContain('€45,000 - 60,000')
     expect(wrapper.text()).not.toContain('Processo di selezione')
   })
@@ -134,8 +134,7 @@ describe('CareersList', () => {
 
   it('lists the ads with a stable path link and the salary always visible', async () => {
     const wrapper = await mountSuspended(CareersList, { props: { careers: { organization: { name: 'Acme', slug: 'acme', logo: 'https://cdn.test/l.png' }, jobs: [summary] } } })
-    expect(wrapper.find('h1').text()).toBe('Posizioni aperte in Acme')
-    expect(wrapper.find('img').attributes('alt')).toBe('Logo di Acme')
+    expect(wrapper.find('h2').text()).toBe('Posizioni aperte')
     const card = wrapper.find('[data-testid="careers-job"]')
     expect(card.find('a').attributes('href')).toBe('/careers/acme/backend-1')
     expect(card.text()).toContain('Senior')

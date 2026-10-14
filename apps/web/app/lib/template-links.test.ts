@@ -19,6 +19,10 @@ function vueFiles(dir: string): string[] {
 const SAFE_BY_CONSTRUCTION = [
   /^safeExternalUrl\(/,
   /^safeImageUrl\(/,
+  // Careers page media: only same-origin paths of the public media route (`lib/careers-site.ts`).
+  /^safeMediaUrl\(/,
+  // YouTube (nocookie) or Vimeo player built from a validated id, loaded only after a click.
+  /^safeEmbedUrl\(/,
   /^`mailto:/,
   /^`tel:/,
   /^cvUrl\(/,

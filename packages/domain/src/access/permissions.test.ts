@@ -98,6 +98,10 @@ describe('permissions', () => {
     expect(ROLES.filter((role) => roleHasPermission(role, 'report:read'))).toEqual(['owner', 'admin', 'recruiter', 'hiring_manager']);
   });
 
+  it('gives careers_page:manage only to owner and admin', () => {
+    expect(ROLES.filter((role) => roleHasPermission(role, 'careers_page:manage'))).toEqual(['owner', 'admin']);
+  });
+
   it('gives job:approve only to owner and admin', () => {
     expect(ROLES.filter((role) => roleHasPermission(role, 'job:approve'))).toEqual(['owner', 'admin']);
   });

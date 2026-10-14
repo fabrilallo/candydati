@@ -1,4 +1,4 @@
-export const ERROR_CODES = ['forbidden', 'not_found', 'validation_failed', 'conflict', 'rate_limited', 'audit_failed', 'storage_unavailable'] as const;
+export const ERROR_CODES = ['forbidden', 'not_found', 'validation_failed', 'conflict', 'rate_limited', 'audit_failed', 'storage_unavailable', 'stale_revision'] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
 /**
@@ -34,6 +34,18 @@ export class ConflictError extends CoreError {
   readonly code = 'conflict';
 
   constructor(message = 'The request conflicts with the current state.') {
+    super(message);
+  }
+}
+
+/**
+ * The caller wrote over a version it never saw (optimistic lock): someone else saved meanwhile. Reload, then retry.
+ * `message` is safe to show.
+ */
+export class StaleRevisionError extends CoreError {
+  readonly code = 'stale_revision';
+
+  constructor(message = 'Someone else changed this in the meantime. Reload to see their version.') {
     super(message);
   }
 }

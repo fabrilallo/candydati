@@ -27,6 +27,7 @@ describe('machine access', () => {
       'data:export',
       'api_key:manage',
       'job_team:manage',
+      'careers_page:manage',
     ] as const) {
       expect(MACHINE_FORBIDDEN_PERMISSIONS).toContain(permission);
     }

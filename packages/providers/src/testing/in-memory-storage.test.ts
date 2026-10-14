@@ -34,4 +34,15 @@ describe('streaming', () => {
     expect(sizeBytes).toBe(3);
     await expect(storage.getStream('missing')).rejects.toThrow(FileNotFoundError);
   });
+
+  it('reads an inclusive byte range', async () => {
+    const storage = createInMemoryFileStorage();
+    await storage.put('r', new Uint8Array([1, 2, 3, 4]), 'x/y');
+    const { stream, sizeBytes } = await storage.getRange!('r', 1, 2);
+    const chunks: number[] = [];
+    for await (const chunk of stream) chunks.push(...chunk);
+    expect(chunks).toEqual([2, 3]);
+    expect(sizeBytes).toBe(2);
+    await expect(storage.getRange!('missing', 0, 1)).rejects.toThrow(FileNotFoundError);
+  });
 });

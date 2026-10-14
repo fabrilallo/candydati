@@ -36,6 +36,7 @@ const shared = () => [
   ...schemaKeys('packages/providers/src/storage/config.ts'),
   ...schemaKeys('packages/providers/src/email/config.ts'),
   ...schemaKeys('packages/domain/src/platform/config.ts'),
+  ...schemaKeys('packages/domain/src/observability/config.ts'),
 ];
 
 const SOURCES = {

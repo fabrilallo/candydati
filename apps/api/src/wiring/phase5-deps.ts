@@ -51,6 +51,8 @@ export function createExportDeps({ uow, files, queue, zip, feedbackRecords }: Ex
     files,
     queue,
     zip,
+    careersPages: r.careersPages,
+    careersMedia: r.careersMedia,
     newId: randomUUID,
     now: () => new Date(),
   };

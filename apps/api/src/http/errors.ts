@@ -31,6 +31,7 @@ export const CORE_STATUS: Readonly<Record<ErrorCode, number>> = {
   rate_limited: 429,
   audit_failed: 500,
   storage_unavailable: 503,
+  stale_revision: 409,
 };
 
 export interface HttpFailure {

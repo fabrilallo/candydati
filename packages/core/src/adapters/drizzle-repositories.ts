@@ -39,6 +39,7 @@ import { createDrizzleWebhookDeliveries, createDrizzleWebhookEndpoints } from '.
 import { toSqlExecutor } from './sql-executor.js';
 import { createDrizzleStuckWork } from './drizzle-stuck-work.js';
 import { createDrizzleSecuritySettings } from './drizzle-security-settings.js';
+import { createDrizzleCareersMedia, createDrizzleCareersPages } from './drizzle-careers.js';
 
 /** Jobs, organizations, approvals, automation and webhooks. */
 const jobRepositories = (db: DbExecutor) => {
@@ -68,6 +69,8 @@ const jobRepositories = (db: DbExecutor) => {
     memberRoles: createDrizzleMemberRoles(db),
     twoFactor: createDrizzleTwoFactor(db),
     reports: createDrizzleReports(db),
+    careersPages: createDrizzleCareersPages(db),
+    careersMedia: createDrizzleCareersMedia(db),
   } as const;
 };
 

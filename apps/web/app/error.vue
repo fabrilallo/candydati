@@ -4,11 +4,13 @@ import { setLucideProps } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 
 const props = defineProps<{ error: NuxtError }>()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const platform = usePlatform()
 setLucideProps({ strokeWidth: 1.5 })
 
 const kind = computed(() => (props.error.statusCode === 404 ? 'notFound' : props.error.statusCode === 503 ? 'unreachable' : 'generic'))
+// error.vue replaces app.vue, which is where the language of the page is normally declared.
+useHead({ htmlAttrs: { lang: locale } })
 useSeoMeta({ title: () => `${t(`errorPage.${kind.value}Title`)} | ${platform.value.name}` })
 const retry = (): void => reloadNuxtApp({ force: true })
 const home = (): Promise<void> => clearError({ redirect: '/' })
@@ -27,7 +29,7 @@ const home = (): Promise<void> => clearError({ redirect: '/' })
       </div>
     </header>
     <main id="main" class="mx-auto grid w-full max-w-3xl flex-1 content-center gap-10 px-5 pb-24 sm:px-10">
-      <p class="figure text-[5.5rem] font-semibold leading-none tracking-tighter text-muted-foreground/40 sm:text-[8rem]" aria-hidden="true">{{ error.statusCode }}</p>
+      <p class="figure text-[5.5rem] font-semibold leading-none tracking-tighter text-muted-foreground sm:text-[8rem]" aria-hidden="true">{{ error.statusCode }}</p>
       <div class="grid max-w-xl gap-3">
         <p class="sr-only">{{ t('errorPage.code', { code: error.statusCode }) }}</p>
         <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">{{ t(`errorPage.${kind}Title`) }}</h1>

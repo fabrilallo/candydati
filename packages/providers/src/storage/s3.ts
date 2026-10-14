@@ -14,9 +14,9 @@ export interface S3FileStorage extends FileStorage {
 const errorName = (error: unknown): string => (error instanceof Error ? error.name : '');
 
 /** Reads an object, turning "missing" into `FileNotFoundError`. */
-async function readObject<T>(client: S3Client, Bucket: string, key: string, read: (output: GetObjectCommandOutput) => Promise<T>): Promise<T> {
+async function readObject<T>(client: S3Client, Bucket: string, key: string, read: (output: GetObjectCommandOutput) => Promise<T>, Range?: string): Promise<T> {
   try {
-    const output = await client.send(new GetObjectCommand({ Bucket, Key: assertStorageKey(key) }));
+    const output = await client.send(new GetObjectCommand({ Bucket, Key: assertStorageKey(key), ...(Range ? { Range } : {}) }));
     if (!output.Body) throw new FileNotFoundError(key);
     return await read(output);
   } catch (error) {
@@ -48,6 +48,10 @@ export function createS3FileStorage(config: S3Config): S3FileStorage {
     putStream: (key, source, mediaType) => uploadStream(client, Bucket, assertStorageKey(key), source, mediaType),
     getStream: (key) =>
       readObject(client, Bucket, key, async (output) => ({ stream: output.Body as AsyncIterable<Uint8Array>, sizeBytes: output.ContentLength ?? null })),
+    getRange: async (key, start, end) => {
+      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start < 0 || end < start) throw new RangeError('Invalid byte range.');
+      return await readObject(client, Bucket, key, async (output) => ({ stream: output.Body as AsyncIterable<Uint8Array>, sizeBytes: output.ContentLength ?? null }), `bytes=${start}-${end}`);
+    },
     get: (key) => readObject(client, Bucket, key, (output) => output.Body!.transformToByteArray()),
     async delete(key) {
       await client.send(new DeleteObjectCommand({ Bucket, Key: assertStorageKey(key) }));

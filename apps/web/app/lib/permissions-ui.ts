@@ -18,7 +18,7 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   return allowed[0] ?? null
 }
 
-export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'emailTemplates' | 'webhooks' | 'distribution' | 'api' | 'data' | 'audit'
+export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'emailTemplates' | 'webhooks' | 'distribution' | 'careersPage' | 'api' | 'data' | 'audit'
 export type NavSectionId = 'work' | 'organization'
 
 export interface NavItem {
@@ -46,6 +46,7 @@ const NAV: readonly NavItem[] = [
   { id: 'emailTemplates', to: '/app/settings/email-templates', section: 'organization', permission: 'email_template:manage' },
   { id: 'webhooks', to: '/app/settings/webhooks', section: 'organization', permission: 'webhook:manage' },
   { id: 'distribution', to: '/app/settings/distribution', section: 'organization', permission: 'job:publish' },
+  { id: 'careersPage', to: '/app/settings/careers', section: 'organization', permission: 'careers_page:manage' },
   { id: 'api', to: '/app/settings/api', section: 'organization', permission: 'api_key:manage' },
   { id: 'data', to: '/app/settings/data', section: 'organization', permission: 'data:export' },
   { id: 'audit', to: '/app/settings/audit-log', section: 'organization', permission: 'audit:read' },

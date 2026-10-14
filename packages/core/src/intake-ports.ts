@@ -6,6 +6,12 @@ import type { AuditLogRepository, CoreDeps } from './ports.js';
 import type { StageEventRepository, ResponsePromiseRepository } from './report-ports.js';
 import type { OutboxRepository } from './webhook-ports.js';
 
+/** A stored file read as a stream. `sizeBytes` is null when the backend does not say. */
+export interface StoredFileStream {
+  readonly stream: AsyncIterable<Uint8Array>;
+  readonly sizeBytes: number | null;
+}
+
 /** Binary storage for CVs. Keys are chosen by core; `@tt/providers` implements it (local disk, S3/MinIO). */
 export interface FileStorage {
   put(key: string, bytes: Uint8Array, mediaType: string): Promise<void>;
@@ -17,6 +23,11 @@ export interface FileStorage {
   getStream(key: string): Promise<{ readonly stream: AsyncIterable<Uint8Array>; readonly sizeBytes: number | null }>;
   /** Deleting a missing key is not an error. */
   delete(key: string): Promise<void>;
+  /**
+   * Bytes `start` to `end` (inclusive) of a file, for video seeking. Optional: a storage without it serves whole files.
+   * @throws when the key does not exist.
+   */
+  getRange?(key: string, start: number, end: number): Promise<StoredFileStream>;
 }
 
 export const TASK_NAMES = [

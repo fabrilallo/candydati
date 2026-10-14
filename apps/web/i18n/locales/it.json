@@ -47,6 +47,7 @@
     "data": "Dati",
     "api": "API e integrazioni",
     "distribution": "Distribuzione",
+    "careersPage": "Pagina carriera",
     "imports": "Import",
     "jobRequests": "Richieste",
     "reports": "Report",
@@ -573,6 +574,14 @@
       },
       "mcp": {
         "read": "Ha letto dati tramite MCP"
+      },
+      "careers_page": {
+        "draft_saved": "Ha salvato la bozza della pagina carriere",
+        "published": "Ha pubblicato la pagina carriere"
+      },
+      "careers_media": {
+        "uploaded": "Ha caricato un'immagine o un video per la pagina carriere",
+        "deleted": "Ha eliminato un'immagine o un video della pagina carriere"
       }
     }
   },
@@ -1271,15 +1280,12 @@
     "processIntro": "Ecco le fasi, nell'ordine in cui le affronterai.",
     "stageMeta": "{duration}, a cura di: {who}",
     "responseTime": "Tempo di risposta",
-    "responseValue": "Riceverai un riscontro entro 1 giorno dopo ogni fase. | Riceverai un riscontro entro {count} giorni dopo ogni fase.",
     "published": "Pubblicato il {date}",
     "backToJobs": "Tutte le posizioni aperte",
     "facts": {
       "ral": "RAL lorda",
       "stages": "1 fase | {count} fasi",
-      "about": "circa {duration}",
       "within": "entro 1 giorno | entro {count} giorni",
-      "afterEachStage": "dopo ogni fase",
       "processTotal": "tempo totale del processo",
       "conductedBy": "Con: {who}"
     },
@@ -1329,13 +1335,12 @@
     "subtitle": "Ogni annuncio dice quanto si guadagna, come si seleziona e quando riceverai una risposta.",
     "metaDescription": "Le posizioni aperte in {organization}: retribuzione, modalità di lavoro e processo di selezione sempre dichiarati.",
     "empty": "Al momento non ci sono posizioni aperte.",
-    "emptyBody": "Quando ne apriremo una, la troverai qui con retribuzione, processo e tempi di risposta già scritti.",
+    "emptyBody": "Quando ne apriremo una, la troverai qui con retribuzione e processo di selezione già scritti.",
     "count": "Nessuna posizione aperta | 1 posizione aperta | {count} posizioni aperte",
     "notFound": "Questa pagina carriere non esiste.",
     "logo": "Logo di {organization}",
     "stats": {
-      "open": "Posizione aperta | Posizioni aperte",
-      "response": "giorno al massimo per una risposta | giorni al massimo per una risposta"
+      "open": "Posizione aperta | Posizioni aperte"
     },
     "filters": {
       "label": "Filtra per modalità di lavoro",
@@ -1344,8 +1349,7 @@
       "noMatch": "Nessuna posizione con questa modalità di lavoro."
     },
     "job": {
-      "stages": "1 fase | {count} fasi",
-      "response": "risposta in 1 giorno | risposta in {count} giorni"
+      "stages": "1 fase | {count} fasi"
     }
   },
   "promise": {
@@ -2397,6 +2401,9 @@
       },
       "report": {
         "read": "Leggere i report aggregati"
+      },
+      "careers_page": {
+        "manage": "Gestire la pagina carriere"
       }
     },
     "withheld": "Alcune cose una chiave non le può fare mai: decisioni sui candidati, messaggi ai candidati e amministrazione restano a una persona.",
@@ -3215,5 +3222,420 @@
     "body": "Questa pagina non esiste più, oppure riguarda un annuncio del cui team non fai parte. Chiedi a chi gestisce l'annuncio di aggiungerti al team.",
     "backCandidates": "Torna ai candidati",
     "backJobs": "Torna agli annunci"
+  },
+  "careersSite": {
+    "nav": {
+      "positions": "Posizioni aperte"
+    },
+    "hero": {
+      "cta": "Vedi le posizioni aperte",
+      "open": "posizione aperta | posizioni aperte"
+    },
+    "jobs": {
+      "title": "Posizioni aperte"
+    },
+    "video": {
+      "pause": "Metti in pausa il video di sfondo",
+      "play": "Riproduci il video di sfondo",
+      "playOn": "Guarda «{title}» su {provider}",
+      "privacy": "Il video si carica da {provider} solo quando premi play: prima nessuna richiesta parte verso {provider}.",
+      "watchOn": "Apri il video su {provider}"
+    },
+    "links": {
+      "title": "Dove trovarci",
+      "kinds": {
+        "website": "Sito web",
+        "linkedin": "LinkedIn",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "x": "X",
+        "youtube": "YouTube",
+        "github": "GitHub",
+        "tiktok": "TikTok",
+        "other": "Link"
+      }
+    },
+    "newTab": "(si apre in una nuova scheda)",
+    "footer": "Qui retribuzione e processo di selezione sono sempre dichiarati, prima di candidarti."
+  },
+  "careersEditor": {
+    "stale": {
+      "message": "Qualcun altro ha salvato o pubblicato la pagina dopo che l'hai aperta. Per non sovrascrivere il suo lavoro, le tue modifiche non sono state salvate: ricarica per vedere la versione attuale.",
+      "reload": "Ricarica la versione attuale"
+    },
+    "title": "Pagina carriera",
+    "modes": {
+      "label": "Modifica o anteprima",
+      "edit": "Modifica",
+      "preview": "Anteprima"
+    },
+    "meta": {
+      "unpublished": "Modifiche non pubblicate",
+      "published": "Pubblicata il {date}",
+      "neverPublished": "Mai pubblicata",
+      "saved": "Bozza salvata il {date}"
+    },
+    "state": {
+      "saving": "Salvataggio…",
+      "unsaved": "Modifiche non salvate",
+      "saved": "Salvato",
+      "invalid": "1 problema da correggere | {count} problemi da correggere"
+    },
+    "actions": {
+      "save": "Salva bozza",
+      "publish": "Pubblica",
+      "viewPublic": "Vedi pagina pubblica"
+    },
+    "save": {
+      "saved": "Bozza salvata",
+      "invalid": "Correggi i problemi segnalati: la bozza si salva quando la pagina è valida."
+    },
+    "publish": {
+      "done": "Pagina pubblicata",
+      "publishing": "Pubblicazione…",
+      "blocked": "Correggi i problemi segnalati per pubblicare."
+    },
+    "languages": {
+      "editing": "Lingua dei testi",
+      "default": "Lingua predefinita della pagina",
+      "defaultHint": "La lingua che legge chi visita quando un testo non è scritto nella sua."
+    },
+    "sections": {
+      "title": "Sezioni",
+      "add": "Aggiungi sezione",
+      "hidden": "Nascosta",
+      "issues": "1 problema | {count} problemi",
+      "up": "Sposta su: {name}",
+      "down": "Sposta giù: {name}",
+      "hide": "Nascondi: {name}",
+      "delete": "Elimina: {name}",
+      "moved": "Sezione spostata in posizione {position} di {total}",
+      "deleteTitle": "Eliminare la sezione «{name}»?",
+      "deleteBody": "La sezione e i suoi testi spariscono dalla bozza. Le immagini restano nella libreria.",
+      "deleteConfirm": "Elimina sezione"
+    },
+    "types": {
+      "hero": {
+        "name": "Apertura",
+        "description": "Il titolo grande in cima alla pagina, con immagine o video di sfondo."
+      },
+      "text": {
+        "name": "Testo",
+        "description": "Un blocco di testo con un titolo facoltativo."
+      },
+      "image_text": {
+        "name": "Immagine e testo",
+        "description": "Un’immagine accanto a un testo."
+      },
+      "gallery": {
+        "name": "Galleria",
+        "description": "Da 2 a 9 foto, ognuna con la sua descrizione."
+      },
+      "video": {
+        "name": "Video",
+        "description": "Un video caricato, oppure da YouTube o Vimeo."
+      },
+      "values": {
+        "name": "Valori e benefit",
+        "description": "Da 3 a 8 punti con icona, titolo e una riga di testo."
+      },
+      "numbers": {
+        "name": "Numeri",
+        "description": "Da 2 a 4 cifre che raccontano l’azienda."
+      },
+      "testimonials": {
+        "name": "Testimonianze",
+        "description": "Le parole di chi lavora da voi."
+      },
+      "jobs": {
+        "name": "Posizioni aperte",
+        "description": "L’elenco degli annunci pubblicati, sempre aggiornato."
+      },
+      "links": {
+        "name": "Link",
+        "description": "Il sito e i profili social."
+      }
+    },
+    "field": {
+      "optional": "facoltativo",
+      "count": "{count} di {max} caratteri"
+    },
+    "common": {
+      "title": "Titolo",
+      "body": "Testo",
+      "paragraphs": "Una riga vuota inizia un nuovo paragrafo.",
+      "image": "Immagine",
+      "alt": "Descrizione dell’immagine",
+      "altHint": "La legge chi usa un lettore di schermo: descrivi cosa si vede."
+    },
+    "hero": {
+      "headline": "Titolo",
+      "subheadline": "Sottotitolo",
+      "cta": "Testo del pulsante",
+      "ctaHint": "Se vuoto: «{label}».",
+      "background": "Sfondo",
+      "backgroundKind": {
+        "none": "Nessuno",
+        "image": "Immagine",
+        "video": "Video"
+      },
+      "image": "Immagine di sfondo",
+      "video": "Video di sfondo",
+      "videoHint": "Parte senza audio e chi visita può metterlo in pausa.",
+      "poster": "Immagine di anteprima",
+      "posterHint": "Si vede mentre il video si carica, e al suo posto per chi riduce le animazioni.",
+      "overlay": "Velo scuro sullo sfondo",
+      "overlayHint": "Almeno {min}% con immagine o video, così il titolo resta leggibile.",
+      "alignment": "Allineamento",
+      "align": {
+        "start": "A sinistra",
+        "center": "Al centro"
+      }
+    },
+    "imageText": {
+      "side": "Posizione dell’immagine",
+      "left": "A sinistra",
+      "right": "A destra"
+    },
+    "gallery": {
+      "images": "Immagini",
+      "add": "Aggiungi immagine",
+      "item": "Immagine {n}"
+    },
+    "video": {
+      "titleHint": "È anche il nome del lettore video per chi usa un lettore di schermo.",
+      "caption": "Didascalia",
+      "source": "Origine del video",
+      "link": "Link YouTube o Vimeo",
+      "upload": "File caricato",
+      "url": "Link al video",
+      "privacy": "Nulla si carica da YouTube o Vimeo finché chi visita non preme play: prima di allora nessuna richiesta parte verso il fornitore.",
+      "file": "File video",
+      "poster": "Immagine di anteprima",
+      "posterHint": "Obbligatoria: si vede prima che il video parta.",
+      "posterLinkHint": "Facoltativa: senza, si vede un riquadro neutro con il pulsante play."
+    },
+    "values": {
+      "items": "Valori",
+      "add": "Aggiungi valore",
+      "item": "Valore {n}",
+      "icon": "Icona",
+      "itemTitle": "Titolo",
+      "itemText": "Testo"
+    },
+    "numbers": {
+      "items": "Numeri",
+      "add": "Aggiungi numero",
+      "item": "Numero {n}",
+      "value": "Cifra",
+      "valueHint": "Breve, come la scriveresti: 42, 3,5k, 98%.",
+      "label": "Etichetta"
+    },
+    "testimonials": {
+      "items": "Testimonianze",
+      "add": "Aggiungi testimonianza",
+      "item": "Testimonianza {n}",
+      "quote": "Citazione",
+      "name": "Nome",
+      "role": "Ruolo",
+      "photo": "Foto"
+    },
+    "jobs": {
+      "note": "L’elenco è automatico: mostra gli annunci pubblicati con retribuzione e processo di selezione. I tempi di risposta non compaiono in questo elenco.",
+      "titleHint": "Se vuoto: «{title}».",
+      "intro": "Introduzione"
+    },
+    "links": {
+      "titleHint": "Se vuoto: «{title}».",
+      "items": "Link",
+      "add": "Aggiungi link",
+      "item": "Link {n}",
+      "kind": "Tipo",
+      "url": "Indirizzo",
+      "label": "Etichetta"
+    },
+    "items": {
+      "up": "Sposta su: {item}",
+      "down": "Sposta giù: {item}",
+      "remove": "Rimuovi: {item}"
+    },
+    "icons": {
+      "heart": "Cuore",
+      "sparkles": "Scintille",
+      "users": "Persone",
+      "rocket": "Razzo",
+      "leaf": "Foglia",
+      "globe": "Mondo",
+      "coffee": "Caffè",
+      "book-open": "Libro",
+      "graduation-cap": "Formazione",
+      "laptop": "Portatile",
+      "house": "Casa",
+      "clock": "Orologio",
+      "calendar": "Calendario",
+      "plane": "Aereo",
+      "shield-check": "Scudo",
+      "hand-heart": "Mano con cuore",
+      "lightbulb": "Lampadina",
+      "target": "Obiettivo",
+      "trophy": "Coppa",
+      "smile": "Sorriso",
+      "bike": "Bicicletta",
+      "baby": "Bambino",
+      "piggy-bank": "Salvadanaio",
+      "trending-up": "Crescita",
+      "handshake": "Stretta di mano",
+      "compass": "Bussola",
+      "palette": "Tavolozza",
+      "code": "Codice",
+      "zap": "Fulmine",
+      "sun": "Sole"
+    },
+    "theme": {
+      "title": "Aspetto",
+      "accent": "Colore principale",
+      "accentPicker": "Scegli il colore principale",
+      "passes": "Contrasto {ratio}:1, il testo sul pulsante si legge bene.",
+      "fails": "Contrasto {ratio}:1, il testo sul pulsante non si legge. Scegli un colore più scuro o più chiaro.",
+      "font": "Carattere dei titoli",
+      "fonts": {
+        "geist": "Geist",
+        "fraunces": "Fraunces",
+        "bricolage": "Bricolage Grotesque",
+        "newsreader": "Newsreader"
+      },
+      "sample": "Lavora con noi",
+      "corners": "Angoli",
+      "cornerStyles": {
+        "soft": "Arrotondati",
+        "sharp": "Netti"
+      }
+    },
+    "preview": {
+      "title": "Anteprima",
+      "device": "Dimensione dell’anteprima",
+      "desktop": "Desktop",
+      "mobile": "Telefono",
+      "frame": "Anteprima della pagina carriera"
+    },
+    "media": {
+      "kind": {
+        "image": "Immagine",
+        "video": "Video"
+      },
+      "none": {
+        "image": "Nessuna immagine scelta",
+        "video": "Nessun video scelto"
+      },
+      "change": "Cambia",
+      "choose": {
+        "image": "Scegli immagine",
+        "video": "Scegli video"
+      },
+      "clear": "Rimuovi",
+      "title": {
+        "image": "Scegli un’immagine",
+        "video": "Scegli un video"
+      },
+      "description": "Carica un file nuovo o scegline uno dalla libreria dell’organizzazione.",
+      "library": "Libreria",
+      "empty": {
+        "image": "Nessuna immagine nella libreria: caricane una qui sopra.",
+        "video": "Nessun video nella libreria: caricane uno qui sopra."
+      },
+      "file": {
+        "image": "File immagine (JPEG, PNG, WebP o AVIF)",
+        "video": "File video (MP4 o WebM)"
+      },
+      "limits": {
+        "image": "Al massimo {max} MB. I dati nascosti della foto, come la posizione, vengono rimossi.",
+        "video": "Al massimo {max} MB."
+      },
+      "alt": "Descrizione in {language}",
+      "altHint": "Serve almeno una lingua: la legge chi usa un lettore di schermo.",
+      "progress": "Caricamento del file",
+      "upload": "Carica",
+      "select": "Scegli: {name}",
+      "used": {
+        "published": "Nella pagina pubblicata",
+        "draft": "Nella bozza"
+      },
+      "delete": "Elimina dalla libreria",
+      "deleteConfirm": "Elimina",
+      "errors": {
+        "unsupported_type": "Formato non supportato: usa JPEG, PNG, WebP o AVIF per le immagini, MP4 o WebM per i video.",
+        "too_large": "File troppo grande: al massimo 8 MB per un’immagine e 60 MB per un video.",
+        "empty": "Il file è vuoto.",
+        "alt_required": "Scrivi la descrizione dell’immagine in almeno una lingua.",
+        "image_unreadable": "Non riusciamo a leggere questa immagine: prova a salvarla di nuovo come JPEG o PNG.",
+        "image_too_big": "Immagine troppo grande: riducila sotto i 50 megapixel.",
+        "library_full": "La libreria è piena: elimina i file che non usi più.",
+        "in_published_page": "Il file è nella pagina pubblicata: toglilo e pubblica di nuovo prima di eliminarlo.",
+        "in_draft": "Il file è nella bozza: toglilo dalla bozza e salva prima di eliminarlo.",
+        "cancelled": "Caricamento annullato.",
+        "no_file": "Scegli un file da caricare."
+      }
+    },
+    "errors": {
+      "required": "Campo obbligatorio.",
+      "too_long": "Testo troppo lungo.",
+      "gallery_min": "Servono almeno 2 immagini.",
+      "gallery_max": "Al massimo 9 immagini.",
+      "values_min": "Servono almeno 3 valori.",
+      "values_max": "Al massimo 8 valori.",
+      "numbers_min": "Servono almeno 2 numeri.",
+      "numbers_max": "Al massimo 4 numeri.",
+      "testimonials_min": "Serve almeno una testimonianza.",
+      "testimonials_max": "Al massimo 6 testimonianze.",
+      "links_min": "Serve almeno un link.",
+      "links_max": "Al massimo 8 link.",
+      "jobs_exactly_one": "La pagina deve contenere le posizioni aperte, una volta sola.",
+      "hero_first": "L’apertura deve essere la prima sezione.",
+      "hero_at_most_one": "La pagina può avere una sola apertura.",
+      "overlay_too_low": "Con immagine o video il velo deve essere almeno al 40%.",
+      "accent_contrast": "Nessun testo si legge su questo colore: scegline uno più scuro o più chiaro.",
+      "hex_color": "Scrivi un colore come #1f47d6.",
+      "media_missing": "Il file non è più nella libreria: scegline un altro.",
+      "media_required": "Scegli un file.",
+      "video_id": "Incolla il link di un video di YouTube o Vimeo.",
+      "video_url": "Questo link non è un video di YouTube o Vimeo.",
+      "url": "Scrivi un indirizzo web completo, che inizia con https://",
+      "duplicate_id": "Due sezioni hanno lo stesso identificativo.",
+      "section_id": "Identificativo di sezione non valido.",
+      "too_many_sections": "Al massimo 24 sezioni.",
+      "invalid": "Valore non valido."
+    },
+    "starter": {
+      "hero": {
+        "headline": "Lavora con noi"
+      },
+      "text": {
+        "title": "Chi siamo",
+        "body": "Racconta in poche righe chi siete, cosa fate e perché lavorare con voi."
+      },
+      "imageText": {
+        "title": "Dove lavoriamo",
+        "body": "Descrivi il posto in cui si lavora: l’ufficio, il lavoro da remoto, il team."
+      },
+      "gallery": {
+        "title": "Una giornata da noi"
+      },
+      "video": {
+        "title": "Il nostro lavoro in un video"
+      },
+      "values": {
+        "title": "Cosa offriamo",
+        "item1": "Lavoro flessibile",
+        "item2": "Formazione",
+        "item3": "Benessere"
+      },
+      "numbers": {
+        "label1": "persone",
+        "label2": "anni di attività"
+      },
+      "testimonials": {
+        "title": "Chi lavora qui"
+      }
+    }
   }
 }

@@ -72,4 +72,20 @@ export const instanceBootstrap = pgTable('instance_bootstrap', {
   slot: text('slot').primaryKey(),
   email: text('email').notNull(),
   claimedAt: timestamp('claimed_at', { withTimezone: true }).notNull(),
+  /** The account that confirmed its address while holding the live claim: the first owner of the instance. */
+  ownerUserId: text('owner_user_id').references(() => user.id, { onDelete: 'set null' }),
+});
+
+/**
+ * Organizations created per account, for ORGANIZATION_CREATION=one_per_user: one row per account that ever created one
+ * (or is creating one right now). The row is claimed before the organization exists, so of concurrent creations exactly
+ * one wins; it outlives the owner role, so demoting oneself frees nothing. `organization_id` stays null until the
+ * organization is created: a claim whose creation failed lapses after a few minutes.
+ */
+export const organizationCreationQuota = pgTable('organization_creation_quota', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  organizationId: text('organization_id').references(() => organization.id, { onDelete: 'restrict' }),
+  claimedAt: timestamp('claimed_at', { withTimezone: true }).notNull(),
 });

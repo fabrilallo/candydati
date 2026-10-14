@@ -35,15 +35,16 @@ describe('CareersList', () => {
     const first = wrapper.find('[data-testid="careers-job"]')
     expect(first.find('[data-testid="careers-salary"]').text().replace(/\s/g, ' ')).toBe('40.000 € - 50.000 €')
     expect(first.find('[data-testid="careers-process"]').text()).toContain('3 fasi')
-    expect(first.find('[data-testid="careers-process"]').text()).toMatch(/risposta in \d+ giorni/)
+    expect(first.find('[data-testid="careers-process"]').text()).not.toMatch(/risposta/)
     expect(first.find('a').attributes('href')).toMatch(/^\/careers\/officina\/annuncio-|^\/careers\/officina\/[a-c]$/)
   })
 
-  it('groups by role family and states the promise as numbers', async () => {
+  it('groups by role family and counts the open ads, without a response time', async () => {
     const wrapper = await mountList(jobs)
-    expect(wrapper.findAll('[data-testid="careers-group"]').map((g) => g.find('h2').text())[0]).toContain('Ingegneria software')
-    expect(wrapper.find('[data-testid="careers-stats"]').text()).toContain('7')
-    expect(wrapper.find('[data-testid="careers-stats"]').text()).toContain('3')
+    expect(wrapper.findAll('[data-testid="careers-group"]').map((g) => g.find('h3').text())[0]).toContain('Ingegneria software')
+    const stats = wrapper.find('[data-testid="careers-stats"]').text()
+    expect(stats).toContain(String(jobs.length))
+    expect(stats).not.toMatch(/risposta/i)
   })
 
   it('filters by work mode in the component only, never in the URL', async () => {

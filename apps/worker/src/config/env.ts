@@ -1,4 +1,4 @@
-import { loadPlatformConfig, productionIssues, type PlatformConfig } from '@tt/domain';
+import { loadObservabilityConfig, loadPlatformConfig, productionIssues, type ObservabilityConfig, type PlatformConfig } from '@tt/domain';
 import { loadEmailConfig, loadS3Config, type EmailConfig, type S3Config } from '@tt/providers';
 import { z } from 'zod';
 
@@ -22,6 +22,10 @@ const envSchema = z.object({
   CV_MODEL_DAILY_BUDGET: z.coerce.number().int().min(1).default(1000),
   /** Days after which an import that was never committed is purged (proposed people, parsed CVs, uploaded files). */
   IMPORT_STALE_DAYS: z.coerce.number().int().min(1).default(7),
+  /** Port of the worker's health and metrics endpoints (`/health`, `/ready`, `/metrics` with METRICS_TOKEN). 0 turns the server off. */
+  WORKER_PORT: z.coerce.number().int().min(0).max(65535).default(4001),
+  /** Address the health server listens on. Inside a container 0.0.0.0; the port is never published by the compose file. */
+  WORKER_HOST: z.string().min(1).default('0.0.0.0'),
   /** Days published (or dead) outbox events and webhook delivery rows are kept before the daily job deletes them. */
   DELIVERY_LOG_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(30),
 }).refine((env) => !(env.NODE_ENV === 'production' && env.WEBHOOKS_ALLOW_PRIVATE), {
@@ -29,7 +33,7 @@ const envSchema = z.object({
   message: 'must not be true in production (it turns off the protection against requests to internal addresses)',
 });
 
-export type WorkerEnv = Readonly<z.infer<typeof envSchema>> & { readonly s3: S3Config; readonly email: EmailConfig; readonly platform: PlatformConfig };
+export type WorkerEnv = Readonly<z.infer<typeof envSchema>> & { readonly s3: S3Config; readonly email: EmailConfig; readonly platform: PlatformConfig; readonly observability: ObservabilityConfig };
 
 /** `.env` files often contain `KEY=` for unset values: treat empty strings as absent. */
 const withoutEmptyStrings = (
@@ -65,6 +69,15 @@ const parseEmail = (source: Readonly<Record<string, string | undefined>>): Email
   }
 };
 
+/** Optional: the error names the variable, never its value. */
+const parseObservability = (source: Readonly<Record<string, string | undefined>>): ObservabilityConfig => {
+  try {
+    return loadObservabilityConfig(source);
+  } catch (error) {
+    throw new Error(`Invalid worker environment: ${error instanceof Error ? error.message : 'observability configuration'}`, { cause: error });
+  }
+};
+
 /** Validates the process environment once at boot. Throws listing every missing or invalid variable. */
 export const loadEnv = (source: Readonly<Record<string, string | undefined>>): WorkerEnv => {
   const normalized = withoutEmptyStrings(source);
@@ -80,5 +93,6 @@ export const loadEnv = (source: Readonly<Record<string, string | undefined>>): W
     s3: parseS3(normalized),
     email: parseEmail(normalized),
     platform: loadPlatformConfig(normalized),
+    observability: parseObservability(normalized),
   });
 };

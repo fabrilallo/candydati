@@ -16,6 +16,7 @@ import {
   type EmailIdentity,
   type EmailSender as MessageSender,
   type FileStorage,
+  type ImageTranscoder,
   type InboundDeps,
   type JobDeps,
   type MessagingDeps,
@@ -48,6 +49,7 @@ import { createRequestActors } from './http/request-actors.js';
 import { createApiKeyDeps } from './wiring/api-key-deps.js';
 import { createDistributionDeps } from './wiring/distribution-deps.js';
 import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
+import { createCareersDeps, type CareersWiring } from './wiring/careers-deps.js';
 import { createHrDeps, type HrWiring } from './wiring/hr-deps.js';
 import { createTeamDeps, type TeamWiring } from './wiring/team-deps.js';
 import { toMessagingConfig } from '@tt/providers';
@@ -74,6 +76,10 @@ export interface RateLimitSettings {
   readonly consentMax?: number | undefined;
   /** Requests per minute per client on the public interview feedback routes. */
   readonly feedbackMax?: number | undefined;
+  /** Careers page media uploads per minute per client. */
+  readonly careersMediaMax?: number | undefined;
+  /** Requests per minute per client on the public careers media files (a page loads many). */
+  readonly publicMediaMax?: number | undefined;
   /** Requests per minute per API key (on top of the per-client limit). */
   readonly apiKeyMax?: number | undefined;
 }
@@ -104,6 +110,8 @@ export interface AppContext {
   /** Organization security settings (2FA requirement for owners and admins). */
   readonly securityDeps: SecurityDeps;
   readonly checkDatabase: () => Promise<void>;
+  /** Asks the object storage for `key`: "missing" proves it answers; anything else means it is unreachable. */
+  readonly checkStorage: (key: string) => Promise<void>;
   /** Account emails, for the notices sent outside Better Auth (failed sign-ins). */
   readonly mailer: AccountMailer;
   /** Daily budgets of paid model calls (MCP tools, assistant). */
@@ -129,6 +137,8 @@ export interface AppContext {
   readonly overviewDeps: Phase5Deps['overviewDeps'];
   readonly importDeps: ImportWiring['importDeps'];
   readonly consentDeps: ImportWiring['consentDeps'];
+  readonly careersDeps: CareersWiring['careersDeps'];
+  readonly publicCareersDeps: CareersWiring['publicCareersDeps'];
   readonly feedbackDeps: HrWiring['feedbackDeps'];
   /** The public feedback form: a visitor with a link, no session. */
   readonly publicFeedbackDeps: HrWiring['publicFeedbackDeps'];
@@ -159,11 +169,13 @@ export interface AppContextDeps {
   readonly distributionChannels?: readonly DistributionChannel[] | undefined;
   /** "Now" of the reports (open and overdue promises, job age). The real clock unless a test fixes it. */
   readonly reportClock?: (() => Date) | undefined;
+  /** Test seam: the careers media transcoder (sharp by default). */
+  readonly images?: ImageTranscoder | undefined;
 }
 
 const isBindable = (queue: TaskQueue | BindableTaskQueue): queue is BindableTaskQueue => 'bindTo' in queue && typeof queue.bindTo === 'function';
 
-export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, reportClock }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, reportClock, images }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
@@ -190,6 +202,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...phase2,
     ...phase5,
     ...createImportDeps({ uow, files, queue }),
+    ...createCareersDeps({ uow, files, queue, defaultLocale: env.platform.defaultLocale, images }),
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     submitDeps: withDailyCaps(env, phase2),
     feedbackDeps: hr.feedbackDeps,
@@ -200,6 +213,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     messagingDeps: messaging.messagingDeps,
     inboundDeps: messaging.inboundDeps,
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
+    checkStorage: storageProbe(rawFiles),
     securityDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, securitySettings: uow.repositories.securitySettings, apiKeys: uow.repositories.apiKeys, memberRoles: uow.repositories.memberRoles, twoFactor: uow.repositories.twoFactor, now: () => new Date() },
     mailer,
     budget: createDailyBudget(budgetStore ?? createPgBudgetStore(db)),
@@ -210,6 +224,17 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
   };
 }
+
+/** Asks the storage for a key: "missing" is the answer we want (the in-memory storage of the tests only names its error). */
+const storageProbe =
+  (files: FileStorage) =>
+  async (key: string): Promise<void> => {
+    try {
+      await files.get(key);
+    } catch (error) {
+      if (!(error instanceof Error && error.name === 'FileNotFoundError')) throw error;
+    }
+  };
 
 function createSessionResolver(auth: ReturnType<typeof createAuth>, db: AppContextDeps['db'], uow: DrizzleUnitOfWork) {
   return createActorResolver({

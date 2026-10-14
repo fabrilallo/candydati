@@ -21,6 +21,16 @@ export const publicRoutes: readonly RouteSpec[] = [
     response: { schema: 'PublicFeed' },
   },
   {
+    method: 'get', path: '/api/v1/public/organizations/:orgSlug/careers-page', tag: 'Public', summary: 'The careers page of an organization', scope: null,
+    description: 'The published page: visible sections only, and the media they use (URLs of the files). An organization that never published gets a default page.',
+    response: { schema: 'PublicCareersPage' },
+  },
+  {
+    method: 'get', path: '/api/v1/public/organizations/:orgSlug/careers-media/:mediaId/:fileName', tag: 'Public', summary: 'A file of the published careers page (image or video)', scope: null, fileMediaType: 'application/octet-stream',
+    description: 'Only files a visible section of the published page uses (404 otherwise: drafts and the library are not public). The bytes, not the JSON envelope: WebP for images (several widths), MP4 or WebM for videos, with `Cache-Control: public, max-age=31536000, immutable` (the file name carries the content hash). Videos accept a single `Range: bytes=a-b` request (206, `Content-Range`; 416 when unsatisfiable). Served with `nosniff` and a sandboxing CSP.',
+    response: { schema: z.string() },
+  },
+  {
     method: 'get', path: '/api/v1/public/organizations/:orgSlug/jobs/:jobSlug', tag: 'Public', summary: 'A published ad', scope: null,
     response: { schema: 'PublicJobPage' },
   },

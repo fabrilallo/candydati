@@ -33,7 +33,7 @@ const curl = computed(() => curlExample(apiUrl.value))
             <p class="text-sm font-medium">{{ t('distribution.api.example') }}</p>
             <CopyButton :text="curl" :label="t('distribution.api.copyExample')" />
           </div>
-          <pre class="overflow-x-auto rounded-lg border bg-muted px-4 py-3 font-mono text-xs leading-relaxed" data-testid="url-curl"><code>{{ curl }}</code></pre>
+          <pre tabindex="0" class="overflow-x-auto rounded-lg border bg-muted px-4 py-3 font-mono text-xs leading-relaxed" data-testid="url-curl"><code>{{ curl }}</code></pre>
         </div>
       </div>
     </section>

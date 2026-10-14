@@ -30,7 +30,7 @@ const snippet = computed(() => mcpConfigSnippet({ serverName: platform.value.nam
           <p class="text-sm font-medium">{{ t('mcp.config') }}</p>
           <CopyButton :text="snippet" :label="t('mcp.copyConfig')" />
         </div>
-        <pre class="overflow-x-auto rounded-lg border bg-muted px-4 py-3 font-mono text-xs leading-relaxed" data-testid="mcp-config"><code>{{ snippet }}</code></pre>
+        <pre tabindex="0" class="overflow-x-auto rounded-lg border bg-muted px-4 py-3 font-mono text-xs leading-relaxed" data-testid="mcp-config"><code>{{ snippet }}</code></pre>
         <p class="text-xs text-muted-foreground">{{ t('mcp.configHint') }}</p>
       </div>
       <div class="grid gap-2">

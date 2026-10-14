@@ -67,12 +67,20 @@ What the code enforces, so an operator does not have to remember it:
   `x-bootstrap-token` header, never in a URL), confirm the email and create the organization. Without the token
   configured nobody can bootstrap a production instance. Only confirmed accounts close the bootstrap, so an unconfirmed
   sign-up cannot squat it: the claim is held by one address under a Postgres advisory lock (two concurrent sign-ups
-  cannot both get through) and lapses after 24 hours if never confirmed. Once the first owner is confirmed the token
+  cannot both get through) and lapses after 24 hours if never confirmed. Confirming the address checks the claim
+  again: only the holder of a live claim becomes the first owner (its account id is recorded), and an account admitted
+  by a claim that has since lapsed or been taken over cannot confirm its address. If you did not confirm within 24
+  hours, sign up again with the token, then use the new link. Once the first owner is confirmed the token
   opens nothing: remove it from `.env`. From then on people join through invitations. To open sign-up on purpose, set
   `SIGNUP_MODE=open`.
 - **Organizations.** Each organization has its own model budgets, so who may create one is an instance setting
-  (`ORGANIZATION_CREATION`): `one_per_user` by default with `invite_only` (a person who already owns an organization
-  cannot create another), `instance_admins` (only the first owner and `INSTANCE_ADMIN_EMAILS`) or `open`.
+  (`ORGANIZATION_CREATION`): `one_per_user` by default with `invite_only`, `instance_admins` (only the first owner and
+  `INSTANCE_ADMIN_EMAILS`) or `open`. `one_per_user` means one organization ever created per account: the slot is
+  taken atomically before the organization exists (concurrent requests cannot both get through) and stays taken
+  whatever role the account has later, so handing the owner role over frees nothing. The limit is per account, not per
+  person: anyone who can get accounts invited can create one organization with each, so invite-only sign-up is what
+  bounds people. Use `instance_admins` when organizations should be created only by you. Instance admins are never
+  limited.
 - **Failed sign-ins** slow down further attempts (per address, and softly per account) instead of locking the
   account; addresses that signed in before are not slowed by a flood, and the owner gets an email after 10 failures.
   The counters live in Postgres, so several api instances share them.

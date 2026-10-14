@@ -5,6 +5,7 @@ import { XIcon } from "@lucide/vue"
 import { reactiveOmit } from "@vueuse/core"
 import { DialogClose, DialogContent, DialogOverlay, DialogPortal, useForwardPropsEmits } from "reka-ui"
 import { cn } from "@/lib/utils"
+import { restoreFocus } from "@/lib/restore-focus"
 
 /** Drawer panel from the side of the screen (mobile navigation, side panels). Built on the Dialog primitives. */
 defineOptions({ inheritAttrs: false })
@@ -28,6 +29,7 @@ const forwarded = useForwardPropsEmits(delegated, emits)
         side === 'left' ? 'left-0 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left' : 'right-0 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
         props.class,
       )"
+      @close-auto-focus="restoreFocus"
     >
       <slot />
       <DialogClose class="absolute top-3 right-3 grid size-8 place-items-center rounded-md text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/35 focus-visible:outline-hidden">

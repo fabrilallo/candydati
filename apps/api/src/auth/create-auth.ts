@@ -15,8 +15,8 @@ import { createAuthEmails, type AuthEmails } from './auth-emails.js';
 import { roleGuardHooks } from './role-guards.js';
 import { createOrganizationGateLookups, organizationTwoFactorCheck } from './organization-two-factor-gate.js';
 import { findMemberRole } from './member-role.js';
-import { createOrganizationCreationLookups, organizationCreationAllowed } from './organization-creation.js';
-import { createSignupLookups, signupPolicyCheck } from './signup-policy.js';
+import { createOrganizationCreationLookups, organizationCreationAllowed, organizationCreationHooks } from './organization-creation.js';
+import { createSignupLookups, emailVerificationCheck, signupPolicyCheck, type SignupPolicy } from './signup-policy.js';
 
 export const INVITATION_TTL_SECONDS = 7 * 24 * 60 * 60;
 export const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
@@ -35,8 +35,13 @@ export interface AuthDependencies {
   readonly requiresTwoFactor: (organizationId: string) => Promise<boolean>;
 }
 
-/** Email + password: no session until the address is confirmed, a known address answers like a new one, reset by email. */
-const credentialOptions = (emails: AuthEmails) => ({
+const signupPolicy = (env: Env): SignupPolicy => ({ mode: env.SIGNUP_MODE, bootstrapToken: env.BOOTSTRAP_TOKEN ?? null, requireBootstrapToken: env.NODE_ENV === 'production' });
+
+/**
+ * Email + password: no session until the address is confirmed, a known address answers like a new one, reset by email.
+ * Confirming the address checks the sign-up policy again (a bootstrap claim may have lapsed since the sign-up).
+ */
+const credentialOptions = (emails: AuthEmails, beforeEmailVerification: (user: { id: string; email: string }) => Promise<void>) => ({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: PASSWORD_MIN_LENGTH,
@@ -54,19 +59,36 @@ const credentialOptions = (emails: AuthEmails) => ({
     sendOnSignIn: true,
     autoSignInAfterVerification: true,
     expiresIn: VERIFICATION_TTL_SECONDS,
+    beforeEmailVerification,
   },
 });
 
 /** Every `hooks.before` step, in order: the sign-up policy, then the 2FA requirement on organization changes. */
 const beforeHooks = (env: Env, db: Db, requiresTwoFactor: AuthDependencies['requiresTwoFactor']) => {
-  const policy = { mode: env.SIGNUP_MODE, bootstrapToken: env.BOOTSTRAP_TOKEN ?? null, requireBootstrapToken: env.NODE_ENV === 'production' };
-  const signup = signupPolicyCheck(policy, createSignupLookups(db));
+  const signup = signupPolicyCheck(signupPolicy(env), createSignupLookups(db));
   const twoFactor = organizationTwoFactorCheck(createOrganizationGateLookups(db, requiresTwoFactor, (userId, organizationId) => findMemberRole(db, userId, organizationId)));
   return createAuthMiddleware(async (ctx) => {
     await signup(ctx);
     await twoFactor(ctx);
   });
 };
+
+/**
+ * Better Auth takes one function per organization hook: the role guards check the logo before the creation slot is
+ * claimed (a refused logo uses no slot), and the creation is recorded before it is audited.
+ */
+const organizationHooks = (creation: ReturnType<typeof organizationCreationHooks>, audit: ReturnType<typeof createAuditHooks>) => ({
+  ...roleGuardHooks,
+  ...audit,
+  beforeCreateOrganization: async (data: Parameters<typeof creation.beforeCreateOrganization>[0] & Parameters<typeof roleGuardHooks.beforeCreateOrganization>[0]) => {
+    await roleGuardHooks.beforeCreateOrganization(data);
+    await creation.beforeCreateOrganization(data);
+  },
+  afterCreateOrganization: async (data: Parameters<typeof audit.afterCreateOrganization>[0] & Parameters<typeof creation.afterCreateOrganization>[0]) => {
+    await creation.afterCreateOrganization(data);
+    await audit.afterCreateOrganization(data);
+  },
+});
 
 /**
  * Email + password with a verified address, password reset, optional TOTP, organizations with the domain's roles,
@@ -94,7 +116,7 @@ export function createAuth({ env, db, core, mailer, requiresTwoFactor }: AuthDep
       backgroundTasks: { handler: (task) => void task },
     },
     database: drizzleAdapter(db, { provider: 'pg', schema }),
-    ...credentialOptions(emails),
+    ...credentialOptions(emails, emailVerificationCheck(signupPolicy(env), createSignupLookups(db))),
     session: { expiresIn: SESSION_TTL_SECONDS, updateAge: 24 * 60 * 60 },
     hooks: { before: beforeHooks(env, db, requiresTwoFactor) },
     plugins: [
@@ -103,14 +125,14 @@ export function createAuth({ env, db, core, mailer, requiresTwoFactor }: AuthDep
         roles,
         creatorRole: CREATOR_ROLE,
         // Each organization has its own model budgets: who may create one is an instance setting (ORGANIZATION_CREATION).
-        allowUserToCreateOrganization: (user) => organizationCreationAllowed(creationPolicy, user, creationLookups),
+        allowUserToCreateOrganization: (user) => organizationCreationAllowed(creationPolicy, user, creationLookups, new Date()),
         invitationExpiresIn: INVITATION_TTL_SECONDS,
         // Only a confirmed account whose address is the invited one can accept (Better Auth checks the address too).
         requireEmailVerificationOnInvitation: true,
         // audit_log.organization_id is ON DELETE RESTRICT: an organization with history cannot be hard-deleted.
         disableOrganizationDeletion: true,
         sendInvitationEmail: emails.invitation,
-        organizationHooks: { ...roleGuardHooks, ...createAuditHooks({ core, lookups }) },
+        organizationHooks: organizationHooks(organizationCreationHooks(creationPolicy, creationLookups), createAuditHooks({ core, lookups })),
       }),
       // TOTP with backup codes; enforcement for owners and admins is an organization setting (security settings).
       twoFactor({ issuer: env.platform.name }),

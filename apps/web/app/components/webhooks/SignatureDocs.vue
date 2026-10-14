@@ -23,7 +23,7 @@ valid = constant_time_equal("sha256=" + expected, header["${WEBHOOK_HEADERS.sign
         <dd class="text-muted-foreground">{{ row.text }}</dd>
       </template>
     </dl>
-    <pre class="overflow-x-auto rounded-lg border bg-muted px-4 py-3 font-mono text-xs leading-relaxed"><code>{{ example }}</code></pre>
+    <pre tabindex="0" class="overflow-x-auto rounded-lg border bg-muted px-4 py-3 font-mono text-xs leading-relaxed"><code>{{ example }}</code></pre>
     <p class="max-w-prose text-sm text-muted-foreground">{{ t('webhooks.docs.retries') }}</p>
   </section>
 </template>

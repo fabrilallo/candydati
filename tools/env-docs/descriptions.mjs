@@ -1,5 +1,12 @@
 /** Hand-written meaning of each variable. The generator fails (and the test with it) when one is missing. */
 export const DESCRIPTIONS = {
+  METRICS_TOKEN: 'Bearer token (at least 16 characters) that opens GET /metrics (Prometheus) on the api and the worker. Unset: the endpoint does not exist.',
+  SENTRY_DSN: 'DSN of a Sentry-compatible collector (Sentry, GlitchTip, Bugsink): server errors are sent there, scrubbed of personal data. Unset: nothing is sent anywhere.',
+  SENTRY_ENVIRONMENT: 'Environment name on error reports (default: NODE_ENV).',
+  SENTRY_RELEASE: 'Release on error reports, e.g. the image tag.',
+  WORKER_PORT: 'Port of the worker health server (/health, /ready, and /metrics with METRICS_TOKEN). 0 turns it off. Never published by the compose file.',
+  WORKER_HOST: 'Address the worker health server binds to.',
+  NUXT_SENTRY_DSN: 'Web: DSN of a Sentry-compatible collector for server errors (5xx), scrubbed of personal data. Empty: nothing is sent.',
   NODE_ENV: 'development, test or production.',
   LOG_LEVEL: 'Log level: fatal, error, warn, info, debug, trace or silent.',
   API_PORT: 'Port the api listens on.',
@@ -18,7 +25,7 @@ export const DESCRIPTIONS = {
   API_KEY_DEFAULT_TTL_DAYS: 'Days an API key lives when its creator gives no expiry (1-365). Every key expires, at most after a year.',
   SIGNUP_MODE: 'open (anyone may create an account) or invite_only (only with a pending invitation, plus the first owner of an instance with no confirmed account). Default: invite_only in production, open elsewhere.',
   BOOTSTRAP_TOKEN: 'One-time secret for the first owner sign-up in invite_only mode (field on /signup?setup, sent as the x-bootstrap-token header). Required in production to bootstrap, at least 32 random characters; useless once a confirmed account exists, remove it then.',
-  ORGANIZATION_CREATION: 'Who may create organizations: open (anyone), one_per_user (a person who owns one cannot create another) or instance_admins (only the first owner and INSTANCE_ADMIN_EMAILS). Default: one_per_user when SIGNUP_MODE=invite_only, open otherwise.',
+  ORGANIZATION_CREATION: 'Who may create organizations: open (anyone), one_per_user (one organization ever created per account; the limit is per account, so invite-only sign-up is what bounds people) or instance_admins (only the first owner and INSTANCE_ADMIN_EMAILS). Default: one_per_user when SIGNUP_MODE=invite_only, open otherwise.',
   INSTANCE_ADMIN_EMAILS: 'Comma-separated addresses that may always create organizations (ORGANIZATION_CREATION).',
   MCP_MODEL_DAILY_BUDGET_PER_KEY: 'MCP calls of model-backed tools (analyze_job_ad, publish_job) per API key per UTC day, when FAST_MODEL is set.',
   MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION: 'MCP calls of model-backed tools per organization per UTC day, when FAST_MODEL is set.',

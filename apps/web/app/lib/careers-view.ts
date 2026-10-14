@@ -34,11 +34,8 @@ export const workModesOf = (jobs: readonly PublicJobSummaryDto[]): readonly { re
 
 export interface CareersStats {
   readonly openCount: number
-  /** The longest wait any open ad promises; null when there is no ad. */
-  readonly maxResponseDays: number | null
 }
 
 export const careersStats = (jobs: readonly PublicJobSummaryDto[]): CareersStats => ({
   openCount: jobs.length,
-  maxResponseDays: jobs.length === 0 ? null : Math.max(...jobs.map((job) => job.responseDays)),
 })

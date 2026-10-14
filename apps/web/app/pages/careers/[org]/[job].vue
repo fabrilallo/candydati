@@ -15,6 +15,7 @@ const status = data.value ? failureStatus(data.value) : 503
 if (status !== null || data.value?.kind !== 'ok') {
   throw createError({ statusCode: status ?? 503, statusMessage: status === 404 ? 'Not Found' : 'Service Unavailable', fatal: true })
 }
+// The template is guarded too: when setup throws (404, 503) it must not render with a missing page.
 const page = data.value.data
 const cacheControl = useResponseHeader('cache-control')
 cacheControl.value = 'public, s-maxage=60, stale-while-revalidate=300'
@@ -42,5 +43,5 @@ useHead({
 </script>
 
 <template>
-  <PublicJobBody :page="page" />
+  <PublicJobBody v-if="data?.kind === 'ok'" :page="data.data" />
 </template>

@@ -47,6 +47,7 @@
     "data": "Data",
     "api": "API and integrations",
     "distribution": "Distribution",
+    "careersPage": "Careers page",
     "imports": "Import",
     "jobRequests": "Requests",
     "reports": "Reports",
@@ -573,6 +574,14 @@
       },
       "mcp": {
         "read": "Read data through MCP"
+      },
+      "careers_page": {
+        "draft_saved": "Saved the careers page draft",
+        "published": "Published the careers page"
+      },
+      "careers_media": {
+        "uploaded": "Uploaded an image or video for the careers page",
+        "deleted": "Deleted an image or video of the careers page"
       }
     }
   },
@@ -1271,15 +1280,12 @@
     "processIntro": "These are the stages, in the order you will go through them.",
     "stageMeta": "{duration}, conducted by: {who}",
     "responseTime": "Response time",
-    "responseValue": "You will hear back within 1 day after each stage. | You will hear back within {count} days after each stage.",
     "published": "Published on {date}",
     "backToJobs": "All open positions",
     "facts": {
       "ral": "Gross annual salary",
       "stages": "1 stage | {count} stages",
-      "about": "about {duration}",
       "within": "within 1 day | within {count} days",
-      "afterEachStage": "after each stage",
       "processTotal": "total time of the process",
       "conductedBy": "With: {who}"
     },
@@ -1329,13 +1335,12 @@
     "subtitle": "Every ad tells you the pay, how we select, and when you will hear back.",
     "metaDescription": "Open positions at {organization}: salary, work mode and selection process always stated.",
     "empty": "There are no open positions right now.",
-    "emptyBody": "When we open one, you will find it here with salary, process and response times already written.",
+    "emptyBody": "When we open one, you will find it here with salary and selection process already written.",
     "count": "No open positions | 1 open position | {count} open positions",
     "notFound": "This careers page does not exist.",
     "logo": "{organization} logo",
     "stats": {
-      "open": "Open position | Open positions",
-      "response": "day at most for an answer | days at most for an answer"
+      "open": "Open position | Open positions"
     },
     "filters": {
       "label": "Filter by work mode",
@@ -1344,8 +1349,7 @@
       "noMatch": "No positions with this work mode."
     },
     "job": {
-      "stages": "1 stage | {count} stages",
-      "response": "answer in 1 day | answer in {count} days"
+      "stages": "1 stage | {count} stages"
     }
   },
   "promise": {
@@ -2397,6 +2401,9 @@
       },
       "report": {
         "read": "Read aggregated reports"
+      },
+      "careers_page": {
+        "manage": "Manage the careers page"
       }
     },
     "withheld": "Some things a key can never do: decisions about candidates, messages to candidates and administration stay with a person.",
@@ -3215,5 +3222,420 @@
     "body": "This page no longer exists, or it belongs to an ad whose team you are not on. Ask whoever manages the ad to add you to its team.",
     "backCandidates": "Back to candidates",
     "backJobs": "Back to ads"
+  },
+  "careersSite": {
+    "nav": {
+      "positions": "Open positions"
+    },
+    "hero": {
+      "cta": "See open positions",
+      "open": "open position | open positions"
+    },
+    "jobs": {
+      "title": "Open positions"
+    },
+    "video": {
+      "pause": "Pause the background video",
+      "play": "Play the background video",
+      "playOn": "Watch “{title}” on {provider}",
+      "privacy": "The video loads from {provider} only when you press play: until then no request goes to {provider}.",
+      "watchOn": "Open the video on {provider}"
+    },
+    "links": {
+      "title": "Find us",
+      "kinds": {
+        "website": "Website",
+        "linkedin": "LinkedIn",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "x": "X",
+        "youtube": "YouTube",
+        "github": "GitHub",
+        "tiktok": "TikTok",
+        "other": "Link"
+      }
+    },
+    "newTab": "(opens in a new tab)",
+    "footer": "Salary and selection process are always stated here, before you apply."
+  },
+  "careersEditor": {
+    "stale": {
+      "message": "Someone else saved or published the page after you opened it. To avoid overwriting their work, your changes were not saved: reload to see the current version.",
+      "reload": "Reload the current version"
+    },
+    "title": "Careers page",
+    "modes": {
+      "label": "Edit or preview",
+      "edit": "Edit",
+      "preview": "Preview"
+    },
+    "meta": {
+      "unpublished": "Unpublished changes",
+      "published": "Published on {date}",
+      "neverPublished": "Never published",
+      "saved": "Draft saved on {date}"
+    },
+    "state": {
+      "saving": "Saving…",
+      "unsaved": "Unsaved changes",
+      "saved": "Saved",
+      "invalid": "1 issue to fix | {count} issues to fix"
+    },
+    "actions": {
+      "save": "Save draft",
+      "publish": "Publish",
+      "viewPublic": "View public page"
+    },
+    "save": {
+      "saved": "Draft saved",
+      "invalid": "Fix the issues shown: the draft is saved once the page is valid."
+    },
+    "publish": {
+      "done": "Page published",
+      "publishing": "Publishing…",
+      "blocked": "Fix the issues shown to publish."
+    },
+    "languages": {
+      "editing": "Language of the texts",
+      "default": "Default language of the page",
+      "defaultHint": "What visitors read when a text is not written in their language."
+    },
+    "sections": {
+      "title": "Sections",
+      "add": "Add section",
+      "hidden": "Hidden",
+      "issues": "1 issue | {count} issues",
+      "up": "Move up: {name}",
+      "down": "Move down: {name}",
+      "hide": "Hide: {name}",
+      "delete": "Delete: {name}",
+      "moved": "Section moved to position {position} of {total}",
+      "deleteTitle": "Delete the section “{name}”?",
+      "deleteBody": "The section and its texts leave the draft. Images stay in the library.",
+      "deleteConfirm": "Delete section"
+    },
+    "types": {
+      "hero": {
+        "name": "Hero",
+        "description": "The large headline at the top, with an optional image or video behind."
+      },
+      "text": {
+        "name": "Text",
+        "description": "A block of text with an optional title."
+      },
+      "image_text": {
+        "name": "Image and text",
+        "description": "An image beside a text."
+      },
+      "gallery": {
+        "name": "Gallery",
+        "description": "From 2 to 9 photos, each with its description."
+      },
+      "video": {
+        "name": "Video",
+        "description": "An uploaded video, or one from YouTube or Vimeo."
+      },
+      "values": {
+        "name": "Values and perks",
+        "description": "From 3 to 8 points with an icon, a title and a line of text."
+      },
+      "numbers": {
+        "name": "Numbers",
+        "description": "From 2 to 4 figures about the company."
+      },
+      "testimonials": {
+        "name": "Testimonials",
+        "description": "In the words of the people who work with you."
+      },
+      "jobs": {
+        "name": "Open positions",
+        "description": "The list of published ads, always up to date."
+      },
+      "links": {
+        "name": "Links",
+        "description": "Your website and social profiles."
+      }
+    },
+    "field": {
+      "optional": "optional",
+      "count": "{count} of {max} characters"
+    },
+    "common": {
+      "title": "Title",
+      "body": "Text",
+      "paragraphs": "A blank line starts a new paragraph.",
+      "image": "Image",
+      "alt": "Image description",
+      "altHint": "Screen reader users hear it: describe what the image shows."
+    },
+    "hero": {
+      "headline": "Headline",
+      "subheadline": "Subheadline",
+      "cta": "Button label",
+      "ctaHint": "When empty: “{label}”.",
+      "background": "Background",
+      "backgroundKind": {
+        "none": "None",
+        "image": "Image",
+        "video": "Video"
+      },
+      "image": "Background image",
+      "video": "Background video",
+      "videoHint": "It plays muted and visitors can pause it.",
+      "poster": "Poster image",
+      "posterHint": "Shown while the video loads, and instead of it for visitors who reduce motion.",
+      "overlay": "Dark veil over the background",
+      "overlayHint": "At least {min}% with an image or video, so the headline stays readable.",
+      "alignment": "Alignment",
+      "align": {
+        "start": "Left",
+        "center": "Centre"
+      }
+    },
+    "imageText": {
+      "side": "Image position",
+      "left": "Left",
+      "right": "Right"
+    },
+    "gallery": {
+      "images": "Images",
+      "add": "Add image",
+      "item": "Image {n}"
+    },
+    "video": {
+      "titleHint": "It is also the player’s name for screen reader users.",
+      "caption": "Caption",
+      "source": "Video source",
+      "link": "YouTube or Vimeo link",
+      "upload": "Uploaded file",
+      "url": "Video link",
+      "privacy": "Nothing loads from YouTube or Vimeo until the visitor presses play: before that, no request reaches the provider.",
+      "file": "Video file",
+      "poster": "Poster image",
+      "posterHint": "Required: shown before the video starts.",
+      "posterLinkHint": "Optional: without it, a plain frame with the play button is shown."
+    },
+    "values": {
+      "items": "Values",
+      "add": "Add value",
+      "item": "Value {n}",
+      "icon": "Icon",
+      "itemTitle": "Title",
+      "itemText": "Text"
+    },
+    "numbers": {
+      "items": "Numbers",
+      "add": "Add number",
+      "item": "Number {n}",
+      "value": "Figure",
+      "valueHint": "Short, as you would write it: 42, 3.5k, 98%.",
+      "label": "Label"
+    },
+    "testimonials": {
+      "items": "Testimonials",
+      "add": "Add testimonial",
+      "item": "Testimonial {n}",
+      "quote": "Quote",
+      "name": "Name",
+      "role": "Role",
+      "photo": "Photo"
+    },
+    "jobs": {
+      "note": "The list is automatic: it shows the published ads with pay and selection process. Response times are not shown in this list.",
+      "titleHint": "When empty: “{title}”.",
+      "intro": "Introduction"
+    },
+    "links": {
+      "titleHint": "When empty: “{title}”.",
+      "items": "Links",
+      "add": "Add link",
+      "item": "Link {n}",
+      "kind": "Kind",
+      "url": "Address",
+      "label": "Label"
+    },
+    "items": {
+      "up": "Move up: {item}",
+      "down": "Move down: {item}",
+      "remove": "Remove: {item}"
+    },
+    "icons": {
+      "heart": "Heart",
+      "sparkles": "Sparkles",
+      "users": "People",
+      "rocket": "Rocket",
+      "leaf": "Leaf",
+      "globe": "Globe",
+      "coffee": "Coffee",
+      "book-open": "Book",
+      "graduation-cap": "Graduation cap",
+      "laptop": "Laptop",
+      "house": "House",
+      "clock": "Clock",
+      "calendar": "Calendar",
+      "plane": "Plane",
+      "shield-check": "Shield",
+      "hand-heart": "Hand with heart",
+      "lightbulb": "Light bulb",
+      "target": "Target",
+      "trophy": "Trophy",
+      "smile": "Smile",
+      "bike": "Bike",
+      "baby": "Baby",
+      "piggy-bank": "Piggy bank",
+      "trending-up": "Growth",
+      "handshake": "Handshake",
+      "compass": "Compass",
+      "palette": "Palette",
+      "code": "Code",
+      "zap": "Lightning",
+      "sun": "Sun"
+    },
+    "theme": {
+      "title": "Look",
+      "accent": "Accent colour",
+      "accentPicker": "Pick the accent colour",
+      "passes": "Contrast {ratio}:1, the button label reads well.",
+      "fails": "Contrast {ratio}:1, the button label does not read. Pick a darker or lighter colour.",
+      "font": "Heading font",
+      "fonts": {
+        "geist": "Geist",
+        "fraunces": "Fraunces",
+        "bricolage": "Bricolage Grotesque",
+        "newsreader": "Newsreader"
+      },
+      "sample": "Work with us",
+      "corners": "Corners",
+      "cornerStyles": {
+        "soft": "Rounded",
+        "sharp": "Sharp"
+      }
+    },
+    "preview": {
+      "title": "Preview",
+      "device": "Preview size",
+      "desktop": "Desktop",
+      "mobile": "Phone",
+      "frame": "Careers page preview"
+    },
+    "media": {
+      "kind": {
+        "image": "Image",
+        "video": "Video"
+      },
+      "none": {
+        "image": "No image chosen",
+        "video": "No video chosen"
+      },
+      "change": "Change",
+      "choose": {
+        "image": "Choose image",
+        "video": "Choose video"
+      },
+      "clear": "Remove",
+      "title": {
+        "image": "Choose an image",
+        "video": "Choose a video"
+      },
+      "description": "Upload a new file or pick one from the organization’s library.",
+      "library": "Library",
+      "empty": {
+        "image": "No images in the library yet: upload one above.",
+        "video": "No videos in the library yet: upload one above."
+      },
+      "file": {
+        "image": "Image file (JPEG, PNG, WebP or AVIF)",
+        "video": "Video file (MP4 or WebM)"
+      },
+      "limits": {
+        "image": "Up to {max} MB. Hidden photo data, such as location, is removed.",
+        "video": "Up to {max} MB."
+      },
+      "alt": "Description in {language}",
+      "altHint": "At least one language is needed: screen reader users hear it.",
+      "progress": "File upload",
+      "upload": "Upload",
+      "select": "Choose: {name}",
+      "used": {
+        "published": "On the published page",
+        "draft": "In the draft"
+      },
+      "delete": "Delete from the library",
+      "deleteConfirm": "Delete",
+      "errors": {
+        "unsupported_type": "Unsupported format: use JPEG, PNG, WebP or AVIF for images, MP4 or WebM for videos.",
+        "too_large": "File too large: up to 8 MB for an image and 60 MB for a video.",
+        "empty": "The file is empty.",
+        "alt_required": "Write the image description in at least one language.",
+        "image_unreadable": "This image cannot be read: try saving it again as JPEG or PNG.",
+        "image_too_big": "Image too large: reduce it below 50 megapixels.",
+        "library_full": "The library is full: delete the files you no longer use.",
+        "in_published_page": "The file is on the published page: remove it and publish again before deleting it.",
+        "in_draft": "The file is in the draft: remove it and save before deleting it.",
+        "cancelled": "Upload cancelled.",
+        "no_file": "Choose a file to upload."
+      }
+    },
+    "errors": {
+      "required": "Required.",
+      "too_long": "Text too long.",
+      "gallery_min": "At least 2 images are needed.",
+      "gallery_max": "At most 9 images.",
+      "values_min": "At least 3 values are needed.",
+      "values_max": "At most 8 values.",
+      "numbers_min": "At least 2 numbers are needed.",
+      "numbers_max": "At most 4 numbers.",
+      "testimonials_min": "At least one testimonial is needed.",
+      "testimonials_max": "At most 6 testimonials.",
+      "links_min": "At least one link is needed.",
+      "links_max": "At most 8 links.",
+      "jobs_exactly_one": "The page must contain the open positions, exactly once.",
+      "hero_first": "The hero must be the first section.",
+      "hero_at_most_one": "The page can have only one hero.",
+      "overlay_too_low": "With an image or video the veil must be at least 40%.",
+      "accent_contrast": "No text reads on this colour: pick a darker or lighter one.",
+      "hex_color": "Write a colour like #1f47d6.",
+      "media_missing": "The file is no longer in the library: choose another one.",
+      "media_required": "Choose a file.",
+      "video_id": "Paste the link of a YouTube or Vimeo video.",
+      "video_url": "This link is not a YouTube or Vimeo video.",
+      "url": "Write a full web address, starting with https://",
+      "duplicate_id": "Two sections have the same id.",
+      "section_id": "Invalid section id.",
+      "too_many_sections": "At most 24 sections.",
+      "invalid": "Invalid value."
+    },
+    "starter": {
+      "hero": {
+        "headline": "Work with us"
+      },
+      "text": {
+        "title": "About us",
+        "body": "Tell in a few lines who you are, what you do and why people should work with you."
+      },
+      "imageText": {
+        "title": "Where we work",
+        "body": "Describe where the work happens: the office, remote work, the team."
+      },
+      "gallery": {
+        "title": "A day with us"
+      },
+      "video": {
+        "title": "Our work in a video"
+      },
+      "values": {
+        "title": "What we offer",
+        "item1": "Flexible work",
+        "item2": "Learning",
+        "item3": "Wellbeing"
+      },
+      "numbers": {
+        "label1": "people",
+        "label2": "years in business"
+      },
+      "testimonials": {
+        "title": "People who work here"
+      }
+    }
   }
 }

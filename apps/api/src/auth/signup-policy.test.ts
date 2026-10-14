@@ -1,14 +1,22 @@
 import { describe, expect, it } from 'vitest';
-import { signupAllowed, type SignupLookups, type SignupPolicy } from './signup-policy.js';
+import { emailVerificationCheck, signupAllowed, verificationAllowed, type SignupLookups, type SignupPolicy } from './signup-policy.js';
 
-const lookups = (bootstrapOpen: boolean, invited: readonly string[]): SignupLookups & { claims: string[] } => {
+/** `bootstrapOwner`: the address whose verification makes it the first owner (it holds the live claim). */
+const lookups = (bootstrapOpen: boolean, invited: readonly string[], bootstrapOwner: string | null = null): SignupLookups & { claims: string[]; owners: string[] } => {
   const claims: string[] = [];
+  const owners: string[] = [];
   return {
     claims,
+    owners,
     hasPendingInvitation: async (email) => invited.includes(email),
     claimBootstrap: async (email) => {
       claims.push(email);
       return bootstrapOpen;
+    },
+    confirmBootstrapOwner: async (user) => {
+      if (user.email !== bootstrapOwner) return false;
+      owners.push(user.id);
+      return true;
     },
   };
 };
@@ -52,5 +60,35 @@ describe('signupAllowed', () => {
 
   it('refuses once the bootstrap is closed (a confirmed account exists or another address holds it)', async () => {
     expect(await signupAllowed(production, 'late@x.it', 'b'.repeat(32), lookups(false, []), NOW)).toBe(false);
+  });
+});
+
+describe('verificationAllowed (the bootstrap claim is checked again when the address is confirmed)', () => {
+  const ada = { id: 'u_ada', email: 'Ada@X.it' };
+
+  it('confirms anyone when open, and nothing is recorded', async () => {
+    const l = lookups(false, [], 'ada@x.it');
+    expect(await verificationAllowed(open, ada, l, NOW)).toBe(true);
+    expect(l.owners).toEqual([]);
+  });
+
+  it('when invite only, confirms an address with a pending invitation', async () => {
+    expect(await verificationAllowed(inviteOnly, ada, lookups(false, ['ada@x.it']), NOW)).toBe(true);
+  });
+
+  it('when invite only, records the holder of the live bootstrap claim as the first owner', async () => {
+    const l = lookups(false, [], 'ada@x.it');
+    expect(await verificationAllowed(inviteOnly, ada, l, NOW)).toBe(true);
+    expect(l.owners).toEqual(['u_ada']);
+  });
+
+  it('when invite only, refuses an account admitted by a claim that lapsed or was taken over', async () => {
+    expect(await verificationAllowed(inviteOnly, ada, lookups(false, [], 'other@x.it'), NOW)).toBe(false);
+  });
+
+  it('emailVerificationCheck refuses with SIGNUP_INVITE_ONLY', async () => {
+    const check = emailVerificationCheck(inviteOnly, lookups(false, []), () => NOW);
+    await expect(check(ada)).rejects.toMatchObject({ statusCode: 403, body: { code: 'SIGNUP_INVITE_ONLY' } });
+    await expect(emailVerificationCheck(inviteOnly, lookups(false, ['ada@x.it']), () => NOW)(ada)).resolves.toBeUndefined();
   });
 });

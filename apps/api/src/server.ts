@@ -1,8 +1,8 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { safeErrorSerializer } from '@tt/core';
-import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, TaskQueue } from '@tt/core';
-import { createEmailProvider } from '@tt/providers';
+import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, TaskQueue } from '@tt/core';
+import { createEmailProvider, createErrorReporter, type ErrorReporter } from '@tt/providers';
 import type { Db } from '@tt/db';
 import type { AdQualityAnalyzer } from '@tt/domain';
 import { createConfiguredAnalyzer } from './ai/ad-quality.js';
@@ -36,6 +36,8 @@ import { registerAuditLogRoutes } from './routes/audit-log.js';
 import { registerEmailSettingsRoutes } from './routes/email-settings.js';
 import { registerEmailTemplateRoutes } from './routes/email-templates.js';
 import { registerHealthRoutes } from './routes/health.js';
+import { createApiMetrics, type ApiMetrics } from './observability/api-metrics.js';
+import { generateRequestId, registerRequestObservability } from './observability/request-hooks.js';
 import { registerCandidateRoutes } from './routes/candidates.js';
 import { registerInboundEmailRoutes } from './routes/inbound-email.js';
 import { registerJobRoutes } from './routes/jobs.js';
@@ -50,6 +52,8 @@ import { registerApplicationRightsRoutes } from './routes/application-rights.js'
 import { registerCandidateRightsRoutes } from './routes/candidate-rights.js';
 import { registerExportRoutes } from './routes/exports.js';
 import { registerPrivacyOverviewRoutes } from './routes/privacy-overview.js';
+import { registerCareersPageRoutes } from './routes/careers-page.js';
+import { registerPublicCareersRoutes } from './routes/public-careers.js';
 import { registerImportRoutes } from './routes/imports.js';
 import { registerPublicConsentRoutes } from './routes/public-consent.js';
 import { registerReportRoutes } from './routes/reports.js';
@@ -79,11 +83,18 @@ export interface ServerDeps {
   readonly distributionChannels?: readonly DistributionChannel[] | undefined;
   /** Test seam: the "now" of the reports. */
   readonly reportClock?: (() => Date) | undefined;
+  /** Test seam: the careers media transcoder (sharp by default). */
+  readonly images?: ImageTranscoder | undefined;
   /** Failed sign-in counters. Postgres by default (shared by every api instance); in memory in tests. */
   readonly throttleStore?: ThrottleStore | undefined;
   /** Daily model budgets. Postgres by default. */
   readonly budgetStore?: BudgetStore | undefined;
+  /** Readiness check of the queue (pg-boss). Absent where there is none (tests): readiness then skips it. */
+  readonly checkQueue?: (() => Promise<void>) | undefined;
+  /** Defaults to one built from SENTRY_DSN (off when unset). */
+  readonly errorReporter?: ErrorReporter | undefined;
 }
+
 
 const loggerOptions = (env: Env) =>
   env.NODE_ENV === 'test'
@@ -102,28 +113,43 @@ const toFastifyTrustProxy = (value: Env['TRUST_PROXY']): string[] | ((address: s
 
 /** Builds the app from injected dependencies; nothing listens until the caller does. */
 export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
-  const app = Fastify({ logger: loggerOptions(deps.env), trustProxy: toFastifyTrustProxy(deps.env.TRUST_PROXY) });
+  const app = Fastify({ logger: loggerOptions(deps.env), trustProxy: toFastifyTrustProxy(deps.env.TRUST_PROXY), genReqId: generateRequestId });
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
-  const ctx = createContext(app, deps);
+  const metrics = createApiMetrics((error) => app.log.error({ err: error }, 'metrics collector failed'));
+  const reporter = deps.errorReporter ?? createReporter(app, deps.env);
+  const ctx = createContext(app, deps, metrics);
 
-  registerErrorHandler(app);
+  registerRequestObservability(app, metrics);
+  registerErrorHandler(app, reporter);
   registerNoStoreByDefault(app);
   await registerSecurity(app, deps.env, ctx.rateLimit);
 
   registerCsrfProtection(app, trustedOrigins(deps.env));
-  registerHealthRoutes(app, ctx);
+  registerHealthRoutes(app, ctx, { metrics, checkQueue: deps.checkQueue });
   registerOpenApiRoute(app, ctx);
   registerApiKeyRoutes(app, ctx);
   registerSecuritySettingsRoutes(app, ctx);
   registerMcpRoute(app, ctx);
-  registerAccountRoutes(app, ctx, deps);
+  registerAccountRoutes(app, ctx, deps, metrics);
   registerRecruitingRoutes(app, ctx);
   await registerCandidateFacingRoutes(app, ctx);
   return app;
 }
 
-function createContext(app: FastifyInstance, deps: ServerDeps): AppContext {
+/** Off (nothing sent anywhere) unless SENTRY_DSN is set. The serializer keeps SQL and bound values out of the report. */
+function createReporter(app: FastifyInstance, env: Env): ErrorReporter {
+  return createErrorReporter({
+    dsn: env.observability.sentryDsn,
+    service: 'api',
+    environment: env.observability.sentryEnvironment ?? env.NODE_ENV,
+    release: env.observability.sentryRelease ?? undefined,
+    describe: safeErrorSerializer,
+    onProblem: (reason) => app.log.warn({ reason }, 'error reporting'),
+  });
+}
+
+function createContext(app: FastifyInstance, deps: ServerDeps, metrics: ApiMetrics): AppContext {
   const provider = deps.messaging ? null : createEmailProvider(deps.env.email, (line) => app.log.info(line));
   const messaging = deps.messaging ?? { sender: toEmailSender(provider!), identity: toEmailIdentity(provider!) };
   return createAppContext({
@@ -135,7 +161,10 @@ function createContext(app: FastifyInstance, deps: ServerDeps): AppContext {
         sender: messaging.sender,
         platformName: deps.env.platform.name,
         fromAddress: `${deps.env.email.fromLocal}@${deps.env.email.domain ?? 'localhost'}`,
-        onError: (error, kind) => app.log.error({ err: error, kind }, 'account email not sent'),
+        onError: (error, kind) => {
+          metrics.emailFailures.inc({ kind: 'account' });
+          app.log.error({ err: error, kind }, 'account email not sent');
+        },
       }),
     budgetStore: deps.budgetStore,
     rateLimit: deps.rateLimit,
@@ -144,20 +173,25 @@ function createContext(app: FastifyInstance, deps: ServerDeps): AppContext {
     ...messaging,
     distributionChannels: deps.distributionChannels,
     reportClock: deps.reportClock,
-    onReceiptError: (error) => app.log.error({ err: error }, 'receipt email not queued'),
+    images: deps.images,
+    onReceiptError: (error) => {
+      metrics.emailFailures.inc({ kind: 'receipt' });
+      app.log.error({ err: error }, 'receipt email not queued');
+    },
     adQuality: deps.adQuality ?? createConfiguredAnalyzer(deps.env.FAST_MODEL, app.log),
   });
 }
 
-function registerAccountRoutes(app: FastifyInstance, ctx: AppContext, deps: ServerDeps): void {
+function registerAccountRoutes(app: FastifyInstance, ctx: AppContext, deps: ServerDeps, metrics: ApiMetrics): void {
   registerAuthRoutes(app, ctx.auth, {
     authMax: ctx.rateLimit.authMax,
     readMax: ctx.rateLimit.max,
     emailMax: ctx.rateLimit.authEmailMax ?? DEFAULT_AUTH_EMAIL_MAX,
     throttle: createSignInThrottle(deps.throttleStore ?? createPgThrottleStore(deps.db)),
-    onRepeatedFailures: createFailureNotifier(deps.db, createAuthEmails(ctx.mailer, deps.env.platform), (error) =>
-      app.log.error({ err: error }, 'sign-in failure notice not sent'),
-    ),
+    onRepeatedFailures: createFailureNotifier(deps.db, createAuthEmails(ctx.mailer, deps.env.platform), (error) => {
+      metrics.emailFailures.inc({ kind: 'signin_notice' });
+      app.log.error({ err: error }, 'sign-in failure notice not sent');
+    }),
   });
 }
 
@@ -192,6 +226,8 @@ async function registerCandidateFacingRoutes(app: FastifyInstance, ctx: AppConte
   await registerPublicApplicationRoute(app, ctx);
   registerPublicConsentRoutes(app, ctx);
   await registerImportRoutes(app, ctx);
+  await registerCareersPageRoutes(app, ctx);
+  registerPublicCareersRoutes(app, ctx);
   registerStatsRoutes(app, ctx);
   registerReportRoutes(app, ctx);
   registerEmailSettingsRoutes(app, ctx);

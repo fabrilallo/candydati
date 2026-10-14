@@ -39,4 +39,5 @@ export const withStorageErrors = (files: FileStorage): FileStorage => ({
   get: (key) => guarded(() => files.get(key)),
   getStream: (key) => guarded(() => files.getStream(key)),
   delete: (key) => guarded(() => files.delete(key)),
+  ...(files.getRange ? { getRange: (key: string, start: number, end: number) => guarded(() => files.getRange!(key, start, end)) } : {}),
 });

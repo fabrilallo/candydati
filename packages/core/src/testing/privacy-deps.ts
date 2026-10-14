@@ -17,6 +17,7 @@ import {
   type InMemoryDataExports,
   type InMemoryRetentionRuns,
 } from './in-memory-privacy-ops.js';
+import { createInMemoryCareersMedia, createInMemoryCareersPages, type InMemoryCareersMedia, type InMemoryCareersPages } from './in-memory-careers.js';
 
 export const testProviders: ConfiguredProviders = { storage: 'local', email: 'smtp', model: 'openai/gpt-test' };
 
@@ -31,6 +32,8 @@ export type TestPrivacyDeps = TestAutomationDeps &
     readonly retentionRuns: InMemoryRetentionRuns;
     readonly dataExports: InMemoryDataExports;
     readonly zip: ReturnType<typeof createFakeZipFactory>;
+    readonly careersPages: InMemoryCareersPages;
+    readonly careersMedia: InMemoryCareersMedia;
   };
 
 export interface PrivacySeedOptions extends AutomationSeedOptions {
@@ -55,6 +58,8 @@ export function seedPrivacyWorld(options: PrivacySeedOptions = {}): TestPrivacyD
     retentionRuns: createInMemoryRetentionRuns(options.retentionRuns),
     dataExports,
     zip: createFakeZipFactory(),
+    careersPages: createInMemoryCareersPages(),
+    careersMedia: createInMemoryCareersMedia(),
     providers: testProviders,
     ...options.privacyOverrides,
   };

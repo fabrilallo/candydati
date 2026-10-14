@@ -14,7 +14,7 @@ const admin = computed(() => can(viewer.value?.role ?? null, 'organization:updat
     <p class="text-sm text-muted-foreground text-pretty">{{ t('assistant.off.body') }}</p>
     <template v-if="admin">
       <p class="text-sm text-muted-foreground text-pretty">{{ t('assistant.off.admin') }}</p>
-      <pre class="overflow-x-auto rounded-lg border bg-muted px-3 py-2 font-mono text-xs"><code>AGENT_MODEL=provider/model</code></pre>
+      <pre tabindex="0" class="overflow-x-auto rounded-lg border bg-muted px-3 py-2 font-mono text-xs"><code>AGENT_MODEL=provider/model</code></pre>
     </template>
     <p v-else class="text-sm text-muted-foreground">{{ t('assistant.off.member') }}</p>
   </div>

@@ -101,6 +101,19 @@ describe.skipIf(!up)('createS3FileStorage (MinIO)', () => {
     await expect(storage.getStream(`${prefix}/missing`)).rejects.toThrow(FileNotFoundError);
   });
 
+  it('reads an inclusive byte range as a stream', async () => {
+    const key = `${prefix}/range.bin`;
+    created.push(key);
+    await storage.put(key, new Uint8Array([10, 11, 12, 13, 14, 15]), 'application/octet-stream');
+    const { stream, sizeBytes } = await storage.getRange!(key, 1, 3);
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of stream) chunks.push(chunk);
+    expect([...Buffer.concat(chunks)]).toEqual([11, 12, 13]);
+    expect(sizeBytes).toBe(3);
+    await expect(storage.getRange!(`${prefix}/missing`, 0, 1)).rejects.toThrow(FileNotFoundError);
+    await expect(storage.getRange!(key, 3, 1)).rejects.toThrow(RangeError);
+  });
+
   it('rejects invalid keys before any request', async () => {
     await expect(storage.put('../x', new Uint8Array(), 'x/y')).rejects.toThrow(InvalidStorageKeyError);
     await expect(storage.get('a b')).rejects.toThrow(InvalidStorageKeyError);

@@ -34,6 +34,22 @@ const dnd = useBoardDrag({
   stageName,
   onMove: (id, stageId) => emit('move', id, stageId),
 })
+/**
+ * A card moved from its menu is re-rendered in another column, which drops focus to the page. Put it back on the card
+ * (as the keyboard drag does), once the board shows it in its new place.
+ */
+const moveFromMenu = async (id: string, stageId: string): Promise<void> => {
+  emit('move', id, stageId)
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    await nextTick()
+    const opener = root.value?.querySelector<HTMLElement>(`[data-card-id="${CSS.escape(id)}"] [data-card-open]`)
+    if (opener && document.activeElement !== opener && !root.value?.contains(document.activeElement)) {
+      opener.focus()
+      return
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50))
+  }
+}
 const selected = ref(props.stages[0]?.id ?? '')
 const hintId = 'pipeline-card-hint'
 </script>
@@ -81,7 +97,7 @@ const hintId = 'pipeline-card-hint'
             :selected="props.selectedIds.has(card.id)"
             @select="emit('select', card.id, $event)"
             @open="emit('open', card)"
-            @move="emit('move', card.id, $event)"
+            @move="moveFromMenu(card.id, $event)"
             @decide="emit('decide', card, $event)"
             @key="dnd.key(card, $event)"
             @dragstart="dnd.dragStart(card, $event)"

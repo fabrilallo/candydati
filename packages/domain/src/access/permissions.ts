@@ -38,6 +38,8 @@ export const STATEMENTS = {
   feedback: ['manage', 'read'],
   /** Aggregated reports (no personal data): grantable to API keys and the agent. */
   report: ['read'],
+  /** The public careers page: its sections, theme and media, the draft and its publication. */
+  careers_page: ['manage'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -78,6 +80,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     import: ['manage'],
     feedback: ['manage', 'read'],
     report: ['read'],
+    careers_page: ['manage'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],

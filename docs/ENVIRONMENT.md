@@ -39,6 +39,7 @@ Variables without a default are required or optional as described; see `.env.exa
 | `MCP_MODEL_DAILY_BUDGET_PER_KEY` | api |  | MCP calls of model-backed tools (analyze_job_ad, publish_job) per API key per UTC day, when FAST_MODEL is set. |
 | `MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION` | api |  | MCP calls of model-backed tools per organization per UTC day, when FAST_MODEL is set. |
 | `MCP_MODEL_DAILY_BUDGET_PER_USER` | api |  | MCP calls of model-backed tools per person (across all their keys and organizations) per UTC day, when FAST_MODEL is set. |
+| `METRICS_TOKEN` | api, worker |  | Bearer token (at least 16 characters) that opens GET /metrics (Prometheus) on the api and the worker. Unset: the endpoint does not exist. |
 | `MISTRAL_API_KEY` | api, worker |  | API key for mistral/* models. |
 | `NODE_ENV` | api, worker | `development` | development, test or production. |
 | `NUXT_API_INTERNAL_URL` | web |  | Origin of the Fastify api that the web proxy forwards /api/** and /mcp to. |
@@ -50,10 +51,11 @@ Variables without a default are required or optional as described; see `.env.exa
 | `NUXT_PUBLIC_SOURCE_URL` | web |  | Where repository files can be browsed (e.g. https://host/blob/main); empty: paths as text. |
 | `NUXT_PUBLIC_TIME_ZONE` | web |  | IANA time zone dates are shown in. |
 | `NUXT_PUBLIC_TURNSTILE_SITE_KEY` | web |  | Cloudflare Turnstile site key: the application form shows the check and the page policy allows challenges.cloudflare.com. Empty: off. |
+| `NUXT_SENTRY_DSN` | web |  | Web: DSN of a Sentry-compatible collector for server errors (5xx), scrubbed of personal data. Empty: nothing is sent. |
 | `NUXT_TRUST_CLOUDFLARE` | web |  | true only when the site is reachable through Cloudflare alone: cf-connecting-ip is then the client IP. |
 | `OPENAI_API_KEY` | api, worker |  | API key for openai/* models. |
 | `OPENROUTER_API_KEY` | api, worker |  | API key for openrouter/* models. |
-| `ORGANIZATION_CREATION` | api |  | Who may create organizations: open (anyone), one_per_user (a person who owns one cannot create another) or instance_admins (only the first owner and INSTANCE_ADMIN_EMAILS). Default: one_per_user when SIGNUP_MODE=invite_only, open otherwise. |
+| `ORGANIZATION_CREATION` | api |  | Who may create organizations: open (anyone), one_per_user (one organization ever created per account; the limit is per account, so invite-only sign-up is what bounds people) or instance_admins (only the first owner and INSTANCE_ADMIN_EMAILS). Default: one_per_user when SIGNUP_MODE=invite_only, open otherwise. |
 | `PLATFORM_AD_QUALITY_THRESHOLD` | api, worker | `6` | Ad quality score (0-10) below which an ad is flagged, never blocked. |
 | `PLATFORM_DEFAULT_LOCALE` | api, worker | `DEFAULT_LOCALE` | Default language: it or en. |
 | `PLATFORM_NAME` | api, worker | `PLATFORM_CODENAME` | Product name shown in the UI and emails. |
@@ -69,6 +71,9 @@ Variables without a default are required or optional as described; see `.env.exa
 | `S3_FORCE_PATH_STYLE` | api, worker | `false` | Path-style S3 URLs (needed by MinIO). |
 | `S3_REGION` | api, worker | `us-east-1` | S3 region. |
 | `S3_SECRET_KEY` | api, worker |  | S3 secret key. In production at least 16 random characters, not the example. |
+| `SENTRY_DSN` | api, worker |  | DSN of a Sentry-compatible collector (Sentry, GlitchTip, Bugsink): server errors are sent there, scrubbed of personal data. Unset: nothing is sent anywhere. |
+| `SENTRY_ENVIRONMENT` | api, worker |  | Environment name on error reports (default: NODE_ENV). |
+| `SENTRY_RELEASE` | api, worker |  | Release on error reports, e.g. the image tag. |
 | `SIGNUP_MODE` | api |  | open (anyone may create an account) or invite_only (only with a pending invitation, plus the first owner of an instance with no confirmed account). Default: invite_only in production, open elsewhere. |
 | `SMTP_HOST` | api, worker |  | SMTP host (EMAIL_PROVIDER=smtp). |
 | `SMTP_PASSWORD` | api, worker |  | SMTP password. |
@@ -80,4 +85,6 @@ Variables without a default are required or optional as described; see `.env.exa
 | `TURNSTILE_SECRET_KEY` | api |  | Cloudflare Turnstile secret key. Set: the public application form needs a valid Turnstile answer (also set NUXT_PUBLIC_TURNSTILE_SITE_KEY). Empty: off. |
 | `WEB_ORIGIN` | api |  | Origin of the web app (CORS and trusted origin). |
 | `WEBHOOKS_ALLOW_PRIVATE` | api, worker |  | Development only: webhooks may target localhost and private addresses. Refused in production. |
+| `WORKER_HOST` | worker | `0.0.0.0` | Address the worker health server binds to. |
+| `WORKER_PORT` | worker | `4001` | Port of the worker health server (/health, /ready, and /metrics with METRICS_TOKEN). 0 turns it off. Never published by the compose file. |
 | `XAI_API_KEY` | api, worker |  | API key for xai/* models. |

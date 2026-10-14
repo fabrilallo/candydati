@@ -126,6 +126,13 @@ App components: `AppPage` (top bar plus main column), `AppTopBar`, `AppBreadcrum
 - **Lists of people and events:** row with avatar, name in `font-medium`, detail in muted, pill or time on the right.
 - **Ad status pills** (`statusTone` in `lib/job-view.ts`): draft = `secondary` (neutral), published = `success`, closed = `outline` (muted). The same code in the overview dots.
 - **Layout:** app with a navigation panel from `lg` (see §5), a drawer (`Sheet`) opened from the menu button below. Auth uses an asymmetric split from `lg` (form left, `inverse` panel with the three principles right), form only on mobile. Public pages: `max-w-3xl` column, header and footer aligned.
+- **Careers page** (`components/careers/site/`, PRODUCT.md §3.4): the exception to the `max-w-3xl` column. Its own top
+  bar, full-bleed hero, then sections in a `max-w-6xl` wrapper with `py-16`/`py-24` rhythm and a border between them. The
+  organization's accent replaces cobalt inside `.careers-site` only (`--primary`, `--ring`, `--accent` are rebound to
+  colours derived for AA in both themes); like cobalt it marks actions and selection, never decoration. Headings use the
+  chosen heading font. Layout uses container queries (`@2xl:` and up), so the editor preview at phone width is a phone.
+  Text over a hero image or video is light on a scrim of at least 40%; a background video has a visible pause button and
+  never plays under reduced motion.
 - **Responsive:** no horizontal scroll at 375px. Wide tables scroll inside their container.
 
 ## 5. App structure

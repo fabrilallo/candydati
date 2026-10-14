@@ -32,6 +32,13 @@ describe('withStorageErrors', () => {
     await expect(withStorageErrors(failing(missing)).get('k')).rejects.toBe(missing);
   });
 
+  it('forwards range reads only when the storage has them, with the same error handling', async () => {
+    expect(withStorageErrors(failing(new Error('x'))).getRange).toBeUndefined();
+    const cause = new Error('timeout');
+    const ranged = withStorageErrors({ ...failing(cause), getRange: () => Promise.reject(cause) });
+    await expect(ranged.getRange!('k', 0, 1)).rejects.toBeInstanceOf(StorageUnavailableError);
+  });
+
   it('passes successes through', async () => {
     const files = withStorageErrors({ ...failing(new Error('unused')), get: async () => new Uint8Array([1]) });
     expect(await files.get('k')).toEqual(new Uint8Array([1]));

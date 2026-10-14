@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Params } from './ad-text'
-import { approxMinutes, currencySymbol, processSummaryText, responseText, salaryFigure, salaryLabelKey, totalMinutes } from './ad-facts'
+import { currencySymbol, processSummaryText, responseText, salaryFigure, salaryLabelKey } from './ad-facts'
 
 /** Fake translator: echoes the key and its params, resolving plurals like vue-i18n would not need to here. */
 const tr = (key: string, params: Params = {}): string => {
@@ -9,7 +9,6 @@ const tr = (key: string, params: Params = {}): string => {
   if (key === 'public.duration.hoursMinutes') return `${params.h} h ${params.m} min`
   if (key === 'public.duration.days') return `${params.n} g`
   if (key === 'public.facts.stages') return params.count === 1 ? '1 fase' : `${params.count} fasi`
-  if (key === 'public.facts.about') return `circa ${params.duration}`
   if (key === 'public.facts.within') return params.count === 1 ? 'entro 1 giorno' : `entro ${params.count} giorni`
   return key
 }
@@ -49,28 +48,9 @@ describe('salaryLabelKey', () => {
 })
 
 describe('process summary', () => {
-  it('adds up the stages', () => {
-    expect(totalMinutes([stage(30), stage(90), stage(60)])).toBe(180)
-    expect(totalMinutes([])).toBe(0)
-  })
-
-  it.each([
-    [0, 0],
-    [42, 40],
-    [43, 45],
-    [110, 105],
-    [113, 120],
-    [185, 180],
-    [1500, 1440],
-    [3000, 2880],
-  ])('rounds %i minutes to a friendly %i', (minutes, expected) => {
-    expect(approxMinutes(minutes)).toBe(expected)
-  })
-
-  it('reads "3 fasi, circa 3 h"', () => {
-    expect(processSummaryText([stage(30), stage(90), stage(60)], tr)).toBe('3 fasi, circa 3 h')
-    expect(processSummaryText([stage(45)], tr)).toBe('1 fase, circa 45 min')
-    expect(processSummaryText([stage(30), stage(45)], tr)).toBe('2 fasi, circa 1 h 15 min')
+  it('counts the stages without a total time', () => {
+    expect(processSummaryText([stage(30), stage(90), stage(60)], tr)).toBe('3 fasi')
+    expect(processSummaryText([stage(45)], tr)).toBe('1 fase')
   })
 
   it('is empty without stages', () => {
