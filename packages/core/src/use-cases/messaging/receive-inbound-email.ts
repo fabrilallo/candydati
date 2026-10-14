@@ -6,9 +6,10 @@ import {
   type Message,
 } from '@tt/domain';
 import { z } from 'zod';
-import { ConflictError, AuditWriteError } from '../../errors.js';
+import { ConflictError } from '../../errors.js';
 import type { InboundDeps } from '../../messaging-ports.js';
-import { definePublicQuery } from '../../use-case.js';
+import { inSavepoint } from '../../transaction.js';
+import { definePublicCommand } from '../../use-case.js';
 import type { InboundResult } from './views.js';
 
 export const INBOUND_ACTOR_ID = 'inbound_email';
@@ -57,15 +58,52 @@ function bodies(input: z.output<typeof inboundEmailSchema>): { readonly bodyText
   return { bodyText: primary.slice(0, MESSAGE_BODY_MAX), rawText: original.slice(0, RAW_TEXT_MAX) };
 }
 
+/** What was stored, for the audit event only: callers get the `InboundResult` without it. */
+interface InboundOutcome extends InboundResult {
+  readonly message?: Pick<Message, 'id' | 'organizationId' | 'applicationId' | 'unverifiedSender'>;
+}
+
+function toMessage(deps: InboundDeps, input: z.output<typeof inboundEmailSchema>, organizationId: string, applicationId: string, candidate: { readonly id: string; readonly email: string }): Message {
+  const now = deps.now();
+  const { bodyText, rawText } = bodies(input);
+  return {
+    id: deps.newId(),
+    organizationId,
+    applicationId,
+    candidateId: candidate.id,
+    direction: 'inbound',
+    subject: clean(input.subject).replace(/\s+/g, ' ').slice(0, SUBJECT_MAX),
+    bodyText,
+    status: 'received',
+    providerMessageId: null,
+    sentBy: null,
+    // Ordered by when we received it: the Date header is the sender's claim and can be skewed or forged.
+    createdAt: now,
+    sentAt: input.receivedAt > now ? now : input.receivedAt,
+    error: null,
+    rawText,
+    unverifiedSender: addressOf(input.from) !== candidate.email.toLowerCase(),
+    inboundMessageId: input.messageId,
+  };
+}
+
 /**
  * Public, no session (provider webhook; the signature is checked by the adapter). The token in the reply address finds
  * the conversation; an unknown token is dropped. A sender other than the candidate is stored flagged `unverifiedSender`,
- * never trusted. Dedupe by `Message-ID`. The body is stored as text and never rendered as HTML.
+ * never trusted. Dedupe by `Message-ID`. The body is stored as text and never rendered as HTML. The message and
+ * `message.received` commit together: if the audit fails nothing is stored, so the provider's retry is not a duplicate.
  */
-export const receiveInboundEmail = definePublicQuery<InboundDeps, typeof inboundEmailSchema, InboundResult>({
+const storeInboundEmail = definePublicCommand<InboundDeps, typeof inboundEmailSchema, InboundOutcome>({
   name: 'receiveInboundEmail',
   input: inboundEmailSchema,
-  handler: async ({ deps, input }): Promise<InboundResult> => {
+  actorId: INBOUND_ACTOR_ID,
+  audit: {
+    action: (_input, result) => (result.message ? 'message.received' : null),
+    organizationOf: (_input, result) => result.message?.organizationId ?? '',
+    target: (_input, result) => ({ type: 'message', id: result.message?.id ?? '' }),
+    metadata: (_input, result) => ({ applicationId: result.message?.applicationId, unverifiedSender: result.message?.unverifiedSender }),
+  },
+  handler: async ({ deps, input }): Promise<InboundOutcome> => {
     const conversation = await findConversation(deps, input.to);
     if (!conversation) return { stored: false, reason: 'unknown_token' };
     const { organizationId } = conversation;
@@ -73,44 +111,19 @@ export const receiveInboundEmail = definePublicQuery<InboundDeps, typeof inbound
     const candidate = application ? await deps.candidates.findById(organizationId, application.candidateId) : null;
     if (!application || !candidate) return { stored: false, reason: 'unknown_application' };
     if (await deps.messages.findByInboundMessageId(organizationId, input.messageId)) return { stored: false, reason: 'duplicate' };
-    const now = deps.now();
-    const { bodyText, rawText } = bodies(input);
-    const message: Message = {
-      id: deps.newId(),
-      organizationId,
-      applicationId: application.id,
-      candidateId: candidate.id,
-      direction: 'inbound',
-      subject: clean(input.subject).replace(/\s+/g, ' ').slice(0, SUBJECT_MAX),
-      bodyText,
-      status: 'received',
-      providerMessageId: null,
-      sentBy: null,
-      // Ordered by when we received it: the Date header is the sender's claim and can be skewed or forged.
-      createdAt: now,
-      sentAt: input.receivedAt > now ? now : input.receivedAt,
-      error: null,
-      rawText,
-      unverifiedSender: addressOf(input.from) !== candidate.email.toLowerCase(),
-      inboundMessageId: input.messageId,
-    };
+    const message = toMessage(deps, input, organizationId, application.id, candidate);
     try {
-      await deps.messages.create(message);
+      // A savepoint: a unique violation in a race must not abort the whole transaction.
+      await inSavepoint(deps, (sp) => sp.messages.create(message));
     } catch (error) {
       if (error instanceof ConflictError) return { stored: false, reason: 'duplicate' };
       throw error;
     }
-    try {
-      await deps.auditLog.append({
-        organizationId,
-        actor: { type: 'system', id: INBOUND_ACTOR_ID, onBehalfOfUserId: null },
-        action: 'message.received',
-        target: { type: 'message', id: message.id },
-        metadata: { applicationId: application.id, unverifiedSender: message.unverifiedSender },
-      });
-    } catch (error) {
-      throw new AuditWriteError(error);
-    }
-    return { stored: true };
+    return { stored: true, message };
   },
 });
+
+export async function receiveInboundEmail(deps: InboundDeps, rawInput: unknown): Promise<InboundResult> {
+  const { stored, reason } = await storeInboundEmail(deps, rawInput);
+  return reason === undefined ? { stored } : { stored, reason };
+}

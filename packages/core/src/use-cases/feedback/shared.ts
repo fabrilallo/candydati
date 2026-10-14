@@ -23,7 +23,6 @@ import { formatFrom, senderIdentity, stageName } from '../messaging/shared.js';
 
 export const FEEDBACK_PAGE_ACTOR_ID = 'feedback_page';
 export const FEEDBACK_SCAN_ACTOR_ID = 'feedback_scan';
-export const FEEDBACK_PAGE_ACTOR: AuditActor = { type: 'system', id: FEEDBACK_PAGE_ACTOR_ID, onBehalfOfUserId: null };
 export const FEEDBACK_SCAN_ACTOR: AuditActor = { type: 'system', id: FEEDBACK_SCAN_ACTOR_ID, onBehalfOfUserId: null };
 
 /** One person to ask: a member resolved to their current email, or an external person. */
@@ -99,6 +98,7 @@ export async function sendRequestEmail(
       link: `${deps.config.platformUrl.replace(/\/$/, '')}${feedbackPath(secret)}`,
       expiresAt: request.expiresAt,
       reminder,
+      timeZone: deps.config.timeZone,
     });
     await deps.sender.send({
       from: formatFrom(identity),

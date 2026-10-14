@@ -67,6 +67,7 @@ describe('cv.extract queue', () => {
     await startWorker({ boss, logger, queues: [createCvExtractQueue(deps)] });
     await handlers.get('cv.extract')!([{ id: 'j1', name: 'cv.extract', data: payload }]);
     expect(await deps.extractions.findByApplication('org_test', 'app_1')).toMatchObject({ status: 'text_only' });
-    await expect(handlers.get('cv.extract')!([{ id: 'j2', name: 'cv.extract', data: { organizationId: 'x' } }])).rejects.toThrow(/Invalid payload/);
+    // An invalid payload is logged and completed: retrying it could never succeed.
+    await expect(handlers.get('cv.extract')!([{ id: 'j2', name: 'cv.extract', data: { organizationId: 'x' } }])).resolves.toBeUndefined();
   });
 });

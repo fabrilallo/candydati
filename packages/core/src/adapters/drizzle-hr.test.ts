@@ -141,8 +141,11 @@ describe('job requests, settings and approvals on Postgres', () => {
     const bare = await repo.create(jobRequest(org));
     expect(bare).not.toHaveProperty('role');
     expect((await repo.list({ organizationId: org, page: 1, limit: 10 })).items.map((r) => r.id)).toEqual([bare.id, full.id]);
-    const saved = await repo.save({ ...bare, status: 'rejected', decidedBy: 'a', decidedAt: NOW, decisionNote: 'no' });
+    const saved = await repo.transition('submitted', { ...bare, status: 'rejected', decidedBy: 'a', decidedAt: NOW, decisionNote: 'no' });
     expect(saved).toMatchObject({ status: 'rejected', decisionNote: 'no' });
+    // Compare-and-set: the status moved, so a second decision from `submitted` changes nothing.
+    expect(await repo.transition('submitted', { ...bare, status: 'approved' })).toBeNull();
+    expect(await repo.transition('submitted', { ...bare, organizationId: await insertOrg(), status: 'approved' })).toBeNull();
     expect(await repo.list({ organizationId: org, status: 'rejected', page: 1, limit: 10 })).toMatchObject({ total: 1 });
     expect((await repo.list({ organizationId: org, page: 2, limit: 1 })).items).toHaveLength(1);
     expect(await repo.findById(await insertOrg(), full.id)).toBeNull();
@@ -156,7 +159,7 @@ describe('job requests, settings and approvals on Postgres', () => {
     expect(await repo.findOpenForJob(org, jobId)).toBeNull();
     const created = await repo.create(jobRequest(org, { jobId }));
     expect((await repo.findOpenForJob(org, jobId))?.id).toBe(created.id);
-    await repo.save({ ...created, status: 'converted' });
+    await repo.transition('submitted', { ...created, status: 'converted' });
     expect(await repo.findOpenForJob(org, jobId)).toBeNull();
   });
 

@@ -71,7 +71,8 @@ describe('list and get', () => {
     expect(all.items.map((r) => r.id)).toEqual(['second', first.id]);
     expect((await listJobRequests(deps, hm, { status: 'rejected' })).items.map((r) => r.id)).toEqual([first.id]);
     expect((await listJobRequests(deps, hm, { page: 2, limit: 1 })).items.map((r) => r.id)).toEqual([first.id]);
-    expect((await listJobRequests(deps, userActor({ role: 'owner', organizationId: ORG_B }), {})).total).toBe(0);
+    expect((await listJobRequests(deps, userActor({ role: 'owner', organizationId: ORG_B }), {})).meta).toEqual({ total: 0, page: 1, limit: 20 });
+    expect((await listJobRequests(deps, hm, { page: 2, limit: 1 })).meta).toMatchObject({ page: 2, limit: 1 });
   });
 
   it('gets one request, and another organization does not see it', async () => {

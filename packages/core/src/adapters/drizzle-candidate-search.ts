@@ -1,4 +1,4 @@
-import { and, eq, schema, sql, type SQL } from '@tt/db';
+import { and, asc, eq, gt, schema, sql, type SQL } from '@tt/db';
 import type { CandidateSearch, CandidateSearchQuery } from '../candidate-ports.js';
 import { toCandidate } from './drizzle-candidates.js';
 import type { DbExecutor } from './db-executor.js';
@@ -23,7 +23,7 @@ const textFilter = (text: string): SQL => {
   return sql`(
     ${candidate.firstName} || ' ' || ${candidate.lastName} ilike ${like}
     or ${candidate.email} ilike ${like}
-    or array_to_string(${candidate.tags}, ' ') ilike ${like}
+    or candidate_tags_text(${candidate.tags}) ilike ${like}
     or exists (
       select 1 from ${application}
       join ${cvExtraction} on "cv_extraction"."application_id" = "application"."id"
@@ -50,28 +50,52 @@ function filtersOf(query: CandidateSearchQuery): SQL | undefined {
   );
 }
 
-/** Postgres implementation. Most recently applied first; every statement filters by `organization_id`. */
+/**
+ * Deepest row a page may start at. Offsets scan and discard every skipped row, so a crawler asking for page 100000
+ * would cost a full scan; deeper pages are empty (the total is still reported). Narrow the filters instead.
+ */
+export const MAX_SEARCH_OFFSET = 10_000;
+
+/**
+ * Postgres implementation. Most recently applied first (`candidate.last_applied_at`, kept by a trigger and indexed),
+ * name/email/tags matched through `pg_trgm` GIN indexes. The total comes from `count(*) over ()` in the same query;
+ * only a page past the end needs a second one. Every statement filters by `organization_id`.
+ */
 export function createDrizzleCandidateSearch(db: DbExecutor): CandidateSearch {
   const applicationCount = sql<number>`(select count(*)::int from ${application} where "application"."candidate_id" = ${outer.id} and "application"."consent_status" = 'given')`;
-  const lastAppliedAt = sql<Date | null>`(select max("application"."created_at") from ${application} where "application"."candidate_id" = ${outer.id} and "application"."consent_status" = 'given')`;
+  const total = sql<number>`count(*) over ()::int`;
   return {
+    async listAfter(organizationId, afterId, limit) {
+      const rows = await db
+        .select({ candidate })
+        .from(candidate)
+        .where(and(filtersOf({ organizationId, page: 1, limit }), afterId === null ? undefined : gt(candidate.id, afterId)))
+        .orderBy(asc(candidate.id))
+        .limit(limit);
+      return rows.map((row) => toCandidate(row.candidate));
+    },
     async search(query) {
       const where = filtersOf(query);
+      const offset = (query.page - 1) * query.limit;
+      const countAll = async (): Promise<number> => {
+        const [row] = await db.select({ total: sql<number>`count(*)::int` }).from(candidate).where(where);
+        return row?.total ?? 0;
+      };
+      if (offset > MAX_SEARCH_OFFSET) return { items: [], total: await countAll() };
       const rows = await db
-        .select({ candidate, applicationCount, lastAppliedAt })
+        .select({ candidate, applicationCount, total })
         .from(candidate)
         .where(where)
-        .orderBy(sql`${lastAppliedAt} desc nulls last`, candidate.id)
+        .orderBy(sql`${candidate.lastAppliedAt} desc nulls last`, candidate.id)
         .limit(query.limit)
-        .offset((query.page - 1) * query.limit);
-      const [totals] = await db.select({ total: sql<number>`count(*)::int` }).from(candidate).where(where);
+        .offset(offset);
       return {
         items: rows.map((row) => ({
           candidate: toCandidate(row.candidate),
           applicationCount: row.applicationCount,
-          lastAppliedAt: row.lastAppliedAt === null ? null : new Date(row.lastAppliedAt),
+          lastAppliedAt: row.candidate.lastAppliedAt === null ? null : new Date(row.candidate.lastAppliedAt),
         })),
-        total: totals?.total ?? 0,
+        total: rows[0]?.total ?? (offset === 0 ? 0 : await countAll()),
       };
     },
   };

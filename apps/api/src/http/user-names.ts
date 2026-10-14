@@ -1,16 +1,16 @@
-import { inArray, schema, type Db } from '@tt/db';
+import type { UserDirectory } from '@tt/core';
 import type { UserNames } from './audit-dto.js';
 
-export type UserNameLookup = (userIds: readonly string[]) => Promise<UserNames>;
+export type UserNameLookup = (organizationId: string, userIds: readonly string[]) => Promise<UserNames>;
 
-/** One query for the whole page; users that no longer exist are simply absent. */
+/**
+ * Display names for a page of rows, through the core directory: only members of the organization and people who acted
+ * in it are named, so a user of another organization is never revealed. One query per page.
+ */
 export const createUserNameLookup =
-  (db: Db): UserNameLookup =>
-  async (userIds) => {
-    if (userIds.length === 0) return new Map();
-    const rows = await db
-      .select({ id: schema.user.id, name: schema.user.name })
-      .from(schema.user)
-      .where(inArray(schema.user.id, [...userIds]));
-    return new Map(rows.map((row) => [row.id, row.name]));
+  (users: UserDirectory): UserNameLookup =>
+  async (organizationId, userIds) => {
+    const unique = [...new Set(userIds)];
+    if (unique.length === 0) return new Map();
+    return new Map(Object.entries(await users.actorNamesOf(organizationId, unique)));
   };

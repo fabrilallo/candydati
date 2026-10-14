@@ -30,6 +30,8 @@ pnpm dev            # web http://localhost:3000, api http://localhost:4100
 ```
 
 Locally, emails go to Mailpit (http://localhost:8025). Checks: `pnpm lint`, `pnpm typecheck`, `pnpm test`.
+`pnpm test` needs the infrastructure running (`pnpm infra:up`: Postgres and MinIO; Mailpit for the SMTP tests).
+Every environment variable is listed in [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
 
 ## Self-hosting
 
@@ -93,7 +95,7 @@ Rete e dati:
 - Volumi Docker `pgdata` (database) e `miniodata` (CV e file): sono i dati da salvare. `docker compose -f docker-compose.prod.yml down` li conserva, `down -v` li cancella.
 - Per più istanze sulla stessa macchina imposta `COMPOSE_PROJECT_NAME` e porte diverse.
 - Dietro un reverse proxy con TLS punta `PLATFORM_URL` all'URL pubblico (https) e inoltra tutto al web. Il compose fissa la rete interna (`TT_SUBNET`, default `172.31.77.0/24`) e la usa come `TRUST_PROXY` dell'api: il web e' il suo proxy. Dietro Cloudflare imposta `NUXT_TRUST_CLOUDFLARE=true` (solo se l'origine e' raggiungibile solo da Cloudflare). `WEBHOOKS_ALLOW_PRIVATE` e' sempre `false` nello stack.
-- Posta di sviluppo: `TT_EMAIL_PROVIDER=smtp` e `--profile mail`, UI Mailpit su `http://localhost:8025`.
+- Posta di sviluppo: `EMAIL_PROVIDER=smtp` e `--profile mail`, UI Mailpit su `http://localhost:8025`.
 
 Variabili (tutte in `.env`; il compose imposta da solo gli indirizzi interni, per cui `DATABASE_URL`, `S3_ENDPOINT` e `NUXT_API_INTERNAL_URL` del `.env` valgono solo in sviluppo):
 
@@ -105,9 +107,12 @@ Variabili (tutte in `.env`; il compose imposta da solo gli indirizzi interni, pe
 | `POSTGRES_PASSWORD` | sì | password del database (`POSTGRES_USER`, `POSTGRES_DB` opzionali) |
 | `S3_ACCESS_KEY`, `S3_SECRET_KEY` | sì | credenziali di MinIO (e dell'app); `S3_BUCKET` opzionale |
 | `PLATFORM_NAME`, `PLATFORM_SUPPORT_EMAIL`, `PLATFORM_DEFAULT_LOCALE` | no | identità e lingua (`it` o `en`; la lingua è fissata alla build, rifai `--build` se la cambi) |
-| `TT_EMAIL_PROVIDER` | no | `log` (default, non invia nulla), `smtp` o `resend` (`RESEND_API_KEY`); per SMTP `TT_SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` |
+| `EMAIL_PROVIDER` | no | `log` (default, non invia nulla), `smtp` o `resend` (`RESEND_API_KEY`); per SMTP `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` |
 | `EMAIL_DOMAIN`, `EMAIL_FROM_LOCAL`, `EMAIL_INBOUND_DOMAIN` | no | dominio di invio e di ricezione delle risposte |
-| `AGENT_MODEL`, `FAST_MODEL` + chiave del fornitore | no | vuoti = assistente spento e nessuna chiamata a modelli |
+| `AGENT_MODEL`, `FAST_MODEL` + chiave del fornitore | no | vuoti = assistente spento e nessuna chiamata a modelli; chiavi: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`, `MISTRAL_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `XAI_API_KEY`, `OPENROUTER_API_KEY` |
+| `LOG_LEVEL`, `TRUSTED_ORIGINS`, `API_KEY_RATE_LIMIT`, `IMPORT_STALE_DAYS` | no | livello di log, origini extra per CORS, richieste al minuto per chiave API, giorni prima che un import non confermato venga eliminato |
+| `NUXT_PUBLIC_TIME_ZONE`, `PLATFORM_TIME_ZONE`, `NUXT_PUBLIC_SOURCE_URL` | no | fuso orario delle date (schermate e email; default `Europe/Rome`) e URL dove sfogliare i file del repository |
+| `NUXT_API_MAX_BODY_BYTES`, `NUXT_API_TIMEOUT_MS` | no | limiti del proxy web verso l'api: dimensione massima del corpo (default 204 MiB) e attesa massima della risposta (default 5 minuti) |
 | `WEB_PORT`, `API_PUBLISH`, `MAILPIT_UI_PORT` | no | porte sull'host |
 | `TT_SUBNET`, `TRUST_PROXY`, `NUXT_TRUST_CLOUDFLARE` | no | rete interna e fiducia nel proxy (vedi sopra) |
 | `APPLICATIONS_DAILY_MAX_PER_ORGANIZATION`, `APPLICATIONS_DAILY_MAX_PER_JOB`, `CV_MODEL_DAILY_BUDGET` | no | tetti giornalieri alle candidature e alle estrazioni di CV con modello (default 500, 200, 1000) |

@@ -267,6 +267,27 @@ describe('Postgres adapters of the privacy ports', () => {
     await applications.update(current.organizationId, current.id, { retentionExpiresAt: current.retentionExpiresAt });
   });
 
+  it('pages the retention scan with a keyset cursor and a limit', async () => {
+    const world = await buildWorld();
+    const applications = createDrizzleApplications(handle.db);
+    const ids = world.applicationIds as readonly string[];
+    for (const id of ids) await applications.update(world.org, id, { retentionExpiresAt: new Date('2020-01-01T00:00:00Z') });
+    const before = new Date('2021-01-01T00:00:00Z');
+    const all = await applications.listRetentionExpiringBefore(world.org, before);
+    expect(all.length).toBe(ids.length);
+    const seen: string[] = [];
+    let after: { retentionExpiresAt: Date; id: string } | undefined;
+    for (;;) {
+      const batch = await applications.listRetentionExpiringBefore(world.org, before, { limit: 1, after });
+      if (batch.length === 0) break;
+      expect(batch).toHaveLength(1);
+      const last = batch[batch.length - 1]!;
+      seen.push(last.id);
+      after = { retentionExpiresAt: last.retentionExpiresAt, id: last.id };
+    }
+    expect(seen).toEqual(all.map((a) => a.id));
+  });
+
   it('stores retention runs and data exports, isolated per organization', async () => {
     const org = await insertOrg();
     const other = await insertOrg();

@@ -35,6 +35,12 @@ export function seedImportWorld(options: ImportSeedOptions = {}): TestImportDeps
   let secrets = 0;
   const mailErrors: unknown[] = [];
   const erasure = createInMemoryErasure({ ...world, importStore });
+  const consentTokens = createInMemoryConsentTokens(importStore);
+  const newSecret = (): string => {
+    secrets += 1;
+    return `consent-secret-${String(secrets).padStart(6, '0')}-abcdefgh`;
+  };
+  const hash = (secret: string): string => createHash('sha256').update(secret).digest('hex');
   return {
     ...world,
     erasure,
@@ -42,14 +48,13 @@ export function seedImportWorld(options: ImportSeedOptions = {}): TestImportDeps
     imports: createInMemoryImportBatches(importStore),
     importItems: createInMemoryImportItems(importStore),
     importAnalyses: createInMemoryImportAnalyses(importStore),
-    consentTokens: createInMemoryConsentTokens(importStore),
-    commit: createInMemoryImportCommit(world.store, importStore, world.jobs),
+    consentTokens,
+    commit: createInMemoryImportCommit(world.store, importStore, world.jobs, world.messagingStore),
     mail: world,
-    newSecret: () => {
-      secrets += 1;
-      return `consent-secret-${String(secrets).padStart(6, '0')}-abcdefgh`;
-    },
-    hash: (secret) => createHash('sha256').update(secret).digest('hex'),
+    newSecret,
+    hash,
+    // The email.send worker puts the consent link in at send time.
+    reconfirmation: { consentTokens, newSecret, hash },
     onMailError: (error) => mailErrors.push(error),
     mailErrors,
     ...options.importOverrides,

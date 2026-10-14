@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { SelectionStage } from '../job/content.js';
+import type { Locale } from '../platform/config.js';
 import { NAME_MAX, personNameSchema } from './person-name.js';
 import { CONSENT_SCOPES, type ConsentRecord, type ConsentStatus } from './privacy.js';
 
@@ -117,6 +118,11 @@ export interface Application {
   readonly responseDueAt: Date | null;
   /** A person answered (message sent, move or decision) after the last stage change. Reset by a move. */
   readonly respondedAt: Date | null;
+  /**
+   * Imported data: when the reconfirmation email actually went out (absent: never, or not imported). Retention never
+   * erases someone who could be asked and was not.
+   */
+  readonly reconfirmationSentAt?: Date | null;
 }
 
 export interface CandidateNote {
@@ -173,3 +179,11 @@ export interface CvExtractionRecord {
   readonly source: 'model' | 'text' | null;
   readonly updatedAt: Date;
 }
+
+const APPLICATIONS_BUSY: Readonly<Record<Locale, string>> = {
+  it: 'Stiamo ricevendo moltissime candidature in questo momento. Riprova domani.',
+  en: 'We are receiving a lot of applications right now. Please try again tomorrow.',
+};
+
+/** Shown to a candidate when a daily intake cap is reached, in the language of the ad they applied to. */
+export const applicationsBusyMessage = (locale: Locale): string => APPLICATIONS_BUSY[locale];

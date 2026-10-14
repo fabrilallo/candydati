@@ -1,17 +1,21 @@
 import { createHash } from 'node:crypto';
-import type { EnqueueOptions, TaskName, TaskQueue } from '@tt/core';
+import type { BindableTaskQueue, EnqueueOptions, SqlExecutor, TaskName, TaskQueue } from '@tt/core';
 
 export interface RetryPolicy {
   readonly retryLimit: number;
   /** Seconds before the first retry; doubles on each one with `retryBackoff`. */
   readonly retryDelay: number;
   readonly retryBackoff: boolean;
+  /** Longest wait between two retries, in seconds. */
+  readonly retryDelayMax?: number;
 }
 
 export interface SendOptions extends RetryPolicy {
   /** A job id derived from the singleton key: pg-boss inserts with `ON CONFLICT DO NOTHING`, so a repeat is dropped. */
   readonly id?: string;
   readonly singletonKey?: string;
+  /** The caller's connection (a transaction): the job row is inserted there and commits or rolls back with it. */
+  readonly db?: SqlExecutor;
 }
 
 /** The only part of pg-boss the api and the worker use to enqueue. The real `PgBoss` satisfies it; tests pass a fake. */
@@ -21,8 +25,8 @@ export interface BossSender {
 }
 
 export const TASK_RETRY: RetryPolicy = { retryLimit: 3, retryDelay: 30, retryBackoff: true };
-/** Webhook receivers can be down for a while: five retries, 30 s then doubling. */
-export const WEBHOOK_RETRY: RetryPolicy = { retryLimit: 5, retryDelay: 30, retryBackoff: true };
+/** Webhook receivers can be down for a day: 14 retries, 30 s then doubling up to 6 h, so at least 24 h in all. */
+export const WEBHOOK_RETRY: RetryPolicy = { retryLimit: 14, retryDelay: 30, retryBackoff: true, retryDelayMax: 6 * 60 * 60 };
 /** A stored file that must go (erasure): eight attempts, 60 s then doubling, so storage can be down for hours. */
 export const FILES_DELETE_RETRY: RetryPolicy = { retryLimit: 8, retryDelay: 60, retryBackoff: true };
 
@@ -43,20 +47,24 @@ const optionsFor = (name: TaskName, options: EnqueueOptions | undefined): SendOp
 };
 
 /**
- * `TaskQueue` over pg-boss, shared by the api and the worker. The queue is created on first use per name (idempotent),
- * so neither depends on the other having started first. A `null` id means pg-boss dropped the job: a failure, unless the
- * task has a singleton key, where it means the same task was already queued (the point of the key).
+ * `TaskQueue` over pg-boss, shared by the api and the worker. The queue is created on first use per name (idempotent,
+ * on pg-boss's own connection), so neither depends on the other having started first. A `null` id means pg-boss dropped
+ * the job: a failure, unless the task has a singleton key, where it means the same task was already queued (the point of
+ * the key). `bindTo(executor)` sends on the caller's transaction instead: the unit of work uses it so a task exists if
+ * and only if the transaction that queued it committed.
  */
-export function createPgBossQueue(boss: BossSender): TaskQueue {
+export function createPgBossQueue(boss: BossSender): BindableTaskQueue {
   const created = new Set<string>();
-  return {
+  const sender = (db: SqlExecutor | undefined): TaskQueue => ({
     async enqueue(name, payload, options) {
       if (!created.has(name)) {
         await boss.createQueue(name);
         created.add(name);
       }
-      const id = await boss.send(name, payload, optionsFor(name, options));
+      const sendOptions = optionsFor(name, options);
+      const id = await boss.send(name, payload, db ? { ...sendOptions, db } : sendOptions);
       if (id === null && options?.singletonKey === undefined) throw new Error(`Task ${name} was not queued.`);
     },
-  };
+  });
+  return { ...sender(undefined), bindTo: (executor) => sender(executor) };
 }

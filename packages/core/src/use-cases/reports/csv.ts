@@ -3,7 +3,7 @@ import type { FunnelStageDto, Rate, ReportsDto } from '@tt/domain';
 /** A cell starting with one of these is read as a formula by spreadsheets: it is prefixed with a quote. */
 const FORMULA_START = /^[=+\-@\t\r]/;
 
-export function csvCell(value: string | number | null): string {
+function csvCell(value: string | number | null): string {
   if (value === null) return '';
   const text = typeof value === 'number' ? String(value) : FORMULA_START.test(value) ? `'${value}` : value;
   return /[",\n\r]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;

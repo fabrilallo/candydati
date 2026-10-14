@@ -1,6 +1,6 @@
-import { and, asc, count, desc, eq, gte, isNotNull, isNull, lte, schema } from '@tt/db';
+import { and, asc, count, desc, eq, gte, isNotNull, isNull, lte, schema, sql } from '@tt/db';
 import { CV_MEDIA_TYPES, type Application, type CvMediaType } from '@tt/domain';
-import type { ApplicationRepository } from '../candidate-ports.js';
+import type { ApplicationRepository, RetentionPage } from '../candidate-ports.js';
 import { ConflictError, NotFoundError } from '../errors.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';
 
@@ -13,7 +13,7 @@ const toMediaType = (value: string): CvMediaType => {
   return found;
 };
 
-export const toApplication = (row: Row): Application => ({
+const toApplication = (row: Row): Application => ({
   id: row.id,
   organizationId: row.organizationId,
   jobId: row.jobId,
@@ -34,6 +34,7 @@ export const toApplication = (row: Row): Application => ({
   closedAt: row.closedAt,
   responseDueAt: row.responseDueAt,
   respondedAt: row.respondedAt,
+  ...(row.reconfirmationSentAt ? { reconfirmationSentAt: row.reconfirmationSentAt } : {}),
 });
 
 const toValues = (a: Application) => ({
@@ -60,6 +61,7 @@ const toValues = (a: Application) => ({
   closedAt: a.closedAt,
   responseDueAt: a.responseDueAt,
   respondedAt: a.respondedAt,
+  reconfirmationSentAt: a.reconfirmationSentAt ?? null,
 });
 
 /** Postgres implementation. Every statement filters by `organization_id`. */
@@ -74,8 +76,14 @@ export function createDrizzleApplications(db: DbExecutor): ApplicationRepository
   const awaitingFilter = (dueBefore: Date) => [isNull(application.outcome), isNull(application.respondedAt), isNotNull(application.responseDueAt), lte(application.responseDueAt, dueBefore)];
   const awaiting = async (where: ReturnType<typeof and>) =>
     (await db.select().from(application).where(where).orderBy(asc(application.responseDueAt), asc(application.id))).map(toApplication);
-  const expiring = async (where: ReturnType<typeof and>) =>
-    (await db.select().from(application).where(where).orderBy(asc(application.retentionExpiresAt), asc(application.id))).map(toApplication);
+  const expiring = async (where: ReturnType<typeof and>, page?: RetentionPage) => {
+    const cursor = page?.after;
+    const after = cursor
+      ? sql`(${application.retentionExpiresAt}, ${application.id}) > (${cursor.retentionExpiresAt.toISOString()}::timestamptz, ${cursor.id})`
+      : undefined;
+    const query = db.select().from(application).where(and(where, after)).orderBy(asc(application.retentionExpiresAt), asc(application.id));
+    return (await (page ? query.limit(page.limit) : query)).map(toApplication);
+  };
   return {
     async create(input) {
       try {
@@ -127,8 +135,8 @@ export function createDrizzleApplications(db: DbExecutor): ApplicationRepository
       list(and(eq(application.organizationId, organizationId), eq(application.candidateId, candidateId))),
     listAwaitingResponse: (organizationId, dueBefore) => awaiting(and(eq(application.organizationId, organizationId), ...awaitingFilter(dueBefore))),
     listAwaitingResponseAcrossOrganizations: (dueBefore) => awaiting(and(...awaitingFilter(dueBefore))),
-    listRetentionExpiringBefore: (organizationId, before) => expiring(and(eq(application.organizationId, organizationId), lte(application.retentionExpiresAt, before))),
-    listRetentionExpiringAcrossOrganizations: (before) => expiring(lte(application.retentionExpiresAt, before)),
+    listRetentionExpiringBefore: (organizationId, before, page) => expiring(and(eq(application.organizationId, organizationId), lte(application.retentionExpiresAt, before)), page),
+    listRetentionExpiringAcrossOrganizations: (before, page) => expiring(lte(application.retentionExpiresAt, before), page),
     listByImportBatch: (organizationId, batchId) => list(and(eq(application.organizationId, organizationId), eq(application.importBatchId, batchId))),
     async countCreatedSince(organizationId, since, jobId) {
       const [row] = await db

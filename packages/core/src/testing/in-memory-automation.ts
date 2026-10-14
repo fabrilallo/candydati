@@ -1,5 +1,4 @@
-import type { AutomationRule, Notification, OutboxEvent, Task, WebhookDelivery, WebhookEndpoint } from '@tt/domain';
-import { ConflictError } from '../errors.js';
+import type { AutomationRule, Notification, Task, WebhookDelivery, WebhookEndpoint } from '@tt/domain';
 import type {
   AutomationExecution,
   AutomationExecutionRepository,
@@ -14,7 +13,6 @@ import type {
   HttpPoster,
   HttpPostRequest,
   HttpPostResult,
-  OutboxRepository,
   WebhookDeliveryRepository,
   WebhookEndpointRepository,
 } from '../webhook-ports.js';
@@ -64,7 +62,7 @@ export function createInMemoryNotifications(initial: readonly Notification[] = [
     async markEmailed(organizationId, ids, _at) {
       const targets = rows.get().filter((n) => n.organizationId === organizationId && ids.includes(n.id) && !emailed.get().has(n.id));
       emailed.set(new Set([...emailed.get(), ...targets.map((n) => n.id)]));
-      return targets.length;
+      return targets.map((n) => n.id);
     },
     snapshot: () => rows.get(),
     purge(doomed) {
@@ -181,34 +179,7 @@ export const createInMemoryMemberDirectory = (membersByOrganization: Readonly<Re
   },
 });
 
-export interface InMemoryOutbox extends OutboxRepository {
-  snapshot(): readonly OutboxEvent[];
-  purge(doomed: (event: OutboxEvent) => boolean): void;
-}
-
-export function createInMemoryOutbox(initial: readonly OutboxEvent[] = []): InMemoryOutbox {
-  const rows = cell<readonly OutboxEvent[]>([...initial]);
-  return {
-    async append(event) {
-      if (rows.get().some((e) => sameKey(e, event))) throw new ConflictError('Event already stored.');
-      rows.set([...rows.get(), event]);
-      return event;
-    },
-    async findById(organizationId, id) {
-      return rows.get().find((e) => e.organizationId === organizationId && e.id === id) ?? null;
-    },
-    async listUnpublished(limit) {
-      return rows.get().filter((e) => e.publishedAt === null).slice(0, limit);
-    },
-    async markPublished(organizationId, id, at) {
-      rows.set(rows.get().map((e) => (e.organizationId === organizationId && e.id === id ? { ...e, publishedAt: at } : e)));
-    },
-    snapshot: () => rows.get(),
-    purge(doomed) {
-      rows.set(rows.get().filter((e) => !doomed(e)));
-    },
-  };
-}
+export { createInMemoryOutbox, type InMemoryOutbox } from './in-memory-outbox.js';
 
 export interface InMemoryWebhookEndpoints extends WebhookEndpointRepository {
   snapshot(): readonly WebhookEndpoint[];
@@ -261,6 +232,12 @@ export function createInMemoryWebhookDeliveries(): InMemoryWebhookDeliveries {
     },
     async listByEndpoint(organizationId, endpointId, limit) {
       return newestFirst(rows.get().filter((d) => d.organizationId === organizationId && d.endpointId === endpointId)).slice(0, limit);
+    },
+    async prune(before) {
+      const kept = rows.get().filter((d) => d.createdAt >= before);
+      const removed = rows.get().length - kept.length;
+      rows.set(kept);
+      return removed;
     },
     snapshot: () => rows.get(),
     purge(doomed) {

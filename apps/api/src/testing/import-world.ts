@@ -2,8 +2,13 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import {
   commitImport,
   createDrizzleUnitOfWork,
+  deliverMessage,
+  type DeliverDeps,
   type ImportCommitDeps,
 } from '@tt/core';
+import { createFakeEmailSender, systemActor } from '@tt/core/testing';
+import { eq, schema } from '@tt/db';
+import { CONSENT_LINK } from '@tt/domain';
 import { newConversationToken, runImportAnalysis, sniffCv, toMessagingConfig } from '@tt/providers';
 import { makePdf } from '@tt/providers/testing';
 import { testEnv, type TestApp } from './test-app.js';
@@ -79,11 +84,38 @@ export function uploadImport(t: TestApp, user: TestUser, jobId: string, files: r
 export const cvPdf = (name: string, email: string | null, role = 'Data Analyst'): Uint8Array =>
   makePdf([name, role, ...(email ? [`Email: ${email}`] : []), 'Esperienza: analisi dati e reportistica']);
 
-/** The first `/consent/<token>` link in the messages of an application. */
-export async function consentTokenOf(user: TestUser, applicationId: string): Promise<string> {
-  const reply = await user.get<{ bodyText: string }[]>(`/api/v1/applications/${applicationId}/messages`);
-  const text = reply.body.data?.map((message) => message.bodyText).join('\n') ?? '';
-  const token = /\/consent\/([\w-]+)/.exec(text)?.[1];
-  if (!token) throw new Error(`no consent link in ${text}`);
+/**
+ * Plays the `email.send` worker for the application's queued reconfirmation request and returns the secret its email
+ * carried: the stored message holds only a placeholder, the link is made at send time.
+ */
+export async function consentTokenOf(t: TestApp, user: TestUser, applicationId: string): Promise<string> {
+  const reply = await user.get<{ id: string; status: string; bodyText: string }[]>(`/api/v1/applications/${applicationId}/messages`);
+  const request = reply.body.data?.find((message) => message.status === 'queued' && message.bodyText.includes(CONSENT_LINK));
+  if (!request) throw new Error('no queued reconfirmation request');
+  const [row] = await t.handle.db.select({ organizationId: schema.message.organizationId }).from(schema.message).where(eq(schema.message.id, request.id));
+  if (!row) throw new Error('message not found');
+  const sender = createFakeEmailSender();
+  const deps = importWorkerDeps(t);
+  const uow = createDrizzleUnitOfWork(t.handle.db);
+  const r = uow.repositories;
+  const deliver: DeliverDeps = {
+    auditLog: r.auditLog,
+    transaction: uow.transaction,
+    organizations: r.organizations,
+    candidates: r.candidates,
+    applications: r.applications,
+    settings: r.settings,
+    conversations: r.conversations,
+    messages: r.messages,
+    promises: r.promises,
+    sender,
+    config: deps.mail.config,
+    newToken: newConversationToken,
+    now: () => new Date(),
+    reconfirmation: { consentTokens: r.consentTokens, newSecret: deps.newSecret, hash: deps.hash },
+  };
+  await deliverMessage(deliver, systemActor({ organizationId: row.organizationId }), { organizationId: row.organizationId, messageId: request.id });
+  const token = /\/consent\/([\w-]+)/.exec(sender.sent().at(-1)?.text ?? '')?.[1];
+  if (!token) throw new Error('no consent link in the email sent');
   return token;
 }

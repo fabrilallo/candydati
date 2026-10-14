@@ -7,6 +7,7 @@ import type { DeliverDeps } from '../../messaging-ports.js';
 import { inTransaction } from '../../transaction.js';
 import { answerPromise } from '../reports/tracking.js';
 import { defineUseCase } from '../../use-case.js';
+import { outgoingFor, recordReconfirmationSent, type Outgoing } from './consent-link.js';
 import { ensureConversation, formatFrom, replyToAddress, senderIdentity } from './shared.js';
 import type { DeliverResult } from './views.js';
 import { sequential } from '../../sequential.js';
@@ -61,7 +62,10 @@ async function recordOutcome(deps: DeliverDeps, actor: Actor, message: Message, 
       target: { type: 'message', id: message.id },
       metadata: { applicationId: message.applicationId, sentBy: message.sentBy ?? SYSTEM_SENDER, ...(done.error ? { error: done.error } : {}) },
     });
-    if (done.status === 'sent' && done.sentAt) await markResponded(tx, message, done.sentAt);
+    if (done.status === 'sent' && done.sentAt) {
+      await markResponded(tx, message, done.sentAt);
+      await recordReconfirmationSent(tx, message, done.sentAt);
+    }
   });
 }
 
@@ -79,7 +83,7 @@ async function claim(deps: DeliverDeps, actor: Actor, message: Message, attempt:
   return null;
 }
 
-async function send(deps: DeliverDeps, message: Message, candidate: Candidate, organization: PublicOrganization): Promise<string> {
+async function send(deps: DeliverDeps, message: Message, candidate: Candidate, organization: PublicOrganization, outgoing: Outgoing): Promise<string> {
   const settings = await deps.settings.find(message.organizationId);
   const conversation = await ensureConversation(deps, message.organizationId, message.applicationId);
   const { providerMessageId } = await deps.sender.send({
@@ -87,10 +91,10 @@ async function send(deps: DeliverDeps, message: Message, candidate: Candidate, o
     replyTo: replyToAddress(deps.config, conversation),
     to: candidate.email,
     subject: message.subject,
-    text: message.bodyText,
-    html: textToHtml(message.bodyText, { literals: [candidate.firstName, candidate.lastName] }),
+    text: outgoing.text,
+    html: textToHtml(outgoing.text, { literals: [candidate.firstName, candidate.lastName] }),
     headers: message.sentBy === SYSTEM_SENDER ? { 'Auto-Submitted': 'auto-generated' } : {},
-    idempotencyKey: message.id,
+    idempotencyKey: outgoing.idempotencyKey,
   });
   return providerMessageId;
 }
@@ -118,9 +122,14 @@ export const deliverMessage = defineUseCase<DeliverDeps, typeof inputSchema, Del
       await recordOutcome(deps, actor, message, { status: 'failed', error: RECIPIENT_MISSING });
       return 'failed';
     }
+    const outgoing = await outgoingFor(deps, message);
+    if ('error' in outgoing) {
+      await recordOutcome(deps, actor, message, { status: 'failed', error: outgoing.error });
+      return 'failed';
+    }
     let providerMessageId: string;
     try {
-      providerMessageId = await send(deps, message, candidate, organization);
+      providerMessageId = await send(deps, message, candidate, organization, outgoing);
     } catch (error) {
       const permanent = isPermanent(error);
       if (!permanent && !input.lastAttempt) {

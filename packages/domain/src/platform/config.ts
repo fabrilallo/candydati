@@ -7,6 +7,17 @@ export const DEFAULT_LOCALE: Locale = 'it';
 /** Codename shown only when PLATFORM_NAME is not set. The product name is never written in code. */
 export const PLATFORM_CODENAME = 'team-tracker';
 
+export const DEFAULT_TIME_ZONE = 'Europe/Rome';
+
+function isTimeZone(value: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en', { timeZone: value });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const platformEnvSchema = z.object({
   PLATFORM_NAME: z.string().trim().min(1).default(PLATFORM_CODENAME),
   PLATFORM_URL: z.url().default('http://localhost:3000'),
@@ -14,6 +25,11 @@ const platformEnvSchema = z.object({
   PLATFORM_DEFAULT_LOCALE: z.enum(SUPPORTED_LOCALES).default(DEFAULT_LOCALE),
   /** 0-10. Below it an ad is flagged before publication, never blocked (PRODUCT.md §4.3). */
   PLATFORM_AD_QUALITY_THRESHOLD: z.coerce.number().min(0).max(10).default(6),
+  /** IANA time zone used for dates in emails (the web app uses `NUXT_PUBLIC_TIME_ZONE` for the screens). */
+  PLATFORM_TIME_ZONE: z
+    .string()
+    .default(DEFAULT_TIME_ZONE)
+    .refine(isTimeZone, { message: 'must be an IANA time zone, e.g. Europe/Rome' }),
 });
 
 export interface PlatformConfig {
@@ -22,6 +38,7 @@ export interface PlatformConfig {
   readonly supportEmail: string | null;
   readonly defaultLocale: Locale;
   readonly adQualityThreshold: number;
+  readonly timeZone: string;
 }
 
 type Env = Readonly<Record<string, string | undefined>>;
@@ -42,6 +59,7 @@ export function loadPlatformConfig(env: Env): PlatformConfig {
     supportEmail: data.PLATFORM_SUPPORT_EMAIL ?? null,
     defaultLocale: data.PLATFORM_DEFAULT_LOCALE,
     adQualityThreshold: data.PLATFORM_AD_QUALITY_THRESHOLD,
+    timeZone: data.PLATFORM_TIME_ZONE,
   };
 }
 

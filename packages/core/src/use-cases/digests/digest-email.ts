@@ -1,9 +1,11 @@
-import type { DigestEntry, EmailSender } from '@tt/core';
 import { textToHtml, type Locale, type NotificationKind } from '@tt/domain';
+import type { EmailSender } from '../../messaging-ports.js';
+import type { DigestEntry } from '../automations/scan-deadlines.js';
 
-export interface DigestSender {
+/** How digests are sent: always from the platform's own identity, never an organization's or a candidate-facing one. */
+export interface DigestMailConfig {
   readonly sender: EmailSender;
-  /** Formatted From of the platform identity, e.g. `"Platform" <noreply@example.com>`. Never a candidate-facing identity. */
+  /** Formatted From of the platform identity, e.g. `"Platform" <noreply@example.com>`. */
   readonly from: string;
   /** Public base URL of the web app. */
   readonly platformUrl: string;
@@ -76,7 +78,7 @@ function summarize(entry: DigestEntry, copy: Copy): readonly string[] {
   return [...counts].map(([line, count]) => (count > 1 ? `- ${line} (${count})` : `- ${line}`));
 }
 
-export function buildDigestEmail(config: DigestSender, entry: DigestEntry): { subject: string; text: string; html: string } {
+export function buildDigestEmail(config: Pick<DigestMailConfig, 'locale' | 'platformUrl'>, entry: DigestEntry): { subject: string; text: string; html: string } {
   const copy = COPY[config.locale];
   const link = `${config.platformUrl.replace(/\/$/, '')}${ATTENTION_PATH}`;
   const text = [copy.greeting(entry.name), copy.intro, summarize(entry, copy).join('\n'), `${copy.open}: ${link}`].join('\n\n');
@@ -95,30 +97,4 @@ export function mergeDigests(...groups: readonly (readonly DigestEntry[])[]): re
     );
   }
   return [...merged.values()];
-}
-
-export interface DigestResult {
-  readonly sent: number;
-  readonly failed: number;
-  /** The entries whose email was accepted: the caller marks their notifications as emailed. */
-  readonly delivered: readonly DigestEntry[];
-}
-
-/**
- * One email per person with what this scan found. A failed send is counted and logged by the caller as a number only:
- * addresses never reach the logs, and one bad mailbox does not stop the others. In-app notifications exist regardless.
- */
-export async function sendDigests(config: DigestSender, entries: readonly DigestEntry[]): Promise<DigestResult> {
-  let failed = 0;
-  const delivered: DigestEntry[] = [];
-  for (const entry of entries) {
-    const { subject, text, html } = buildDigestEmail(config, entry);
-    try {
-      await config.sender.send({ from: config.from, replyTo: config.from, to: entry.email, subject, text, html, headers: { 'Auto-Submitted': 'auto-generated' } });
-      delivered.push(entry);
-    } catch {
-      failed += 1;
-    }
-  }
-  return { sent: delivered.length, failed, delivered };
 }

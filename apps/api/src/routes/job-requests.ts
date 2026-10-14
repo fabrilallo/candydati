@@ -27,8 +27,7 @@ export function registerJobRequestRoutes(app: FastifyInstance, ctx: AppContext):
   app.get('/api/v1/job-requests', async (request) => {
     const query = queryOf(request);
     const page = await listJobRequests(deps, await ctx.resolveActor(request), withoutUndefined({ status: query.status, page: asNumber(query.page), limit: asNumber(query.limit) }));
-    const limit = Number(asNumber(query.limit) ?? 20);
-    return ok(page.items, { total: page.total, page: Number(asNumber(query.page) ?? 1), limit });
+    return ok(page.items, page.meta);
   });
 
   app.post('/api/v1/job-requests', async (request, reply) => reply.status(201).send(ok(await submitJobRequest(deps, await ctx.resolveActor(request), request.body))));

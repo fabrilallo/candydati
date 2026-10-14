@@ -1,36 +1,36 @@
 # syntax=docker/dockerfile:1
-# Una sola Dockerfile con tre target finali: api, worker, web.
+# One Dockerfile with three final targets: api, worker, web.
 #   docker build --target api -t tt-api .
-# Nessun segreto nell'immagine: tutta la configurazione arriva dall'ambiente a runtime.
+# No secret in the image: all configuration comes from the environment at runtime.
 
 ARG NODE_VERSION=24
 
-# ---------- base: Node + pnpm (versione dal campo packageManager) ----------
+# ---------- base: Node + pnpm (version from the packageManager field) ----------
 FROM node:${NODE_VERSION}-bookworm-slim AS base
 ENV PNPM_HOME=/pnpm CI=true
 ENV PATH=$PNPM_HOME:$PATH
 RUN corepack enable
 WORKDIR /repo
 
-# ---------- fetch: scarica i pacchetti dal solo lockfile (layer cacheabile) ----------
+# ---------- fetch: download packages from the lockfile only (cacheable layer) ----------
 FROM base AS fetch
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm fetch
 
-# ---------- build: installa offline, compila tutto ----------
+# ---------- build: install offline, build everything ----------
 FROM fetch AS build
-# Lingua di default del frontend: e' risolta a build time da nuxt.config.ts.
+# Default language of the frontend: resolved at build time by nuxt.config.ts.
 ARG NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE=it
 ENV NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE=$NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE
 COPY . .
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm install --frozen-lockfile --offline
 RUN pnpm exec turbo run build --filter=@tt/api --filter=@tt/worker --filter=@tt/web
-# Solo le dipendenze di produzione di ciascun servizio.
+# Production dependencies of each service only.
 RUN pnpm --filter @tt/api deploy --prod --legacy /out/api \
  && pnpm --filter @tt/worker deploy --prod --legacy /out/worker \
  && rm -rf /out/api/src /out/api/eval /out/worker/src
 
-# ---------- runtime comune ----------
+# ---------- shared runtime ----------
 FROM node:${NODE_VERSION}-bookworm-slim AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
@@ -47,7 +47,7 @@ CMD ["node", "dist/index.js"]
 FROM runtime AS worker
 COPY --from=build --chown=node:node /out/worker /app
 USER node
-# Il worker non apre porte: la salute e' il processo in vita; riavvio con restart: unless-stopped.
+# The worker opens no port: health is the process being alive; it restarts with restart: unless-stopped.
 CMD ["node", "dist/index.js"]
 
 FROM runtime AS web

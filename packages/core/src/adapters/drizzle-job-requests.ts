@@ -58,11 +58,10 @@ export function createDrizzleJobRequests(db: DbExecutor): JobRequestRepository {
       if (!row) throw new Error('job_request insert returned no row');
       return toRequest(row);
     },
-    async save(request) {
+    async transition(from, request) {
       const { id, organizationId, ...values } = toValues(request);
-      const [row] = await db.update(table).set(values).where(own(organizationId, id)).returning();
-      if (!row) throw new Error('job_request not found');
-      return toRequest(row);
+      const [row] = await db.update(table).set(values).where(and(own(organizationId, id), eq(table.status, from))).returning();
+      return row ? toRequest(row) : null;
     },
     async findById(organizationId, id) {
       const [row] = await db.select().from(table).where(own(organizationId, id)).limit(1);

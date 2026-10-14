@@ -22,6 +22,8 @@ const envSchema = z.object({
   CV_MODEL_DAILY_BUDGET: z.coerce.number().int().min(1).default(1000),
   /** Days after which an import that was never committed is purged (proposed people, parsed CVs, uploaded files). */
   IMPORT_STALE_DAYS: z.coerce.number().int().min(1).default(7),
+  /** Days published (or dead) outbox events and webhook delivery rows are kept before the daily job deletes them. */
+  DELIVERY_LOG_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(30),
 }).refine((env) => !(env.NODE_ENV === 'production' && env.WEBHOOKS_ALLOW_PRIVATE), {
   path: ['WEBHOOKS_ALLOW_PRIVATE'],
   message: 'must not be true in production (it turns off the protection against requests to internal addresses)',

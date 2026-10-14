@@ -13,7 +13,7 @@ const inputSchema = z.object({
 });
 
 /** Keys of `overrides` whose value is not `undefined` replace the same key of `base`; nested objects are replaced whole. */
-export const mergeContent = (base: object, overrides: Record<string, unknown>): Record<string, unknown> => ({
+const mergeContent = (base: object, overrides: Record<string, unknown>): Record<string, unknown> => ({
   ...base,
   ...Object.fromEntries(Object.entries(overrides).filter(([, value]) => value !== undefined)),
 });

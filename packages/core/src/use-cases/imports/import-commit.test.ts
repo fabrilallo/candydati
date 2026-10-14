@@ -1,4 +1,4 @@
-import { IMPORT_RECONFIRM_DAYS, isPlaceholderEmail } from '@tt/domain';
+import { CONSENT_LINK, IMPORT_RECONFIRM_DAYS, isPlaceholderEmail } from '@tt/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError } from '../../errors.js';
 import { buildApplication, buildCandidate, createInMemoryTaskQueue, ORG_A } from '../../testing/index.js';
@@ -7,11 +7,10 @@ import { answerConsentRequest } from './consent-request.js';
 import { getImportBatch, setImportItems } from './queries.js';
 import { requestImportCommit } from './request-commit.js';
 import { undoImport } from './undo-import.js';
-import { commit, GIULIA, GIULIA_ROW, importWorld, JOB_2, MARIO, MARIO_ROW, readyBatch, recruiter } from './fixtures.js';
+import { commit, deliverQueued, GIULIA, GIULIA_ROW, importWorld, JOB_2, MARIO, MARIO_ROW, readyBatch, recruiter } from '../../testing/import-fixtures.js';
 
 const DAY = 24 * 3600 * 1000;
 const rejection = (promise: Promise<unknown>) => promise.catch((e: unknown) => e);
-const tokenFromEmail = (body: string): string => /\/consent\/(\S+)/.exec(body)?.[1] ?? '';
 
 describe('commitImport', () => {
   it('creates to_renew candidates and applications with the CV, extraction, note, token and email, then purges the working data', async () => {
@@ -33,12 +32,12 @@ describe('commitImport', () => {
     expect(candidates.find((c) => c.email === 'mario@example.com')).toMatchObject({ phone: '333 111', tags: ['java'] });
     const messages = deps.messagingStore.read().messages.filter((m) => m.applicationId === mario.id);
     expect(messages).toMatchObject([{ status: 'queued', sentBy: 'system', direction: 'outbound' }]);
-    expect(messages[0]?.bodyText).toContain('https://platform.example/consent/');
+    // The link is put in at send time: the stored body holds the placeholder, never a secret.
+    expect(messages[0]?.bodyText).toContain(CONSENT_LINK);
+    expect(messages[0]?.bodyText).not.toContain('/consent/');
     expect(deps.queue.jobs().filter((j) => j.name === 'email.send')).toHaveLength(2);
     expect(deps.importStore.read().tokens).toHaveLength(2);
     expect(deps.importStore.read().tokens.every((t) => t.expiresAt.getTime() === expected.getTime() && t.usedAt === null)).toBe(true);
-    // The raw secret is only in the email: the table holds hashes.
-    expect(JSON.stringify(deps.importStore.read().tokens)).not.toContain(tokenFromEmail(messages[0]?.bodyText ?? ''));
     // Working data is gone: items, analysis and every file of the batch prefix.
     expect(deps.importStore.read().items).toEqual([]);
     expect(deps.importStore.read().analyses).toEqual([]);
@@ -98,29 +97,89 @@ describe('commitImport', () => {
     expect(deps.store.read().candidates.filter((c) => c.importBatchId === batch.id)).toEqual([]);
   });
 
-  it('writes a chunk in ONE transaction: a failure leaves no row and no copied file', async () => {
+  it('isolates a failing item: the others go in, and its stored error is a code, never the error text (#13)', async () => {
     const deps = importWorld();
     const batch = await readyBatch(deps, [MARIO, GIULIA], [MARIO_ROW, GIULIA_ROW]);
     let calls = 0;
-    const failing = { ...deps, newSecret: () => { calls += 1; if (calls === 2) throw new Error('rng down'); return `consent-secret-${calls}-abcdefghijkl`; } };
+    const errors: (string | null)[] = [];
+    const commitRun = deps.commit.run.bind(deps.commit);
+    const spied: typeof deps.commit = {
+      run: (work) =>
+        commitRun((repos) =>
+          work({ ...repos, importItems: { ...repos.importItems, setStatus: async (...args: Parameters<typeof repos.importItems.setStatus>) => (errors.push(args[3]), repos.importItems.setStatus(...args)) } }),
+        ),
+    };
+    const failing = {
+      ...deps,
+      commit: spied,
+      newSecret: () => {
+        calls += 1;
+        if (calls === 1) throw new Error('insert failed for mario@example.com (Mario Rossi)');
+        return `consent-secret-${calls}-abcdefghijkl`;
+      },
+    };
     await requestImportCommit(deps, recruiter, { batchId: batch.id });
     const { commitImport } = await import('./commit-import.js');
     const done = await commitImport(failing, { organizationId: ORG_A, batchId: batch.id });
+    expect(done).toMatchObject({ status: 'done', counts: { imported: 1, failed: 1, emailsQueued: 1 } });
+    expect(deps.store.read().applications.filter((a) => a.importBatchId === batch.id)).toHaveLength(1);
+    expect(deps.importStore.read().tokens).toHaveLength(1);
+    expect(deps.messagingStore.read().messages).toHaveLength(1);
+    expect(errors).toContain('write_failed');
+    expect(JSON.stringify(errors)).not.toMatch(/mario|Rossi/i);
+    expect(deps.files.keys().filter((k) => k.includes('/applications/'))).toHaveLength(1);
+  });
+
+  it('fails a whole chunk with a code when the job closed, leaving no row and no copied file', async () => {
+    const deps = importWorld();
+    const batch = await readyBatch(deps, [MARIO, GIULIA], [MARIO_ROW, GIULIA_ROW]);
+    await requestImportCommit(deps, recruiter, { batchId: batch.id });
+    const closed = { ...deps, commit: { run: () => Promise.reject(new ConflictError('job_closed')) } };
+    const { commitImport } = await import('./commit-import.js');
+    const done = await commitImport(closed, { organizationId: ORG_A, batchId: batch.id });
     expect(done).toMatchObject({ status: 'failed', counts: { imported: 0, failed: 2 } });
-    expect(deps.store.read().candidates.filter((c) => c.importBatchId === batch.id)).toEqual([]);
-    expect(deps.store.read().applications.filter((a) => a.importBatchId === batch.id)).toEqual([]);
-    expect(deps.importStore.read().tokens).toEqual([]);
     expect(deps.files.keys().filter((k) => k.includes('/applications/'))).toEqual([]);
   });
 
-  it('survives an email that cannot be queued and reports it', async () => {
+  it('rethrows a transient database error so the queue retries the task, and the items stay pending (#13)', async () => {
+    const deps = importWorld();
+    const batch = await readyBatch(deps, [MARIO, GIULIA], [MARIO_ROW, GIULIA_ROW]);
+    await requestImportCommit(deps, recruiter, { batchId: batch.id });
+    const deadlock = Object.assign(new Error('deadlock detected'), { code: '40P01' });
+    const flaky = { ...deps, commit: { run: () => Promise.reject(deadlock) } };
+    const { commitImport } = await import('./commit-import.js');
+    await expect(commitImport(flaky, { organizationId: ORG_A, batchId: batch.id })).rejects.toBe(deadlock);
+    expect((await deps.importItems.listAll(ORG_A, batch.id)).every((item) => item.status === 'pending')).toBe(true);
+    expect(deps.files.keys().filter((k) => k.includes('/applications/'))).toEqual([]);
+    const done = await commitImport(deps, { organizationId: ORG_A, batchId: batch.id });
+    expect(done).toMatchObject({ status: 'done', counts: { imported: 2, failed: 0 } });
+  });
+
+  it('retries an item in place after a transient error inside its savepoint', async () => {
     const deps = importWorld();
     const batch = await readyBatch(deps, [MARIO], [MARIO_ROW]);
-    const broken = { ...deps, mail: { ...deps.mail, conversations: { ...deps.mail.conversations, ensure: async () => Promise.reject(new Error('mail down')) } } };
+    await requestImportCommit(deps, recruiter, { batchId: batch.id });
+    let calls = 0;
+    const once = {
+      ...deps,
+      newSecret: () => {
+        calls += 1;
+        if (calls === 1) throw Object.assign(new Error('serialization failure'), { code: '40001' });
+        return `consent-secret-${calls}-abcdefghijkl`;
+      },
+    };
+    const { commitImport } = await import('./commit-import.js');
+    expect(await commitImport(once, { organizationId: ORG_A, batchId: batch.id })).toMatchObject({ status: 'done', counts: { imported: 1, failed: 0 } });
+  });
+
+  it('keeps the reconfirmation as a queued message when its delivery cannot be queued, for the reconciler', async () => {
+    const deps = importWorld();
+    const batch = await readyBatch(deps, [MARIO], [MARIO_ROW]);
     await requestImportCommit(deps, recruiter, { batchId: batch.id });
     const { commitImport } = await import('./commit-import.js');
-    const done = await commitImport(broken, { organizationId: ORG_A, batchId: batch.id });
-    expect(done).toMatchObject({ status: 'done', counts: { imported: 1, emailsQueued: 0 } });
+    const done = await commitImport({ ...deps, queue: createInMemoryTaskQueue(new Error('queue down')) }, { organizationId: ORG_A, batchId: batch.id });
+    expect(done).toMatchObject({ status: 'done', counts: { imported: 1, emailsQueued: 1 } });
+    expect(deps.messagingStore.read().messages).toMatchObject([{ status: 'queued' }]);
     expect(deps.mailErrors).toHaveLength(1);
   });
 
@@ -139,7 +198,7 @@ describe('undoImport', () => {
     const batch = await readyBatch(deps, [MARIO, GIULIA], [MARIO_ROW, GIULIA_ROW]);
     await commit(deps, batch.id);
     const mario = deps.store.read().applications.find((a) => a.cv.fileName.startsWith('Mario'))!;
-    const secret = tokenFromEmail(deps.messagingStore.read().messages.find((m) => m.applicationId === mario.id)!.bodyText);
+    const secret = (await deliverQueued(deps)).get(mario.id)!;
     await answerConsentRequest(deps, { token: secret, scopes: ['selection'] });
     const result = await undoImport(deps, recruiter, { batchId: batch.id });
     expect(result).toMatchObject({ erased: 1, skippedReconfirmed: 1, failed: 0, batch: { status: 'undone', counts: { erased: 1, skippedReconfirmed: 1 } } });

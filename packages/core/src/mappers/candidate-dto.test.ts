@@ -11,7 +11,6 @@ import { pipelineStagesOf } from '@tt/domain';
 import {
   toApplicationCardDto,
   toCandidateDetailDto,
-  toCandidateSummaryDto,
   toCandidateSummaryDtos,
   toNoteDto,
   toPipelineDto,
@@ -94,7 +93,8 @@ describe('candidate DTO mappers', () => {
 
   it('maps summaries', () => {
     const summary = { candidate, applicationCount: 2, lastAppliedAt: new Date('2026-02-01T00:00:00Z') };
-    expect(toCandidateSummaryDto(summary)).toEqual({
+    const one = (item: typeof summary) => toCandidateSummaryDtos({ items: [item], total: 1, page: 1, limit: 25 })[0];
+    expect(one(summary)).toEqual({
       id: 'cand_1',
       firstName: 'Ada',
       lastName: 'Lovelace',
@@ -107,8 +107,7 @@ describe('candidate DTO mappers', () => {
       lastAppliedAt: '2026-02-01T00:00:00.000Z',
       retentionExpiresAt: '2027-01-01T00:00:00.000Z',
     });
-    expect(toCandidateSummaryDto({ ...summary, lastAppliedAt: null }).lastAppliedAt).toBeNull();
-    expect(toCandidateSummaryDtos({ items: [summary], total: 1, page: 1, limit: 25 })).toHaveLength(1);
+    expect(one({ ...summary, lastAppliedAt: null })?.lastAppliedAt).toBeNull();
   });
 
   it('maps a note', () => {

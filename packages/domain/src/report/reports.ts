@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DAY_MS } from '../response/response-state.js';
 import type { Outcome } from '../candidate/application.js';
 import type { StageType } from '../job/taxonomy.js';
 import type { DurationStat, Rate } from './stats.js';
@@ -15,7 +16,7 @@ export const reportQuerySchema = z
     jobId: z.string().min(1).optional(),
   })
   .refine((q) => q.from <= q.to, { message: 'from_after_to', path: ['from'] })
-  .refine((q) => q.to.getTime() - q.from.getTime() <= REPORT_MAX_DAYS * 86_400_000, { message: 'period_too_long', path: ['to'] });
+  .refine((q) => q.to.getTime() - q.from.getTime() <= REPORT_MAX_DAYS * DAY_MS, { message: 'period_too_long', path: ['to'] });
 export type ReportQuery = z.input<typeof reportQuerySchema>;
 
 export type OutcomeCounts = { readonly [O in Outcome]: number };

@@ -135,9 +135,12 @@ export interface FeedbackEmailInput {
   readonly link: string;
   readonly expiresAt: Date;
   readonly reminder: boolean;
+  /** IANA time zone the deadline is printed in (the organization's); UTC when omitted. */
+  readonly timeZone?: string | undefined;
 }
 
-const dateOf = (date: Date): string => date.toISOString().slice(0, 10);
+const dateOf = (date: Date, locale: Locale, timeZone = 'UTC'): string =>
+  new Intl.DateTimeFormat(locale, { dateStyle: 'long', timeZone }).format(date);
 
 /** Plain text subject and body of the request. It goes to the interviewer, who sees the candidate's name anyway. */
 export function buildFeedbackEmail(input: FeedbackEmailInput): { readonly subject: string; readonly text: string } {
@@ -149,7 +152,7 @@ export function buildFeedbackEmail(input: FeedbackEmailInput): { readonly subjec
         `Ciao ${interviewerName},`,
         `${organizationName} ti chiede un breve feedback sul colloquio con ${candidateName} (${jobTitle}, fase: ${stageLabel}).`,
         `Bastano pochi minuti, anche da telefono, senza account: ${link}`,
-        `Il link è personale e vale fino al ${dateOf(expiresAt)}. Il feedback descrive quello che hai visto: non dà un voto al candidato.`,
+        `Il link è personale e vale fino al ${dateOf(expiresAt, input.locale, input.timeZone)}. Il feedback descrive quello che hai visto: non dà un voto al candidato.`,
       ].join('\n\n'),
     };
   }
@@ -159,7 +162,7 @@ export function buildFeedbackEmail(input: FeedbackEmailInput): { readonly subjec
       `Hi ${interviewerName},`,
       `${organizationName} is asking for brief feedback on the interview with ${candidateName} (${jobTitle}, stage: ${stageLabel}).`,
       `It takes a few minutes, from your phone too, with no account: ${link}`,
-      `The link is personal and valid until ${dateOf(expiresAt)}. The feedback describes what you saw: it does not score the candidate.`,
+      `The link is personal and valid until ${dateOf(expiresAt, input.locale, input.timeZone)}. The feedback describes what you saw: it does not score the candidate.`,
     ].join('\n\n'),
   };
 }

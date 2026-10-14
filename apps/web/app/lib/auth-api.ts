@@ -88,6 +88,16 @@ type InviteRole = Parameters<AuthClient['organization']['inviteMember']>[0]['rol
 
 const asIso = (value: string | Date): string => (value instanceof Date ? value.toISOString() : value)
 
+const toFullOrganization = (full: z.infer<typeof fullOrganizationSchema>): FullOrganization => ({
+  id: full.id,
+  name: full.name,
+  slug: full.slug,
+  members: full.members.map((m) => ({ id: m.id, userId: m.userId, role: m.role, name: m.user.name, email: m.user.email })),
+  invitations: full.invitations
+    .filter((invitation) => invitation.status === 'pending')
+    .map((i) => ({ id: i.id, email: i.email, role: i.role ?? null, expiresAt: asIso(i.expiresAt) })),
+})
+
 export const createAuthApi = (client: AuthClient) => {
   const org = client.organization
   return {
@@ -117,16 +127,7 @@ export const createAuthApi = (client: AuthClient) => {
     },
     async getFullOrganization(): Promise<FullOrganization | null> {
       const full = parse(fullOrganizationSchema.nullable(), await settle(() => org.getFullOrganization()))
-      if (!full) return null
-      return {
-        id: full.id,
-        name: full.name,
-        slug: full.slug,
-        members: full.members.map((m) => ({ id: m.id, userId: m.userId, role: m.role, name: m.user.name, email: m.user.email })),
-        invitations: full.invitations
-          .filter((invitation) => invitation.status === 'pending')
-          .map((i) => ({ id: i.id, email: i.email, role: i.role ?? null, expiresAt: asIso(i.expiresAt) })),
-      }
+      return full ? toFullOrganization(full) : null
     },
     async inviteMember(input: { email: string; role: Role }): Promise<void> {
       await settle(() => org.inviteMember({ email: input.email, role: input.role as InviteRole }))

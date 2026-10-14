@@ -1,4 +1,5 @@
-import type { TransactionPort } from '../transaction.js';
+import type { BindableTaskQueue } from '../intake-ports.js';
+import type { TransactionPort, TransactionScope } from '../transaction.js';
 import type { DbExecutor } from './db-executor.js';
 import { createDrizzleApiKeys, createDrizzleMemberRoles } from './drizzle-api-keys.js';
 import { createDrizzleApplicationCounts } from './drizzle-application-counts.js';
@@ -33,6 +34,8 @@ import { createDrizzleReports } from './drizzle-reports.js';
 import { createDrizzleTasks } from './drizzle-tasks.js';
 import { createDrizzleUserDirectory } from './drizzle-user-directory.js';
 import { createDrizzleWebhookDeliveries, createDrizzleWebhookEndpoints } from './drizzle-webhooks.js';
+import { toSqlExecutor } from './sql-executor.js';
+import { createDrizzleStuckWork } from './drizzle-stuck-work.js';
 
 /** Jobs, organizations, approvals, automation and webhooks. */
 const jobRepositories = (db: DbExecutor) => {
@@ -97,6 +100,7 @@ const operationRepositories = (db: DbExecutor) =>
     importAnalyses: createDrizzleImportAnalyses(db),
     consentTokens: createDrizzleConsentTokens(db),
     commit: createDrizzleImportCommit(db),
+    stuck: createDrizzleStuckWork(db),
   }) as const;
 
 /**
@@ -113,11 +117,16 @@ export interface DrizzleUnitOfWork {
   readonly transaction: TransactionPort;
 }
 
+/** A savepoint on the transaction's connection: Drizzle's nested transaction (`SAVEPOINT` / `ROLLBACK TO SAVEPOINT`). */
+const scopeOf = (tx: DbExecutor): TransactionScope => ({ savepoint: (work) => tx.transaction(() => work()) });
+
 /**
  * The unit of work on Postgres: `db.transaction`, with every repository of `repositories` swapped for the same one
  * rebuilt on the transaction. Adapters that open their own transaction (intake, erasure, import chunk) get a savepoint.
+ * With `queue` (pg-boss), the queue is swapped too, for one sending on the transaction's connection: a task is
+ * inserted together with the rows it is about, so it exists if and only if they committed.
  */
-export function createDrizzleUnitOfWork(db: DbExecutor, onEffectError?: (error: unknown) => void): DrizzleUnitOfWork {
+export function createDrizzleUnitOfWork(db: DbExecutor, onEffectError?: (error: unknown) => void, queue?: BindableTaskQueue): DrizzleUnitOfWork {
   const repositories = createDrizzleRepositories(db);
   const names = Object.keys(repositories) as (keyof DrizzleRepositories)[];
   const transaction: TransactionPort = {
@@ -125,7 +134,9 @@ export function createDrizzleUnitOfWork(db: DbExecutor, onEffectError?: (error: 
     run: (work) =>
       db.transaction((tx) => {
         const bound = createDrizzleRepositories(tx);
-        return work(new Map<unknown, unknown>(names.map((name) => [repositories[name], bound[name]])));
+        const swapped = new Map<unknown, unknown>(names.map((name) => [repositories[name], bound[name]]));
+        if (queue) swapped.set(queue, queue.bindTo(toSqlExecutor(tx)));
+        return work(swapped, scopeOf(tx));
       }),
   };
   return { repositories, transaction };

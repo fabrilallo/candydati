@@ -215,15 +215,15 @@ describe('outbox, webhook endpoints and deliveries', () => {
     const later = buildOutboxEvent({ id: randomUUID(), organizationId: b.org, occurredAt: D('2026-01-02T00:00:00Z') });
     expect(await outbox.append(event)).toEqual(event);
     await outbox.append(later);
-    const pending = (await outbox.listUnpublished(1000)).map((e) => e.id);
+    const pending = (await outbox.listUnpublished(1000, new Date())).map((e) => e.id);
     expect(pending.indexOf(event.id)).toBeLessThan(pending.indexOf(later.id));
-    expect(await outbox.listUnpublished(1)).toHaveLength(1);
+    expect(await outbox.listUnpublished(1, new Date())).toHaveLength(1);
     expect(await outbox.findById(a.org, event.id)).toEqual(event);
     expect(await outbox.findById(b.org, event.id)).toBeNull();
     await outbox.markPublished(b.org, event.id, new Date());
-    expect((await outbox.listUnpublished(1000)).map((e) => e.id)).toContain(event.id);
+    expect((await outbox.listUnpublished(1000, new Date())).map((e) => e.id)).toContain(event.id);
     await outbox.markPublished(a.org, event.id, D('2026-02-01T00:00:00Z'));
-    expect((await outbox.listUnpublished(1000)).map((e) => e.id)).not.toContain(event.id);
+    expect((await outbox.listUnpublished(1000, new Date())).map((e) => e.id)).not.toContain(event.id);
     expect((await outbox.findById(a.org, event.id))?.publishedAt).toEqual(D('2026-02-01T00:00:00Z'));
   });
 

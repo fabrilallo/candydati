@@ -25,7 +25,7 @@ const expectUnavailable = (response: { statusCode: number; body: string }) => {
 describe('storage down', () => {
   it('import upload answers 503 storage_unavailable and leaves no batch behind', async () => {
     const w = await createWorld(t);
-    vi.spyOn(t.files, 'put').mockRejectedValue(down());
+    vi.spyOn(t.files, 'putStream').mockRejectedValue(down());
     expectUnavailable(await uploadImport(t, w.owner, w.job.id, [{ fileName: 'cv.zip', bytes: cvPdf('Anna Verdi', 'anna@posta.it') }]));
     vi.restoreAllMocks();
     expect((await w.owner.get<ImportBatchDto[]>('/api/v1/imports')).body.data).toEqual([]);

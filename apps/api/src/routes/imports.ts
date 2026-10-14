@@ -36,13 +36,16 @@ export async function registerImportRoutes(app: FastifyInstance, ctx: AppContext
     const mayImport = async (request: FastifyRequest): Promise<void> => authorize(await ctx.resolveSessionActor(request), 'import:manage');
     scope.post('/api/v1/imports', { bodyLimit: IMPORT_BODY_LIMIT, config: importUploadRouteConfig(ctx), onRequest: mayImport }, async (request, reply) => {
       const actor = await ctx.resolveSessionActor(request);
-      const upload = await readImportParts(request);
+      const upload = await readImportParts(request, { organizationId: actor.organizationId, newId: deps.newId, files: deps.files });
       const batch = await createImportBatch(deps, actor, upload);
       return reply.status(201).send(ok({ id: batch.id, status: batch.status }));
     });
   });
 
-  app.get('/api/v1/imports', async (request) => ok(await toBatchViews(ctx, await listImports(deps, await ctx.resolveSessionActor(request), {}))));
+  app.get('/api/v1/imports', async (request) => {
+    const actor = await ctx.resolveSessionActor(request);
+    return ok(await toBatchViews(ctx, actor.organizationId, await listImports(deps, actor, {})));
+  });
 
   app.get('/api/v1/imports/:id', async (request) => {
     const query = queryOf(request);
@@ -64,10 +67,10 @@ export async function registerImportRoutes(app: FastifyInstance, ctx: AppContext
 
   app.post('/api/v1/imports/:id/commit', async (request, reply) => {
     const batch = await requestImportCommit(deps, await ctx.resolveSessionActor(request), { batchId: paramOf(request, 'id') });
-    return reply.status(202).send(ok((await toBatchViews(ctx, [batch]))[0]));
+    return reply.status(202).send(ok((await toBatchViews(ctx, batch.organizationId, [batch]))[0]));
   });
 
-  const undoView = async (result: Parameters<typeof toUndoImportDto>[0]) => ({ ...toUndoImportDto(result), batch: (await toBatchViews(ctx, [result.batch]))[0] });
+  const undoView = async (result: Parameters<typeof toUndoImportDto>[0]) => ({ ...toUndoImportDto(result), batch: (await toBatchViews(ctx, result.batch.organizationId, [result.batch]))[0] });
 
   app.post('/api/v1/imports/:id/undo', async (request) =>
     ok(await undoView(await undoImport(deps, await ctx.resolveSessionActor(request), { batchId: paramOf(request, 'id') }))),

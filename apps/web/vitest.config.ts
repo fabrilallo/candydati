@@ -31,8 +31,9 @@ export default defineConfig({
     ],
     coverage: {
       provider: 'v8',
-      include: ['app/lib/**', 'app/composables/**', 'server/**'],
-      exclude: ['**/*.test.ts', '**/*.d.ts'],
+      include: ['app/lib/**', 'app/composables/**', 'app/components/**', 'app/pages/**', 'app/layouts/**', 'app/middleware/**', 'app/plugins/**', 'server/**'],
+      // shadcn-vue primitives are generated (components.json) and covered through the components that use them.
+      exclude: ['**/*.test.ts', '**/*.d.ts', 'app/components/ui/**', 'test/**'],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },

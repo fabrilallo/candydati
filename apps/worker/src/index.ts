@@ -1,4 +1,4 @@
-import { createDrizzleUnitOfWork } from '@tt/core';
+import { createDrizzleUnitOfWork, formatDigestFrom } from '@tt/core';
 import { createDb } from '@tt/db';
 import { createEmailProvider, createS3FileStorage, toEmailIdentity } from '@tt/providers';
 import { PgBoss } from 'pg-boss';
@@ -8,7 +8,6 @@ import { createDeliverDeps } from './email/deps.js';
 import { toEmailSender, toMessagingConfig } from '@tt/providers';
 import { createHrWorkerDeps } from './hr/deps.js';
 import { createPhase4WorkerDeps } from './automation/deps.js';
-import { formatDigestFrom } from './deadlines/digest.js';
 import { createPgBossQueue } from '@tt/providers';
 import { createAutomationRunQueue } from './queues/automation-run.js';
 import { createDeadlinesScanQueue } from './queues/deadlines-scan.js';
@@ -26,6 +25,7 @@ import { createImportWorkerDeps } from './import/deps.js';
 import { createImportAnalyzeQueue } from './queues/import-analyze.js';
 import { createImportCommitQueue } from './queues/import-commit.js';
 import { createEmailSendQueue } from './queues/email-send.js';
+import { createReconcileQueue } from './queues/reconcile.js';
 import { QUEUE_DEFINITIONS } from './queues/definitions.js';
 import { startWorker, type WorkerHandle } from './worker.js';
 
@@ -58,8 +58,9 @@ const main = async (): Promise<void> => {
 
   const database = createDb(env.DATABASE_URL);
   // The one composition root: every repository on the pool and the unit of work that rebinds them to a transaction.
-  const uow = createDrizzleUnitOfWork(database.db, (error) => logger.error({ err: error }, 'side effect after commit failed'));
   const queue = createPgBossQueue(boss);
+  // Tasks queued inside a transaction are sent on its connection: they exist if and only if it commits.
+  const uow = createDrizzleUnitOfWork(database.db, (error) => logger.error({ err: error }, 'side effect after commit failed'), queue);
   const files = createS3FileStorage(env.s3);
   await files.ensureBucket();
   const cvDeps = createCvExtractionDeps({
@@ -96,10 +97,13 @@ const main = async (): Promise<void> => {
   });
   const hr = createHrWorkerDeps({ uow, sender, config: messaging, onMailError: (error) => logger.error({ err: error }, 'feedback email not sent') });
   const digest = {
-    sender,
-    from: formatDigestFrom(env.platform.name, `${messaging.emailFromLocal}@${messaging.emailDomain}`),
-    platformUrl: env.platform.url,
-    locale: env.platform.defaultLocale,
+    transaction: uow.transaction,
+    mail: {
+      sender,
+      from: formatDigestFrom(env.platform.name, `${messaging.emailFromLocal}@${messaging.emailDomain}`),
+      platformUrl: env.platform.url,
+      locale: env.platform.defaultLocale,
+    },
   };
   const queues = [
     ...QUEUE_DEFINITIONS,
@@ -119,8 +123,18 @@ const main = async (): Promise<void> => {
     createImportAnalyzeQueue({ deps: imports.analysis, extractor: imports.extractor }),
     createImportCommitQueue(imports.commit),
     createFilesDeleteQueue(files),
+    // Uses the queue outside any transaction: it repairs what a transaction could not queue.
+    createReconcileQueue({ stuck: uow.repositories.stuck, queue }, () => new Date()),
     createOrganizationExportQueue(privacy.organizationExport),
-    createRetentionRunQueue({ retention: privacy.retention, imports: imports.commit, importStaleDays: env.IMPORT_STALE_DAYS, digest, now: () => new Date() }),
+    createRetentionRunQueue({
+      retention: privacy.retention,
+      imports: imports.commit,
+      importStaleDays: env.IMPORT_STALE_DAYS,
+      deliveryLog: { outbox: uow.repositories.outbox, deliveries: uow.repositories.deliveries },
+      deliveryLogRetentionDays: env.DELIVERY_LOG_RETENTION_DAYS,
+      digest,
+      now: () => new Date(),
+    }),
   ];
   const worker = await startWorker({ boss, logger, queues });
   for (const signal of SHUTDOWN_SIGNALS) {

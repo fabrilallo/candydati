@@ -1,3 +1,4 @@
+import type { ConsentTokenRepository } from './import-ports.js';
 import type {
   DomainRecord,
   DomainStatus,
@@ -117,6 +118,8 @@ export interface MessagingConfig {
   readonly emailInboundDomain: string;
   /** Locale of the default templates shown in the settings. */
   readonly defaultLocale: Locale;
+  /** `PLATFORM_TIME_ZONE`: IANA zone dates in emails are printed in. Defaults to UTC when absent. */
+  readonly timeZone?: string;
 }
 
 export interface MessagingDeps extends CoreDeps {
@@ -148,10 +151,22 @@ export interface ReceiptDeps
   readonly onError?: (error: unknown) => void;
 }
 
+/** What the delivery needs to put a fresh consent link into an import reconfirmation request at send time. */
+export interface ReconfirmationDeps {
+  readonly consentTokens: Pick<ConsentTokenRepository, 'rotate'>;
+  /** A new secret from a CSPRNG (24+ chars). */
+  readonly newSecret: () => string;
+  /** sha256 of the secret as hex: what the token table stores. */
+  readonly hash: (secret: string) => string;
+}
+
 export type DeliverDeps = Pick<
   MessagingDeps,
   'auditLog' | 'transaction' | 'organizations' | 'candidates' | 'applications' | 'settings' | 'conversations' | 'messages' | 'promises' | 'sender' | 'config' | 'newToken' | 'now'
->;
+> & {
+  /** Absent: a reconfirmation request is recorded as failed (`consent_link_unavailable`), never sent without its link. */
+  readonly reconfirmation?: ReconfirmationDeps | undefined;
+};
 
 export type InboundDeps = Pick<
   MessagingDeps,

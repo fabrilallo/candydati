@@ -1,4 +1,4 @@
-import { and, count, desc, eq, schema } from '@tt/db';
+import { and, asc, count, desc, eq, gt, schema } from '@tt/db';
 import { adQualityReportSchema, jobContentSchema, type Job } from '@tt/domain';
 import { ConflictError } from '../errors.js';
 import type { JobListQuery, JobRepository } from '../job-ports.js';
@@ -106,6 +106,16 @@ export function createDrizzleJobs(db: DbExecutor): JobRepository {
         () => db.select({ total: count() }).from(job).where(where),
       );
       return { items: rows.map(toJob), total: totals[0]?.total ?? 0 };
+    },
+
+    async listAfter(organizationId, afterId, limit) {
+      const rows = await db
+        .select()
+        .from(job)
+        .where(and(eq(job.organizationId, organizationId), afterId === null ? undefined : gt(job.id, afterId)))
+        .orderBy(asc(job.id))
+        .limit(limit);
+      return rows.map(toJob);
     },
 
     async listPublished(organizationId) {

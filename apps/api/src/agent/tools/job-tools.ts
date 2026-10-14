@@ -1,8 +1,8 @@
 import { createTool } from '@mastra/core/tools';
-import { analyzeJobAd, authorize, ConflictError, getJob, listJobTemplates, listJobs, updateJob, ValidationError, type JobDeps } from '@tt/core';
+import { analyzeJobAd, ConflictError, draftJobContent, getJob, JOB_BRIEF_MAX, listJobTemplates, listJobs, updateJob, ValidationError, type JobDeps } from '@tt/core';
 import { checkPublishable, JOB_STATUSES, jobContentSchema, type Job } from '@tt/domain';
 import { z } from 'zod';
-import { BRIEF_MAX, type JobDrafter } from '../job-drafter.js';
+import type { JobDrafter } from '../job-drafter.js';
 import { readAgentIdentity } from '../request-context.js';
 import { refusal, runTool } from '../tool-result.js';
 
@@ -83,33 +83,22 @@ export const createUpdateJobDraftTool = (deps: JobDeps) =>
       }),
   });
 
-/** The model call can fail (timeout, invalid structured output): the chat goes on with a short code, the cause is logged. */
-async function proposeContent(draft: JobDrafter, input: Parameters<JobDrafter>[0], onError: (error: unknown, tool: string) => void) {
-  try {
-    return { proposal: await draft(input) };
-  } catch (error) {
-    onError(error, 'draft_job_content');
-    return null;
-  }
-}
-
+/** Thin adapter over `draftJobContent` (permission, lookup, model call and validation are core's). A failure is a short refusal. */
 export const createDraftJobContentTool = (deps: JobDeps, draft: JobDrafter, onError: (error: unknown, tool: string) => void = () => undefined) =>
   createTool({
     id: 'draft_job_content',
     description:
       'Writes a job ad proposal (JobContent) from a brief, optionally improving an existing ad (jobId). Nothing is saved: show the proposal and save it with update_job_draft only if the user asks.',
     inputSchema: z.object({
-      brief: z.string().trim().min(1).max(BRIEF_MAX).describe('What the ad must say, in the words of the user'),
+      brief: z.string().trim().min(1).max(JOB_BRIEF_MAX).describe('What the ad must say, in the words of the user'),
       jobId: jobId.optional(),
       language: z.enum(['it', 'en']).default('it'),
     }),
     execute: async (input, context) =>
       runTool(async () => {
         const { actor } = readAgentIdentity(context?.requestContext);
-        authorize(actor, 'job:update');
-        const base = input.jobId ? (await getJob(deps, actor, { jobId: input.jobId })).content : null;
-        const result = await proposeContent(draft, { brief: input.brief, base, language: input.language }, onError);
-        if (!result) return refusal('draft_failed', 'The proposal could not be generated this time; try again or write a shorter brief.');
-        return { proposal: result.proposal, saved: false, publishIssues: checkPublishable(result.proposal) };
+        const result = await draftJobContent({ ...deps, drafter: draft, onDraftError: (error) => onError(error, 'draft_job_content') }, actor, input);
+        if (result.status === 'failed') return refusal('draft_failed', 'The proposal could not be generated this time; try again or write a shorter brief.');
+        return { proposal: result.proposal, saved: false, publishIssues: result.publishIssues };
       }),
   });

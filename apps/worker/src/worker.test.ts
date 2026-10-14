@@ -73,31 +73,32 @@ describe('startWorker', () => {
     expect(handle.mock.calls[1]?.[0]).toMatchObject({ jobId: 'b', payload: { value: 2 } });
   });
 
-  it('fails the job with a clear error and skips the handler when the payload is invalid', async () => {
+  it('logs an invalid payload (field paths only) and completes the job without retrying it or running the handler', async () => {
     const { boss, handlers } = createFakeBoss();
     const handle = vi.fn(async () => undefined);
+    const error = vi.spyOn(silentLogger, 'error');
     await startWorker({ boss, logger: silentLogger, queues: [countingQueue(handle)] });
 
-    const run = handlers.get('test.queue')?.([job('bad-1', { value: 'not-a-number' })]);
+    await expect(handlers.get('test.queue')?.([job('bad-1', { value: 'secret-token-123' })])).resolves.toBeUndefined();
+    await expect(handlers.get('test.queue')?.([job('bad-3', null)])).resolves.toBeUndefined();
 
-    await expect(run).rejects.toThrow(/Invalid payload for queue "test\.queue" \(job bad-1\): value/);
     expect(handle).not.toHaveBeenCalled();
+    expect(error).toHaveBeenCalledWith({ queue: 'test.queue', jobId: 'bad-1', fields: ['value'] }, 'invalid job payload, dropped');
+    expect(JSON.stringify(error.mock.calls)).not.toContain('secret-token-123');
+    error.mockRestore();
   });
 
-  it('does not echo the rejected payload in the error message', async () => {
+  it('logs a failing handler with queue, job id, attempt and a safe error code, then rethrows so pg-boss retries', async () => {
     const { boss, handlers } = createFakeBoss();
-    await startWorker({ boss, logger: silentLogger, queues: [countingQueue()] });
+    const failure = Object.assign(new Error('duplicate key alice@example.org'), { code: '23505' });
+    const error = vi.spyOn(silentLogger, 'error');
+    await startWorker({ boss, logger: silentLogger, queues: [countingQueue(vi.fn(async () => Promise.reject(failure)))] });
 
-    const run = handlers.get('test.queue')?.([job('bad-2', { value: 'secret-token-123' })]);
+    await expect(handlers.get('test.queue')?.([{ ...job('j-9', { value: 1 }), retryCount: 1, retryLimit: 3 }])).rejects.toBe(failure);
 
-    await expect(run).rejects.not.toThrow(/secret-token-123/);
-  });
-
-  it('rejects a payload that is not an object', async () => {
-    const { boss, handlers } = createFakeBoss();
-    await startWorker({ boss, logger: silentLogger, queues: [countingQueue()] });
-
-    await expect(handlers.get('test.queue')?.([job('bad-3', null)])).rejects.toThrow(/Invalid payload/);
+    expect(error).toHaveBeenCalledWith({ queue: 'test.queue', jobId: 'j-9', attempt: 2, lastAttempt: false, error: 'pg_23505' }, 'job failed');
+    expect(JSON.stringify(error.mock.calls)).not.toContain('alice');
+    error.mockRestore();
   });
 
   it('logs ready after registering the queues', async () => {

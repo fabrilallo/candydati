@@ -145,6 +145,16 @@ describe('receiveInboundEmail', () => {
     expect(await rejection(receiveInboundEmail(failing, email()))).toBeInstanceOf(AuditWriteError);
   });
 
+  it('stores the message and its audit event in one transaction: a failed audit leaves nothing, so the retry stores it (#12)', async () => {
+    const deps = world();
+    const failing = { ...deps, auditLog: failingAuditLog(new Error('db')) };
+    expect(await rejection(receiveInboundEmail(failing, email()))).toBeInstanceOf(AuditWriteError);
+    expect(deps.messagingStore.read().messages).toEqual([]);
+    // The provider retries: not a duplicate, and this time it is audited.
+    expect(await receiveInboundEmail(deps, email())).toEqual({ stored: true });
+    expect(deps.auditLog.events().map((e) => e.action)).toEqual(['message.received']);
+  });
+
   it('addressOf handles display names and bare addresses', () => {
     expect(addressOf('Ada <A@B.it>')).toBe('a@b.it');
     expect(addressOf(' a@b.it ')).toBe('a@b.it');

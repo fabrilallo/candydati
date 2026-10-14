@@ -10,3 +10,12 @@ export default withNuxt({
     'vue/require-default-prop': 'off',
   },
 })
+  // Size guardrails, same limits as the root config (CONTRIBUTING). Tests and fixtures are exempt.
+  .append({
+    files: ['**/*.ts', '**/*.vue'],
+    ignores: ['**/*.test.ts', 'test/**'],
+    rules: {
+      'max-lines': ['error', 400],
+      'max-lines-per-function': ['error', { max: 50, skipBlankLines: true, skipComments: true }],
+    },
+  })

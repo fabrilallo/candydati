@@ -9,7 +9,7 @@ export interface StaleJobView {
   readonly daysIdle: number;
 }
 
-export const defineStaleUseCase = <S extends z.ZodType, O>(definition: UseCaseDefinition<StaleJobDeps, S, O>): UseCase<StaleJobDeps, O> =>
+const defineStaleUseCase = <S extends z.ZodType, O>(definition: UseCaseDefinition<StaleJobDeps, S, O>): UseCase<StaleJobDeps, O> =>
   defineUseCase<StaleJobDeps, S, O>(definition);
 
 /**

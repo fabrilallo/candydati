@@ -60,5 +60,6 @@ export function toMessagingConfig(platform: PlatformConfig, email: EmailConfig):
     emailDomain,
     emailInboundDomain: email.inboundDomain ?? `inbound.${emailDomain}`,
     defaultLocale: platform.defaultLocale,
+    timeZone: platform.timeZone,
   };
 }

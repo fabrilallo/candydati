@@ -60,6 +60,8 @@ export interface JobRepository {
   transition(organizationId: string, id: string, from: JobStatus, patch: JobTransition): Promise<Job>;
   /** Newest `updatedAt` first. */
   list(query: JobListQuery): Promise<{ readonly items: readonly Job[]; readonly total: number }>;
+  /** Every status, ordered by `id`, at most `limit` jobs with `id` greater than `afterId` (null: from the start). Keyset. */
+  listAfter(organizationId: string, afterId: string | null, limit: number): Promise<readonly Job[]>;
   /** Published only, newest `publishedAt` first. */
   listPublished(organizationId: string): Promise<readonly Job[]>;
   /** Published only: drafts and closed jobs are never found. */

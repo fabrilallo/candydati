@@ -103,4 +103,12 @@ describe('feedbackRequestStatus and email', () => {
     expect(en.subject).toBe('Reminder: Feedback on Mario Rossi for Backend');
     expect(en.text).toContain('does not score');
   });
+
+  it('prints the deadline in the language and time zone given, not as an ISO UTC date', () => {
+    const late = new Date('2026-06-30T23:30:00Z');
+    const base = { interviewerName: 'Ada', candidateName: 'Mario Rossi', jobTitle: 'Backend', stageLabel: 'Colloquio', organizationName: 'Acme', link: 'https://x.test/f', expiresAt: late, reminder: false };
+    expect(buildFeedbackEmail({ ...base, locale: 'it', timeZone: 'Europe/Rome' }).text).toContain('fino al 1 luglio 2026');
+    expect(buildFeedbackEmail({ ...base, locale: 'en', timeZone: 'America/New_York' }).text).toContain('valid until June 30, 2026');
+    expect(buildFeedbackEmail({ ...base, locale: 'en' }).text).not.toContain('2026-06-30');
+  });
 });

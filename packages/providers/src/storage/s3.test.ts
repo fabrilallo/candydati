@@ -1,9 +1,9 @@
 import { DeleteBucketCommand, S3Client } from '@aws-sdk/client-s3';
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { createConnection } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { loadS3Config, type S3Config } from './config.js';
-import { createS3FileStorage, type S3FileStorage } from './s3.js';
+import { createS3FileStorage, MULTIPART_PART_BYTES, type S3FileStorage } from './s3.js';
 import { FileNotFoundError, InvalidStorageKeyError } from './types.js';
 
 const config: S3Config = loadS3Config({
@@ -66,6 +66,39 @@ describe.skipIf(!up)('createS3FileStorage (MinIO)', () => {
     expect([...(await storage.get(key))]).toEqual([0, 1, 2, 255]);
     await storage.delete(key);
     await expect(storage.get(key)).rejects.toThrow(FileNotFoundError);
+  });
+
+  it('uploads a stream in several parts and reads it back as a stream', async () => {
+    const key = `${prefix}/big.bin`;
+    created.push(key);
+    const part = randomBytes(MULTIPART_PART_BYTES);
+    const tail = randomBytes(1234);
+    const source = (async function* () {
+      yield part.subarray(0, 1000);
+      yield part.subarray(1000);
+      yield tail;
+    })();
+    expect(await storage.putStream(key, source, 'application/octet-stream')).toBe(MULTIPART_PART_BYTES + 1234);
+    const { stream, sizeBytes } = await storage.getStream(key);
+    expect(sizeBytes).toBe(MULTIPART_PART_BYTES + 1234);
+    const chunks: Uint8Array[] = [];
+    for await (const chunk of stream) chunks.push(chunk);
+    expect(Buffer.concat(chunks).equals(Buffer.concat([part, tail]))).toBe(true);
+  });
+
+  it('stores a small stream with a single put, and nothing when the source fails', async () => {
+    const small = `${prefix}/small.bin`;
+    created.push(small);
+    expect(await storage.putStream(small, (async function* () { yield new Uint8Array([7, 8]); })(), 'application/octet-stream')).toBe(2);
+    expect([...(await storage.get(small))]).toEqual([7, 8]);
+    const broken = `${prefix}/broken.bin`;
+    const failing = (async function* () {
+      yield randomBytes(MULTIPART_PART_BYTES);
+      throw new Error('source failed');
+    })();
+    await expect(storage.putStream(broken, failing, 'application/octet-stream')).rejects.toThrow('source failed');
+    await expect(storage.get(broken)).rejects.toThrow(FileNotFoundError);
+    await expect(storage.getStream(`${prefix}/missing`)).rejects.toThrow(FileNotFoundError);
   });
 
   it('rejects invalid keys before any request', async () => {

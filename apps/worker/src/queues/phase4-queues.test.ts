@@ -1,7 +1,7 @@
-import { seedHrWorld, createFakeEmailSender, createFakeHostGuard, createFakeHttpPoster, buildApplication, buildAutomationRule, buildJob, buildEmailTemplate, buildOutboxEvent, buildWebhookEndpoint, seedAutomationWorld, ORG_A } from '@tt/core/testing';
+import { seedHrWorld, createFakeEmailSender, createFakeHostGuard, createFakeHttpPoster, buildApplication, buildAutomationRule, buildJob, buildEmailTemplate, buildOutboxEvent, buildWebhookEndpoint, seedAutomationWorld, ORG_A, createInMemoryTransaction } from '@tt/core/testing';
+import { formatDigestFrom } from '@tt/core';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
-import { formatDigestFrom } from '../deadlines/digest.js';
 import { createAutomationRunQueue } from './automation-run.js';
 import { createDeadlinesScanQueue, DEADLINES_SCAN_CRON } from './deadlines-scan.js';
 import { createWebhookDeliverQueue } from './webhook-deliver.js';
@@ -75,7 +75,7 @@ describe('deadlines.scan', () => {
     const now = new Date('2026-06-01T10:00:00.000Z');
     const deps = seedAutomationWorld({ applications: [buildApplication({ organizationId: ORG_A, responseDueAt: new Date(now.getTime() - 3_600_000) })] });
     const sender = createFakeEmailSender();
-    const queue = createDeadlinesScanQueue({ scan: deps, digest: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' }, now: () => now });
+    const queue = createDeadlinesScanQueue({ scan: deps, digest: { transaction: createInMemoryTransaction(), mail: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' } }, now: () => now });
     expect(queue.schedule).toEqual({ cron: DEADLINES_SCAN_CRON, data: {} });
     expect(DEADLINES_SCAN_CRON).toBe('0 * * * *');
     await queue.handle(job(null));
@@ -92,7 +92,7 @@ describe('deadlines.scan', () => {
     let down = true;
     const sent: unknown[] = [];
     const sender = { send: async (message: unknown) => { if (down) throw new Error('smtp down'); sent.push(message); return { messageId: 'm1' }; } } as unknown as ReturnType<typeof createFakeEmailSender>;
-    const queue = createDeadlinesScanQueue({ scan: deps, digest: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' }, now: () => now });
+    const queue = createDeadlinesScanQueue({ scan: deps, digest: { transaction: createInMemoryTransaction(), mail: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' } }, now: () => now });
     await queue.handle(job(null));
     expect(sent).toHaveLength(0);
     down = false;
@@ -109,7 +109,7 @@ describe('deadlines.scan', () => {
     const ago = (days: number) => new Date(now.getTime() - days * day);
     const hr = seedHrWorld({ jobs: [buildJob({ id: 'stale_1', slug: 'stale-1', organizationId: ORG_A, status: 'published', publishedAt: ago(120), updatedAt: ago(120), createdBy: 'recruiter_1' })], overrides: { now: () => now } });
     const sender = createFakeEmailSender();
-    const queue = createDeadlinesScanQueue({ scan: seedAutomationWorld(), feedback: hr, stale: hr, digest: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' }, now: () => now });
+    const queue = createDeadlinesScanQueue({ scan: seedAutomationWorld(), feedback: hr, stale: hr, digest: { transaction: createInMemoryTransaction(), mail: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' } }, now: () => now });
     await queue.handle(job(null));
     expect(hr.notifications.snapshot().map((n) => n.kind)).toEqual(['job_stale']);
     expect(sender.sent()).toHaveLength(1);

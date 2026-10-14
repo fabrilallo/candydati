@@ -30,7 +30,10 @@ export const auditLog = pgTable(
     metadata: jsonb('metadata').$type<Record<string, unknown>>().notNull().default({}),
     occurredAt: timestamp('occurred_at', { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index('audit_log_org_occurred_at_idx').on(table.organizationId, sql`${table.occurredAt} desc`)],
+  (table) => [
+    index('audit_log_org_occurred_at_idx').on(table.organizationId, sql`${table.occurredAt} desc`),
+    index('audit_log_org_action_occurred_at_idx').on(table.organizationId, table.action, sql`${table.occurredAt} desc`),
+  ],
 );
 
 export type AuditLogRow = typeof auditLog.$inferSelect;

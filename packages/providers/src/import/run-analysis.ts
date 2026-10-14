@@ -2,7 +2,7 @@ import { autoMapColumns, importFileKey, type ImportBatch, type ImportMapping } f
 import { failImportBatch, recordImportAnalysis, startImportAnalysis, type ImportDeps } from '@tt/core';
 import { gatherSources, type FoundCv, type SourceFile } from './gather.js';
 import { ImportError } from './limits.js';
-import { parseCvs, type ParseCvOptions } from './parse-cvs.js';
+import { createCvParser, type ParseCvOptions } from './parse-cvs.js';
 
 export type ImportAnalysisDeps = Pick<ImportDeps, 'imports' | 'importItems' | 'importAnalyses' | 'candidates' | 'files' | 'queue' | 'newId' | 'now'>;
 
@@ -27,10 +27,9 @@ function keyOf(batch: ImportBatch, cv: FoundCv, index: number): string {
   return cv.sourceKey ?? importFileKey(batch.organizationId, batch.id, `cv/${index}-${safeName(cv.fileName)}`);
 }
 
-async function loadSources(deps: ImportAnalysisDeps, batch: ImportBatch): Promise<readonly SourceFile[]> {
-  const sources: SourceFile[] = [];
-  for (const file of batch.sourceFiles) sources.push({ key: file.key, fileName: file.fileName, bytes: await deps.files.get(file.key) });
-  return sources;
+/** One stored original at a time: the next is only read when the previous has been processed. */
+async function* loadSources(deps: ImportAnalysisDeps, batch: ImportBatch): AsyncGenerator<SourceFile> {
+  for (const file of batch.sourceFiles) yield { key: file.key, fileName: file.fileName, bytes: await deps.files.get(file.key) };
 }
 
 /** A failed batch cannot be previewed or committed: the uploaded originals are personal data and go (a failed delete is retried by `files.delete`). */
@@ -46,13 +45,15 @@ const mappingFor = (headers: readonly string[], filesColumn: string | null): Imp
 };
 
 async function analyse(deps: ImportAnalysisDeps, batch: ImportBatch, options: RunImportAnalysisOptions): Promise<void> {
-  const gathered = await gatherSources(await loadSources(deps, batch));
-  if (gathered.cvs.length === 0 && gathered.rows.length === 0) throw new AnalysisRefused('nothing_to_import');
-  const keys = gathered.cvs.map((cv, index) => keyOf(batch, cv, index));
-  for (const [index, cv] of gathered.cvs.entries()) {
-    if (cv.sourceKey === null) await deps.files.put(keys[index] ?? '', cv.bytes, cv.mediaType);
-  }
-  const cvs = await parseCvs(gathered.cvs, keys, options);
+  // Each CV is stored (when it came out of an archive), read and dropped; only `concurrency` of them live at once.
+  const parser = createCvParser(async (cv, index) => {
+    const key = keyOf(batch, cv, index);
+    if (cv.sourceKey === null) await deps.files.put(key, cv.bytes, cv.mediaType);
+    return key;
+  }, options);
+  const gathered = await gatherSources(loadSources(deps, batch), (cv) => parser.submit(cv));
+  const cvs = await parser.finish();
+  if (cvs.length === 0 && gathered.rows.length === 0) throw new AnalysisRefused('nothing_to_import');
   await recordImportAnalysis(deps, {
     organizationId: batch.organizationId,
     batchId: batch.id,

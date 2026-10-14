@@ -26,7 +26,12 @@ import { userActor } from './actors.js';
 import { buildJob } from './job-fixtures.js';
 import { buildPrivacyNotice, fakePdfBytes } from './candidate-fixtures.js';
 import { createInMemoryFileStorage, createInMemoryTaskQueue, fakeCvSniffer } from './in-memory-files.js';
-import { testMessagingConfig } from './in-memory-messaging.js';
+import { createFakeEmailSender, testMessagingConfig } from './in-memory-messaging.js';
+import { createDrizzleEmailSettings } from '../adapters/drizzle-email-settings.js';
+import { createDrizzleResponsePromises } from '../adapters/drizzle-report-history.js';
+import type { DeliverDeps } from '../messaging-ports.js';
+import { deliverMessage } from '../use-cases/messaging/deliver-message.js';
+import { systemActor } from './actors.js';
 
 /** The import world of the Postgres tests: what the worker and the routes would do, driven by hand. */
 
@@ -40,6 +45,10 @@ export interface World {
   readonly queue: ReturnType<typeof createInMemoryTaskQueue>;
   readonly deps: ImportCommitDeps & ImportUndoDeps & ConsentDeps & RetentionDeps;
   readonly now: { current: Date };
+  /** The `email.send` worker's deps, with the fake provider. */
+  readonly deliver: DeliverDeps;
+  /** Consent secrets by application id, as the sent reconfirmation emails carried them. */
+  readonly secrets: Map<string, string>;
 }
 
 /** An organization with two published jobs and a notice, and the import, consent and retention deps on Postgres. */
@@ -82,7 +91,23 @@ export async function buildImportWorld(handle: DbHandle, NOW: Date): Promise<Wor
     hash,
     now: () => now.current,
   } as unknown as World['deps'];
-  return { org, jobId, otherJobId, files, queue, deps, now };
+  const deliver: DeliverDeps = {
+    auditLog: deps.auditLog,
+    transaction: deps.transaction,
+    organizations: deps.organizations,
+    candidates: deps.candidates,
+    applications: deps.applications,
+    settings: createDrizzleEmailSettings(db),
+    conversations: deps.mail.conversations,
+    messages: deps.mail.messages,
+    promises: createDrizzleResponsePromises(db),
+    sender: createFakeEmailSender(),
+    config: testMessagingConfig,
+    newToken: deps.mail.newToken,
+    now: deps.now,
+    reconfirmation: { consentTokens: deps.consentTokens, newSecret: deps.newSecret, hash },
+  };
+  return { org, jobId, otherJobId, files, queue, deps, now, deliver, secrets: new Map() };
 }
 
 export const recruiterOf = (org: string) => userActor({ id: 'user_rec', organizationId: org, role: 'recruiter' });
@@ -113,8 +138,21 @@ export async function readyBatch(world: World, people: readonly Person[], jobId 
   return batch.id;
 }
 
+/** Plays the `email.send` worker for the queued tasks; the consent secrets exist only in the emails it sends. */
+export async function deliverQueued(world: World): Promise<void> {
+  for (const job of world.queue.jobs()) {
+    if (job.name !== 'email.send') continue;
+    const message = await world.deliver.messages.findById(job.payload.organizationId, job.payload.messageId);
+    if (!message || message.status !== 'queued') continue;
+    await deliverMessage(world.deliver, systemActor({ organizationId: world.org }), job.payload);
+    const secret = /\/consent\/(\S+)/.exec((world.deliver.sender as ReturnType<typeof createFakeEmailSender>).sent().at(-1)?.text ?? '')?.[1];
+    if (secret) world.secrets.set(message.applicationId, secret);
+  }
+}
+
 export async function runCommit(world: World, batchId: string): Promise<void> {
   await requestImportCommit(world.deps, recruiterOf(world.org), { batchId });
   await commitImport(world.deps, { organizationId: world.org, batchId });
+  await deliverQueued(world);
 }
 

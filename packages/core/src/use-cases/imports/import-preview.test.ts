@@ -6,7 +6,7 @@ import { recordImportAnalysis, startImportAnalysis, failImportBatch } from './an
 import { createImportBatch } from './create-import-batch.js';
 import { getImportBatch, setImportItems, updateImportMapping } from './queries.js';
 import { requestImportCommit } from './request-commit.js';
-import { GIULIA, GIULIA_ROW, importWorld, JOB_2, MARIO, MARIO_ROW, readyBatch, recruiter, row } from './fixtures.js';
+import { GIULIA, GIULIA_ROW, importWorld, JOB_2, MARIO, MARIO_ROW, readyBatch, recruiter, row } from '../../testing/import-fixtures.js';
 
 const rejection = (promise: Promise<unknown>) => promise.catch((e: unknown) => e);
 

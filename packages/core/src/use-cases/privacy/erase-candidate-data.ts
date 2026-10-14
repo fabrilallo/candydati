@@ -1,5 +1,6 @@
 import type { AuditActor, ErasureReason } from '@tt/domain';
-import type { ErasureDeps } from '../../privacy-ports.js';
+import type { ErasableApplication, ErasureDeps } from '../../privacy-ports.js';
+import { afterCommitOrNow, baseDeps, type TransactionalDeps } from '../../transaction.js';
 import { recordEvent } from '../webhooks/record-event.js';
 
 export interface EraseInput {
@@ -9,6 +10,11 @@ export interface EraseInput {
   readonly applicationIds?: readonly string[] | undefined;
   readonly reason: ErasureReason;
   readonly actor: AuditActor;
+  /**
+   * Re-checked on the locked rows inside the erasure transaction: only the applications that still pass it go. The
+   * retention job passes "still expired, consent unchanged": someone who reconfirmed meanwhile is kept.
+   */
+  readonly onlyIf?: ((application: ErasableApplication) => boolean) | undefined;
 }
 
 export interface EraseResult {
@@ -53,20 +59,45 @@ export class FileCleanupError extends Error {
   }
 }
 
+/** What the erasure transaction decided and deleted. */
+interface Erased {
+  readonly result: EraseResult;
+  readonly keys: readonly string[];
+}
+
+/**
+ * After the commit (or right away outside a transaction): delete the files, queue a retry for those that fail. Inside a
+ * caller's transaction, the queue used is the one outside it (the transaction is over by then), and keys that could be
+ * neither deleted nor queued go to the transaction's error sink as `FileCleanupError`: the erasure itself stands.
+ */
+async function deleteFilesAfterCommit(deps: ErasureDeps & Partial<TransactionalDeps>, organizationId: string, erased: Erased): Promise<void> {
+  const inTransaction = deps.afterCommit !== undefined;
+  const base = baseDeps(deps);
+  let lost: readonly string[] = [];
+  await afterCommitOrNow(deps, async () => {
+    lost = await deleteFilesAfterErasure(base, organizationId, erased.keys);
+    if (inTransaction && lost.length > 0) deps.transaction?.onEffectError?.(new FileCleanupError(lost, erased.result));
+  });
+  if (!inTransaction && lost.length > 0) throw new FileCleanupError(lost, erased.result);
+}
+
 /**
  * THE erasure (PRODUCT.md §6), used by the recruiter's request, the consent withdrawal and the retention job: nothing else
- * deletes candidate data. In one transaction it removes the applications and everything hanging from them, the
- * candidate when no application is left, and writes the audit event `candidate.erased` (ids and counts only) and the
- * webhook event of the same name. After the commit it deletes the CV files; the ones that fail are retried by the worker.
+ * deletes candidate data. In one transaction it locks the candidate and their applications, picks again the ones to
+ * erase from what is locked (`applicationIds`, `onlyIf`), removes them and everything hanging from them, the candidate
+ * when no application is left, and writes the audit event `candidate.erased` (ids and counts only) and the webhook
+ * event of the same name. Nothing left to erase: nothing is written. The CV files are deleted only once the erasure is
+ * committed, the caller's transaction included: a rollback never leaves rows without their files.
  */
-export async function eraseCandidateData(deps: ErasureDeps, input: EraseInput): Promise<EraseResult> {
+export async function eraseCandidateData(deps: ErasureDeps & Partial<TransactionalDeps>, input: EraseInput): Promise<EraseResult> {
   const { organizationId, candidateId } = input;
-  const all = await deps.applications.listByCandidate(organizationId, candidateId);
   const wanted = input.applicationIds === undefined ? undefined : new Set(input.applicationIds);
-  const selected = all.filter((application) => wanted === undefined || wanted.has(application.id));
-  const candidateErased = selected.length === all.length;
-  const keys = await deps.erasure.run(async ({ store, auditLog, outbox }) => {
-    const cvKeys = await store.deleteApplications(
+  const erased = await deps.erasure.run(async ({ store, auditLog, outbox }): Promise<Erased> => {
+    const all = await store.lockCandidateApplications(organizationId, candidateId);
+    const selected = all.filter((application) => (wanted === undefined || wanted.has(application.id)) && (input.onlyIf?.(application) ?? true));
+    const candidateErased = selected.length === all.length;
+    if (selected.length === 0 && !candidateErased) return { result: { applicationCount: 0, candidateErased: false }, keys: [] };
+    const keys = await store.deleteApplications(
       organizationId,
       selected.map((application) => application.id),
     );
@@ -83,10 +114,8 @@ export async function eraseCandidateData(deps: ErasureDeps, input: EraseInput): 
       applicationCount: selected.length,
       candidateErased,
     });
-    return cvKeys;
+    return { result: { applicationCount: selected.length, candidateErased }, keys };
   });
-  const lost = await deleteFilesAfterErasure(deps, organizationId, keys);
-  const result = { applicationCount: selected.length, candidateErased };
-  if (lost.length > 0) throw new FileCleanupError(lost, result);
-  return result;
+  await deleteFilesAfterCommit(deps, organizationId, erased);
+  return erased.result;
 }

@@ -1,10 +1,10 @@
+import { DAY_MS } from '@tt/domain';
 import { z } from 'zod';
 import { ConflictError } from '../../errors.js';
 import type { ImportDeps } from '../../import-ports.js';
 import { defineSystemJob } from '../../use-case.js';
 import { purgeBatchData } from './shared.js';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 /** Default age after which an import that was never committed is purged. */
 export const IMPORT_STALE_DAYS = 7;
 

@@ -32,8 +32,11 @@ export interface NotificationRepository {
    * organizations. The digest is built from these, so a crash after the insert loses nothing.
    */
   listUnemailed(kinds: readonly NotificationKind[], since: Date): Promise<readonly Notification[]>;
-  /** Marks notifications of one organization as emailed. Returns how many changed. */
-  markEmailed(organizationId: string, ids: readonly string[], at: Date): Promise<number>;
+  /**
+   * Marks notifications of one organization as emailed, only those not marked yet. Returns their ids: inside a
+   * transaction this is the claim of a digest, so two runs never email the same notification.
+   */
+  markEmailed(organizationId: string, ids: readonly string[], at: Date): Promise<readonly string[]>;
 }
 
 export interface TaskListQuery {

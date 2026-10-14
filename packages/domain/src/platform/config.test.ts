@@ -9,6 +9,7 @@ describe('loadPlatformConfig', () => {
       supportEmail: null,
       defaultLocale: 'it',
       adQualityThreshold: 6,
+      timeZone: 'Europe/Rome',
     });
   });
 
@@ -36,6 +37,7 @@ describe('loadPlatformConfig', () => {
       supportEmail: 'help@example.com',
       defaultLocale: 'en',
       adQualityThreshold: 6,
+      timeZone: 'Europe/Rome',
     });
   });
 
@@ -55,5 +57,10 @@ describe('isLocale', () => {
     expect(isLocale('en')).toBe(true);
     expect(isLocale('fr')).toBe(false);
     expect(isLocale(undefined)).toBe(false);
+  });
+
+  it('accepts an IANA time zone and rejects anything else', () => {
+    expect(loadPlatformConfig({ PLATFORM_TIME_ZONE: 'America/New_York' }).timeZone).toBe('America/New_York');
+    expect(() => loadPlatformConfig({ PLATFORM_TIME_ZONE: 'Mars/Olympus' })).toThrow(/IANA/);
   });
 });

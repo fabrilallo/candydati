@@ -170,6 +170,16 @@ const audits = (target: string, action: string) => count(`select count(*)::int a
 const outboxEvents = (key: string, value: string, type: string) => count(`select count(*)::int as n from outbox_event where data ->> $1 = $2 and type = $3`, [key, value, type]);
 const decisionEvents = (applicationId: string) => count(`select count(*)::int as n from application_stage_event where application_id = $1 and to_stage_id is null`, [applicationId]);
 
+/** Resolves once some backend of this database waits on a heavyweight lock (a row lock held by another transaction). */
+async function untilBlockedOnLock(timeoutMs = 10_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  const blocked = `select count(*)::int as n from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock'`;
+  while ((await count(blocked, [])) === 0) {
+    if (Date.now() > deadline) throw new Error('no transaction ever waited on a lock');
+    await new Promise((resolve) => setImmediate(resolve));
+  }
+}
+
 const settle = (promises: readonly Promise<unknown>[]) => Promise.allSettled(promises);
 const rejected = (results: readonly PromiseSettledResult<unknown>[]) => results.filter((r): r is PromiseRejectedResult => r.status === 'rejected').map((r) => r.reason as unknown);
 
@@ -343,7 +353,8 @@ describe('jobs on Postgres', () => {
     const application = apply(world, submitDeps({ intake }));
     await holding;
     const close = closeJob(jobDeps(), recruiter(world.org), { jobId: world.jobId });
-    await new Promise((resolve) => setTimeout(resolve, 150));
+    // Postgres itself says the close is waiting on the intake's lock: no guess about how long that takes.
+    await untilBlockedOnLock();
     release();
     await expect(application).resolves.toEqual({ received: true });
     const error = await close.catch((e: unknown) => e);

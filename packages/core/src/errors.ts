@@ -82,3 +82,24 @@ export class StorageUnavailableError extends CoreError {
 }
 
 export const isCoreError = (value: unknown): value is CoreError => value instanceof CoreError;
+
+/**
+ * SQLSTATE classes and codes that mean "try again": serialization failure (40001), deadlock (40P01), lock not available
+ * (55P03), insufficient resources (class 53), connection exceptions (class 08), operator intervention (class 57). The
+ * code is read from the error or its `cause` (Drizzle wraps the driver's error).
+ */
+const TRANSIENT_CODES = new Set(['40001', '40P01', '55P03']);
+const TRANSIENT_CLASSES = new Set(['08', '53', '57']);
+/** The connection itself dropped or timed out (Node's codes). */
+const NETWORK_CODES = new Set(['ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'EPIPE']);
+
+const isTransientCode = (code: string): boolean =>
+  NETWORK_CODES.has(code) || (/^[0-9A-Z]{5}$/.test(code) && (TRANSIENT_CODES.has(code) || TRANSIENT_CLASSES.has(code.slice(0, 2))));
+
+/** True for a storage error worth retrying as it is (see the codes above); false for everything else. */
+export const isTransientError = (error: unknown, depth = 0): boolean => {
+  const code = (error as { code?: unknown } | null)?.code;
+  if (typeof code === 'string' && isTransientCode(code)) return true;
+  const cause = (error as { cause?: unknown } | null)?.cause;
+  return depth < 3 && cause !== undefined && cause !== error && isTransientError(cause, depth + 1);
+};

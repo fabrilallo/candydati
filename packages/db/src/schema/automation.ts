@@ -56,6 +56,10 @@ export const notification = pgTable(
   (table) => [
     uniqueIndex('notification_org_user_dedupe_uidx').on(table.organizationId, table.userId, table.dedupeKey),
     index('notification_org_user_created_idx').on(table.organizationId, table.userId, sql`${table.createdAt} desc`),
+    // Backs the email digest scan: only what is still to send.
+    index('notification_unemailed_idx').on(table.createdAt).where(sql`${table.emailedAt} is null`),
+    // Backs the unread badge and mark-all-read.
+    index('notification_unread_idx').on(table.organizationId, table.userId).where(sql`${table.readAt} is null`),
   ],
 );
 
@@ -133,10 +137,21 @@ export const outboxEvent = pgTable(
     data: jsonb('data').$type<Record<string, string | number | boolean | null>>().notNull(),
     occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull(),
     publishedAt: timestamp('published_at', { withTimezone: true }),
+    /** Failed fan-outs so far; the event is parked (`dead_at`) after the last allowed one. */
+    attempts: integer('attempts').notNull().default(0),
+    /** A short code of the last failure, never personal data. */
+    lastError: text('last_error'),
+    /** Backoff: the publisher skips the event until then. Null: due now. */
+    nextAttemptAt: timestamp('next_attempt_at', { withTimezone: true }),
+    /** Dead letter: set when the event ran out of attempts; the publisher never takes it again. */
+    deadAt: timestamp('dead_at', { withTimezone: true }),
   },
   (table) => [
     index('outbox_event_unpublished_idx').on(table.occurredAt).where(sql`${table.publishedAt} is null`),
     index('outbox_event_org_idx').on(table.organizationId),
+    // Erasure looks events up by the ids they mention.
+    index('outbox_event_org_candidate_idx').on(table.organizationId, sql`(${table.data} ->> 'candidateId')`),
+    index('outbox_event_org_application_idx').on(table.organizationId, sql`(${table.data} ->> 'applicationId')`),
   ],
 );
 
@@ -158,7 +173,13 @@ export const webhookDelivery = pgTable(
     error: text('error'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index('webhook_delivery_endpoint_created_idx').on(table.organizationId, table.endpointId, sql`${table.createdAt} desc`)],
+  (table) => [
+    index('webhook_delivery_endpoint_created_idx').on(table.organizationId, table.endpointId, sql`${table.createdAt} desc`),
+    // One successful delivery per (endpoint, event): backs `hasSucceeded` and makes a double success impossible.
+    uniqueIndex('webhook_delivery_success_uidx')
+      .on(table.endpointId, table.eventId)
+      .where(sql`${table.status} = 'success'`),
+  ],
 );
 
 export type TaskRow = typeof task.$inferSelect;

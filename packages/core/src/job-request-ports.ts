@@ -13,8 +13,11 @@ export interface JobRequestListQuery {
 
 export interface JobRequestRepository {
   create(request: JobRequest): Promise<JobRequest>;
-  /** Full replace by (organizationId, id). */
-  save(request: JobRequest): Promise<JobRequest>;
+  /**
+   * Full replace by (organizationId, id), only while the stored status is still `from` (a compare-and-set: Postgres
+   * re-checks it after waiting on the row lock). Null when another decision got there first: the caller answers with a conflict.
+   */
+  transition(from: JobRequestStatus, next: JobRequest): Promise<JobRequest | null>;
   findById(organizationId: string, id: string): Promise<JobRequest | null>;
   /** Newest first. */
   list(query: JobRequestListQuery): Promise<{ readonly items: readonly JobRequest[]; readonly total: number }>;

@@ -13,7 +13,7 @@ export interface ErasureOutcome {
 }
 
 /** The recruiter types the candidate's full name before anything is deleted. */
-export function assertConfirmed(candidate: Pick<Candidate, 'firstName' | 'lastName'>, confirmName: string): void {
+function assertConfirmed(candidate: Pick<Candidate, 'firstName' | 'lastName'>, confirmName: string): void {
   if (normalizeName(confirmName) !== normalizeName(`${candidate.firstName} ${candidate.lastName}`)) {
     throw new ValidationError([{ path: 'confirmName', message: 'confirmation_mismatch' }]);
   }

@@ -1,40 +1,22 @@
-import { markDigestsEmailed, scanDeadlines, scanFeedbackReminders, scanStaleJobs, type FeedbackStageEntryDeps, type ScanDeps, type StaleScanDeps } from '@tt/core';
+import { runDeadlineScan, type DeadlineScanJobDeps } from '@tt/core';
 import { z } from 'zod';
-import { mergeDigests, sendDigests, type DigestSender } from '../deadlines/digest.js';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 
 export const DEADLINES_SCAN_QUEUE = 'deadlines.scan';
 export const DEADLINES_SCAN_CRON = '0 * * * *';
 
-export interface DeadlineScanDeps {
-  readonly scan: ScanDeps;
-  /** Reminders for interview feedback still empty after 2 and 5 days. */
-  readonly feedback?: FeedbackStageEntryDeps;
-  /** Published ads idle for 90 days. */
-  readonly stale?: StaleScanDeps;
-  readonly digest: DigestSender;
+export interface DeadlineScanDeps extends DeadlineScanJobDeps {
   readonly now: () => Date;
 }
 
-/**
- * Hourly: notifies about applications due soon or overdue and tasks due, reminds interviewers who have not left
- * feedback, flags ads idle for 90 days (never closing them), then emails each person one digest.
- */
-export const createDeadlinesScanQueue = ({ scan, feedback, stale, digest, now }: DeadlineScanDeps): QueueDefinition<z.ZodType> =>
+/** Hourly: the deadline, feedback and stale-ad scans and the digest emails (`runDeadlineScan`). Logs counts only. */
+export const createDeadlinesScanQueue = ({ now, ...deps }: DeadlineScanDeps): QueueDefinition<z.ZodType> =>
   defineQueue({
     name: DEADLINES_SCAN_QUEUE,
     payload: z.unknown(),
     schedule: { cron: DEADLINES_SCAN_CRON, data: {} },
     handle: async ({ jobId, logger }) => {
-      const at = now();
-      const deadlines = await scanDeadlines(scan, { now: at });
-      const reminders = feedback ? await scanFeedbackReminders(feedback, { now: at }) : { reminded: 0, failed: 0 };
-      const staleResult = stale ? await scanStaleJobs(stale, { now: at }) : { digests: [] };
-      const digests = mergeDigests(deadlines.digests, staleResult.digests);
-      const { delivered, ...result } = await sendDigests(digest, digests);
-      // Only what was emailed is marked: a failed send stays unsent and goes out with the next scan.
-      await markDigestsEmailed(scan.notifications, delivered, at);
-      if (stale && stale.notifications !== scan.notifications) await markDigestsEmailed(stale.notifications, delivered, at);
-      logger.info({ jobId, digests: digests.length, missedPromises: deadlines.missedPromises, feedbackReminded: reminders.reminded, feedbackFailed: reminders.failed, ...result }, 'deadline scan finished');
+      const result = await runDeadlineScan(deps, now());
+      logger.info({ jobId, ...result }, 'deadline scan finished');
     },
   });

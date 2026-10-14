@@ -113,6 +113,34 @@
       "when": 1791935755301,
       "tag": "0015_notification_emailed_at",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791937279377,
+      "tag": "0016_search_extensions",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791937283880,
+      "tag": "0017_candidate_last_applied",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791937297656,
+      "tag": "0018_concurrent_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791937606206,
+      "tag": "0019_outbox_retries_reconfirmation",
+      "breakpoints": true
     }
   ]
 }

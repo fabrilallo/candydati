@@ -1,4 +1,4 @@
-import { CV_MAX_BYTES } from '@tt/domain';
+import { applicationsBusyMessage, CV_MAX_BYTES } from '@tt/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError, NotFoundError, RateLimitedError, ValidationError } from '../../errors.js';
 import {
@@ -16,7 +16,7 @@ import {
   validApplicationForm,
   ORG_A,
 } from '../../testing/index.js';
-import { APPLICATIONS_BUSY_MESSAGE, submitApplication, type ApplicationSubmission } from './submit-application.js';
+import { submitApplication, type ApplicationSubmission } from './submit-application.js';
 
 const submission = (overrides: Partial<ApplicationSubmission> = {}): ApplicationSubmission => ({
   organizationSlug: 'acme',
@@ -120,7 +120,7 @@ describe('submitApplication: daily caps', () => {
     await apply(deps, 'b@example.com');
     const error = await rejection(apply(deps, 'c@example.com'));
     expect(error).toBeInstanceOf(RateLimitedError);
-    expect((error as RateLimitedError).message).toBe(APPLICATIONS_BUSY_MESSAGE);
+    expect((error as RateLimitedError).message).toBe(applicationsBusyMessage('it'));
     expect(deps.store.read().applications).toHaveLength(2);
   });
 

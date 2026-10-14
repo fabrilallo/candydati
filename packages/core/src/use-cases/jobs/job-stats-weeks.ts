@@ -1,12 +1,12 @@
+import { DAY_MS } from '@tt/domain';
 import type { JobStatsDto } from '@tt/domain';
 import type { WeeklyActivity, WeeklyCount } from '../../job-ports.js';
 import { groupBy } from './group-by.js';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * DAY_MS;
 
 /** Midnight UTC of the Monday that opens the week of `date`. */
-export function mondayOf(date: Date): Date {
+function mondayOf(date: Date): Date {
   const midnight = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
   const daysSinceMonday = (new Date(midnight).getUTCDay() + 6) % 7;
   return new Date(midnight - daysSinceMonday * DAY_MS);

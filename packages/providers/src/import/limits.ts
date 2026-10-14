@@ -1,5 +1,14 @@
+/**
+ * Limits are per BATCH, shared by every uploaded file of it (an upload is at most `IMPORT_LIMITS.maxBytes`, 200 MB):
+ * entries and expanded bytes of all archives together count against `IMPORT_MAX_ENTRIES` and `IMPORT_MAX_TOTAL_BYTES`.
+ * Memory does not grow with them: the worker holds one source file, the CSV/XLSX tables (at most
+ * `IMPORT_MAX_TABLE_BYTES` each) and the few CVs being read (`DEFAULT_ANALYSIS_CONCURRENCY`); every CV goes to storage
+ * and is dropped as soon as it has been read.
+ */
 export const IMPORT_MAX_ENTRIES = 1000;
 export const IMPORT_MAX_TOTAL_BYTES = 500 * 1024 * 1024;
+/** A sheet is parsed in memory, so it is capped much lower than the batch. */
+export const IMPORT_MAX_TABLE_BYTES = 25 * 1024 * 1024;
 export const IMPORT_MAX_RATIO = 100;
 /** Ratio is checked only above this size: tiny files legitimately compress very well. */
 export const IMPORT_RATIO_MIN_BYTES = 64 * 1024;

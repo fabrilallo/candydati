@@ -8,6 +8,19 @@ import { fetchPublicJob } from '@/lib/job-api'
 
 const CV_ERRORS = { empty: 'apply.cv.errors.empty', too_large: 'apply.cv.errors.tooLarge', unsupported: 'apply.cv.errors.unsupported' } as const
 
+const currentOrigin = () => applicationOrigin({ search: window.location.search, referrer: document.referrer, host: window.location.host })
+
+const fetchNotice = async (request: ReturnType<typeof useJobsApi>, target: { readonly org: string; readonly job: string }): Promise<PublicPrivacyNoticeDto | null> => {
+  try {
+    return (await fetchPublicJob(request, target.org, target.job)).privacyNotice ?? null
+  } catch (error) {
+    console.error('[apply] could not reload the privacy notice', error instanceof Error ? error.message : error)
+    return null
+  }
+}
+
+const withoutError = (errors: ApplyErrors, field: string): ApplyErrors => Object.fromEntries(Object.entries(errors).filter(([name]) => name !== field))
+
 /**
  * State of the public application form: values, CV, per-field errors (translation keys in the ad's language), the
  * submission and its outcome. If the notice changed meanwhile, the new one is loaded and consent is asked again.
@@ -25,21 +38,17 @@ export const useApplyForm = (target: { readonly org: string; readonly job: strin
 
   const setField = <K extends keyof ApplyValues>(key: K, value: ApplyValues[K]): void => {
     values.value = { ...values.value, [key]: value }
-    errors.value = Object.fromEntries(Object.entries(errors.value).filter(([field]) => field !== key))
+    errors.value = withoutError(errors.value, key)
   }
   const setFile = (next: File | null): void => {
     const check = next ? checkCvFile(next) : null
     file.value = check && !check.ok ? null : next
-    errors.value = { ...Object.fromEntries(Object.entries(errors.value).filter(([field]) => field !== 'cv')), ...(check && !check.ok ? { cv: CV_ERRORS[check.reason] } : {}) }
+    errors.value = { ...withoutError(errors.value, 'cv'), ...(check && !check.ok ? { cv: CV_ERRORS[check.reason] } : {}) }
   }
 
   const reloadNotice = async (): Promise<void> => {
-    try {
-      const page = await fetchPublicJob(request, target.org, target.job)
-      if (page.privacyNotice) notice.value = page.privacyNotice
-    } catch (error) {
-      console.error('[apply] could not reload the privacy notice', error instanceof Error ? error.message : error)
-    }
+    const fresh = await fetchNotice(request, target)
+    if (fresh) notice.value = fresh
     values.value = { ...values.value, selection: false, talentPool: false }
     noticeChanged.value = true
   }
@@ -55,8 +64,7 @@ export const useApplyForm = (target: { readonly org: string; readonly job: strin
     }
     pending.value = true
     try {
-      const origin = applicationOrigin({ search: window.location.search, referrer: document.referrer, host: window.location.host })
-      await submitApplication(request, target.org, target.job, result.form, file.value, origin)
+      await submitApplication(request, target.org, target.job, result.form, file.value, currentOrigin())
       done.value = true
       return null
     } catch (error) {

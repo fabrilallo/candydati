@@ -11,11 +11,12 @@ import { bodyOf, paramOf } from './request.js';
  */
 export function registerApiKeyRoutes(app: FastifyInstance, ctx: AppContext): void {
   const deps = ctx.apiKeyDeps;
-  const dtoOf = async (key: Parameters<typeof toApiKeyDto>[0]) => toApiKeyDto(key, await ctx.userNames([key.createdBy]));
+  const dtoOf = async (key: Parameters<typeof toApiKeyDto>[0]) => toApiKeyDto(key, await ctx.userNames(key.organizationId, [key.createdBy]));
 
   app.get('/api/v1/api-keys', async (request) => {
-    const keys = await listApiKeys(deps, await ctx.resolveSessionActor(request), {});
-    const names = await ctx.userNames([...new Set(keys.map((key) => key.createdBy))]);
+    const actor = await ctx.resolveSessionActor(request);
+    const keys = await listApiKeys(deps, actor, {});
+    const names = await ctx.userNames(actor.organizationId, keys.map((key) => key.createdBy));
     return ok(keys.map((key) => toApiKeyDto(key, names)));
   });
 

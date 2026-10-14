@@ -43,12 +43,12 @@ function looksLikeCsv(entry: ImportEntry): boolean {
   return /[,;\t]/.test(text.split(/\r?\n/)[0] ?? '');
 }
 
-type Classified =
+export type Classified =
   | { readonly kind: 'cv'; readonly value: ClassifiedCv }
   | { readonly kind: 'table'; readonly value: ClassifiedTable }
   | { readonly kind: 'ignored'; readonly value: IgnoredFile };
 
-function classifyOne(entry: ImportEntry): Classified {
+export function classifyOne(entry: ImportEntry): Classified {
   const ignored = (reason: IgnoredReason): Classified => ({ kind: 'ignored', value: { path: entry.path, reason } });
   if (entry.bytes.byteLength === 0) return ignored('empty_file');
   const cv = sniffCv(entry.bytes, entry.path.split('/').at(-1) ?? entry.path);
@@ -61,7 +61,14 @@ function classifyOne(entry: ImportEntry): Classified {
 
 /** Sorts archive entries by their content (never by name alone); whatever is not usable is listed with a reason. */
 export function classifyImportFiles(entries: readonly ImportEntry[]): ClassifiedImport {
-  const results = entries.map(classifyOne);
+  return summariseClassified(entries.map(classifyOne), entries);
+}
+
+/**
+ * Same as `classifyImportFiles` when every entry was already classified one by one (so big files could be dropped as
+ * they went). `entries` only needs real bytes for the CSV tables: they are all the Notion check reads.
+ */
+export function summariseClassified(results: readonly Classified[], entries: readonly ImportEntry[]): ClassifiedImport {
   const cvs = results.flatMap((r) => (r.kind === 'cv' ? [r.value] : []));
   const tables = results.flatMap((r) => (r.kind === 'table' ? [r.value] : []));
   const ignored = results.flatMap((r) => (r.kind === 'ignored' ? [r.value] : []));

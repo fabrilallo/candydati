@@ -9,12 +9,10 @@ export const useAutomations = (jobId: string) => {
   const { t } = useI18n()
   const request = useJobsApi()
   const { data, refresh } = useFreshAsyncData(`automations-${jobId}`, () => loaded(() => listRules(request, jobId)))
-  const rules = ref<readonly AutomationRuleDto[] | null>(data.value?.data ?? null)
-  watch(data, (fresh) => {
-    rules.value = fresh?.data ?? null
-  })
+  const rules = useSyncedData<readonly AutomationRuleDto[]>(data)
   const busy = ref<string | null>(null)
   const saveErrorKey = ref<string | null>(null)
+  const run = useBusyRunner(busy)
 
   const upsert = (fresh: AutomationRuleDto): void => {
     const list = rules.value ?? []
@@ -38,29 +36,14 @@ export const useAutomations = (jobId: string) => {
   }
 
   const setEnabled = async (rule: AutomationRuleDto, enabled: boolean): Promise<void> => {
-    busy.value = rule.id
-    try {
-      upsert(await updateRule(request, rule.id, { stageId: rule.stageId, enabled, action: rule.action }))
-    } catch (error) {
-      toast.error(t(errorKeyOf(error)))
-    } finally {
-      busy.value = null
-    }
+    const fresh = await run(rule.id, () => updateRule(request, rule.id, { stageId: rule.stageId, enabled, action: rule.action }), null)
+    if (fresh) upsert(fresh)
   }
 
   const remove = async (rule: AutomationRuleDto): Promise<boolean> => {
-    busy.value = rule.id
-    try {
-      await deleteRule(request, rule.id)
-      rules.value = (rules.value ?? []).filter((item) => item.id !== rule.id)
-      toast.success(t('automations.deleted'))
-      return true
-    } catch (error) {
-      toast.error(t(errorKeyOf(error)))
-      return false
-    } finally {
-      busy.value = null
-    }
+    const done = await run(rule.id, () => deleteRule(request, rule.id).then(() => true), 'automations.deleted')
+    if (done) rules.value = (rules.value ?? []).filter((item) => item.id !== rule.id)
+    return done === true
   }
 
   return {

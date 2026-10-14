@@ -1,4 +1,4 @@
-import type { Outcome } from '@tt/domain';
+import { DAY_MS, type Outcome } from '@tt/domain';
 import { buildApplication, buildCandidate } from './candidate-fixtures.js';
 import { buildJob, completeJobContent } from './job-fixtures.js';
 import type { DatasetRepositories } from './report-dataset.js';
@@ -15,7 +15,7 @@ export function seededRandom(seed: number): () => number {
   };
 }
 
-const DAY = 86_400_000;
+const DAY = DAY_MS;
 const START = Date.UTC(2026, 4, 15);
 /** Window in which events happen: it straddles the June report period on both sides. */
 const SPAN_DAYS = 60;

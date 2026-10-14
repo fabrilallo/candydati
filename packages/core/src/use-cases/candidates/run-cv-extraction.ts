@@ -1,4 +1,4 @@
-import { cvExtractionSchema, type CvExtractionRecord, type CvMediaType } from '@tt/domain';
+import { DAY_MS, cvExtractionSchema, type CvExtractionRecord, type CvMediaType } from '@tt/domain';
 import { z } from 'zod';
 import type { CvExtractionDeps } from '../../intake-ports.js';
 import { defineUseCase } from '../../use-case.js';
@@ -37,7 +37,6 @@ async function readText(deps: CvExtractionDeps, key: string, mediaType: CvMediaT
   }
 }
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Cost guard: past the daily budget of the organization the model is skipped and only the text is kept. */
 async function overBudget(deps: CvExtractionDeps, organizationId: string): Promise<boolean> {

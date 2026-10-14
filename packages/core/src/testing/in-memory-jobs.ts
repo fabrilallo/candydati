@@ -52,6 +52,12 @@ export function createInMemoryJobRepository(initial: readonly Job[] = []): InMem
       const start = (query.page - 1) * query.limit;
       return { items: matching.slice(start, start + query.limit), total: matching.length };
     },
+    async listAfter(organizationId, afterId, limit) {
+      return inOrg(organizationId)
+        .filter((j) => afterId === null || j.id > afterId)
+        .toSorted((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+        .slice(0, limit);
+    },
     async listPublished(organizationId) {
       return inOrg(organizationId)
         .filter((j) => j.status === 'published')

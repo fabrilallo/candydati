@@ -1,5 +1,5 @@
 export * from './limits.js';
-export { readImportArchive, type ImportEntry } from './archive.js';
+export { readImportArchive, openImportArchive, type ImportEntry, type ImportArchive } from './archive.js';
 export { classifyImportFiles, type ClassifiedImport, type ClassifiedCv, type ClassifiedTable, type IgnoredFile, type IgnoredReason } from './classify.js';
 export { parseCsv, decodeText, detectDelimiter } from './csv.js';
 export { parseXlsx, cellToString, type ParsedWorkbook } from './xlsx.js';

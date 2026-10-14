@@ -4,7 +4,7 @@ import {
   type RetentionDeps,
 } from '@tt/core';
 import { eq, schema } from '@tt/db';
-import { zipWriterFactory } from '@tt/providers';
+import { zipStreamFactory } from '@tt/providers';
 import { createExportDeps } from '../wiring/phase5-deps.js';
 import { createWorld, personForm, type World } from './candidate-world.js';
 import type { TestApp } from './test-app.js';
@@ -88,4 +88,4 @@ export function retentionDeps(t: TestApp): RetentionDeps {
 }
 
 /** What the worker's `organization.export` uses. */
-export const exportDeps = (t: TestApp) => createExportDeps({ uow: createDrizzleUnitOfWork(t.handle.db), files: t.files, queue: t.queue, zip: zipWriterFactory });
+export const exportDeps = (t: TestApp) => createExportDeps({ uow: createDrizzleUnitOfWork(t.handle.db), files: t.files, queue: t.queue, zip: zipStreamFactory });

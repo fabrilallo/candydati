@@ -56,12 +56,20 @@ export const candidate = pgTable(
     retentionExpiresAt: timestamp('retention_expires_at', { withTimezone: true }).notNull(),
     /** Set when an import created the candidate. */
     importBatchId: text('import_batch_id').references(() => importBatch.id, { onDelete: 'restrict' }),
+    /** Latest `created_at` of a consented application. Kept by the `application_refresh_candidate_last_applied` trigger. */
+    lastAppliedAt: timestamp('last_applied_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     uniqueIndex('candidate_org_email_uidx').on(table.organizationId, sql`lower(${table.email})`),
     index('candidate_org_created_at_idx').on(table.organizationId, sql`${table.createdAt} desc`),
+    // The list order: most recently applied first, never-applied last.
+    index('candidate_org_last_applied_idx').on(table.organizationId, sql`${table.lastAppliedAt} desc nulls last`, table.id),
+    // Trigram indexes behind the free-text search (ILIKE '%x%'); `candidate_tags_text` is an immutable wrapper.
+    index('candidate_name_trgm_idx').using('gin', sql`(${table.firstName} || ' ' || ${table.lastName}) gin_trgm_ops`),
+    index('candidate_email_trgm_idx').using('gin', sql`${table.email} gin_trgm_ops`),
+    index('candidate_tags_trgm_idx').using('gin', sql`candidate_tags_text(${table.tags}) gin_trgm_ops`),
   ],
 );
 
@@ -98,6 +106,8 @@ export const application = pgTable(
     /** Deadline of the promise to answer; null once answered or decided. */
     responseDueAt: timestamp('response_due_at', { withTimezone: true }),
     respondedAt: timestamp('responded_at', { withTimezone: true }),
+    /** Imported data: when the reconfirmation email actually went out. Retention never erases someone never asked. */
+    reconfirmationSentAt: timestamp('reconfirmation_sent_at', { withTimezone: true }),
   },
   (table) => [
     // A candidate cannot have two OPEN applications to the same job; a decided one does not block a new one.
@@ -107,6 +117,12 @@ export const application = pgTable(
     index('application_org_job_idx').on(table.organizationId, table.jobId),
     index('application_org_candidate_idx').on(table.organizationId, table.candidateId),
     index('application_import_batch_idx').on(table.importBatchId),
+    // Daily caps of the public form count recent careers-page applications.
+    index('application_careers_created_idx')
+      .on(table.organizationId, table.createdAt)
+      .where(sql`${table.source} = 'careers_page'`),
+    // Retention scan, keyset ordered by (retention_expires_at, id).
+    index('application_retention_idx').on(table.retentionExpiresAt, table.id),
     // Backs the deadline scan and the attention list: only open applications still waiting for an answer.
     index('application_awaiting_response_idx')
       .on(table.organizationId, table.responseDueAt)

@@ -1,0 +1,55 @@
+# Migrations
+
+Schema changes are Drizzle migrations in `packages/db/drizzle`. Generate with `pnpm db:generate`, review the SQL, commit it.
+`runMigrations` (`packages/db/src/migrate.ts`) applies them, on api start when `RUN_MIGRATIONS=true`.
+
+## How they run
+
+- **One runner at a time.** The runner takes a Postgres session advisory lock for the whole run. Replicas started
+  together wait for the first one and then find nothing to do, instead of racing and crash-looping.
+- **One transaction per migration.** A failure rolls back only that migration; the earlier ones stay applied and the
+  journal (`drizzle.__drizzle_migrations`) matches the database. Within a migration all statements are atomic.
+- **`CONCURRENTLY` migrations run outside a transaction** (Postgres forbids it inside one). A migration containing the word
+  `CONCURRENTLY` is applied statement by statement, so every statement in it must be idempotent (`IF NOT EXISTS`). If one
+  fails midway, fix the cause and restart: it resumes safely. A failed `CREATE INDEX CONCURRENTLY` leaves an INVALID
+  index behind; `DROP INDEX CONCURRENTLY` it before retrying (`select indexrelid::regclass from pg_index where not indisvalid`).
+- `drizzle-kit migrate` (`pnpm db:migrate`) uses its own runner, without the lock or the per-migration transaction.
+  Use it on a developer machine only.
+
+## Rules for new migrations
+
+1. **Additive first.** Add the column, table or index in one release; switch the code to it in the next; remove the old
+   thing in a later one. Never rename or drop something the running version still reads: old and new api replicas
+   overlap during a deploy.
+2. **`NOT NULL` needs a default or a backfill.** `ADD COLUMN x text NOT NULL` fails on a table that has rows. Use
+   `ADD COLUMN x text NOT NULL DEFAULT '...'` (instant on Postgres 11+ for constant defaults), or add it nullable,
+   backfill, then `SET NOT NULL`. To keep a "no default" schema, drop the default afterwards.
+3. **Backfill in batches, outside the migration.** An `UPDATE` or `INSERT ... SELECT` over a big table inside a migration
+   holds a transaction (and row locks) for its whole duration and blocks every deploy behind it. In the migration add the
+   column nullable; backfill from a worker task or a one-off script in batches of a few thousand rows
+   (`WHERE id > $last ORDER BY id LIMIT 5000`, commit between batches); enforce `NOT NULL` or the constraint once done.
+   Small, bounded backfills (lookup tables, a handful of rows per organization) may stay inline.
+4. **`CREATE INDEX CONCURRENTLY` in its own migration**, with `IF NOT EXISTS`, containing nothing else
+   (`generate --custom`, then write the SQL). Plain `CREATE INDEX` blocks writes on the table while it builds. Declare the
+   index in the Drizzle schema as usual so `drizzle-kit generate` sees no drift; only the SQL file differs.
+5. **Constraints in two steps.** `ADD CONSTRAINT ... NOT VALID` first (cheap), `VALIDATE CONSTRAINT` later (does not block writes).
+6. **Keep locks short.** Do not combine a table rewrite (`ALTER COLUMN TYPE`, volatile default) with other work. Set a
+   `lock_timeout` for DDL on hot tables.
+7. **Never edit an applied migration** except to make it safer without changing the resulting schema (see below). The
+   runner decides what to apply by the journal timestamp, so such an edit does not re-run anywhere.
+8. Triggers and functions live in migrations too (Drizzle does not model them): `CREATE OR REPLACE`, and describe the
+   reason in a SQL comment.
+
+## Existing migrations
+
+- **0002** added `account.issuer NOT NULL` with no default. It now adds the column nullable, backfills it from
+  `provider_id` and then sets `NOT NULL`: same final schema, and it no longer fails on a database that has accounts.
+- **0013** adds `application.origin` with a constant default (no rewrite) and backfills `application_stage_event` and
+  `response_promise` from `application` and a full scan of `audit_log`, in one transaction. Fine for the current data
+  volumes; on a large existing installation it holds locks while it runs. It has already run everywhere it will run
+  (the product has no public release yet), so it stays as is: rule 3 applies from now on.
+- **0015** adds `notification.emailed_at` and sets it for every existing row (`UPDATE ... SET emailed_at = created_at`),
+  which rewrites `notification` once in a transaction. Same remark.
+- **0017** adds `candidate.last_applied_at`, a trigger on `application` that keeps it up to date and a one-statement
+  backfill. The backfill is small per organization; on a very large `candidate` table, split it per rule 3.
+- **0018** creates the indexes concurrently (search, notifications, caps, outbox, audit log, retention).

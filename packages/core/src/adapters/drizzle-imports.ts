@@ -174,5 +174,13 @@ export function createDrizzleConsentTokens(db: DbExecutor): ConsentTokenReposito
         .returning({ tokenHash: consentToken.tokenHash });
       return rows.length > 0;
     },
+    async rotate(organizationId, applicationId, tokenHash, expiresAt) {
+      const rows = await db
+        .update(consentToken)
+        .set({ tokenHash, expiresAt: sql`greatest(${consentToken.expiresAt}, ${expiresAt})` })
+        .where(and(eq(consentToken.organizationId, organizationId), eq(consentToken.applicationId, applicationId), isNull(consentToken.usedAt)))
+        .returning({ tokenHash: consentToken.tokenHash });
+      return rows.length > 0;
+    },
   };
 }

@@ -1,4 +1,4 @@
-import { defaultEmailTemplate, renderTemplate, SYSTEM_SENDER, type Job, type Message } from '@tt/domain';
+import { DAY_MS, defaultEmailTemplate, renderTemplate, SYSTEM_SENDER, type Job, type Message } from '@tt/domain';
 import type { TaskQueue } from '../../intake-ports.js';
 import type { ReceiptDeps } from '../../messaging-ports.js';
 import { enqueueDelivery } from './send-message.js';
@@ -6,7 +6,6 @@ import { buildTemplateValues, ensureConversation, oneLine } from './shared.js';
 
 /** Anyone can type any address in the public form: a receipt must not become a way to mail a stranger over and over. */
 export const RECEIPTS_PER_RECIPIENT_PER_DAY = 3;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface ReceiptInput {
   readonly organization: { readonly id: string; readonly name: string; readonly slug: string };

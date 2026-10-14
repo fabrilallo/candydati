@@ -19,13 +19,29 @@ describe('createPgBossQueue', () => {
     expect(TASK_RETRY.retryLimit).toBeLessThanOrEqual(3);
   });
 
-  it('retries webhook deliveries and distribution syncs five times with backoff', async () => {
+  it('retries webhook deliveries and distribution syncs with exponential backoff over at least 24 hours', async () => {
     const boss = fakeBoss();
     await createPgBossQueue(boss).enqueue('webhook.deliver', { organizationId: 'o', eventId: 'e', endpointId: 'h' });
     await createPgBossQueue(boss).enqueue('distribution.sync', { organizationId: 'o', jobId: 'j' });
     expect(boss.send).toHaveBeenCalledWith('webhook.deliver', { organizationId: 'o', eventId: 'e', endpointId: 'h' }, WEBHOOK_RETRY);
     expect(boss.send).toHaveBeenCalledWith('distribution.sync', { organizationId: 'o', jobId: 'j' }, WEBHOOK_RETRY);
-    expect(WEBHOOK_RETRY).toMatchObject({ retryLimit: 5, retryBackoff: true });
+    expect(WEBHOOK_RETRY.retryBackoff).toBe(true);
+    // pg-boss waits at least half of `retryDelay * 2^n` (jittered), capped at `retryDelayMax`.
+    let shortest = 0;
+    for (let retry = 1; retry <= WEBHOOK_RETRY.retryLimit; retry += 1) {
+      shortest += Math.min(WEBHOOK_RETRY.retryDelayMax ?? Infinity, (WEBHOOK_RETRY.retryDelay * 2 ** retry) / 2);
+    }
+    expect(shortest).toBeGreaterThanOrEqual(24 * 60 * 60);
+  });
+
+  it('binds to an executor: the task is sent on it (the caller\'s transaction) with the same options', async () => {
+    const boss = fakeBoss();
+    const executor = { executeSql: vi.fn(async () => ({ rows: [] })) };
+    const queue = createPgBossQueue(boss);
+    await queue.bindTo(executor).enqueue('email.send', { organizationId: 'o', messageId: 'm' }, { singletonKey: 'm' });
+    expect(boss.send).toHaveBeenCalledWith('email.send', { organizationId: 'o', messageId: 'm' }, { ...TASK_RETRY, id: singletonJobId('email.send', 'm'), singletonKey: 'm', db: executor });
+    await queue.enqueue('email.send', { organizationId: 'o', messageId: 'm' });
+    expect(boss.createQueue).toHaveBeenCalledTimes(1);
   });
 
   it('retries file deletions eight times, so storage can be down for hours', async () => {

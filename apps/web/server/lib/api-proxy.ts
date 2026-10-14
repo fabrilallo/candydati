@@ -44,8 +44,14 @@ export interface ProxyRequest {
   /** Path and query of the incoming request, e.g. `/api/me?x=1`. */
   readonly pathWithQuery: string
   readonly headers: Headers
-  /** Raw body for methods that carry one. */
-  readonly body?: Uint8Array | undefined
+  /** Body for methods that carry one: bytes, or a stream that is piped upstream without buffering. */
+  readonly body?: Uint8Array | ReadableStream<Uint8Array> | undefined
+  /** Largest request body accepted, in bytes. Counted while streaming, so a missing or lying `content-length` does not help. */
+  readonly maxBodyBytes?: number | undefined
+  /** Milliseconds to wait for the api to start answering (response headers). The body of the answer is not time limited. */
+  readonly timeoutMs?: number | undefined
+  /** Aborts the upstream call, e.g. when the browser disconnects. */
+  readonly signal?: AbortSignal | undefined
   /** Public host and protocol of the web origin, forwarded as `x-forwarded-*`. */
   readonly host: string
   readonly protocol: 'http' | 'https'
@@ -56,6 +62,16 @@ export interface ProxyRequest {
 }
 
 export type FetchLike = (input: string, init: RequestInit) => Promise<Response>
+
+export const API_TIMEOUT = { code: 'api_timeout', message: 'The service took too long to answer' } as const
+export const BODY_TOO_LARGE = { code: 'payload_too_large', message: 'The request body is too large' } as const
+
+/** Default for `NUXT_API_MAX_BODY_BYTES`: the api's largest route limit (import upload, 200 MiB + 4 MiB of form overhead). */
+export const DEFAULT_MAX_BODY_BYTES = 204 * 1024 * 1024
+/** Default for `NUXT_API_TIMEOUT_MS`. */
+export const DEFAULT_TIMEOUT_MS = 300_000
+
+class BodyTooLargeError extends Error {}
 
 export const API_UNREACHABLE = { code: 'api_unreachable', message: 'The service is temporarily unreachable' } as const
 
@@ -87,28 +103,82 @@ export const downstreamResponseHeaders = (upstream: Headers): Headers => {
   return out
 }
 
-const unreachable = (): Response =>
-  new Response(JSON.stringify({ success: false, data: null, error: API_UNREACHABLE }), {
-    status: 502,
+const jsonError = (status: number, error: { code: string; message: string }): Response =>
+  new Response(JSON.stringify({ success: false, data: null, error }), {
+    status,
     headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
   })
+
+/** Passes the chunks through and errors the stream as soon as more than `max` bytes went by. */
+const limitStream = (source: ReadableStream<Uint8Array>, max: number): ReadableStream<Uint8Array> => {
+  let seen = 0
+  return source.pipeThrough(
+    new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk, controller) {
+        seen += chunk.byteLength
+        if (seen > max) throw new BodyTooLargeError()
+        controller.enqueue(chunk)
+      },
+    }),
+  )
+}
+
+const declaredLength = (headers: Headers): number => {
+  const value = Number(headers.get('content-length'))
+  return Number.isFinite(value) ? value : 0
+}
+
+const upstreamBody = (request: ProxyRequest, max: number): BodyInit | undefined => {
+  if (METHODS_WITHOUT_BODY.has(request.method.toUpperCase()) || request.body === undefined) return undefined
+  return request.body instanceof Uint8Array ? (request.body as BodyInit) : limitStream(request.body, max)
+}
+
+const isTimeout = (error: unknown, timedOut: () => boolean): boolean => timedOut() && error instanceof Error
+
+const failureResponse = (request: ProxyRequest, error: unknown, timedOut: boolean): Response => {
+  if (error instanceof BodyTooLargeError || (error instanceof Error && error.cause instanceof BodyTooLargeError)) return jsonError(413, BODY_TOO_LARGE)
+  const path = request.pathWithQuery.split('?')[0]
+  const message = error instanceof Error ? error.message : String(error)
+  if (timedOut) {
+    console.error('[api-proxy] api timeout', { method: request.method, path })
+    return jsonError(504, API_TIMEOUT)
+  }
+  console.error('[api-proxy] api unreachable', { method: request.method, path, error: message })
+  return jsonError(502, API_UNREACHABLE)
+}
 
 /**
  * Forwards one request and returns the api response as is: status (3xx included, `redirect: 'manual'` so
  * auth callbacks reach the browser with their cookies), headers, every `Set-Cookie`, streamed body.
+ * The request body is capped (413) and the wait for the api is bounded (504); the caller's signal is propagated.
  */
 export const proxyToApi = async (apiOrigin: string, request: ProxyRequest, fetchImpl: FetchLike): Promise<Response> => {
-  const hasBody = !METHODS_WITHOUT_BODY.has(request.method.toUpperCase()) && request.body !== undefined
+  const max = request.maxBodyBytes ?? DEFAULT_MAX_BODY_BYTES
+  if (declaredLength(request.headers) > max) return jsonError(413, BODY_TOO_LARGE)
+  const controller = new AbortController()
+  const abort = () => controller.abort(request.signal?.reason)
+  if (request.signal?.aborted) abort()
+  request.signal?.addEventListener('abort', abort, { once: true })
+  let timedOut = false
+  const timer = setTimeout(() => {
+    timedOut = true
+    controller.abort()
+  }, request.timeoutMs ?? DEFAULT_TIMEOUT_MS)
   try {
+    const body = upstreamBody(request, max)
     const upstream = await fetchImpl(apiTarget(apiOrigin, request.pathWithQuery), {
       method: request.method,
       headers: upstreamRequestHeaders(request),
-      body: hasBody ? (request.body as BodyInit) : undefined,
+      body,
+      ...(body instanceof ReadableStream ? { duplex: 'half' } : {}),
       redirect: 'manual',
+      signal: controller.signal,
     })
     return new Response(upstream.body, { status: upstream.status, statusText: upstream.statusText, headers: downstreamResponseHeaders(upstream.headers) })
   } catch (error) {
-    console.error('[api-proxy] api unreachable', { method: request.method, path: request.pathWithQuery.split('?')[0], error: error instanceof Error ? error.message : String(error) })
-    return unreachable()
+    return failureResponse(request, error, isTimeout(error, () => timedOut))
+  } finally {
+    clearTimeout(timer)
+    request.signal?.removeEventListener('abort', abort)
   }
 }

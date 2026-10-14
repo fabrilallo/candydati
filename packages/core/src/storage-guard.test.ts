@@ -5,15 +5,21 @@ import { withStorageErrors } from './storage-guard.js';
 
 const failing = (error: Error): FileStorage => ({
   put: () => Promise.reject(error),
+  putStream: () => Promise.reject(error),
   get: () => Promise.reject(error),
+  getStream: () => Promise.reject(error),
   delete: () => Promise.reject(error),
 });
+
+const bytes = async function* () {
+  yield new Uint8Array([1]);
+};
 
 describe('withStorageErrors', () => {
   it('turns infrastructure failures into StorageUnavailableError, keeping the cause', async () => {
     const cause = new Error('ECONNREFUSED');
     const files = withStorageErrors(failing(cause));
-    for (const call of [files.put('k', new Uint8Array(), 't'), files.get('k'), files.delete('k')]) {
+    for (const call of [files.put('k', new Uint8Array(), 't'), files.putStream('k', bytes(), 't'), files.get('k'), files.getStream('k'), files.delete('k')]) {
       const error = await call.catch((e: unknown) => e);
       expect(error).toBeInstanceOf(StorageUnavailableError);
       expect((error as StorageUnavailableError).message).not.toContain('ECONNREFUSED');
@@ -27,7 +33,23 @@ describe('withStorageErrors', () => {
   });
 
   it('passes successes through', async () => {
-    const files = withStorageErrors({ put: async () => undefined, get: async () => new Uint8Array([1]), delete: async () => undefined });
+    const files = withStorageErrors({ ...failing(new Error('unused')), get: async () => new Uint8Array([1]) });
     expect(await files.get('k')).toEqual(new Uint8Array([1]));
+  });
+
+  it('does not turn an error of the streamed source into a storage outage', async () => {
+    const refused = Object.assign(new Error('too large'), { statusCode: 413 });
+    const consuming: FileStorage = {
+      ...failing(new Error('unused')),
+      putStream: async (_key, source) => {
+        for await (const chunk of source) void chunk;
+        return 0;
+      },
+    };
+    const source = (async function* () {
+      yield new Uint8Array([1]);
+      throw refused;
+    })();
+    await expect(withStorageErrors(consuming).putStream('k', source, 't')).rejects.toBe(refused);
   });
 });

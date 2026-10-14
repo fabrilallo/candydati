@@ -67,13 +67,13 @@ const errorResponses = (isPublic: boolean): Json =>
   );
 
 function operation(route: RouteSpec): Json {
-  const isPublic = route.scope === null;
+  const isPublic = route.scope === null && !route.sessionOnly && !route.authenticated;
   const parameters = [
     ...pathParams(route.path).map((name) => ({ name, in: 'path', required: true, schema: { type: 'string' } })),
     ...(route.query ? queryParameters(route.query) : []),
   ];
   const scopeNote = route.sessionOnly
-    ? ` Session only: requires the \`${route.scope}\` permission, and a request with an API key is refused with 403.`
+    ? ` Session only: ${route.scope ? `requires the \`${route.scope}\` permission, and ` : ''}a request with an API key is refused with 403.`
     : route.scope
       ? ` Requires the \`${route.scope}\` scope.`
       : '';
@@ -141,15 +141,16 @@ export function buildOpenApiDocument(info: OpenApiInfo, routes: readonly RouteSp
       title: info.title,
       version: info.version,
       description:
-        'The routes tagged `Public` need no authentication and are open to any origin (CORS `*`, GET only, no credentials). The routes under `/api/v1/public/consent` are public too but not cross-origin: the link token is the credential. Everything else: authenticate with `Authorization: Bearer <key>`. A key never has more than the person who created it, and can never move, decide on, message or erase candidates. Every response uses the same envelope: `success`, `data`, `error`, and `meta` for pages.',
+        'The routes tagged `Public` need no authentication. The read-only ones under `/api/v1/public/organizations` are open to any origin (CORS `*`, GET only, no credentials); the consent, feedback and application routes are public too but not cross-origin: the link token (or the form) is the credential. The envelope has two exceptions that are not part of this document: the inbound email webhooks answer `{ received: true }`, and the Better Auth routes under `/api/auth` return their own error shape. Everything else: authenticate with `Authorization: Bearer <key>`. A key never has more than the person who created it, and can never decide on, message or erase candidates, nor manage keys, webhooks, privacy settings or exports: those routes are marked session only. Every other response uses the same envelope: `success`, `data`, `error`, and `meta` for pages.',
     },
     tags: [...new Set(routes.map((route) => route.tag))].map((name) => ({ name })),
     security: [{ bearerAuth: [] }],
     paths,
     components: {
       securitySchemes: {
-        sessionCookie: { type: 'apiKey', in: 'cookie', name: 'better-auth.session_token', description: 'The browser session. Used by the routes that no API key may call (imports).' },
-        bearerAuth: { type: 'http', scheme: 'bearer', description: 'An API key (`tt_...`), created in the settings by an owner or admin.' } },
+        sessionCookie: { type: 'apiKey', in: 'cookie', name: 'better-auth.session_token', description: 'The browser session. Used by the routes that no API key may call (imports, decisions, messages, erasure, settings).' },
+        bearerAuth: { type: 'http', scheme: 'bearer', description: 'An API key (`tt_...`), created in the settings by an owner or admin.' },
+      },
       schemas: {
         ...schemas,
         PageMeta: { type: 'object', required: ['total', 'page', 'limit'], properties: { total: { type: 'integer' }, page: { type: 'integer' }, limit: { type: 'integer' } } },

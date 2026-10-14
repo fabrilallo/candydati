@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DAY_MS } from '../response/response-state.js';
 import { SUPPORTED_LOCALES } from '../platform/config.js';
 
 /**
@@ -60,5 +61,5 @@ export interface ConsentRecord {
 export function retentionExpiry(consent: Pick<ConsentRecord, 'scopes' | 'givenAt'>, notice: Pick<PrivacyNotice, 'retentionDays'>): Date {
   if (consent.scopes.length === 0) throw new Error('retentionExpiry needs at least one consent scope');
   const days = Math.max(...consent.scopes.map((scope) => notice.retentionDays[scope]));
-  return new Date(consent.givenAt.getTime() + days * 24 * 60 * 60 * 1000);
+  return new Date(consent.givenAt.getTime() + days * DAY_MS);
 }

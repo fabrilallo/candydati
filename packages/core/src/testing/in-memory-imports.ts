@@ -18,6 +18,7 @@ import {
 } from './in-memory-candidates.js';
 import { createInMemoryStageEvents } from './in-memory-reports.js';
 import { cell } from './in-memory-transaction.js';
+import { createInMemoryConversationRepository, createInMemoryMessageRepository, type MessagingStore } from './in-memory-messaging.js';
 
 export interface ImportStoreState {
   readonly batches: readonly ImportBatch[];
@@ -137,11 +138,33 @@ export function createInMemoryConsentTokens(store: ImportStore): ConsentTokenRep
       store.write({ tokens: store.read().tokens.map((t) => (t.tokenHash === tokenHash ? { ...t, usedAt: at } : t)) });
       return true;
     },
+    async rotate(organizationId, applicationId, tokenHash, expiresAt) {
+      const pending = (t: ConsentToken): boolean => t.organizationId === organizationId && t.applicationId === applicationId && t.usedAt === null;
+      if (!store.read().tokens.some(pending)) return false;
+      const later = (date: Date): Date => (date > expiresAt ? date : expiresAt);
+      store.write({ tokens: store.read().tokens.map((t) => (pending(t) ? { ...t, tokenHash, expiresAt: later(t.expiresAt) } : t)) });
+      return true;
+    },
   };
 }
 
-/** Transaction by snapshot over the candidate store and the import store: on failure both go back to what they were. */
-export function createInMemoryImportCommit(candidateStore: CandidateStore, importStore: ImportStore, jobs: JobRepository): ImportCommitTransaction {
+/** Transaction by snapshot over the candidate, import and messaging stores: on failure all go back to what they were. */
+export function createInMemoryImportCommit(candidateStore: CandidateStore, importStore: ImportStore, jobs: JobRepository, messagingStore: MessagingStore): ImportCommitTransaction {
+  const snapshot = () => ({ candidates: candidateStore.read(), imports: importStore.read(), messaging: messagingStore.read() });
+  const restore = (before: ReturnType<typeof snapshot>): void => {
+    candidateStore.write(before.candidates);
+    importStore.write(before.imports);
+    messagingStore.write(before.messaging);
+  };
+  const isolated = async <T,>(work: () => Promise<T>): Promise<T> => {
+    const before = snapshot();
+    try {
+      return await work();
+    } catch (error) {
+      restore(before);
+      throw error;
+    }
+  };
   const repositories = {
     jobs,
     imports: createInMemoryImportBatches(importStore),
@@ -152,17 +175,9 @@ export function createInMemoryImportCommit(candidateStore: CandidateStore, impor
     stageEvents: createInMemoryStageEvents(candidateStore),
     importItems: createInMemoryImportItems(importStore),
     consentTokens: createInMemoryConsentTokens(importStore),
+    messages: createInMemoryMessageRepository(messagingStore),
+    conversations: createInMemoryConversationRepository(messagingStore),
+    savepoint: isolated,
   };
-  return {
-    async run(work) {
-      const before = { candidates: candidateStore.read(), imports: importStore.read() };
-      try {
-        return await work(repositories);
-      } catch (error) {
-        candidateStore.write(before.candidates);
-        importStore.write(before.imports);
-        throw error;
-      }
-    },
-  };
+  return { run: (work) => isolated(() => work(repositories)) };
 }

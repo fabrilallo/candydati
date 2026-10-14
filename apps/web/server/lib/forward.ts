@@ -1,5 +1,5 @@
-import { defineEventHandler, getRequestURL, readRawBody } from 'h3'
-import { proxyToApi } from './api-proxy'
+import { defineEventHandler, getRequestURL, getRequestWebStream } from 'h3'
+import { DEFAULT_MAX_BODY_BYTES, DEFAULT_TIMEOUT_MS, proxyToApi } from './api-proxy'
 
 /**
  * A route that forwards matching requests to the Fastify api (`NUXT_API_INTERNAL_URL`, read at runtime), body and
@@ -11,15 +11,23 @@ export const forwardToApi = (matches: (pathWithQuery: string) => boolean) =>
     const pathWithQuery = `${url.pathname}${url.search}`
     if (!matches(pathWithQuery)) return
 
-    const body = event.method === 'GET' || event.method === 'HEAD' ? undefined : await readRawBody(event, false)
-    const { apiInternalUrl, trustCloudflare } = useRuntimeConfig(event)
+    const body = event.method === 'GET' || event.method === 'HEAD' ? undefined : (getRequestWebStream(event) ?? undefined)
+    const { apiInternalUrl, trustCloudflare, apiMaxBodyBytes, apiTimeoutMs } = useRuntimeConfig(event)
+    // Browser went away before the api answered: stop the upstream call too.
+    const clientGone = new AbortController()
+    event.node.res.once('close', () => {
+      if (!event.node.res.writableEnded) clientGone.abort()
+    })
     return proxyToApi(
       apiInternalUrl,
       {
         method: event.method,
         pathWithQuery,
         headers: new Headers(event.headers),
-        body: body ?? undefined,
+        body,
+        maxBodyBytes: Number(apiMaxBodyBytes) || DEFAULT_MAX_BODY_BYTES,
+        timeoutMs: Number(apiTimeoutMs) || DEFAULT_TIMEOUT_MS,
+        signal: clientGone.signal,
         host: url.host,
         protocol: url.protocol === 'https:' ? 'https' : 'http',
         socketAddress: event.node.req.socket.remoteAddress,

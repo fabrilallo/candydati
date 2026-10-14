@@ -2,9 +2,8 @@ import { jobContentSchema, type JobContent } from '@tt/domain';
 import type { MastraModelConfig } from '@mastra/core/llm';
 
 export const DRAFT_TIMEOUT_MS = 90_000;
-export const BRIEF_MAX = 4000;
 
-/** Writes a JobContent proposal from a brief. The result is always re-validated with `jobContentSchema`. */
+/** Writes a JobContent proposal from a brief (the `JobContentDrafter` port of core, which re-validates the result). */
 export type JobDrafter = (input: { readonly brief: string; readonly base: JobContent | null; readonly language: 'it' | 'en' }) => Promise<JobContent>;
 
 const SYSTEM = `You write job ads for an applicant tracking system whose principles are: the gross salary range is always

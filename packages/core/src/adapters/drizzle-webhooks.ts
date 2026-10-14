@@ -1,4 +1,4 @@
-import { and, desc, eq, schema, sql } from '@tt/db';
+import { and, desc, eq, lt, schema, sql } from '@tt/db';
 import type { WebhookEndpoint } from '@tt/domain';
 import type { WebhookDeliveryRepository, WebhookEndpointRepository } from '../webhook-ports.js';
 import type { DbExecutor } from './db-executor.js';
@@ -78,5 +78,9 @@ export function createDrizzleWebhookDeliveries(db: DbExecutor): WebhookDeliveryR
         .where(and(eq(webhookDelivery.organizationId, organizationId), eq(webhookDelivery.endpointId, endpointId)))
         .orderBy(desc(webhookDelivery.createdAt), desc(webhookDelivery.id))
         .limit(limit),
+    async prune(before) {
+      const removed = await db.delete(webhookDelivery).where(lt(webhookDelivery.createdAt, before)).returning({ id: webhookDelivery.id });
+      return removed.length;
+    },
   };
 }

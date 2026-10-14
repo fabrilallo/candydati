@@ -1,4 +1,3 @@
-import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { createWebhook, deleteWebhook, listWebhooks, testWebhook, updateWebhook, type WebhookInput } from '@/lib/automation-api'
 import { loaded } from '@/lib/job-api'
@@ -6,29 +5,13 @@ import type { WebhookCreatedDto, WebhookEndpointDto } from '@tt/domain'
 
 /** The organization's webhook endpoints (`webhook:manage`). The secret of a new one is returned once and never kept. */
 export const useWebhooks = () => {
-  const { t } = useI18n()
   const request = useJobsApi()
   const { data, refresh } = useFreshAsyncData('webhooks', () => loaded(() => listWebhooks(request)))
-  const endpoints = ref<readonly WebhookEndpointDto[] | null>(data.value?.data ?? null)
-  watch(data, (fresh) => {
-    endpoints.value = fresh?.data ?? null
-  })
+  const endpoints = useSyncedData<readonly WebhookEndpointDto[]>(data)
   const busy = ref<string | null>(null)
   const createErrorKey = ref<string | null>(null)
 
-  const run = async <T>(id: string, action: () => Promise<T>, successKey: string | null): Promise<T | null> => {
-    busy.value = id
-    try {
-      const result = await action()
-      if (successKey) toast.success(t(successKey))
-      return result
-    } catch (error) {
-      toast.error(t(errorKeyOf(error)))
-      return null
-    } finally {
-      busy.value = null
-    }
-  }
+  const run = useBusyRunner(busy)
 
   const create = async (input: WebhookInput): Promise<WebhookCreatedDto | null> => {
     busy.value = 'new'

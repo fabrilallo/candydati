@@ -8,6 +8,7 @@ import type {
   CandidateSummary,
   CvExtractionRepository,
   UserDirectory,
+  RetentionPage,
 } from '../candidate-ports.js';
 import type { JobRepository, OpenApplicationCounts } from '../job-ports.js';
 import type { ApplicationIntake, IntakeRepositories } from '../intake-ports.js';
@@ -125,11 +126,11 @@ export function createInMemoryApplicationRepository(store: CandidateStore): Appl
     async listAwaitingResponseAcrossOrganizations(dueBefore) {
       return awaiting(store.read().applications, dueBefore);
     },
-    async listRetentionExpiringBefore(organizationId, before) {
-      return expiring(inOrg(organizationId), before);
+    async listRetentionExpiringBefore(organizationId, before, page) {
+      return expiring(inOrg(organizationId), before, page);
     },
-    async listRetentionExpiringAcrossOrganizations(before) {
-      return expiring(store.read().applications, before);
+    async listRetentionExpiringAcrossOrganizations(before, page) {
+      return expiring(store.read().applications, before, page);
     },
     async listByImportBatch(organizationId, batchId) {
       return newestFirst(inOrg(organizationId).filter((a) => a.importBatchId === batchId));
@@ -140,8 +141,14 @@ export function createInMemoryApplicationRepository(store: CandidateStore): Appl
   };
 }
 
-const expiring = (applications: readonly Application[], before: Date): readonly Application[] =>
-  applications.filter((a) => a.retentionExpiresAt <= before).toSorted((a, b) => a.retentionExpiresAt.getTime() - b.retentionExpiresAt.getTime());
+/** Keyset order `(retentionExpiresAt, id)`, like Postgres; with `page`, at most `limit` rows after the cursor. */
+const expiring = (applications: readonly Application[], before: Date, page?: RetentionPage): readonly Application[] => {
+  const key = (a: Pick<Application, 'retentionExpiresAt' | 'id'>): string => `${a.retentionExpiresAt.toISOString()}\u0000${a.id}`;
+  const sorted = applications.filter((a) => a.retentionExpiresAt <= before).toSorted((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0));
+  if (!page) return sorted;
+  const after = page.after;
+  return (after ? sorted.filter((a) => key(a) > key(after)) : sorted).slice(0, page.limit);
+};
 
 const awaiting = (applications: readonly Application[], dueBefore: Date): readonly Application[] =>
   applications
@@ -199,8 +206,20 @@ const matchesText = (store: CandidateStore, candidate: Candidate, query: string)
   );
 };
 
+const isVisible = (store: CandidateStore, candidateId: string): boolean => {
+  const own = store.read().applications.filter((a) => a.candidateId === candidateId);
+  return own.some((a) => a.consentStatus === 'given') || !own.some((a) => a.consentStatus === 'to_renew');
+};
+
 export function createInMemoryCandidateSearch(store: CandidateStore): CandidateSearch {
   return {
+    async listAfter(organizationId, afterId, limit) {
+      return store
+        .read()
+        .candidates.filter((c) => c.organizationId === organizationId && (afterId === null || c.id > afterId) && isVisible(store, c.id))
+        .toSorted((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
+        .slice(0, limit);
+    },
     async search(query) {
       const text = query.query?.trim() ?? '';
       const summaries: CandidateSummary[] = store
@@ -229,6 +248,9 @@ export function createInMemoryCandidateSearch(store: CandidateStore): CandidateS
 
 export const createInMemoryUserDirectory = (names: Readonly<Record<string, string>> = {}): UserDirectory => ({
   async namesOf(_organizationId, userIds) {
+    return Object.fromEntries(userIds.filter((id) => id in names).map((id) => [id, names[id] as string]));
+  },
+  async actorNamesOf(_organizationId, userIds) {
     return Object.fromEntries(userIds.filter((id) => id in names).map((id) => [id, names[id] as string]));
   },
 });

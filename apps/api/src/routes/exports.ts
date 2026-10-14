@@ -2,7 +2,7 @@ import { listExports, openExport, requestOrganizationExport } from '@tt/core';
 import { ok } from '@tt/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
-import { sendZip } from '../http/zip-download.js';
+import { sendZipStream } from '../http/zip-download.js';
 import { toDataExportDto } from './privacy-dto.js';
 import { paramOf } from './request.js';
 
@@ -19,6 +19,6 @@ export function registerExportRoutes(app: FastifyInstance, ctx: AppContext): voi
 
   app.get('/api/v1/exports/:id/download', async (request, reply) => {
     const file = await openExport(deps, await ctx.resolveActor(request), { exportId: paramOf(request, 'id') });
-    return sendZip(reply, file.bytes, file.fileName);
+    return sendZipStream(reply, file.stream, file.sizeBytes, file.fileName);
   });
 }

@@ -1,4 +1,4 @@
-import { jobRequestInputSchema, JOB_REQUEST_STATUSES, type JobRequest } from '@tt/domain';
+import { jobRequestInputSchema, JOB_REQUEST_STATUSES, type JobRequest, type PageMeta } from '@tt/domain';
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';
@@ -99,7 +99,10 @@ export const listJobRequests = defineJobRequestUseCase({
   }),
   permission: 'job:read',
   audit: { skip: 'read-only list of requests, no candidate data' },
-  handler: ({ deps, actor, input }) => deps.jobRequests.list({ organizationId: actor.organizationId, ...input }),
+  handler: async ({ deps, actor, input }): Promise<{ readonly items: readonly JobRequest[]; readonly meta: PageMeta }> => {
+    const { items, total } = await deps.jobRequests.list({ organizationId: actor.organizationId, ...input });
+    return { items, meta: { total, page: input.page, limit: input.limit } };
+  },
 });
 
 export const getJobRequest = defineJobRequestUseCase({

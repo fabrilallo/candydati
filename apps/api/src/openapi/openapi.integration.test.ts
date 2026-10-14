@@ -1,7 +1,9 @@
 import { MACHINE_FORBIDDEN_PERMISSIONS, isPermission } from '@tt/domain';
+import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestApp, type TestApp } from '../testing/test-app.js';
 import { buildOpenApiDocument, operationIdOf } from './document.js';
+import { INTERNAL_ROUTES } from './internal-routes.js';
 import { COMPONENT_SCHEMAS, ROUTE_REGISTRY } from './registry.js';
 
 let t: TestApp;
@@ -14,6 +16,23 @@ afterAll(async () => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- JSON read back from the wire, asserted field by field
 type Json = Record<string, any>;
+
+/** Every `METHOD path` Fastify serves, read from its route tree (`printRoutes`); HEAD and OPTIONS are implicit and skipped. */
+function fastifyRoutes(app: FastifyInstance): readonly string[] {
+  const stack: string[] = [];
+  const routes: string[] = [];
+  for (const line of app.printRoutes({ commonPrefix: false }).split('\n')) {
+    const match = /^((?:│ {3}| {4})*)[├└]── (.+?)(?: \(([^)]*)\))?$/.exec(line);
+    if (!match) continue;
+    const depth = match[1]!.length / 4;
+    stack.length = depth;
+    stack[depth] = match[2]!;
+    const methods = (match[3] ?? '').split(', ').filter((method) => method && method !== 'HEAD' && method !== 'OPTIONS');
+    for (const method of methods) routes.push(`${method.toLowerCase()} ${stack.join('')}`);
+  }
+  return routes;
+}
+
 const document = (): Json => buildOpenApiDocument({ title: 'Test API', version: '1' });
 
 describe('route registry', () => {
@@ -28,14 +47,29 @@ describe('route registry', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('covers every /api/v1 route: documented or explicitly internal, and nothing documented that does not exist', () => {
+    const actual = fastifyRoutes(t.app).filter((route) => route.split(' ')[1]!.startsWith('/api/v1/'));
+    expect(actual.length).toBeGreaterThan(100);
+    const documented = new Set(ROUTE_REGISTRY.map((route) => `${route.method} ${route.path}`));
+    const internal = new Set(INTERNAL_ROUTES.map((route) => `${route.method} ${route.path}`));
+    expect([...documented].filter((key) => internal.has(key)), 'both documented and internal').toEqual([]);
+    expect(actual.filter((key) => !documented.has(key) && !internal.has(key)), 'routes that are neither documented nor internal').toEqual([]);
+    expect([...documented, ...internal].filter((key) => !actual.includes(key)), 'listed routes that Fastify does not serve').toEqual([]);
+    for (const route of INTERNAL_ROUTES) expect(route.reason.length, route.path).toBeGreaterThan(10);
+  });
+
   it('only asks for scopes a key can hold, and leaves out the routes a key can never use', () => {
     for (const route of ROUTE_REGISTRY) {
       if (route.scope === null || route.sessionOnly) continue;
       expect(isPermission(route.scope)).toBe(true);
       expect(MACHINE_FORBIDDEN_PERMISSIONS).not.toContain(route.scope);
     }
-    const paths = ROUTE_REGISTRY.map((route) => route.path);
-    expect(paths.some((path) => /api-keys|decide|move|messages|privacy|export(?!\.csv)|webhooks|notifications|erase/.test(path))).toBe(false);
+    // What a key can never do is documented as session only, never as a key route.
+    for (const route of ROUTE_REGISTRY) {
+      if (route.scope !== null && MACHINE_FORBIDDEN_PERMISSIONS.includes(route.scope)) expect(route.sessionOnly, `${route.method} ${route.path}`).toBe(true);
+    }
+    const keyPaths = ROUTE_REGISTRY.filter((route) => route.scope !== null && !route.sessionOnly).map((route) => route.path);
+    expect(keyPaths.some((path) => /api-keys|decide|webhooks|notifications|erase|exports/.test(path))).toBe(false);
   });
 });
 
@@ -84,7 +118,7 @@ describe('OpenAPI document', () => {
 
   it('documents the public read-only API under the Public tag, with the summary and the full feed', () => {
     const doc = document();
-    const publicPaths = Object.keys(doc.paths).filter((path) => path.startsWith('/api/v1/public/organizations'));
+    const publicPaths = Object.keys(doc.paths).filter((path) => path.startsWith('/api/v1/public/organizations') && !path.endsWith('/applications'));
     expect(publicPaths.toSorted()).toEqual([
       '/api/v1/public/organizations/{orgSlug}',
       '/api/v1/public/organizations/{orgSlug}/feed',

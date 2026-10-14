@@ -1,9 +1,11 @@
 import { importFileKey, type ImportBatch, type ParsedImportCvInput, type ParsedImportRow } from '@tt/domain';
-import { buildJob, fakeDocxBytes, fakePdfBytes, ORG_A, seedImportWorld, userActor, type ImportSeedOptions, type TestImportDeps } from '../../testing/index.js';
-import { createImportBatch } from './create-import-batch.js';
-import { recordImportAnalysis, startImportAnalysis } from './analyze.js';
-import { requestImportCommit } from './request-commit.js';
-import { commitImport } from './commit-import.js';
+import { buildJob, fakeDocxBytes, fakePdfBytes, ORG_A, seedImportWorld, userActor, type ImportSeedOptions, type TestImportDeps } from './index.js';
+import { createImportBatch } from '../use-cases/imports/create-import-batch.js';
+import { recordImportAnalysis, startImportAnalysis } from '../use-cases/imports/analyze.js';
+import { requestImportCommit } from '../use-cases/imports/request-commit.js';
+import { commitImport } from '../use-cases/imports/commit-import.js';
+import { deliverMessage } from '../use-cases/messaging/deliver-message.js';
+import { systemActor } from './actors.js';
 
 export const recruiter = userActor({ id: 'user_rec', organizationId: ORG_A, role: 'recruiter' });
 export const outsider = userActor({ id: 'user_out', organizationId: 'org_b', role: 'owner' });
@@ -57,3 +59,19 @@ export const MARIO: CvSpec = { file: 'Mario_Rossi.pdf', name: 'Mario Rossi', ema
 export const GIULIA: CvSpec = { file: 'Giulia_Bianchi.docx', name: 'Giulia Bianchi' };
 export const MARIO_ROW = row(2, { Nome: 'Mario', Cognome: 'Rossi', Email: 'mario@example.com', Telefono: '333 111', Note: 'Ottimo colloquio', Tag: 'java' });
 export const GIULIA_ROW = row(3, { Nome: 'Giulia', Cognome: 'Bianchi', Email: 'giulia@example.com' });
+
+/**
+ * Plays the `email.send` worker for every queued message. Returns, by application, the consent secret the
+ * reconfirmation email carried: it exists only in the sent email, never in the database.
+ */
+export async function deliverQueued(deps: TestImportDeps): Promise<ReadonlyMap<string, string>> {
+  const secrets = new Map<string, string>();
+  for (const message of deps.messagingStore.read().messages.filter((m) => m.status === 'queued')) {
+    const before = deps.sender.sent().length;
+    await deliverMessage(deps, systemActor({ organizationId: message.organizationId }), { organizationId: message.organizationId, messageId: message.id });
+    const email = deps.sender.sent()[before];
+    const secret = email ? /\/consent\/(\S+)/.exec(email.text)?.[1] : undefined;
+    if (secret) secrets.set(message.applicationId, secret);
+  }
+  return secrets;
+}

@@ -23,8 +23,10 @@ export function createInMemoryJobRequests(initial: readonly JobRequest[] = []): 
       rows.set([...rows.get(), request]);
       return request;
     },
-    async save(request) {
-      rows.set(rows.get().map((r) => (r.organizationId === request.organizationId && r.id === request.id ? request : r)));
+    async transition(from, request) {
+      const current = rows.get().find((r) => r.organizationId === request.organizationId && r.id === request.id);
+      if (!current || current.status !== from) return null;
+      rows.set(rows.get().map((r) => (r === current ? request : r)));
       return request;
     },
     async findById(organizationId, id) {

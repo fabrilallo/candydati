@@ -117,15 +117,15 @@ describe('publishWebhookEvents', () => {
       ],
       outbox: [buildOutboxEvent()],
     });
-    expect(await publish(deps)).toEqual({ published: 1, enqueued: 1, pending: 0 });
+    expect(await publish(deps)).toEqual({ published: 1, enqueued: 1, pending: 0, failures: expect.any(Array) });
     expect(deps.queue.jobs()).toEqual([{ name: 'webhook.deliver', payload: { organizationId: ORG_A, eventId: 'evt_1', endpointId: 'a' } }]);
     expect(deps.outbox.snapshot()[0]?.publishedAt).toEqual(NOW);
-    expect(await publish(deps)).toEqual({ published: 0, enqueued: 0, pending: 0 });
+    expect(await publish(deps)).toEqual({ published: 0, enqueued: 0, pending: 0, failures: expect.any(Array) });
   });
 
   it.each(['job.published', 'job.updated', 'job.closed'] as const)('queues one distribution sync of the job for %s, with or without subscribers', async (type) => {
     const deps = world({ endpoints: [buildWebhookEndpoint({ events: [type] })], outbox: [buildOutboxEvent({ type, data: { jobId: 'job_9' } })] });
-    expect(await publish(deps)).toEqual({ published: 1, enqueued: 1, pending: 0 });
+    expect(await publish(deps)).toEqual({ published: 1, enqueued: 1, pending: 0, failures: expect.any(Array) });
     expect(deps.queue.jobs()).toEqual([
       { name: 'webhook.deliver', payload: { organizationId: ORG_A, eventId: 'evt_1', endpointId: 'hook_1' } },
       { name: 'distribution.sync', payload: { organizationId: ORG_A, jobId: 'job_9' } },
@@ -143,19 +143,19 @@ describe('publishWebhookEvents', () => {
 
   it('retries the whole event, sync included, when the distribution task cannot be queued', async () => {
     const failing = world({ outbox: [buildOutboxEvent({ type: 'job.closed', data: { jobId: 'job_9' } })], automationOverrides: { queue: createInMemoryTaskQueue(new Error('down')) } });
-    expect(await publish(failing)).toEqual({ published: 0, enqueued: 0, pending: 1 });
+    expect(await publish(failing)).toEqual({ published: 0, enqueued: 0, pending: 1, failures: expect.any(Array) });
   });
 
   it('marks an event with no subscriber as published, and leaves pings alone', async () => {
     const deps = world({ outbox: [buildOutboxEvent(), buildOutboxEvent({ id: 'ping_1', type: 'ping' })] });
-    expect(await publish(deps)).toEqual({ published: 1, enqueued: 0, pending: 1 });
+    expect(await publish(deps)).toEqual({ published: 1, enqueued: 0, pending: 1, failures: expect.any(Array) });
   });
 
   it('leaves the event unpublished when a delivery cannot be enqueued, so the next run retries', async () => {
     const seed = { endpoints: [buildWebhookEndpoint()], outbox: [buildOutboxEvent(), buildOutboxEvent({ id: 'evt_2' })] };
     const failing = world({ ...seed, automationOverrides: { queue: createInMemoryTaskQueue(new Error('down')) } });
-    expect(await publish(failing)).toEqual({ published: 0, enqueued: 0, pending: 2 });
-    expect(await publish(world(seed))).toEqual({ published: 2, enqueued: 2, pending: 0 });
+    expect(await publish(failing)).toEqual({ published: 0, enqueued: 0, pending: 2, failures: expect.any(Array) });
+    expect(await publish(world(seed))).toEqual({ published: 2, enqueued: 2, pending: 0, failures: expect.any(Array) });
   });
 
   it('respects the batch limit and validates it', async () => {

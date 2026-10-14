@@ -1,9 +1,9 @@
 import { dataExportKey, emptyImportCounts } from '@tt/domain';
-import { buildApplication, createFakeEmailSender, createInMemoryFileStorage, ORG_A, ORG_B, seedImportWorld, seedPrivacyData, userActor } from '@tt/core/testing';
+import { buildApplication, createFakeEmailSender, createInMemoryFileStorage, ORG_A, ORG_B, seedImportWorld, seedPrivacyData, userActor, createInMemoryTransaction } from '@tt/core/testing';
+import { formatDigestFrom } from '@tt/core';
 import { requestOrganizationExport } from '@tt/core';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
-import { formatDigestFrom } from '../deadlines/digest.js';
 import { createFilesDeleteQueue } from './files-delete.js';
 import { createOrganizationExportQueue } from './organization-export.js';
 import { createRetentionRunQueue, RETENTION_RUN_CRON } from './retention-run.js';
@@ -66,7 +66,7 @@ describe('retention.run: abandoned imports', () => {
       retention,
       imports,
       importStaleDays: 7,
-      digest: { sender: createFakeEmailSender(), from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' },
+      digest: { transaction: createInMemoryTransaction(), mail: { sender: createFakeEmailSender(), from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' } },
       now: () => NOW,
     });
     await queue.handle(job({}));
@@ -90,7 +90,7 @@ describe('retention.run', () => {
       retention: deps,
       imports: seedImportWorld(),
       importStaleDays: 7,
-      digest: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' },
+      digest: { transaction: createInMemoryTransaction(), mail: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' } },
       now: () => NOW,
     });
     expect(queue.schedule).toEqual({ cron: '0 3 * * *', data: {} });

@@ -47,6 +47,47 @@ function readAttributes(source: string, start: number): { attributes: Record<str
   return { attributes, end: position };
 }
 
+interface SpecialMarkup {
+  readonly end: number;
+  readonly text?: string;
+  readonly error?: string;
+}
+
+/** Declarations, comments and CDATA sections: `end` is the offset after them, `text` the CDATA content. */
+function readSpecialMarkup(source: string, position: number): SpecialMarkup | null {
+  const kinds: ReadonlyArray<{ open: string; close: string; error: string; text: boolean }> = [
+    { open: '<?', close: '?>', error: 'Unterminated declaration', text: false },
+    { open: '<!--', close: '-->', error: 'Unterminated comment', text: false },
+    { open: '<![CDATA[', close: ']]>', error: 'Unterminated CDATA', text: true },
+  ];
+  const kind = kinds.find((candidate) => source.startsWith(candidate.open, position));
+  if (!kind) return null;
+  const end = source.indexOf(kind.close, position);
+  if (end === -1) return { end: position, error: kind.error };
+  const after = end + kind.close.length;
+  return kind.text ? { end: after, text: source.slice(position + kind.open.length, end) } : { end: after };
+}
+
+type StartTag =
+  | { readonly ok: true; readonly element: MutableElement; readonly end: number; readonly selfClosing: boolean }
+  | { readonly ok: false; readonly message: string };
+
+/** Reads `<name attr="v" ...>` or `<name ... />` at `position`; `end` is the offset just past the closing `>`. */
+function readStartTag(source: string, position: number): StartTag {
+  const nameMatch = new RegExp(`^<(${NAME})`).exec(source.slice(position, position + 200));
+  if (!nameMatch) return { ok: false, message: 'Malformed tag' };
+  const name = nameMatch[1]!;
+  const { attributes, end } = readAttributes(source, position + nameMatch[0].length);
+  const rest = /^\s*(\/?)>/.exec(source.slice(end, end + 20));
+  if (!rest) return { ok: false, message: `Malformed tag <${name}>` };
+  return {
+    ok: true,
+    element: { name, attributes, children: [], text: '' },
+    end: end + rest[0].length,
+    selfClosing: rest[1] === '/',
+  };
+}
+
 export function parseXml(source: string): XmlElement {
   let position = 0;
   let root: MutableElement | null = null;
@@ -67,20 +108,12 @@ export function parseXml(source: string): XmlElement {
     }
     if (next > position) currentText(decode(source.slice(position, next)));
     position = next;
-    if (source.startsWith('<?', position)) {
-      const end = source.indexOf('?>', position);
-      if (end === -1) fail('Unterminated declaration');
-      position = end + 2;
-    } else if (source.startsWith('<!--', position)) {
-      const end = source.indexOf('-->', position);
-      if (end === -1) fail('Unterminated comment');
-      position = end + 3;
-    } else if (source.startsWith('<![CDATA[', position)) {
-      const end = source.indexOf(']]>', position);
-      if (end === -1) fail('Unterminated CDATA');
-      if (stack.length === 0) fail('CDATA outside the root element');
-      currentText(source.slice(position + 9, end));
-      position = end + 3;
+    const special = readSpecialMarkup(source, position);
+    if (special) {
+      if (special.error) fail(special.error);
+      if (special.text !== undefined && stack.length === 0) fail('CDATA outside the root element');
+      if (special.text !== undefined) currentText(special.text);
+      position = special.end;
     } else if (source.startsWith('</', position)) {
       const end = source.indexOf('>', position);
       const name = source.slice(position + 2, end).trim();
@@ -88,19 +121,16 @@ export function parseXml(source: string): XmlElement {
       if (end === -1 || !open || open.name !== name) fail(`Mismatched closing tag </${name}>`);
       position = end + 1;
     } else {
-      const nameMatch = new RegExp(`^<(${NAME})`).exec(source.slice(position, position + 200));
-      if (!nameMatch) fail('Malformed tag');
-      const name = nameMatch![1]!;
-      const { attributes, end } = readAttributes(source, position + nameMatch![0].length);
-      const rest = /^\s*(\/?)>/.exec(source.slice(end, end + 20));
-      if (!rest) fail(`Malformed tag <${name}>`);
-      const element: MutableElement = { name, attributes, children: [], text: '' };
-      const parent = stack.at(-1);
-      if (parent) parent.children.push(element);
-      else if (root) fail('More than one root element');
-      else root = element;
-      if (rest![1] !== '/') stack.push(element);
-      position = end + rest![0].length;
+      const tag = readStartTag(source, position);
+      if (!tag.ok) fail(tag.message);
+      else {
+        const parent = stack.at(-1);
+        if (parent) parent.children.push(tag.element);
+        else if (root) fail('More than one root element');
+        else root = tag.element;
+        if (!tag.selfClosing) stack.push(tag.element);
+        position = tag.end;
+      }
     }
   }
   if (stack.length > 0) fail('Unclosed element');

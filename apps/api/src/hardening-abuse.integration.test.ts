@@ -1,3 +1,4 @@
+import { applicationsBusyMessage } from '@tt/domain';
 import { afterAll, describe, expect, it } from 'vitest';
 import { createInMemorySignInLockout, SIGN_IN_LOCK_MS, SIGN_IN_MAX_FAILURES } from './auth/sign-in-lockout.js';
 import { createWorld, personForm } from './testing/candidate-world.js';
@@ -100,7 +101,7 @@ describe('daily caps on public applications', () => {
     expect((await w.submit(personForm())).statusCode).toBe(201);
     const refused = await w.submit(personForm());
     expect(refused.statusCode).toBe(429);
-    expect(refused.json()).toMatchObject({ success: false, error: { code: 'rate_limited', message: expect.stringContaining('try again tomorrow') } });
+    expect(refused.json()).toMatchObject({ success: false, error: { code: 'rate_limited', message: applicationsBusyMessage('it') } });
     const cards = (await w.owner.get<{ applications: unknown[] }>(`/api/v1/jobs/${w.job.id}/pipeline`)).body.data!.applications;
     expect(cards).toHaveLength(2);
   });

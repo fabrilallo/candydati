@@ -8,7 +8,7 @@ import type {
 } from './candidate-ports.js';
 import type { FileStorage, CvSniffer, TaskQueue } from './intake-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
-import type { MessagingDeps } from './messaging-ports.js';
+import type { ConversationRepository, MessageRepository, MessagingDeps } from './messaging-ports.js';
 import type { StageEventRepository } from './report-ports.js';
 import type { CoreDeps } from './ports.js';
 import type { ErasureDeps } from './privacy-ports.js';
@@ -84,6 +84,11 @@ export interface ConsentTokenRepository {
   findByHash(tokenHash: string): Promise<ConsentToken | null>;
   /** Marks the token used; false when it was already used (single use, safe under concurrency). */
   markUsed(tokenHash: string, at: Date): Promise<boolean>;
+  /**
+   * Replaces the hash of the application's unused token (the link about to be emailed) and pushes its expiry to at least
+   * `expiresAt`: any earlier link stops working. False when no unused token is left (answered, or erased).
+   */
+  rotate(organizationId: string, applicationId: string, tokenHash: string, expiresAt: Date): Promise<boolean>;
 }
 
 /** What the recruiter-facing import use cases need. */
@@ -114,6 +119,11 @@ export interface ImportCommitRepositories {
   readonly stageEvents: StageEventRepository;
   readonly importItems: ImportItemRepository;
   readonly consentTokens: ConsentTokenRepository;
+  /** The reconfirmation request is stored as a queued message in the same transaction as the person it asks. */
+  readonly messages: MessageRepository;
+  readonly conversations: ConversationRepository;
+  /** Runs `work` in a savepoint: one failing item is undone alone and the chunk goes on. */
+  savepoint<T>(work: () => Promise<T>): Promise<T>;
 }
 
 /** Runs `work` in ONE database transaction: if it throws, nothing it wrote remains. */

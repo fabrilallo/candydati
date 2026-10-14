@@ -14,9 +14,8 @@ import {
 import { z } from 'zod';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import type { PublicFeedbackDeps } from '../../feedback-ports.js';
-import { definePublicFeedbackQuery } from './define.js';
-import { FEEDBACK_PAGE_ACTOR, stageContextOf } from './shared.js';
-import { inTransaction } from '../../transaction.js';
+import { definePublicFeedbackCommand, definePublicFeedbackQuery } from './define.js';
+import { FEEDBACK_PAGE_ACTOR_ID, stageContextOf } from './shared.js';
 import { sequential } from '../../sequential.js';
 
 const tokenInput = z.object({ token: z.string().min(16).max(200) });
@@ -98,10 +97,12 @@ export interface FeedbackCvFile {
 }
 
 /** The candidate's CV for the interviewer who holds the link, audited as `feedback.cv_opened` (ids only). */
-export const openFeedbackCv = definePublicFeedbackQuery({
+export const openFeedbackCv = definePublicFeedbackCommand({
   name: 'openFeedbackCv',
   input: tokenInput,
-  handler: async ({ deps, input }): Promise<FeedbackCvFile> => {
+  actorId: FEEDBACK_PAGE_ACTOR_ID,
+  audit: { skip: 'appended by the handler in the command transaction: the event needs ids the result does not carry' },
+  handler: async ({ deps, input, actor }): Promise<FeedbackCvFile> => {
     const { request, application } = await resolve(deps, input.token);
     let bytes: Uint8Array;
     try {
@@ -111,7 +112,7 @@ export const openFeedbackCv = definePublicFeedbackQuery({
     }
     await deps.auditLog.append({
       organizationId: request.organizationId,
-      actor: FEEDBACK_PAGE_ACTOR,
+      actor,
       action: 'feedback.cv_opened',
       target: { type: 'feedback_request', id: request.id },
       metadata: { applicationId: application.id },
@@ -130,20 +131,21 @@ export interface SubmitFeedbackResult {
  * Single use: one submission per link, then the link is read-only. Answers must belong to the stage's questions and the
  * required ones must be filled. There is no score and nothing else is accepted (the input is strict).
  */
-export const submitFeedback = definePublicFeedbackQuery({
+export const submitFeedback = definePublicFeedbackCommand({
   name: 'submitFeedback',
   input: submitInput,
-  handler: async ({ deps, input }): Promise<SubmitFeedbackResult> => {
+  actorId: FEEDBACK_PAGE_ACTOR_ID,
+  audit: { skip: 'appended by the handler in the command transaction: the event needs ids the result does not carry' },
+  handler: async ({ deps, input, actor }): Promise<SubmitFeedbackResult> => {
     const { request, application, job } = await resolve(deps, input.token);
     if (request.submittedAt !== null) throw new ConflictError('already_submitted');
     const stage = stageContextOf(job, request.stageId);
     const checked = checkAnswers(stage.declared?.type ?? null, input.answers);
     if (checked.issues.length > 0) throw new ValidationError(checked.issues.map((issue) => ({ path: issue.path, message: issue.message })));
     const submittedAt = deps.now();
-    return inTransaction(deps, async (tx) => {
-      // Single use: the guarded mark and the unique request id both decide a race between two submissions of the link.
-      if (!(await tx.feedbackRequests.markSubmitted(request.organizationId, request.id, submittedAt))) throw new ConflictError('already_submitted');
-      await tx.interviewFeedback.create({
+    // Single use: the guarded mark and the unique request id both decide a race between two submissions of the link.
+    if (!(await deps.feedbackRequests.markSubmitted(request.organizationId, request.id, submittedAt))) throw new ConflictError('already_submitted');
+    await deps.interviewFeedback.create({
       id: deps.newId(),
       organizationId: request.organizationId,
       applicationId: application.id,
@@ -152,16 +154,15 @@ export const submitFeedback = definePublicFeedbackQuery({
       interviewerName: request.interviewerName,
       answers: checked.answers,
       recommendation: input.recommendation,
-        submittedAt,
-      });
-      await tx.auditLog.append({
-        organizationId: request.organizationId,
-        actor: FEEDBACK_PAGE_ACTOR,
-        action: 'feedback.submitted',
-        target: { type: 'feedback_request', id: request.id },
-        metadata: { applicationId: application.id, stageId: request.stageId, recommendation: input.recommendation },
-      });
-      return { submittedAt };
+      submittedAt,
     });
+    await deps.auditLog.append({
+      organizationId: request.organizationId,
+      actor,
+      action: 'feedback.submitted',
+      target: { type: 'feedback_request', id: request.id },
+      metadata: { applicationId: application.id, stageId: request.stageId, recommendation: input.recommendation },
+    });
+    return { submittedAt };
   },
 });

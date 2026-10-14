@@ -16,6 +16,13 @@ function assertSubmitted(request: JobRequest): void {
   if (request.status !== 'submitted') throw new ConflictError(`Request is already ${request.status}.`);
 }
 
+/** Guarded write: of two decisions that read the same status, the second finds it changed and is a conflict. */
+async function transition(deps: JobRequestDeps, from: JobRequest, next: JobRequest): Promise<JobRequest> {
+  const saved = await deps.jobRequests.transition(from.status, next);
+  if (!saved) throw new ConflictError('Request was decided meanwhile.');
+  return saved;
+}
+
 /**
  * Owners and admins sign off the budget. A request made for an existing draft puts the approval on that job at once; a
  * request for a new position becomes convertible. The requester is notified.
@@ -35,8 +42,7 @@ export const approveJobRequest = defineJobRequestUseCase({
     const now = deps.now();
     const by = decidedBy(actor);
     const approval = { approvedBy: by, approvedAt: now, salaryMin: request.salaryMin, salaryMax: request.salaryMax, currency: request.currency };
-    if (request.jobId !== null) await deps.approvals.set(actor.organizationId, request.jobId, approval);
-    const saved = await deps.jobRequests.save({
+    const saved = await transition(deps, request, {
       ...request,
       status: request.jobId === null ? 'approved' : 'converted',
       decidedBy: by,
@@ -44,6 +50,7 @@ export const approveJobRequest = defineJobRequestUseCase({
       decisionNote: input.note ?? null,
       updatedAt: now,
     });
+    if (request.jobId !== null) await deps.approvals.set(actor.organizationId, request.jobId, approval);
     await notifyRequester(deps, saved, by);
     return saved;
   },
@@ -60,7 +67,7 @@ export const rejectJobRequest = defineJobRequestUseCase({
     assertSubmitted(request);
     const now = deps.now();
     const by = decidedBy(actor);
-    const saved = await deps.jobRequests.save({ ...request, status: 'rejected', decidedBy: by, decidedAt: now, decisionNote: input.note, updatedAt: now });
+    const saved = await transition(deps, request, { ...request, status: 'rejected', decidedBy: by, decidedAt: now, decisionNote: input.note, updatedAt: now });
     await notifyRequester(deps, saved, by);
     return saved;
   },
@@ -119,7 +126,8 @@ export const convertJobRequest = defineJobRequestUseCase({
         currency: request.currency,
       });
     }
-    await deps.jobRequests.save({ ...request, status: 'converted', jobId: job.id, updatedAt: now });
+    // The draft is rolled back with the transaction when another convert claimed the request first.
+    await transition(deps, request, { ...request, status: 'converted', jobId: job.id, updatedAt: now });
     await deps.auditLog.append({
       organizationId: actor.organizationId,
       actor: toAuditActor(actor),

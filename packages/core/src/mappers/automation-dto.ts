@@ -61,7 +61,7 @@ export interface AutomationRuleDto {
   readonly createdAt: string;
 }
 
-export const toAttentionItemDto = (view: AttentionItemView): AttentionItemDto => ({
+const toAttentionItemDto = (view: AttentionItemView): AttentionItemDto => ({
   applicationId: view.application.id,
   candidate: { id: view.candidate.id, firstName: view.candidate.firstName, lastName: view.candidate.lastName },
   job: { id: view.job.id, title: view.job.content.title },

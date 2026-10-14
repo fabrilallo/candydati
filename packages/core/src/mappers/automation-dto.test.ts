@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildApplication, buildAutomationRule, buildCandidate, buildJob, buildNotification, buildTask } from '../testing/index.js';
-import { toAttentionItemDto, toAttentionItemDtos, toAutomationRuleDto, toNotificationDto, toTaskDto } from './automation-dto.js';
+import { toAttentionItemDtos, toAutomationRuleDto, toNotificationDto, toTaskDto } from './automation-dto.js';
 
 const candidate = buildCandidate();
 const job = buildJob({ id: 'job_1' });
@@ -15,7 +15,8 @@ describe('automation DTO mappers', () => {
       state: 'due_soon' as const,
       ownerName: 'Olivia',
     };
-    expect(toAttentionItemDto(view)).toEqual({
+    const one = (item: typeof view) => toAttentionItemDtos({ items: [item], total: 1, page: 1, limit: 20 })[0];
+    expect(one(view)).toEqual({
       applicationId: 'app_1',
       candidate: { id: 'cand_1', firstName: 'Ada', lastName: 'Lovelace' },
       job: { id: 'job_1', title: 'Backend Developer' },
@@ -24,8 +25,7 @@ describe('automation DTO mappers', () => {
       state: 'due_soon',
       ownerName: 'Olivia',
     });
-    expect(toAttentionItemDtos({ items: [view], total: 1, page: 1, limit: 20 })).toHaveLength(1);
-    expect(toAttentionItemDto({ ...view, application: buildApplication(), stageLabel: null }).stage.label).toBeNull();
+    expect(one({ ...view, application: buildApplication(), stageLabel: null })?.stage.label).toBeNull();
   });
 
   it('maps a notification with context and null dates', () => {

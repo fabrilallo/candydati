@@ -6,7 +6,8 @@ import { isUniqueViolation, type DbExecutor } from './db-executor.js';
 
 type Row = typeof schema.candidate.$inferSelect;
 
-export const toCandidate = (row: Row): Candidate => ({ ...row });
+/** `lastAppliedAt` belongs to the database (trigger): it is not part of the domain candidate and is never written back. */
+export const toCandidate = ({ lastAppliedAt: _lastAppliedAt, ...row }: Row): Candidate => ({ ...row });
 
 const toValues = (candidate: Candidate) => ({ ...candidate, tags: [...candidate.tags] });
 

@@ -1,7 +1,5 @@
-import type { ApplicationCardDto, CandidateDetailDto, Outcome  } from '@tt/domain'
+import type { ApplicationCardDto, CandidateDetailDto, Outcome } from '@tt/domain'
 import type { MaybeRefOrGetter } from 'vue'
-import { toast } from 'vue-sonner'
-import { errorKeyOf } from '@/lib/auth-errors'
 import { addNote, decideApplication, getCandidate, moveApplication, updateCandidateTags } from '@/lib/candidate-api'
 import { loaded } from '@/lib/job-api'
 
@@ -31,31 +29,15 @@ const withCard = (detail: CandidateDetailDto, card: ApplicationCardDto): Candida
  * Each action returns what changed so a board behind the sheet can follow.
  */
 export const useCandidate = (candidateId: MaybeRefOrGetter<string>, viaJobId: MaybeRefOrGetter<string | null> = null) => {
-  const { t } = useI18n()
   const request = useJobsApi()
   const { data, status, refresh } = useFreshAsyncData(
     () => `candidate-${toValue(candidateId)}-${toValue(viaJobId) ?? ''}`,
     () => loaded(() => getCandidate(request, toValue(candidateId), toValue(viaJobId))),
   )
-  const detail = ref<CandidateDetailDto | null>(data.value?.data ?? null)
-  watch(data, (fresh) => {
-    detail.value = fresh?.data ?? null
-  })
+  const detail = useSyncedData<CandidateDetailDto>(data)
   const busy = ref<Busy>(null)
 
-  const run = async <T>(kind: Exclude<Busy, null>, action: () => Promise<T>, successKey: string | null): Promise<T | null> => {
-    busy.value = kind
-    try {
-      const result = await action()
-      if (successKey) toast.success(t(successKey))
-      return result
-    } catch (error) {
-      toast.error(t(errorKeyOf(error)))
-      return null
-    } finally {
-      busy.value = null
-    }
-  }
+  const run = useBusyRunner(busy)
 
   const applyCard = (card: ApplicationCardDto | null): ApplicationCardDto | null => {
     if (card && detail.value) detail.value = withCard(detail.value, card)

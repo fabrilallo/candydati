@@ -1,12 +1,24 @@
 import type { Locale } from '../platform/config.js';
 import { IMPORT_RECONFIRM_DAYS } from './import.js';
 
+/**
+ * Stands for the consent link in a stored reconfirmation message. The link carries a single-use secret, so it is never
+ * stored: the delivery puts a fresh one in at send time (`renderConsentLink`) and keeps only its hash.
+ */
+export const CONSENT_LINK = '{{consent_link}}';
+
+/** The body to send: the placeholder replaced by the link. */
+export const renderConsentLink = (body: string, url: string): string => body.split(CONSENT_LINK).join(url);
+
+/** A system message holding the placeholder is a reconfirmation request. */
+export const isConsentRequestBody = (body: string): boolean => body.includes(CONSENT_LINK);
+
 export interface ReconfirmEmailInput {
   readonly language: Locale;
   readonly firstName: string;
   readonly organizationName: string;
   readonly jobTitle: string;
-  /** Public link `/consent/{token}`. */
+  /** Public link `/consent/{token}`, or `CONSENT_LINK` for a message stored before sending. */
   readonly url: string;
 }
 

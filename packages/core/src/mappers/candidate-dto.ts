@@ -201,7 +201,7 @@ export const toPipelineDto = (view: PipelineView): PipelineDto => ({
   applications: view.cards.map(toApplicationCardDto),
 });
 
-export const toCandidateSummaryDto = ({ candidate, applicationCount, lastAppliedAt }: CandidateSummary): CandidateSummaryDto => ({
+const toCandidateSummaryDto = ({ candidate, applicationCount, lastAppliedAt }: CandidateSummary): CandidateSummaryDto => ({
   id: candidate.id,
   firstName: candidate.firstName,
   lastName: candidate.lastName,

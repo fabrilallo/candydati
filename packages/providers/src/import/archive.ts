@@ -91,24 +91,62 @@ function validate(central: readonly CentralEntry[], limits: ImportLimits): Reado
   return wanted;
 }
 
+export interface ArchiveEntryInfo {
+  /** Name inside the archive, as `inflate` expects it. */
+  readonly name: string;
+  /** Normalised path. */
+  readonly path: string;
+  /** Declared size once inflated. */
+  readonly size: number;
+}
+
+export interface ImportArchive {
+  /** Files worth reading (no directories, `__MACOSX` or dotfiles). Nothing is inflated yet. */
+  readonly entries: readonly ArchiveEntryInfo[];
+  /** Every central-directory entry, the ignored ones included: what counts against the batch entry budget. */
+  readonly entryCount: number;
+  /** Sum of the declared sizes of every entry: what counts against the batch expanded-size budget. */
+  readonly declaredBytes: number;
+  /** Inflates one entry; only that entry is held in memory. */
+  inflate(name: string): Uint8Array;
+}
+
 /**
- * Safe unzip in memory. Rejects the whole archive on absolute paths, `..`, symlinks, too many entries, too much
- * expanded data or a suspicious ratio. Nested archives are returned as plain files, never expanded.
- * `__MACOSX` and dotfiles are skipped.
+ * Validates the archive (every entry, also the ignored ones) without inflating anything, then lets the caller inflate
+ * entries one at a time. Rejects absolute paths, `..`, symlinks, too many entries, too much expanded data or a suspicious
+ * ratio. Nested archives are plain files, never expanded. `__MACOSX` and dotfiles are skipped.
  */
+export function openImportArchive(bytes: Uint8Array, limits: ImportLimits = DEFAULT_IMPORT_LIMITS): ImportArchive {
+  const central = readCentralDirectory(bytes, limits);
+  const wanted = validate(central, limits);
+  const declared = new Map(central.map((entry) => [entry.name, entry.size]));
+  return {
+    entries: [...wanted].map(([name, path]) => ({ name, path, size: declared.get(name) ?? 0 })),
+    entryCount: central.length,
+    declaredBytes: central.reduce((sum, entry) => sum + entry.size, 0),
+    inflate(name) {
+      let files: Record<string, Uint8Array>;
+      try {
+        files = unzipSync(bytes, { filter: (file) => file.name === name });
+      } catch {
+        throw new ImportError('invalid_archive', 'The ZIP archive could not be read.');
+      }
+      const content = files[name];
+      if (!content) throw new ImportError('invalid_archive', 'The ZIP archive could not be read.');
+      // The declared size was checked against the limits: a lying header must not slip a bigger entry through.
+      if (content.byteLength > (declared.get(name) ?? 0)) throw new ImportError('too_large', 'An archive entry is larger than declared.');
+      return content;
+    },
+  };
+}
+
+/** Safe unzip of a whole archive in memory (see `openImportArchive`). Prefer that one for big archives. */
 export function readImportArchive(bytes: Uint8Array, limits: ImportLimits = DEFAULT_IMPORT_LIMITS): readonly ImportEntry[] {
-  const wanted = validate(readCentralDirectory(bytes, limits), limits);
-  let files: Record<string, Uint8Array>;
-  try {
-    files = unzipSync(bytes, { filter: (file) => wanted.has(file.name) });
-  } catch {
-    throw new ImportError('invalid_archive', 'The ZIP archive could not be read.');
-  }
+  const archive = openImportArchive(bytes, limits);
   const entries: ImportEntry[] = [];
   let total = 0;
-  for (const [name, path] of wanted) {
-    const content = files[name];
-    if (!content) continue;
+  for (const { name, path } of archive.entries) {
+    const content = archive.inflate(name);
     total += content.byteLength;
     if (total > limits.maxTotalBytes) throw new ImportError('too_large', 'The archive expands to too much data.');
     entries.push({ path, bytes: content });

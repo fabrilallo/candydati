@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { reconfirmEmail } from './reconfirm-email.js';
+import { reconfirmEmail, CONSENT_LINK, isConsentRequestBody, renderConsentLink } from './reconfirm-email.js';
 import { IMPORT_RECONFIRM_DAYS, importFileKey, importFilePrefix, isPlaceholderEmail, placeholderEmail } from './import.js';
 
 describe('reconfirmEmail', () => {
@@ -24,5 +24,16 @@ describe('import keys and placeholders', () => {
   it('recognises the placeholder email', () => {
     expect(isPlaceholderEmail(placeholderEmail('c1'))).toBe(true);
     expect(isPlaceholderEmail('ada@example.com')).toBe(false);
+  });
+});
+
+describe('consent link placeholder', () => {
+  it('marks a stored reconfirmation body and is replaced by the link only when sending', () => {
+    const stored = reconfirmEmail({ language: 'en', firstName: 'Ada', organizationName: 'Acme', jobTitle: 'Backend', url: CONSENT_LINK }).body;
+    expect(isConsentRequestBody(stored)).toBe(true);
+    expect(isConsentRequestBody('Hello')).toBe(false);
+    const sent = renderConsentLink(stored, 'https://app.example/consent/s3cret');
+    expect(sent).toContain('https://app.example/consent/s3cret');
+    expect(isConsentRequestBody(sent)).toBe(false);
   });
 });

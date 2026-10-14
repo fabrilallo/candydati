@@ -314,6 +314,13 @@ describe('createDrizzleCandidateSearch', () => {
     expect(page.items).toHaveLength(1);
   });
 
+  it('answers deep pages with no rows but the real total, and a page past the end with the total', async () => {
+    const deep = await search.search({ organizationId: org, page: 100_000, limit: 25 });
+    expect(deep).toEqual({ items: [], total: 4 });
+    const past = await search.search({ organizationId: org, page: 3, limit: 3 });
+    expect(past).toEqual({ items: [], total: 4 });
+  });
+
   it('never returns another organization, even with a matching CV text', async () => {
     const result = await search.search({ organizationId: orgB, query: 'kubernetes', page: 1, limit: 25 });
     expect(result).toEqual({ items: [], total: 0 });

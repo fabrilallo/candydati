@@ -46,6 +46,10 @@ export default defineNuxtConfig({
   nitro: { preset: 'node-server' },
   runtimeConfig: {
     apiInternalUrl: API_ORIGIN,
+    /** `NUXT_API_MAX_BODY_BYTES`: largest request body the proxy streams to the api (default 204 MiB, the api's biggest route limit). */
+    apiMaxBodyBytes: 204 * 1024 * 1024,
+    /** `NUXT_API_TIMEOUT_MS`: how long the proxy waits for the api to start answering (default 5 minutes). */
+    apiTimeoutMs: 300_000,
     /** `NUXT_TRUST_CLOUDFLARE=true`: only when the site is reachable through Cloudflare alone; then `cf-connecting-ip` is the client IP. */
     trustCloudflare: false,
     public: {

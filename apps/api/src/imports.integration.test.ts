@@ -113,7 +113,7 @@ describe('import: full flow', () => {
     expect((await w.owner.post(`/api/v1/imports/${id}/commit`)).status).toBe(409);
 
     // Reconfirm Anna through the public page.
-    const annaToken = await consentTokenOf(w.owner, anna.id);
+    const annaToken = await consentTokenOf(t, w.owner, anna.id);
     const request = await publicGet(annaToken);
     expect(request.statusCode).toBe(200);
     expect(request.headers['cache-control']).toBe('no-store');
@@ -127,11 +127,11 @@ describe('import: full flow', () => {
 
     // Bruno (the sheet writes his name as "Neri Bruno") declines: erased at once. Carla's link expires: 404.
     const brunoCard = applications.find((card) => card.candidate.firstName === 'Neri')!;
-    const declined = await publicPost(await consentTokenOf(w.owner, brunoCard.id), { decline: true });
+    const declined = await publicPost(await consentTokenOf(t, w.owner, brunoCard.id), { decline: true });
     expect(declined.json()).toMatchObject({ data: { status: 'declined' } });
     expect((await cards(w)).map((card) => card.candidate.firstName).toSorted()).toEqual(['Anna', 'Carla']);
     const carla = applications.find((card) => card.candidate.firstName === 'Carla')!;
-    const carlaToken = await consentTokenOf(w.owner, carla.id);
+    const carlaToken = await consentTokenOf(t, w.owner, carla.id);
     await t.handle.db.update(schema.consentToken).set({ expiresAt: new Date(Date.now() - 1000) }).where(eq(schema.consentToken.applicationId, carla.id));
     expect((await publicGet(carlaToken)).statusCode).toBe(404);
     expect((await publicGet('x'.repeat(32))).statusCode).toBe(404);

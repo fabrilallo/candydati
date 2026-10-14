@@ -1,5 +1,5 @@
 import type { DataExport, RetentionRun } from '@tt/domain';
-import type { DataExportRepository, ErasureTransaction, RetentionRunRepository, ZipWriter, ZipWriterFactory } from '../privacy-ports.js';
+import type { DataExportRepository, ErasureTransaction, RetentionRunRepository, ZipStream, ZipStreamFactory, ZipWriter, ZipWriterFactory } from '../privacy-ports.js';
 import type { AuditLogRepository } from '../ports.js';
 import type { CandidateStore } from './in-memory-candidates.js';
 import type { InMemoryNotifications, InMemoryOutbox, InMemoryTasks, InMemoryWebhookDeliveries } from './in-memory-automation.js';
@@ -29,6 +29,13 @@ export function createInMemoryErasure(world: ErasureWorld): ErasureTransaction {
     auditLog: world.auditLog,
     outbox: world.outbox,
     store: {
+      async lockCandidateApplications(organizationId: string, candidateId: string) {
+        const tokens = new Set((world.importStore?.read().tokens ?? []).map((token) => token.applicationId));
+        return store
+          .read()
+          .applications.filter((a) => a.organizationId === organizationId && a.candidateId === candidateId)
+          .map((a) => ({ id: a.id, retentionExpiresAt: a.retentionExpiresAt, consentStatus: a.consentStatus, reconfirmationSentAt: a.reconfirmationSentAt ?? null, canBeAsked: tokens.has(a.id) }));
+      },
       async deleteApplications(organizationId: string, applicationIds: readonly string[]): Promise<readonly string[]> {
         const ids = new Set(applicationIds);
         const own = <T extends { organizationId: string }>(row: T): boolean => row.organizationId === organizationId;
@@ -140,26 +147,44 @@ export function createInMemoryDataExports(initial: readonly DataExport[] = []): 
   };
 }
 
-export interface FakeZipWriter extends ZipWriter {
+export interface FakeZipWriter extends ZipWriter, ZipStream {
+  finish(): Promise<Uint8Array>;
   entries(): readonly { readonly path: string; readonly bytes: Uint8Array }[];
 }
 
 /** Records entries; `finish` returns them as JSON (`{ path: text }`), enough to inspect an archive in a test. */
 export function createFakeZipWriter(): FakeZipWriter {
   let entries: readonly { readonly path: string; readonly bytes: Uint8Array }[] = [];
+  let aborted: Error | null = null;
+  const finishBytes = async (): Promise<Uint8Array> => {
+    await closed;
+    return new TextEncoder().encode(JSON.stringify(Object.fromEntries(entries.map((e) => [e.path, new TextDecoder().decode(e.bytes)]))));
+  };
+  let close: () => void = () => undefined;
+  const closed = new Promise<void>((resolve) => (close = resolve));
   return {
     async add(path, bytes) {
       entries = [...entries, { path, bytes }];
     },
     async finish() {
-      return new TextEncoder().encode(JSON.stringify(Object.fromEntries(entries.map((e) => [e.path, new TextDecoder().decode(e.bytes)]))));
+      close();
+      return finishBytes();
+    },
+    abort(error) {
+      aborted = error;
+    },
+    get output() {
+      return (async function* () {
+        if (aborted) throw aborted;
+        yield await finishBytes();
+      })();
     },
     entries: () => entries,
   };
 }
 
 /** Every writer the factory made, in order, so a test can look into the last archive. */
-export function createFakeZipFactory(): ZipWriterFactory & { readonly writers: () => readonly FakeZipWriter[] } {
+export function createFakeZipFactory(): ZipWriterFactory & ZipStreamFactory & { readonly writers: () => readonly FakeZipWriter[] } {
   let writers: readonly FakeZipWriter[] = [];
   const factory = (): FakeZipWriter => {
     const writer = createFakeZipWriter();

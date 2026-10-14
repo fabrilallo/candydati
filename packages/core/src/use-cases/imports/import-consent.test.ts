@@ -7,23 +7,23 @@ import { createImportBatch } from './create-import-batch.js';
 import { getImportBatch, listImports, setImportItems, updateImportMapping } from './queries.js';
 import { requestImportCommit } from './request-commit.js';
 import { undoImport } from './undo-import.js';
-import { commit, GIULIA, GIULIA_ROW, importWorld, JOB_2, MARIO, MARIO_ROW, outsider, readyBatch, recruiter } from './fixtures.js';
+import { commit, deliverQueued, GIULIA, GIULIA_ROW, importWorld, JOB_2, MARIO, MARIO_ROW, outsider, readyBatch, recruiter } from '../../testing/import-fixtures.js';
 import { runRetention } from '../privacy/run-retention.js';
 
 const DAY = 24 * 3600 * 1000;
 const rejection = (promise: Promise<unknown>) => promise.catch((e: unknown) => e);
-const tokenFromEmail = (body: string): string => /\/consent\/(\S+)/.exec(body)?.[1] ?? '';
 
 describe('reconfirmation', () => {
   const imported = async () => {
     const deps = importWorld();
     const batch = await readyBatch(deps, [MARIO, GIULIA], [MARIO_ROW, GIULIA_ROW]);
     await commit(deps, batch.id);
-    const secrets = deps.messagingStore.read().messages.map((m) => tokenFromEmail(m.bodyText));
+    // The worker sends the requests: the secrets exist only in the emails that went out.
+    const delivered = await deliverQueued(deps);
+    const secrets = [...delivered.values()];
     const byApp = (name: string) => {
       const app = deps.store.read().applications.find((a) => a.cv.fileName.startsWith(name))!;
-      const message = deps.messagingStore.read().messages.find((m) => m.applicationId === app.id)!;
-      return { app, secret: tokenFromEmail(message.bodyText) };
+      return { app, secret: delivered.get(app.id)! };
     };
     return { deps, batch, secrets, mario: byApp('Mario'), giulia: byApp('Giulia') };
   };
@@ -129,7 +129,7 @@ describe('visibility of people who still have to reconfirm', () => {
     const batch = await readyBatch(deps, [MARIO], [MARIO_ROW]);
     await commit(deps, batch.id);
     const app = deps.store.read().applications.find((a) => a.importBatchId === batch.id)!;
-    const secret = tokenFromEmail(deps.messagingStore.read().messages.find((m) => m.applicationId === app.id)!.bodyText);
+    const secret = (await deliverQueued(deps)).get(app.id)!;
     await answerConsentRequest(deps, { token: secret, scopes: ['selection', 'talent_pool'] });
     expect((await searchCandidates(deps, recruiter, { query: 'mario' })).total).toBe(1);
     expect((await searchCandidates(deps, recruiter, { talentPool: true })).total).toBe(1);

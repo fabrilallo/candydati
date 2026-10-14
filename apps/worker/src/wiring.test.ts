@@ -37,6 +37,9 @@ describe('worker wiring', () => {
     expect(hr.feedback.feedbackRequests).toBe(r.feedbackRequests);
     expect(hr.stale.staleJobs).toBe(r.staleJobs);
     expect(imports.commit.commit).toBe(r.commit);
+    // The delivery rotates the consent token of a reconfirmation request at send time.
+    expect(deliver.reconfirmation?.consentTokens).toBe(r.consentTokens);
+    expect(deliver.reconfirmation?.hash('s')).toBe(imports.commit.hash('s'));
     expect(imports.extractor).toBeNull();
     expect(privacy.retention.erasure).toBe(r.erasure);
     expect(hr.feedback.hash('secret')).toMatch(/^[0-9a-f]{64}$/);

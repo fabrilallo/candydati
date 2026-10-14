@@ -1,4 +1,4 @@
-import type { DataExport, RetentionRun } from '@tt/domain';
+import type { ConsentStatus, DataExport, RetentionRun } from '@tt/domain';
 import type { ApplicationRepository, CandidateRepository, CandidateSearch, CandidateNoteRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
 import type { NotificationRepository, MemberDirectory } from './automation-ports.js';
 import type { FeedbackRecords } from './feedback-ports.js';
@@ -12,7 +12,23 @@ import type { OutboxRepository } from './webhook-ports.js';
  * Removes everything stored about applications and candidates (PRODUCT.md §6). One implementation per storage; the Postgres one
  * runs inside the transaction `ErasureTransaction.run` opens, so a failure leaves nothing half deleted.
  */
+/** An application as the erasure sees it once locked: what decides whether it still has to go. */
+export interface ErasableApplication {
+  readonly id: string;
+  readonly retentionExpiresAt: Date;
+  readonly consentStatus: ConsentStatus;
+  /** When the reconfirmation email went out (imported data); null: never. */
+  readonly reconfirmationSentAt: Date | null;
+  /** A consent token exists: the person has an address and can be asked to reconfirm. */
+  readonly canBeAsked: boolean;
+}
+
 export interface ErasureStore {
+  /**
+   * Locks the candidate row and every application of theirs (`FOR UPDATE`) until the erasure commits, and returns the
+   * applications as they are now: a reconfirmation, a new application or a second erasure waits for this one.
+   */
+  lockCandidateApplications(organizationId: string, candidateId: string): Promise<readonly ErasableApplication[]>;
   /**
    * Deletes, for the given applications: notifications, tasks, outbox events and webhook deliveries that point to them,
    * messages, conversations, CV extractions, stage events and response promises, notes about them, interview feedback and its requests and finally the applications. Returns their CV file keys.
@@ -77,6 +93,23 @@ export interface ZipWriter {
 
 export type ZipWriterFactory = () => ZipWriter;
 
+/**
+ * Builds a ZIP as a stream, for archives too big to hold in memory. Read `output` while adding (for instance by
+ * handing it to `FileStorage.putStream`): `add` waits when the reader is slow, so memory stays bounded.
+ */
+export interface ZipStream {
+  /** Adds a file after the previous one. `path` uses `/` and never starts with one. */
+  add(path: string, bytes: Uint8Array): Promise<void>;
+  /** Closes the archive: `output` ends after the last chunk. */
+  finish(): Promise<unknown>;
+  /** Gives up: `output` fails with `error` and pending `add` calls reject. */
+  abort(error: Error): void;
+  /** The archive bytes in order. Iterate once. */
+  readonly output: AsyncIterable<Uint8Array>;
+}
+
+export type ZipStreamFactory = () => ZipStream;
+
 /** Providers the instance is configured with, for the registro dei trattamenti. Names only, never credentials. */
 export interface ConfiguredProviders {
   /** `local` or `s3`, with the host when relevant. */
@@ -109,7 +142,7 @@ export interface OrganizationExportDeps extends CoreDeps, FeedbackRecords {
   readonly messages: MessageRepository;
   readonly files: FileStorage;
   readonly queue: TaskQueue;
-  readonly zip: ZipWriterFactory;
+  readonly zip: ZipStreamFactory;
   readonly newId: () => string;
   readonly now: () => Date;
 }

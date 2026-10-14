@@ -32,7 +32,7 @@ const iso = (date: Date): string => date.toISOString();
 const isoOrNull = (date: Date | null): string | null => (date ? date.toISOString() : null);
 
 /** `files/<applicationId>/<file name>`: unique per application, the same in the single and the organization export. */
-export const cvPathOf = (application: Application): string => `files/${application.id}/${application.cv.fileName}`;
+const cvPathOf = (application: Application): string => `files/${application.id}/${application.cv.fileName}`;
 
 const oldestFirst = (a: { createdAt: Date; id: string }, b: { createdAt: Date; id: string }): number =>
   a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id);

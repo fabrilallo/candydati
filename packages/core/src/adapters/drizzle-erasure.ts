@@ -24,6 +24,27 @@ export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
   };
 
   return {
+    async lockCandidateApplications(organizationId, candidateId) {
+      // Candidate first, then its applications: the order every erasure takes, so two of them queue instead of deadlocking.
+      await db
+        .select({ id: candidate.id })
+        .from(candidate)
+        .where(and(eq(candidate.organizationId, organizationId), eq(candidate.id, candidateId)))
+        .for('update');
+      const rows = await db
+        .select({ id: application.id, retentionExpiresAt: application.retentionExpiresAt, consentStatus: application.consentStatus, reconfirmationSentAt: application.reconfirmationSentAt })
+        .from(application)
+        .where(and(eq(application.organizationId, organizationId), eq(application.candidateId, candidateId)))
+        .orderBy(application.id)
+        .for('update');
+      if (rows.length === 0) return [];
+      const tokens = await db
+        .select({ applicationId: consentToken.applicationId })
+        .from(consentToken)
+        .where(and(eq(consentToken.organizationId, organizationId), inArray(consentToken.applicationId, rows.map((row) => row.id))));
+      const askable = new Set(tokens.map((token) => token.applicationId));
+      return rows.map((row) => ({ ...row, canBeAsked: askable.has(row.id) }));
+    },
     async deleteApplications(organizationId, applicationIds) {
       if (applicationIds.length === 0) return [];
       const ids = [...applicationIds];

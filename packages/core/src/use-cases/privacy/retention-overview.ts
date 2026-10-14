@@ -1,11 +1,10 @@
-import { RETENTION_WARNING_DAYS, type RetentionRun } from '@tt/domain';
+import { DAY_MS, RETENTION_WARNING_DAYS, type RetentionRun } from '@tt/domain';
 import { z } from 'zod';
 import type { PrivacyOverviewDeps, ConfiguredProviders } from '../../privacy-ports.js';
 import { defineUseCase, type UseCase, type UseCaseDefinition } from '../../use-case.js';
 import { loadRefs } from '../refs.js';
 import { sequential } from '../../sequential.js';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const UPCOMING_MAX = 200;
 const RUNS_SHOWN = 10;
 

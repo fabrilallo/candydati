@@ -50,7 +50,7 @@ export type ApplicationPatch = Partial<
 >;
 
 /** The columns a plain update may write: never stage or outcome. */
-export type ApplicationDataPatch = Partial<Pick<Application, 'consent' | 'consentStatus' | 'retentionExpiresAt' | 'updatedAt'>>;
+export type ApplicationDataPatch = Partial<Pick<Application, 'consent' | 'consentStatus' | 'retentionExpiresAt' | 'updatedAt' | 'reconfirmationSentAt'>>;
 
 export interface ApplicationRepository {
   /** @throws ConflictError when the candidate already has an OPEN application for the same job. */
@@ -77,14 +77,24 @@ export interface ApplicationRepository {
   listAwaitingResponse(organizationId: string, dueBefore: Date): Promise<readonly Application[]>;
   /** Same, across every organization. Only for the system scan: it groups the result by organization itself. */
   listAwaitingResponseAcrossOrganizations(dueBefore: Date): Promise<readonly Application[]>;
-  /** Applications (open or decided) whose retention expires at or before `before`, earliest first. */
-  listRetentionExpiringBefore(organizationId: string, before: Date): Promise<readonly Application[]>;
+  /**
+   * Applications (open or decided) whose retention expires at or before `before`, ordered by `(retentionExpiresAt, id)`.
+   * Without `page` the whole list comes back; with it, at most `limit` rows after the `after` cursor (keyset: pass the
+   * last row of the previous batch).
+   */
+  listRetentionExpiringBefore(organizationId: string, before: Date, page?: RetentionPage): Promise<readonly Application[]>;
   /** Same, across every organization. Only for the retention job. */
-  listRetentionExpiringAcrossOrganizations(before: Date): Promise<readonly Application[]>;
+  listRetentionExpiringAcrossOrganizations(before: Date, page?: RetentionPage): Promise<readonly Application[]>;
   /** Every application (open or decided) created by an import batch, newest first. */
   listByImportBatch(organizationId: string, batchId: string): Promise<readonly Application[]>;
   /** Applications stored at or after `since`, in the organization or, when `jobId` is given, for that job only. */
   countCreatedSince(organizationId: string, since: Date, jobId?: string): Promise<number>;
+}
+
+/** Keyset batch of the retention scan. */
+export interface RetentionPage {
+  readonly limit: number;
+  readonly after?: { readonly retentionExpiresAt: Date; readonly id: string } | undefined;
 }
 
 export interface CandidateNoteRepository {
@@ -127,6 +137,11 @@ export interface CandidateSummary {
 }
 
 export interface CandidateSearch {
+  /**
+   * The candidates `search` would list (imported people who have not reconfirmed stay hidden), ordered by `id`, at most
+   * `limit` of them with `id` greater than `afterId` (null: from the start). Keyset: stable while rows change.
+   */
+  listAfter(organizationId: string, afterId: string | null, limit: number): Promise<readonly Candidate[]>;
   /** Most recently applied first. */
   search(query: CandidateSearchQuery): Promise<{ readonly items: readonly CandidateSummary[]; readonly total: number }>;
 }
@@ -134,6 +149,11 @@ export interface CandidateSearch {
 /** Display names of the members of an organization. Ids that are not members are absent from the result. */
 export interface UserDirectory {
   namesOf(organizationId: string, userIds: readonly string[]): Promise<Readonly<Record<string, string>>>;
+  /**
+   * Names for the actors shown in the organization's own records (audit log, keys, imports): its members, plus users who
+   * acted in it and are no member (an invitee who declined, someone who left). Nobody else is ever named.
+   */
+  actorNamesOf(organizationId: string, userIds: readonly string[]): Promise<Readonly<Record<string, string>>>;
 }
 
 export interface PrivacyDeps extends CoreDeps {

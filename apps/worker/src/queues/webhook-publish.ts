@@ -12,7 +12,9 @@ export const createWebhookPublishQueue = (deps: WebhookPublishDeps): QueueDefini
     payload: z.unknown(),
     schedule: { cron: WEBHOOK_PUBLISH_CRON, data: {} },
     handle: async ({ jobId, logger }) => {
-      const result = await publishWebhookEvents(deps, {});
+      const { failures, ...result } = await publishWebhookEvents(deps, {});
       if (result.published > 0 || result.pending > 0) logger.info({ jobId, ...result }, 'webhook events published');
+      // Event ids and short codes only; a dead event is parked and needs a person to look at it.
+      for (const failure of failures) logger[failure.dead ? 'error' : 'warn']({ jobId, ...failure }, failure.dead ? 'outbox event parked as dead' : 'outbox event fan-out failed');
     },
   });

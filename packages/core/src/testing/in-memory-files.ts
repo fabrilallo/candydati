@@ -11,6 +11,28 @@ export function createInMemoryFileStorage(initial: Readonly<Record<string, Uint8
     async put(key, bytes) {
       files = { ...files, [key]: bytes };
     },
+    async putStream(key, source) {
+      const chunks: Uint8Array[] = [];
+      for await (const chunk of source) chunks.push(chunk);
+      const bytes = new Uint8Array(chunks.reduce((n, c) => n + c.byteLength, 0));
+      let offset = 0;
+      for (const chunk of chunks) {
+        bytes.set(chunk, offset);
+        offset += chunk.byteLength;
+      }
+      files = { ...files, [key]: bytes };
+      return bytes.byteLength;
+    },
+    async getStream(key) {
+      const bytes = files[key];
+      if (!bytes) throw Object.assign(new Error(`No such file: ${key}`), { name: 'FileNotFoundError' });
+      return {
+        stream: (async function* () {
+          yield bytes;
+        })(),
+        sizeBytes: bytes.byteLength,
+      };
+    },
     async get(key) {
       const bytes = files[key];
       if (!bytes) throw Object.assign(new Error(`No such file: ${key}`), { name: 'FileNotFoundError' });

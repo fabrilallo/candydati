@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
-import type { TransactionPort } from '../transaction.js';
+import type { TransactionPort, TransactionScope } from '../transaction.js';
 
 /** Values a transaction changed, with what they held before its first change: the undo log. */
 type Journal = Map<Cell<unknown>, unknown>;
@@ -36,9 +36,29 @@ const serialized = <T>(work: () => Promise<T>): Promise<T> => {
   return next;
 };
 
+/** Restores outside any journal: an undo is not a write the enclosing transaction should remember. */
 function rollback(journal: Journal): void {
-  for (const [state, before] of journal) state.set(before);
+  journals.exit(() => {
+    for (const [state, before] of journal) state.set(before);
+  });
 }
+
+/** A savepoint: a journal of its own, merged into the enclosing one when it succeeds and undone alone when it throws. */
+const savepoints: TransactionScope = {
+  async savepoint<T>(work: () => Promise<T>): Promise<T> {
+    const parent = journals.getStore();
+    if (!parent) return work();
+    const journal: Journal = new Map();
+    try {
+      const result = await journals.run(journal, work);
+      for (const [state, before] of journal) if (!parent.has(state)) parent.set(state, before);
+      return result;
+    } catch (error) {
+      rollback(journal);
+      throw error;
+    }
+  },
+};
 
 /**
  * The in-memory unit of work: transactions run one after the other, and every cell written inside one is put back when
@@ -48,12 +68,12 @@ function rollback(journal: Journal): void {
 export function createInMemoryTransaction(onEffectError?: (error: unknown) => void): TransactionPort {
   return {
     onEffectError,
-    run<T>(work: (repositories: ReadonlyMap<unknown, unknown>) => Promise<T>): Promise<T> {
-      if (journals.getStore()) return work(NONE);
+    run<T>(work: (repositories: ReadonlyMap<unknown, unknown>, scope?: TransactionScope) => Promise<T>): Promise<T> {
+      if (journals.getStore()) return work(NONE, savepoints);
       return serialized(async () => {
         const journal: Journal = new Map();
         try {
-          return await journals.run(journal, () => work(NONE));
+          return await journals.run(journal, () => work(NONE, savepoints));
         } catch (error) {
           rollback(journal);
           throw error;

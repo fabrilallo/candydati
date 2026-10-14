@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ORG_A } from '../../testing/index.js';
 import { IMPORT_STALE_DAYS, purgeStaleImports } from './purge-stale-imports.js';
-import { commit, GIULIA, GIULIA_ROW, importWorld, MARIO, MARIO_ROW, readyBatch } from './fixtures.js';
+import { commit, GIULIA, GIULIA_ROW, importWorld, MARIO, MARIO_ROW, readyBatch } from '../../testing/import-fixtures.js';
 
 const DAY = 24 * 3600 * 1000;
 

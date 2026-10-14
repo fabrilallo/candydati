@@ -12,7 +12,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts', 'src/index.ts', 'src/testing/global-setup.ts', 'src/testing/overlap-guard.setup.ts', 'src/testing/postgres.ts'],
+      exclude: ['src/**/*.test.ts', 'src/index.ts', 'src/testing/**', '**/*fixtures*.ts'],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },

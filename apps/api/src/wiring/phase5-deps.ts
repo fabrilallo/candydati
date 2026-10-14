@@ -9,7 +9,7 @@ import {
   type OrganizationExportDeps,
   type PrivacyOverviewDeps,
   type TaskQueue,
-  type ZipWriterFactory,
+  type ZipStreamFactory,
 } from '@tt/core';
 
 export interface Phase5Deps {
@@ -25,7 +25,7 @@ export interface Phase5Inputs {
   readonly queue: TaskQueue;
   readonly candidateDeps: CandidateDeps;
   readonly providers: ConfiguredProviders;
-  readonly zip: ZipWriterFactory;
+  readonly zip: ZipStreamFactory;
   readonly feedbackRecords: FeedbackRecords;
 }
 

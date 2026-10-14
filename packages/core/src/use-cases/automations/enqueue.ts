@@ -1,5 +1,5 @@
 import type { TaskQueue } from '../../intake-ports.js';
-import { afterCommitOrNow, baseDeps, type TransactionalDeps } from '../../transaction.js';
+import { afterCommitOrNow, baseDeps, queuesInTransaction, type TransactionalDeps } from '../../transaction.js';
 
 /** An automation that could not be queued. Ids only, so it can go to the logs as it is. */
 export class AutomationEnqueueError extends Error {
@@ -13,8 +13,9 @@ export class AutomationEnqueueError extends Error {
 }
 
 /**
- * For the change that brought the application into `stageId`. Inside a unit of work the task is sent after the commit
- * (the worker must find the new stage); outside one, right away. A failure never undoes the move or the application:
+ * For the change that brought the application into `stageId`. Inside a unit of work that owns the queue (pg-boss on
+ * its connection) the task is inserted with the change; with another queue it is sent after the commit (the worker
+ * must find the new stage); outside one, right away. A failure never undoes the move or the application:
  * only the automation of that stage is lost, so it is reported (ids only) to the transaction's error sink instead of
  * being swallowed. `runAutomations` re-checks the application when it runs, and runs each rule once per stage entry.
  */
@@ -24,6 +25,11 @@ export async function enqueueAutomations(
   applicationId: string,
   stageId: string,
 ): Promise<void> {
+  if (queuesInTransaction(deps)) {
+    // Inserted with the move: the task exists if and only if the move commits.
+    await deps.queue.enqueue('automation.run', { organizationId, applicationId, stageId });
+    return;
+  }
   const queue = baseDeps(deps).queue;
   await afterCommitOrNow(deps, async () => {
     try {

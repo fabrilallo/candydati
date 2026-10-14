@@ -66,13 +66,13 @@ export function createDrizzleNotifications(db: DbExecutor): NotificationReposito
       return rows.map(toNotification);
     },
     async markEmailed(organizationId, ids, at) {
-      if (ids.length === 0) return 0;
+      if (ids.length === 0) return [];
       const rows = await db
         .update(notification)
         .set({ emailedAt: at })
         .where(and(eq(notification.organizationId, organizationId), isNull(notification.emailedAt), inArray(notification.id, [...ids])))
         .returning({ id: notification.id });
-      return rows.length;
+      return rows.map((row) => row.id);
     },
     async unreadCount(organizationId, userId) {
       const [row] = await db

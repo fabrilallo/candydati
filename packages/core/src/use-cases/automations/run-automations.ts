@@ -1,8 +1,9 @@
 import { JOB_OWNER_ASSIGNEE, DAY_MS, isRole, roleHasPermission, type Application, type AutomationRule, type Job, type Permission, type Role, type Task } from '@tt/domain';
 import { z } from 'zod';
 import type { SystemActor } from '../../actor.js';
-import { toAuditActor } from '../../actor.js';
+import { toAuditActor, type Actor } from '../../actor.js';
 import type { AutomationRunDeps } from '../../automation-ports.js';
+import { inSavepoint } from '../../transaction.js';
 import { defineUseCase } from '../../use-case.js';
 import { requireApplication } from '../candidates/shared.js';
 import { requireJob } from '../jobs/shared.js';
@@ -143,6 +144,35 @@ const claimRun = (deps: AutomationRunDeps, rule: AutomationRule, application: Ap
   });
 
 /**
+ * One rule, null when it already ran for this stage entry. Its action runs in a savepoint: a failure (an SQL error
+ * included) undoes only what this rule wrote, and the claim, the failure notice and the audit event stay in the
+ * transaction, so the other rules go on and the failed one is not retried.
+ */
+async function runRule(deps: AutomationRunDeps, actor: Actor, rule: AutomationRule, job: Job, application: Application): Promise<boolean | null> {
+  if (!(await claimRun(deps, rule, application))) return null;
+  const role = await currentRole(deps, rule);
+  let ok = false;
+  if (role === null) {
+    // Skipped, not sent in the name of someone who is gone: admins are told once.
+    await notifyCreatorUnauthorized(deps, rule, application.id);
+  } else {
+    ok = await inSavepoint(deps, (sp) => execute(sp, rule, role, job, application.id)).then(
+      () => true,
+      () => false,
+    );
+    if (!ok) await notifyFailure(deps, rule, application.id);
+  }
+  await deps.auditLog.append({
+    organizationId: rule.organizationId,
+    actor: toAuditActor(actor),
+    action: 'automation.ran',
+    target: { type: 'automation_rule', id: rule.id },
+    metadata: { applicationId: application.id, action: rule.action.type, ok },
+  });
+  return ok;
+}
+
+/**
  * Worker use case (system actor, task `automation.run`): runs the enabled rules of the stage the application just
  * entered. Re-checks everything when it runs: an application that moved on, was decided or is gone is skipped. Rules run
  * independently; a failing one notifies its creator (`automation_failed`) and never stops the others or undoes the
@@ -170,29 +200,10 @@ export const runAutomations = defineUseCase<AutomationRunDeps, typeof inputSchem
     let executed = 0;
     let failed = 0;
     for (const rule of rules) {
-      if (!(await claimRun(deps, rule, application))) continue;
-      let ok = true;
-      try {
-        const role = await currentRole(deps, rule);
-        if (role === null) {
-          // Skipped, not sent in the name of someone who is gone: admins are told once.
-          await notifyCreatorUnauthorized(deps, rule, application.id);
-          throw new Error('creator_not_authorized');
-        }
-        await execute(deps, rule, role, job, application.id);
-        executed += 1;
-      } catch (error) {
-        ok = false;
-        failed += 1;
-        if (!(error instanceof Error && error.message === 'creator_not_authorized')) await notifyFailure(deps, rule, application.id);
-      }
-      await deps.auditLog.append({
-        organizationId,
-        actor: toAuditActor(actor),
-        action: 'automation.ran',
-        target: { type: 'automation_rule', id: rule.id },
-        metadata: { applicationId: application.id, action: rule.action.type, ok },
-      });
+      const ran = await runRule(deps, actor, rule, job, application);
+      if (ran === null) continue;
+      if (ran) executed += 1;
+      else failed += 1;
     }
     return { executed, failed, skipped: null };
   },

@@ -1,5 +1,7 @@
 import {
+  DAY_MS,
   applicationFormSchema,
+  applicationsBusyMessage,
   CV_MAX_BYTES,
   computeResponseDueAt,
   retentionExpiry,
@@ -9,12 +11,13 @@ import {
   type ApplicationForm,
   type Candidate,
   type ConsentRecord,
+  type Job,
   type PrivacyNotice,
 } from '@tt/domain';
 import { z } from 'zod';
 import { ConflictError, NotFoundError, RateLimitedError, ValidationError } from '../../errors.js';
 import type { IntakeRepositories, SniffedCv, SubmitApplicationDeps } from '../../intake-ports.js';
-import { definePublicQuery, parseInput } from '../../use-case.js';
+import { definePublicCommand, parseInput } from '../../use-case.js';
 import { enqueueAutomations } from '../automations/enqueue.js';
 import { queueReceipt } from '../messaging/receipt.js';
 import { trackStageEntry } from '../reports/tracking.js';
@@ -189,19 +192,17 @@ async function enqueueExtraction(deps: SubmitApplicationDeps, intake: Intake): P
   }
 }
 
-export const APPLICATIONS_BUSY_MESSAGE = 'We are receiving a lot of applications right now. Please try again tomorrow.';
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Both caps count what is already stored in the last 24 hours; above either one nothing more is accepted. */
-async function assertUnderDailyCaps(deps: SubmitApplicationDeps, organizationId: string, jobId: string, now: Date): Promise<void> {
+async function assertUnderDailyCaps(deps: SubmitApplicationDeps, organizationId: string, job: Job, now: Date): Promise<void> {
   const caps = deps.dailyCaps;
   if (!caps) return;
   const since = new Date(now.getTime() - DAY_MS);
   const [inOrganization, inJob] = await sequential(
     () => caps.applications.countCreatedSince(organizationId, since),
-    () => caps.applications.countCreatedSince(organizationId, since, jobId),
+    () => caps.applications.countCreatedSince(organizationId, since, job.id),
   );
-  if (inOrganization >= caps.perOrganization || inJob >= caps.perJob) throw new RateLimitedError(APPLICATIONS_BUSY_MESSAGE);
+  if (inOrganization >= caps.perOrganization || inJob >= caps.perJob) throw new RateLimitedError(applicationsBusyMessage(job.content.language));
 }
 
 const isFilledHoneypot = (form: Record<string, unknown>): boolean =>
@@ -210,10 +211,17 @@ const isFilledHoneypot = (form: Record<string, unknown>): boolean =>
 /**
  * Public, no session. A filled honeypot answers like a success and stores nothing. Draft, closed and unknown jobs are
  * all "not found". A stale notice version is refused so nobody consents to a text they did not read.
+ *
+ * A public command that keeps its own transaction: the CV is uploaded first (an upload must not hold a database
+ * transaction open), then the intake writes the candidate, the application and `application.received` in ONE
+ * transaction of its own (`deps.intake`).
  */
-export const submitApplication = definePublicQuery<SubmitApplicationDeps, typeof applicationSubmissionSchema, ApplicationReceipt>({
+export const submitApplication = definePublicCommand<SubmitApplicationDeps, typeof applicationSubmissionSchema, ApplicationReceipt>({
   name: 'submitApplication',
   input: applicationSubmissionSchema,
+  actorId: CAREERS_PAGE_ACTOR_ID,
+  audit: { skip: 'application.received is appended inside the intake transaction' },
+  transaction: { skip: 'the CV upload comes before the intake transaction, which the intake opens itself' },
   handler: async ({ deps, input }) => {
     if (isFilledHoneypot(input.form)) return RECEIPT;
     const form = parseInput(applicationFormSchema, input.form);
@@ -225,7 +233,7 @@ export const submitApplication = definePublicQuery<SubmitApplicationDeps, typeof
     const notice = assertNoticeIsCurrent(await deps.privacyNotices.findActive(organization.id), form);
     const applicationId = deps.newId();
     const now = deps.now();
-    await assertUnderDailyCaps(deps, organization.id, job.id, now);
+    await assertUnderDailyCaps(deps, organization.id, job, now);
     const intake: Intake = {
       organizationId: organization.id,
       applicationId,

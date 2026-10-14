@@ -87,7 +87,7 @@ export const toImportBatchDto = (batch: ImportBatch): ImportBatchDto => ({
   undoneAt: isoOrNull(batch.undoneAt),
 });
 
-export const toImportItemDto = (item: ImportItem): ImportItemDto => ({
+const toImportItemDto = (item: ImportItem): ImportItemDto => ({
   id: item.id,
   position: item.position,
   included: item.included,

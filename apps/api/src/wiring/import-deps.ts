@@ -4,13 +4,14 @@ import {
   type ConsentDeps,
   type FileStorage,
   type ImportDeps,
+  type ImportSummaryDeps,
   type ImportUndoDeps,
   type TaskQueue,
 } from '@tt/core';
 
 export interface ImportWiring {
   /** Upload, preview, mapping, confirm and undo (recruiter side). */
-  readonly importDeps: ImportDeps & ImportUndoDeps;
+  readonly importDeps: ImportDeps & ImportUndoDeps & ImportSummaryDeps;
   /** The public reconfirmation page. */
   readonly consentDeps: ConsentDeps;
 }
@@ -37,6 +38,7 @@ export function createImportDeps({ uow, files, queue }: ImportInputs): ImportWir
       imports: r.imports,
       importItems: r.importItems,
       importAnalyses: r.importAnalyses,
+      users: r.users,
       files,
       queue,
       ...clock,

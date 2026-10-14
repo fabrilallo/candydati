@@ -6,6 +6,7 @@ import {
 import type { PlatformConfig } from '@tt/domain';
 import type { EmailConfig } from '@tt/providers';
 import { newConversationToken, toMessagingConfig } from '@tt/providers';
+import { hashConsentSecret, newConsentSecret } from '../import/deps.js';
 
 export interface EmailDeliveryWiring {
   readonly uow: DrizzleUnitOfWork;
@@ -14,7 +15,10 @@ export interface EmailDeliveryWiring {
   readonly email: EmailConfig;
 }
 
-/** Drizzle repositories and the injected sender: what `deliverMessage` needs. */
+/**
+ * Drizzle repositories and the injected sender: what `deliverMessage` needs. With the consent tokens: an import
+ * reconfirmation request gets its link (a fresh single-use secret) only here, at send time.
+ */
 export function createDeliverDeps({ uow, sender, platform, email }: EmailDeliveryWiring): DeliverDeps {
   const r = uow.repositories;
   return {
@@ -31,5 +35,6 @@ export function createDeliverDeps({ uow, sender, platform, email }: EmailDeliver
     config: toMessagingConfig(platform, email),
     newToken: newConversationToken,
     now: () => new Date(),
+    reconfirmation: { consentTokens: r.consentTokens, newSecret: newConsentSecret, hash: hashConsentSecret },
   };
 }

@@ -21,3 +21,17 @@ describe('createInMemoryFileStorage', () => {
     await expect(createInMemoryFileStorage().put('../x', new Uint8Array(), 'x/y')).rejects.toThrow(InvalidStorageKeyError);
   });
 });
+
+describe('streaming', () => {
+  it('stores a stream and reads it back in chunks', async () => {
+    const storage = createInMemoryFileStorage();
+    const written = await storage.putStream('k', (async function* () { yield new Uint8Array([1, 2]); yield new Uint8Array([3]); })(), 'x/y');
+    expect(written).toBe(3);
+    const { stream, sizeBytes } = await storage.getStream('k');
+    const chunks: number[] = [];
+    for await (const chunk of stream) chunks.push(...chunk);
+    expect(chunks).toEqual([1, 2, 3]);
+    expect(sizeBytes).toBe(3);
+    await expect(storage.getStream('missing')).rejects.toThrow(FileNotFoundError);
+  });
+});

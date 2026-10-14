@@ -1,10 +1,11 @@
-# Self-hosting: tutto lo stack (postgres, minio, api, worker, web) in un comando.
-#   cp .env.example .env   # poi imposta i valori obbligatori (vedi README, sezione Self-hosting)
+# Self-hosting: the whole stack (postgres, minio, api, worker, web) in one command.
+#   cp .env.example .env   # then set the required values (see README, Self-hosting section)
 #   docker compose -f docker-compose.prod.yml up -d --build
-# Con la posta di sviluppo (Mailpit): aggiungi --profile mail e TT_EMAIL_PROVIDER=smtp.
-# Solo "web" e' pubblicato sull'host (WEB_PORT); api, worker, postgres e minio restano sulla rete interna.
-# Le variabili sono lette dal .env nella cartella corrente; gli indirizzi dei servizi interni sono fissati qui
-# e sovrascrivono quelli di sviluppo (localhost) presenti nel .env.
+# With development mail (Mailpit): add --profile mail and EMAIL_PROVIDER=smtp.
+# Only "web" is published on the host (WEB_PORT); api, worker, postgres and minio stay on the internal network.
+# Variables are read from the .env in the current folder; internal service addresses are fixed here and override
+# the development ones (localhost) found in .env.
+# Every variable listed in docs/ENVIRONMENT.md is passed through (a test checks it).
 
 x-app-env: &app-env
   NODE_ENV: production
@@ -20,9 +21,10 @@ x-app-env: &app-env
   PLATFORM_URL: ${PLATFORM_URL:?imposta PLATFORM_URL}
   PLATFORM_SUPPORT_EMAIL: ${PLATFORM_SUPPORT_EMAIL:-support@example.com}
   PLATFORM_DEFAULT_LOCALE: ${PLATFORM_DEFAULT_LOCALE:-it}
+  PLATFORM_TIME_ZONE: ${PLATFORM_TIME_ZONE:-Europe/Rome}
   PLATFORM_AD_QUALITY_THRESHOLD: ${PLATFORM_AD_QUALITY_THRESHOLD:-6}
-  EMAIL_PROVIDER: ${TT_EMAIL_PROVIDER:-log}
-  SMTP_HOST: ${TT_SMTP_HOST:-mailpit}
+  EMAIL_PROVIDER: ${EMAIL_PROVIDER:-log}
+  SMTP_HOST: ${SMTP_HOST:-mailpit}
   SMTP_PORT: ${SMTP_PORT:-1025}
   SMTP_SECURE: ${SMTP_SECURE:-false}
   SMTP_USER: ${SMTP_USER:-}
@@ -37,7 +39,14 @@ x-app-env: &app-env
   OPENAI_API_KEY: ${OPENAI_API_KEY:-}
   ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
   GOOGLE_GENERATIVE_AI_API_KEY: ${GOOGLE_GENERATIVE_AI_API_KEY:-}
+  MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
+  GROQ_API_KEY: ${GROQ_API_KEY:-}
+  DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
+  XAI_API_KEY: ${XAI_API_KEY:-}
+  OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
   CV_MODEL_DAILY_BUDGET: ${CV_MODEL_DAILY_BUDGET:-1000}
+  IMPORT_STALE_DAYS: ${IMPORT_STALE_DAYS:-7}
+  DELIVERY_LOG_RETENTION_DAYS: ${DELIVERY_LOG_RETENTION_DAYS:-30}
 
 name: ${COMPOSE_PROJECT_NAME:-team-tracker-prod}
 
@@ -59,8 +68,8 @@ services:
       retries: 10
 
   minio:
-    # Le immagini community di MinIO non sono piu' pubblicate su Docker Hub: build Chainguard.
-    image: cgr.dev/chainguard/minio:latest
+    # The MinIO community images are no longer published on Docker Hub: Chainguard build, pinned by digest (tag: latest).
+    image: cgr.dev/chainguard/minio:latest@sha256:dc455cdd4db6e390b1b26514f15ff37681a777bf8dab41aac445a0259f751e56
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
@@ -94,7 +103,8 @@ services:
       BETTER_AUTH_URL: ${PLATFORM_URL}
       WEB_ORIGIN: ${PLATFORM_URL}
       TRUSTED_ORIGINS: ${TRUSTED_ORIGINS:-}
-      # L'api si fida di x-forwarded-for solo dalla rete interna (dove sta il web). Mai "true".
+      API_KEY_RATE_LIMIT: ${API_KEY_RATE_LIMIT:-}
+      # The api trusts x-forwarded-for only from the internal network (where the web runs). Never "true".
       TRUST_PROXY: ${TRUST_PROXY:-${TT_SUBNET:-172.31.77.0/24}}
       APPLICATIONS_DAILY_MAX_PER_ORGANIZATION: ${APPLICATIONS_DAILY_MAX_PER_ORGANIZATION:-500}
       APPLICATIONS_DAILY_MAX_PER_JOB: ${APPLICATIONS_DAILY_MAX_PER_JOB:-200}
@@ -129,6 +139,10 @@ services:
       NUXT_PUBLIC_PLATFORM_NAME: ${PLATFORM_NAME:-team-tracker}
       NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE: ${PLATFORM_DEFAULT_LOCALE:-it}
       NUXT_PUBLIC_SITE_URL: ${PLATFORM_URL}
+      NUXT_PUBLIC_TIME_ZONE: ${NUXT_PUBLIC_TIME_ZONE:-Europe/Rome}
+      NUXT_PUBLIC_SOURCE_URL: ${NUXT_PUBLIC_SOURCE_URL:-}
+      NUXT_API_MAX_BODY_BYTES: ${NUXT_API_MAX_BODY_BYTES:-213909504}
+      NUXT_API_TIMEOUT_MS: ${NUXT_API_TIMEOUT_MS:-300000}
       NUXT_TRUST_CLOUDFLARE: ${NUXT_TRUST_CLOUDFLARE:-false}
     ports:
       - "${WEB_PORT:-3000}:3000"

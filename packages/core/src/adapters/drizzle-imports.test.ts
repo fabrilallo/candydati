@@ -2,7 +2,7 @@ import { createHash, randomUUID } from 'node:crypto';
 import { createDb, type DbHandle } from '@tt/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApplication, buildCandidate, fakePdfBytes } from '../testing/index.js';
-import { buildImportWorld, newPerson, readyBatch, recruiterOf, runCommit, type Person, type World } from '../testing/import-postgres.js';
+import { buildImportWorld, deliverQueued, newPerson, readyBatch, recruiterOf, runCommit, type Person, type World } from '../testing/import-postgres.js';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { commitImport } from '../use-cases/imports/commit-import.js';
 import { answerConsentRequest } from '../use-cases/imports/consent-request.js';
@@ -50,10 +50,8 @@ async function leftovers(needles: readonly string[]): Promise<Record<string, num
   return found;
 }
 
-const secretOf = async (applicationId: string): Promise<string> => {
-  const { rows } = await handle.pool.query<{ body_text: string }>(`select body_text from message where application_id = $1`, [applicationId]);
-  return /\/consent\/(\S+)/.exec(rows[0]?.body_text ?? '')?.[1] ?? '';
-};
+/** Never from the database: the secret exists only in the email that went out. */
+const secretOf = (world: World, applicationId: string): string => world.secrets.get(applicationId) ?? '';
 const applicationOf = async (org: string, email: string) => {
   const person = await createDrizzleCandidates(handle.db).findByEmail(org, email);
   const [application] = person ? await createDrizzleApplications(handle.db).listByCandidate(org, person.id) : [];
@@ -81,7 +79,7 @@ describe('import on Postgres', () => {
 
     // Giulia reconfirms: from now on her data is hers.
     const g = await applicationOf(world.org, giulia.email);
-    expect(await answerConsentRequest(world.deps, { token: await secretOf(g.application!.id), scopes: ['selection'] })).toEqual({ status: 'reconfirmed' });
+    expect(await answerConsentRequest(world.deps, { token: secretOf(world, g.application!.id), scopes: ['selection'] })).toEqual({ status: 'reconfirmed' });
     expect((await applicationOf(world.org, giulia.email)).application).toMatchObject({ consentStatus: 'given' });
 
     const result = await undoImport(world.deps, recruiterOf(world.org), { batchId });
@@ -142,10 +140,10 @@ describe('import on Postgres', () => {
     const batchId = await readyBatch(world, [declining, silent, keeper]);
     await runCommit(world, batchId);
     const d = await applicationOf(world.org, declining.email);
-    expect(await answerConsentRequest(world.deps, { token: await secretOf(d.application!.id), decline: true })).toEqual({ status: 'declined' });
+    expect(await answerConsentRequest(world.deps, { token: secretOf(world, d.application!.id), decline: true })).toEqual({ status: 'declined' });
     expect(await leftovers([declining.email, declining.last])).toEqual({});
     const k = await applicationOf(world.org, keeper.email);
-    await answerConsentRequest(world.deps, { token: await secretOf(k.application!.id), scopes: ['selection', 'talent_pool'] });
+    await answerConsentRequest(world.deps, { token: secretOf(world, k.application!.id), scopes: ['selection', 'talent_pool'] });
 
     world.now.current = new Date(NOW.getTime() + 20 * DAY);
     const early = await runRetention(world.deps, { now: world.now.current });
@@ -181,7 +179,7 @@ describe('import on Postgres', () => {
     await expect(getCandidate(profileDeps, actor, { candidateId: imported!.id, viaJobId: world.otherJobId })).rejects.toBeInstanceOf(NotFoundError);
     expect((await getCandidate(profileDeps, actor, { candidateId: imported!.id, viaJobId: world.jobId })).applications).toHaveLength(1);
 
-    await answerConsentRequest(world.deps, { token: await secretOf(application!.id), scopes: ['selection', 'talent_pool'] });
+    await answerConsentRequest(world.deps, { token: secretOf(world, application!.id), scopes: ['selection', 'talent_pool'] });
     expect((await search.search({ organizationId: world.org, query: person.last, page: 1, limit: 10 })).total).toBe(1);
     expect((await search.search({ organizationId: world.org, talentPool: true, page: 1, limit: 10 })).items.map((i) => i.candidate.id)).toEqual([imported!.id]);
   });
@@ -200,7 +198,7 @@ describe('import on Postgres', () => {
     const mine = await applicationOf(world.org, person.email);
     expect((await applicationOf(other.org, person.email)).person).toBeNull();
     const tokens = createDrizzleConsentTokens(handle.db);
-    const secret = await secretOf(mine.application!.id);
+    const secret = secretOf(world, mine.application!.id);
     expect(await tokens.findByHash(hash(secret))).toMatchObject({ organizationId: world.org, usedAt: null });
     expect(await tokens.markUsed(hash(secret), NOW)).toBe(true);
     expect(await tokens.markUsed(hash(secret), NOW)).toBe(false);
@@ -230,16 +228,33 @@ describe('import on Postgres', () => {
     expect((await analyses.find(world.org, batchId))?.cvs).toEqual([]);
   });
 
-  it('a chunk is one transaction: a failing write leaves nothing of the chunk', async () => {
+  it('an SQL error in one item rolls back only that item in its savepoint; the rest of the chunk commits (#13)', async () => {
     const world = await buildWorld();
-    const people = [newPerson(), newPerson()];
-    const batchId = await readyBatch(world, people);
+    const [kept, broken] = [newPerson(), newPerson()] as [Person, Person];
+    const batchId = await readyBatch(world, [kept, broken]);
     await requestImportCommit(world.deps, recruiterOf(world.org), { batchId });
-    let calls = 0;
-    const failing = { ...world.deps, newSecret: () => { calls += 1; if (calls === 2) throw new Error('rng down'); return `secret-${calls}-${randomUUID()}`; } };
-    const done = await commitImport(failing, { organizationId: world.org, batchId });
-    expect(done).toMatchObject({ status: 'failed', counts: { imported: 0, failed: 2 } });
-    expect(Object.keys(await leftovers(people.map((p) => p.email)))).toEqual([]);
-    expect(world.files.keys().filter((k) => k.includes('/applications/'))).toEqual([]);
+    // The same secret twice: the second item's consent token violates the primary key on Postgres.
+    const same = `same-${randomUUID()}`;
+    const done = await commitImport({ ...world.deps, newSecret: () => same }, { organizationId: world.org, batchId });
+    expect(done).toMatchObject({ status: 'done', counts: { imported: 1, failed: 1, emailsQueued: 1 } });
+    const found = await leftovers([kept.email, broken.email]);
+    expect(Object.keys(found).length).toBeGreaterThan(0);
+    expect(Object.keys(await leftovers([broken.email, broken.last]))).toEqual([]);
+    expect(world.files.keys().filter((k) => k.includes('/applications/'))).toHaveLength(1);
+  });
+
+  it('stores the reconfirmation request without a link, and the link that went out answers it (#4)', async () => {
+    const world = await buildWorld();
+    const person = newPerson();
+    const batchId = await readyBatch(world, [person]);
+    await requestImportCommit(world.deps, recruiterOf(world.org), { batchId });
+    await commitImport(world.deps, { organizationId: world.org, batchId });
+    const { rows } = await handle.pool.query<{ body_text: string }>(`select body_text from message where organization_id = $1`, [world.org]);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]?.body_text).not.toContain('/consent/');
+    await deliverQueued(world);
+    const { application } = await applicationOf(world.org, person.email);
+    expect(application?.reconfirmationSentAt).toEqual(NOW);
+    expect(await answerConsentRequest(world.deps, { token: secretOf(world, application!.id), scopes: ['selection'] })).toEqual({ status: 'reconfirmed' });
   });
 });

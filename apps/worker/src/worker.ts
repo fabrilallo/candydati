@@ -1,3 +1,4 @@
+import { safeErrorCode } from '@tt/core';
 import type { Logger } from 'pino';
 import type { QueueDefinition } from './queues/definitions.js';
 
@@ -45,21 +46,33 @@ const assertUniqueQueueNames = (queues: readonly QueueDefinition[]): void => {
   }
 };
 
-const describeIssues = (issues: readonly { path: readonly PropertyKey[]; message: string }[]): string =>
-  issues.map((issue) => `${issue.path.map(String).join('.') || '(root)'}: ${issue.message}`).join('; ');
+/** Field paths only: neither the values nor the messages, which can echo what was sent. */
+const fieldsOf = (issues: readonly { path: readonly PropertyKey[] }[]): readonly string[] =>
+  [...new Set(issues.map((issue) => issue.path.map(String).join('.') || '(root)'))];
 
 /** The sender chooses the retry limit; without metadata a failure is treated as final. */
 const isLastAttempt = (job: WorkerJob): boolean => (job.retryCount ?? 0) >= (job.retryLimit ?? 0);
 
+/**
+ * One job. An invalid payload can never succeed: it is logged (field paths only) and completed, not retried. A
+ * failing handler is logged with the queue, the job id, the attempt and a safe error code (never the message, which
+ * can carry personal data), then rethrown so pg-boss retries it.
+ */
 const processJob = async (definition: QueueDefinition, job: WorkerJob, logger: Logger): Promise<void> => {
   const parsed = definition.payload.safeParse(job.data);
   if (!parsed.success) {
-    throw new Error(
-      `Invalid payload for queue "${definition.name}" (job ${job.id}): ${describeIssues(parsed.error.issues)}`,
-    );
+    logger.error({ queue: definition.name, jobId: job.id, fields: fieldsOf(parsed.error.issues) }, 'invalid job payload, dropped');
+    return;
   }
   const jobLogger = logger.child({ queue: definition.name, jobId: job.id });
-  await definition.handle({ jobId: job.id, payload: parsed.data, logger: jobLogger, lastAttempt: isLastAttempt(job), attempt: (job.retryCount ?? 0) + 1 });
+  const attempt = (job.retryCount ?? 0) + 1;
+  const lastAttempt = isLastAttempt(job);
+  try {
+    await definition.handle({ jobId: job.id, payload: parsed.data, logger: jobLogger, lastAttempt, attempt });
+  } catch (error) {
+    logger.error({ queue: definition.name, jobId: job.id, attempt, lastAttempt, error: safeErrorCode(error) }, 'job failed');
+    throw error;
+  }
 };
 
 const createBatchHandler =

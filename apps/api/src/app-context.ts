@@ -22,6 +22,7 @@ import {
   type PrivacyDeps,
   type SubmitApplicationDeps,
   type TaskQueue,
+  type BindableTaskQueue,
 } from '@tt/core';
 import type { AdQualityAnalyzer } from '@tt/domain';
 import { sql, type Db } from '@tt/db';
@@ -37,7 +38,7 @@ import { createPhase2Deps } from './wiring/phase2-deps.js';
 import { createPhase4Deps } from './wiring/phase4-deps.js';
 import { configuredProviders } from './wiring/configured-providers.js';
 import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
-import { zipWriterFactory } from '@tt/providers';
+import { zipStreamFactory } from '@tt/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
 import type { Actor, ApiKeyDeps, DelegatedActor } from '@tt/core';
 import { authenticateApiKey, withStorageErrors } from '@tt/core';
@@ -131,7 +132,8 @@ export interface AppContextDeps {
   readonly rateLimit?: RateLimitSettings | undefined;
   readonly adQuality: AdQualityAnalyzer;
   readonly files: FileStorage;
-  readonly queue: TaskQueue;
+  /** pg-boss in production (bindable: tasks are sent inside the transaction that queues them); a fake in tests. */
+  readonly queue: TaskQueue | BindableTaskQueue;
   readonly sender: MessageSender;
   readonly identity: EmailIdentity;
   readonly onReceiptError: (error: unknown) => void;
@@ -143,10 +145,12 @@ export interface AppContextDeps {
   readonly reportClock?: (() => Date) | undefined;
 }
 
+const isBindable = (queue: TaskQueue | BindableTaskQueue): queue is BindableTaskQueue => 'bindTo' in queue && typeof queue.bindTo === 'function';
+
 export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, reportClock }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
-  const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError);
+  const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
   const { auditLog } = uow.repositories;
   const core: CoreDeps = { auditLog, transaction: uow.transaction };
   const auth = createAuth({ env, db, core, emailSender });
@@ -175,7 +179,7 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     onFeedbackMailError: (error) => onReceiptError(error),
   });
   const phase2 = createPhase2Deps({ uow, files, queue, receipts: messaging.receipts, feedback: hr.stageEntry });
-  const phase5 = createPhase5Deps({ uow, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipWriterFactory, feedbackRecords: hr.feedbackRecords });
+  const phase5 = createPhase5Deps({ uow, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipStreamFactory, feedbackRecords: hr.feedbackRecords });
   const jobDeps = createJobDeps(uow, adQuality, env.platform.adQualityThreshold);
   const distributionDeps = createDistributionDeps({ uow, publicBaseUrl: env.platform.url, channels: distributionChannels });
   return {
@@ -183,7 +187,7 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     auth,
     auditLog,
     core,
-    userNames: createUserNameLookup(db),
+    userNames: createUserNameLookup(uow.repositories.users),
     ...actors,
     apiKeyDeps,
     ...phase2,

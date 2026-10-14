@@ -6,7 +6,7 @@ import {
   type RetentionDeps,
   type TaskQueue,
 } from '@tt/core';
-import { zipWriterFactory } from '@tt/providers';
+import { zipStreamFactory } from '@tt/providers';
 
 export interface PrivacyWorkerDeps {
   readonly retention: RetentionDeps;
@@ -52,7 +52,7 @@ export function createPrivacyWorkerDeps({ uow, files, queue }: PrivacyWiring): P
       interviewFeedback: r.interviewFeedback,
       files,
       queue,
-      zip: zipWriterFactory,
+      zip: zipStreamFactory,
       ...clock,
     },
   };

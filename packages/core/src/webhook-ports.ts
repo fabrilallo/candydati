@@ -3,17 +3,37 @@ import type { TaskQueue } from './intake-ports.js';
 import type { CoreDeps } from './ports.js';
 import type { TransactionalDeps } from './transaction.js';
 
+/** How the publisher has fared with an event so far. */
+export interface OutboxRetryState {
+  /** Failed fan-outs. */
+  readonly attempts: number;
+  /** A short code of the last failure (`pg_22012`, `Error`), never a message that could carry personal data. */
+  readonly lastError: string | null;
+  /** Not taken again before then; null: due now. */
+  readonly nextAttemptAt: Date | null;
+  /** Dead letter: out of attempts, never taken again. */
+  readonly deadAt: Date | null;
+}
+
+export type PendingOutboxEvent = OutboxEvent & OutboxRetryState;
+
 /** Events are appended in the same transaction as the change; a worker publishes them. */
 export interface OutboxRepository {
   append(event: OutboxEvent): Promise<OutboxEvent>;
   findById(organizationId: string, id: string): Promise<OutboxEvent | null>;
+  /** The event with its retry state. */
+  findWithAttempts(organizationId: string, id: string): Promise<PendingOutboxEvent | null>;
   /**
-   * Oldest first, across organizations: only for the system job that publishes. Inside a transaction the rows are
-   * claimed (`FOR UPDATE SKIP LOCKED`): a second publisher running at the same time skips them instead of fanning them
-   * out again.
+   * Unpublished, not dead and due at `now`; oldest first, across organizations: only for the system job that publishes.
+   * Inside a transaction the rows are claimed (`FOR UPDATE SKIP LOCKED`): a second publisher running at the same time
+   * skips them instead of fanning them out again.
    */
-  listUnpublished(limit: number): Promise<readonly OutboxEvent[]>;
+  listUnpublished(limit: number, now: Date): Promise<readonly PendingOutboxEvent[]>;
   markPublished(organizationId: string, id: string, at: Date): Promise<void>;
+  /** Stores the retry state after a failed fan-out. */
+  recordFailure(organizationId: string, id: string, state: OutboxRetryState): Promise<void>;
+  /** Deletes events published or parked before `before`, across organizations (system pruning). Returns the count. */
+  prune(before: Date): Promise<number>;
 }
 
 export interface WebhookEndpointRepository {
@@ -35,6 +55,8 @@ export interface WebhookDeliveryRepository {
   hasSucceeded(organizationId: string, endpointId: string, eventId: string): Promise<boolean>;
   /** Newest first. */
   listByEndpoint(organizationId: string, endpointId: string, limit: number): Promise<readonly WebhookDelivery[]>;
+  /** Deletes delivery rows created before `before`, across organizations (system pruning). Returns the count. */
+  prune(before: Date): Promise<number>;
 }
 
 export interface HttpPostRequest {

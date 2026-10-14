@@ -82,6 +82,10 @@ export const message = pgTable(
   },
   (table) => [
     index('message_org_application_created_idx').on(table.organizationId, table.applicationId, table.createdAt),
+    // Hourly caps count the outbound messages sent to one candidate.
+    index('message_org_candidate_outbound_idx')
+      .on(table.organizationId, table.candidateId, table.createdAt)
+      .where(sql`${table.direction} = 'outbound'`),
     // Postgres treats nulls as distinct: outbound messages (null) never collide, a repeated inbound id does.
     uniqueIndex('message_org_inbound_message_id_uidx').on(table.organizationId, table.inboundMessageId),
   ],

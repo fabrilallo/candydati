@@ -32,6 +32,21 @@ browser -> web (Nuxt, proxies /api/** and /mcp) -> api (Fastify)
   -> response in the { ok, data | error } envelope from @tt/domain
 ```
 
+### Envelope exceptions
+
+Every `/api/v1` route answers with the `ok` / `fail` envelope, except:
+
+- **Inbound email webhooks** (`/api/v1/inbound/email/*`): called by the mail provider, they answer `{ "received": true }`
+  and a plain provider-facing status code, never the envelope.
+- **Better Auth** (`/api/auth/**`): sign-in, sessions and organization management are served by Better Auth, which
+  returns its own JSON errors (`{ code, message }`) untouched.
+- **Files** (CV, candidate export, organization export, CSV report) and **`/api/v1/openapi.json`**: the body is the file
+  or the document; errors still use the envelope.
+
+The OpenAPI document (`/api/v1/openapi.json`) describes every route usable with a session or an API key. A test
+compares it with the real Fastify router in both directions: each `/api/v1` route is either documented or listed with a
+reason in `apps/api/src/openapi/internal-routes.ts`, and each documented route exists.
+
 The browser only talks to the web origin. The api is reachable from the web proxy and, in the production compose,
 only from loopback on the host.
 
@@ -42,10 +57,12 @@ handler). The wrapper runs, in order:
 
 1. validate input;
 2. check the actor's permission (declared in `packages/domain/src/access/permissions.ts`, nowhere else);
-3. open a unit of work (one DB transaction);
+3. open a unit of work (one DB transaction), except for read-only use cases and those declared with `transaction.skip`,
+   which run without one;
 4. run the handler against ports (`deps.jobs`, `deps.applications`, ...);
 5. write an `audit_log` row in the same transaction;
-6. commit.
+6. commit, then run the after-commit effects (queue sends such as email, automations and file deletion). They run only
+   once the transaction has committed, so a rollback never leaves a message sent or a file gone.
 
 REST routes, assistant tools and MCP tools call the same use cases, so permissions and audit are identical on every
 surface. Adapters contain no business rules.
@@ -113,5 +130,5 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 | Automation | `automation_rule`, `automation_execution`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |
 | Privacy | `privacy_notice`, `consent_token`, `data_export`, `retention_run` |
 | Import | `import_batch`, `import_item`, `import_analysis` |
-| HR tools | `feedback_request`, `interview_feedback`, `job_request` |
+| HR tools | `feedback_request`, `interview_feedback` |
 | Audit | `audit_log` (append-only, enforced by triggers) |

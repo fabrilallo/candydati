@@ -9,8 +9,12 @@ import type { OutboxRepository } from './webhook-ports.js';
 /** Binary storage for CVs. Keys are chosen by core; `@tt/providers` implements it (local disk, S3/MinIO). */
 export interface FileStorage {
   put(key: string, bytes: Uint8Array, mediaType: string): Promise<void>;
+  /** Stores what `source` yields without holding it all in memory; returns the bytes written. Nothing is stored when `source` throws. */
+  putStream(key: string, source: AsyncIterable<Uint8Array>, mediaType: string): Promise<number>;
   /** @throws when the key does not exist. */
   get(key: string): Promise<Uint8Array>;
+  /** @throws when the key does not exist. `sizeBytes` is null when unknown. */
+  getStream(key: string): Promise<{ readonly stream: AsyncIterable<Uint8Array>; readonly sizeBytes: number | null }>;
   /** Deleting a missing key is not an error. */
   delete(key: string): Promise<void>;
 }
@@ -108,6 +112,19 @@ export interface EnqueueOptions {
 
 export interface TaskQueue {
   enqueue<N extends TaskName>(name: N, payload: TaskPayloads[N], options?: EnqueueOptions): Promise<void>;
+}
+
+/** Runs SQL text with `$1`-style placeholders. On a transaction's connection, what it writes commits or rolls back with it. */
+export interface SqlExecutor {
+  executeSql(text: string, values?: readonly unknown[]): Promise<{ readonly rows: unknown[] }>;
+}
+
+/**
+ * A queue stored in the database itself (pg-boss): `bindTo` gives the same queue writing through `executor`. The unit of
+ * work binds it to each transaction, so a task exists if and only if the transaction that queued it committed.
+ */
+export interface BindableTaskQueue extends TaskQueue {
+  bindTo(executor: SqlExecutor): TaskQueue;
 }
 
 export interface SniffedCv {

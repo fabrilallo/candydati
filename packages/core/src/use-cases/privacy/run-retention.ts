@@ -1,12 +1,14 @@
-import { dataExportKey, RETENTION_DIGEST_KINDS, RETENTION_WARNING_DAYS, type Application, type RetentionRun } from '@tt/domain';
+import { DAY_MS, dataExportKey, RETENTION_DIGEST_KINDS, RETENTION_WARNING_DAYS, type Application, type RetentionRun } from '@tt/domain';
 import { z } from 'zod';
 import { groupBy } from '../../group-by.js';
 import type { RetentionDeps } from '../../privacy-ports.js';
 import { defineSystemJob } from '../../use-case.js';
 import { OrganizationContext, unsentDigests, type DigestEntry } from '../automations/scan-deadlines.js';
+import type { ErasableApplication } from '../../privacy-ports.js';
 import { deleteFilesAfterErasure, eraseCandidateData, FileCleanupError } from './erase-candidate-data.js';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
+/** Applications read per page of the retention scan (keyset on `(retentionExpiresAt, id)`). */
+export const RETENTION_PAGE = 500;
 const RECIPIENT_ROLES = ['owner', 'admin'];
 
 export interface RetentionFailure {
@@ -56,9 +58,26 @@ async function warn(deps: RetentionDeps, contexts: (org: string) => Organization
   return warned;
 }
 
+/**
+ * Decided again on the locked rows, inside the erasure: still expired, consent unchanged since the scan (a
+ * reconfirmation keeps the person), and never someone who can be asked to reconfirm but was not asked yet.
+ */
+export const stillDue =
+  (now: Date, consentStatus: Application['consentStatus']) =>
+  (application: ErasableApplication): boolean =>
+    application.retentionExpiresAt <= now && application.consentStatus === consentStatus && !neverAsked(application);
+
+const neverAsked = (application: Pick<ErasableApplication, 'consentStatus' | 'canBeAsked' | 'reconfirmationSentAt'>): boolean =>
+  application.consentStatus === 'to_renew' && application.canBeAsked && application.reconfirmationSentAt === null;
+
+const addTo = (counts: Map<string, number>, organizationId: string, count: number): void => {
+  if (count > 0) counts.set(organizationId, (counts.get(organizationId) ?? 0) + count);
+};
+
 async function eraseExpired(
   deps: RetentionDeps,
   expired: readonly Application[],
+  now: Date,
 ): Promise<{ erased: Map<string, number>; failures: RetentionFailure[]; orphanedFiles: { organizationId: string; keys: readonly string[] }[] }> {
   const erased = new Map<string, number>();
   const failures: RetentionFailure[] = [];
@@ -74,12 +93,13 @@ async function eraseExpired(
         applicationIds: group.map((a) => a.id),
         reason: first.consentStatus === 'to_renew' ? 'consent_not_renewed' : 'retention',
         actor: SYSTEM_ACTOR,
+        onlyIf: stillDue(now, first.consentStatus),
       });
-      erased.set(first.organizationId, (erased.get(first.organizationId) ?? 0) + result.applicationCount);
+      addTo(erased, first.organizationId, result.applicationCount);
     } catch (error) {
       if (error instanceof FileCleanupError) {
         // The database erase committed: the people are gone and counted, so the next run must not retry them.
-        erased.set(first.organizationId, (erased.get(first.organizationId) ?? 0) + error.result.applicationCount);
+        addTo(erased, first.organizationId, error.result.applicationCount);
         orphanedFiles.push({ organizationId: first.organizationId, keys: error.keys });
         continue;
       }
@@ -109,35 +129,64 @@ async function deleteExpiredExports(deps: RetentionDeps, now: Date): Promise<num
  * application goes too. One failing candidate does not stop the others. Also deletes organization exports past
  * their expiry. Stores one `retention_run` summary per organization that had something to do.
  */
-export const runRetention = defineSystemJob<RetentionDeps, z.ZodObject<{ now: z.ZodDate }>, RetentionResult>({
+interface Tally {
+  readonly warned: Map<string, Set<string>>;
+  readonly erased: Map<string, number>;
+  readonly failures: RetentionFailure[];
+  readonly orphanedFiles: { organizationId: string; keys: readonly string[] }[];
+}
+
+/** One page of the scan: warn the upcoming ones, erase the expired ones, add it all to the tally. */
+async function processPage(deps: RetentionDeps, context: (organizationId: string) => OrganizationContext, page: readonly Application[], now: Date, tally: Tally): Promise<void> {
+  // Imported applications always expire within the reconfirmation window: no warning, the email already asked.
+  const upcoming = page.filter((a) => a.retentionExpiresAt > now && a.consentStatus === 'given');
+  for (const [organizationId, ids] of await warn(deps, context, upcoming, now)) tally.warned.set(organizationId, new Set([...(tally.warned.get(organizationId) ?? []), ...ids]));
+  const result = await eraseExpired(deps, page.filter((a) => a.retentionExpiresAt <= now), now);
+  for (const [organizationId, count] of result.erased) addTo(tally.erased, organizationId, count);
+  tally.failures.push(...result.failures);
+  tally.orphanedFiles.push(...result.orphanedFiles);
+}
+
+/** Pages through every application expiring before the warning horizon. Erased rows sit behind the cursor: none is skipped. */
+async function scan(deps: RetentionDeps, context: (organizationId: string) => OrganizationContext, now: Date, pageSize: number): Promise<Tally> {
+  const tally: Tally = { warned: new Map(), erased: new Map(), failures: [], orphanedFiles: [] };
+  const horizon = new Date(now.getTime() + RETENTION_WARNING_DAYS * DAY_MS);
+  let after: { readonly retentionExpiresAt: Date; readonly id: string } | undefined;
+  for (;;) {
+    const page = await deps.applications.listRetentionExpiringAcrossOrganizations(horizon, { limit: pageSize, after });
+    await processPage(deps, context, page, now, tally);
+    const last = page.at(-1);
+    if (!last || page.length < pageSize) return tally;
+    after = { retentionExpiresAt: last.retentionExpiresAt, id: last.id };
+  }
+}
+
+const inputSchema = z.object({ now: z.date(), pageSize: z.number().int().min(1).max(5000).default(RETENTION_PAGE) });
+
+/**
+ * Daily system job (`retention.run`, 03:00). Applications that expire within RETENTION_WARNING_DAYS warn every owner
+ * and admin once (a notification per application, deduped, and a digest entry). Applications already past their expiry
+ * are erased, open ones included, through `eraseCandidateData` with reason `retention`, re-checked under lock; a
+ * candidate left with no application goes too. The scan is read in keyset pages, so memory stays flat. One failing
+ * candidate does not stop the others. Also deletes organization exports past their expiry. Stores one `retention_run`
+ * summary per organization that had something to do.
+ */
+export const runRetention = defineSystemJob<RetentionDeps, typeof inputSchema, RetentionResult>({
   name: 'runRetention',
-  input: z.object({ now: z.date() }),
+  input: inputSchema,
   handler: async ({ deps, input }): Promise<RetentionResult> => {
     const { now } = input;
-    const expiring = await deps.applications.listRetentionExpiringAcrossOrganizations(new Date(now.getTime() + RETENTION_WARNING_DAYS * DAY_MS));
-    const expired = expiring.filter((a) => a.retentionExpiresAt <= now);
-    // Imported applications always expire within the reconfirmation window: no warning, the email already asked.
-    const upcoming = expiring.filter((a) => a.retentionExpiresAt > now && a.consentStatus === 'given');
     const contexts = new Map<string, OrganizationContext>();
     const context = (organizationId: string): OrganizationContext => {
       const found = contexts.get(organizationId) ?? new OrganizationContext(deps, organizationId);
       contexts.set(organizationId, found);
       return found;
     };
-    const warnings = await warn(deps, context, upcoming, now);
-    const { erased, failures, orphanedFiles } = await eraseExpired(deps, expired);
-    const warnedByOrganization = warnings;
-    const organizations = new Set([...erased.keys(), ...warnedByOrganization.keys()]);
+    const { warned, erased, failures, orphanedFiles } = await scan(deps, context, now, input.pageSize);
     const runs: RetentionRun[] = [];
-    for (const organizationId of organizations) {
+    for (const organizationId of new Set([...erased.keys(), ...warned.keys()])) {
       runs.push(
-        await deps.retentionRuns.create({
-          id: deps.newId(),
-          organizationId,
-          startedAt: now,
-          warned: warnedByOrganization.get(organizationId)?.size ?? 0,
-          erased: erased.get(organizationId) ?? 0,
-        }),
+        await deps.retentionRuns.create({ id: deps.newId(), organizationId, startedAt: now, warned: warned.get(organizationId)?.size ?? 0, erased: erased.get(organizationId) ?? 0 }),
       );
     }
     return { digests: await unsentDigests(deps.notifications, context, RETENTION_DIGEST_KINDS, now), runs, exportsDeleted: await deleteExpiredExports(deps, now), failures, orphanedFiles };
