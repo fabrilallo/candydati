@@ -135,13 +135,16 @@ describe('SIGNUP_MODE=invite_only (M5)', () => {
 
     await inviteOnly.handle.db.update(schema.invitation).set({ status: 'canceled' }).where(eq(schema.invitation.id, invitationId));
     const refused = await inviteOnly.app.inject({ method: 'GET', url: link, headers: { origin: WEB_ORIGIN } });
-    expect(refused.statusCode).toBe(403);
-    expect(refused.json()).toMatchObject({ code: 'SIGNUP_INVITE_ONLY' });
+    // The link carries the app's callback: the refusal lands there with the reason instead of a raw JSON answer.
+    expect(refused.statusCode).toBe(302);
+    expect(refused.headers.location).toMatch(/[?&]error=SIGNUP_INVITE_ONLY$/);
     const [account] = await inviteOnly.handle.db.select({ emailVerified: schema.user.emailVerified }).from(schema.user).where(eq(schema.user.email, email));
     expect(account).toEqual({ emailVerified: false });
 
     await inviteOnly.handle.db.update(schema.invitation).set({ status: 'pending' }).where(eq(schema.invitation.id, invitationId));
-    expect((await inviteOnly.app.inject({ method: 'GET', url: link, headers: { origin: WEB_ORIGIN } })).statusCode).toBe(302);
+    const confirmed = await inviteOnly.app.inject({ method: 'GET', url: link, headers: { origin: WEB_ORIGIN } });
+    expect(confirmed.statusCode).toBe(302);
+    expect(confirmed.headers.location).not.toContain('error=');
   });
 });
 

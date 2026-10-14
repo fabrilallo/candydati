@@ -41,7 +41,7 @@ const signupPolicy = (env: Env): SignupPolicy => ({ mode: env.SIGNUP_MODE, boots
  * Email + password: no session until the address is confirmed, a known address answers like a new one, reset by email.
  * Confirming the address checks the sign-up policy again (a bootstrap claim may have lapsed since the sign-up).
  */
-const credentialOptions = (emails: AuthEmails, beforeEmailVerification: (user: { id: string; email: string }) => Promise<void>) => ({
+const credentialOptions = (emails: AuthEmails, beforeEmailVerification: (user: { id: string; email: string }, request?: Request) => Promise<void>) => ({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: PASSWORD_MIN_LENGTH,

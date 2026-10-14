@@ -91,4 +91,22 @@ describe('verificationAllowed (the bootstrap claim is checked again when the add
     await expect(check(ada)).rejects.toMatchObject({ statusCode: 403, body: { code: 'SIGNUP_INVITE_ONLY' } });
     await expect(emailVerificationCheck(inviteOnly, lookups(false, ['ada@x.it']), () => NOW)(ada)).resolves.toBeUndefined();
   });
+
+  it('sends a refused link back to its in-app callback with ?error=SIGNUP_INVITE_ONLY, so the person sees a page', async () => {
+    const check = emailVerificationCheck(inviteOnly, lookups(false, []), () => NOW);
+    const link = (callbackURL: string) => new Request(`https://ats.example.com/api/auth/verify-email?token=t&callbackURL=${encodeURIComponent(callbackURL)}`);
+    const refusal = check(ada, link('/verify-email?next=%2Fonboarding'));
+    await expect(refusal).rejects.toMatchObject({ statusCode: 302 });
+    const location = await refusal.catch((error: { headers: Headers }) => error.headers.get('location'));
+    expect(location).toBe('/verify-email?next=%2Fonboarding&error=SIGNUP_INVITE_ONLY');
+  });
+
+  it('never redirects outside the app: an absolute or protocol-relative callback gets the plain 403', async () => {
+    const check = emailVerificationCheck(inviteOnly, lookups(false, []), () => NOW);
+    for (const callbackURL of ['https://evil.example/x', '//evil.example/x', '/\\evil.example']) {
+      const request = new Request(`https://ats.example.com/api/auth/verify-email?token=t&callbackURL=${encodeURIComponent(callbackURL)}`);
+      await expect(check(ada, request)).rejects.toMatchObject({ statusCode: 403, body: { code: 'SIGNUP_INVITE_ONLY' } });
+    }
+    await expect(check(ada, new Request('https://ats.example.com/api/auth/verify-email?token=t'))).rejects.toMatchObject({ statusCode: 403 });
+  });
 });

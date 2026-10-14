@@ -14,6 +14,3 @@ coverage/
 # Third-party design screenshots (not ours, never commit)
 docs/design/references/
 
-# Local planning notes, not published
-docs/PLAN.md
-docs/DESIGN.md

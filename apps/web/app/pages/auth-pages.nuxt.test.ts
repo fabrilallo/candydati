@@ -179,6 +179,15 @@ describe('verify email page', () => {
     expect(wrapper.find('[data-testid="verify-email-resend"]').exists()).toBe(false)
   })
 
+  it('explains a confirmation refused for a lapsed invitation, without the inbox copy or a resend', async () => {
+    const wrapper = await mountSuspended(VerifyEmail, { route: '/verify-email?email=ada%40example.com&next=%2Fonboarding&error=SIGNUP_INVITE_ONLY' })
+    expect(wrapper.find('h1').text()).toBe('Invito non più valido')
+    expect(wrapper.find('[data-testid="verify-email-invite-required"]').text()).toContain('nuovo invito')
+    expect(wrapper.find('[data-testid="verify-email-subtitle"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="verify-email-resend"]').exists()).toBe(false)
+    expect(wrapper.find('a[href="/login"]').exists()).toBe(true)
+  })
+
   it('moves on when the person is already confirmed', async () => {
     useViewer().viewer.value = viewerWith('owner')
     await mountSuspended(VerifyEmail, { route: '/verify-email?next=%2Fapp%2Fjobs' })

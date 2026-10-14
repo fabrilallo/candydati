@@ -208,6 +208,8 @@
       "resending": "Sending…",
       "resent": "If the address needs confirming, a new link is on its way.",
       "expired": "That confirmation link is not valid any more. Send a new one.",
+      "inviteRequiredTitle": "Invitation no longer valid",
+      "inviteRequired": "Your address was invited, but the invitation expired or was withdrawn, so the account cannot be confirmed. Ask the person who invited you to send a new invitation: opening it will let you activate the account.",
       "backToLogin": "Back to sign in"
     },
     "forgot": {

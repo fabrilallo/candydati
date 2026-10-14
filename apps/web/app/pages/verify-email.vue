@@ -1,22 +1,25 @@
 <script setup lang="ts">
-import { MailCheckIcon } from '@lucide/vue'
+import { MailCheckIcon, MailXIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { safeRedirect, verificationCallback } from '@/lib/auth-paths'
 import { errorKeyOf } from '@/lib/auth-errors'
 
 /**
  * "Check your inbox" after sign-up (or a sign-in before confirming), and the landing page of the confirmation link:
- * once that link has signed the person in, this page moves on to `next`; an expired link lands here with `?error=`.
+ * once that link has signed the person in, this page moves on to `next`; an expired link lands here with `?error=`, and a
+ * link refused because the invitation that admitted the address lapsed with `?error=SIGNUP_INVITE_ONLY` (no resend:
+ * only a new invitation helps).
  */
 const { t } = useI18n()
 const route = useRoute()
 const api = useAuthApi()
 const { viewer } = useViewer()
-useSeoMeta({ title: () => t('auth.verify.title'), robots: 'noindex, nofollow' })
 
 const next = computed(() => safeRedirect(route.query.next))
 const email = computed(() => (typeof route.query.email === 'string' ? route.query.email : (viewer.value?.user.email ?? '')))
 const expired = computed(() => typeof route.query.error === 'string')
+const inviteRequired = computed(() => route.query.error === 'SIGNUP_INVITE_ONLY')
+useSeoMeta({ title: () => t(inviteRequired.value ? 'auth.verify.inviteRequiredTitle' : 'auth.verify.title'), robots: 'noindex, nofollow' })
 
 if (viewer.value && viewer.value.user.emailVerified !== false && !expired.value) await navigateTo(next.value ?? '/app', { replace: true })
 
@@ -38,7 +41,15 @@ const resend = async (): Promise<void> => {
 </script>
 
 <template>
-  <div class="grid gap-8">
+  <div v-if="inviteRequired" class="grid gap-8">
+    <div class="grid gap-3">
+      <span class="grid size-10 place-items-center rounded-lg bg-destructive/10 text-destructive" aria-hidden="true"><MailXIcon class="size-5" /></span>
+      <h1 class="text-3xl font-semibold tracking-tight">{{ t('auth.verify.inviteRequiredTitle') }}</h1>
+      <p class="text-[0.9375rem] text-muted-foreground" data-testid="verify-email-invite-required">{{ t('auth.verify.inviteRequired') }}</p>
+    </div>
+    <NuxtLink to="/login" rel="nofollow" class="text-sm font-medium text-primary underline-offset-4 hover:underline">{{ t('auth.verify.backToLogin') }}</NuxtLink>
+  </div>
+  <div v-else class="grid gap-8">
     <div class="grid gap-3">
       <span class="grid size-10 place-items-center rounded-lg bg-primary/10 text-primary" aria-hidden="true"><MailCheckIcon class="size-5" /></span>
       <h1 class="text-3xl font-semibold tracking-tight">{{ t('auth.verify.title') }}</h1>

@@ -208,6 +208,8 @@
       "resending": "Invio…",
       "resent": "Se l'indirizzo va confermato, un nuovo link è in arrivo.",
       "expired": "Quel link di conferma non è più valido. Fattene mandare uno nuovo.",
+      "inviteRequiredTitle": "Invito non più valido",
+      "inviteRequired": "Il tuo indirizzo era stato invitato, ma l'invito è scaduto o è stato ritirato, quindi l'account non può essere confermato. Chiedi a chi ti ha invitato di mandarti un nuovo invito: aprendolo potrai attivare l'account.",
       "backToLogin": "Torna all'accesso"
     },
     "forgot": {

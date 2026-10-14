@@ -125,8 +125,25 @@ export const signupPolicyCheck = (policy: SignupPolicy, lookups: SignupLookups, 
  * Better Auth's `emailVerification.beforeEmailVerification`: runs before the address is marked as confirmed, and a
  * refusal leaves the account unconfirmed (so without a session).
  */
+/** The link's `callbackURL` when it is an in-app path (never another origin: no open redirect), else null. */
+const inAppCallback = (request: Request | undefined): string | null => {
+  const raw = request ? new URL(request.url).searchParams.get('callbackURL') : null;
+  if (raw === null || !raw.startsWith('/') || raw.startsWith('//') || raw.includes('\\')) return null;
+  return raw;
+};
+
+/**
+ * Better Auth's `beforeEmailVerification`: a refused link goes back to its in-app callback with
+ * `?error=SIGNUP_INVITE_ONLY`, like Better Auth does for an expired one, so the person lands on a page; without a
+ * usable callback it is a plain 403.
+ */
 export const emailVerificationCheck = (policy: SignupPolicy, lookups: SignupLookups, now: () => Date = () => new Date()) =>
-  async (user: { readonly id: string; readonly email: string }): Promise<void> => {
+  async (user: { readonly id: string; readonly email: string }, request?: Request): Promise<void> => {
     if (await verificationAllowed(policy, user, lookups, now())) return;
+    const callback = inAppCallback(request);
+    if (callback !== null) {
+      const separator = callback.includes('?') ? '&' : '?';
+      throw new APIError('FOUND', undefined, new Headers({ location: `${callback}${separator}error=${SIGNUP_INVITE_ONLY}` }));
+    }
     throw new APIError('FORBIDDEN', { code: SIGNUP_INVITE_ONLY, message: 'Accounts on this instance are created by invitation only.' });
   };

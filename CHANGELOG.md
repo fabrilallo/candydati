@@ -93,4 +93,6 @@ Phases 0 to 10 of the roadmap are implemented. Nothing has been released yet.
 
 ### Fixed
 
+- Confirmation link refused because the invitation lapsed or was withdrawn: the person lands on a page that
+  explains it and asks for a new invitation, instead of a raw JSON answer.
 - Candidate page: server and browser rendered different markup on a production build (hydration mismatch).
