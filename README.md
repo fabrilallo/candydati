@@ -102,10 +102,9 @@ With `SIGNUP_MODE=invite_only` (the production default) the first owner signs up
 `BOOTSTRAP_TOKEN` from `.env`. Guides:
 
 - [Operations](docs/OPERATIONS.md): backups, upgrades, monitoring
-- [Deploy with Docker Compose](docs/deploy/docker-compose.md)
+- [Deploy with Docker Compose](docs/deploy/docker-compose.md), with network, volumes and several instances on one host
 - [Deploy with Dokploy](docs/deploy/dokploy.md), also hands-off with a coding agent (Claude Code, Codex, Cursor) through [Dokploy's MCP server or CLI](docs/deploy/dokploy.md#set-it-up-with-an-ai-coding-agent-optional)
 - [Environment variables](docs/ENVIRONMENT.md) and [reverse proxy log masking](SECURITY.md#reverse-proxy-access-logs)
-- Detailed notes in Italian: [README.it.md](README.it.md#self-hosting-in-dettaglio)
 
 ## Architecture
 
@@ -227,4 +226,4 @@ source to its users.
 ---
 
 **Italiano.** ATS open source e agentico dalla parte del candidato: RAL in chiaro obbligatoria, processo dichiarato,
-nessuna candidatura senza esito. Documentazione in italiano, avvio e self-hosting in dettaglio: [README.it.md](README.it.md).
+nessuna candidatura senza esito. Questo README in italiano: [README.it.md](README.it.md).
