@@ -19,6 +19,15 @@ Per questo è open source: le regole che applica sono codice che chiunque può l
   [Riccometro](https://www.riccometro.it).
 - Avvio in locale: `cp .env.example .env`, `pnpm install`, `pnpm infra:up`, `pnpm dev` (web su :3000, api su :4100).
 
+## Schermate
+
+| | |
+|---|---|
+| <img src="docs/assets/screenshots/pipeline.png" alt="Pipeline di un annuncio con i candidati nelle varie fasi" width="100%"><br>**Pipeline**: i candidati nelle fasi dichiarate dell'annuncio | <img src="docs/assets/screenshots/job-editor.png" alt="Editor dell'annuncio con l'anteprima dal vivo accanto al modulo" width="100%"><br>**Editor dell'annuncio**: RAL e processo obbligatori, anteprima dal vivo |
+| <img src="docs/assets/screenshots/careers.png" alt="Pagina carriere pubblica con immagine di copertina e numeri dell'azienda" width="100%"><br>**Pagina carriere**: costruita con l'editor delle sezioni | <img src="docs/assets/screenshots/candidate.png" alt="Scheda del candidato con fase, tag e feedback del colloquio" width="100%"><br>**Candidato**: fase, note e feedback dei colloqui, senza punteggi |
+
+I dati sono inventati. Per rigenerarle: `pnpm --filter @tt/e2e screenshots` con lo stack di sviluppo avviato.
+
 ## Self-hosting in dettaglio
 
 Uno stack completo (Postgres 17, MinIO, api, worker, web) con un solo comando. Serve Docker con Compose v2.

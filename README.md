@@ -67,13 +67,12 @@ Status: pre-1.0 (see the [changelog](CHANGELOG.md)). Full product definition: [d
 
 ## Screenshots
 
-> Placeholders: capture them from your own instance (light theme, 1440 px wide) and save them under
-> `docs/assets/screenshots/`. The images below are not in the repository yet.
-
 | | |
 |---|---|
-| `docs/assets/screenshots/pipeline.png` | `docs/assets/screenshots/job-editor.png` |
-| `docs/assets/screenshots/careers.png` | `docs/assets/screenshots/candidate.png` |
+| <img src="docs/assets/screenshots/pipeline.png" alt="Pipeline of a job with candidates across stages" width="100%"><br>**Pipeline**: candidates across the declared stages of a job | <img src="docs/assets/screenshots/job-editor.png" alt="Job ad editor with the live preview next to the form" width="100%"><br>**Job ad editor**: salary and process required, live preview |
+| <img src="docs/assets/screenshots/careers.png" alt="Public careers page with a hero image and company numbers" width="100%"><br>**Careers page**: sections built in the page builder with a live preview | <img src="docs/assets/screenshots/candidate.png" alt="Candidate detail with stage, tags and interview feedback" width="100%"><br>**Candidate**: stage, notes and interview feedback, no scores |
+
+Demo data is invented. Regenerate with `pnpm --filter @tt/e2e screenshots` against a running dev stack.
 
 ## Quick start (development)
 

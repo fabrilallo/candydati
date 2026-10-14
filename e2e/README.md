@@ -46,3 +46,12 @@ In CI against a compose stack: set `BASE_URL`, `MAILPIT_URL`, and either set `AP
 runner's `X-Forwarded-For` (`TRUST_PROXY`), or `API_URL=proxy` if that stack runs with relaxed limits. Invitations are emailed: the accept link
 (`/accept-invitation/{id}`) is read from the invitee's message in Mailpit.
 A first run against `nuxt dev` is slow (the browser loads thousands of modules): prefer a built stack in CI.
+
+## README screenshots
+
+`pnpm --filter @tt/e2e screenshots` builds a demo organization through the app (owner `giulia.rossi@example.com`, four
+published ads, ten applicants, notes, external interviewer feedback, a published careers page with locally generated
+images) and writes `docs/assets/screenshots/{pipeline,job-editor,careers,candidate}.png` (1440 px wide, light theme,
+palette PNGs under 600 KB). It uses its own config (`playwright.screenshots.config.ts`, files in `screenshots/`), so
+`pnpm test` and CI never run it. Needs the dev stack with the worker running (the CV reader fills the cards).
+`SCREENSHOTS_REUSE=1` captures again from the previous run's organization without seeding.
