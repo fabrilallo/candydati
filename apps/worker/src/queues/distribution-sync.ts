@@ -19,7 +19,7 @@ const systemActorFor = (organizationId: string): Actor => ({
  * Syncs every registered distribution channel of a job after `job.published`, `job.updated` or `job.closed`. A channel that
  * fails is recorded (`failed`, with its reason) by the use case; here the task is rethrown while retries remain so
  * pg-boss tries again with backoff, and on the last attempt the `failed` status simply stays. With the empty registry of
- * the open source distribution this does nothing and records nothing.
+ * the self-hosted default this does nothing and records nothing.
  */
 export const createDistributionSyncQueue = (deps: DistributionDeps): QueueDefinition<typeof distributionSyncPayload> =>
   defineQueue({

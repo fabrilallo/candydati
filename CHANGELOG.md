@@ -62,6 +62,10 @@ Phases 0 to 10 of the roadmap are implemented. Nothing has been released yet.
 
 ### Changed
 
+- **License:** from AGPL-3.0-only to the Business Source License 1.1 (`BUSL-1.1`). Self-hosting for your own
+  hiring stays free; offering the product to third parties as a hosted or embedded service needs a commercial license.
+  Each version becomes AGPL-3.0-only four years after its release. Contributions now require the [CLA](CLA.md)
+  instead of the DCO sign-off.
 - **Reliability:** background jobs are sent on the transaction connection (a job exists if and only if its transaction
   committed). The reconciler (`tasks.reconcile`) queues again messages, exports, imports and CV extractions whose task
   was lost, including work blocked by a job that failed for good. The outbox retries with backoff and parks an event

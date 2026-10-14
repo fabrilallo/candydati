@@ -2,8 +2,8 @@
   "name": "team-tracker",
   "private": true,
   "version": "0.1.0",
-  "description": "ATS open source e agentico (nome in codice team-tracker). Il nome del prodotto si legge da PLATFORM_*.",
-  "license": "AGPL-3.0-only",
+  "description": "ATS agentico a sorgente disponibile (nome in codice team-tracker). Il nome del prodotto si legge da PLATFORM_*.",
+  "license": "BUSL-1.1",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=24"

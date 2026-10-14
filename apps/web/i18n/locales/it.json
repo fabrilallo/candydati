@@ -1356,7 +1356,7 @@
   },
   "promise": {
     "label": "I principi del prodotto",
-    "lead": "{name} è un ATS open source dalla parte di chi si candida.",
+    "lead": "{name} è un ATS a sorgente disponibile dalla parte di chi si candida.",
     "salary": {
       "title": "RAL in chiaro.",
       "body": "Un annuncio senza range retributivo non si può pubblicare."

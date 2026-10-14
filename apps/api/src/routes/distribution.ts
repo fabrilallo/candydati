@@ -4,7 +4,7 @@ import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { bodyOf, paramOf } from './request.js';
 
-/** Where the ads go: the XML feed and the registered channels (none in the open source distribution). Thin adapters. */
+/** Where the ads go: the XML feed and the registered channels (none in the self-hosted default). Thin adapters. */
 export function registerDistributionRoutes(app: FastifyInstance, ctx: AppContext): void {
   const deps = ctx.distributionDeps;
 

@@ -6,7 +6,7 @@ This document explains what the product is, the principles it will not trade awa
 
 ## 1. What it is
 
-An open source, agentic applicant tracking system (ATS) that sits on the candidate's side of the table. Transparency is not an option a company can switch off: it is how the product works.
+A source-available, agentic applicant tracking system (ATS) that sits on the candidate's side of the table. Transparency is not an option a company can switch off: it is how the product works.
 
 It is built for small and mid-sized companies, their recruiters and generalist HR people (not only technical users), and for the candidates who apply through the public careers pages. It is designed to be driven equally well by a person in the interface and by an agent through the API.
 
@@ -247,11 +247,11 @@ tasks, notifications, the attention list, pipelines, search, exports, imports, a
   hiring manager is not implemented: notes are not tied to a stage today. Until then, everyone on a job's team sees all
   of its feedback and notes.
 
-## 7. Open source and hosted
+## 7. Self-hosted and hosted
 
-- **Open source (AGPL):** the complete product. No reserved features.
+- **Self-hosted (BUSL-1.1):** the complete product, free to run for your own organization's hiring. No reserved features. Offering it to third parties as a hosted service needs a commercial license from the licensor. Each version becomes AGPL-3.0 four years after its release.
 - **Optional hosted offering:** the same code, with external data providers (for example salary benchmarks) and distribution channels registered on top.
-- **How the two are kept apart in code:** external data enters only through generic interfaces (such as `SalaryBenchmarkProvider`, `DistributionChannel`, `EmailProvider`). The open source build ships empty or generic implementations. There is no hosted-only branch in the code.
+- **How the two are kept apart in code:** external data enters only through generic interfaces (such as `SalaryBenchmarkProvider`, `DistributionChannel`, `EmailProvider`). The self-hosted build ships empty or generic implementations. There is no hosted-only branch in the code.
 
 ## 8. Architecture and conventions in brief
 

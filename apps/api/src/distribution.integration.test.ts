@@ -252,7 +252,7 @@ describe('distribution permissions', () => {
   });
 });
 
-describe('open source default: no channel registered', () => {
+describe('self-hosted default: no channel registered', () => {
   it('shows only the computed feed row and lists only the feed as a channel', async () => {
     const plain = await createTestApp();
     try {

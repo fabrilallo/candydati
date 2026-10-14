@@ -13,5 +13,5 @@ export function createDistributionRegistry(channels: readonly DistributionChanne
   return { list: () => list, get: (channelId) => list.find((channel) => channel.id === channelId) ?? null };
 }
 
-/** The open source default: only the built-in feed, no external channel and no `if hosted` anywhere. */
+/** The self-hosted default: only the built-in feed, no external channel and no `if hosted` anywhere. */
 export const emptyDistributionRegistry: DistributionRegistry = createDistributionRegistry([]);

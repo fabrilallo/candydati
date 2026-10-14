@@ -5,10 +5,10 @@
   </picture>
 </p>
 
-<p align="center"><strong>The open source, agentic ATS on the candidate's side.</strong></p>
+<p align="center"><strong>The source-available, agentic ATS on the candidate's side.</strong></p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="License: AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-1F47D6"></a>
+  <a href="LICENSE"><img alt="License: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1F47D6"></a>
   <a href="https://github.com/fabrilallo/team-tracker/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/fabrilallo/team-tracker/actions/workflows/ci.yml/badge.svg"></a>
   <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-1F47D6"></a>
   <img alt="Node 24+" src="https://img.shields.io/badge/node-%3E%3D24-1F47D6">
@@ -24,7 +24,7 @@
 CV or filters them out before a person reads it. Software does what the people running it decide: the same tool can
 leave applicants in silence or answer every one of them. The difference lies in how it is set up and used.
 
-That is why team-tracker is open source. The rules it applies are code anyone can read, check and improve, and the
+That is why the source of team-tracker is public. The rules it applies are code anyone can read, check and improve, and the
 good practices are built into the product instead of being left to goodwill. Most hiring tools hide the salary, the
 process and the outcome from the people who apply; here transparency is structural, not optional: a deployment cannot
 switch these principles off.
@@ -220,10 +220,18 @@ this project is derived from FuffAnnuncio.
 
 ## License
 
-[GNU AGPL v3](LICENSE) (`AGPL-3.0-only`). If you run a modified version as a network service, you must offer its
-source to its users.
+[Business Source License 1.1](LICENSE) (`BUSL-1.1`), by Fabrizio Lallo.
+
+- **Free:** read, modify and self-host it, including in production to run your own organization's hiring. Consultants
+  may install and run it for a single organization's own hiring.
+- **Requires a commercial license:** offering it to third parties as a hosted service (an ATS or recruiting SaaS) or
+  embedding it in a product you sell. Write to fabrizio.lallo95@gmail.com.
+- **Becomes open source:** each version converts to [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html)
+  (`AGPL-3.0-only`) four years after its first public release.
+
+The license text is binding; this summary is not.
 
 ---
 
-**Italiano.** ATS open source e agentico dalla parte del candidato: RAL in chiaro obbligatoria, processo dichiarato,
+**Italiano.** ATS agentico a sorgente disponibile, dalla parte del candidato: RAL in chiaro obbligatoria, processo dichiarato,
 nessuna candidatura senza esito. Questo README in italiano: [README.it.md](README.it.md).

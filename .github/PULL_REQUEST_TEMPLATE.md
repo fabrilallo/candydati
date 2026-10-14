@@ -13,7 +13,8 @@
 - [ ] No candidate ranking, scoring or automatic rejection added
 - [ ] No secrets, personal data or third-party copyrighted material added
 - [ ] Docs, ADR or CHANGELOG updated if behavior changed
-- [ ] Commits follow Conventional Commits and are signed off (`git commit -s`, DCO)
+- [ ] Commits follow Conventional Commits
+- [ ] I have read [CLA.md](../CLA.md) and I agree to it
 
 ## Test plan
 

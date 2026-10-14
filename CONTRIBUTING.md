@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping. This is an open source ATS built on the candidate's side: salary range in clear, a declared
+Thanks for helping. This is a source-available ATS built on the candidate's side: salary range in clear, a declared
 selection process, every application gets an outcome. Contributions must respect those principles
 (see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and [`docs/adr/`](docs/adr)).
 
@@ -75,21 +75,16 @@ CI also runs the Playwright flows (`e2e` job) and fails when the Drizzle migrati
 - Keep pull requests focused; fill in the template; make sure `pnpm lint`, `pnpm typecheck` and tests pass.
 - Use `Fixes #123` to link the issue.
 
-## Sign-off (DCO), no CLA
+## Contributor License Agreement
 
-We use the [Developer Certificate of Origin](https://developercertificate.org/) instead of a Contributor License
-Agreement. It is a lightweight statement that you wrote the change or have the right to submit it under the project
-license (AGPL-3.0-only). You keep your copyright, and we do not ask you to assign or relicense anything. Sign every
-commit:
-
-```bash
-git commit -s -m "feat: add something"
-```
-
-This appends `Signed-off-by: Your Name <you@example.com>`, which must match your commit author. To fix a missing
-sign-off: `git commit --amend -s` (last commit) or `git rebase --signoff main`.
+The project is published under the [Business Source License 1.1](LICENSE) and is also offered under commercial
+licenses. Before your first pull request is merged you must accept the [Contributor License Agreement](CLA.md): tick
+the box in the pull request template, or comment "I have read the CLA and I agree to it". You keep the copyright in
+your contribution; the CLA lets the licensor distribute it under the project license, its Change License
+(AGPL-3.0-only) and commercial licenses.
 
 ## Contributions and licensing
 
-All contributions are licensed under AGPL-3.0-only. Do not add code, assets or screenshots you do not have the right to
-publish, and do not copy from proprietary products.
+Do not add code, assets or screenshots you do not have the right to publish, and do not copy from proprietary products.
+Third-party code must come with a license compatible with BUSL-1.1 and AGPL-3.0-only (for example MIT, BSD or Apache
+2.0); say so in the pull request.

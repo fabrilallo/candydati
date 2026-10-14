@@ -60,7 +60,7 @@ export interface DistributionChannelDto {
 export interface DistributionOverviewDto {
   readonly feedUrl: string;
   readonly llmsTxtUrl: string;
-  /** The feed first, then the registered channels (none in the open source distribution). */
+  /** The feed first, then the registered channels (none in the self-hosted default). */
   readonly channels: readonly DistributionChannelDto[];
 }
 

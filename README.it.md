@@ -5,10 +5,10 @@
   </picture>
 </p>
 
-<p align="center"><strong>L'ATS open source e agentico dalla parte del candidato.</strong></p>
+<p align="center"><strong>L'ATS agentico a sorgente disponibile, dalla parte del candidato.</strong></p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="Licenza: AGPL-3.0" src="https://img.shields.io/badge/license-AGPL--3.0-1F47D6"></a>
+  <a href="LICENSE"><img alt="Licenza: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1F47D6"></a>
   <a href="https://github.com/fabrilallo/team-tracker/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/fabrilallo/team-tracker/actions/workflows/ci.yml/badge.svg"></a>
   <a href="CONTRIBUTING.md"><img alt="PR benvenute" src="https://img.shields.io/badge/PRs-welcome-1F47D6"></a>
   <img alt="Node 24+" src="https://img.shields.io/badge/node-%3E%3D24-1F47D6">
@@ -26,7 +26,7 @@
 fuori le persone prima che qualcuno le legga. Il software fa quello che decide chi lo gestisce: lo stesso strumento
 può lasciare i candidati senza risposta oppure rispondere a tutti. La differenza sta in come lo si configura e lo si usa.
 
-Per questo team-tracker è open source. Le regole che applica sono codice che chiunque può leggere, verificare e
+Per questo il codice di team-tracker è pubblico. Le regole che applica sono codice che chiunque può leggere, verificare e
 migliorare, e le buone pratiche sono parte del prodotto invece di essere lasciate alla buona volontà. La maggior parte
 degli strumenti di selezione nasconde a chi si candida la retribuzione, il processo e l'esito; qui la trasparenza è
 strutturale, non opzionale: un'installazione non può disattivare questi principi.
@@ -222,5 +222,13 @@ annunci in questo progetto deriva da FuffAnnuncio.
 
 ## Licenza
 
-[GNU AGPL v3](LICENSE) (`AGPL-3.0-only`). Se offri una versione modificata come servizio di rete, devi mettere a
-disposizione dei suoi utenti il codice sorgente.
+[Business Source License 1.1](LICENSE) (`BUSL-1.1`), di Fabrizio Lallo.
+
+- **Gratis:** leggerlo, modificarlo e installarlo in proprio, anche in produzione per la selezione della propria
+  organizzazione. Un consulente può installarlo e gestirlo per la selezione di una singola organizzazione.
+- **Serve una licenza commerciale:** offrirlo a terzi come servizio ospitato (un ATS o un SaaS di recruiting) o
+  includerlo in un prodotto che vendi. Scrivi a fabrizio.lallo95@gmail.com.
+- **Diventa open source:** ogni versione passa alla [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html)
+  (`AGPL-3.0-only`) quattro anni dopo la sua prima pubblicazione.
+
+Fa fede il testo della licenza, non questo riassunto.

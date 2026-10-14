@@ -21,7 +21,7 @@ export interface DistributionRemoval extends DistributionPrevious {
 }
 
 /**
- * A place an ad can be sent to besides the built-in XML feed (a job board). Registered per deployment: the open source
+ * A place an ad can be sent to besides the built-in XML feed (a job board). Registered per deployment: the self-hosted
  * distribution registers none, a hosted one registers its own. `update` must be safe to repeat: a retry re-sends.
  * A thrown error means "not delivered": the sync records it as `failed` and retries; keep the message short, it is shown.
  */

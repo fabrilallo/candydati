@@ -9,7 +9,7 @@ export interface DistributionInputs {
   readonly uow: DrizzleUnitOfWork;
   /** Public site URL (`PLATFORM_URL`). */
   readonly publicBaseUrl: string;
-  /** Hosted deployments register their channels here; the open source default is none. */
+  /** Hosted deployments register their channels here; the self-hosted default is none. */
   readonly channels?: readonly DistributionChannel[] | undefined;
 }
 

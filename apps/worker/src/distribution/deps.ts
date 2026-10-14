@@ -9,7 +9,7 @@ import type { PlatformConfig } from '@tt/domain';
 export interface DistributionWiring {
   readonly uow: DrizzleUnitOfWork;
   readonly platform: PlatformConfig;
-  /** Channels beyond the built-in feed. The open source distribution registers none; a hosted one passes its own. */
+  /** Channels beyond the built-in feed. The self-hosted default registers none; a hosted one passes its own. */
   readonly channels?: readonly DistributionChannel[] | undefined;
 }
 

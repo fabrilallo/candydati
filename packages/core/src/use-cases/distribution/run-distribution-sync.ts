@@ -15,7 +15,7 @@ export interface DistributionSyncResult extends SyncSummary {
  * Worker use case (system actor, task `distribution.sync`): reacts to `job.published`, `job.updated` and `job.closed` by
  * syncing every registered channel with the job as it is NOW (the event only says which job). Status per channel lands in
  * `job_distribution`. Failures do not throw: the caller reads `failed` and decides to retry. Safe to repeat. With the
- * empty registry of the open source distribution it is a no-op that records nothing.
+ * empty registry of the self-hosted default it is a no-op that records nothing.
  */
 export const runDistributionSync = defineUseCase<DistributionDeps, typeof inputSchema, DistributionSyncResult>({
   name: 'runDistributionSync',

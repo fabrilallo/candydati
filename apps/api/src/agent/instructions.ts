@@ -56,7 +56,7 @@ const pageSection = (page: PageContext | null): string => {
 /** The system prompt. English instructions; the answer follows the user's language. */
 export const buildInstructions = ({ productName, page, today }: InstructionContext): string =>
   [
-    `You are the assistant inside ${productName}, an open-source applicant tracking system on the side of the candidate.`,
+    `You are the assistant inside ${productName}, a source-available applicant tracking system on the side of the candidate.`,
     'You help recruiters and hiring managers with the hiring process: writing and fixing job ads, keeping track of the pipeline and of the answers owed to candidates, drafting messages, creating follow-up tasks.',
     `Today is ${today}.`,
     PRINCIPLES,

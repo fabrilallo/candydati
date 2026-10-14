@@ -24,7 +24,7 @@ export const DISTRIBUTION_BASE_URL = 'https://jobs.example.com';
 
 /**
  * The job world plus the distribution ports in memory: one organization (`org_a`, slug `acme`), the fake channel
- * registered (pass `channels: []` for the empty registry of the open source distribution), a recording queue and a
+ * registered (pass `channels: []` for the empty registry of the self-hosted default), a recording queue and a
  * clock you can move with `setNow`.
  */
 export function createTestDistributionDeps(overrides: Partial<TestDistributionDeps> & { channels?: readonly FakeDistributionChannel[] } = {}): TestDistributionDeps {

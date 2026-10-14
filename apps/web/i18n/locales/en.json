@@ -1356,7 +1356,7 @@
   },
   "promise": {
     "label": "Product principles",
-    "lead": "{name} is an open source ATS on the candidate's side.",
+    "lead": "{name} is a source-available ATS on the candidate's side.",
     "salary": {
       "title": "Salary in the clear.",
       "body": "A job ad without a salary range cannot be published."

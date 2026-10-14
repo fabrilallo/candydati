@@ -79,7 +79,7 @@ export interface ServerDeps {
   readonly adQuality?: AdQualityAnalyzer | undefined;
   /** Messages to candidates: the provider chosen by EMAIL_PROVIDER by default, a fake in tests. */
   readonly messaging?: { readonly sender: MessageSender; readonly identity: EmailIdentity } | undefined;
-  /** Channels to distribute ads to besides the built-in feed. Empty by default (open source); hosted deployments pass theirs. */
+  /** Channels to distribute ads to besides the built-in feed. Empty by default (self-hosted); hosted deployments pass theirs. */
   readonly distributionChannels?: readonly DistributionChannel[] | undefined;
   /** Test seam: the "now" of the reports. */
   readonly reportClock?: (() => Date) | undefined;
