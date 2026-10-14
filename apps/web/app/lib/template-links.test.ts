@@ -31,6 +31,8 @@ const SAFE_BY_CONSTRUCTION = [
   /^props\.csvUrl$/,
   // otpauth:// address the api generates for the signed-in user's own two-factor enrolment.
   /^enrolment\.totpUri$/,
+  // SVG data URL drawn in the browser by `totpQrDataUrl` from that same address.
+  /^qrCode$/,
   /^OPENAPI_PATH$/,
 ]
 

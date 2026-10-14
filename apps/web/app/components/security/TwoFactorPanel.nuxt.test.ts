@@ -34,6 +34,7 @@ describe('TwoFactorPanel', () => {
     await flushPromises()
     expect(mocks.api.enableTwoFactor).toHaveBeenCalledWith('my-password')
     expect(wrapper.find('[data-testid="two-factor-secret"]').text()).toBe('JBSW Y3DP EHPK 3PXP')
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="two-factor-qr"]').attributes('src')).toMatch(/^data:image\/svg\+xml/))
     await wrapper.find('[data-testid="two-factor-code"]').setValue('123 456')
     await wrapper.find('form').trigger('submit')
     await flushPromises()

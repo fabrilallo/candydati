@@ -82,24 +82,6 @@ export default tseslint.config(
     files: ['packages/core/src/adapters/drizzle-*.ts', 'apps/api/eval/cases.ts'],
     rules: { 'max-lines-per-function': 'off' },
   },
-  // TEMPORARY baseline: functions that still exceed 50 lines in code that was being reworked in parallel when these
-  // rules were introduced. Split them and delete the entry; do not add new ones.
-  {
-    files: [
-      'apps/api/src/app-context.ts',
-      'apps/api/src/auth/audit-hooks.ts',
-      'apps/api/src/routes/inbound-email.ts',
-      'apps/api/src/server.ts',
-      'apps/worker/src/index.ts',
-      'packages/core/src/use-cases/automations/scan-deadlines.ts',
-      'packages/core/src/use-cases/candidates/submit-application.ts',
-      'packages/core/src/use-cases/imports/create-import-batch.ts',
-      'packages/providers/src/storage/s3.ts',
-      'packages/providers/src/zip/zip-stream.ts',
-      'packages/core/src/use-cases/privacy/build-candidate-export.ts',
-    ],
-    rules: { 'max-lines-per-function': 'off' },
-  },
   ...importBoundaries,
   noDeepImports,
 );

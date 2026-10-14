@@ -22,7 +22,13 @@ export interface SendOptions extends RetryPolicy {
 export interface BossSender {
   send(name: string, data: object, options: SendOptions): Promise<string | null>;
   createQueue(name: string): Promise<void>;
+  /** The stored job, in any state, or null (pg-boss keeps finished jobs until its own cleanup). */
+  getJobById(name: string, id: string): Promise<{ readonly state: string } | null>;
+  deleteJob(name: string, id: string): Promise<unknown>;
 }
+
+/** States of a job that will never run again but still hold its id, so a repeat send would be dropped. */
+const DEAD_STATES: readonly string[] = ['failed', 'cancelled'];
 
 export const TASK_RETRY: RetryPolicy = { retryLimit: 3, retryDelay: 30, retryBackoff: true };
 /** Webhook receivers can be down for a day: 14 retries, 30 s then doubling up to 6 h, so at least 24 h in all. */
@@ -53,6 +59,12 @@ const optionsFor = (name: TaskName, options: EnqueueOptions | undefined): SendOp
  * the key). `bindTo(executor)` sends on the caller's transaction instead: the unit of work uses it so a task exists if
  * and only if the transaction that queued it committed.
  */
+/** pg-boss inserts with `ON CONFLICT DO NOTHING` on the id: a job that failed for good would block its key until pg-boss cleans up. */
+async function removeDeadJob(boss: BossSender, name: string, id: string): Promise<void> {
+  const existing = await boss.getJobById(name, id);
+  if (existing && DEAD_STATES.includes(existing.state)) await boss.deleteJob(name, id);
+}
+
 export function createPgBossQueue(boss: BossSender): BindableTaskQueue {
   const created = new Set<string>();
   const sender = (db: SqlExecutor | undefined): TaskQueue => ({
@@ -62,6 +74,7 @@ export function createPgBossQueue(boss: BossSender): BindableTaskQueue {
         created.add(name);
       }
       const sendOptions = optionsFor(name, options);
+      if (options?.replaceFailed && sendOptions.id) await removeDeadJob(boss, name, sendOptions.id);
       const id = await boss.send(name, payload, db ? { ...sendOptions, db } : sendOptions);
       if (id === null && options?.singletonKey === undefined) throw new Error(`Task ${name} was not queued.`);
     },

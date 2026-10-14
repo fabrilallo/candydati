@@ -1,5 +1,6 @@
 import type { ZipStream, ZipStreamFactory } from '@tt/core';
 import { AsyncZipDeflate, Zip, ZipDeflate, ZipPassThrough } from 'fflate';
+import { BoundedChunkQueue, HIGH_WATER_BYTES } from './bounded-queue.js';
 import { assertZipPath } from './zip-writer.js';
 
 const DEFLATE_LEVEL = 6;
@@ -12,82 +13,7 @@ const ENTRY_MTIME = new Date(Date.UTC(2000, 0, 1));
 export const ASYNC_DEFLATE_MIN_BYTES = 512 * 1024;
 /** Original CVs (PDF, DOCX) are already compressed: storing them costs no CPU and loses almost nothing. */
 const STORED_PREFIX = 'files/';
-/** Compressed bytes waiting for the consumer before `add` pauses the producer: the memory bound of the archive. */
-export const HIGH_WATER_BYTES = 4 * 1024 * 1024;
-
-/**
- * Bounded hand-off between the compressor (producer) and whoever reads `output` (an upload). The producer waits in
- * `room()` while too much is buffered; a consumer that stops (error, `return()`) releases and fails the producer.
- */
-function createQueue() {
-  let chunks: Uint8Array[] = [];
-  let buffered = 0;
-  let ended = false;
-  let failure: Error | null = null;
-  let wakeConsumer: (() => void) | null = null;
-  let wakeProducers: Array<() => void> = [];
-
-  const notifyConsumer = () => {
-    wakeConsumer?.();
-    wakeConsumer = null;
-  };
-  const notifyProducers = () => {
-    const waiting = wakeProducers;
-    wakeProducers = [];
-    for (const wake of waiting) wake();
-  };
-
-  return {
-    push(chunk: Uint8Array): void {
-      if (ended || failure) return;
-      chunks.push(chunk);
-      buffered += chunk.byteLength;
-      notifyConsumer();
-    },
-    end(): void {
-      ended = true;
-      notifyConsumer();
-    },
-    fail(error: Error): void {
-      failure ??= error;
-      chunks = [];
-      buffered = 0;
-      notifyConsumer();
-      notifyProducers();
-    },
-    /** Resolves when the buffer has room; rejects when the archive failed or the consumer went away. */
-    async room(): Promise<void> {
-      while (buffered >= HIGH_WATER_BYTES && !failure) await new Promise<void>((resolve) => wakeProducers.push(resolve));
-      if (failure) throw failure;
-    },
-    iterable: {
-      [Symbol.asyncIterator](): AsyncIterator<Uint8Array> {
-        return {
-          async next(): Promise<IteratorResult<Uint8Array>> {
-            for (;;) {
-              if (failure) throw failure;
-              const chunk = chunks.shift();
-              if (chunk) {
-                buffered -= chunk.byteLength;
-                notifyProducers();
-                return { value: chunk, done: false };
-              }
-              if (ended) return { value: undefined, done: true };
-              await new Promise<void>((resolve) => (wakeConsumer = resolve));
-            }
-          },
-          async return(): Promise<IteratorResult<Uint8Array>> {
-            failure ??= new Error('The ZIP consumer stopped reading.');
-            chunks = [];
-            buffered = 0;
-            notifyProducers();
-            return { value: undefined, done: true };
-          },
-        };
-      },
-    },
-  };
-}
+export { HIGH_WATER_BYTES };
 
 const entryFor = (path: string, size: number): ZipPassThrough | ZipDeflate | AsyncZipDeflate => {
   if (path.startsWith(STORED_PREFIX)) return new ZipPassThrough(path);
@@ -100,7 +26,7 @@ const entryFor = (path: string, size: number): ZipPassThrough | ZipDeflate | Asy
  * Entries appear in the order they are added. A path that is absolute, contains `..` or is added twice is rejected.
  */
 export function createZipStream(): ZipStream {
-  const queue = createQueue();
+  const queue = new BoundedChunkQueue();
   const seen = new Set<string>();
   let closed = false;
   const zip = new Zip((error, chunk, final) => {

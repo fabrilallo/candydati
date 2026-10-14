@@ -82,70 +82,78 @@ export const scanDeadlines = defineSystemJob<ScanDeps, z.ZodObject<{ now: z.ZodD
     const { now } = input;
     // Past-due promises become `missed` here, once an hour; they stay unanswered until someone replies.
     const missedPromises = await deps.promises.markOverdueMissedAcrossOrganizations(now);
-    const contexts = new Map<string, OrganizationContext>();
-    const context = (organizationId: string): OrganizationContext => {
-      let found = contexts.get(organizationId);
-      if (!found) {
-        found = new OrganizationContext(deps, organizationId);
-        contexts.set(organizationId, found);
-      }
-      return found;
-    };
-    const notify = async (notification: Notification, key: string): Promise<void> => {
-      await deps.notifications.createIfAbsent(notification, key);
-    };
-
-    const awaiting = await deps.applications.listAwaitingResponseAcrossOrganizations(new Date(now.getTime() + DUE_SOON_HOURS * HOUR_MS));
-    for (const application of awaiting) {
-      const scope = context(application.organizationId);
-      const job = await scope.job(application.jobId);
-      if (!job) continue;
-      const state = responseState(application, job, now);
-      if (state !== 'due_soon' && state !== 'overdue') continue;
-      const kind: NotificationKind = state === 'overdue' ? 'response_overdue' : 'response_due_soon';
-      const due = application.responseDueAt;
-      const escalate = state === 'overdue' && due !== null && needsEscalation(due, now);
-      const recipients = [...(await scope.owners(job)), ...(escalate ? await scope.escalation() : [])];
-      for (const userId of new Set(recipients.map((m) => m.userId))) {
-        await notify(
-          {
-            id: deps.newId(),
-            organizationId: application.organizationId,
-            userId,
-            kind,
-            applicationId: application.id,
-            jobId: application.jobId,
-            taskId: null,
-            payload: { stageId: application.stageId, escalated: escalate && userId !== job.createdBy },
-            createdAt: now,
-            readAt: null,
-          },
-          notificationDedupeKey(kind, application.id, application.stageId, application.responseDueAt),
-        );
-      }
-    }
-
-    const tasks = await deps.tasks.listOpenDueAcrossOrganizations(new Date(now.getTime() + TASK_DUE_SOON_HOURS * HOUR_MS));
-    for (const task of tasks) {
-      await notify(
-        {
-          id: deps.newId(),
-          organizationId: task.organizationId,
-          userId: task.assigneeId,
-          kind: 'task_due',
-          applicationId: task.applicationId,
-          jobId: task.jobId,
-          taskId: task.id,
-          payload: {},
-          createdAt: now,
-          readAt: null,
-        },
-        `task_due:${task.id}`,
-      );
-    }
+    const context = organizationContexts(deps);
+    await notifyAwaitingResponses(deps, context, now);
+    await notifyDueTasks(deps, now);
     return { digests: await unsentDigests(deps.notifications, context, DEADLINE_DIGEST_KINDS, now), missedPromises };
   },
 });
+
+/** One lazily built, cached context per organization for the duration of a scan. */
+function organizationContexts(deps: ScanDeps): (organizationId: string) => OrganizationContext {
+  const contexts = new Map<string, OrganizationContext>();
+  return (organizationId) => {
+    let found = contexts.get(organizationId);
+    if (!found) {
+      found = new OrganizationContext(deps, organizationId);
+      contexts.set(organizationId, found);
+    }
+    return found;
+  };
+}
+
+async function notifyAwaitingResponses(deps: ScanDeps, context: (organizationId: string) => OrganizationContext, now: Date): Promise<void> {
+  const awaiting = await deps.applications.listAwaitingResponseAcrossOrganizations(new Date(now.getTime() + DUE_SOON_HOURS * HOUR_MS));
+  for (const application of awaiting) {
+    const scope = context(application.organizationId);
+    const job = await scope.job(application.jobId);
+    if (!job) continue;
+    const state = responseState(application, job, now);
+    if (state !== 'due_soon' && state !== 'overdue') continue;
+    const kind: NotificationKind = state === 'overdue' ? 'response_overdue' : 'response_due_soon';
+    const due = application.responseDueAt;
+    const escalate = state === 'overdue' && due !== null && needsEscalation(due, now);
+    const recipients = [...(await scope.owners(job)), ...(escalate ? await scope.escalation() : [])];
+    for (const userId of new Set(recipients.map((m) => m.userId))) {
+      await deps.notifications.createIfAbsent(
+        {
+          id: deps.newId(),
+          organizationId: application.organizationId,
+          userId,
+          kind,
+          applicationId: application.id,
+          jobId: application.jobId,
+          taskId: null,
+          payload: { stageId: application.stageId, escalated: escalate && userId !== job.createdBy },
+          createdAt: now,
+          readAt: null,
+        },
+        notificationDedupeKey(kind, application.id, application.stageId, application.responseDueAt),
+      );
+    }
+  }
+}
+
+async function notifyDueTasks(deps: ScanDeps, now: Date): Promise<void> {
+  const tasks = await deps.tasks.listOpenDueAcrossOrganizations(new Date(now.getTime() + TASK_DUE_SOON_HOURS * HOUR_MS));
+  for (const task of tasks) {
+    await deps.notifications.createIfAbsent(
+      {
+        id: deps.newId(),
+        organizationId: task.organizationId,
+        userId: task.assigneeId,
+        kind: 'task_due',
+        applicationId: task.applicationId,
+        jobId: task.jobId,
+        taskId: task.id,
+        payload: {},
+        createdAt: now,
+        readAt: null,
+      },
+      `task_due:${task.id}`,
+    );
+  }
+}
 
 /** The digests of notifications of `kinds` not yet emailed: built from what is stored, never from what this run inserted. */
 export async function unsentDigests(

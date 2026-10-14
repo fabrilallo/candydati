@@ -117,6 +117,31 @@ notifications and tasks. pg-boss (in Postgres) drives queues for email sending, 
 and erasure, response deadlines, imports and distribution sync. Scheduled jobs handle retention warnings, daily digests
 and stale-job detection. Jobs are idempotent and keyed so a retry does not repeat a side effect.
 
+**Where a job is queued.** With pg-boss, the unit of work sends a job on the connection of the transaction that stores
+the work (`BindableTaskQueue.bindTo`), so the job exists if and only if the transaction committed. Two sends happen
+after the commit and are not atomic with it: `cv.extract` of a public application (it keeps its own intake
+transaction) and sends with a queue that cannot join a transaction.
+
+**Reconciler (`tasks.reconcile`).** Every five minutes the worker looks for work that was stored but whose task never
+arrived (a crash between commit and send, a queue outage): messages still `queued`, organization exports still
+`pending`, import batches `uploaded` or `importing`, CV extractions still `pending`, each older than 15 minutes
+(`STUCK_AFTER_MINUTES`). It queues their task again with the row id as singleton key, so a task the queue still knows
+is not duplicated. pg-boss inserts with a job id derived from that key (`ON CONFLICT DO NOTHING`), so a job that ended
+`failed` or `cancelled` would block its key until pg-boss cleans it up: the reconciler asks for `replaceFailed`, and
+the queue deletes a dead job of that key before sending the new one. Tasks that cannot be queued are counted
+(`failed`) and retried on the next run. Rows are only ever picked while they still wait, so finished work is never
+queued again.
+
+**Outbox retry and dead letter.** The publisher claims due events (`SKIP LOCKED`) and fans each one out in a savepoint of
+its own. A failing event is rolled back alone and its attempt is counted with a short error code, due again after a
+backoff of 30 s doubling per attempt, capped at 6 h. After `OUTBOX_MAX_ATTEMPTS` (10) failed fan-outs the event is
+parked (`dead_at`, dead letter): it is never taken again and newer events go on. Webhook deliveries and distribution
+syncs retry with pg-boss backoff for at least 24 hours; the delivery itself is logged as `failed` on the last attempt.
+
+**Log retention (`DELIVERY_LOG_RETENTION_DAYS`).** The daily retention job deletes outbox events that are published or
+dead and webhook delivery rows older than this many days (default 30, worker setting). Events still waiting are never
+deleted.
+
 ## Public and authenticated surfaces
 
 | Surface | Auth | Notes |

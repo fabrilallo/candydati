@@ -63,6 +63,11 @@ interface Recorded {
  * Each hook records the action of its own name; accepting an invitation also records the resulting member.
  */
 export function createAuditHooks({ core, lookups }: AuditHookDeps) {
+  const helpers = createHookHelpers(core, lookups);
+  return { ...organizationHooks(helpers), ...invitationHooks(helpers, lookups), ...memberHooks(helpers) };
+}
+
+function createHookHelpers(core: CoreDeps, lookups: AuditHookDeps['lookups']) {
   const record = (actor: Actor, event: Recorded): Promise<unknown> => recordAuditEvent(core, actor, event);
 
   const log = (actor: Actor, action: RecordableAction, target: AuditTarget, metadata: Record<string, unknown> = {}) =>
@@ -79,7 +84,12 @@ export function createAuditHooks({ core, lookups }: AuditHookDeps) {
   const memberTarget = (member: MemberLike) => ({ type: 'member', id: member.id });
   const invitationTarget = (invitation: InvitationLike) => ({ type: 'invitation', id: invitation.id });
   const invitationMeta = (invitation: InvitationLike) => ({ email: invitation.email, role: invitation.role ?? null });
+  return { log, actingActor, memberTarget, invitationTarget, invitationMeta };
+}
 
+type HookHelpers = ReturnType<typeof createHookHelpers>;
+
+function organizationHooks({ log }: HookHelpers) {
   return {
     afterCreateOrganization: async (data: { organization: Organization; member: MemberLike; user: UserLike }) =>
       void (await log(
@@ -96,7 +106,11 @@ export function createAuditHooks({ core, lookups }: AuditHookDeps) {
         { type: 'organization', id: data.member.organizationId },
         data.organization ? { name: data.organization.name, slug: data.organization.slug } : {},
       )),
+  };
+}
 
+function invitationHooks({ log, invitationTarget, invitationMeta, memberTarget }: HookHelpers, lookups: AuditHookDeps['lookups']) {
+  return {
     afterCreateInvitation: async (data: { invitation: InvitationLike; inviter: UserLike; organization: Organization }) =>
       void (await log(
         userActor(data.inviter.id, data.organization.id, toRole(await lookups.roleOf(data.inviter.id, data.organization.id))),
@@ -126,7 +140,11 @@ export function createAuditHooks({ core, lookups }: AuditHookDeps) {
         invitationTarget(data.invitation),
         invitationMeta(data.invitation),
       )),
+  };
+}
 
+function memberHooks({ log, actingActor, memberTarget }: HookHelpers) {
+  return {
     afterAddMember: async (data: { member: MemberLike; user: UserLike; organization: Organization }) =>
       void (await log(
         await actingActor(data.organization.id, { userId: data.user.id, role: data.member.role }),

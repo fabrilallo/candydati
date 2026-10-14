@@ -116,7 +116,7 @@ export interface ZipStream {
 
 export type ZipStreamFactory = () => ZipStream;
 
-/** Providers the instance is configured with, for the registro dei trattamenti. Names only, never credentials. */
+/** Providers the instance is configured with, for the record of processing activities (GDPR art. 30). Names only, never credentials. */
 export interface ConfiguredProviders {
   /** `local` or `s3`, with the host when relevant. */
   readonly storage: string;

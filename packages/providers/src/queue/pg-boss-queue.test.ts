@@ -1,9 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createPgBossQueue, FILES_DELETE_RETRY, singletonJobId, TASK_RETRY, WEBHOOK_RETRY, type BossSender } from './pg-boss-queue.js';
 
-const fakeBoss = (id: string | null = 'job-1'): BossSender & { send: ReturnType<typeof vi.fn>; createQueue: ReturnType<typeof vi.fn> } => ({
+type FakeBoss = BossSender & { send: ReturnType<typeof vi.fn>; createQueue: ReturnType<typeof vi.fn>; getJobById: ReturnType<typeof vi.fn>; deleteJob: ReturnType<typeof vi.fn> };
+
+const fakeBoss = (id: string | null = 'job-1', existing: { state: string } | null = null): FakeBoss => ({
   send: vi.fn(async () => id),
   createQueue: vi.fn(async () => undefined),
+  getJobById: vi.fn(async () => existing),
+  deleteJob: vi.fn(async () => undefined),
 });
 
 const payload = { organizationId: 'org', applicationId: 'app' };
@@ -74,5 +78,32 @@ describe('createPgBossQueue', () => {
     expect(singletonJobId('email.send', 'm1')).toMatch(uuid);
     expect(singletonJobId('email.send', 'm1')).not.toBe(singletonJobId('email.send', 'm2'));
     expect(singletonJobId('email.send', 'm1')).not.toBe(singletonJobId('webhook.deliver', 'm1'));
+  });
+
+  describe('replaceFailed', () => {
+    const task = { organizationId: 'o', messageId: 'm' };
+    const id = singletonJobId('email.send', 'm');
+
+    it('deletes a job of that key that failed for good, then sends again', async () => {
+      const boss = fakeBoss('job-2', { state: 'failed' });
+      await createPgBossQueue(boss).enqueue('email.send', task, { singletonKey: 'm', replaceFailed: true });
+      expect(boss.getJobById).toHaveBeenCalledWith('email.send', id);
+      expect(boss.deleteJob).toHaveBeenCalledWith('email.send', id);
+      expect(boss.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves a job that is still waiting or running alone', async () => {
+      for (const state of ['created', 'retry', 'active']) {
+        const boss = fakeBoss(null, { state });
+        await createPgBossQueue(boss).enqueue('email.send', task, { singletonKey: 'm', replaceFailed: true });
+        expect(boss.deleteJob).not.toHaveBeenCalled();
+      }
+    });
+
+    it('does not look anything up without the option', async () => {
+      const boss = fakeBoss(null, { state: 'failed' });
+      await createPgBossQueue(boss).enqueue('email.send', task, { singletonKey: 'm' });
+      expect(boss.getJobById).not.toHaveBeenCalled();
+    });
   });
 });

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import type { TwoFactorEnrolment } from '@/lib/auth-api'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { totpSecretOf } from '@/lib/security-api'
+import { totpQrDataUrl } from '@/lib/totp-qr'
 
 /**
  * The person's own second factor. Turning it on: password -> key and setup link for the authenticator app -> a code to
@@ -25,7 +26,22 @@ const backupCodes = ref<readonly string[] | null>(null)
 const busy = ref(false)
 const errorKey = ref<string | null>(null)
 const copied = ref(false)
+const qrCode = ref<string | null>(null)
 const secret = computed(() => (enrolment.value ? totpSecretOf(enrolment.value.totpUri) : null))
+
+/** Drawn in the browser only (the setup link holds the key, so it is never rendered on the server). */
+watch(
+  () => enrolment.value?.totpUri ?? null,
+  async (uri) => {
+    qrCode.value = null
+    if (!uri) return
+    try {
+      qrCode.value = await totpQrDataUrl(uri)
+    } catch (error) {
+      console.error('[security] QR code not drawn', error instanceof Error ? error.message : error)
+    }
+  },
+)
 
 const run = async (work: () => Promise<void>): Promise<void> => {
   busy.value = true
@@ -96,6 +112,7 @@ const copyUri = async (): Promise<void> => {
 
     <form v-if="enrolment" class="grid gap-4" novalidate @submit.prevent="confirm">
       <p class="text-sm">{{ t('security.personal.scan') }}</p>
+      <img v-if="qrCode" :src="qrCode" :alt="t('security.personal.qrAlt')" width="192" height="192" class="size-48 rounded-md border bg-white p-1" data-testid="two-factor-qr" />
       <div v-if="secret" class="grid gap-1">
         <span class="text-xs font-medium text-muted-foreground">{{ t('security.personal.secret') }}</span>
         <code class="rounded-md border bg-muted px-3 py-2 font-mono text-sm select-all" data-testid="two-factor-secret">{{ secret }}</code>

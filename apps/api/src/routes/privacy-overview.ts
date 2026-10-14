@@ -4,7 +4,7 @@ import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { toProcessingRecordDto, toRetentionOverviewDto } from './privacy-dto.js';
 
-/** What the retention job will do and the data of the registro dei trattamenti. Owner and admin. */
+/** What the retention job will do and the data of the record of processing activities (GDPR art. 30). Owner and admin. */
 export function registerPrivacyOverviewRoutes(app: FastifyInstance, ctx: AppContext): void {
   const deps = ctx.overviewDeps;
 

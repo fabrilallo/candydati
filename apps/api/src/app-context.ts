@@ -171,7 +171,48 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
   const core: CoreDeps = { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams };
   const auth = createAuth({ env, db, core, mailer });
   const messaging = createMessagingDeps({ env, uow, queue, sender, identity, onReceiptError });
-  const resolveFromHeaders = createActorResolver({
+  const resolveFromHeaders = createSessionResolver(auth, db, uow);
+  const apiKeyDeps = createApiKeyDeps(uow, env.API_KEY_DEFAULT_TTL_DAYS);
+  const limits = rateLimit ?? DEFAULT_RATE_LIMIT;
+  const actors = createActors({ env, limits, apiKeyDeps, resolveFromHeaders });
+  const hr = createHrDeps({ uow, files, sender, config: toMessagingConfig(env.platform, env.email), onFeedbackMailError: onReceiptError });
+  const phase2 = createPhase2Deps({ uow, files, queue, receipts: messaging.receipts, feedback: hr.stageEntry });
+  const phase5 = createPhase5Deps({ uow, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipStreamFactory, feedbackRecords: hr.feedbackRecords });
+  const jobDeps = createJobDeps(uow, adQuality, env.platform.adQualityThreshold);
+  return {
+    env,
+    auth,
+    auditLog,
+    core,
+    userNames: createUserNameLookup(uow.repositories.users),
+    ...actors,
+    apiKeyDeps,
+    ...phase2,
+    ...phase5,
+    ...createImportDeps({ uow, files, queue }),
+    ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
+    submitDeps: withDailyCaps(env, phase2),
+    feedbackDeps: hr.feedbackDeps,
+    publicFeedbackDeps: hr.publicFeedbackDeps,
+    jobRequestDeps: hr.jobRequestDeps,
+    staleJobDeps: hr.staleJobDeps,
+    ...createTeamDeps(uow),
+    messagingDeps: messaging.messagingDeps,
+    inboundDeps: messaging.inboundDeps,
+    checkDatabase: async () => void (await db.execute(sql`select 1`)),
+    securityDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, securitySettings: uow.repositories.securitySettings, now: () => new Date() },
+    mailer,
+    budget: createDailyBudget(budgetStore ?? createPgBudgetStore(db)),
+    rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
+    jobDeps,
+    reportDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, jobs: jobDeps.jobs, reports: uow.repositories.reports, now: reportClock ?? (() => new Date()) },
+    distributionDeps: createDistributionDeps({ uow, publicBaseUrl: env.platform.url, channels: distributionChannels }),
+    publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
+  };
+}
+
+function createSessionResolver(auth: ReturnType<typeof createAuth>, db: AppContextDeps['db'], uow: DrizzleUnitOfWork) {
+  return createActorResolver({
     getSession: async (headers) => {
       const result = await auth.api.getSession({ headers });
       if (!result) return null;
@@ -187,60 +228,29 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     findRole: (userId, organizationId) => findMemberRole(db, userId, organizationId),
     requiresTwoFactor: async (organizationId) => (await uow.repositories.securitySettings.get(organizationId)).requireTwoFactor,
   });
-  const apiKeyDeps = createApiKeyDeps(uow, env.API_KEY_DEFAULT_TTL_DAYS);
-  const limits = rateLimit ?? DEFAULT_RATE_LIMIT;
-  const actors = createRequestActors({
+}
+
+function createActors({ env, limits, apiKeyDeps, resolveFromHeaders }: {
+  env: AppContextDeps['env'];
+  limits: RateLimitSettings;
+  apiKeyDeps: ReturnType<typeof createApiKeyDeps>;
+  resolveFromHeaders: ReturnType<typeof createSessionResolver>;
+}) {
+  return createRequestActors({
     session: async (request) => resolveFromHeaders(fromNodeHeaders(request.headers)),
     authenticate: (secret) => authenticateApiKey(apiKeyDeps, secret),
     limiter: createKeyRateLimiter({ max: limits.apiKeyMax ?? env.API_KEY_RATE_LIMIT ?? DEFAULT_API_KEY_MAX, windowMs: 60_000 }),
   });
-  const hr = createHrDeps({
-    uow,
-    files,
-    sender,
-    config: toMessagingConfig(env.platform, env.email),
-    onFeedbackMailError: (error) => onReceiptError(error),
-  });
-  const phase2 = createPhase2Deps({ uow, files, queue, receipts: messaging.receipts, feedback: hr.stageEntry });
-  const phase5 = createPhase5Deps({ uow, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipStreamFactory, feedbackRecords: hr.feedbackRecords });
-  const jobDeps = createJobDeps(uow, adQuality, env.platform.adQualityThreshold);
-  const distributionDeps = createDistributionDeps({ uow, publicBaseUrl: env.platform.url, channels: distributionChannels });
+}
+
+function withDailyCaps(env: AppContextDeps['env'], phase2: ReturnType<typeof createPhase2Deps>): AppContext['submitDeps'] {
   return {
-    env,
-    auth,
-    auditLog,
-    core,
-    userNames: createUserNameLookup(uow.repositories.users),
-    ...actors,
-    apiKeyDeps,
-    ...phase2,
-    ...phase5,
-    ...createImportDeps({ uow, files, queue }),
-    ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
-    submitDeps: {
-      ...phase2.submitDeps,
-      dailyCaps: {
-        applications: phase2.candidateDeps.applications,
-        perOrganization: env.APPLICATIONS_DAILY_MAX_PER_ORGANIZATION,
-        perJob: env.APPLICATIONS_DAILY_MAX_PER_JOB,
-      },
+    ...phase2.submitDeps,
+    dailyCaps: {
+      applications: phase2.candidateDeps.applications,
+      perOrganization: env.APPLICATIONS_DAILY_MAX_PER_ORGANIZATION,
+      perJob: env.APPLICATIONS_DAILY_MAX_PER_JOB,
     },
-    feedbackDeps: hr.feedbackDeps,
-    publicFeedbackDeps: hr.publicFeedbackDeps,
-    jobRequestDeps: hr.jobRequestDeps,
-    staleJobDeps: hr.staleJobDeps,
-    ...createTeamDeps(uow),
-    messagingDeps: messaging.messagingDeps,
-    inboundDeps: messaging.inboundDeps,
-    checkDatabase: async () => void (await db.execute(sql`select 1`)),
-    securityDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, securitySettings: uow.repositories.securitySettings, now: () => new Date() },
-    mailer,
-    budget: createDailyBudget(budgetStore ?? createPgBudgetStore(db)),
-    rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
-    jobDeps,
-    reportDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, jobs: jobDeps.jobs, reports: uow.repositories.reports, now: reportClock ?? (() => new Date()) },
-    distributionDeps,
-    publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
   };
 }
 

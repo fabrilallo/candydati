@@ -108,6 +108,11 @@ export interface EnqueueOptions {
    * work that must not run twice (one commit per import batch, one delivery per message or per event and endpoint).
    */
   readonly singletonKey?: string | undefined;
+  /**
+   * With `singletonKey`: a task of that key that already ended `failed` (or `cancelled`) is removed first, so the work
+   * is queued again instead of being dropped as a repeat. For the reconciler, which only asks for rows still waiting.
+   */
+  readonly replaceFailed?: boolean | undefined;
 }
 
 export interface TaskQueue {

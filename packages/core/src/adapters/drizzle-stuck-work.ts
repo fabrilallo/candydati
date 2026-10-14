@@ -4,7 +4,7 @@ import type { DbExecutor } from './db-executor.js';
 
 /** Postgres implementation. Spans organizations on purpose: only the reconciler (a system job) reads it. */
 export function createDrizzleStuckWork(db: DbExecutor): StuckWorkRepository {
-  const { message, dataExport, importBatch } = schema;
+  const { message, dataExport, importBatch, cvExtraction } = schema;
   return {
     queuedMessages: (before, limit) =>
       db
@@ -19,6 +19,13 @@ export function createDrizzleStuckWork(db: DbExecutor): StuckWorkRepository {
         .from(dataExport)
         .where(and(eq(dataExport.status, 'pending'), lt(dataExport.createdAt, before)))
         .orderBy(asc(dataExport.createdAt), asc(dataExport.id))
+        .limit(limit),
+    pendingExtractions: (before, limit) =>
+      db
+        .select({ organizationId: cvExtraction.organizationId, id: cvExtraction.applicationId })
+        .from(cvExtraction)
+        .where(and(eq(cvExtraction.status, 'pending'), lt(cvExtraction.updatedAt, before)))
+        .orderBy(asc(cvExtraction.updatedAt), asc(cvExtraction.applicationId))
         .limit(limit),
     async unfinishedImports(before, limit) {
       const rows = await db

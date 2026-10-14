@@ -17,7 +17,7 @@ const hostOf = (endpoint: string): string => {
   }
 };
 
-/** Names of the configured providers for the registro dei trattamenti. Never credentials, paths or full URLs. */
+/** Names of the configured providers for the record of processing activities (GDPR art. 30). Never credentials, paths or full URLs. */
 export function configuredProviders(env: Pick<Env, 's3' | 'email' | 'AGENT_MODEL' | 'FAST_MODEL'>): ConfiguredProviders {
   return {
     storage: `s3 (${hostOf(env.s3.endpoint)})`,

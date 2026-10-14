@@ -62,7 +62,7 @@ export interface ProcessingRecord {
   readonly providers: ConfiguredProviders;
 }
 
-/** The data for the registro dei trattamenti (art. 30), filled from the organization's settings and the instance config. */
+/** The data for the record of processing activities (GDPR art. 30), filled from the organization's settings and the instance config. */
 export const getProcessingRecord = defineOverviewUseCase({
   name: 'getProcessingRecord',
   input: z.object({}),

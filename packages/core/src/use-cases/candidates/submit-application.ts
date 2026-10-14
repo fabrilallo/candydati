@@ -121,6 +121,33 @@ const submittedContactOf = (form: ApplicationForm): SubmittedContact => ({
 /** The stored person the receipt is addressed to; null when an open application already exists (nothing was stored). */
 type StoredPerson = Pick<Candidate, 'id' | 'firstName' | 'lastName'>;
 
+function buildApplication(intake: Intake, candidateId: string, consent: ConsentRecord, retentionExpiresAt: Date): Application {
+  const { form, now, organizationId } = intake;
+  return {
+    id: intake.applicationId,
+    organizationId,
+    jobId: intake.jobId,
+    candidateId,
+    stageId: RECEIVED_STAGE_ID,
+    outcome: null,
+    message: form.message,
+    cv: { key: intake.cvKey, fileName: intake.cv.fileName, mediaType: intake.cv.mediaType, sizeBytes: intake.cvSize },
+    submittedContact: submittedContactOf(form),
+    consent,
+    consentStatus: 'given',
+    importBatchId: null,
+    retentionExpiresAt,
+    source: 'careers_page',
+    origin: intake.origin,
+    createdAt: now,
+    updatedAt: now,
+    stageChangedAt: now,
+    closedAt: null,
+    responseDueAt: intake.responseDueAt,
+    respondedAt: null,
+  };
+}
+
 async function storeApplication(deps: SubmitApplicationDeps, repositories: IntakeRepositories, intake: Intake): Promise<StoredPerson | null> {
   const { form, notice, now, organizationId } = intake;
   const consent: ConsentRecord = {
@@ -140,29 +167,7 @@ async function storeApplication(deps: SubmitApplicationDeps, repositories: Intak
   }
   const merged = mergeCandidate(existing, intake, consent, retentionExpiresAt);
   const candidate = existing ? await repositories.candidates.save(merged) : await repositories.candidates.create(merged);
-  const application: Application = {
-    id: intake.applicationId,
-    organizationId,
-    jobId: intake.jobId,
-    candidateId: candidate.id,
-    stageId: RECEIVED_STAGE_ID,
-    outcome: null,
-    message: form.message,
-    cv: { key: intake.cvKey, fileName: intake.cv.fileName, mediaType: intake.cv.mediaType, sizeBytes: intake.cvSize },
-    submittedContact: submittedContactOf(form),
-    consent,
-    consentStatus: 'given',
-    importBatchId: null,
-    retentionExpiresAt,
-    source: 'careers_page',
-    origin: intake.origin,
-    createdAt: now,
-    updatedAt: now,
-    stageChangedAt: now,
-    closedAt: null,
-    responseDueAt: intake.responseDueAt,
-    respondedAt: null,
-  };
+  const application = buildApplication(intake, candidate.id, consent, retentionExpiresAt);
   await repositories.applications.create(application);
   await trackStageEntry({ stageEvents: repositories.stageEvents, promises: repositories.promises, newId: deps.newId }, application, null, 'system');
   await repositories.extractions.upsert({
@@ -204,7 +209,7 @@ async function storeAtomically(deps: SubmitApplicationDeps, intake: Intake, byte
   }
 }
 
-/** The application is stored: if the job cannot be queued the extraction is visibly `failed`, never silently pending. */
+/** The application is stored: if the job cannot be queued the extraction is visibly `failed`; if the process dies before the send, `tasks.reconcile` queues it again (still `pending`). */
 async function enqueueExtraction(deps: SubmitApplicationDeps, intake: Intake): Promise<void> {
   const payload = { organizationId: intake.organizationId, applicationId: intake.applicationId };
   try {

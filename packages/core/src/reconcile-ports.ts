@@ -13,6 +13,8 @@ export interface StuckWorkRepository {
   queuedMessages(before: Date, limit: number): Promise<readonly StuckRow[]>;
   /** Organization exports still `pending` that were requested before `before`. */
   pendingExports(before: Date, limit: number): Promise<readonly StuckRow[]>;
+  /** Applications whose CV extraction is still `pending` since before `before` (the `id` is the application id). */
+  pendingExtractions(before: Date, limit: number): Promise<readonly StuckRow[]>;
   /** Import batches created before `before` and still waiting for their analysis (`uploaded`) or commit (`importing`). */
   unfinishedImports(before: Date, limit: number): Promise<readonly (StuckRow & { readonly status: 'uploaded' | 'importing' })[]>;
 }

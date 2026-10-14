@@ -8,7 +8,7 @@ import type { AdQualityAnalyzer } from '@tt/domain';
 import { createConfiguredAnalyzer } from './ai/ad-quality.js';
 import { registerAgentRoutes } from './agent/routes.js';
 import { toEmailIdentity, toEmailSender } from '@tt/providers';
-import { createAppContext, DEFAULT_AUTH_EMAIL_MAX, type RateLimitSettings } from './app-context.js';
+import { createAppContext, DEFAULT_AUTH_EMAIL_MAX, type AppContext, type RateLimitSettings } from './app-context.js';
 import { registerAuthRoutes } from './auth/fastify-auth.js';
 import { createAccountMailer, type AccountMailer } from './auth/account-mailer.js';
 import { createAuthEmails } from './auth/auth-emails.js';
@@ -105,10 +105,28 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   const app = Fastify({ logger: loggerOptions(deps.env), trustProxy: toFastifyTrustProxy(deps.env.TRUST_PROXY) });
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+  const ctx = createContext(app, deps);
 
+  registerErrorHandler(app);
+  registerNoStoreByDefault(app);
+  await registerSecurity(app, deps.env, ctx.rateLimit);
+
+  registerCsrfProtection(app, trustedOrigins(deps.env));
+  registerHealthRoutes(app, ctx);
+  registerOpenApiRoute(app, ctx);
+  registerApiKeyRoutes(app, ctx);
+  registerSecuritySettingsRoutes(app, ctx);
+  registerMcpRoute(app, ctx);
+  registerAccountRoutes(app, ctx, deps);
+  registerRecruitingRoutes(app, ctx);
+  await registerCandidateFacingRoutes(app, ctx);
+  return app;
+}
+
+function createContext(app: FastifyInstance, deps: ServerDeps): AppContext {
   const provider = deps.messaging ? null : createEmailProvider(deps.env.email, (line) => app.log.info(line));
   const messaging = deps.messaging ?? { sender: toEmailSender(provider!), identity: toEmailIdentity(provider!) };
-  const ctx = createAppContext({
+  return createAppContext({
     env: deps.env,
     db: deps.db,
     mailer:
@@ -129,17 +147,9 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
     onReceiptError: (error) => app.log.error({ err: error }, 'receipt email not queued'),
     adQuality: deps.adQuality ?? createConfiguredAnalyzer(deps.env.FAST_MODEL, app.log),
   });
+}
 
-  registerErrorHandler(app);
-  registerNoStoreByDefault(app);
-  await registerSecurity(app, deps.env, ctx.rateLimit);
-
-  registerCsrfProtection(app, trustedOrigins(deps.env));
-  registerHealthRoutes(app, ctx);
-  registerOpenApiRoute(app, ctx);
-  registerApiKeyRoutes(app, ctx);
-  registerSecuritySettingsRoutes(app, ctx);
-  registerMcpRoute(app, ctx);
+function registerAccountRoutes(app: FastifyInstance, ctx: AppContext, deps: ServerDeps): void {
   registerAuthRoutes(app, ctx.auth, {
     authMax: ctx.rateLimit.authMax,
     readMax: ctx.rateLimit.max,
@@ -149,6 +159,9 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
       app.log.error({ err: error }, 'sign-in failure notice not sent'),
     ),
   });
+}
+
+function registerRecruitingRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerAuditLogRoutes(app, ctx);
   registerJobQualityRoute(app, ctx);
   registerJobRoutes(app, ctx);
@@ -167,6 +180,9 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerTaskRoutes(app, ctx);
   registerAutomationRoutes(app, ctx);
   registerWebhookRoutes(app, ctx);
+}
+
+async function registerCandidateFacingRoutes(app: FastifyInstance, ctx: AppContext): Promise<void> {
   registerCandidateRoutes(app, ctx);
   registerApplicationCvRoute(app, ctx);
   registerCandidateRightsRoutes(app, ctx);
@@ -183,5 +199,4 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerMessageRoutes(app, ctx);
   await registerInboundEmailRoutes(app, ctx);
   registerAgentRoutes(app, ctx);
-  return app;
 }

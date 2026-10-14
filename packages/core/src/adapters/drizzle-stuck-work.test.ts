@@ -1,12 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import { createDb, eq, schema, type DbHandle } from '@tt/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createInMemoryTaskQueue } from '../testing/index.js';
+import { buildApplication, buildCandidate, createInMemoryTaskQueue } from '../testing/index.js';
 import { buildImportWorld, newPerson, readyBatch, recruiterOf } from '../testing/import-postgres.js';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { commitImport } from '../use-cases/imports/commit-import.js';
 import { requestImportCommit } from '../use-cases/imports/request-commit.js';
 import { reconcileQueuedWork } from '../use-cases/reconcile/reconcile-queued-work.js';
+import { createDrizzleApplications } from './drizzle-applications.js';
+import { createDrizzleCandidates } from './drizzle-candidates.js';
+import { createDrizzleCvExtractions } from './drizzle-cv-extractions.js';
 import { createDrizzleStuckWork } from './drizzle-stuck-work.js';
 
 let handle: DbHandle;
@@ -19,6 +22,16 @@ beforeAll(() => {
 afterAll(async () => {
   await handle.close();
 });
+
+/** An application of the world's first job with a CV extraction in `status`, last touched at NOW. */
+async function insertApplicationRow(org: string, jobId: string, status: 'pending' | 'done'): Promise<string> {
+  const candidateId = randomUUID();
+  await createDrizzleCandidates(handle.db).create(buildCandidate({ id: candidateId, organizationId: org, email: `${candidateId}@x.example` }));
+  const id = randomUUID();
+  await createDrizzleApplications(handle.db).create(buildApplication({ id, organizationId: org, jobId, candidateId }));
+  await createDrizzleCvExtractions(handle.db).upsert({ applicationId: id, organizationId: org, status, text: null, data: null, source: null, updatedAt: NOW });
+  return id;
+}
 
 describe('reconciler on Postgres (#3)', () => {
   it('finds a reconfirmation whose delivery was never queued (crash after the commit) and queues it', async () => {
@@ -47,5 +60,15 @@ describe('reconciler on Postgres (#3)', () => {
     expect(pending.filter((row) => row.organizationId === world.org)).toHaveLength(1);
     const batches = await stuck.unfinishedImports(new Date(Date.now() + 60_000), 5000);
     expect(batches.every((row) => row.status === 'uploaded' || row.status === 'importing')).toBe(true);
+  });
+
+  it('finds a CV extraction left pending since before the cutoff, never a finished one', async () => {
+    const world = await buildImportWorld(handle, NOW);
+    const pendingApplication = await insertApplicationRow(world.org, world.jobId, 'pending');
+    await insertApplicationRow(world.org, world.jobId, 'done');
+    const stuck = createDrizzleStuckWork(handle.db);
+    const found = (await stuck.pendingExtractions(LATER, 5000)).filter((row) => row.organizationId === world.org);
+    expect(found).toEqual([{ organizationId: world.org, id: pendingApplication }]);
+    expect((await stuck.pendingExtractions(new Date(NOW.getTime() - 60_000), 5000)).filter((row) => row.organizationId === world.org)).toEqual([]);
   });
 });

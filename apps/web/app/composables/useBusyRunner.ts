@@ -21,12 +21,3 @@ export const useBusyRunner = <K extends string>(busy: Ref<K | null>) => {
     }
   }
 }
-
-/** A local copy of a loaded payload that composables edit in place of reloading, and that follows fresh loads. */
-export const useSyncedData = <T>(data: Ref<{ readonly data: T | null } | null | undefined>): Ref<T | null> => {
-  const local = ref(data.value?.data ?? null) as Ref<T | null>
-  watch(data, (fresh) => {
-    local.value = fresh?.data ?? null
-  })
-  return local
-}

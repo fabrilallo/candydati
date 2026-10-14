@@ -8,7 +8,7 @@ import { toTaskResponse } from './task-view.js';
 const withoutUndefined = (input: Readonly<Record<string, unknown>>): Record<string, unknown> =>
   Object.fromEntries(Object.entries(input).filter(([, value]) => value !== undefined));
 
-/** Tasks ("attività"): mine, by application, create, complete and reopen. */
+/** Tasks: mine, by application, create, complete and reopen. */
 export function registerTaskRoutes(app: FastifyInstance, ctx: AppContext): void {
   const deps = ctx.taskDeps;
 
