@@ -31,6 +31,7 @@ useSeoMeta({ title: () => `${t('distribution.job.title')}: ${title.value}` })
         <template #tabs><JobTabs :job-id="id" current="distribution" /></template>
       </PageHeader>
       <FormAlert v-if="!allowed" message-key="errors.forbidden" />
+      <NotAccessible v-else-if="!job && errorKey === 'errors.notFound'" back-to="/app/jobs" back-key="notAccessible.backJobs" />
       <FormAlert v-else-if="!job" :message-key="errorKey ?? 'job.errors.loadFailed'" />
       <JobDistributionPanel v-else :job="job" />
     </div>

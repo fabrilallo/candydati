@@ -14,4 +14,11 @@ describe('createKeyRateLimiter', () => {
     now += 1_000;
     expect(limiter.consume('a').allowed).toBe(true);
   });
+
+  it('charges a cost per request: a batch of tool calls spends one unit per call', () => {
+    const limiter = createKeyRateLimiter({ max: 5, windowMs: 60_000, now: () => 1_000 });
+    expect(limiter.consume('a', 4).allowed).toBe(true);
+    expect(limiter.consume('a', 2).allowed).toBe(false);
+    expect(limiter.consume('a').allowed).toBe(false);
+  });
 });

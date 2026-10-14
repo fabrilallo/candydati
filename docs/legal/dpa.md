@@ -78,7 +78,7 @@ Misure implementate dal prodotto:
 | Cifratura in transito | Connessioni cifrate con TLS tra utenti, applicazione, database e storage. [Verificare per ogni sub-responsabile] |
 | Cifratura a riposo | [Da indicare in base al fornitore di hosting e storage] |
 | Registro non modificabile | `audit_log` in sola aggiunta: chi ha visto, modificato, esportato o cancellato cosa; azioni dell'agente distinte da quelle umane |
-| Controllo accessi | Permessi per ruolo e per annuncio, fasi riservate, chiavi API con ambiti per organizzazione. L'agente e gli strumenti MCP hanno gli stessi permessi dell'utente |
+| Controllo accessi | Permessi per ruolo e per annuncio (gruppo di selezione di ciascuna posizione), chiavi API con ambiti per organizzazione. L'agente e gli strumenti MCP hanno gli stessi permessi e lo stesso perimetro di posizioni dell'utente |
 | Autenticazione | [Specificare: metodi, 2FA, durata sessioni] |
 | Cancellazione alla scadenza | Job giornaliero di conservazione: anonimizza o cancella dati e file alla scadenza |
 | Minimizzazione | Nessun campo per dati particolari; l'estrazione dai CV scarta foto, data di nascita, stato civile |

@@ -54,7 +54,7 @@ export const useApplyForm = (target: { readonly org: string; readonly job: strin
   }
 
   /** Returns the field to focus when something needs attention, null otherwise. */
-  const submit = async (): Promise<string | null> => {
+  const submit = async (turnstileToken?: string): Promise<string | null> => {
     errorKey.value = null
     const result = toApplicationForm(values.value, notice.value.version)
     const fieldErrors: ApplyErrors = { ...(result.ok ? {} : result.errors), ...(file.value ? {} : { cv: errors.value.cv ?? 'apply.cv.errors.required' }) }
@@ -64,7 +64,7 @@ export const useApplyForm = (target: { readonly org: string; readonly job: strin
     }
     pending.value = true
     try {
-      await submitApplication(request, target.org, target.job, result.form, file.value, currentOrigin())
+      await submitApplication(request, target.org, target.job, result.form, file.value, currentOrigin(), turnstileToken)
       done.value = true
       return null
     } catch (error) {

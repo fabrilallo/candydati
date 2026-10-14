@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:17
+    image: postgres:17@sha256:4d89c904835259bc58876520e56267ca07a4ebd6a027f7814bbbf91b50d685be
     container_name: team-tracker-postgres
     environment:
       POSTGRES_USER: tt
@@ -33,7 +33,7 @@ services:
 
   mailpit:
     # Development SMTP: accepts everything and shows messages in the UI on :8025 (nothing is delivered).
-    image: axllent/mailpit:v1.31.5
+    image: axllent/mailpit:v1.31.5@sha256:94f6b70c1436defae6799d9ac7ff0eeff9540465b842026d5cdb018f1c0234ea
     container_name: team-tracker-mailpit
     ports:
       - "1025:1025"

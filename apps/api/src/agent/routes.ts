@@ -5,6 +5,7 @@ import type { MastraModelConfig } from '@mastra/core/llm';
 import { ForbiddenError, type Actor } from '@tt/core';
 import { fail, ok } from '@tt/domain';
 import { createUIMessageStreamResponse } from 'ai';
+import type { DailyBudget } from '../limits/daily-budget.js';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { ASSISTANT_AGENT_ID } from './assistant.js';
@@ -30,7 +31,16 @@ const chatBodySchema = z.object({
 export interface AgentRouteContext extends AgentContext {
   /** Session cookie only: an API key never reaches the assistant. */
   readonly resolveSessionActor: (request: FastifyRequest) => Promise<Actor>;
+  /** Daily budget of chat requests per person and per organization (each request may make several model calls). */
+  readonly budget: DailyBudget;
 }
+
+export const ASSISTANT_USER_SCOPE = 'assistant:user';
+export const ASSISTANT_ORGANIZATION_SCOPE = 'assistant:organization';
+const BUDGET_MESSAGE: Readonly<Record<string, string>> = {
+  [ASSISTANT_USER_SCOPE]: 'You have used the assistant\'s daily budget. It resets at midnight UTC.',
+  [ASSISTANT_ORGANIZATION_SCOPE]: 'Your organization has used the assistant\'s daily budget. It resets at midnight UTC.',
+};
 
 export interface AgentRouteOptions {
   /** Tests: a mock model instead of AGENT_MODEL (the assistant is then enabled). */
@@ -77,6 +87,11 @@ export function registerAgentRoutes(app: FastifyInstance, ctx: AgentRouteContext
       if (!body.success) return reply.status(422).send(fail('validation_failed', body.error.issues.map((i) => `${i.path.join('.') || 'body'}: ${i.message}`).join('; ')));
       const messages = trimHistory(body.data.messages);
       if (messages.length === 0) return reply.status(422).send(fail('validation_failed', 'messages: the last message is too large or no user message is left'));
+      const budget = await ctx.budget.consume([
+        { scope: ASSISTANT_USER_SCOPE, subject: user.id, limit: ctx.env.ASSISTANT_DAILY_BUDGET_PER_USER },
+        { scope: ASSISTANT_ORGANIZATION_SCOPE, subject: user.organizationId, limit: ctx.env.ASSISTANT_DAILY_BUDGET_PER_ORGANIZATION },
+      ]);
+      if (!budget.allowed) return reply.status(429).send(fail('rate_limited', BUDGET_MESSAGE[budget.exhausted ?? ''] ?? 'Daily budget used up.'));
       const stream = await handleChatStream({
         mastra: runtime(),
         agentId: ASSISTANT_AGENT_ID,

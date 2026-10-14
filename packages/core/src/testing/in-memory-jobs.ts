@@ -48,6 +48,7 @@ export function createInMemoryJobRepository(initial: readonly Job[] = []): InMem
     async list(query) {
       const matching = inOrg(query.organizationId)
         .filter((j) => query.status === undefined || j.status === query.status)
+        .filter((j) => query.jobIds === undefined || query.jobIds.includes(j.id))
         .toSorted(byDateDesc('updatedAt'));
       const start = (query.page - 1) * query.limit;
       return { items: matching.slice(start, start + query.limit), total: matching.length };

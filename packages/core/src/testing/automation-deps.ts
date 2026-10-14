@@ -66,6 +66,7 @@ export function seedAutomationWorld(options: AutomationSeedOptions = {}): TestAu
   const members = options.members ?? { [ORG_A]: defaultMembers };
   const names = Object.fromEntries(Object.values(members).flat().map((m) => [m.userId, m.name]));
   const rules = createInMemoryAutomationRules(options.rules);
+  const organizationSettings = createInMemoryOrganizationSettings();
   let secretCounter = 0;
   for (const event of options.outbox ?? []) void world.outbox.append(event);
   return {
@@ -88,7 +89,8 @@ export function seedAutomationWorld(options: AutomationSeedOptions = {}): TestAu
     },
     jobTemplates: createInMemoryJobTemplateRepository(),
     approvals: createInMemoryJobApprovals(),
-    organizationSettings: createInMemoryOrganizationSettings(),
+    organizationSettings,
+    jobTeams: world.jobTeams.withSources({ settings: organizationSettings }),
     applicationCounts: createInMemoryApplicationCounts(world.store),
     adQuality: fakeAdQualityAnalyzer(),
     adQualityThreshold: 6,

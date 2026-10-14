@@ -125,6 +125,8 @@ export interface CandidateSearchQuery {
   /** Exact, lowercase. */
   readonly tag?: string | undefined;
   readonly talentPool?: boolean | undefined;
+  /** Only candidates with an application in these jobs, counting only those applications. Absent: no job filter. */
+  readonly jobIds?: readonly string[] | undefined;
   /** 1-based. */
   readonly page: number;
   readonly limit: number;

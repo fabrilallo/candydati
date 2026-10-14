@@ -98,6 +98,14 @@ describe('privacyNoticeTemplate', () => {
     expect(privacyNoticeInputSchema.safeParse(completePrivacyNoticeInput({ language, text })).success).toBe(true);
   });
 
+  it('says who reads the data exactly as per-job access works (PRODUCT.md §6)', () => {
+    const it_ = renderPrivacyTemplate({ language: 'it', organizationName: 'Acme' });
+    const en = renderPrivacyTemplate({ language: 'en', organizationName: 'Acme' });
+    expect(it_).toContain('solo alle candidature delle posizioni di cui fanno parte');
+    expect(en).toContain('only the applications to the positions whose team they are on');
+    expect(en).not.toContain('involved in the selection');
+  });
+
   it('leaves a visible placeholder without a contact email', async () => {
     expect((await privacyNoticeTemplate(deps(), admin, { language: 'it' })).text).toContain('[indirizzo email di contatto da inserire]');
     expect(renderPrivacyTemplate({ language: 'en', organizationName: 'X' })).toContain('[contact email address to be added]');

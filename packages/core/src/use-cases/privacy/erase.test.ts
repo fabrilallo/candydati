@@ -40,6 +40,15 @@ describe('eraseCandidate', () => {
     expect(deps.files.keys()).toEqual([CV_KEY_3]);
   });
 
+  it('deletes the organization exports already generated (they hold a copy of the erased person) with their files', async () => {
+    const stored = { id: 'exp_1', organizationId: ORG_A, requestedBy: 'user_r', status: 'ready' as const, sizeBytes: 10, createdAt: new Date(), completedAt: new Date(), expiresAt: new Date(Date.now() + 86_400_000) };
+    const deps = await seedPrivacyData({ dataExports: [stored] });
+    await deps.files.put('organizations/org_a/exports/exp_1.zip', new Uint8Array([1]), 'application/zip');
+    await eraseCandidate(deps, recruiter, { candidateId: 'cand_1', confirmName: fullName });
+    expect(deps.dataExports.snapshot()).toEqual([]);
+    expect(deps.files.keys()).not.toContain('organizations/org_a/exports/exp_1.zip');
+  });
+
   it('removes the stage events and response promises of the erased applications and keeps the others', async () => {
     const deps = await seedPrivacyData();
     const event = (applicationId: string) => ({ id: `ev_${applicationId}`, organizationId: ORG_A, applicationId, jobId: 'job_1', fromStageId: null, toStageId: 'received', outcome: null, occurredAt: new Date(), actorType: 'system' as const, backfilled: false });

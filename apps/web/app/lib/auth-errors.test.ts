@@ -8,6 +8,15 @@ describe('authErrorKey', () => {
     expect(authErrorKey({ code: 'ORGANIZATION_SLUG_ALREADY_TAKEN' })).toBe('errors.slugTaken')
   })
 
+  it('maps the account codes: verification, invite-only sign-up, reset link and second factor', () => {
+    expect(authErrorKey({ code: 'EMAIL_NOT_VERIFIED', status: 403 })).toBe('errors.emailNotVerified')
+    expect(authErrorKey({ code: 'SIGNUP_INVITE_ONLY', status: 403 })).toBe('errors.signupInviteOnly')
+    expect(authErrorKey({ code: 'INVALID_TOKEN', status: 400 })).toBe('errors.invalidResetLink')
+    expect(authErrorKey({ code: 'INVALID_CODE', status: 401 })).toBe('errors.invalidCode')
+    expect(authErrorKey({ code: 'INVALID_BACKUP_CODE', status: 401 })).toBe('errors.invalidCode')
+    expect(authErrorKey({ code: 'ACCOUNT_TEMPORARILY_LOCKED', status: 429 })).toBe('errors.tooManyAttempts')
+  })
+
   it('falls back on the HTTP status', () => {
     expect(authErrorKey({ status: 403 })).toBe('errors.forbidden')
     expect(authErrorKey({ status: 401 })).toBe('errors.unauthenticated')

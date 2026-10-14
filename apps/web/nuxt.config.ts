@@ -60,6 +60,8 @@ export default defineNuxtConfig({
       timeZone: 'Europe/Rome',
       /** Where the repository files can be browsed (`NUXT_PUBLIC_SOURCE_URL`, e.g. `https://…/blob/main`); empty = paths as text. */
       sourceUrl: '',
+      /** Cloudflare Turnstile site key (`NUXT_PUBLIC_TURNSTILE_SITE_KEY`): when set, the application form shows the check. Empty = off. */
+      turnstileSiteKey: '',
     },
   },
 })

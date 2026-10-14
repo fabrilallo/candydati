@@ -29,6 +29,9 @@ export interface InMemoryNotifications extends NotificationRepository {
   purge(doomed: (notification: Notification) => boolean): void;
 }
 
+/** Rows about no job pass; rows about a job pass only when it is listed (absent list: everything passes). */
+const inJobs = (jobId: string | null, jobIds: readonly string[] | undefined): boolean => jobIds === undefined || jobId === null || jobIds.includes(jobId);
+
 export function createInMemoryNotifications(initial: readonly Notification[] = []): InMemoryNotifications {
   const rows = cell<readonly Notification[]>([...initial]);
   const keys = cell<ReadonlySet<string>>(new Set());
@@ -43,7 +46,9 @@ export function createInMemoryNotifications(initial: readonly Notification[] = [
       return notification;
     },
     async list(query) {
-      const matching = newestFirst(own(query.organizationId, query.userId).filter((n) => !query.unreadOnly || n.readAt === null));
+      const matching = newestFirst(
+        own(query.organizationId, query.userId).filter((n) => (!query.unreadOnly || n.readAt === null) && inJobs(n.jobId, query.jobIds)),
+      );
       const start = (query.page - 1) * query.limit;
       return { items: matching.slice(start, start + query.limit), total: matching.length };
     },
@@ -53,8 +58,8 @@ export function createInMemoryNotifications(initial: readonly Notification[] = [
       rows.set(rows.get().map((n) => (targetIds.has(n.id) && n.organizationId === organizationId ? { ...n, readAt: at } : n)));
       return targets.length;
     },
-    async unreadCount(organizationId, userId) {
-      return own(organizationId, userId).filter((n) => n.readAt === null).length;
+    async unreadCount(organizationId, userId, jobIds) {
+      return own(organizationId, userId).filter((n) => n.readAt === null && inJobs(n.jobId, jobIds)).length;
     },
     async listUnemailed(kinds, since) {
       return rows.get().filter((n) => kinds.includes(n.kind) && n.createdAt >= since && !emailed.get().has(n.id));
@@ -100,6 +105,7 @@ export function createInMemoryTasks(initial: readonly Task[] = []): InMemoryTask
       return inOrg(query.organizationId)
         .filter((t) => query.assigneeId === undefined || t.assigneeId === query.assigneeId)
         .filter((t) => !query.openOnly || t.completedAt === null)
+        .filter((t) => inJobs(t.jobId, query.jobIds))
         .toSorted(taskOrder)
         .slice(0, query.limit);
     },

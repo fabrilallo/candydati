@@ -28,7 +28,7 @@ export interface Phase2Inputs {
 /** Candidates, privacy notices and the public application: the shared repositories, injected storage and queue. */
 export function createPhase2Deps({ uow, files, queue, receipts, feedback }: Phase2Inputs): Phase2Deps {
   const r = uow.repositories;
-  const core = { auditLog: r.auditLog, transaction: uow.transaction };
+  const core = { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams };
   const { jobs, organizations, privacyNotices } = r;
   const clock = { newId: randomUUID, now: () => new Date() };
   return {

@@ -73,6 +73,17 @@ describe('defineUseCase', () => {
     expect(auditLog.events()).toHaveLength(0);
   });
 
+  it('authorizes before validating: a role without the permission learns nothing about the schema', async () => {
+    const recruiter = userActor({ role: 'recruiter', organizationId: 'o1' });
+    await expect(renameOrg({ auditLog: createInMemoryAuditLog(), transaction: tx }, recruiter, { nonsense: true })).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  it('still validates, then scopes to the organization, for a role that has the permission', async () => {
+    const other = userActor({ role: 'owner', organizationId: 'other' });
+    await expect(renameOrg({ auditLog: createInMemoryAuditLog(), transaction: tx }, other, { organizationId: 'o1', name: '' })).rejects.toBeInstanceOf(ValidationError);
+    await expect(renameOrg({ auditLog: createInMemoryAuditLog(), transaction: tx }, other, valid)).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
   it('denies cross-organization access', async () => {
     const auditLog = createInMemoryAuditLog();
     const owner = userActor({ role: 'owner', organizationId: 'other' });

@@ -12,8 +12,12 @@ const hm = userActor({ id: 'hm_1', role: 'hiring_manager', organizationId: ORG_A
 
 const published = (id: string, days: number, overrides = {}) =>
   buildJob({ id, slug: id, organizationId: ORG_A, status: 'published', publishedAt: ago(days), updatedAt: ago(days), createdBy: 'recruiter_1', content: completeJobContent({ title: `Job ${id}` }), ...overrides });
-const world = (jobs = [published('stale', 120)], applications = [] as ReturnType<typeof buildApplication>[]): TestHrDeps =>
-  seedHrWorld({ jobs, applications, candidates: [buildCandidate({ organizationId: ORG_A })], overrides: { now: () => NOW } });
+const world = (jobs = [published('stale', 120)], applications = [] as ReturnType<typeof buildApplication>[]): TestHrDeps => {
+  const deps = seedHrWorld({ jobs, applications, candidates: [buildCandidate({ organizationId: ORG_A })], overrides: { now: () => NOW } });
+  // The hiring manager is on the team of every job here: the list shows only the jobs of one's teams.
+  for (const job of jobs) void deps.jobTeams.upsert({ organizationId: job.organizationId, jobId: job.id, userId: 'hm_1', role: 'hiring_manager', addedBy: 'system', createdAt: NOW });
+  return deps;
+};
 
 describe('listStaleJobs', () => {
   it('lists published jobs idle for 90 days, longest idle first, with days idle', async () => {
@@ -46,13 +50,15 @@ describe('listStaleJobs', () => {
       ],
       overrides: { now: () => NOW },
     });
+    for (const job of [edited, received, moved, decided, idle]) await deps.jobTeams.upsert({ organizationId: ORG_A, jobId: job.id, userId: 'hm_1', role: 'hiring_manager', addedBy: 'system', createdAt: NOW });
     expect((await listStaleJobs(deps, hm, {})).map((s) => s.job.id)).toEqual(['idle']);
   });
 
-  it('is isolated per organization and open to anyone who reads jobs, but not to outsiders', async () => {
+  it('is isolated per organization and open to anyone who reads jobs (their teams\' jobs), but not to outsiders', async () => {
     const deps = world();
     expect(await listStaleJobs(deps, userActor({ role: 'owner', organizationId: ORG_B }), {})).toEqual([]);
-    expect(await listStaleJobs(deps, userActor({ role: 'interviewer', organizationId: ORG_A }), {})).toHaveLength(1);
+    expect(await listStaleJobs(deps, userActor({ role: 'interviewer', organizationId: ORG_A }), {})).toHaveLength(0);
+    expect(await listStaleJobs(deps, userActor({ role: 'admin', organizationId: ORG_A }), {})).toHaveLength(1);
     await expect(listStaleJobs(deps, apiKeyActor({ organizationId: ORG_A, scopes: ['candidate:read'] }), {})).rejects.toBeInstanceOf(ForbiddenError);
   });
 });

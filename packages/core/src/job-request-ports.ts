@@ -28,11 +28,14 @@ export interface JobRequestRepository {
 /** Settings of an organization that are not email or privacy. Absent row means the defaults. */
 export interface OrganizationSettings {
   readonly requireApproval: boolean;
+  /** Recruiters see only the jobs whose team they are on (PRODUCT.md §6). Off by default. */
+  readonly restrictRecruitersToTeam: boolean;
 }
 
 export interface OrganizationSettingsRepository {
   get(organizationId: string): Promise<OrganizationSettings>;
   setRequireApproval(organizationId: string, value: boolean, at: Date): Promise<OrganizationSettings>;
+  setRestrictRecruitersToTeam(organizationId: string, value: boolean, at: Date): Promise<OrganizationSettings>;
 }
 
 /**

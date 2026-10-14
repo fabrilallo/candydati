@@ -1,18 +1,27 @@
 <script setup lang="ts">
-import type { CandidateApplicationDto, CandidateDetailDto } from '@tt/domain'
+import type { CandidateApplicationDto, CandidateCorrection, CandidateDetailDto } from '@tt/domain'
 import { BriefcaseIcon, CalendarClockIcon, LinkIcon, MailIcon, MessageSquareQuoteIcon, PhoneIcon, ShieldCheckIcon } from '@lucide/vue'
 import { applicationStatus, retentionState, stageOf } from '@/lib/candidate-view'
 import { formatDate } from '@/lib/format'
+import { safeExternalUrl } from '@/lib/safe-url'
 import { isToRenew } from '@/lib/import-view'
 import { stageName } from '@/lib/pipeline-board'
+import { contactChanges } from '@/lib/submitted-contact'
 import { Badge } from '@/components/ui/badge'
 
 /** Key and value list of the profile (docs/DESIGN-SYSTEM.md "Elenco chiave e valore"), then what was read from the CV. */
-const props = defineProps<{ detail: CandidateDetailDto; current: CandidateApplicationDto | null; now: Date }>()
+const props = defineProps<{ detail: CandidateDetailDto; current: CandidateApplicationDto | null; now: Date; canUpdate?: boolean }>()
+const emit = defineEmits<{ updated: [detail: CandidateDetailDto] }>()
 const { t, locale } = useI18n()
 const candidate = computed(() => props.detail.candidate)
 const retention = computed(() => retentionState(candidate.value.retentionExpiresAt, props.now))
 const showAll = ref(false)
+const changes = computed(() => contactChanges(candidate.value, props.current?.submittedContact))
+const rights = useCandidateRights(() => candidate.value.id)
+const applyChanges = async (correction: CandidateCorrection): Promise<void> => {
+  const outcome = await rights.correct(correction)
+  if ('detail' in outcome) emit('updated', outcome.detail)
+}
 const stageNameOf = (app: CandidateApplicationDto): string => {
   const stage = stageOf(app)
   return stage ? stageName(stage, t) : app.stageRemoved ? t('pipeline.stageRemoved') : ''
@@ -23,6 +32,7 @@ const labelClass = 'flex items-center gap-2 text-sm text-muted-foreground'
 
 <template>
   <div class="grid gap-8">
+    <SubmittedContactReview :changes="changes" :can-apply="canUpdate === true" :busy="rights.busy.value === 'correct'" @apply="applyChanges" />
     <dl class="divide-y" data-testid="candidate-profile">
       <div :class="rowClass">
         <dt :class="labelClass"><MailIcon class="size-4" aria-hidden="true" />{{ t('candidate.fields.email') }}</dt>
@@ -38,7 +48,7 @@ const labelClass = 'flex items-center gap-2 text-sm text-muted-foreground'
       <div :class="rowClass">
         <dt :class="labelClass"><LinkIcon class="size-4" aria-hidden="true" />{{ t('candidate.fields.linkedin') }}</dt>
         <dd class="min-w-0 text-sm">
-          <a v-if="candidate.linkedinUrl" :href="candidate.linkedinUrl" target="_blank" rel="noopener noreferrer nofollow" class="break-all text-primary underline-offset-4 hover:underline">{{ candidate.linkedinUrl }}</a>
+          <a v-if="safeExternalUrl(candidate.linkedinUrl)" :href="safeExternalUrl(candidate.linkedinUrl) ?? undefined" target="_blank" rel="noopener noreferrer nofollow" class="break-all text-primary underline-offset-4 hover:underline">{{ candidate.linkedinUrl }}</a>
           <span v-else class="text-muted-foreground">{{ t('candidate.fields.notGiven') }}</span>
         </dd>
       </div>

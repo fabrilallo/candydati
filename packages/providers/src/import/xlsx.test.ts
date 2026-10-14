@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
+import { makeLyingBomb } from '../testing/fixtures.js';
 import { utf8, xlsxBytes, zipOf } from '../testing/fixtures/import-fixtures.js';
 import { cellToString, parseXlsx } from './xlsx.js';
+
+describe('parseXlsx zip bombs', () => {
+  it('refuses a workbook that lies about its size before the reader inflates it', async () => {
+    const bomb = makeLyingBomb('xl/worksheets/sheet1.xml', 64 * 1024 * 1024, 100);
+    await expect(parseXlsx(bomb)).rejects.toMatchObject({ code: 'too_large' });
+  });
+});
 
 describe('parseXlsx', () => {
   it('reads the first non-empty sheet, detects the header row and flattens values', async () => {

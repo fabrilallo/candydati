@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gt, schema } from '@tt/db';
+import { and, asc, count, desc, eq, gt, inArray, schema } from '@tt/db';
 import { adQualityReportSchema, jobContentSchema, type Job } from '@tt/domain';
 import { ConflictError } from '../errors.js';
 import type { JobListQuery, JobRepository } from '../job-ports.js';
@@ -93,6 +93,7 @@ export function createDrizzleJobs(db: DbExecutor): JobRepository {
       const where = and(
         eq(job.organizationId, query.organizationId),
         query.status === undefined ? undefined : eq(job.status, query.status),
+        query.jobIds === undefined ? undefined : inArray(job.id, [...query.jobIds]),
       );
       const [rows, totals] = await sequential(
         () =>

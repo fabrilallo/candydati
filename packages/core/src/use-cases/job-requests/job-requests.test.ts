@@ -18,8 +18,11 @@ const withApproval = async (deps: TestHrDeps, on = true) => {
   await setApprovalSetting(deps, owner, { requireApproval: on });
   return deps;
 };
-const draft = (deps: TestHrDeps, id: string, salary = { min: 40000, max: 50000, currency: 'EUR', period: 'year' }) =>
-  deps.jobs.create(buildJob({ id, slug: id, organizationId: ORG_A, status: 'draft', createdBy: 'hm_1', content: completeJobContent({ title: 'Platform Engineer', salary: salary as never }) }));
+const draft = async (deps: TestHrDeps, id: string, salary = { min: 40000, max: 50000, currency: 'EUR', period: 'year' }) => {
+  // Written directly, so the creator joins the team here (createJob does it itself).
+  await deps.jobTeams.addIfAbsent({ organizationId: ORG_A, jobId: id, userId: 'hm_1', role: 'hiring_manager', addedBy: 'system', createdAt: new Date() });
+  return deps.jobs.create(buildJob({ id, slug: id, organizationId: ORG_A, status: 'draft', createdBy: 'hm_1', content: completeJobContent({ title: 'Platform Engineer', salary: salary as never }) }));
+};
 const issuesOf = async (promise: Promise<unknown>) => ((await promise.catch((e: unknown) => e)) as ValidationError).issues;
 
 describe('submitJobRequest', () => {
@@ -245,6 +248,7 @@ describe('asking approval for a draft written directly', () => {
 
   it('needs a draft with a salary range, and an existing job of the organization', async () => {
     const deps = world();
+    for (const jobId of ['job_1', 'job_n']) await deps.jobTeams.upsert({ organizationId: ORG_A, jobId, userId: 'hm_1', role: 'hiring_manager', addedBy: 'system', createdAt: new Date() });
     await expect(requestJobApproval(deps, hm, { jobId: 'job_1', reason: 'x' })).rejects.toBeInstanceOf(ConflictError);
     await deps.jobs.create(buildJob({ id: 'job_n', slug: 'n', organizationId: ORG_A, status: 'draft', content: completeJobContent({ title: 'No range', salary: { currency: 'EUR', period: 'year' } }) }));
     await expect(requestJobApproval(deps, hm, { jobId: 'job_n', reason: 'x' })).rejects.toBeInstanceOf(ValidationError);

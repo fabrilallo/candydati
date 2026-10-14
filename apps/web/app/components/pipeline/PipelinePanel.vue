@@ -89,7 +89,8 @@ const openCard = (card: ApplicationCardDto): void => {
 
 <template>
   <div class="grid gap-5">
-    <div v-if="pl.errorKey.value" class="grid gap-3">
+    <NotAccessible v-if="pl.errorKey.value === 'errors.notFound'" back-to="/app/jobs" back-key="notAccessible.backJobs" />
+    <div v-else-if="pl.errorKey.value" class="grid gap-3">
       <FormAlert :message-key="pl.errorKey.value" />
       <div><Button variant="outline" @click="() => pl.refresh()">{{ t('common.retry') }}</Button></div>
     </div>

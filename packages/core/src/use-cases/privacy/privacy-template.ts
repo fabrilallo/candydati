@@ -24,7 +24,9 @@ Database candidati. Solo se lo scegli espressamente, possiamo conservare i tuoi 
 
 Come li trattiamo. Il curriculum viene letto da persone autorizzate di ${org}. Per estrarne in modo ordinato le informazioni principali (esperienze, competenze, lingue) possiamo usare strumenti automatici, compresi modelli linguistici forniti da responsabili del trattamento. Questi strumenti propongono dati da verificare: nessuna decisione sulla tua candidatura è presa in modo automatizzato e nessuna persona viene scartata da un sistema automatico.
 
-A chi comunichiamo i dati. I dati sono accessibili solo al personale di ${org} coinvolto nella selezione e ai fornitori che trattano i dati per nostro conto (ospitalità dell'infrastruttura, invio di email, strumenti di estrazione), nominati responsabili del trattamento. Non vendiamo i tuoi dati e non li usiamo per addestrare modelli.
+Chi può vedere i dati. Dentro ${org} i dati sono accessibili solo a persone autorizzate: chi amministra le selezioni (titolari e amministratori dell'account e, salvo diversa scelta di ${org}, i recruiter) e il gruppo di selezione di ciascuna posizione (responsabili dell'assunzione e intervistatori), che accedono solo alle candidature delle posizioni di cui fanno parte. Ogni consultazione del profilo e del curriculum è registrata.
+
+A chi comunichiamo i dati. I dati sono comunicati solo ai fornitori che li trattano per nostro conto (ospitalità dell'infrastruttura, invio di email, strumenti di estrazione), nominati responsabili del trattamento. Non vendiamo i tuoi dati e non li usiamo per addestrare modelli.
 
 Per quanto tempo li conserviamo. Conserviamo i dati per il periodo indicato in questa pagina per la selezione e, se hai dato il consenso al database candidati, per il periodo indicato per quell'ambito. Alla scadenza i dati e il curriculum vengono cancellati o anonimizzati.
 
@@ -46,7 +48,9 @@ Candidate database. Only if you explicitly choose so, we may also keep your data
 
 How we process it. Your CV is read by authorised people at ${org}. To pull out the main information in an orderly way (experience, skills, languages) we may use automated tools, including language models provided by data processors. These tools suggest data to be verified: no decision about your application is taken automatically and no one is rejected by an automated system.
 
-Who receives the data. The data is accessible only to the ${org} staff involved in the selection and to providers that process data on our behalf (infrastructure hosting, email delivery, extraction tools), appointed as data processors. We do not sell your data and we do not use it to train models.
+Who can see the data. Within ${org} the data is accessible only to authorised people: those who run recruitment (account owners and administrators and, unless ${org} chooses otherwise, recruiters) and the selection team of each position (hiring managers and interviewers), who reach only the applications to the positions whose team they are on. Every view of your profile and CV is logged.
+
+Who receives the data. The data is disclosed only to providers that process it on our behalf (infrastructure hosting, email delivery, extraction tools), appointed as data processors. We do not sell your data and we do not use it to train models.
 
 How long we keep it. We keep the data for the period shown on this page for the selection and, if you gave consent to the candidate database, for the period shown for that scope. When it expires the data and the CV are deleted or anonymised.
 

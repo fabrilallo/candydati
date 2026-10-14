@@ -8,6 +8,8 @@ import type { OutboxRepository } from './webhook-ports.js';
 export interface JobListQuery {
   readonly organizationId: string;
   readonly status?: JobStatus | undefined;
+  /** Only these jobs (per-job access, set by the scoped repositories). Absent: every job of the organization. */
+  readonly jobIds?: readonly string[] | undefined;
   /** 1-based. */
   readonly page: number;
   readonly limit: number;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { makeDocx, makePdf, makeZip } from '../testing/fixtures.js';
+import { makeDocx, makeLyingBomb, makePdf, makeZip } from '../testing/fixtures.js';
 import { safeFileName } from './file-name.js';
 import { sniffCv } from './sniff.js';
 import { ZIP_MAX_ENTRIES, ZIP_MAX_ENTRY_BYTES, zipHasEntry } from './zip.js';
@@ -92,5 +92,13 @@ describe('safeFileName', () => {
     expect(name.length).toBe(120);
     expect(name.endsWith('.pdf')).toBe(true);
     expect(safeFileName(`${'à'.repeat(300)}.docx`, DOCX).length).toBeLessThanOrEqual(120);
+  });
+});
+
+describe('sniffCv zip bombs', () => {
+  it('refuses a DOCX that inflates far beyond what it declares', () => {
+    const bomb = makeLyingBomb('word/document.xml', 64 * 1024 * 1024, 100);
+    expect(zipHasEntry(bomb, 'word/document.xml')).toBe(true); // the headers look fine
+    expect(sniffCv(bomb, 'cv.docx')).toBeNull();
   });
 });

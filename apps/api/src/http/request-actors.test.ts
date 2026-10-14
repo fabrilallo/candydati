@@ -8,7 +8,7 @@ const user: Actor = { type: 'user', id: 'u1', organizationId: 'o1', role: 'owner
 const key: DelegatedActor = { type: 'api_key', id: 'k1', organizationId: 'o1', role: 'owner', onBehalfOfUserId: 'u1', scopes: ['job:read'] };
 const request = (authorization?: string) => ({ headers: authorization === undefined ? {} : { authorization } }) as FastifyRequest;
 
-function actors(limiter = { consume: () => ({ allowed: true, retryAfterMs: 0 }) }) {
+function actors(limiter: { consume: (keyId: string, cost?: number) => { allowed: boolean; retryAfterMs: number } } = { consume: () => ({ allowed: true, retryAfterMs: 0 }) }) {
   const session = vi.fn(async () => user);
   const authenticate = vi.fn(async (secret: string) => (secret === 'good' ? key : null));
   return { session, authenticate, ...createRequestActors({ session, authenticate, limiter }) };
@@ -38,6 +38,13 @@ describe('request actors', () => {
   it('answers 429 when the key is over its budget', async () => {
     const a = actors({ consume: () => ({ allowed: false, retryAfterMs: 5 }) });
     await expect(a.resolveActor(request('Bearer good'))).rejects.toMatchObject({ statusCode: 429 });
+  });
+
+  it('charges the given cost to the key', async () => {
+    const consume = vi.fn(() => ({ allowed: true, retryAfterMs: 0 }));
+    const a = actors({ consume });
+    await a.resolveKeyActor(request('Bearer good'), 7);
+    expect(consume).toHaveBeenCalledWith('k1', 7);
   });
 
   it('requires a key for the key-only resolver', async () => {

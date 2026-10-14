@@ -33,7 +33,16 @@ const fakeClient = (overrides: Record<string, unknown> = {}) => {
   }
   const client = {
     signIn: { email: vi.fn((): Settled => ok({})) },
-    signUp: { email: vi.fn((): Settled => ok({})) },
+    signUp: { email: vi.fn((): Settled => ok({ token: null })) },
+    sendVerificationEmail: vi.fn((): Settled => ok({ status: true })),
+    requestPasswordReset: vi.fn((): Settled => ok({ status: true })),
+    resetPassword: vi.fn((): Settled => ok({ status: true })),
+    twoFactor: {
+      enable: vi.fn((): Settled => ok({ totpURI: 'otpauth://totp/x?secret=ABC', backupCodes: ['a1', 'b2'] })),
+      disable: vi.fn((): Settled => ok({ status: true })),
+      verifyTotp: vi.fn((): Settled => ok({ token: 't' })),
+      verifyBackupCode: vi.fn((): Settled => ok({ token: 't' })),
+    },
     signOut: vi.fn((): Settled => ok({ success: true })),
     getSession: vi.fn((): Settled => ok({ user, session: { activeOrganizationId: 'o1' } })),
     organization,
@@ -55,6 +64,41 @@ describe('createAuthApi', () => {
     expect(client.signUp.email).toHaveBeenCalledWith({ name: 'Ada', email: 'a@b.co', password: 'longpassword' })
   })
 
+  it('tells when the sign-in waits for the second factor, and passes the verification landing page', async () => {
+    const { client, api } = fakeClient({ signIn: { email: vi.fn((): Settled => ok({ twoFactorRedirect: true })) } })
+    expect(await api.signIn({ email: 'a@b.co', password: 'pw' })).toEqual({ twoFactor: true })
+    expect(await fakeClient().api.signIn({ email: 'a@b.co', password: 'pw' })).toEqual({ twoFactor: false })
+    await api.signUp({ name: 'Ada', email: 'a@b.co', password: 'longpassword', callbackURL: '/onboarding' })
+    expect(client.signUp.email).toHaveBeenCalledWith({ name: 'Ada', email: 'a@b.co', password: 'longpassword', callbackURL: '/onboarding' })
+  })
+
+  it('resends the verification, asks and completes a password reset', async () => {
+    const { client, api } = fakeClient()
+    await api.sendVerificationEmail({ email: 'a@b.co', callbackURL: '/onboarding' })
+    await api.requestPasswordReset({ email: 'a@b.co', redirectTo: '/reset-password' })
+    await api.resetPassword({ token: 'tok', newPassword: 'long-enough-pw' })
+    expect(client.sendVerificationEmail).toHaveBeenCalledWith({ email: 'a@b.co', callbackURL: '/onboarding' })
+    expect(client.requestPasswordReset).toHaveBeenCalledWith({ email: 'a@b.co', redirectTo: '/reset-password' })
+    expect(client.resetPassword).toHaveBeenCalledWith({ token: 'tok', newPassword: 'long-enough-pw' })
+  })
+
+  it('enrols, verifies and disables the second factor', async () => {
+    const { client, api } = fakeClient()
+    expect(await api.enableTwoFactor('pw')).toEqual({ totpUri: 'otpauth://totp/x?secret=ABC', backupCodes: ['a1', 'b2'] })
+    await api.verifyTotp('123456')
+    await api.verifyBackupCode('a1')
+    await api.disableTwoFactor('pw')
+    expect(client.twoFactor.enable).toHaveBeenCalledWith({ password: 'pw' })
+    expect(client.twoFactor.verifyTotp).toHaveBeenCalledWith({ code: '123456' })
+    expect(client.twoFactor.verifyBackupCode).toHaveBeenCalledWith({ code: 'a1' })
+    expect(client.twoFactor.disable).toHaveBeenCalledWith({ password: 'pw' })
+  })
+
+  it('reads whether the address is confirmed and the second factor is on', async () => {
+    const { api } = fakeClient({ getSession: vi.fn((): Settled => ok({ user: { ...user, emailVerified: false, twoFactorEnabled: true }, session: {} })) })
+    expect((await api.getSession())?.user).toMatchObject({ emailVerified: false, twoFactorEnabled: true })
+  })
+
   it('turns Better Auth errors into translatable AppErrors', async () => {
     const { api } = fakeClient({ signIn: { email: vi.fn((): Settled => err(401, 'INVALID_EMAIL_OR_PASSWORD')) } })
     const failure = await api.signIn({ email: 'a@b.co', password: 'x' }).catch((e: unknown) => e)
@@ -70,7 +114,7 @@ describe('createAuthApi', () => {
 
   it('reads the session', async () => {
     const { api } = fakeClient()
-    expect(await api.getSession()).toEqual({ user, activeOrganizationId: 'o1' })
+    expect(await api.getSession()).toEqual({ user: { ...user, emailVerified: true, twoFactorEnabled: false }, activeOrganizationId: 'o1' })
   })
 
   it('returns null for an anonymous session and for a malformed one', async () => {

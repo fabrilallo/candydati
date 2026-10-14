@@ -10,4 +10,6 @@ export * from './distribution.js';
 export * from './import.js';
 export * from './feedback.js';
 export * from './job-request.js';
+export * from './job-team.js';
 export * from './report.js';
+export * from './security.js';

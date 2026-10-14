@@ -1,4 +1,4 @@
-import { organizationClient } from 'better-auth/client/plugins'
+import { organizationClient, twoFactorClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/vue'
 
 /** Same-origin base path of the Better Auth routes (forwarded to the api by `server/routes/api/[...path].ts`). */
@@ -8,7 +8,8 @@ const build = (baseURL: string, headers?: Readonly<Record<string, string>>) =>
   createAuthClient({
     baseURL,
     basePath: AUTH_BASE_PATH,
-    plugins: [organizationClient()],
+    // twoFactorClient without options: the sign-in screen reads `twoFactorRedirect` itself and routes to /two-factor.
+    plugins: [organizationClient(), twoFactorClient()],
     ...(headers ? { fetchOptions: { headers } } : {}),
   })
 

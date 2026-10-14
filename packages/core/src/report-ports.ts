@@ -37,6 +37,8 @@ export interface ReportAggregateQuery {
   readonly from: Date;
   readonly to: Date;
   readonly jobId?: string | undefined;
+  /** Only these jobs (per-job access). Absent: every job of the organization. */
+  readonly jobIds?: readonly string[] | undefined;
   /** For "waiting now" and "overdue now". */
   readonly now: Date;
 }

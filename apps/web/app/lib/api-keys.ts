@@ -2,7 +2,7 @@ import { API_KEY_NAME_MAX, grantablePermissions, type Permission, type Resource,
 
 /** Areas of the scope picker, in order, and the resources each one gathers. */
 const AREAS = [
-  ['jobs', ['job', 'job_template']],
+  ['jobs', ['job', 'job_team', 'job_template']],
   ['candidates', ['candidate', 'candidate_note', 'feedback']],
   ['communication', ['message', 'email_template']],
   ['work', ['task', 'automation']],
@@ -40,7 +40,9 @@ export const scopeLabelKey = (scope: Permission): string => `apiKeys.scope.${sco
 export const toggleScope = (scopes: readonly Permission[], scope: Permission): readonly Permission[] =>
   scopes.includes(scope) ? scopes.filter((item) => item !== scope) : [...scopes, scope]
 
-export const EXPIRY_CHOICES = ['never', '30', '90', '365'] as const
+/** Every key expires (the api refuses more than a year); 90 days is the default choice. */
+export const EXPIRY_CHOICES = ['30', '90', '180', '365'] as const
+export const DEFAULT_EXPIRY: ExpiryChoice = '90'
 export type ExpiryChoice = (typeof EXPIRY_CHOICES)[number]
 
 export interface KeyForm {
@@ -62,9 +64,8 @@ export const validateKeyForm = (form: KeyForm): KeyFormErrors => {
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-/** The expiry sent to the api: an ISO date `days` from now, or null for a key that does not expire. */
-export const expiryDate = (choice: ExpiryChoice, now: Date): string | null =>
-  choice === 'never' ? null : new Date(now.getTime() + Number(choice) * DAY_MS).toISOString()
+/** The expiry sent to the api: an ISO date `days` from now. */
+export const expiryDate = (choice: ExpiryChoice, now: Date): string => new Date(now.getTime() + Number(choice) * DAY_MS).toISOString()
 
 export type KeyStatus = 'active' | 'expired' | 'revoked'
 

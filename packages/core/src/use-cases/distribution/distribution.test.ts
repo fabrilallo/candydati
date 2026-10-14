@@ -218,6 +218,9 @@ describe('getJobDistribution', () => {
 
   it('is open to every role that reads jobs, hides other organizations and unknown jobs', async () => {
     const deps = await world();
+    // An interviewer reads the ads of their team only (job-team.ts).
+    await expect(getJobDistribution(deps, userActor({ role: 'interviewer', organizationId: DISTRIBUTION_ORG }), { jobId: 'job_1' })).rejects.toBeInstanceOf(NotFoundError);
+    await deps.jobTeams.upsert({ organizationId: DISTRIBUTION_ORG, jobId: 'job_1', userId: 'user_test', role: 'interviewer', addedBy: 'system', createdAt: new Date() });
     await expect(getJobDistribution(deps, userActor({ role: 'interviewer', organizationId: DISTRIBUTION_ORG }), { jobId: 'job_1' })).resolves.toHaveLength(2);
     await expect(getJobDistribution(deps, userActor({ organizationId: 'org_b' }), { jobId: 'job_1' })).rejects.toBeInstanceOf(NotFoundError);
     await expect(getJobDistribution(deps, recruiter, { jobId: 'nope' })).rejects.toBeInstanceOf(NotFoundError);

@@ -7,6 +7,7 @@ import {
 import { createTestCandidateDeps, type TestCandidateDeps } from './candidate-deps.js';
 import { createCandidateStore } from './in-memory-candidates.js';
 import { createInMemoryJobRepository, createInMemoryOrganizationDirectory } from './in-memory-jobs.js';
+import { createInMemoryJobTeams } from './in-memory-job-teams.js';
 import { createInMemoryPrivacyNoticeRepository } from './in-memory-privacy.js';
 import { buildJob } from './job-fixtures.js';
 import type { Application, Candidate, CandidateNote, CvExtractionRecord, Job } from '@tt/domain';
@@ -24,8 +25,8 @@ export interface SeedOptions {
 }
 
 /**
- * Organization `org_a` (slug `acme`) with a published job `job_1` (slug `backend`), an active notice v1, and one
- * open candidate/application. Organization `org_b` (slug `beta`) exists with nothing in it.
+ * Organization `org_a` (slug `acme`) with a published job `job_1` (slug `backend`, created by `user_test`, who is on its
+ * team), an active notice v1, and one open candidate/application. Organization `org_b` (slug `beta`) exists with nothing in it.
  */
 export function seedCandidateWorld(options: SeedOptions = {}): TestCandidateDeps {
   const store = createCandidateStore({
@@ -34,13 +35,15 @@ export function seedCandidateWorld(options: SeedOptions = {}): TestCandidateDeps
     notes: options.notes ?? [],
     extractions: options.extractions ?? [buildExtraction({ organizationId: ORG_A })],
   });
+  const jobs = options.jobs ?? [
+    buildJob({ id: 'job_1', slug: 'backend', organizationId: ORG_A, status: 'published', publishedAt: new Date('2026-02-01T00:00:00Z') }),
+  ];
+  // Like the migration backfill: the creator of each job is on its team.
+  const team = jobs.map((job) => ({ organizationId: job.organizationId, jobId: job.id, userId: job.createdBy, role: 'recruiter' as const, addedBy: 'system', createdAt: job.createdAt }));
   return createTestCandidateDeps({
     store,
-    jobs: createInMemoryJobRepository(
-      options.jobs ?? [
-        buildJob({ id: 'job_1', slug: 'backend', organizationId: ORG_A, status: 'published', publishedAt: new Date('2026-02-01T00:00:00Z') }),
-      ],
-    ),
+    jobTeams: createInMemoryJobTeams(team, { store }),
+    jobs: createInMemoryJobRepository(jobs),
     organizations: createInMemoryOrganizationDirectory([
       { id: ORG_A, name: 'Acme', slug: 'acme', logo: null },
       { id: ORG_B, name: 'Beta', slug: 'beta', logo: null },

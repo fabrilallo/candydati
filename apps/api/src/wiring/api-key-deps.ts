@@ -13,16 +13,18 @@ export const sha256Hex = (value: string): string => createHash('sha256').update(
 /** A new secret `tt_<8 base62>_<32 base62>` from the operating system CSPRNG. */
 export const newApiKeySecret = (): string => formatApiKeySecret(randomBase62(API_KEY_PREFIX_LENGTH), randomBase62(API_KEY_RANDOM_LENGTH));
 
-export function createApiKeyDeps(uow: DrizzleUnitOfWork): ApiKeyDeps {
+export function createApiKeyDeps(uow: DrizzleUnitOfWork, defaultTtlDays?: number): ApiKeyDeps {
   const r = uow.repositories;
   return {
     auditLog: r.auditLog,
     transaction: uow.transaction,
+    jobTeams: uow.repositories.jobTeams,
     apiKeys: r.apiKeys,
     memberRoles: r.memberRoles,
     newSecret: newApiKeySecret,
     hash: sha256Hex,
     newId: randomUUID,
     now: () => new Date(),
+    defaultTtlDays,
   };
 }

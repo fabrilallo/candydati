@@ -1,4 +1,5 @@
 import { defineEventHandler, getRequestURL, getRequestWebStream } from 'h3'
+import { publicOriginOf } from '../../app/lib/public-origin'
 import { DEFAULT_MAX_BODY_BYTES, DEFAULT_TIMEOUT_MS, proxyToApi } from './api-proxy'
 
 /**
@@ -7,12 +8,14 @@ import { DEFAULT_MAX_BODY_BYTES, DEFAULT_TIMEOUT_MS, proxyToApi } from './api-pr
  */
 export const forwardToApi = (matches: (pathWithQuery: string) => boolean) =>
   defineEventHandler(async (event) => {
-    const url = getRequestURL(event, { xForwardedProto: true })
+    // Host and protocol come from the connection itself (never the client's `X-Forwarded-*`), then from the configured site URL below.
+    const url = getRequestURL(event, { xForwardedProto: false, xForwardedHost: false })
     const pathWithQuery = `${url.pathname}${url.search}`
     if (!matches(pathWithQuery)) return
 
     const body = event.method === 'GET' || event.method === 'HEAD' ? undefined : (getRequestWebStream(event) ?? undefined)
-    const { apiInternalUrl, trustCloudflare, apiMaxBodyBytes, apiTimeoutMs } = useRuntimeConfig(event)
+    const { apiInternalUrl, trustCloudflare, apiMaxBodyBytes, apiTimeoutMs, public: site } = useRuntimeConfig(event)
+    const origin = publicOriginOf(String(site?.siteUrl ?? ''), { host: url.host, protocol: url.protocol === 'https:' ? 'https' : 'http' })
     // Browser went away before the api answered: stop the upstream call too.
     const clientGone = new AbortController()
     event.node.res.once('close', () => {
@@ -28,8 +31,8 @@ export const forwardToApi = (matches: (pathWithQuery: string) => boolean) =>
         maxBodyBytes: Number(apiMaxBodyBytes) || DEFAULT_MAX_BODY_BYTES,
         timeoutMs: Number(apiTimeoutMs) || DEFAULT_TIMEOUT_MS,
         signal: clientGone.signal,
-        host: url.host,
-        protocol: url.protocol === 'https:' ? 'https' : 'http',
+        host: origin.host,
+        protocol: origin.protocol,
         socketAddress: event.node.req.socket.remoteAddress,
         trustCloudflare,
       },

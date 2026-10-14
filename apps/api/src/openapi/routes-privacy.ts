@@ -1,4 +1,4 @@
-import { SUPPORTED_LOCALES, erasedSchema, privacyNoticeInputSchema, processingRecordSchema, retentionOverviewSchema, dataExportCreatedSchema, privacyTemplateSchema } from '@tt/domain';
+import { SUPPORTED_LOCALES, erasedSchema, privacyNoticeInputSchema, processingRecordSchema, retentionOverviewSchema, dataExportCreatedSchema, privacyTemplateSchema, httpUrlSchema } from '@tt/domain';
 import { z } from 'zod';
 import { confirmNameBody } from './schemas-admin.js';
 import type { RouteSpec } from './spec.js';
@@ -35,7 +35,7 @@ export const privacyRoutes: readonly RouteSpec[] = [
     method: 'patch', path: '/api/v1/candidates/:id/details', tag: 'Privacy', summary: 'Correct the personal data of a candidate', scope: 'candidate:update',
     description: 'Right to rectification: only the fields sent change (`firstName`, `lastName`, `email`, `phone`, `linkedinUrl`).',
     body: z.object({
-      firstName: z.string().optional(), lastName: z.string().optional(), email: z.email().optional(), phone: z.string().optional(), linkedinUrl: z.url().optional(),
+      firstName: z.string().optional(), lastName: z.string().optional(), email: z.email().optional(), phone: z.string().optional(), linkedinUrl: httpUrlSchema.optional(),
     }), response: { schema: 'CandidateDetail' },
   },
   {

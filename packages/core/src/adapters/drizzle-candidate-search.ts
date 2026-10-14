@@ -35,6 +35,10 @@ const textFilter = (text: string): SQL => {
   )`;
 };
 
+/** Applications of the outer candidate in `jobIds` (per-job access); no filter when absent. */
+const inJobs = (jobIds: readonly string[] | undefined): SQL =>
+  jobIds === undefined ? sql`true` : jobIds.length === 0 ? sql`false` : sql`"application"."job_id" in (${sql.join(jobIds.map((id) => sql`${id}`), sql`, `)})`;
+
 function filtersOf(query: CandidateSearchQuery): SQL | undefined {
   const text = query.query?.trim() ?? '';
   return and(
@@ -44,6 +48,9 @@ function filtersOf(query: CandidateSearchQuery): SQL | undefined {
       exists (select 1 from ${application} where "application"."candidate_id" = ${outer.id} and "application"."organization_id" = ${outer.organizationId} and "application"."consent_status" = 'given')
       or not exists (select 1 from ${application} where "application"."candidate_id" = ${outer.id} and "application"."organization_id" = ${outer.organizationId} and "application"."consent_status" = 'to_renew')
     )`,
+    query.jobIds === undefined
+      ? undefined
+      : sql`exists (select 1 from ${application} where "application"."candidate_id" = ${outer.id} and "application"."organization_id" = ${outer.organizationId} and ${inJobs(query.jobIds)})`,
     query.talentPool === undefined ? undefined : eq(candidate.talentPool, query.talentPool),
     query.tag === undefined ? undefined : sql`${query.tag} = any(${candidate.tags})`,
     text === '' ? undefined : textFilter(text),
@@ -62,7 +69,8 @@ export const MAX_SEARCH_OFFSET = 10_000;
  * only a page past the end needs a second one. Every statement filters by `organization_id`.
  */
 export function createDrizzleCandidateSearch(db: DbExecutor): CandidateSearch {
-  const applicationCount = sql<number>`(select count(*)::int from ${application} where "application"."candidate_id" = ${outer.id} and "application"."consent_status" = 'given')`;
+  const applicationCount = (jobIds: readonly string[] | undefined) =>
+    sql<number>`(select count(*)::int from ${application} where "application"."candidate_id" = ${outer.id} and "application"."consent_status" = 'given' and ${inJobs(jobIds)})`;
   const total = sql<number>`count(*) over ()::int`;
   return {
     async listAfter(organizationId, afterId, limit) {
@@ -83,7 +91,7 @@ export function createDrizzleCandidateSearch(db: DbExecutor): CandidateSearch {
       };
       if (offset > MAX_SEARCH_OFFSET) return { items: [], total: await countAll() };
       const rows = await db
-        .select({ candidate, applicationCount, total })
+        .select({ candidate, applicationCount: applicationCount(query.jobIds), total })
         .from(candidate)
         .where(where)
         .orderBy(sql`${candidate.lastAppliedAt} desc nulls last`, candidate.id)

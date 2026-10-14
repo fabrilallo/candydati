@@ -166,12 +166,16 @@ describe('job requests, settings and approvals on Postgres', () => {
   it('keeps the approval setting per organization, off by default', async () => {
     const org = await insertOrg();
     const repo = createDrizzleOrganizationSettings(handle.db);
-    expect(await repo.get(org)).toEqual({ requireApproval: false });
-    expect(await repo.setRequireApproval(org, true, NOW)).toEqual({ requireApproval: true });
-    expect(await repo.setRequireApproval(org, true, NOW)).toEqual({ requireApproval: true });
-    expect(await repo.get(org)).toEqual({ requireApproval: true });
-    expect(await repo.get(await insertOrg())).toEqual({ requireApproval: false });
-    expect(await repo.setRequireApproval(org, false, NOW)).toEqual({ requireApproval: false });
+    const off = { restrictRecruitersToTeam: false };
+    expect(await repo.get(org)).toEqual({ requireApproval: false, ...off });
+    expect(await repo.setRequireApproval(org, true, NOW)).toEqual({ requireApproval: true, ...off });
+    expect(await repo.setRequireApproval(org, true, NOW)).toEqual({ requireApproval: true, ...off });
+    expect(await repo.get(org)).toEqual({ requireApproval: true, ...off });
+    expect(await repo.get(await insertOrg())).toEqual({ requireApproval: false, ...off });
+    expect(await repo.setRequireApproval(org, false, NOW)).toEqual({ requireApproval: false, ...off });
+    // The recruiter restriction is its own column: switching it keeps the approval setting.
+    expect(await repo.setRestrictRecruitersToTeam(org, true, NOW)).toEqual({ requireApproval: false, restrictRecruitersToTeam: true });
+    expect(await repo.get(org)).toEqual({ requireApproval: false, restrictRecruitersToTeam: true });
   });
 
   it('stores the approval apart from the job: editing the job neither wipes nor forges it', async () => {

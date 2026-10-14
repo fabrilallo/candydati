@@ -81,23 +81,32 @@ describe('submitApplication: success', () => {
     expect(deps.store.read().applications[0]?.retentionExpiresAt).toEqual(new Date(deps.now().getTime() + 365 * 86_400_000));
   });
 
-  it('treats the same email as the same candidate: refreshes details, unions talent pool, keeps the longest retention and tags', async () => {
+  it('treats the same email as the same candidate but never rewrites the profile: unions talent pool, keeps the longest retention and tags', async () => {
     const existing = buildCandidate({ organizationId: ORG_A, email: 'ada@example.com', firstName: 'A.', phone: '+39 02 1234567', tags: ['go'], talentPool: true, retentionExpiresAt: new Date('2030-01-01T00:00:00Z') });
     const decided = buildApplication({ organizationId: ORG_A, outcome: 'not_selected', closedAt: new Date() });
     const deps = seedCandidateWorld({ candidates: [existing], applications: [decided], extractions: [] });
-    await submitApplication(deps, submission({ form: validApplicationForm({ email: 'ADA@Example.com', firstName: 'Ada', linkedinUrl: 'https://linkedin.com/in/ada' }) }));
+    await submitApplication(deps, submission({ form: validApplicationForm({ email: 'ADA@Example.com', firstName: 'Ada', phone: '+39 333 1234567', linkedinUrl: 'https://linkedin.com/in/ada' }) }));
     const { candidates, applications } = deps.store.read();
     expect(candidates).toHaveLength(1);
     expect(candidates[0]).toMatchObject({
       id: existing.id,
-      firstName: 'Ada',
+      firstName: 'A.',
       phone: '+39 02 1234567',
-      linkedinUrl: 'https://linkedin.com/in/ada',
+      linkedinUrl: null,
       tags: ['go'],
       talentPool: true,
       retentionExpiresAt: new Date('2030-01-01T00:00:00Z'),
     });
     expect(applications).toHaveLength(2);
+  });
+
+  it('keeps what was submitted on the application itself, for a recruiter to review', async () => {
+    const existing = buildCandidate({ organizationId: ORG_A, email: 'ada@example.com', firstName: 'A.' });
+    const deps = seedCandidateWorld({ candidates: [existing], applications: [], extractions: [] });
+    await submitApplication(deps, submission({ form: validApplicationForm({ firstName: 'Mallory', lastName: 'Eve', phone: '+39 333 1234567', linkedinUrl: 'https://linkedin.com/in/mallory' }) }));
+    const [application] = deps.store.read().applications;
+    expect(application?.candidateId).toBe(existing.id);
+    expect(application?.submittedContact).toEqual({ firstName: 'Mallory', lastName: 'Eve', phone: '+39 333 1234567', linkedinUrl: 'https://linkedin.com/in/mallory' });
   });
 
   it('never tells whether the person existed: same receipt both ways', async () => {
@@ -211,14 +220,22 @@ describe('submitApplication: refusals', () => {
     await expect(submitApplication(empty(), submission({ cv: { bytes: fakePdfBytes(CV_MAX_BYTES), declaredName: 'cv.pdf' } }))).resolves.toBeDefined();
   });
 
-  it('refuses a second OPEN application to the same job with already_applied, and removes the uploaded file', async () => {
+  it('answers a second OPEN application to the same job with the usual receipt, storing and sending nothing', async () => {
     const deps = seedCandidateWorld({ extractions: [] });
-    const error = await rejection(submitApplication(deps, submission()));
-    expect(error).toBeInstanceOf(ConflictError);
-    expect((error as ConflictError).message).toBe('already_applied');
+    const before = deps.store.read();
+    const receipt = await submitApplication(deps, submission());
+    expect(receipt).toEqual({ received: true });
     expect(deps.files.keys()).toEqual([]);
-    expect(deps.store.read().applications).toHaveLength(1);
+    expect(deps.store.read().applications).toHaveLength(before.applications.length);
     expect(deps.queue.jobs()).toEqual([]);
+    expect(deps.auditLog.events()).toEqual([]);
+  });
+
+  it('answers a lost race on the unique constraints like a duplicate, and removes the file', async () => {
+    const base = empty();
+    const deps = { ...base, intake: { run: async () => { throw new ConflictError('An open application already exists.'); } } };
+    expect(await submitApplication(deps, submission())).toEqual({ received: true });
+    expect(deps.files.keys()).toEqual([]);
   });
 
   it('allows a new application to a different job', async () => {

@@ -1,4 +1,4 @@
-import { apiKeyInputSchema, grantablePermissions, parseApiKeySecret, type ApiKeyView } from '@tt/domain';
+import { API_KEY_DEFAULT_TTL_DAYS, API_KEY_MAX_TTL_DAYS, apiKeyInputSchema, grantablePermissions, parseApiKeySecret, type ApiKeyView } from '@tt/domain';
 import { z } from 'zod';
 import { toActorUserId } from '../../actor-user.js';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
@@ -18,6 +18,18 @@ export const listApiKeys = defineApiKeyUseCase({
   audit: { skip: 'read of organization settings' },
   handler: async ({ deps, actor }): Promise<readonly ApiKeyView[]> => (await deps.apiKeys.list(actor.organizationId)).map(toApiKeyView),
 });
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Every key expires: by default after `defaultDays`, never later than API_KEY_MAX_TTL_DAYS from now. */
+function expiryOf(requested: Date | undefined, now: Date, defaultDays: number): Date {
+  if (requested === undefined) return new Date(now.getTime() + defaultDays * DAY_MS);
+  if (requested.getTime() <= now.getTime()) throw new ValidationError([{ path: 'expiresAt', message: 'The expiry must be in the future.' }]);
+  if (requested.getTime() > now.getTime() + API_KEY_MAX_TTL_DAYS * DAY_MS) {
+    throw new ValidationError([{ path: 'expiresAt', message: `A key lives at most ${API_KEY_MAX_TTL_DAYS} days.` }]);
+  }
+  return requested;
+}
 
 /**
  * Scopes must be grantable to a key for the creator's role: a key never has more than its creator, and never a
@@ -43,9 +55,7 @@ export const createApiKey = defineApiKeyUseCase({
       throw new ValidationError([{ path: 'scopes', message: `Not grantable to an API key: ${refused.join(', ')}.` }]);
     }
     const now = deps.now();
-    if (input.expiresAt !== undefined && input.expiresAt.getTime() <= now.getTime()) {
-      throw new ValidationError([{ path: 'expiresAt', message: 'The expiry must be in the future.' }]);
-    }
+    const expiresAt = expiryOf(input.expiresAt, now, deps.defaultTtlDays ?? API_KEY_DEFAULT_TTL_DAYS);
     const secret = deps.newSecret();
     const parsed = parseApiKeySecret(secret);
     if (!parsed) throw new Error('newSecret returned a malformed API key secret');
@@ -59,7 +69,7 @@ export const createApiKey = defineApiKeyUseCase({
       createdBy: toActorUserId(actor),
       createdAt: now,
       lastUsedAt: null,
-      expiresAt: input.expiresAt ?? null,
+      expiresAt,
       revokedAt: null,
     });
     return { key: toApiKeyView(key), secret };

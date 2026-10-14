@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { httpUrlSchema } from '../url/http-url.js';
 import type { SelectionStage } from '../job/content.js';
 import type { Locale } from '../platform/config.js';
 import { NAME_MAX, personNameSchema } from './person-name.js';
@@ -28,7 +29,7 @@ export const applicationFormSchema = z.object({
     .trim()
     .regex(/^\+?[0-9 ()-]{6,20}$/, 'phone')
     .optional(),
-  linkedinUrl: z.url().max(300).optional(),
+  linkedinUrl: httpUrlSchema.max(300).optional(),
   message: z.string().trim().max(MESSAGE_MAX).default(''),
   /** `selection` must be present: without it the application cannot be processed. */
   consentScopes: z
@@ -42,6 +43,17 @@ export const applicationFormSchema = z.object({
   website: z.string().max(0).optional(),
 });
 export type ApplicationForm = z.infer<typeof applicationFormSchema>;
+
+/**
+ * What the person typed on the public form, kept on the application. A public submission never rewrites the candidate
+ * profile (anyone can type someone else's email): a recruiter compares the two and decides.
+ */
+export interface SubmittedContact {
+  readonly firstName: string;
+  readonly lastName: string;
+  readonly phone: string | null;
+  readonly linkedinUrl: string | null;
+}
 
 /**
  * Pipeline stages of a job: `received`, then one per stage of the DECLARED process (PRODUCT.md §4.1: what the candidate
@@ -101,6 +113,8 @@ export interface Application {
   readonly outcome: Outcome | null;
   readonly message: string;
   readonly cv: StoredFile;
+  /** Contact data as submitted on the public form; absent for imported and manual applications. */
+  readonly submittedContact?: SubmittedContact | null;
   readonly consent: ConsentRecord;
   /** `to_renew` for imported data until the candidate reconfirms: then `consent` holds the real consent. */
   readonly consentStatus: ConsentStatus;

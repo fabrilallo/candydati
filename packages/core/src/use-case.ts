@@ -1,5 +1,7 @@
 import type { AuditAction, AuditActor, AuditTarget, Permission } from '@tt/domain';
 import type { z } from 'zod';
+import type { JobScope } from '@tt/domain';
+import { jobScopeOf, scopeDeps, unscopedDeps } from './access/scope-deps.js';
 import { toAuditActor, type Actor } from './actor.js';
 import { assertSameOrganization, authorize } from './authorization.js';
 import { AuditWriteError, ValidationError } from './errors.js';
@@ -22,9 +24,12 @@ export interface AuditSpec<I, O> {
 }
 
 export interface HandlerContext<D, I> {
+  /** Repositories already limited to the jobs the actor reaches. */
   readonly deps: D;
   readonly actor: Actor;
   readonly input: I;
+  /** The jobs the actor reaches (resolved on first call), for the rare handler that must tell scoped actors apart. */
+  readonly jobScope: () => Promise<JobScope>;
 }
 
 export interface UseCaseDefinition<D extends CoreDeps, S extends z.ZodType, O> {
@@ -89,8 +94,9 @@ const isTransactional = <D extends CoreDeps, S extends z.ZodType, O>(definition:
   definition.transaction === undefined ? !isSkip(definition.audit) : definition.transaction === 'required';
 
 /**
- * The only way to write a use case. Order: validate input, authorize, then in ONE transaction run the handler and append
- * the audit event; after the commit, the side effects it registered (queued tasks, emails) run.
+ * The only way to write a use case. Order: authorize the role, validate input, scope to the organization, then in ONE transaction run the handler and append
+ * the audit event; after the commit, the side effects it registered (queued tasks, emails) run. The handler receives its
+ * repositories scoped to the jobs the actor reaches (`access/scope-deps.ts`): per-job access cannot be skipped.
  *
  * If the handler throws, nothing is audited and every write is rolled back. If the audit append fails,
  * `AuditWriteError` is thrown and the handler's writes are rolled back with it: no unlogged action, no half-done one.
@@ -98,14 +104,19 @@ const isTransactional = <D extends CoreDeps, S extends z.ZodType, O>(definition:
 export function defineUseCase<D extends CoreDeps, S extends z.ZodType, O>(
   definition: UseCaseDefinition<D, S, O>,
 ): UseCase<D, O> {
-  const run = async (deps: D, actor: Actor, rawInput: unknown): Promise<O> => {
+  const run = async (given: D, actor: Actor, rawInput: unknown): Promise<O> => {
+    // The permission is checked on the role alone first: someone who may not do this learns nothing about the input schema.
+    if (!isSkip(definition.permission)) authorize(actor, definition.permission);
     const input = parseInput(definition.input, rawInput);
     const organizationId = definition.organizationOf?.(input) ?? actor.organizationId;
-    if (isSkip(definition.permission)) assertSameOrganization(actor, organizationId);
-    else authorize(actor, definition.permission, organizationId);
+    assertSameOrganization(actor, organizationId);
     const audit = definition.audit;
+    // Called from another use case: start again from the unscoped deps, then scope them for this actor.
+    const deps = unscopedDeps(given);
     const execute = async (bound: D): Promise<O> => {
-      const result = await definition.handler({ deps: bound, actor, input });
+      // Per-job access (PRODUCT.md §6): the handler only ever sees repositories limited to the jobs the actor reaches.
+      const scope = jobScopeOf(bound, actor);
+      const result = await definition.handler({ deps: scopeDeps(bound, actor, scope), actor, input, jobScope: scope.scope });
       if (!isSkip(audit)) await appendAudit(bound, actor, audit, organizationId, input, result);
       return result;
     };

@@ -17,6 +17,7 @@ const organization = computed(() => data.value?.data ?? null)
 const loadErrorKey = computed(() => data.value?.errorKey ?? null)
 const role = computed(() => viewer.value?.role ?? null)
 const canManageInvitations = computed(() => can(role.value, 'invitation:cancel'))
+const canSetAccess = computed(() => can(role.value, 'organization:update'))
 const busyId = ref<string | null>(null)
 
 const cancelInvitation = async (id: string): Promise<void> => {
@@ -62,8 +63,9 @@ const cancelInvitation = async (id: string): Promise<void> => {
         </section>
       </div>
 
-      <div class="lg:sticky lg:top-20 lg:order-none">
+      <div class="grid gap-6 lg:sticky lg:top-20 lg:order-none">
         <InviteForm :actor-role="role" @invited="() => refresh()" />
+        <AccessSetting v-if="canSetAccess" />
       </div>
     </div>
   </div>

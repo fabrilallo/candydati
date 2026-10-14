@@ -29,7 +29,8 @@ import { sql, type Db } from '@tt/db';
 import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyRequest } from 'fastify';
 import { createAuth, type Auth } from './auth/create-auth.js';
-import type { EmailSender } from './auth/email-sender.js';
+import type { AccountMailer } from './auth/account-mailer.js';
+import { createDailyBudget, createPgBudgetStore, type BudgetStore, type DailyBudget } from './limits/daily-budget.js';
 import { findMemberRole } from './auth/member-role.js';
 import type { Env } from './config/env.js';
 import { createActorResolver } from './http/actor-resolver.js';
@@ -40,7 +41,7 @@ import { configuredProviders } from './wiring/configured-providers.js';
 import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
 import { zipStreamFactory } from '@tt/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
-import type { Actor, ApiKeyDeps, DelegatedActor } from '@tt/core';
+import type { Actor, ApiKeyDeps, DelegatedActor, SecurityDeps } from '@tt/core';
 import { authenticateApiKey, withStorageErrors } from '@tt/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
@@ -48,6 +49,7 @@ import { createApiKeyDeps } from './wiring/api-key-deps.js';
 import { createDistributionDeps } from './wiring/distribution-deps.js';
 import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
 import { createHrDeps, type HrWiring } from './wiring/hr-deps.js';
+import { createTeamDeps, type TeamWiring } from './wiring/team-deps.js';
 import { toMessagingConfig } from '@tt/providers';
 
 export interface RateLimitSettings {
@@ -55,6 +57,8 @@ export interface RateLimitSettings {
   readonly max: number;
   /** Requests per minute per client on /api/auth/*. */
   readonly authMax: number;
+  /** Requests per minute per client on the auth routes that send an email (sign-up, password reset, verification). */
+  readonly authEmailMax?: number | undefined;
   /** Requests per minute per client on the public careers routes. */
   readonly publicMax?: number | undefined;
   /** Requests per minute per client on the ad quality analysis. */
@@ -79,6 +83,7 @@ export const DEFAULT_QUALITY_MAX = 20;
 export const DEFAULT_INBOUND_MAX = 120;
 export const DEFAULT_API_KEY_MAX = 120;
 export const DEFAULT_APPLY_MAX = 5;
+export const DEFAULT_AUTH_EMAIL_MAX = 5;
 export const DEFAULT_APPLY_WINDOW_MINUTES = 10;
 export const DEFAULT_RATE_LIMIT: RateLimitSettings = { max: 300, authMax: 20, publicMax: DEFAULT_PUBLIC_MAX, qualityMax: DEFAULT_QUALITY_MAX };
 
@@ -94,9 +99,15 @@ export interface AppContext {
   /** Session only: refuses any request that carries a bearer. */
   readonly resolveSessionActor: (request: FastifyRequest) => Promise<Actor>;
   /** Bearer API key only (MCP). */
-  readonly resolveKeyActor: (request: FastifyRequest) => Promise<DelegatedActor>;
+  readonly resolveKeyActor: (request: FastifyRequest, cost?: number) => Promise<DelegatedActor>;
   readonly apiKeyDeps: ApiKeyDeps;
+  /** Organization security settings (2FA requirement for owners and admins). */
+  readonly securityDeps: SecurityDeps;
   readonly checkDatabase: () => Promise<void>;
+  /** Account emails, for the notices sent outside Better Auth (failed sign-ins). */
+  readonly mailer: AccountMailer;
+  /** Daily budgets of paid model calls (MCP tools, assistant). */
+  readonly budget: DailyBudget;
   readonly rateLimit: RateLimitSettings;
   readonly jobDeps: JobDeps;
   /** Read-only aggregates of the history kept by core. */
@@ -123,12 +134,17 @@ export interface AppContext {
   readonly publicFeedbackDeps: HrWiring['publicFeedbackDeps'];
   readonly jobRequestDeps: HrWiring['jobRequestDeps'];
   readonly staleJobDeps: HrWiring['staleJobDeps'];
+  readonly jobTeamDeps: TeamWiring['jobTeamDeps'];
+  readonly accessSettingDeps: TeamWiring['accessSettingDeps'];
 }
 
 export interface AppContextDeps {
   readonly env: Env;
   readonly db: Db;
-  readonly emailSender: EmailSender;
+  /** Account emails (verification, password reset, invitations, failed sign-ins). */
+  readonly mailer: AccountMailer;
+  /** Daily model budgets: Postgres by default (shared by every instance), in memory in some tests. */
+  readonly budgetStore?: BudgetStore | undefined;
   readonly rateLimit?: RateLimitSettings | undefined;
   readonly adQuality: AdQualityAnalyzer;
   readonly files: FileStorage;
@@ -147,24 +163,31 @@ export interface AppContextDeps {
 
 const isBindable = (queue: TaskQueue | BindableTaskQueue): queue is BindableTaskQueue => 'bindTo' in queue && typeof queue.bindTo === 'function';
 
-export function createAppContext({ env, db, emailSender, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, reportClock }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, reportClock }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
   const { auditLog } = uow.repositories;
-  const core: CoreDeps = { auditLog, transaction: uow.transaction };
-  const auth = createAuth({ env, db, core, emailSender });
+  const core: CoreDeps = { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams };
+  const auth = createAuth({ env, db, core, mailer });
   const messaging = createMessagingDeps({ env, uow, queue, sender, identity, onReceiptError });
   const resolveFromHeaders = createActorResolver({
     getSession: async (headers) => {
       const result = await auth.api.getSession({ headers });
       if (!result) return null;
       const activeOrganizationId: unknown = result.session.activeOrganizationId;
-      return { userId: result.user.id, activeOrganizationId: typeof activeOrganizationId === 'string' ? activeOrganizationId : null };
+      const user = result.user as { id: string; emailVerified: boolean; twoFactorEnabled?: boolean | null };
+      return {
+        userId: user.id,
+        activeOrganizationId: typeof activeOrganizationId === 'string' ? activeOrganizationId : null,
+        emailVerified: user.emailVerified,
+        twoFactorEnabled: user.twoFactorEnabled === true,
+      };
     },
     findRole: (userId, organizationId) => findMemberRole(db, userId, organizationId),
+    requiresTwoFactor: async (organizationId) => (await uow.repositories.securitySettings.get(organizationId)).requireTwoFactor,
   });
-  const apiKeyDeps = createApiKeyDeps(uow);
+  const apiKeyDeps = createApiKeyDeps(uow, env.API_KEY_DEFAULT_TTL_DAYS);
   const limits = rateLimit ?? DEFAULT_RATE_LIMIT;
   const actors = createRequestActors({
     session: async (request) => resolveFromHeaders(fromNodeHeaders(request.headers)),
@@ -206,12 +229,16 @@ export function createAppContext({ env, db, emailSender, rateLimit, adQuality, f
     publicFeedbackDeps: hr.publicFeedbackDeps,
     jobRequestDeps: hr.jobRequestDeps,
     staleJobDeps: hr.staleJobDeps,
+    ...createTeamDeps(uow),
     messagingDeps: messaging.messagingDeps,
     inboundDeps: messaging.inboundDeps,
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
+    securityDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, securitySettings: uow.repositories.securitySettings, now: () => new Date() },
+    mailer,
+    budget: createDailyBudget(budgetStore ?? createPgBudgetStore(db)),
     rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
     jobDeps,
-    reportDeps: { auditLog, transaction: uow.transaction, jobs: jobDeps.jobs, reports: uow.repositories.reports, now: reportClock ?? (() => new Date()) },
+    reportDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, jobs: jobDeps.jobs, reports: uow.repositories.reports, now: reportClock ?? (() => new Date()) },
     distributionDeps,
     publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
   };
@@ -222,6 +249,7 @@ function createJobDeps(uow: DrizzleUnitOfWork, adQuality: AdQualityAnalyzer, adQ
   return {
     auditLog: r.auditLog,
     transaction: uow.transaction,
+    jobTeams: r.jobTeams,
     jobs: r.jobs,
     jobTemplates: r.jobTemplates,
     applicationCounts: r.applicationCounts,

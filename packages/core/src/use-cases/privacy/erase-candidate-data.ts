@@ -102,6 +102,7 @@ export async function eraseCandidateData(deps: ErasureDeps & Partial<Transaction
       selected.map((application) => application.id),
     );
     if (candidateErased) await store.deleteCandidate(organizationId, candidateId);
+    const exportKeys = await store.deleteDataExports(organizationId);
     await auditLog.append({
       organizationId,
       actor: input.actor,
@@ -114,7 +115,7 @@ export async function eraseCandidateData(deps: ErasureDeps & Partial<Transaction
       applicationCount: selected.length,
       candidateErased,
     });
-    return { result: { applicationCount: selected.length, candidateErased }, keys };
+    return { result: { applicationCount: selected.length, candidateErased }, keys: [...keys, ...exportKeys] };
   });
   await deleteFilesAfterCommit(deps, organizationId, erased);
   return erased.result;

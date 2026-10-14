@@ -1,4 +1,4 @@
-import { CONSENT_SCOPES, receivedSchema } from '@tt/domain';
+import { CONSENT_SCOPES, httpUrlSchema, receivedSchema } from '@tt/domain';
 import { z } from 'zod';
 import { consentAnswerBody } from './schemas-import.js';
 import { submitFeedbackBody } from './schemas-hr.js';
@@ -48,7 +48,7 @@ export const publicRoutes: readonly RouteSpec[] = [
     method: 'post', path: '/api/v1/public/organizations/:orgSlug/jobs/:jobSlug/applications', tag: 'Public', summary: 'Apply to a published ad', scope: null, status: 201, multipart: true,
     description: 'What the careers page sends: the form fields and one `cv` file (PDF or DOCX, checked by content, not by name). `consentScopes` must include `selection` and `privacyNoticeVersion` must be the active one, or the request is refused with `422`. The answer is always `{ received: true }` and never says whether the person, the ad or the email already existed. Rate limited per IP, with daily caps per organization and per job. Not open to other origins.',
     body: z.object({
-      firstName: z.string(), lastName: z.string(), email: z.email(), phone: z.string().optional(), linkedinUrl: z.url().optional(), message: z.string().optional(),
+      firstName: z.string(), lastName: z.string(), email: z.email(), phone: z.string().optional(), linkedinUrl: httpUrlSchema.optional(), message: z.string().optional(),
       consentScopes: z.array(z.enum(CONSENT_SCOPES)).min(1).describe('Sent as repeated fields. Must include `selection`.'), privacyNoticeVersion: z.number().int().positive(),
       origin: z.string().max(500).optional().describe('Where the person came from (`utm_source`, `ref`); sanitized to a short label.'),
       website: z.string().max(0).optional().describe('Honeypot: leave empty.'),

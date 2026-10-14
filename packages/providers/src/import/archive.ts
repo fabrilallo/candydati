@@ -1,4 +1,4 @@
-import { unzipSync } from 'fflate';
+import { inflateBounded, ZipBoundsError } from '../zip/bounded-inflate.js';
 import { DEFAULT_IMPORT_LIMITS, IMPORT_RATIO_MIN_BYTES, ImportError, type ImportLimits } from './limits.js';
 
 export interface ImportEntry {
@@ -125,16 +125,21 @@ export function openImportArchive(bytes: Uint8Array, limits: ImportLimits = DEFA
     entryCount: central.length,
     declaredBytes: central.reduce((sum, entry) => sum + entry.size, 0),
     inflate(name) {
-      let files: Record<string, Uint8Array>;
+      const declaredSize = declared.get(name) ?? 0;
+      // Streaming: the bytes that really come out are counted, and the entry is dropped the moment it passes what it
+      // declared (or the batch cap). Only this entry is kept; the others are skipped without being held.
+      let content: Uint8Array | undefined;
       try {
-        files = unzipSync(bytes, { filter: (file) => file.name === name });
-      } catch {
+        content = inflateBounded(
+          bytes,
+          { maxEntryBytes: Math.min(declaredSize, limits.maxTotalBytes), maxTotalBytes: limits.maxTotalBytes, maxEntries: limits.maxEntries },
+          { only: (entry) => entry === name, keep: (entry) => entry === name, declaredSize: () => declaredSize },
+        ).get(name);
+      } catch (error) {
+        if (error instanceof ZipBoundsError && error.reason !== 'invalid_archive') throw new ImportError('too_large', 'An archive entry is larger than declared.');
         throw new ImportError('invalid_archive', 'The ZIP archive could not be read.');
       }
-      const content = files[name];
       if (!content) throw new ImportError('invalid_archive', 'The ZIP archive could not be read.');
-      // The declared size was checked against the limits: a lying header must not slip a bigger entry through.
-      if (content.byteLength > (declared.get(name) ?? 0)) throw new ImportError('too_large', 'An archive entry is larger than declared.');
       return content;
     },
   };

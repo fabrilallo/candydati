@@ -34,6 +34,17 @@ const CODE_KEYS: Readonly<Record<string, string>> = {
   YOU_ARE_NOT_THE_RECIPIENT_OF_THE_INVITATION: 'errors.invitationWrongRecipient',
   EMAIL_VERIFICATION_REQUIRED_BEFORE_ACCEPTING_OR_REJECTING_INVITATION: 'errors.emailVerificationRequired',
   INVITATION_LIMIT_REACHED: 'errors.tooManyRequests',
+  EMAIL_NOT_VERIFIED: 'errors.emailNotVerified',
+  SIGNUP_INVITE_ONLY: 'errors.signupInviteOnly',
+  INVALID_TOKEN: 'errors.invalidResetLink',
+  TOKEN_EXPIRED: 'errors.invalidResetLink',
+  PASSWORD_TOO_LONG: 'validation.passwordMax',
+  INVALID_CODE: 'errors.invalidCode',
+  INVALID_BACKUP_CODE: 'errors.invalidCode',
+  TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE: 'errors.tooManyAttempts',
+  ACCOUNT_TEMPORARILY_LOCKED: 'errors.tooManyAttempts',
+  INVALID_TWO_FACTOR_COOKIE: 'errors.twoFactorExpired',
+  EMAIL_VERIFICATION_REQUIRED_FOR_INVITATION: 'errors.emailVerificationRequired',
 }
 
 const STATUS_KEYS: ReadonlyArray<readonly [(status: number) => boolean, string]> = [

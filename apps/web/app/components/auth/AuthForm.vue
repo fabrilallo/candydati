@@ -2,7 +2,8 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { loginSchema, signupSchema } from '@/lib/schemas'
-import { safeRedirect } from '@/lib/auth-paths'
+import { safeRedirect, verificationCallback, VERIFY_EMAIL } from '@/lib/auth-paths'
+import { AppError } from '@/lib/auth-errors'
 
 const props = defineProps<{ mode: 'login' | 'signup' }>()
 const { t } = useI18n()
@@ -18,13 +19,39 @@ const form = isSignup.value
 const values = computed(() => form.values.value as { name?: string; email: string; password: string })
 const set = (key: 'name' | 'email' | 'password', value: string | number): void => (form.setField as (k: string, v: unknown) => void)(key, String(value))
 
+const redirect = computed(() => safeRedirect(route.query.redirect))
+/** Where the confirmation link lands once it has signed the person in. */
+const callbackURL = computed(() => verificationCallback(redirect.value))
+const withRedirect = (query: Record<string, string>): Record<string, string> => (redirect.value ? { ...query, redirect: redirect.value } : query)
+const inbox = (email: string): Next => ({ path: VERIFY_EMAIL, query: redirect.value ? { email, next: redirect.value } : { email } })
+
+/** What comes after a successful submit: the inbox, the second factor, or the app. */
+type Next = { readonly path: string; readonly query?: Record<string, string> } | string
+
+const signUp = async (data: { name: string; email: string; password: string }): Promise<Next> => {
+  await api.signUp({ ...data, callbackURL: callbackURL.value })
+  return inbox(data.email)
+}
+
+const signIn = async (data: { email: string; password: string }): Promise<Next> => {
+  try {
+    const { twoFactor } = await api.signIn({ ...data, callbackURL: callbackURL.value })
+    if (twoFactor) return { path: '/two-factor', query: withRedirect({}) }
+  } catch (error) {
+    // A fresh confirmation link is already on its way: the inbox page says so.
+    if (error instanceof AppError && error.code === 'EMAIL_NOT_VERIFIED') return inbox(data.email)
+    throw error
+  }
+  await refresh()
+  return redirect.value ?? '/app'
+}
+
 const onSubmit = async (): Promise<void> => {
+  let next: Next = '/app'
   const ok = await form.submit(async (data) => {
-    if (isSignup.value) await api.signUp(data as { name: string; email: string; password: string })
-    else await api.signIn(data)
-    await refresh()
+    next = isSignup.value ? await signUp(data as { name: string; email: string; password: string }) : await signIn(data)
   })
-  if (ok) await navigateTo(safeRedirect(route.query.redirect) ?? '/app')
+  if (ok) await navigateTo(next)
 }
 </script>
 
@@ -45,6 +72,9 @@ const onSubmit = async (): Promise<void> => {
         <Input id="password" type="password" :autocomplete="isSignup ? 'new-password' : 'current-password'" :model-value="values.password" :aria-invalid="invalid" :aria-describedby="describedBy" @update:model-value="set('password', $event)" />
       </template>
     </FormField>
+    <p v-if="!isSignup" class="-mt-2 text-sm">
+      <NuxtLink to="/forgot-password" rel="nofollow" class="font-medium text-primary underline-offset-4 hover:underline" data-testid="forgot-password-link">{{ t('auth.login.forgot') }}</NuxtLink>
+    </p>
     <FormAlert :message-key="form.submitError.value" />
     <Button type="submit" size="lg" class="mt-1 w-full" :disabled="form.pending.value">
       {{ form.pending.value ? t(`auth.${mode}.submitting`) : t(`auth.${mode}.submit`) }}

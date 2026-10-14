@@ -49,7 +49,8 @@
     "distribution": "Distribution",
     "imports": "Import",
     "jobRequests": "Requests",
-    "reports": "Reports"
+    "reports": "Reports",
+    "security": "Security"
   },
   "jobRequests": {
     "title": "Hiring requests",
@@ -184,7 +185,8 @@
       "submit": "Sign in",
       "submitting": "Signing in…",
       "noAccount": "No account yet?",
-      "signupLink": "Sign up"
+      "signupLink": "Sign up",
+      "forgot": "Forgot your password?"
     },
     "signup": {
       "title": "Create your account",
@@ -193,6 +195,49 @@
       "submitting": "Creating account…",
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in"
+    },
+    "verify": {
+      "title": "Check your inbox",
+      "subtitle": "We sent a confirmation link to {email}. Open it to activate your account.",
+      "subtitleUnknown": "We sent you a confirmation link. Open it to activate your account.",
+      "hint": "The link works for 24 hours. Not there? Check the spam folder or send it again.",
+      "resend": "Send the link again",
+      "resending": "Sending…",
+      "resent": "If the address needs confirming, a new link is on its way.",
+      "expired": "That confirmation link is not valid any more. Send a new one.",
+      "backToLogin": "Back to sign in"
+    },
+    "forgot": {
+      "title": "Reset your password",
+      "subtitle": "Enter the email of your account: we will send you a link to choose a new password.",
+      "submit": "Send the link",
+      "submitting": "Sending…",
+      "sentTitle": "Check your inbox",
+      "sentBody": "If {email} has an account, a link to reset the password is on its way. It works for 1 hour.",
+      "backToLogin": "Back to sign in"
+    },
+    "reset": {
+      "title": "Choose a new password",
+      "subtitle": "After the change every open session is signed out.",
+      "password": "New password",
+      "submit": "Save the password",
+      "submitting": "Saving…",
+      "done": "Password changed: sign in with the new one",
+      "invalidTitle": "This link does not work",
+      "invalidBody": "Reset links work once and for 1 hour. Ask for a new one.",
+      "requestNew": "Ask for a new link"
+    },
+    "twoFactor": {
+      "title": "Two-factor authentication",
+      "subtitle": "Enter the 6-digit code shown by your authenticator app.",
+      "subtitleBackup": "Enter one of the backup codes you saved. Each works once.",
+      "code": "Code",
+      "backupCode": "Backup code",
+      "useBackup": "Use a backup code",
+      "useCode": "Use the authenticator app",
+      "submit": "Verify",
+      "submitting": "Verifying…",
+      "backToLogin": "Back to sign in"
     }
   },
   "onboarding": {
@@ -362,7 +407,15 @@
     "inviting": "Sending…",
     "invited": "Invitation sent to {email}",
     "noInvitePermission": "Your role does not allow inviting people.",
-    "noRoleSelf": "No role"
+    "noRoleSelf": "No role",
+    "access": {
+      "title": "Access to ads",
+      "label": "Recruiters see only the ads of their team",
+      "on": "Recruiters see candidates and ads only of the teams they are on. Owners and admins see everything.",
+      "off": "Recruiters see every ad of the organization. Hiring managers and interviewers see only their team's ads.",
+      "saved": "Setting saved",
+      "loadFailed": "We could not read the access setting."
+    }
   },
   "audit": {
     "title": "Audit log",
@@ -415,7 +468,9 @@
         "updated": "Updated the organization",
         "deleted": "Deleted the organization",
         "exported": "Exported all of the organization's data",
-        "approval_setting_updated": "Changed whether ads need approval"
+        "approval_setting_updated": "Changed whether ads need approval",
+        "security_setting_updated": "Changed the two-factor authentication requirement",
+        "access_setting_updated": "Changed who sees which ads"
       },
       "invitation": {
         "created": "Invited a person",
@@ -437,7 +492,9 @@
         "published": "Published a job ad",
         "closed": "Closed a job ad",
         "distribution_synced": "Synced a job ad with the distribution channels",
-        "interviewers_updated": "Changed who interviews for an ad"
+        "interviewers_updated": "Changed who interviews for an ad",
+        "team_member_added": "Added a person to an ad's team",
+        "team_member_removed": "Removed a person from an ad's team"
       },
       "job_template": {
         "created": "Saved a job ad template",
@@ -511,6 +568,9 @@
         "approved": "Approved a request to open a position",
         "rejected": "Rejected a request to open a position",
         "converted": "Created an ad from a request"
+      },
+      "mcp": {
+        "read": "Read data through MCP"
       }
     }
   },
@@ -535,7 +595,8 @@
     "nameMin": "At least 2 characters",
     "nameMax": "Too long",
     "slug": "Lowercase letters, numbers and single dashes only",
-    "role": "Choose a role"
+    "role": "Choose a role",
+    "code": "Enter the code as shown, digits and letters only"
   },
   "errors": {
     "generic": "Something went wrong. Please try again shortly.",
@@ -552,7 +613,14 @@
     "notFound": "Not found",
     "tooManyRequests": "Too many requests, try again shortly",
     "unreachable": "The service is not reachable right now",
-    "conflict": "This is no longer possible: something changed in the meantime"
+    "conflict": "This is no longer possible: something changed in the meantime",
+    "emailNotVerified": "Confirm your email address first: we sent you a link",
+    "signupInviteOnly": "On this instance accounts are created by invitation only. Ask an administrator to invite you.",
+    "invalidResetLink": "This link is not valid any more. Ask for a new one.",
+    "invalidCode": "The code is not correct",
+    "tooManyAttempts": "Too many attempts. Wait a few minutes and try again.",
+    "twoFactorExpired": "The sign-in took too long. Sign in again.",
+    "twoFactorRequired": "Your organization requires two-factor authentication: turn it on to continue"
   },
   "taxonomy": {
     "roleFamilies": {
@@ -1310,7 +1378,8 @@
       "candidates": "Candidates",
       "ad": "Job ad",
       "automations": "Automations",
-      "distribution": "Distribution"
+      "distribution": "Distribution",
+      "team": "Team"
     },
     "received": "Received",
     "receivedHint": "New applications, not looked at yet",
@@ -1467,6 +1536,11 @@
       "title": "Candidate profile",
       "description": "The candidate's profile, CV and notes",
       "fullPage": "Open full page"
+    },
+    "submitted": {
+      "title": "New details from the application",
+      "body": "The application carries details that differ from the profile. The profile was not changed: check them and update it only if they belong to the same person.",
+      "apply": "Update the profile"
     }
   },
   "candidates": {
@@ -2225,7 +2299,8 @@
       "nameHint": "To recognise it later, for example \"HR team agent\".",
       "scopes": "What it can do",
       "scopesHint": "We only offer what you can do yourself.",
-      "expiry": "Expiry"
+      "expiry": "Expiry",
+      "expiryHint": "Every key expires: at most one year. Create a new one before it does."
     },
     "areas": {
       "jobs": "Job ads",
@@ -2260,6 +2335,10 @@
         "publish": "Publish job ads",
         "close": "Close job ads",
         "approve": "Approve the opening of positions"
+      },
+      "job_team": {
+        "read": "See an ad's team",
+        "manage": "Change an ad's team"
       },
       "job_template": {
         "read": "Read templates",
@@ -2322,7 +2401,7 @@
       "30": "In 30 days",
       "90": "In 90 days",
       "365": "In one year",
-      "never": "Never expires"
+      "180": "In 6 months"
     },
     "create": "Create key",
     "creating": "Creating",
@@ -3069,5 +3148,68 @@
       "emptyTitle": "No hires in this period",
       "emptyBody": "When an application ends with a hire, the days it took show up here."
     }
+  },
+  "security": {
+    "pageTitle": "Security",
+    "pageDescription": "Protect your account with a second factor, and decide what your organization requires.",
+    "personal": {
+      "title": "Two-factor authentication",
+      "description": "After the password, the sign-in asks for a code from an authenticator app (any TOTP app works).",
+      "statusOn": "On",
+      "statusOff": "Off",
+      "required": "Your organization requires it for your role: turn it on to keep using the app.",
+      "password": "Your password",
+      "passwordHint": "Needed to change how you sign in.",
+      "enable": "Turn on",
+      "enabling": "Preparing…",
+      "scan": "Add this account to your authenticator app with the key below, or open the link on your phone.",
+      "secret": "Key",
+      "uri": "Setup link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "code": "Code from the app",
+      "confirm": "Confirm",
+      "confirming": "Confirming…",
+      "backupTitle": "Backup codes",
+      "backupBody": "Save them somewhere safe: each one signs you in once if you lose the phone. They are shown only now.",
+      "enabled": "Two-factor authentication is on",
+      "disable": "Turn off",
+      "disabling": "Turning off…",
+      "disabled": "Two-factor authentication is off"
+    },
+    "organization": {
+      "title": "Organization requirement",
+      "description": "Owners and administrators must have two-factor authentication on to use the app. Each of them is asked to turn it on at the next visit.",
+      "toggle": "Require two-factor authentication for owners and administrators",
+      "saved": "Requirement saved"
+    }
+  },
+  "jobTeam": {
+    "title": "Team",
+    "explain": "Who sees the candidates of this ad. Owners and admins see every ad, and so do recruiters unless the organization restricts them to their teams. Hiring managers and interviewers see only the ads whose team they are on. Whoever runs a stage is on the team automatically.",
+    "listTitle": "People on the team",
+    "empty": "Nobody on the team yet.",
+    "interviewsAt": "Runs: {stages}",
+    "fromStage": "From the stage",
+    "roleOf": "Team role of {name}",
+    "remove": "Remove {name} from the team",
+    "addPerson": "Add a person",
+    "choosePerson": "Choose a member…",
+    "role": "Team role",
+    "add": "Add",
+    "saved": "Team updated",
+    "removed": "Removed from the team",
+    "saveFailed": "We could not change the team.",
+    "roles": {
+      "hiring_manager": "Hiring manager",
+      "interviewer": "Interviewer",
+      "recruiter": "Recruiter"
+    }
+  },
+  "notAccessible": {
+    "title": "Not found or not accessible",
+    "body": "This page no longer exists, or it belongs to an ad whose team you are not on. Ask whoever manages the ad to add you to its team.",
+    "backCandidates": "Back to candidates",
+    "backJobs": "Back to ads"
   }
 }

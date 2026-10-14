@@ -3,6 +3,7 @@
 #   docker compose -f docker-compose.prod.yml up -d --build
 # With development mail (Mailpit): add --profile mail and EMAIL_PROVIDER=smtp.
 # Only "web" is published on the host (WEB_PORT); api, worker, postgres and minio stay on the internal network.
+# The stack refuses to start with the example secrets, an http PLATFORM_URL or EMAIL_PROVIDER=log (config-check).
 # Variables are read from the .env in the current folder; internal service addresses are fixed here and override
 # the development ones (localhost) found in .env.
 # Every variable listed in docs/ENVIRONMENT.md is passed through (a test checks it).
@@ -23,7 +24,7 @@ x-app-env: &app-env
   PLATFORM_DEFAULT_LOCALE: ${PLATFORM_DEFAULT_LOCALE:-it}
   PLATFORM_TIME_ZONE: ${PLATFORM_TIME_ZONE:-Europe/Rome}
   PLATFORM_AD_QUALITY_THRESHOLD: ${PLATFORM_AD_QUALITY_THRESHOLD:-6}
-  EMAIL_PROVIDER: ${EMAIL_PROVIDER:-log}
+  EMAIL_PROVIDER: ${EMAIL_PROVIDER:?imposta EMAIL_PROVIDER (smtp o resend)}
   SMTP_HOST: ${SMTP_HOST:-mailpit}
   SMTP_PORT: ${SMTP_PORT:-1025}
   SMTP_SECURE: ${SMTP_SECURE:-false}
@@ -51,9 +52,28 @@ x-app-env: &app-env
 name: ${COMPOSE_PROJECT_NAME:-team-tracker-prod}
 
 services:
+  # Refuses to start the stack with the example secrets of .env.example, short secrets, an http PLATFORM_URL or
+  # EMAIL_PROVIDER=log (docker/config-check.sh). The api and the worker apply the same rules again at boot.
+  config-check:
+    image: busybox:1.37@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e
+    restart: "no"
+    command: ["sh", "/config-check.sh"]
+    volumes:
+      - ./docker/config-check.sh:/config-check.sh:ro
+    environment:
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-}
+      INBOUND_WEBHOOK_SECRET: ${INBOUND_WEBHOOK_SECRET:-}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      PLATFORM_URL: ${PLATFORM_URL:-}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-log}
+    network_mode: none
+
   postgres:
-    image: postgres:17
+    image: postgres:17@sha256:4d89c904835259bc58876520e56267ca07a4ebd6a027f7814bbbf91b50d685be
     restart: unless-stopped
+    depends_on:
+      config-check: { condition: service_completed_successfully }
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-tt}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD}
@@ -72,6 +92,8 @@ services:
     image: cgr.dev/chainguard/minio:latest@sha256:dc455cdd4db6e390b1b26514f15ff37681a777bf8dab41aac445a0259f751e56
     restart: unless-stopped
     command: server /data --console-address ":9001"
+    depends_on:
+      config-check: { condition: service_completed_successfully }
     environment:
       MINIO_ROOT_USER: ${S3_ACCESS_KEY:?imposta S3_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?imposta S3_SECRET_KEY}
@@ -81,10 +103,10 @@ services:
 
   mailpit:
     profiles: [mail]
-    image: axllent/mailpit:v1.31.5
+    image: axllent/mailpit:v1.31.5@sha256:94f6b70c1436defae6799d9ac7ff0eeff9540465b842026d5cdb018f1c0234ea
     restart: unless-stopped
     ports:
-      - "${MAILPIT_UI_PORT:-8025}:8025"
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
     networks: [internal]
 
   api:
@@ -104,11 +126,21 @@ services:
       WEB_ORIGIN: ${PLATFORM_URL}
       TRUSTED_ORIGINS: ${TRUSTED_ORIGINS:-}
       API_KEY_RATE_LIMIT: ${API_KEY_RATE_LIMIT:-}
-      # The api trusts x-forwarded-for only from the internal network (where the web runs). Never "true".
-      TRUST_PROXY: ${TRUST_PROXY:-${TT_SUBNET:-172.31.77.0/24}}
+      # The api trusts x-forwarded-for only from the web container, which has a fixed address (TT_WEB_IP, inside TT_SUBNET).
+      # Never a whole subnet and never "true": anything else on the network could forge a client address.
+      TRUST_PROXY: ${TRUST_PROXY:-${TT_WEB_IP:-172.31.77.10}}
       APPLICATIONS_DAILY_MAX_PER_ORGANIZATION: ${APPLICATIONS_DAILY_MAX_PER_ORGANIZATION:-500}
       APPLICATIONS_DAILY_MAX_PER_JOB: ${APPLICATIONS_DAILY_MAX_PER_JOB:-200}
+      RECEIPTS_DAILY_MAX_PER_ORGANIZATION: ${RECEIPTS_DAILY_MAX_PER_ORGANIZATION:-300}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
       INBOUND_WEBHOOK_SECRET: ${INBOUND_WEBHOOK_SECRET:?imposta INBOUND_WEBHOOK_SECRET (almeno 32 caratteri)}
+      # invite_only (default in production): accounts only through an invitation, plus the very first one (SECURITY.md).
+      SIGNUP_MODE: ${SIGNUP_MODE:-invite_only}
+      API_KEY_DEFAULT_TTL_DAYS: ${API_KEY_DEFAULT_TTL_DAYS:-90}
+      MCP_MODEL_DAILY_BUDGET_PER_KEY: ${MCP_MODEL_DAILY_BUDGET_PER_KEY:-200}
+      MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION: ${MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION:-1000}
+      ASSISTANT_DAILY_BUDGET_PER_USER: ${ASSISTANT_DAILY_BUDGET_PER_USER:-200}
+      ASSISTANT_DAILY_BUDGET_PER_ORGANIZATION: ${ASSISTANT_DAILY_BUDGET_PER_ORGANIZATION:-2000}
     ports:
       - "${API_PUBLISH:-127.0.0.1:4000}:4000"
     networks: [internal]
@@ -144,9 +176,12 @@ services:
       NUXT_API_MAX_BODY_BYTES: ${NUXT_API_MAX_BODY_BYTES:-213909504}
       NUXT_API_TIMEOUT_MS: ${NUXT_API_TIMEOUT_MS:-300000}
       NUXT_TRUST_CLOUDFLARE: ${NUXT_TRUST_CLOUDFLARE:-false}
+      NUXT_PUBLIC_TURNSTILE_SITE_KEY: ${NUXT_PUBLIC_TURNSTILE_SITE_KEY:-}
     ports:
       - "${WEB_PORT:-3000}:3000"
-    networks: [internal]
+    networks:
+      internal:
+        ipv4_address: ${TT_WEB_IP:-172.31.77.10}
 
 networks:
   internal:

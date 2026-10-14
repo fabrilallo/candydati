@@ -123,8 +123,9 @@ describe('sending', () => {
   it('lets hiring managers and interviewers read but not send', async () => {
     const w = await createWorld(t);
     const { id } = await apply(w);
-    for (const role of ['hiring_manager', 'interviewer']) {
+    for (const role of ['hiring_manager', 'interviewer'] as const) {
       const user = await w.member(role);
+      await w.joinTeam(user, role);
       expect((await user.post('/api/v1/messages', { applicationIds: [id], subject: 's', body: 'b' })).status).toBe(403);
       expect((await user.post('/api/v1/email-templates/preview', { applicationId: id, subject: 's', body: 'b' })).status).toBe(403);
       expect((await user.get(`/api/v1/applications/${id}/messages`)).status).toBe(200);

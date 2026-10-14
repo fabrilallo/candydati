@@ -36,11 +36,11 @@ const toolCallStream = (toolName: string, input: unknown) => ({
 const userMessage = (text: string) => [{ id: `u-${Math.random()}`, role: 'user', parts: [{ type: 'text', text }] }];
 
 /** The agent routes alone, on a bare Fastify app, with a mock model and the session replaced by a fixed actor. */
-async function mockApp(model: MockLanguageModelV3, actorOf: () => Actor = () => owner): Promise<FastifyInstance> {
+async function mockApp(model: MockLanguageModelV3, actorOf: () => Actor = () => owner, env = testEnv()): Promise<FastifyInstance> {
   const ctx = createAppContext({
-    env: testEnv(),
+    env,
     db: t.handle.db,
-    emailSender: { sendInvitation: async () => undefined },
+    mailer: { send: () => undefined },
     adQuality: fakeAdQualityAnalyzer(),
     files: createInMemoryFileStorage(),
     queue: createInMemoryTaskQueue(),
@@ -95,6 +95,21 @@ describe('agent routes without AGENT_MODEL', () => {
       const both = await withKey(t.app, key.secret, method, url, { headers: { cookie: w.owner.cookieHeader() }, ...(method === 'POST' ? { body: { messages: userMessage('ciao') } } : {}) });
       expect([401, 403], `${method} ${url} with cookie`).toContain(both.status);
     }
+  });
+});
+
+describe('assistant daily budget', () => {
+  it('refuses with 429 once the person has used the daily budget, before calling the model', async () => {
+    const model = new MockLanguageModelV3({ doStream: async () => textStream('Ok.') as never });
+    const person: UserActor = { ...owner, id: `budget-${Math.random().toString(36).slice(2)}` };
+    const app = await mockApp(model, () => person, testEnv({ ASSISTANT_DAILY_BUDGET_PER_USER: '2' }));
+    expect((await chat(app, 'uno')).statusCode).toBe(200);
+    expect((await chat(app, 'due')).statusCode).toBe(200);
+    const refused = await chat(app, 'tre');
+    expect(refused.statusCode).toBe(429);
+    expect(refused.json()).toMatchObject({ success: false, error: { code: 'rate_limited' } });
+    expect(model.doStreamCalls).toHaveLength(2);
+    await app.close();
   });
 });
 

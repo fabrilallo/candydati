@@ -1,8 +1,9 @@
 import multipart from '@fastify/multipart';
-import { submitApplication } from '@tt/core';
+import { submitApplication, ValidationError } from '@tt/core';
 import { ok, sanitizeOrigin } from '@tt/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
+import { verifyTurnstile } from '../http/turnstile.js';
 import { APPLICATION_BODY_LIMIT, MULTIPART_LIMITS, readApplicationParts } from '../http/application-multipart.js';
 import { applyRouteConfig } from './limits.js';
 import { paramOf } from './request.js';
@@ -20,7 +21,11 @@ export async function registerPublicApplicationRoute(app: FastifyInstance, ctx: 
       async (request, reply) => {
         const { form: rawForm, cv } = await readApplicationParts(request);
         // `origin` rides in the JSON of the form but is not a form field: it is sanitized to a short label and never refuses anything.
-        const { origin, ...form } = rawForm;
+        const { origin, turnstileToken, ...form } = rawForm;
+        const secret = ctx.env.TURNSTILE_SECRET_KEY;
+        if (secret && !(await verifyTurnstile({ secret, token: typeof turnstileToken === 'string' ? turnstileToken : '', ip: request.ip }))) {
+          throw new ValidationError([{ path: 'turnstile', message: 'captcha_failed' }]);
+        }
         const receipt = await submitApplication(ctx.submitDeps, {
           organizationSlug: paramOf(request, 'orgSlug'),
           jobSlug: paramOf(request, 'jobSlug'),

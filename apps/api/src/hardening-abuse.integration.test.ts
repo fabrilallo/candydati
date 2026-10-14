@@ -1,6 +1,6 @@
 import { applicationsBusyMessage } from '@tt/domain';
 import { afterAll, describe, expect, it } from 'vitest';
-import { createInMemorySignInLockout, SIGN_IN_LOCK_MS, SIGN_IN_MAX_FAILURES } from './auth/sign-in-lockout.js';
+import { ACCOUNT_FREE_FAILURES, PAIR_FREE_FAILURES } from './auth/sign-in-throttle.js';
 import { createWorld, personForm } from './testing/candidate-world.js';
 import { TestUser } from './testing/client.js';
 import { createTestApp, PASSWORD, uniqueEmail, WEB_ORIGIN, type TestApp } from './testing/test-app.js';
@@ -54,7 +54,7 @@ describe('client address (H1: rate limit bypass through a spoofed IP)', () => {
   });
 });
 
-describe('sign-in lockout per account', () => {
+describe('sign-in throttle (M4: progressive delays, no lockout of the owner)', () => {
   const signIn = (t: TestApp, email: string, password: string, ip: string) =>
     t.app.inject({
       method: 'POST',
@@ -63,33 +63,42 @@ describe('sign-in lockout per account', () => {
       headers: { origin: WEB_ORIGIN, 'content-type': 'application/json' },
       payload: { email, password },
     });
+  const waitFor = async (check: () => boolean): Promise<void> => {
+    for (let i = 0; i < 50 && !check(); i += 1) await new Promise((resolve) => setTimeout(resolve, 20));
+  };
 
-  it('refuses an account for 15 minutes after 10 failures, from any address, even with the right password', async () => {
-    let at = Date.now();
-    const t = await app({ signInLockout: createInMemorySignInLockout(() => at) });
-    const email = uniqueEmail('lock');
-    await new TestUser(t.app, email, 'Lock').signUp();
-    for (let i = 0; i < SIGN_IN_MAX_FAILURES; i += 1) {
-      expect((await signIn(t, email, 'wrong-password-123', `203.0.113.${i + 1}`)).statusCode).toBe(401);
-    }
-    const locked = await signIn(t, email, PASSWORD, '198.51.100.77');
-    expect(locked.statusCode).toBe(429);
-    expect(locked.json()).toMatchObject({ success: false, error: { code: 'rate_limited' } });
-    expect(Number(locked.headers['retry-after'])).toBeGreaterThan(0);
-    expect((await signIn(t, email.toUpperCase(), PASSWORD, '198.51.100.78')).statusCode).toBe(429);
-    expect((await signIn(t, uniqueEmail('other'), 'wrong-password-123', '198.51.100.77')).statusCode).toBe(401);
-    at += SIGN_IN_LOCK_MS + 1;
-    expect((await signIn(t, email, PASSWORD, '198.51.100.77')).statusCode).toBe(200);
+  it('slows one address after a few failures, while the right password still works from elsewhere', async () => {
+    const t = await app();
+    const email = uniqueEmail('slow');
+    await new TestUser(t.app, email, 'Slow').signUp();
+    for (let i = 0; i < PAIR_FREE_FAILURES + 1; i += 1) expect((await signIn(t, email, 'wrong-password-123', OUTSIDER)).statusCode).toBe(401);
+    const slowed = await signIn(t, email, PASSWORD, OUTSIDER);
+    expect(slowed.statusCode).toBe(429);
+    expect(slowed.json()).toMatchObject({ success: false, error: { code: 'rate_limited' } });
+    expect(Number(slowed.headers['retry-after'])).toBeGreaterThan(0);
+    expect((await signIn(t, email.toUpperCase(), PASSWORD, '198.51.100.78')).statusCode).toBe(200);
   });
 
-  it('a successful sign-in forgets earlier failures', async () => {
-    const t = await app({ signInLockout: createInMemorySignInLockout() });
-    const email = uniqueEmail('ok');
-    await new TestUser(t.app, email, 'Ok').signUp();
-    for (let round = 0; round < 3; round += 1) {
-      for (let i = 0; i < SIGN_IN_MAX_FAILURES - 1; i += 1) await signIn(t, email, 'wrong-password-123', OUTSIDER);
-      expect((await signIn(t, email, PASSWORD, OUTSIDER)).statusCode).toBe(200);
-    }
+  it('a flood from many addresses slows new addresses, never the one the owner signed in from', async () => {
+    const t = await app();
+    const email = uniqueEmail('flood');
+    await new TestUser(t.app, email, 'Flood').signUp();
+    expect((await signIn(t, email, PASSWORD, '198.51.100.7')).statusCode).toBe(200);
+    for (let i = 0; i < ACCOUNT_FREE_FAILURES + 2; i += 1) await signIn(t, email, 'wrong-password-123', `203.0.113.${i + 1}`);
+    expect((await signIn(t, email, PASSWORD, '192.0.2.200')).statusCode).toBe(429);
+    expect((await signIn(t, email, PASSWORD, '198.51.100.7')).statusCode).toBe(200);
+    await waitFor(() => t.mailbox.sent.some((mail) => mail.to === email && mail.email.kind === 'sign_in_failures'));
+    const notices = t.mailbox.sent.filter((mail) => mail.to === email && mail.email.kind === 'sign_in_failures');
+    expect(notices).toHaveLength(1);
+    expect(notices[0]!.email.link).toBe('http://localhost:3000/forgot-password');
+  });
+
+  it('sends no notice for an address without an account', async () => {
+    const t = await app();
+    const email = uniqueEmail('ghost');
+    for (let i = 0; i < ACCOUNT_FREE_FAILURES; i += 1) expect((await signIn(t, email, 'wrong-password-123', `203.0.113.${i + 1}`)).statusCode).toBe(401);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(t.mailbox.sent.filter((mail) => mail.to === email)).toEqual([]);
   });
 });
 

@@ -47,6 +47,8 @@ describe('listAttention', () => {
       jobs: [buildJob({ id: 'job_1', organizationId: ORG_A, status: 'published', createdBy: 'ghost' })],
       applications: [buildApplication({ organizationId: ORG_A, responseDueAt: at(-5) })],
     });
+    expect((await listAttention(noOwner, viewer, {})).total).toBe(0);
+    await noOwner.jobTeams.upsert({ organizationId: ORG_A, jobId: 'job_1', userId: viewer.id, role: 'interviewer', addedBy: 'system', createdAt: new Date() });
     expect((await listAttention(noOwner, viewer, {})).items[0]?.ownerName).toBe('Former member');
   });
 

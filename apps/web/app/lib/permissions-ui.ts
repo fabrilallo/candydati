@@ -18,7 +18,7 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   return allowed[0] ?? null
 }
 
-export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'privacy' | 'email' | 'emailTemplates' | 'webhooks' | 'distribution' | 'api' | 'data' | 'audit'
+export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'emailTemplates' | 'webhooks' | 'distribution' | 'api' | 'data' | 'audit'
 export type NavSectionId = 'work' | 'organization'
 
 export interface NavItem {
@@ -39,6 +39,8 @@ const NAV: readonly NavItem[] = [
   { id: 'imports', to: '/app/imports', section: 'work', permission: 'import:manage' },
   { id: 'templates', to: '/app/jobs/templates', section: 'work', permission: 'job_template:read' },
   { id: 'members', to: '/app/settings/members', section: 'organization' },
+  // Everyone: the person's own second factor; owners and admins also find the organization's requirement there.
+  { id: 'security', to: '/app/settings/security', section: 'organization' },
   { id: 'privacy', to: '/app/settings/privacy', section: 'organization', permission: 'privacy:manage' },
   { id: 'email', to: '/app/settings/email', section: 'organization', permission: 'email_settings:manage' },
   { id: 'emailTemplates', to: '/app/settings/email-templates', section: 'organization', permission: 'email_template:manage' },

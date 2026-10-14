@@ -1,4 +1,4 @@
-import { and, eq, gte, isNotNull, lte, ne, schema, sql, type SQL } from '@tt/db';
+import { and, eq, gte, inArray, isNotNull, lte, ne, schema, sql, type SQL } from '@tt/db';
 import { EMPTY_DURATION, type DurationStat, type Outcome } from '@tt/domain';
 import type { ReportAggregateQuery, ReportAggregates, ReportRepository } from '../report-ports.js';
 import type { DbExecutor } from './db-executor.js';
@@ -28,7 +28,11 @@ const toStat = (row: DurationStat | undefined): DurationStat => (row && row.coun
 
 export function createDrizzleReports(db: DbExecutor): ReportRepository {
   const scope = (query: ReportAggregateQuery, columns: { organizationId: Column; jobId: Column }) =>
-    and(eq(columns.organizationId, query.organizationId), query.jobId === undefined ? undefined : eq(columns.jobId, query.jobId));
+    and(
+      eq(columns.organizationId, query.organizationId),
+      query.jobId === undefined ? undefined : eq(columns.jobId, query.jobId),
+      query.jobIds === undefined ? undefined : inArray(columns.jobId, [...query.jobIds]),
+    );
   return {
     async aggregate(query): Promise<ReportAggregates> {
       const { from, to, now } = query;

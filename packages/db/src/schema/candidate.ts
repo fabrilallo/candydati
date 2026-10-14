@@ -5,6 +5,7 @@ import type {
   ExtractionStatus,
   Outcome,
   PrivacyNotice,
+  SubmittedContact,
 } from '@tt/domain';
 import { sql } from 'drizzle-orm';
 import { boolean, customType, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
@@ -91,6 +92,8 @@ export const application = pgTable(
     cvFileName: text('cv_file_name').notNull(),
     cvMediaType: text('cv_media_type').notNull(),
     cvSizeBytes: integer('cv_size_bytes').notNull(),
+    /** Contact data typed on the public form, kept apart from the candidate profile for a recruiter to review. */
+    submittedContact: jsonb('submitted_contact').$type<SubmittedContact>(),
     consent: jsonb('consent').$type<ConsentRecord>().notNull(),
     /** `to_renew` for imported data until the candidate reconfirms. Existing rows are `given`. */
     consentStatus: text('consent_status').$type<ConsentStatus>().notNull().default('given'),

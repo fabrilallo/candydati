@@ -1,4 +1,4 @@
-import { createDrizzleUnitOfWork, formatDigestFrom } from '@tt/core';
+import { createDrizzleUnitOfWork, formatDigestFrom, safeErrorSerializer } from '@tt/core';
 import { createDb } from '@tt/db';
 import { createEmailProvider, createS3FileStorage, toEmailIdentity } from '@tt/providers';
 import { PgBoss } from 'pg-boss';
@@ -51,7 +51,7 @@ const shutdown = async (
 
 const main = async (): Promise<void> => {
   const env = loadEnv(process.env);
-  const logger = pino({ level: env.LOG_LEVEL, name: 'worker' });
+  const logger = pino({ level: env.LOG_LEVEL, name: 'worker', serializers: { err: safeErrorSerializer } });
   const boss = new PgBoss({ connectionString: env.DATABASE_URL, schema: PG_BOSS_SCHEMA });
   boss.on('error', (error: Error) => logger.error({ err: error }, 'pg-boss error'));
   await boss.start();
@@ -143,6 +143,6 @@ const main = async (): Promise<void> => {
 };
 
 main().catch((error: unknown) => {
-  pino({ name: 'worker' }).fatal({ err: error }, 'worker startup failed');
+  pino({ name: 'worker', serializers: { err: safeErrorSerializer } }).fatal({ err: error }, 'worker startup failed');
   process.exit(1);
 });

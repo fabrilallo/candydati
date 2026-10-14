@@ -49,7 +49,10 @@ describe('attention list', () => {
     const w = await createWorld(t);
     const [only] = await apply(w, 1);
     await setResponseDue(t, only!, new Date(Date.now() - HOUR));
-    expect((await (await w.member('interviewer')).get<Item[]>('/api/v1/applications/attention')).body.data).toHaveLength(1);
+    const interviewer = await w.member('interviewer');
+    expect((await interviewer.get<Item[]>('/api/v1/applications/attention')).body.data).toHaveLength(0);
+    await w.joinTeam(interviewer, 'interviewer');
+    expect((await interviewer.get<Item[]>('/api/v1/applications/attention')).body.data).toHaveLength(1);
     const other = await createWorld(t, 'Other');
     expect((await other.owner.get<Item[]>('/api/v1/applications/attention')).body.data!.filter((i) => i.applicationId === only)).toEqual([]);
   });

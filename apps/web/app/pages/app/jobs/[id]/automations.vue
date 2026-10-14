@@ -32,6 +32,7 @@ useSeoMeta({ title: () => `${t('automations.title')}: ${title.value}` })
         <template #tabs><JobTabs :job-id="id" current="automations" /></template>
       </PageHeader>
       <FormAlert v-if="!allowed" message-key="errors.forbidden" />
+      <NotAccessible v-else-if="!job && errorKey === 'errors.notFound'" back-to="/app/jobs" back-key="notAccessible.backJobs" />
       <FormAlert v-else-if="!job" :message-key="errorKey ?? 'job.errors.loadFailed'" />
       <AutomationsPanel v-else :job="job" />
     </div>

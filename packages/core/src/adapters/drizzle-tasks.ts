@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNotNull, isNull, lte, schema, sql } from '@tt/db';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, lte, or, schema, sql } from '@tt/db';
 import type { Task } from '@tt/domain';
 import type { TaskRepository } from '../automation-ports.js';
 import type { DbExecutor } from './db-executor.js';
@@ -35,6 +35,7 @@ export function createDrizzleTasks(db: DbExecutor): TaskRepository {
             eq(task.organizationId, query.organizationId),
             ...(query.assigneeId === undefined ? [] : [eq(task.assigneeId, query.assigneeId)]),
             ...(query.openOnly ? [isNull(task.completedAt)] : []),
+            ...(query.jobIds === undefined ? [] : [or(isNull(task.jobId), inArray(task.jobId, [...query.jobIds]))]),
           ),
         )
         .orderBy(sql`${task.completedAt} is not null`, sql`${task.dueAt} asc nulls last`, desc(task.createdAt), asc(task.id))

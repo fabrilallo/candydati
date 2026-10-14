@@ -60,6 +60,8 @@ describe('permissions', () => {
       'job:read',
       'job:create',
       'job:update',
+      'job_team:read',
+      'job_team:manage',
       'job_template:read',
       'candidate:read',
       'candidate:update',
@@ -82,6 +84,7 @@ describe('permissions', () => {
   it('gives an interviewer read access to ads and candidates and note writing, and nothing else', () => {
     expect(permissionsOf('interviewer')).toEqual([
       'job:read',
+      'job_team:read',
       'candidate:read',
       'candidate_note:create',
       'message:read',

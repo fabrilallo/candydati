@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { parseEnv } from './env.js';
+import { PRODUCTION_ENV } from '../testing/production-env.js';
 
 const valid = {
   DATABASE_URL: 'postgres://tt:tt@localhost:5434/team_tracker',
@@ -25,8 +26,8 @@ describe('parseEnv WEBHOOKS_ALLOW_PRIVATE', () => {
   it('is accepted outside production and refused in production', () => {
     expect(parseEnv({ ...valid, WEBHOOKS_ALLOW_PRIVATE: 'true' }).WEBHOOKS_ALLOW_PRIVATE).toBe(true);
     expect(parseEnv({ ...valid, NODE_ENV: 'test', WEBHOOKS_ALLOW_PRIVATE: 'true' }).WEBHOOKS_ALLOW_PRIVATE).toBe(true);
-    expect(() => parseEnv({ ...valid, NODE_ENV: 'production', INBOUND_WEBHOOK_SECRET: 'w'.repeat(32), WEBHOOKS_ALLOW_PRIVATE: 'true' })).toThrow(/WEBHOOKS_ALLOW_PRIVATE.*production/);
-    expect(parseEnv({ ...valid, NODE_ENV: 'production', INBOUND_WEBHOOK_SECRET: 'w'.repeat(32) }).WEBHOOKS_ALLOW_PRIVATE).toBe(false);
+    expect(() => parseEnv({ ...PRODUCTION_ENV, WEBHOOKS_ALLOW_PRIVATE: 'true' })).toThrow(/WEBHOOKS_ALLOW_PRIVATE.*production/);
+    expect(parseEnv(PRODUCTION_ENV).WEBHOOKS_ALLOW_PRIVATE).toBe(false);
   });
 });
 
@@ -123,8 +124,9 @@ describe('parseEnv email', () => {
   it('reads the email settings and requires the webhook secret only in production', () => {
     expect(parseEnv(valid).email.transport.kind).toBe('log');
     expect(parseEnv({ ...valid, EMAIL_PROVIDER: 'smtp', SMTP_HOST: 'localhost', SMTP_PORT: '1025' }).email.transport).toMatchObject({ kind: 'smtp', port: 1025 });
-    expect(() => parseEnv({ ...valid, NODE_ENV: 'production' })).toThrow(/INBOUND_WEBHOOK_SECRET/);
-    expect(parseEnv({ ...valid, NODE_ENV: 'production', INBOUND_WEBHOOK_SECRET: 'x'.repeat(32) }).email.webhookSecret).toHaveLength(32);
+    const { INBOUND_WEBHOOK_SECRET: _secret, ...withoutSecret } = PRODUCTION_ENV;
+    expect(() => parseEnv(withoutSecret)).toThrow(/INBOUND_WEBHOOK_SECRET/);
+    expect(parseEnv(PRODUCTION_ENV).email.webhookSecret).toHaveLength(32);
     expect(() => parseEnv({ ...valid, INBOUND_WEBHOOK_SECRET: 'short' })).toThrow(/INBOUND_WEBHOOK_SECRET/);
   });
 });

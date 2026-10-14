@@ -19,6 +19,7 @@ export function createDistributionDeps({ uow, publicBaseUrl, channels = [] }: Di
   return {
     auditLog: r.auditLog,
     transaction: uow.transaction,
+    jobTeams: uow.repositories.jobTeams,
     jobs: r.jobs,
     organizations: r.organizations,
     distributions: r.distributions,

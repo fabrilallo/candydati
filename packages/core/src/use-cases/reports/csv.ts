@@ -1,7 +1,7 @@
 import type { FunnelStageDto, Rate, ReportsDto } from '@tt/domain';
 
-/** A cell starting with one of these is read as a formula by spreadsheets: it is prefixed with a quote. */
-const FORMULA_START = /^[=+\-@\t\r]/;
+/** A cell starting with one of these is read as a formula by spreadsheets, also behind leading whitespace or control characters: it is prefixed with a quote. */
+const FORMULA_START = /^[\s\p{Cc}\u200b\ufeff]*[=+\-@]|^[\t\r]/u;
 
 function csvCell(value: string | number | null): string {
   if (value === null) return '';

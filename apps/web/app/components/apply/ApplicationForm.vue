@@ -33,8 +33,10 @@ const FOCUS_IDS: Readonly<Record<Field, string>> = {
   selection: 'consent-selection',
 }
 
+const turnstileToken = ref('')
+const turnstileKey = computed(() => String(useRuntimeConfig().public.turnstileSiteKey ?? ''))
 const send = async (): Promise<void> => {
-  const invalid = await form.submit()
+  const invalid = await form.submit(turnstileToken.value)
   if (form.done.value) {
     emit('done', values.value.firstName.trim(), values.value.email.trim())
     return
@@ -74,6 +76,8 @@ const send = async (): Promise<void> => {
       <label for="apply-website">Website</label>
       <input id="apply-website" name="website" type="text" tabindex="-1" autocomplete="off" :value="values.website" @input="form.setField('website', ($event.target as HTMLInputElement).value)" />
     </div>
+
+    <TurnstileWidget v-if="turnstileKey" :site-key="turnstileKey" @token="turnstileToken = $event" />
 
     <p v-if="form.noticeChanged.value" class="flex items-start gap-2 rounded-md border bg-muted px-3 py-2 text-sm" role="status" data-testid="notice-changed">
       <InfoIcon class="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />{{ x('apply.consent.changed', { version: notice.version }) }}

@@ -53,3 +53,10 @@ Schema changes are Drizzle migrations in `packages/db/drizzle`. Generate with `p
 - **0017** adds `candidate.last_applied_at`, a trigger on `application` that keeps it up to date and a one-statement
   backfill. The backfill is small per organization; on a very large `candidate` table, split it per rule 3.
 - **0018** creates the indexes concurrently (search, notifications, caps, outbox, audit log, retention).
+- **0020** creates `job_team_member`, adds `organization_setting.restrict_recruiters_to_team` (constant default) and
+  backfills the teams inline: each job's creator, and every hiring manager or interviewer referenced by a job (feedback
+  asked of them, a task about the job, the request it came from), if still a member. One row per job and person, so small;
+  on a very large installation split it per rule 3. Stage interviewers need no row: they are read with the team.
+- **0021** adds `application.submitted_contact` and nulls stored `candidate.linkedin_url` values that are not http(s)
+  addresses and `organization.logo` values that are not https ones (stored XSS and tracking-pixel hardening). The two
+  `UPDATE`s write only the offending rows; on a very large `candidate` table the scan itself is the only cost.

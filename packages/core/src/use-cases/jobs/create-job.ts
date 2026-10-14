@@ -1,5 +1,6 @@
 import { jobSlug, type Job } from '@tt/domain';
 import { z } from 'zod';
+import { addToJobTeam } from '../../access/team-membership.js';
 import { NotFoundError } from '../../errors.js';
 import { defineJobUseCase } from './define.js';
 import { parseContent, withStageIds } from './shared.js';
@@ -38,7 +39,7 @@ export const createJob = defineJobUseCase({
     const content = withStageIds(parseContent(template ? mergeContent(template.content, input.content) : input.content), deps.newId);
     const id = deps.newId();
     const now = deps.now();
-    return deps.jobs.create({
+    const job = await deps.jobs.create({
       id,
       organizationId: actor.organizationId,
       slug: jobSlug(content.title, id.slice(0, SLUG_SUFFIX_LENGTH)),
@@ -52,5 +53,7 @@ export const createJob = defineJobUseCase({
       publishedAt: null,
       closedAt: null,
     });
+    await addToJobTeam(deps, actor, job, now);
+    return job;
   },
 });

@@ -19,6 +19,7 @@ describe('draftJobContent', () => {
   it('asks the model with the brief and the current ad, validates the proposal and saves nothing', async () => {
     const deps = createTestJobDeps();
     const job = await deps.jobs.create(buildJob({ id: 'job_d', organizationId: 'org_a', content: completeJobContent({ title: 'Old title' }) }));
+    await deps.jobTeams.upsert({ organizationId: 'org_a', jobId: 'job_d', userId: actor.id, role: 'hiring_manager', addedBy: 'system', createdAt: new Date() });
     const { drafter, calls } = recording(completeJobContent({ title: 'New title' }));
     const result = await draftJobContent({ ...deps, drafter }, actor, { brief: 'More remote', jobId: job.id, language: 'en' });
     expect(result).toMatchObject({ status: 'proposed', proposal: { title: 'New title' }, publishIssues: [] });

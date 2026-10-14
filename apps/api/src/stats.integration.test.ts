@@ -2,6 +2,7 @@ import { completeJobContent } from '@tt/core/testing';
 import { jobStatsDtoSchema, STATS_WEEKS, type JobStatsDto } from '@tt/domain';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { TestUser } from './testing/client.js';
+import { userIdOf } from './testing/candidate-world.js';
 import { publishNotice } from './testing/privacy.js';
 import { createTestApp, uniqueEmail, type TestApp } from './testing/test-app.js';
 
@@ -53,15 +54,18 @@ describe('GET /api/v1/stats/jobs', () => {
     expect(stats.readiness.blockers.length).toBeGreaterThan(0);
   });
 
-  it('lets an interviewer read and audits nothing', async () => {
+  it('lets an interviewer read the jobs of their team only, and audits nothing', async () => {
     const owner = await ownerOf('Readers');
     await seed(owner);
     const interviewer = await newUser('int').signUp();
     await interviewer.joinAs(owner, 'interviewer');
+    expect((await interviewer.get<JobStatsDto>(URL)).body.data!.statusCounts.total).toBe(0);
+    const jobs = (await owner.get<{ id: string }[]>('/api/v1/jobs')).body.data!;
+    expect((await owner.put(`/api/v1/jobs/${jobs[0]!.id}/team/${await userIdOf(interviewer)}`, { role: 'interviewer' })).status).toBe(200);
     const before = (await owner.get<unknown[]>('/api/v1/audit-log')).body.meta?.total;
     const reply = await interviewer.get<JobStatsDto>(URL);
     expect(reply.status).toBe(200);
-    expect(reply.body.data!.statusCounts.total).toBe(2);
+    expect(reply.body.data!.statusCounts.total).toBe(1);
     expect((await owner.get<unknown[]>('/api/v1/audit-log')).body.meta?.total).toBe(before);
   });
 

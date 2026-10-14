@@ -4,6 +4,8 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.ts'],
     env: { NODE_ENV: 'test' },
+    // The streaming export test measures retained memory and needs to trigger garbage collection.
+    execArgv: ['--expose-gc'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],

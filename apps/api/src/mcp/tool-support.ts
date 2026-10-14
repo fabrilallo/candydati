@@ -17,6 +17,8 @@ export interface ToolDefinition<S extends z.ZodRawShape> {
   readonly description: string;
   readonly shape: S;
   readonly readOnly: boolean;
+  /** May call the model (FAST_MODEL): spends the daily model budget of the key and of the organization. */
+  readonly usesModel?: boolean;
   readonly run: (context: ToolContext, input: z.infer<z.ZodObject<S>>) => Promise<unknown>;
 }
 

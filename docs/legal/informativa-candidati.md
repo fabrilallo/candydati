@@ -29,7 +29,7 @@ Il curriculum è letto da persone autorizzate di [Nome del titolare]. Per estrar
 
 ## A chi comunichiamo i dati
 
-Solo al personale di [Nome del titolare] coinvolto nella selezione e ai fornitori che trattano dati per nostro conto, nominati responsabili del trattamento: [elenco categorie: hosting, archiviazione file, invio email, modello linguistico]. L'elenco aggiornato è disponibile su richiesta a [indirizzo email di contatto]. Non vendiamo i dati. [Trasferimenti extra UE: indicare se presenti e le garanzie, ad esempio decisione di adeguatezza o clausole contrattuali standard.]
+Dentro [Nome del titolare] solo a persone autorizzate: chi amministra le selezioni e il gruppo di selezione di ciascuna posizione (responsabili dell'assunzione e intervistatori), che accede solo alle candidature delle posizioni di cui fa parte; ogni consultazione del profilo e del curriculum è registrata. All'esterno, solo ai fornitori che trattano dati per nostro conto, nominati responsabili del trattamento: [elenco categorie: hosting, archiviazione file, invio email, modello linguistico]. L'elenco aggiornato è disponibile su richiesta a [indirizzo email di contatto]. Non vendiamo i dati. [Trasferimenti extra UE: indicare se presenti e le garanzie, ad esempio decisione di adeguatezza o clausole contrattuali standard.]
 
 ## Per quanto tempo li conserviamo
 

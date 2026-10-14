@@ -10,6 +10,7 @@ import type {
   PrivacyNotice,
   ResponseState,
   SelectionStage,
+  SubmittedContact,
 } from '@tt/domain';
 import type { CandidateSummary } from '../candidate-ports.js';
 import type { CandidatePage } from '../use-cases/candidates/search-candidates.js';
@@ -138,6 +139,7 @@ export interface CandidateDetailDto {
     readonly importBatchId: string | null;
     readonly retentionExpiresAt: string;
     readonly cv: { readonly fileName: string; readonly mediaType: string; readonly sizeBytes: number };
+    readonly submittedContact?: SubmittedContact | null;
     readonly extraction: { readonly status: ExtractionStatus; readonly data: CvExtraction | null; readonly source: 'model' | 'text' | null };
     /** Messages in the conversation of this application (sent, received and failed). */
     readonly messageCount: number;
@@ -263,6 +265,7 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
     importBatchId: application.importBatchId,
     retentionExpiresAt: iso(application.retentionExpiresAt),
     cv: { fileName: application.cv.fileName, mediaType: application.cv.mediaType, sizeBytes: application.cv.sizeBytes },
+    submittedContact: application.submittedContact ?? null,
     extraction: { status: extraction?.status ?? 'pending', data: extraction?.data ?? null, source: extraction?.source ?? null },
     messageCount,
   })),

@@ -28,6 +28,8 @@ export async function queueReceipt(
     const since = new Date(deps.now().getTime() - DAY_MS);
     const sent = await receipts.messages.countOutboundSince(input.organization.id, input.candidate.id, since);
     if (sent >= RECEIPTS_PER_RECIPIENT_PER_DAY) return false;
+    const cap = receipts.dailyMaxPerOrganization;
+    if (cap !== undefined && (await receipts.messages.countSystemOutboundSince(input.organization.id, since)) >= cap) return false;
     const stored = await receipts.templates.findByKind(input.organization.id, 'receipt');
     const template = stored ?? defaultEmailTemplate('receipt', input.job.content.language);
     const values = buildTemplateValues({

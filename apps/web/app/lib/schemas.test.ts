@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createOrganizationSchema, inviteSchema, loginSchema, signupSchema } from './schemas'
+import { createOrganizationSchema, forgotPasswordSchema, inviteSchema, loginSchema, resetPasswordSchema, signupSchema, twoFactorCodeSchema } from './schemas'
 
 const messages = (result: { success: boolean; error?: { issues: { message: string }[] } }): string[] =>
   result.success ? [] : (result.error?.issues.map((issue) => issue.message) ?? [])
@@ -34,5 +34,15 @@ describe('inviteSchema', () => {
   it('accepts domain roles only', () => {
     expect(inviteSchema.safeParse({ email: 'a@b.co', role: 'recruiter' }).success).toBe(true)
     expect(messages(inviteSchema.safeParse({ email: 'a@b.co', role: 'god' }))).toEqual(['validation.role'])
+  })
+})
+
+describe('account schemas', () => {
+  it('validate the reset request, the new password and the second-factor code', () => {
+    expect(messages(forgotPasswordSchema.safeParse({ email: 'nope' }))).toEqual(['validation.email'])
+    expect(messages(resetPasswordSchema.safeParse({ password: 'short' }))).toEqual(['validation.passwordMin'])
+    expect(twoFactorCodeSchema.parse({ code: ' 123 456 ' })).toEqual({ code: '123456' })
+    expect(messages(twoFactorCodeSchema.safeParse({ code: '12<>' }))).toEqual(['validation.code'])
+    expect(messages(twoFactorCodeSchema.safeParse({ code: '  ' }))).toEqual(['validation.required'])
   })
 })

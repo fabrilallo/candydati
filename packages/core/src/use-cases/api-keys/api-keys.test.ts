@@ -72,6 +72,23 @@ describe('createApiKey', () => {
   });
 });
 
+describe('createApiKey expiry', () => {
+  it('expires after 90 days when no expiry is given, or after the instance default', async () => {
+    const deps = createTestApiKeyDeps();
+    const { key } = await make(deps);
+    expect(key.expiresAt?.getTime()).toBe(deps.now().getTime() + 90 * DAY);
+    const shorter = createTestApiKeyDeps({ defaultTtlDays: 30 });
+    expect((await make(shorter)).key.expiresAt?.getTime()).toBe(shorter.now().getTime() + 30 * DAY);
+  });
+
+  it('accepts up to one year and refuses longer', async () => {
+    const deps = createTestApiKeyDeps();
+    const year = new Date(deps.now().getTime() + 365 * DAY);
+    expect((await make(deps, ['job:read'], { expiresAt: year })).key.expiresAt).toEqual(year);
+    expect((await issues(make(deps, ['job:read'], { expiresAt: new Date(year.getTime() + DAY) })))[0]).toMatchObject({ path: 'expiresAt' });
+  });
+});
+
 describe('listApiKeys and revokeApiKey', () => {
   it('lists without secret or hash, only for the own organization', async () => {
     const deps = createTestApiKeyDeps();

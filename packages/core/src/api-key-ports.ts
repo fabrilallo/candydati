@@ -31,6 +31,8 @@ export interface ApiKeyDeps extends CoreDeps {
   readonly hash: (secret: string) => string;
   readonly newId: () => string;
   readonly now: () => Date;
+  /** Days a key lives when its creator gives no expiry (API_KEY_DEFAULT_TTL_DAYS); 90 when absent. */
+  readonly defaultTtlDays?: number | undefined;
 }
 
 export type ApiKeyAuthDeps = Pick<ApiKeyDeps, 'apiKeys' | 'memberRoles' | 'hash' | 'now'>;

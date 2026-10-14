@@ -8,7 +8,9 @@ import { AppError, toAppError, type RawAuthError } from './auth-errors'
  * translatable `AppError`s (raw server text is never shown) and parses `data` with Zod, so the screens deal
  * with plain typed objects and tests mock one small interface.
  */
-const userSchema = z.object({ id: z.string(), name: z.string(), email: z.string() })
+const userSchema = z
+  .object({ id: z.string(), name: z.string(), email: z.string(), emailVerified: z.boolean().optional(), twoFactorEnabled: z.boolean().nullish() })
+  .transform(({ id, name, email, emailVerified, twoFactorEnabled }) => ({ id, name, email, emailVerified: emailVerified ?? true, twoFactorEnabled: twoFactorEnabled === true }))
 const sessionSchema = z
   .object({ user: userSchema, session: z.object({ activeOrganizationId: z.string().nullish() }) })
   .nullable()
@@ -27,7 +29,22 @@ const invitationSchema = z.object({
   inviterEmail: z.string().nullish(),
 })
 
-export type SessionUser = z.infer<typeof userSchema>
+export interface SessionUser {
+  readonly id: string
+  readonly name: string
+  readonly email: string
+  /** Absent means confirmed: only a session older than the verification rule can be unconfirmed. */
+  readonly emailVerified?: boolean
+  readonly twoFactorEnabled?: boolean
+}
+const signInSchema = z.object({ twoFactorRedirect: z.boolean().optional() }).passthrough().nullable()
+const enableTwoFactorSchema = z.object({ totpURI: z.string(), backupCodes: z.array(z.string()) })
+
+/** What the person sees to enrol an authenticator: the otpauth URI and the backup codes, shown once. */
+export interface TwoFactorEnrolment {
+  readonly totpUri: string
+  readonly backupCodes: readonly string[]
+}
 export type OrganizationSummary = z.infer<typeof organizationSchema>
 export interface SessionInfo {
   readonly user: SessionUser
@@ -98,22 +115,60 @@ const toFullOrganization = (full: z.infer<typeof fullOrganizationSchema>): FullO
     .map((i) => ({ id: i.id, email: i.email, role: i.role ?? null, expiresAt: asIso(i.expiresAt) })),
 })
 
+/** Sign-in, sign-up, confirmation and password reset. */
+const accountMethods = (client: AuthClient) => ({
+  /** `twoFactor`: the password was right and the account asks for its second factor (`verifyTotp`). */
+  async signIn(input: { email: string; password: string; callbackURL?: string }): Promise<{ readonly twoFactor: boolean }> {
+    const payload = { email: input.email, password: input.password, ...(input.callbackURL ? { callbackURL: input.callbackURL } : {}) }
+    const result = parse(signInSchema, await settle(() => client.signIn.email(payload)))
+    return { twoFactor: result?.twoFactorRedirect === true }
+  },
+  /** No session: the account starts once the address is confirmed through the emailed link, which lands on `callbackURL`. */
+  async signUp(input: { name: string; email: string; password: string; callbackURL?: string }): Promise<void> {
+    const payload = { name: input.name, email: input.email, password: input.password, ...(input.callbackURL ? { callbackURL: input.callbackURL } : {}) }
+    await settle(() => client.signUp.email(payload))
+  },
+  async sendVerificationEmail(input: { email: string; callbackURL: string }): Promise<void> {
+    await settle(() => client.sendVerificationEmail({ email: input.email, callbackURL: input.callbackURL }))
+  },
+  /** Same answer whether the address has an account or not. */
+  async requestPasswordReset(input: { email: string; redirectTo: string }): Promise<void> {
+    await settle(() => client.requestPasswordReset({ email: input.email, redirectTo: input.redirectTo }))
+  },
+  async resetPassword(input: { token: string; newPassword: string }): Promise<void> {
+    await settle(() => client.resetPassword({ token: input.token, newPassword: input.newPassword }))
+  },
+  async signOut(): Promise<void> {
+    await settle(() => client.signOut())
+  },
+  async getSession(): Promise<SessionInfo | null> {
+    const session = parse(sessionSchema, await settle(() => client.getSession()))
+    return session ? { user: session.user, activeOrganizationId: session.session.activeOrganizationId ?? null } : null
+  },
+})
+
+/** The person's second factor: enrolment, sign-in codes and backup codes. */
+const twoFactorMethods = (client: AuthClient) => ({
+  async verifyTotp(code: string): Promise<void> {
+    await settle(() => client.twoFactor.verifyTotp({ code }))
+  },
+  async verifyBackupCode(code: string): Promise<void> {
+    await settle(() => client.twoFactor.verifyBackupCode({ code }))
+  },
+  async enableTwoFactor(password: string): Promise<TwoFactorEnrolment> {
+    const enrolment = parse(enableTwoFactorSchema, await settle(() => client.twoFactor.enable({ password })))
+    return { totpUri: enrolment.totpURI, backupCodes: enrolment.backupCodes }
+  },
+  async disableTwoFactor(password: string): Promise<void> {
+    await settle(() => client.twoFactor.disable({ password }))
+  },
+})
+
 export const createAuthApi = (client: AuthClient) => {
   const org = client.organization
   return {
-    async signIn(input: { email: string; password: string }): Promise<void> {
-      await settle(() => client.signIn.email({ email: input.email, password: input.password }))
-    },
-    async signUp(input: { name: string; email: string; password: string }): Promise<void> {
-      await settle(() => client.signUp.email({ name: input.name, email: input.email, password: input.password }))
-    },
-    async signOut(): Promise<void> {
-      await settle(() => client.signOut())
-    },
-    async getSession(): Promise<SessionInfo | null> {
-      const session = parse(sessionSchema, await settle(() => client.getSession()))
-      return session ? { user: session.user, activeOrganizationId: session.session.activeOrganizationId ?? null } : null
-    },
+    ...accountMethods(client),
+    ...twoFactorMethods(client),
     async listOrganizations(): Promise<readonly OrganizationSummary[]> {
       const list = parse(z.array(organizationSchema), await settle(() => org.list()))
       return list.map(({ id, name, slug }) => ({ id, name, slug }))

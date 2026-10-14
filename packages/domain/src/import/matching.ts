@@ -9,6 +9,7 @@ import type {
 } from './import.js';
 import type { ImportMapping } from './mapping.js';
 import { safePersonNameOrEmpty } from '../candidate/person-name.js';
+import { httpUrlOrNull } from '../url/http-url.js';
 import { fileStem, nameFromFileName, nameKey, nameSimilarity, normalizeEmail, normalizeText, phoneDigits, splitFullName } from './names.js';
 
 /** Fuzzy name pairing needs at least this Levenshtein ratio, and a clear winner. */
@@ -59,8 +60,9 @@ function splitTags(value: string): readonly string[] {
 
 function linkedinOf(value: string): string | null {
   if (value === '') return null;
-  const url = /^https?:\/\//i.test(value) ? value : `https://${value}`;
-  return /linkedin\.com/i.test(url) ? url.slice(0, 300) : null;
+  const candidate = /^[a-z][a-z0-9+.-]*:/i.test(value) ? value : `https://${value}`;
+  const url = httpUrlOrNull(candidate);
+  return url !== null && /linkedin\.com/i.test(url) ? url.slice(0, 300) : null;
 }
 
 function toRowRecord(row: ParsedImportRow, mapping: ImportMapping): RowRecord {

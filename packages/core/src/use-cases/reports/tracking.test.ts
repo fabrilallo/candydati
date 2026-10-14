@@ -98,10 +98,10 @@ describe('tracking: intake', () => {
     expect(personal.store.read().applications[0]?.origin).toBe('direct');
   });
 
-  it('leaves no event or promise behind when the intake fails', async () => {
+  it('leaves no event or promise behind for a duplicate application', async () => {
     const deps = seedMessagingWorld({ applications: [], candidates: [] });
     await submit(deps);
-    await expect(submit(deps)).rejects.toThrow();
+    await submit(deps); // a duplicate is answered like a success and stores nothing
     expect(deps.store.read().stageEvents).toHaveLength(1);
     expect(deps.store.read().promises).toHaveLength(1);
   });

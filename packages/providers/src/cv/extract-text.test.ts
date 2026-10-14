@@ -1,8 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { makeDocx, makePdf } from '../testing/fixtures.js';
+import { makeDocx, makeLyingBomb, makePdf } from '../testing/fixtures.js';
 import { CV_TEXT_MAX_CHARS, extractCvText, normalizeCvText } from './extract-text.js';
 
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+
+describe('extractCvText zip bombs', () => {
+  it('refuses a DOCX that lies about its size before the reader inflates it', async () => {
+    const bomb = makeLyingBomb('word/document.xml', 64 * 1024 * 1024, 100);
+    await expect(extractCvText(bomb, DOCX)).rejects.toThrow(/inflates/);
+  });
+});
 
 describe('extractCvText', () => {
   it('reads a PDF', async () => {

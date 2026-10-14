@@ -1,0 +1,26 @@
+# Secret scanning (gitleaks, .github/workflows/security.yml). The default rules stay on; this file only adds an
+# allowlist for values that are public on purpose. Keep it small: a real secret in the history must be rotated, not
+# allowlisted.
+title = "team-tracker gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Example and test values that are public on purpose"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''(^|/)docs/ENVIRONMENT\.md$''',
+  '''pnpm-lock\.yaml$''',
+  '''(^|/)[^/]+\.test\.ts$''',
+  '''(^|/)testing/''',
+  '''(^|/)test/fixtures/''',
+  '''^apps/api/eval/''',
+]
+regexes = [
+  # The placeholders of .env.example and the docs; production refuses them (config-check, boot checks).
+  '''change-me[-_a-z0-9]*''',
+  '''password-lunga-1''',
+  # Public images are pinned by content digest, which looks like a high-entropy token.
+  '''@sha256:[0-9a-f]{64}''',
+]

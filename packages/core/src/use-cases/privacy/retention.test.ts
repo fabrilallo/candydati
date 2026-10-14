@@ -1,7 +1,7 @@
 import type { DataExport } from '@tt/domain';
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError, ValidationError } from '../../errors.js';
-import { buildApplication, buildCandidate, ERASED, ORG_A, ORG_B, seedPrivacyData, userActor, createInMemoryTaskQueue } from '../../testing/index.js';
+import { buildApplication, buildCandidate, ERASED, ORG_A, ORG_B, seedPrivacyData, seedPrivacyWorld, userActor, createInMemoryTaskQueue } from '../../testing/index.js';
 import { getProcessingRecord, getRetentionOverview } from './retention-overview.js';
 import { markDigestsEmailed } from '../automations/scan-deadlines.js';
 import { runRetention } from './run-retention.js';
@@ -91,7 +91,7 @@ describe('runRetention', () => {
 
   it('deletes expired organization exports and their files, and keeps the others', async () => {
     const make = (id: string, expiresAt: Date): DataExport => ({ id, organizationId: ORG_A, requestedBy: 'u', status: 'ready', sizeBytes: 1, createdAt: at(-8), completedAt: at(-8), expiresAt });
-    const deps = await seedPrivacyData({ dataExports: [make('old', at(-1)), make('fresh', at(3))] });
+    const deps = seedPrivacyWorld({ candidates: [], applications: [], extractions: [], dataExports: [make('old', at(-1)), make('fresh', at(3))] });
     await deps.files.put(`organizations/${ORG_A}/exports/old.zip`, new Uint8Array([1]), 'application/zip');
     await deps.files.put(`organizations/${ORG_A}/exports/fresh.zip`, new Uint8Array([1]), 'application/zip');
     const result = await runRetention(deps, { now: NOW });
@@ -102,7 +102,7 @@ describe('runRetention', () => {
   });
 
   it('keeps the export row when its file can be neither deleted nor queued', async () => {
-    const seeded = await seedPrivacyData({ dataExports: [{ id: 'old', organizationId: ORG_A, requestedBy: 'u', status: 'ready', sizeBytes: 1, createdAt: at(-8), completedAt: at(-8), expiresAt: at(-1) }] });
+    const seeded = seedPrivacyWorld({ candidates: [], applications: [], extractions: [], dataExports: [{ id: 'old', organizationId: ORG_A, requestedBy: 'u', status: 'ready', sizeBytes: 1, createdAt: at(-8), completedAt: at(-8), expiresAt: at(-1) }] });
     const deps = { ...seeded, files: { ...seeded.files, delete: async () => Promise.reject(new Error('down')) }, queue: createInMemoryTaskQueue(new Error('down')) };
     const result = await runRetention(deps, { now: NOW });
     expect(result.exportsDeleted).toBe(0);

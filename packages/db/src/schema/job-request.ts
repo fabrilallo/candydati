@@ -47,6 +47,8 @@ export const organizationSetting = pgTable('organization_setting', {
     .references(() => organization.id, { onDelete: 'restrict' }),
   /** Publishing needs an approved budget (PRODUCT.md §3.1). Off by default. */
   requireApproval: boolean('require_approval').notNull().default(false),
+  /** Recruiters see only the jobs whose team they are on (PRODUCT.md §6). Off by default: they see every job. */
+  restrictRecruitersToTeam: boolean('restrict_recruiters_to_team').notNull().default(false),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 

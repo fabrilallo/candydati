@@ -229,11 +229,14 @@ export function createInMemoryCandidateSearch(store: CandidateStore): CandidateS
           const own = store.read().applications.filter((a) => a.candidateId === c.id);
           return own.some((a) => a.consentStatus === 'given') || !own.some((a) => a.consentStatus === 'to_renew');
         })
+        .filter((c) => query.jobIds === undefined || store.read().applications.some((a) => a.candidateId === c.id && query.jobIds?.includes(a.jobId)))
         .filter((c) => query.talentPool === undefined || c.talentPool === query.talentPool)
         .filter((c) => query.tag === undefined || c.tags.includes(query.tag))
         .filter((c) => text === '' || matchesText(store, c, text))
         .map((candidate) => {
-          const own = store.read().applications.filter((a) => a.candidateId === candidate.id && a.consentStatus === 'given');
+          const own = store
+            .read()
+            .applications.filter((a) => a.candidateId === candidate.id && a.consentStatus === 'given' && (query.jobIds === undefined || query.jobIds.includes(a.jobId)));
           const last = own.map((a) => a.createdAt.getTime()).reduce((max, t) => Math.max(max, t), 0);
           return { candidate, applicationCount: own.length, lastAppliedAt: own.length > 0 ? new Date(last) : null };
         });

@@ -26,6 +26,7 @@ describe('machine access', () => {
       'email_settings:manage',
       'data:export',
       'api_key:manage',
+      'job_team:manage',
     ] as const) {
       expect(MACHINE_FORBIDDEN_PERMISSIONS).toContain(permission);
     }

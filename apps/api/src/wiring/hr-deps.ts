@@ -40,7 +40,7 @@ export const hashSecret = (secret: string): string => createHash('sha256').updat
 /** Feedback without login, job requests with approval and stale ads on Postgres; the sender is injected. */
 export function createHrDeps({ uow, files, sender, config, onFeedbackMailError }: HrInputs): HrWiring {
   const r = uow.repositories;
-  const core = { auditLog: r.auditLog, transaction: uow.transaction };
+  const core = { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams };
   const { jobs, candidates, applications, organizations, members, stageInterviewers, approvals, organizationSettings } = r;
   const feedbackRecords: FeedbackRecords = { feedbackRequests: r.feedbackRequests, interviewFeedback: r.interviewFeedback };
   const clock = { newId: randomUUID, now: () => new Date() };

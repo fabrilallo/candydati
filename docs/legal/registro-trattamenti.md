@@ -63,7 +63,7 @@ La cancellazione è automatica: un job giornaliero avvisa prima della scadenza, 
 
 - Isolamento dei dati per organizzazione: ogni tabella di dominio ha un identificativo di organizzazione e nessuna query ne prescinde.
 - Cifratura in transito (TLS). [Cifratura a riposo: specificare in base all'infrastruttura.]
-- Controllo degli accessi per ruolo e per annuncio, con fasi riservate.
+- Controllo degli accessi per ruolo e per annuncio: chi non amministra le selezioni vede solo le candidature delle posizioni del proprio gruppo di selezione.
 - Registro delle azioni non modificabile (solo append), con distinzione tra azioni umane e dell'agente.
 - Conservazione limitata e cancellazione automatica.
 - L'agente opera con i permessi dell'utente e non decide sui candidati; ogni messaggio ai candidati richiede conferma di una persona.

@@ -1,4 +1,5 @@
 import { careersUrl, FEED_CHANNEL_ID, feedUrl, llmsTxtUrl, type DistributionStatus, type JobDistributionDto } from '@tt/domain'
+import { safeExternalUrl } from './safe-url'
 
 /** Public machine-readable addresses of an organization. Pure: the site URL is passed in, never read here. */
 const trimmed = (siteUrl: string): string => siteUrl.replace(/\/+$/, '')
@@ -91,13 +92,4 @@ export const jobRows = (input: RowsInput): readonly ChannelRow[] => {
 /** True when at least one registered channel exists: decides whether the explanatory sentence is shown. */
 export const hasRegisteredChannels = (rows: readonly ChannelRow[]): boolean => rows.some((row) => row.syncable)
 
-/** Only an http(s) address becomes a link: a channel could send anything. */
-export const safeExternalUrl = (url: string | null): string | null => {
-  if (!url) return null
-  try {
-    const parsed = new URL(url)
-    return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.toString() : null
-  } catch {
-    return null
-  }
-}
+export { safeExternalUrl }

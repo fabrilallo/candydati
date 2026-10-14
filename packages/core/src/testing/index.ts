@@ -29,5 +29,7 @@ export * from './in-memory-feedback.js';
 export * from './in-memory-job-requests.js';
 export * from './hr-deps.js';
 export * from './in-memory-reports.js';
+export * from './in-memory-job-teams.js';
 export * from './report-dataset.js';
 export * from './report-random.js';
+export * from './in-memory-security-settings.js';

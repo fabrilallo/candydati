@@ -1,5 +1,6 @@
 import type { CvMediaType } from '@tt/domain';
 import { safeFileName } from './file-name.js';
+import { isWithinOoxmlBudget } from '../zip/bounded-inflate.js';
 import { zipHasEntry } from './zip.js';
 
 export interface SniffedCv {
@@ -16,7 +17,8 @@ const startsWith = (bytes: Uint8Array, magic: readonly number[]): boolean => mag
 
 function detect(bytes: Uint8Array): CvMediaType | null {
   if (startsWith(bytes, PDF_MAGIC)) return PDF;
-  if (startsWith(bytes, ZIP_MAGIC) && zipHasEntry(bytes, 'word/document.xml')) return DOCX;
+  // The declared sizes are the sender's word: what the document really inflates to is counted, under a cap.
+  if (startsWith(bytes, ZIP_MAGIC) && zipHasEntry(bytes, 'word/document.xml') && isWithinOoxmlBudget(bytes)) return DOCX;
   return null;
 }
 

@@ -12,6 +12,17 @@ export class UnauthenticatedError extends Error {
   }
 }
 
+/** A signed-in person whose account does not yet meet a condition of the app (403 with its own code, for the web). */
+export class AccountGateError extends Error {
+  constructor(
+    readonly code: 'email_not_verified' | 'two_factor_required',
+    message: string,
+  ) {
+    super(message);
+    this.name = 'AccountGateError';
+  }
+}
+
 export const CORE_STATUS: Readonly<Record<ErrorCode, number>> = {
   forbidden: 403,
   not_found: 404,
@@ -80,6 +91,7 @@ export function toHttpFailure(error: unknown): HttpFailure {
     return { status, code: error.code, message: detail || error.message, log: false };
   }
   if (error instanceof UnauthenticatedError) return { status: 401, code: error.code, message: error.message, log: false };
+  if (error instanceof AccountGateError) return { status: 403, code: error.code, message: error.message, log: false };
   if (typeof error !== 'object' || error === null) return INTERNAL;
   const candidate = error as FastifyLikeError;
   if (candidate.validation) {

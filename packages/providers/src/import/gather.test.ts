@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { makeLyingBomb } from '../testing/fixtures.js';
 import { pdfBytes, utf8, zipOf } from '../testing/fixtures/import-fixtures.js';
 import { openImportArchive } from './archive.js';
 import { gatherSources, type FoundCv } from './gather.js';
@@ -47,6 +48,13 @@ describe('gatherSources', () => {
     const big = () => source('y.zip', zipOf({ 'a.csv': utf8(`Name\n${'x'.repeat(1500)}\n`) }));
     expect(await codeOf(gatherSources([big()], async () => undefined, bytes))).toBeUndefined();
     expect(await codeOf(gatherSources([big(), big(), big()], async () => undefined, bytes))).toBe('too_large');
+  });
+});
+
+describe('openImportArchive with a lying entry', () => {
+  it('stops inflating an entry that grows past its declared size', () => {
+    const archive = openImportArchive(makeLyingBomb('cv.pdf', 64 * 1024 * 1024, 100));
+    expect(() => archive.inflate('cv.pdf')).toThrow(expect.objectContaining({ code: 'too_large' }));
   });
 });
 

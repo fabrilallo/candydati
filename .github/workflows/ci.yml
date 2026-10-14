@@ -62,6 +62,8 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       # MinIO (Chainguard build, same digest as docker-compose.yml): a service container cannot pass the command.
       - name: Start MinIO
@@ -157,6 +159,8 @@ jobs:
       SMTP_SECURE: "false"
       EMAIL_DOMAIN: localhost
       EMAIL_INBOUND_DOMAIN: inbound.localhost
+      # The e2e specs sign up their own users (and confirm the address through Mailpit): open sign-up.
+      SIGNUP_MODE: open
       # CI-only dummy values. Never used outside this workflow.
       BETTER_AUTH_SECRET: ci-only-dummy-secret-0123456789abcdef
       INBOUND_WEBHOOK_SECRET: ci-only-dummy-webhook-secret-0123456789abcdef
@@ -166,6 +170,8 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Start MinIO
         run: |
@@ -247,6 +253,8 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3

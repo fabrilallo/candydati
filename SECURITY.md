@@ -45,6 +45,34 @@ Out of scope: denial of service by volume, social engineering, findings from aut
 impact, vulnerabilities in third-party dependencies with no exploitable path here (report those upstream; we track them
 with Dependabot and `pnpm audit`).
 
+## Secure defaults for self-hosted instances
+
+What the code enforces, so an operator does not have to remember it:
+
+- **Secrets.** With `NODE_ENV=production` the api and the worker refuse to start when `BETTER_AUTH_SECRET`,
+  `INBOUND_WEBHOOK_SECRET`, `S3_SECRET_KEY` or the password in `DATABASE_URL` is an example value from `.env.example`
+  (`change-me...`, `tt-minio-secret`), too short (32 characters for the first two, 16 for the others) or not random
+  enough. `docker-compose.prod.yml` runs the same check (`docker/config-check.sh`) before any other service starts.
+  Generate each one with `openssl rand -base64 48`.
+- **Transport.** Production requires `https` for `BETTER_AUTH_URL` and `PLATFORM_URL`, so the session cookie is
+  always `Secure`.
+- **Email.** `EMAIL_PROVIDER=log` (which sends nothing) is refused in production: confirmation, password reset and
+  invitation emails must arrive.
+- **Accounts.** Every account confirms its email before the first sign-in; sign-up and password reset answer the
+  same whether an address is registered or not. `SIGNUP_MODE=invite_only` is the production default: an account can be
+  created only by an address with a pending invitation, which only a confirmed account with that address can accept.
+- **First owner (bootstrap).** On an instance with no account at all, `invite_only` still accepts one sign-up: the
+  first owner. Create it right after the first start (sign up, confirm the email, create the organization), before
+  the URL is public. From then on people join through invitations. To open sign-up on purpose, set `SIGNUP_MODE=open`.
+- **Failed sign-ins** slow down further attempts (per address, and softly per account) instead of locking the
+  account; addresses that signed in before are not slowed by a flood, and the owner gets an email after 10 failures.
+  The counters live in Postgres, so several api instances share them.
+- **Two-factor authentication** (TOTP with backup codes) is available to everyone under Settings, Security. Owners and
+  admins can require it for owners and admins of their organization.
+- **API keys** expire after 90 days by default (`API_KEY_DEFAULT_TTL_DAYS`) and never live longer than a year. MCP
+  counts each tool call of a batch against the key's rate limit, caps batches at 20 messages and audits reads as
+  `mcp.read`. Model-backed MCP tools and the assistant have daily budgets per key, person and organization.
+
 ## Safe harbor
 
 Good-faith research that respects this policy, avoids privacy violations and service disruption, and uses only your own

@@ -1,6 +1,6 @@
 import { CV_MAX_BYTES } from '@tt/domain';
 import { completeJobContent, completePrivacyNoticeInput, fakePdfBytes } from '@tt/core/testing';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createWorld, personForm, type World } from './testing/candidate-world.js';
 import { TestUser } from './testing/client.js';
 import { publishNotice } from './testing/privacy.js';
@@ -38,15 +38,17 @@ describe('public application', () => {
     expect((await w.submit(personForm({ privacyNoticeVersion: 2 }))).statusCode).toBe(201);
   });
 
-  it('refuses the same person twice on the same job without revealing anything else', async () => {
+  it('answers the same person twice on the same job like a success, storing nothing and revealing nothing', async () => {
     const w = await createWorld(t);
     const form = personForm({ email: 'twice@example.com' });
-    expect((await w.submit(form)).statusCode).toBe(201);
+    const first = await w.submit(form);
+    const files = t.files.keys().length;
     const again = await w.submit(form);
-    expect(again.statusCode).toBe(409);
-    expect(body(again).error).toMatchObject({ code: 'conflict', message: 'already_applied' });
-    expect(again.body).not.toMatch(/twice@example\.com|candidate/i);
+    expect(first.statusCode).toBe(201);
+    expect(again.statusCode).toBe(201);
+    expect(again.body).toBe(first.body);
     expect(await cardsOf(w)).toHaveLength(1);
+    expect(t.files.keys()).toHaveLength(files);
   });
 
   it('refuses a file that is not a PDF or DOCX with 415, an empty or huge one with 422 and 413', async () => {
@@ -123,5 +125,26 @@ describe('application rate limit', () => {
     } finally {
       await limited.close();
     }
+  });
+});
+
+describe('public application with Turnstile on', () => {
+  let guarded: TestApp;
+  beforeAll(async () => {
+    guarded = await createTestApp({ env: { TURNSTILE_SECRET_KEY: 'secret-key' } });
+  });
+  afterAll(async () => {
+    vi.unstubAllGlobals();
+    await guarded.close();
+  });
+
+  it('refuses a submission without a valid answer, and accepts one the service confirms', async () => {
+    const w = await createWorld(guarded);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ success: false }))));
+    const refused = await w.submit(personForm({ turnstileToken: 'bad' }));
+    expect(refused.statusCode).toBe(422);
+    expect(body(refused).error?.issues).toEqual([{ path: 'turnstile', message: 'captcha_failed' }]);
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ success: true }))));
+    expect((await w.submit(personForm({ turnstileToken: 'good' }))).statusCode).toBe(201);
   });
 });

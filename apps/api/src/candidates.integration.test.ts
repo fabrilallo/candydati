@@ -112,6 +112,10 @@ describe('roles and isolation', () => {
     const card = (await pipelineOf(w)).applications[0]!;
     const next = (await pipelineOf(w)).stages[1]!.id;
     const [hm, interviewer, recruiter] = [await w.member('hiring_manager'), await w.member('interviewer'), await w.member('recruiter')];
+    // Hiring managers and interviewers see a job's candidates only from its team.
+    expect((await interviewer.get(`/api/v1/jobs/${w.job.id}/pipeline`)).status).toBe(404);
+    await w.joinTeam(hm, 'hiring_manager');
+    await w.joinTeam(interviewer, 'interviewer');
 
     expect((await hm.post(`/api/v1/applications/${card.id}/decide`, { outcome: 'hired' })).status).toBe(403);
     expect((await hm.post(`/api/v1/applications/${card.id}/move`, { stageId: next })).status).toBe(200);

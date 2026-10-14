@@ -36,6 +36,8 @@ registerEndpoint('/api/v1/applications/a1/move', {
   },
 })
 
+registerEndpoint('/api/v1/candidates/c404', () => new Response(JSON.stringify({ success: false, data: null, error: { code: 'not_found', message: 'Candidate not found.' } }), { status: 404, headers: { 'content-type': 'application/json' } }))
+
 const mounted: { unmount: () => void }[] = []
 const mountDetail = async () => {
   const wrapper = await mountSuspended(CandidateDetailView, { props: { candidateId: 'c1' }, attachTo: document.body })
@@ -180,5 +182,14 @@ describe('CandidateDetailView', () => {
     expect(wrapper.find('[data-testid="tag-add"]').exists()).toBe(false)
     await tab(wrapper, 'notes')
     expect(wrapper.find('[data-testid="note-body"]').exists()).toBe(true)
+  })
+
+  it('shows a calm "not found or not accessible" state for a candidate outside the viewer\'s jobs', async () => {
+    clearNuxtData('candidate-c404')
+    const wrapper = await mountSuspended(CandidateDetailView, { props: { candidateId: 'c404' }, attachTo: document.body })
+    mounted.push(wrapper)
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="not-accessible"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="not-accessible"] a').attributes('href')).toBe('/app/candidates')
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false)
   })
 })

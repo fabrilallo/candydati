@@ -20,6 +20,7 @@ import { createDrizzleCandidates } from './drizzle-candidates.js';
 import { createDrizzleCvExtractions } from './drizzle-cv-extractions.js';
 import { createDrizzleConsentTokens, createDrizzleImportAnalyses, createDrizzleImportBatches, createDrizzleImportItems } from './drizzle-imports.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
+import { createDrizzleJobTeams } from './drizzle-job-teams.js';
 import { createDrizzleMessages } from './drizzle-messages.js';
 import { createDrizzleTransaction } from './drizzle-repositories.js';
 
@@ -169,12 +170,12 @@ describe('import on Postgres', () => {
     await runCommit(world, batchId);
     const search = createDrizzleCandidateSearch(handle.db);
     const actor = recruiterOf(world.org);
-    const searchDeps = { auditLog: createDrizzleAuditLog(handle.db), transaction: createDrizzleTransaction(handle.db), candidateSearch: search } as never;
+    const searchDeps = { auditLog: createDrizzleAuditLog(handle.db), transaction: createDrizzleTransaction(handle.db), jobTeams: createDrizzleJobTeams(handle.db), candidateSearch: search } as never;
     expect((await search.search({ organizationId: world.org, page: 1, limit: 10 })).items.map((i) => i.candidate.id)).toEqual([visible.id]);
     expect((await search.search({ organizationId: world.org, query: person.last, page: 1, limit: 10 })).total).toBe(0);
     expect((await searchCandidates(searchDeps, actor, { query: person.first })).total).toBe(0);
     const { person: imported, application } = await applicationOf(world.org, person.email);
-    const profileDeps = { auditLog: createDrizzleAuditLog(handle.db), transaction: createDrizzleTransaction(handle.db), candidates: createDrizzleCandidates(handle.db), applications: createDrizzleApplications(handle.db), extractions: createDrizzleCvExtractions(handle.db), messages: createDrizzleMessages(handle.db), jobs: createDrizzleJobs(handle.db), notes: createDrizzleCandidateNotes(handle.db), users: { namesOf: async () => ({}) }, now: () => NOW } as never;
+    const profileDeps = { auditLog: createDrizzleAuditLog(handle.db), transaction: createDrizzleTransaction(handle.db), jobTeams: createDrizzleJobTeams(handle.db), candidates: createDrizzleCandidates(handle.db), applications: createDrizzleApplications(handle.db), extractions: createDrizzleCvExtractions(handle.db), messages: createDrizzleMessages(handle.db), jobs: createDrizzleJobs(handle.db), notes: createDrizzleCandidateNotes(handle.db), users: { namesOf: async () => ({}) }, now: () => NOW } as never;
     await expect(getCandidate(profileDeps, actor, { candidateId: imported!.id })).rejects.toBeInstanceOf(NotFoundError);
     await expect(getCandidate(profileDeps, actor, { candidateId: imported!.id, viaJobId: world.otherJobId })).rejects.toBeInstanceOf(NotFoundError);
     expect((await getCandidate(profileDeps, actor, { candidateId: imported!.id, viaJobId: world.jobId })).applications).toHaveLength(1);

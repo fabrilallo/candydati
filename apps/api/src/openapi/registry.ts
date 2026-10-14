@@ -7,6 +7,7 @@ import { jobRoutes } from './routes-jobs.js';
 import { privacyRoutes } from './routes-privacy.js';
 import { publicRoutes } from './routes-public.js';
 import { reportRoutes } from './routes-reports.js';
+import { teamRoutes } from './routes-teams.js';
 import type { RouteSpec } from './spec.js';
 
 export { COMPONENT_SCHEMAS, type ComponentName } from './components.js';
@@ -26,5 +27,6 @@ export const ROUTE_REGISTRY: readonly RouteSpec[] = [
   ...configRoutes,
   ...importRoutes,
   ...hrRoutes,
+  ...teamRoutes,
   ...publicRoutes,
 ];

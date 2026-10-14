@@ -49,8 +49,9 @@ describe('Phase 0: create organization, invite a colleague, everything is audite
 
     const { reply, id: invitationId } = await invite(a, b, 'recruiter');
     expect(reply.status).toBe(200);
-    expect(t.sentInvitations.at(-1)).toMatchObject({ to: b.email, role: 'recruiter' });
-    expect(t.sentInvitations.at(-1)!.acceptUrl).toBe(`http://localhost:3000/accept-invitation/${invitationId}`);
+    const invitationMail = t.mailbox.sent.at(-1)!;
+    expect(invitationMail).toMatchObject({ to: b.email, email: { kind: 'invitation', organizationName: 'Acme', roleLabel: 'recruiter' } });
+    expect(invitationMail.email.link).toBe(`http://localhost:3000/accept-invitation/${invitationId}`);
 
     const accepted = await b.post('/api/auth/organization/accept-invitation', { invitationId });
     expect(accepted.status).toBe(200);

@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, gte, inArray, isNull, schema } from '@tt/db';
+import { and, asc, count, desc, eq, gte, inArray, isNull, or, schema } from '@tt/db';
 import type { Notification } from '@tt/domain';
 import type { NotificationRepository } from '../automation-ports.js';
 import type { DbExecutor } from './db-executor.js';
@@ -19,6 +19,10 @@ const toNotification = (row: Row): Notification => ({
   readAt: row.readAt,
 });
 
+/** Per-job access: notifications about no job, or about one of `jobIds`. Absent: no filter. */
+const inJobs = (jobIds: readonly string[] | undefined) =>
+  jobIds === undefined ? undefined : or(isNull(schema.notification.jobId), inArray(schema.notification.jobId, [...jobIds]));
+
 /** Postgres implementation. Every statement filters by organization and user. */
 export function createDrizzleNotifications(db: DbExecutor): NotificationRepository {
   const { notification } = schema;
@@ -33,7 +37,7 @@ export function createDrizzleNotifications(db: DbExecutor): NotificationReposito
       return row ? toNotification(row) : null;
     },
     async list(query) {
-      const where = and(...own(query.organizationId, query.userId), ...(query.unreadOnly ? [isNull(notification.readAt)] : []));
+      const where = and(...own(query.organizationId, query.userId), ...(query.unreadOnly ? [isNull(notification.readAt)] : []), inJobs(query.jobIds));
       const [items, totals] = await sequential(
         () =>
           db
@@ -74,11 +78,11 @@ export function createDrizzleNotifications(db: DbExecutor): NotificationReposito
         .returning({ id: notification.id });
       return rows.map((row) => row.id);
     },
-    async unreadCount(organizationId, userId) {
+    async unreadCount(organizationId, userId, jobIds) {
       const [row] = await db
         .select({ total: count() })
         .from(notification)
-        .where(and(...own(organizationId, userId), isNull(notification.readAt)));
+        .where(and(...own(organizationId, userId), isNull(notification.readAt), inJobs(jobIds)));
       return row?.total ?? 0;
     },
   };

@@ -22,6 +22,7 @@ import { recordImportAnalysis, startImportAnalysis } from '../use-cases/imports/
 import { commitImport } from '../use-cases/imports/commit-import.js';
 import { createImportBatch } from '../use-cases/imports/create-import-batch.js';
 import { requestImportCommit } from '../use-cases/imports/request-commit.js';
+import { createDrizzleJobTeams } from '../adapters/drizzle-job-teams.js';
 import { userActor } from './actors.js';
 import { buildJob } from './job-fixtures.js';
 import { buildPrivacyNotice, fakePdfBytes } from './candidate-fixtures.js';
@@ -67,6 +68,7 @@ export async function buildImportWorld(handle: DbHandle, NOW: Date): Promise<Wor
   const deps = {
     auditLog: createDrizzleAuditLog(db),
     transaction: createDrizzleTransaction(db),
+    jobTeams: createDrizzleJobTeams(db),
     jobs,
     candidates: createDrizzleCandidates(db),
     applications: createDrizzleApplications(db),

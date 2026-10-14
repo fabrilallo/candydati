@@ -2,6 +2,7 @@ import { completeJobContent, createFakeDistributionChannel, type FakeDistributio
 import { buildJobsFeedXml, childText, childrenNamed, parseXml, type DistributionChannelDto, type DistributionOverviewDto, type JobDistributionDto, type PublicFeedDto } from '@tt/domain';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createKey, withKey } from './testing/api-keys.js';
+import { userIdOf } from './testing/candidate-world.js';
 import { TestUser } from './testing/client.js';
 import { publishNotice } from './testing/privacy.js';
 import { createTestApp, uniqueEmail, WEB_ORIGIN, type TestApp } from './testing/test-app.js';
@@ -209,6 +210,11 @@ describe('distribution permissions', () => {
   it('lets every member read, only recruiters and above sync, only owners and admins switch channels', async () => {
     const { owner, admin, recruiter, hm, interviewer } = await team();
     const { id } = await publishedJob(owner);
+    // Hiring managers and interviewers read the ads of their teams.
+    expect((await interviewer.get(`/api/v1/jobs/${id}/distribution`)).status).toBe(404);
+    for (const [member, role] of [[hm, 'hiring_manager'], [interviewer, 'interviewer']] as const) {
+      expect((await owner.put(`/api/v1/jobs/${id}/team/${await userIdOf(member)}`, { role })).status).toBe(200);
+    }
     for (const member of [owner, admin, recruiter, hm, interviewer]) {
       expect((await member.get(`/api/v1/jobs/${id}/distribution`)).status).toBe(200);
       expect((await member.get('/api/v1/distribution')).status).toBe(200);

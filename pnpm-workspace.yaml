@@ -4,7 +4,7 @@ packages:
   - e2e
   - tools
 auditConfig:
-  ignoreCves:
+  ignoreGhsas:
     - GHSA-v5rq-49vh-5v5c
     - GHSA-x6jw-m9v5-85vh
     - GHSA-g4wm-2vf7-vfgr
@@ -16,3 +16,5 @@ onlyBuiltDependencies:
   - sharp
   - '@tailwindcss/oxide'
   - unrs-resolver
+# Do not install a version published less than 7 days ago (minutes): a compromised release is usually pulled within days.
+minimumReleaseAge: 10080

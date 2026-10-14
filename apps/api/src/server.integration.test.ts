@@ -3,7 +3,7 @@ import { createDb } from '@tt/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildServer } from './server.js';
 import { TestUser } from './testing/client.js';
-import { createTestApp, testEnv, uniqueEmail, WEB_ORIGIN, type TestApp } from './testing/test-app.js';
+import { PASSWORD, createTestApp, testEnv, uniqueEmail, WEB_ORIGIN, type TestApp } from './testing/test-app.js';
 import { apiTestDatabaseUrl } from './testing/test-database.js';
 
 let t: TestApp;
@@ -122,13 +122,12 @@ describe('error handling', () => {
     expect(response.json()).toMatchObject({ success: false, data: null, error: { code: 'bad_request' } });
   });
 
-  it('works with the default log email sender', async () => {
+  it('sends account emails through the configured provider by default (log in tests), never failing the request', async () => {
     const handle = createDb(apiTestDatabaseUrl(), 1);
     const app = await buildServer({ env: testEnv(), db: handle.db, files: createInMemoryFileStorage(), queue: createInMemoryTaskQueue() });
-    const owner = await new TestUser(app, uniqueEmail('log'), 'Log Owner').signUp();
-    await owner.createOrganization('LogOrg');
-    const reply = await owner.post('/api/auth/organization/invite-member', { email: uniqueEmail('x'), role: 'recruiter' });
-    expect(reply.status).toBe(200);
+    const person = new TestUser(app, uniqueEmail('log'), 'Log Owner');
+    expect((await person.post('/api/auth/sign-up/email', { email: person.email, password: PASSWORD, name: person.name })).status).toBe(200);
+    expect((await person.post('/api/auth/request-password-reset', { email: person.email, redirectTo: '/reset-password' })).status).toBe(200);
     await app.close();
     await handle.close();
   });

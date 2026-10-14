@@ -9,6 +9,8 @@ export const STATEMENTS = {
   invitation: ['create', 'cancel'],
   audit: ['read'],
   job: ['read', 'create', 'update', 'publish', 'close', 'approve'],
+  /** The people of a job's team (job-team.ts): `read` lists them, `manage` adds and removes them. */
+  job_team: ['read', 'manage'],
   job_template: ['read', 'create', 'delete'],
   /** Candidates and their applications. `read` opens the profile and the CV, and is audited (PRODUCT.md §6). */
   candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
@@ -60,6 +62,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     invitation: ['create', 'cancel'],
     audit: ['read'],
     job: ['read', 'create', 'update', 'publish', 'close', 'approve'],
+    job_team: ['read', 'manage'],
     job_template: ['read', 'create', 'delete'],
     candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
     candidate_note: ['create'],
@@ -78,6 +81,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],
+    job_team: ['read', 'manage'],
     job_template: ['read', 'create', 'delete'],
     candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
     candidate_note: ['create'],
@@ -90,11 +94,12 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     report: ['read'],
   },
   /**
-   * Writes and edits ads and moves candidates through the stages. Putting ads online, taking them down and deciding
+   * Writes and edits ads and moves candidates through the stages, on the jobs whose team they are on (job-team.ts). Putting ads online, taking them down and deciding
    * the final outcome stay with recruiters and admins.
    */
   hiring_manager: {
     job: ['read', 'create', 'update'],
+    job_team: ['read', 'manage'],
     job_template: ['read'],
     candidate: ['read', 'update', 'move'],
     candidate_note: ['create'],
@@ -105,6 +110,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
   },
   interviewer: {
     job: ['read'],
+    job_team: ['read'],
     candidate: ['read'],
     candidate_note: ['create'],
     message: ['read'],

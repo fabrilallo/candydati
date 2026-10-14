@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
+import { safeErrorSerializer } from '@tt/core';
 import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, TaskQueue } from '@tt/core';
 import { createEmailProvider } from '@tt/providers';
 import type { Db } from '@tt/db';
@@ -7,15 +8,19 @@ import type { AdQualityAnalyzer } from '@tt/domain';
 import { createConfiguredAnalyzer } from './ai/ad-quality.js';
 import { registerAgentRoutes } from './agent/routes.js';
 import { toEmailIdentity, toEmailSender } from '@tt/providers';
-import { createAppContext, type RateLimitSettings } from './app-context.js';
+import { createAppContext, DEFAULT_AUTH_EMAIL_MAX, type RateLimitSettings } from './app-context.js';
 import { registerAuthRoutes } from './auth/fastify-auth.js';
-import { createLogEmailSender, type EmailSender } from './auth/email-sender.js';
+import { createAccountMailer, type AccountMailer } from './auth/account-mailer.js';
+import { createAuthEmails } from './auth/auth-emails.js';
+import { createFailureNotifier } from './auth/failure-notice.js';
+import { createPgThrottleStore } from './auth/pg-throttle-store.js';
+import { createSignInThrottle, type ThrottleStore } from './auth/sign-in-throttle.js';
+import type { BudgetStore } from './limits/daily-budget.js';
 import type { Env } from './config/env.js';
 import { registerErrorHandler } from './http/error-handler.js';
 import { registerCsrfProtection } from './plugins/csrf.js';
 import { registerNoStoreByDefault } from './plugins/cache-control.js';
 import { requestLogSerializer } from './http/log-serializers.js';
-import type { SignInLockout } from './auth/sign-in-lockout.js';
 import { registerSecurity, trustedOrigins } from './plugins/security.js';
 import { registerApplicationCvRoute } from './routes/application-cv.js';
 import { registerApiKeyRoutes } from './routes/api-keys.js';
@@ -52,13 +57,15 @@ import { registerStatsRoutes } from './routes/stats.js';
 import { registerFeedbackRoutes } from './routes/feedback.js';
 import { registerPublicFeedbackRoutes } from './routes/public-feedback.js';
 import { registerJobRequestRoutes } from './routes/job-requests.js';
+import { registerJobTeamRoutes } from './routes/job-team.js';
 import { registerStaleJobRoutes } from './routes/stale-jobs.js';
+import { registerSecuritySettingsRoutes } from './routes/security-settings.js';
 
 export interface ServerDeps {
   readonly env: Env;
   readonly db: Db;
-  /** Defaults to the log implementation. */
-  readonly emailSender?: EmailSender | undefined;
+  /** Account emails (verification, reset, invitations): through the messaging sender by default, a recorder in tests. */
+  readonly accountMailer?: AccountMailer | undefined;
   readonly rateLimit?: RateLimitSettings | undefined;
   /** CV storage: S3 in production, in memory in tests. */
   readonly files: FileStorage;
@@ -72,8 +79,10 @@ export interface ServerDeps {
   readonly distributionChannels?: readonly DistributionChannel[] | undefined;
   /** Test seam: the "now" of the reports. */
   readonly reportClock?: (() => Date) | undefined;
-  /** Failed sign-ins per account. In memory by default (one api instance); a shared store goes here. */
-  readonly signInLockout?: SignInLockout | undefined;
+  /** Failed sign-in counters. Postgres by default (shared by every api instance); in memory in tests. */
+  readonly throttleStore?: ThrottleStore | undefined;
+  /** Daily model budgets. Postgres by default. */
+  readonly budgetStore?: BudgetStore | undefined;
 }
 
 const loggerOptions = (env: Env) =>
@@ -83,7 +92,7 @@ const loggerOptions = (env: Env) =>
         level: env.LOG_LEVEL,
         redact: ['req.headers.cookie', 'req.headers.authorization'],
         // Public links carry their token in the path: it never reaches the logs.
-        serializers: { req: requestLogSerializer },
+        serializers: { req: requestLogSerializer, err: safeErrorSerializer },
         ...(env.NODE_ENV === 'development' ? { transport: { target: 'pino-pretty', options: { colorize: true } } } : {}),
       };
 
@@ -102,7 +111,15 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   const ctx = createAppContext({
     env: deps.env,
     db: deps.db,
-    emailSender: deps.emailSender ?? createLogEmailSender(app.log),
+    mailer:
+      deps.accountMailer ??
+      createAccountMailer({
+        sender: messaging.sender,
+        platformName: deps.env.platform.name,
+        fromAddress: `${deps.env.email.fromLocal}@${deps.env.email.domain ?? 'localhost'}`,
+        onError: (error, kind) => app.log.error({ err: error, kind }, 'account email not sent'),
+      }),
+    budgetStore: deps.budgetStore,
     rateLimit: deps.rateLimit,
     files: deps.files,
     queue: deps.queue,
@@ -121,14 +138,24 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerHealthRoutes(app, ctx);
   registerOpenApiRoute(app, ctx);
   registerApiKeyRoutes(app, ctx);
+  registerSecuritySettingsRoutes(app, ctx);
   registerMcpRoute(app, ctx);
-  registerAuthRoutes(app, ctx.auth, ctx.rateLimit.authMax, ctx.rateLimit.max, deps.signInLockout);
+  registerAuthRoutes(app, ctx.auth, {
+    authMax: ctx.rateLimit.authMax,
+    readMax: ctx.rateLimit.max,
+    emailMax: ctx.rateLimit.authEmailMax ?? DEFAULT_AUTH_EMAIL_MAX,
+    throttle: createSignInThrottle(deps.throttleStore ?? createPgThrottleStore(deps.db)),
+    onRepeatedFailures: createFailureNotifier(deps.db, createAuthEmails(ctx.mailer, deps.env.platform), (error) =>
+      app.log.error({ err: error }, 'sign-in failure notice not sent'),
+    ),
+  });
   registerAuditLogRoutes(app, ctx);
   registerJobQualityRoute(app, ctx);
   registerJobRoutes(app, ctx);
   registerStaleJobRoutes(app, ctx);
   registerFeedbackRoutes(app, ctx);
   registerJobRequestRoutes(app, ctx);
+  registerJobTeamRoutes(app, ctx);
   registerPublicFeedbackRoutes(app, ctx);
   registerJobTemplateRoutes(app, ctx);
   registerDistributionRoutes(app, ctx);

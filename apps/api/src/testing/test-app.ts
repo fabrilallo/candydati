@@ -3,11 +3,12 @@ import type { DistributionChannel } from '@tt/core';
 import type { AdQualityAnalyzer } from '@tt/domain';
 import { createDb, type DbHandle } from '@tt/db';
 import type { FastifyInstance } from 'fastify';
-import type { InvitationEmail, EmailSender } from '../auth/email-sender.js';
+import type { AccountMailer } from '../auth/account-mailer.js';
+import { createRecordingMailer, registerMailbox, type RecordingMailer } from './mailbox.js';
 import type { RateLimitSettings } from '../app-context.js';
 import { parseEnv, type Env } from '../config/env.js';
 import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer, type FakeEmailSender, type InMemoryFileStorage, type InMemoryTaskQueue } from '@tt/core/testing';
-import type { SignInLockout } from '../auth/sign-in-lockout.js';
+import { createInMemoryThrottleStore, type ThrottleStore } from '../auth/sign-in-throttle.js';
 import { buildServer } from '../server.js';
 import { apiTestDatabaseUrl } from './test-database.js';
 
@@ -38,28 +39,39 @@ export const testEnv = (overrides: Record<string, string> = {}): Env =>
 export interface TestApp {
   readonly app: FastifyInstance;
   readonly handle: DbHandle;
-  readonly sentInvitations: readonly InvitationEmail[];
+  /** Account emails (verification, reset, invitations) the app sent, newest last. */
+  readonly mailbox: RecordingMailer;
   readonly files: InMemoryFileStorage;
   readonly queue: InMemoryTaskQueue;
   readonly emailSender: FakeEmailSender;
   close(): Promise<void>;
 }
 
-const HIGH_LIMITS: RateLimitSettings = { max: 100_000, authMax: 100_000, publicMax: 100_000, qualityMax: 100_000, applyMax: 100_000, importMax: 100_000, consentMax: 100_000 };
+const HIGH_LIMITS: RateLimitSettings = { max: 100_000, authMax: 100_000, authEmailMax: 100_000, publicMax: 100_000, qualityMax: 100_000, applyMax: 100_000, importMax: 100_000, consentMax: 100_000 };
 
-export async function createTestApp(options: { rateLimit?: RateLimitSettings; emailSender?: EmailSender; adQuality?: AdQualityAnalyzer; distributionChannels?: readonly DistributionChannel[]; reportClock?: () => Date; env?: Record<string, string>; signInLockout?: SignInLockout } = {}): Promise<TestApp> {
+export interface TestAppOptions {
+  readonly rateLimit?: RateLimitSettings;
+  readonly accountMailer?: AccountMailer;
+  readonly adQuality?: AdQualityAnalyzer;
+  readonly distributionChannels?: readonly DistributionChannel[];
+  readonly reportClock?: () => Date;
+  readonly env?: Record<string, string>;
+  readonly throttleStore?: ThrottleStore;
+}
+
+export async function createTestApp(options: TestAppOptions = {}): Promise<TestApp> {
   const handle = createDb(apiTestDatabaseUrl(), 4);
-  const sent: InvitationEmail[] = [];
+  const mailbox = createRecordingMailer();
   const files = createInMemoryFileStorage();
   const queue = createInMemoryTaskQueue();
   const fakeSender = createFakeEmailSender();
-  const emailSender: EmailSender = options.emailSender ?? { sendInvitation: async (email) => void sent.push(email) };
-  const app = await buildServer({ env: testEnv(options.env), signInLockout: options.signInLockout, db: handle.db, emailSender, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, reportClock: options.reportClock });
+  const app = await buildServer({ env: testEnv(options.env), throttleStore: options.throttleStore ?? createInMemoryThrottleStore(), db: handle.db, accountMailer: options.accountMailer ?? mailbox, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, reportClock: options.reportClock });
   await app.ready();
+  registerMailbox(app, mailbox);
   return {
     app,
     handle,
-    sentInvitations: sent,
+    mailbox,
     files,
     queue,
     emailSender: fakeSender,

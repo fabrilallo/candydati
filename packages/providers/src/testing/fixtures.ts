@@ -1,4 +1,5 @@
 import ExcelJS from 'exceljs';
+import { zipSync } from 'fflate';
 import { crc32 } from 'node:zlib';
 
 const encoder = new TextEncoder();
@@ -87,4 +88,16 @@ export async function makeXlsx(rows: readonly (readonly string[])[], sheetName =
   const sheet = workbook.addWorksheet(sheetName);
   for (const row of rows) sheet.addRow([...row]);
   return new Uint8Array(await workbook.xlsx.writeBuffer());
+}
+
+/**
+ * A real deflated archive with one entry of `size` zero bytes (a few KB on disk) whose local and central headers claim
+ * `claimed` bytes: the shape of a zip bomb that lies about its size.
+ */
+export function makeLyingBomb(entryName: string, size: number, claimed: number): Uint8Array {
+  const zip = Uint8Array.from(zipSync({ [entryName]: new Uint8Array(size) }, { level: 9 }));
+  const view = new DataView(zip.buffer);
+  view.setUint32(22, claimed, true);
+  view.setUint32(zip.length - 22 - 46 - entryName.length + 24, claimed, true);
+  return zip;
 }

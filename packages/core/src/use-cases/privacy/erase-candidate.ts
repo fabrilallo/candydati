@@ -27,12 +27,16 @@ export const eraseCandidate = defineRightsUseCase({
   input: z.object({ candidateId: z.string().min(1), confirmName: z.string() }),
   permission: 'candidate:erase',
   audit: { action: () => null, target: (input) => ({ type: 'candidate', id: input.candidateId }) },
-  handler: async ({ deps, actor, input }): Promise<ErasureOutcome> => {
+  handler: async ({ deps, actor, input, jobScope }): Promise<ErasureOutcome> => {
     const candidate = await requireCandidate(deps, actor.organizationId, input.candidateId);
     assertConfirmed(candidate, input.confirmName);
+    // Someone limited to some jobs erases only the applications of those jobs: the rest of the person stays.
+    const scoped = (await jobScope()).kind === 'jobs';
+    const applicationIds = scoped ? (await deps.applications.listByCandidate(actor.organizationId, candidate.id)).map((a) => a.id) : undefined;
     const result = await eraseCandidateData(deps, {
       organizationId: actor.organizationId,
       candidateId: candidate.id,
+      applicationIds,
       reason: 'request',
       actor: toAuditActor(actor),
     });

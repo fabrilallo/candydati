@@ -30,7 +30,7 @@ export const newWebhookSecret = (): string => `${WEBHOOK_SECRET_PREFIX}${randomB
 /** Notifications, tasks, automation rules and webhooks on Postgres. */
 export function createPhase4Deps({ uow, queue, allowPrivateWebhooks }: Phase4Inputs): Phase4Deps {
   const r = uow.repositories;
-  const core = { auditLog: r.auditLog, transaction: uow.transaction };
+  const core = { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams };
   const { jobs, applications, candidates, notifications, users } = r;
   const clock = { newId: randomUUID, now: () => new Date() };
   return {

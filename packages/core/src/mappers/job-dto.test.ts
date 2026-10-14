@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildJob, buildJobTemplate, completeJobContent, fixedQualityReport } from '../testing/index.js';
-import { toJobDto, toJobSummaryDto, toJobTemplateDto, toPublicJobDto, toPublicJobSummaryDto, toPublishJobResultDto } from './job-dto.js';
+import { toJobDto, toJobSummaryDto, toJobTemplateDto, toPublicJobDto, toPublicJobSummaryDto, toPublicOrganizationDto, toPublishJobResultDto } from './job-dto.js';
 
 const published = buildJob({ status: 'published', publishedAt: new Date('2026-02-01T00:00:00.000Z'), quality: fixedQualityReport() });
 
@@ -44,5 +44,14 @@ describe('job mappers', () => {
     expect(() => toPublicJobDto(broken)).toThrow();
     expect(() => toPublicJobSummaryDto(broken)).toThrow();
     expect(() => toPublicJobDto(buildJob())).toThrow(/published/);
+  });
+});
+
+describe('toPublicOrganizationDto logo', () => {
+  it('only exposes an https logo', () => {
+    const org = { id: 'o', name: 'Acme', slug: 'acme' };
+    expect(toPublicOrganizationDto({ ...org, logo: 'javascript:alert(1)' }).logo).toBeNull();
+    expect(toPublicOrganizationDto({ ...org, logo: 'http://a.example/l.png' }).logo).toBeNull();
+    expect(toPublicOrganizationDto({ ...org, logo: 'https://a.example/l.png' }).logo).toBe('https://a.example/l.png');
   });
 });

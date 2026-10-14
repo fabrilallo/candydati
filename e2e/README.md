@@ -2,7 +2,8 @@
 
 End-to-end tests (Playwright, Chromium only) for the critical flows. One spec per flow:
 
-1. `01-invite-colleague` sign up, create organization, invite a recruiter, accept, members page
+1. `01-invite-colleague` sign up (address confirmed through the emailed link), create organization, invite a recruiter
+   by email, accept, members page
 2. `02-job-ad` privacy notice, job ad, publish blocked (missing field, one-sex title), public pages, XML feed
 3. `03-apply-and-pipeline` public application with PDF, receipt email, move, message, outcome
 4. `04-candidate-rights` ZIP export, erasure by typing the name, gone from search
@@ -10,6 +11,9 @@ End-to-end tests (Playwright, Chromium only) for the critical flows. One spec pe
 6. `06-import` ZIP + CSV import, preview with confidence, confirm, undo
 
 Every test creates its own user, organization and data with unique emails and never touches anything else.
+Signing up sends a confirmation email: `signUp` opens its link from Mailpit, which signs the person in (there is no
+session before that). The stack must run with `SIGNUP_MODE=open` (the default outside production) and an SMTP
+provider that delivers to Mailpit (`EMAIL_PROVIDER=smtp`, as in `.env.example`).
 PDFs, ZIP and CSV are generated in code.
 
 ## Run
@@ -39,6 +43,6 @@ the api for the session, which shares one budget for all users, so after the fir
 router (`support/nav.ts`) and reload only where fresh data is the point.
 
 In CI against a compose stack: set `BASE_URL`, `MAILPIT_URL`, and either set `API_URL` to an api origin that trusts the
-runner's `X-Forwarded-For` (`TRUST_PROXY`), or `API_URL=proxy` if that stack runs with relaxed limits. Invitations are
-logged by the api, not emailed: the accept link is read from the inviter's organization (`/accept-invitation/{id}`).
+runner's `X-Forwarded-For` (`TRUST_PROXY`), or `API_URL=proxy` if that stack runs with relaxed limits. Invitations are emailed: the accept link
+(`/accept-invitation/{id}`) is read from the invitee's message in Mailpit.
 A first run against `nuxt dev` is slow (the browser loads thousands of modules): prefer a built stack in CI.

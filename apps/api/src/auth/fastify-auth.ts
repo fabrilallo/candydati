@@ -2,7 +2,7 @@ import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { fail } from '@tt/domain';
 import type { Auth } from './create-auth.js';
-import { createInMemorySignInLockout, type SignInLockout } from './sign-in-lockout.js';
+import { createInMemoryThrottleStore, createSignInThrottle, type SignInThrottle } from './sign-in-throttle.js';
 import { runWithRequestHeaders } from './request-context.js';
 
 export const AUTH_PREFIX = '/api/auth';
@@ -10,8 +10,18 @@ export const SIGN_IN_PATH = `${AUTH_PREFIX}/sign-in/email`;
 
 /** Cheap, read-only session lookups that every server-rendered page makes: they get their own, larger budget. */
 const SESSION_READ_PATHS: ReadonlySet<string> = new Set([`${AUTH_PREFIX}/get-session`, `${AUTH_PREFIX}/organization/list`, `${AUTH_PREFIX}/organization/get-full-organization`]);
+/** Routes that send an email to whatever address they are given: the smallest budget, so they cannot be used to spam. */
+const EMAIL_SENDING_PATHS: ReadonlySet<string> = new Set([
+  `${AUTH_PREFIX}/sign-up/email`,
+  `${AUTH_PREFIX}/request-password-reset`,
+  `${AUTH_PREFIX}/send-verification-email`,
+]);
+
+const pathOf = (request: Pick<FastifyRequest, 'url'>): string => request.url.split('?')[0] ?? '';
 export const isSessionRead = (request: Pick<FastifyRequest, 'method' | 'url'>): boolean =>
-  request.method === 'GET' && SESSION_READ_PATHS.has(request.url.split('?')[0] ?? '');
+  request.method === 'GET' && SESSION_READ_PATHS.has(pathOf(request));
+export const isEmailSending = (request: Pick<FastifyRequest, 'method' | 'url'>): boolean =>
+  request.method === 'POST' && EMAIL_SENDING_PATHS.has(pathOf(request));
 
 const toWebRequest = (request: FastifyRequest): Request => {
   const url = new URL(request.url, `${request.protocol}://${request.headers.host ?? 'localhost'}`);
@@ -35,51 +45,69 @@ async function forward(response: Response, reply: FastifyReply): Promise<Fastify
 
 /** The address of a password sign-in attempt, or null for any other request. */
 const signInEmailOf = (request: FastifyRequest): string | null => {
-  if (request.method !== 'POST' || (request.url.split('?')[0] ?? '') !== SIGN_IN_PATH) return null;
+  if (request.method !== 'POST' || pathOf(request) !== SIGN_IN_PATH) return null;
   const email = (request.body as { email?: unknown } | null | undefined)?.email;
   return typeof email === 'string' && email.trim() !== '' ? email : null;
 };
 
-/** A wrong password or unknown user is a 401 from Better Auth; anything else (400, 403, 5xx) is not a guess. */
-async function recordOutcome(lockout: SignInLockout, email: string, status: number): Promise<void> {
-  if (status === 401) await lockout.recordFailure(email);
-  else if (status >= 200 && status < 300) await lockout.recordSuccess(email);
+export interface AuthRouteOptions {
+  /** Requests per minute per client on /api/auth/*. */
+  readonly authMax: number;
+  /** Requests per minute per client on the session reads. */
+  readonly readMax: number;
+  /** Requests per minute per client on the routes that send an email (sign-up, reset, verification). */
+  readonly emailMax: number;
+  /** Failed sign-ins: progressive delays per (email, address). In memory unless a shared store is given. */
+  readonly throttle?: SignInThrottle | undefined;
+  /** Called once per cooldown when an account collects many failed sign-ins: tell its owner. */
+  readonly onRepeatedFailures?: ((email: string, failures: number, request: Request) => void) | undefined;
 }
 
+/** A wrong password or unknown user is a 401 from Better Auth; anything else (400, 403, 5xx) is not a guess. */
+async function recordOutcome(options: AuthRouteOptions & { throttle: SignInThrottle }, email: string, ip: string, response: Response, request: Request): Promise<void> {
+  if (response.status === 401) {
+    const outcome = await options.throttle.recordFailure(email, ip);
+    if (outcome.notify) options.onRepeatedFailures?.(email, outcome.failures, request);
+  } else if (response.status >= 200 && response.status < 300) {
+    await options.throttle.recordSuccess(email, ip);
+  }
+}
+
+const budgetOf = (request: FastifyRequest, options: AuthRouteOptions): { max: number; key: string } => {
+  if (isSessionRead(request)) return { max: options.readMax, key: `session-read:${request.ip}` };
+  if (isEmailSending(request)) return { max: options.emailMax, key: `auth-email:${request.ip}` };
+  return { max: options.authMax, key: request.ip };
+};
+
 /**
- * Mounts Better Auth under /api/auth/*. `authMax`: requests per minute per client; sign-in and sign-up get a much
- * smaller budget than the rest of the api. Session reads (`readMax`, the general api budget) have a separate counter. `lockout` refuses sign-in for an account after repeated failures, whatever
- * the client address (the address can be spoofed or rotated; the account cannot).
+ * Mounts Better Auth under /api/auth/*, with per-client budgets (sign-in and sign-up much smaller than the rest of
+ * the api, the email-sending routes smaller still) and the sign-in throttle: repeated failures for one account slow
+ * down further attempts (from that address, and softly from everywhere) instead of locking the account.
  */
-export function registerAuthRoutes(
-  app: FastifyInstance,
-  auth: Auth,
-  authMax: number,
-  readMax: number,
-  lockout: SignInLockout = createInMemorySignInLockout(),
-): void {
+export function registerAuthRoutes(app: FastifyInstance, auth: Auth, options: AuthRouteOptions): void {
+  const settings = { ...options, throttle: options.throttle ?? createSignInThrottle(createInMemoryThrottleStore()) };
   app.route({
     method: ['GET', 'POST'],
     url: `${AUTH_PREFIX}/*`,
     config: {
       rateLimit: {
-        max: (request: FastifyRequest) => (isSessionRead(request) ? readMax : authMax),
-        keyGenerator: (request: FastifyRequest) => (isSessionRead(request) ? `session-read:${request.ip}` : request.ip),
+        max: (request: FastifyRequest) => budgetOf(request, options).max,
+        keyGenerator: (request: FastifyRequest) => budgetOf(request, options).key,
         timeWindow: '1 minute',
       },
     },
     handler: async (request, reply) => {
       const signInEmail = signInEmailOf(request);
-      const lockedForMs = signInEmail === null ? null : await lockout.lockedForMs(signInEmail);
-      if (lockedForMs !== null) {
+      const waitMs = signInEmail === null ? null : await settings.throttle.waitMs(signInEmail, request.ip);
+      if (waitMs !== null) {
         return reply
           .status(429)
-          .header('retry-after', String(Math.ceil(lockedForMs / 1000)))
-          .send(fail('rate_limited', 'Too many failed sign-in attempts. Try again later.'));
+          .header('retry-after', String(Math.ceil(waitMs / 1000)))
+          .send(fail('rate_limited', 'Too many failed sign-in attempts. Try again in a moment.'));
       }
       const webRequest = toWebRequest(request);
-      const response = await runWithRequestHeaders(webRequest.headers, () => auth.handler(webRequest));
-      if (signInEmail !== null) await recordOutcome(lockout, signInEmail, response.status);
+      const response = await runWithRequestHeaders(webRequest.headers, () => auth.handler(webRequest.clone()));
+      if (signInEmail !== null) await recordOutcome(settings, signInEmail, request.ip, response, webRequest);
       return forward(response, reply);
     },
   });

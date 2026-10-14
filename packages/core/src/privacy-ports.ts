@@ -39,6 +39,12 @@ export interface ErasureStore {
    * candidate id. Only call it when no application of the candidate remains.
    */
   deleteCandidate(organizationId: string, candidateId: string): Promise<void>;
+  /**
+   * Deletes the organization's data exports (the rows; the ZIP files are returned as keys to delete after the commit).
+   * A generated export is a copy of everyone, the erased person included, so none may outlive an erasure: a new one is
+   * generated on demand.
+   */
+  deleteDataExports(organizationId: string): Promise<readonly string[]>;
 }
 
 export interface ErasureRepositories {

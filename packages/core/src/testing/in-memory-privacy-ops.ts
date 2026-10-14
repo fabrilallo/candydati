@@ -1,4 +1,4 @@
-import type { DataExport, RetentionRun } from '@tt/domain';
+import { dataExportKey, type DataExport, type RetentionRun } from '@tt/domain';
 import type { DataExportRepository, ErasureTransaction, RetentionRunRepository, ZipStream, ZipStreamFactory, ZipWriter, ZipWriterFactory } from '../privacy-ports.js';
 import type { AuditLogRepository } from '../ports.js';
 import type { CandidateStore } from './in-memory-candidates.js';
@@ -20,6 +20,8 @@ export interface ErasureWorld {
   readonly importStore?: ImportStore;
   /** Interview feedback and its requests go with their applications. */
   readonly feedbackStore?: FeedbackStore;
+  /** Generated organization exports go on any erasure. */
+  readonly dataExports?: InMemoryDataExports;
 }
 
 /** Same rules as the Postgres store, over the in-memory stores. The candidate store rolls back on failure; the others do not. */
@@ -61,6 +63,10 @@ export function createInMemoryErasure(world: ErasureWorld): ErasureTransaction {
           promises: store.read().promises.filter((p) => !(own(p) && ids.has(p.applicationId))),
         });
         return doomed.map((a) => a.cv.key);
+      },
+      async deleteDataExports(organizationId: string): Promise<readonly string[]> {
+        const removed = world.dataExports?.purge(organizationId) ?? [];
+        return removed.map((row) => dataExportKey(organizationId, row.id));
       },
       async deleteCandidate(organizationId: string, candidateId: string): Promise<void> {
         purgeEvents(world, organizationId, 'candidateId', new Set([candidateId]));
@@ -115,6 +121,8 @@ export function createInMemoryRetentionRuns(initial: readonly RetentionRun[] = [
 
 export interface InMemoryDataExports extends DataExportRepository {
   snapshot(): readonly DataExport[];
+  /** Removes every export of the organization and returns them. */
+  purge(organizationId: string): readonly DataExport[];
 }
 
 export function createInMemoryDataExports(initial: readonly DataExport[] = []): InMemoryDataExports {
@@ -142,6 +150,11 @@ export function createInMemoryDataExports(initial: readonly DataExport[] = []): 
       const exists = inOrg(organizationId).some((r) => r.id === id);
       rows.set(rows.get().filter((r) => !(r.organizationId === organizationId && r.id === id)));
       return exists;
+    },
+    purge(organizationId) {
+      const removed = inOrg(organizationId);
+      rows.set(rows.get().filter((r) => r.organizationId !== organizationId));
+      return removed;
     },
     snapshot: () => rows.get(),
   };

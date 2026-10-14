@@ -2,7 +2,7 @@
 import { ShieldCheckIcon, TriangleAlertIcon } from '@lucide/vue'
 import { API_KEY_NAME_MAX, type Permission } from '@tt/domain'
 import type { ApiKeyCreateInput } from '@/lib/api-key-api'
-import { EXPIRY_CHOICES, expiryDate, scopeGroups, scopeLabelKey, toggleScope, validateKeyForm, type KeyForm, type KeyFormErrors } from '@/lib/api-keys'
+import { DEFAULT_EXPIRY, EXPIRY_CHOICES, expiryDate, scopeGroups, scopeLabelKey, toggleScope, validateKeyForm, type KeyForm, type KeyFormErrors } from '@/lib/api-keys'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
@@ -19,7 +19,7 @@ const emit = defineEmits<{ 'update:open': [open: boolean]; create: [input: ApiKe
 const { t } = useI18n()
 const { viewer } = useViewer()
 const groups = computed(() => scopeGroups(viewer.value?.role ?? null))
-const blank = (): KeyForm => ({ name: '', scopes: [], expiry: 'never' })
+const blank = (): KeyForm => ({ name: '', scopes: [], expiry: DEFAULT_EXPIRY })
 const form = ref<KeyForm>(blank())
 const errors = ref<KeyFormErrors>({})
 const copied = ref(false)
@@ -117,6 +117,7 @@ const guard = (event: Event): void => {
             <NativeSelect id="api-key-expiry" :model-value="form.expiry" data-testid="api-key-expiry" @update:model-value="(value) => (form = { ...form, expiry: value as KeyForm['expiry'] })">
               <option v-for="choice in EXPIRY_CHOICES" :key="choice" :value="choice">{{ t(`apiKeys.expiry.${choice}`) }}</option>
             </NativeSelect>
+            <p class="text-xs text-muted-foreground">{{ t('apiKeys.fields.expiryHint') }}</p>
           </div>
           <FormAlert :message-key="errorKey" />
         </form>

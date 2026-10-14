@@ -89,6 +89,7 @@ const candidateDeps = (overrides: Partial<CandidateDeps> = {}): CandidateDeps =>
   return {
     auditLog: r.auditLog,
     transaction: uow.transaction,
+    jobTeams: r.jobTeams,
     jobs: r.jobs,
     candidates: r.candidates,
     applications: r.applications,
@@ -112,6 +113,7 @@ const jobDeps = (overrides: Partial<JobDeps> = {}): JobDeps => {
   return {
     auditLog: r.auditLog,
     transaction: uow.transaction,
+    jobTeams: r.jobTeams,
     jobs: r.jobs,
     jobTemplates: r.jobTemplates,
     applicationCounts: r.applicationCounts,

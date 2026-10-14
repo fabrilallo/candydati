@@ -38,6 +38,7 @@ export function createExportDeps({ uow, files, queue, zip, feedbackRecords }: Ex
     ...(feedbackRecords ?? { feedbackRequests: r.feedbackRequests, interviewFeedback: r.interviewFeedback }),
     auditLog: r.auditLog,
     transaction: uow.transaction,
+    jobTeams: uow.repositories.jobTeams,
     dataExports: r.dataExports,
     organizations: r.organizations,
     jobs: r.jobs,
@@ -58,7 +59,7 @@ export function createExportDeps({ uow, files, queue, zip, feedbackRecords }: Ex
 /** Candidate rights, organization export and the privacy overview on Postgres. */
 export function createPhase5Deps({ uow, files, queue, candidateDeps, providers, zip, feedbackRecords }: Phase5Inputs): Phase5Deps {
   const r = uow.repositories;
-  const core = { auditLog: r.auditLog, transaction: uow.transaction };
+  const core = { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams };
   return {
     rightsDeps: { ...candidateDeps, ...feedbackRecords, privacyNotices: r.privacyNotices, erasure: r.erasure },
     exportDeps: createExportDeps({ uow, files, queue, zip, feedbackRecords }),

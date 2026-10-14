@@ -3,10 +3,11 @@
 #   docker build --target api -t tt-api .
 # No secret in the image: all configuration comes from the environment at runtime.
 
+# Base images are pinned by digest (the tag only says what it is); Dependabot (docker ecosystem) bumps tag and digest together.
 ARG NODE_VERSION=24
 
 # ---------- base: Node + pnpm (version from the packageManager field) ----------
-FROM node:${NODE_VERSION}-bookworm-slim AS base
+FROM node:${NODE_VERSION}-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 AS base
 ENV PNPM_HOME=/pnpm CI=true
 ENV PATH=$PNPM_HOME:$PATH
 RUN corepack enable
@@ -31,7 +32,7 @@ RUN pnpm --filter @tt/api deploy --prod --legacy /out/api \
  && rm -rf /out/api/src /out/api/eval /out/worker/src
 
 # ---------- shared runtime ----------
-FROM node:${NODE_VERSION}-bookworm-slim AS runtime
+FROM node:${NODE_VERSION}-bookworm-slim@sha256:d6aa754f16b3197301076f047b5def2f02ea1dbbc2ca920407d46d7ec7f87b20 AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 

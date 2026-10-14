@@ -1,4 +1,5 @@
-import { isPublicPath, resolveGuard } from '@/lib/auth-paths'
+import { isPublicPath, mayNeedTwoFactor, resolveGuard, SECURITY_SETTINGS } from '@/lib/auth-paths'
+import { mustEnrolTwoFactor } from '@/lib/security-api'
 import { hasSessionCookie } from '@/lib/session-cookie'
 
 /**
@@ -16,9 +17,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
     viewer = await ensure()
   } catch (error) {
     console.error('[auth middleware] could not load the session', error instanceof Error ? error.message : error)
-    if (to.path === '/login' || to.path === '/signup') return
+    if (['/login', '/signup', '/forgot-password', '/reset-password', '/verify-email', '/two-factor'].includes(to.path)) return
     throw createError({ statusCode: 503, statusMessage: 'Service unavailable', fatal: true })
   }
   const target = resolveGuard(to.path, viewer, to.query.redirect)
   if (target && target !== to.fullPath) return navigateTo(target)
+  // An owner or admin without a second factor, in an organization that requires one: enrol first (checked once per load).
+  if (mayNeedTwoFactor(to.path, viewer ?? null)) {
+    const gate = useState<boolean | null>('two-factor-gate', () => null)
+    gate.value ??= await mustEnrolTwoFactor(useJobsApi())
+    if (gate.value) return navigateTo({ path: SECURITY_SETTINGS, query: { required: '1' } })
+  }
 })

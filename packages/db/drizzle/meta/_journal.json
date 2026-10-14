@@ -141,6 +141,27 @@
       "when": 1791937606206,
       "tag": "0019_outbox_retries_reconfirmation",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791939702337,
+      "tag": "0020_job_teams",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791939748797,
+      "tag": "0021_application_submitted_contact",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1791939808243,
+      "tag": "0022_auth_security",
+      "breakpoints": true
     }
   ]
 }

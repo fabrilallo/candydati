@@ -69,7 +69,10 @@ describe('api keys', () => {
     await flushPromises()
     document.body.querySelector<HTMLFormElement>('#api-key-form')?.requestSubmit()
     await vi.waitFor(() => expect(byTestId('api-key-secret')?.textContent).toBe('tt_Zz99Yy88_once'))
-    expect(state.created).toEqual([{ name: 'Agente HR', scopes: ['job:read', 'job:create'] }])
+    // Every key expires: 90 days unless another choice is made.
+    expect(state.created).toEqual([{ name: 'Agente HR', scopes: ['job:read', 'job:create'], expiresAt: expect.any(String) }])
+    const days = (Date.parse((state.created[0] as { expiresAt: string }).expiresAt) - Date.now()) / 86_400_000
+    expect(Math.round(days)).toBe(90)
     expect(byTestId<HTMLButtonElement>('api-key-done')?.disabled).toBe(true)
     byTestId<HTMLInputElement>('api-key-stored')?.click()
     await flushPromises()

@@ -4,6 +4,37 @@ import { loadEnv } from './env.js';
 const VALID_DATABASE_URL = 'postgres://tt:tt@localhost:5434/team_tracker';
 const S3 = { S3_ENDPOINT: 'http://localhost:9000', S3_BUCKET: 'team-tracker', S3_ACCESS_KEY: 'key', S3_SECRET_KEY: 'secret' };
 
+/** Passes every production rule: strong secrets, https PLATFORM_URL, a real email provider. */
+const PRODUCTION = {
+  ...S3,
+  NODE_ENV: 'production',
+  DATABASE_URL: 'postgres://tt:r7Kp2XwN9vLq4TsB@postgres:5432/team_tracker',
+  S3_SECRET_KEY: 'u5Hq9ZpW3kXv7NcR',
+  PLATFORM_URL: 'https://ats.example.org',
+  EMAIL_PROVIDER: 'smtp',
+  SMTP_HOST: 'smtp.example.org',
+  SMTP_PORT: '587',
+};
+
+describe('loadEnv in production', () => {
+  it('refuses example secrets, http PLATFORM_URL and the log email provider, naming variables only', () => {
+    const fails = (patch: Record<string, string | undefined>): string => {
+      try {
+        loadEnv({ ...PRODUCTION, ...patch });
+        return '';
+      } catch (error) {
+        return (error as Error).message;
+      }
+    };
+    expect(fails({})).toBe('');
+    expect(fails({ DATABASE_URL: 'postgres://tt:change-me-postgres-password@postgres:5432/x' })).toMatch(/DATABASE_URL/);
+    expect(fails({ S3_SECRET_KEY: 'tt-minio-secret' })).toMatch(/S3_SECRET_KEY/);
+    expect(fails({ S3_SECRET_KEY: 'tt-minio-secret' })).not.toContain('tt-minio-secret');
+    expect(fails({ PLATFORM_URL: 'http://ats.example.org' })).toMatch(/PLATFORM_URL/);
+    expect(fails({ EMAIL_PROVIDER: 'log' })).toMatch(/EMAIL_PROVIDER/);
+  });
+});
+
 describe('loadEnv', () => {
   it('accepts a valid environment and applies defaults', () => {
     const env = loadEnv({ ...S3, DATABASE_URL: VALID_DATABASE_URL });
@@ -14,7 +45,7 @@ describe('loadEnv', () => {
   });
 
   it('accepts explicit LOG_LEVEL and NODE_ENV values', () => {
-    const env = loadEnv({ ...S3, DATABASE_URL: VALID_DATABASE_URL, LOG_LEVEL: 'debug', NODE_ENV: 'production' });
+    const env = loadEnv({ ...PRODUCTION, LOG_LEVEL: 'debug' });
 
     expect(env.LOG_LEVEL).toBe('debug');
     expect(env.NODE_ENV).toBe('production');
@@ -97,7 +128,7 @@ describe('loadEnv webhooks', () => {
 
   it('refuses private webhook targets in production', () => {
     expect(() => loadEnv({ ...base, NODE_ENV: 'production', WEBHOOKS_ALLOW_PRIVATE: 'true' })).toThrow(/WEBHOOKS_ALLOW_PRIVATE.*production/);
-    expect(loadEnv({ ...base, NODE_ENV: 'production' }).WEBHOOKS_ALLOW_PRIVATE).toBe(false);
+    expect(loadEnv(PRODUCTION).WEBHOOKS_ALLOW_PRIVATE).toBe(false);
   });
 
   it('budgets the model at 1000 extractions per organization and day unless told otherwise', () => {

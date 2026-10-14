@@ -1,5 +1,5 @@
 import { and, asc, count, eq, gte, inArray, schema } from '@tt/db';
-import type { Message } from '@tt/domain';
+import { SYSTEM_SENDER, type Message } from '@tt/domain';
 import { ConflictError } from '../errors.js';
 import type { MessageRepository } from '../messaging-ports.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';
@@ -45,6 +45,13 @@ export function createDrizzleMessages(db: DbExecutor): MessageRepository {
         .where(and(eq(message.organizationId, organizationId), inArray(message.applicationId, [...applicationIds])))
         .groupBy(message.applicationId);
       return { ...zero, ...Object.fromEntries(rows.map((r) => [r.applicationId, r.total])) };
+    },
+    async countSystemOutboundSince(organizationId, since) {
+      const [row] = await db
+        .select({ total: count() })
+        .from(message)
+        .where(and(eq(message.organizationId, organizationId), eq(message.direction, 'outbound'), eq(message.sentBy, SYSTEM_SENDER), gte(message.createdAt, since)));
+      return row?.total ?? 0;
     },
     async countOutboundSince(organizationId, candidateId, since) {
       const [row] = await db

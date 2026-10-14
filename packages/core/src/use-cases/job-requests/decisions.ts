@@ -1,3 +1,4 @@
+import { addToJobTeam } from '../../access/team-membership.js';
 import { jobContentFromRequest, jobSlug, type Job, type JobRequest } from '@tt/domain';
 import { z } from 'zod';
 import { toAuditActor } from '../../actor.js';
@@ -117,6 +118,8 @@ export const convertJobRequest = defineJobRequestUseCase({
     }
     const job = await createDraft(deps, request, actor.organizationId);
     const now = deps.now();
+    // The requester (usually the hiring manager) and whoever converts it form the first team of the job.
+    await addToJobTeam(deps, actor, job, now, [{ userId: request.requestedBy, role: 'hiring_manager' }]);
     if (request.status === 'approved' && request.decidedBy !== null && request.decidedAt !== null) {
       await deps.approvals.set(actor.organizationId, job.id, {
         approvedBy: request.decidedBy,

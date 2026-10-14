@@ -1,5 +1,6 @@
 import {
   checkPublishable,
+  httpUrlOrNull,
   complianceWarnings,
   isPublishedContent,
   type Job,
@@ -68,7 +69,7 @@ export const toPublishJobResultDto = (result: PublishJobResult): PublishJobResul
 export const toPublicOrganizationDto = (organization: PublicOrganization): PublicOrganizationDto => ({
   name: organization.name,
   slug: organization.slug,
-  logo: organization.logo,
+  logo: httpUrlOrNull(organization.logo, { httpsOnly: true }),
 });
 
 /** A published job that fails the §5.1 rules is corrupted data, not a user error: fail loudly. */

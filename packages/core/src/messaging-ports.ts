@@ -69,6 +69,8 @@ export interface MessageRepository {
   countByApplication(organizationId: string, applicationIds: readonly string[]): Promise<Readonly<Record<string, number>>>;
   /** Outbound messages to the candidate created at or after `since` (queued, sent or failed). */
   countOutboundSince(organizationId: string, candidateId: string, since: Date): Promise<number>;
+  /** Messages the system itself sent in the organization (receipts and the like) created at or after `since`. */
+  countSystemOutboundSince(organizationId: string, since: Date): Promise<number>;
 }
 
 export interface DomainCheck {
@@ -147,6 +149,8 @@ export interface MessagingDeps extends CoreDeps {
 /** What `submitApplication` needs to queue the receipt. */
 export interface ReceiptDeps
   extends Pick<MessagingDeps, 'templates' | 'conversations' | 'messages' | 'config' | 'newToken'> {
+  /** Receipts one organization may queue in 24 hours: the form is public, so receipts must not be a way to mail strangers in bulk. */
+  readonly dailyMaxPerOrganization?: number;
   /** Called when the receipt could not be queued; the application is not affected. */
   readonly onError?: (error: unknown) => void;
 }

@@ -19,7 +19,7 @@ const submit = async (wrapper: Awaited<ReturnType<typeof mountSuspended>>): Prom
 describe('AuthForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    mocks.api.signIn.mockResolvedValue(undefined)
+    mocks.api.signIn.mockResolvedValue({ twoFactor: false })
     mocks.api.signUp.mockResolvedValue(undefined)
     mocks.api.getSession.mockResolvedValue(null)
   })
@@ -29,7 +29,7 @@ describe('AuthForm', () => {
     await wrapper.find('#email').setValue('ada@example.com')
     await wrapper.find('#password').setValue('secret-pass')
     await submit(wrapper)
-    expect(mocks.api.signIn).toHaveBeenCalledWith({ email: 'ada@example.com', password: 'secret-pass' })
+    expect(mocks.api.signIn).toHaveBeenCalledWith({ email: 'ada@example.com', password: 'secret-pass', callbackURL: '/verify-email?next=%2Fonboarding' })
     expect(mocks.navigateTo).toHaveBeenCalledWith('/app')
   })
 
@@ -53,6 +53,27 @@ describe('AuthForm', () => {
     expect(wrapper.find('[role="alert"]').text()).toBe('La password deve avere almeno 10 caratteri')
     await wrapper.find('#password').setValue('long-enough-pw')
     await submit(wrapper)
-    expect(mocks.api.signUp).toHaveBeenCalledWith({ name: 'Ada Lovelace', email: 'ada@example.com', password: 'long-enough-pw' })
+    expect(mocks.api.signUp).toHaveBeenCalledWith({ name: 'Ada Lovelace', email: 'ada@example.com', password: 'long-enough-pw', callbackURL: '/verify-email?next=%2Fonboarding' })
+    expect(mocks.navigateTo).toHaveBeenCalledWith({ path: '/verify-email', query: { email: 'ada@example.com' } })
+    expect(mocks.api.getSession).not.toHaveBeenCalled()
+  })
+
+  it('sends an unconfirmed address to the inbox page instead of an error', async () => {
+    mocks.api.signIn.mockRejectedValue(new AppError('errors.emailNotVerified', 'EMAIL_NOT_VERIFIED'))
+    const wrapper = await mountSuspended(AuthForm, { props: { mode: 'login' } })
+    await wrapper.find('#email').setValue('ada@example.com')
+    await wrapper.find('#password').setValue('secret-pass')
+    await submit(wrapper)
+    expect(mocks.navigateTo).toHaveBeenCalledWith({ path: '/verify-email', query: { email: 'ada@example.com' } })
+  })
+
+  it('asks for the second factor when the account has one', async () => {
+    mocks.api.signIn.mockResolvedValue({ twoFactor: true })
+    const wrapper = await mountSuspended(AuthForm, { props: { mode: 'login' } })
+    await wrapper.find('#email').setValue('ada@example.com')
+    await wrapper.find('#password').setValue('secret-pass')
+    await submit(wrapper)
+    expect(mocks.navigateTo).toHaveBeenCalledWith({ path: '/two-factor', query: {} })
+    expect(wrapper.find('[data-testid="forgot-password-link"]').attributes('href')).toBe('/forgot-password')
   })
 })

@@ -22,6 +22,19 @@ export const signupSchema = z.object({
 })
 export type SignupInput = z.infer<typeof signupSchema>
 
+const newPassword = z.string().min(PASSWORD_MIN_LENGTH, 'validation.passwordMin').max(PASSWORD_MAX_LENGTH, 'validation.passwordMax')
+
+export const forgotPasswordSchema = z.object({ email })
+export const resetPasswordSchema = z.object({ password: newPassword })
+/** 6 digits from the authenticator, or a backup code (letters, digits, dashes). Spaces typed by the person are dropped. */
+export const twoFactorCodeSchema = z.object({
+  code: z
+    .string()
+    .transform((value) => value.replace(/\s+/g, ''))
+    .pipe(z.string().min(1, required).max(32, 'validation.code').regex(/^[A-Za-z0-9-]*$/, 'validation.code')),
+})
+export const passwordConfirmSchema = z.object({ password: z.string().min(1, required) })
+
 export const createOrganizationSchema = z.object({
   name: z.string().trim().min(2, 'validation.nameMin').max(80, 'validation.nameMax'),
   slug: z.string().refine(isValidOrganizationSlug, 'validation.slug'),

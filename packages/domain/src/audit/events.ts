@@ -62,6 +62,11 @@ export const AUDIT_ACTIONS = [
   'job_request.rejected',
   'job_request.converted',
   'organization.approval_setting_updated',
+  'organization.security_setting_updated',
+  'mcp.read',
+  'job.team_member_added',
+  'job.team_member_removed',
+  'organization.access_setting_updated',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

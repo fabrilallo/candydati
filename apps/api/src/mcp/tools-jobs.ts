@@ -93,6 +93,7 @@ export const analyzeJobAdTool = {
     'It scores the ad, never people. Changes nothing.',
   shape: { content: jobContentSchema },
   readOnly: true,
+  usesModel: true,
   run: async ({ app, actor }, input) => analyzeJobAd(app.jobDeps, actor, input),
 } satisfies ToolDefinition<{ content: typeof jobContentSchema }>;
 
@@ -123,6 +124,7 @@ export const publishJobTool = {
     'and the organization has an active privacy notice. Needs the job:publish scope. A quality score below the threshold is flagged, not blocking.',
   shape: { jobId },
   readOnly: false,
+  usesModel: true,
   run: async ({ app, actor }, input) => toPublishJobResultDto(await publishJob(app.jobDeps, actor, input)),
 } satisfies ToolDefinition<{ jobId: typeof jobId }>;
 

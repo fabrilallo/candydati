@@ -13,6 +13,7 @@ import {
   type ConsentRecord,
   type Job,
   type PrivacyNotice,
+  type SubmittedContact,
 } from '@tt/domain';
 import { z } from 'zod';
 import { ConflictError, NotFoundError, RateLimitedError, ValidationError } from '../../errors.js';
@@ -78,32 +79,49 @@ interface Intake {
   readonly responseDueAt: Date | null;
 }
 
-/** Same email in the organization is the same person: details are refreshed, talent-pool consent is a union. */
+/**
+ * Same email in the organization is the same person, but a public submission never rewrites who that person is: the
+ * profile keeps its name, phone and LinkedIn (a stranger can type anyone's email). Only consent-driven fields move:
+ * talent-pool union and the longest retention. A new person is created from the form.
+ */
 function mergeCandidate(existing: Candidate | null, intake: Intake, consent: ConsentRecord, expiresAt: Date): Candidate {
   const { form, now } = intake;
-  const base = existing ?? {
-    id: intake.candidateId,
-    organizationId: intake.organizationId,
-    email: form.email,
-    tags: [],
-    talentPool: false,
-    importBatchId: null,
-    createdAt: now,
-  };
-  const retention = existing && existing.retentionExpiresAt > expiresAt ? existing.retentionExpiresAt : expiresAt;
+  if (!existing) {
+    return {
+      id: intake.candidateId,
+      organizationId: intake.organizationId,
+      email: form.email,
+      firstName: form.firstName,
+      lastName: form.lastName,
+      phone: form.phone ?? null,
+      linkedinUrl: form.linkedinUrl ?? null,
+      tags: [],
+      talentPool: consent.scopes.includes('talent_pool'),
+      importBatchId: null,
+      retentionExpiresAt: expiresAt,
+      createdAt: now,
+      updatedAt: now,
+    };
+  }
   return {
-    ...base,
-    firstName: form.firstName,
-    lastName: form.lastName,
-    phone: form.phone ?? existing?.phone ?? null,
-    linkedinUrl: form.linkedinUrl ?? existing?.linkedinUrl ?? null,
-    talentPool: base.talentPool || consent.scopes.includes('talent_pool'),
-    retentionExpiresAt: retention,
+    ...existing,
+    talentPool: existing.talentPool || consent.scopes.includes('talent_pool'),
+    retentionExpiresAt: existing.retentionExpiresAt > expiresAt ? existing.retentionExpiresAt : expiresAt,
     updatedAt: now,
   };
 }
 
-async function storeApplication(deps: SubmitApplicationDeps, repositories: IntakeRepositories, intake: Intake): Promise<string> {
+const submittedContactOf = (form: ApplicationForm): SubmittedContact => ({
+  firstName: form.firstName,
+  lastName: form.lastName,
+  phone: form.phone ?? null,
+  linkedinUrl: form.linkedinUrl ?? null,
+});
+
+/** The stored person the receipt is addressed to; null when an open application already exists (nothing was stored). */
+type StoredPerson = Pick<Candidate, 'id' | 'firstName' | 'lastName'>;
+
+async function storeApplication(deps: SubmitApplicationDeps, repositories: IntakeRepositories, intake: Intake): Promise<StoredPerson | null> {
   const { form, notice, now, organizationId } = intake;
   const consent: ConsentRecord = {
     privacyNoticeId: notice.id,
@@ -117,7 +135,8 @@ async function storeApplication(deps: SubmitApplicationDeps, repositories: Intak
   if (!job || job.status !== 'published') throw new NotFoundError('Job not found.');
   const existing = await repositories.candidates.findByEmail(organizationId, form.email);
   if (existing && (await repositories.applications.findOpen(organizationId, intake.jobId, existing.id))) {
-    throw new ConflictError('already_applied');
+    // Same answer as a success: the form must not tell whether an email already has an application.
+    return null;
   }
   const merged = mergeCandidate(existing, intake, consent, retentionExpiresAt);
   const candidate = existing ? await repositories.candidates.save(merged) : await repositories.candidates.create(merged);
@@ -130,6 +149,7 @@ async function storeApplication(deps: SubmitApplicationDeps, repositories: Intak
     outcome: null,
     message: form.message,
     cv: { key: intake.cvKey, fileName: intake.cv.fileName, mediaType: intake.cv.mediaType, sizeBytes: intake.cvSize },
+    submittedContact: submittedContactOf(form),
     consent,
     consentStatus: 'given',
     importBatchId: null,
@@ -165,17 +185,21 @@ async function storeApplication(deps: SubmitApplicationDeps, repositories: Intak
     applicationId: application.id,
     jobId: intake.jobId,
   });
-  return candidate.id;
+  return { id: candidate.id, firstName: candidate.firstName, lastName: candidate.lastName };
 }
 
-/** The CV goes to storage first; if the transaction fails the file is removed, so no orphan stays behind. */
-async function storeAtomically(deps: SubmitApplicationDeps, intake: Intake, bytes: Uint8Array): Promise<string> {
+/** The CV goes to storage first; if the transaction fails, or nothing is stored, the file is removed: no orphan stays behind. */
+async function storeAtomically(deps: SubmitApplicationDeps, intake: Intake, bytes: Uint8Array): Promise<StoredPerson | null> {
   await deps.files.put(intake.cvKey, bytes, intake.cv.mediaType);
   try {
-    return await deps.intake.run((repositories) => storeApplication(deps, repositories, intake));
+    const stored = await deps.intake.run((repositories) => storeApplication(deps, repositories, intake));
+    if (stored === null) await deps.files.delete(intake.cvKey).catch(() => undefined);
+    return stored;
   } catch (error) {
     // The original failure is what matters; a failed cleanup must not hide it.
     await deps.files.delete(intake.cvKey).catch(() => undefined);
+    // Two submissions of the same person racing: the loser is a duplicate, answered like one.
+    if (error instanceof ConflictError) return null;
     throw error;
   }
 }
@@ -248,12 +272,12 @@ export const submitApplication = definePublicCommand<SubmitApplicationDeps, type
       candidateId: deps.newId(),
       responseDueAt: computeResponseDueAt(now, job),
     };
-    const candidateId = await storeAtomically(deps, intake, input.cv.bytes);
+    const person = await storeAtomically(deps, intake, input.cv.bytes);
+    if (person === null) return RECEIPT;
     await enqueueExtraction(deps, intake);
     await enqueueAutomations(deps, organization.id, applicationId, RECEIVED_STAGE_ID);
     if (deps.receipts) {
-      const candidate = { id: candidateId, firstName: form.firstName, lastName: form.lastName };
-      await queueReceipt({ ...deps, receipts: deps.receipts }, { organization, job, applicationId, candidate });
+      await queueReceipt({ ...deps, receipts: deps.receipts }, { organization, job, applicationId, candidate: person });
     }
     return RECEIPT;
   },

@@ -17,20 +17,20 @@ export interface RequestActors {
   readonly resolveActor: (request: FastifyRequest) => Promise<Actor>;
   /** Session only: a request with a bearer is refused, so a key can never manage keys. */
   readonly resolveSessionActor: (request: FastifyRequest) => Promise<Actor>;
-  /** Bearer key only (the MCP endpoint). */
-  readonly resolveKeyActor: (request: FastifyRequest) => Promise<DelegatedActor>;
+  /** Bearer key only (the MCP endpoint). `cost`: units charged to the key's rate limit (one per tool call of a batch). */
+  readonly resolveKeyActor: (request: FastifyRequest, cost?: number) => Promise<DelegatedActor>;
 }
 
 const tooManyRequests = (retryAfterMs: number): Error =>
   Object.assign(new Error('Too many requests.'), { statusCode: 429, retryAfterMs });
 
 export function createRequestActors({ session, authenticate, limiter }: RequestActorsDeps): RequestActors {
-  const resolveKeyActor = async (request: FastifyRequest): Promise<DelegatedActor> => {
+  const resolveKeyActor = async (request: FastifyRequest, cost = 1): Promise<DelegatedActor> => {
     const secret = bearerOf(request.headers);
     if (secret === null) throw new UnauthenticatedError();
     const actor = await authenticate(secret);
     if (!actor) throw new UnauthenticatedError('Invalid API key.');
-    const verdict = limiter.consume(actor.id);
+    const verdict = limiter.consume(actor.id, cost);
     if (!verdict.allowed) throw tooManyRequests(verdict.retryAfterMs);
     return actor;
   };

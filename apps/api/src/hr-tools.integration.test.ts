@@ -200,6 +200,8 @@ describe('interview feedback without login', () => {
     const stageId = await declaredStage(w);
     const body = { stages: [{ stageId, interviewers: [{ kind: 'external', name: 'Ugo', email: uniqueMail('ugo') }] }] };
     const [hm, recruiter, interviewer] = [await w.member('hiring_manager'), await w.member('recruiter'), await w.member('interviewer')];
+    await w.joinTeam(hm, 'hiring_manager');
+    await w.joinTeam(interviewer, 'interviewer');
     expect((await hm.put(`/api/v1/jobs/${w.job.id}/interviewers`, body)).status).toBe(200);
     expect((await recruiter.put(`/api/v1/jobs/${w.job.id}/interviewers`, body)).status).toBe(200);
     expect((await interviewer.put(`/api/v1/jobs/${w.job.id}/interviewers`, body)).status).toBe(403);

@@ -87,7 +87,7 @@ export function createDrizzleOrganizationSettings(db: DbExecutor): OrganizationS
   return {
     async get(organizationId) {
       const [row] = await db.select().from(table).where(eq(table.organizationId, organizationId)).limit(1);
-      return { requireApproval: row?.requireApproval ?? false };
+      return { requireApproval: row?.requireApproval ?? false, restrictRecruitersToTeam: row?.restrictRecruitersToTeam ?? false };
     },
     async setRequireApproval(organizationId, value, at) {
       const [row] = await db
@@ -95,7 +95,15 @@ export function createDrizzleOrganizationSettings(db: DbExecutor): OrganizationS
         .values({ organizationId, requireApproval: value, updatedAt: at })
         .onConflictDoUpdate({ target: table.organizationId, set: { requireApproval: value, updatedAt: at } })
         .returning();
-      return { requireApproval: row?.requireApproval ?? value };
+      return { requireApproval: row?.requireApproval ?? value, restrictRecruitersToTeam: row?.restrictRecruitersToTeam ?? false };
+    },
+    async setRestrictRecruitersToTeam(organizationId, value, at) {
+      const [row] = await db
+        .insert(table)
+        .values({ organizationId, restrictRecruitersToTeam: value, updatedAt: at })
+        .onConflictDoUpdate({ target: table.organizationId, set: { restrictRecruitersToTeam: value, updatedAt: at } })
+        .returning();
+      return { requireApproval: row?.requireApproval ?? false, restrictRecruitersToTeam: row?.restrictRecruitersToTeam ?? value };
     },
   };
 }

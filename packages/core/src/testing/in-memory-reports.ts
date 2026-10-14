@@ -65,10 +65,10 @@ const countBy = <T>(items: readonly T[], key: (item: T) => string): Map<string, 
 export function createInMemoryReports(store: CandidateStore): ReportRepository {
   return {
     async aggregate(query): Promise<ReportAggregates> {
-      const { organizationId, jobId } = query;
+      const { organizationId, jobId, jobIds } = query;
       const state = store.read();
       const inScope = <T extends { organizationId: string; jobId: string }>(row: T): boolean =>
-        row.organizationId === organizationId && (jobId === undefined || row.jobId === jobId);
+        row.organizationId === organizationId && (jobId === undefined || row.jobId === jobId) && (jobIds === undefined || jobIds.includes(row.jobId));
       const applications = state.applications.filter(inScope);
       const events = state.stageEvents.filter(inScope);
       const promises = state.promises.filter(inScope);

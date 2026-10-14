@@ -97,6 +97,11 @@ export const candidateApplicationSchema = z.object({
   importBatchId: z.string().nullable(),
   retentionExpiresAt: isoDate,
   cv: z.object({ fileName: z.string(), mediaType: z.string(), sizeBytes: count }),
+  /** What the person typed on the public form (never applied to the profile by itself); null for imports and manual entries. */
+  submittedContact: z
+    .object({ firstName: z.string(), lastName: z.string(), phone: z.string().nullable(), linkedinUrl: z.string().nullable() })
+    .nullable()
+    .optional(),
   extraction: extractionSchema,
   /** Messages in the conversation of this application (sent, received and failed). */
   messageCount: count,

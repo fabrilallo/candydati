@@ -67,6 +67,16 @@ describe('application receipt', () => {
     expect(deps.messagingStore.read().messages).toHaveLength(RECEIPTS_PER_RECIPIENT_PER_DAY);
   });
 
+  it('stops queueing receipts for an organization once its daily cap is reached, still storing the application', async () => {
+    const deps = empty();
+    const receipts = receiptsFor(deps, { dailyMaxPerOrganization: 2 });
+    for (const email of ['a@example.com', 'b@example.com', 'c@example.com']) {
+      await submitApplication({ ...deps, receipts }, { ...submission(), form: validApplicationForm({ email }) });
+    }
+    expect(deps.messagingStore.read().messages).toHaveLength(2);
+    expect(deps.store.read().applications).toHaveLength(3);
+  });
+
   it('uses English defaults for an English ad and the organization template when it has one', async () => {
     const english = empty();
     const job = buildJob({ id: 'job_1', slug: 'backend', organizationId: ORG_A, status: 'published', publishedAt: new Date(), content: completeJobContent({ title: 'Engineer', language: 'en' }) });

@@ -371,10 +371,10 @@ describe('createDrizzleApplicationIntake with submitApplication', () => {
     expect(deps.queue.jobs().map((j) => j.name)).toEqual(['cv.extract', 'automation.run']);
   });
 
-  it('refuses the same candidate applying twice to the same job, and keeps one application', async () => {
+  it('answers the same candidate applying twice to the same job like a success, and keeps one application', async () => {
     const { org, job, deps } = await makeDeps();
     await submitApplication(deps, submission(org, job));
-    await expect(submitApplication(deps, submission(org, job))).rejects.toThrow('already_applied');
+    expect(await submitApplication(deps, submission(org, job))).toEqual({ received: true });
     const { rows } = await handle.pool.query('select count(*)::int as n from application where organization_id = $1', [org.id]);
     expect(rows[0].n).toBe(1);
     expect(deps.files.keys()).toHaveLength(1);

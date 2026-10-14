@@ -163,4 +163,11 @@ describe('exportReportsCsv', () => {
     const csv = reportsToCsv({ ...report, timeToHire: { ...report.timeToHire, byJob: [{ jobId: ids.backend, title: '=HYPERLINK("x"),"y"', count: 1, median: 1, p75: 1 }] } });
     expect(csv).toContain(`${ids.backend},"'=HYPERLINK(""x""),""y""",1,1,1`);
   });
+
+  it.each([' =1+1', '  @SUM(A1)', '\t=1', '\r-1', ' +cmd', '​=1'])('defuses a formula hidden behind leading whitespace: %j', async (title) => {
+    const { deps, ids } = await seeded();
+    const report = await getReports(deps, owner, query);
+    const csv = reportsToCsv({ ...report, timeToHire: { ...report.timeToHire, byJob: [{ jobId: ids.backend, title, count: 1, median: 1, p75: 1 }] } });
+    expect(csv).toContain(`'${title}`);
+  });
 });

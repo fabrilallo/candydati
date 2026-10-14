@@ -43,15 +43,17 @@ export interface PrivacySeedOptions extends AutomationSeedOptions {
 export function seedPrivacyWorld(options: PrivacySeedOptions = {}): TestPrivacyDeps {
   const world = seedAutomationWorld(options);
   const feedbackStore = createFeedbackStore();
+  const dataExports = createInMemoryDataExports(options.dataExports);
   return {
     ...world,
     feedbackStore,
+    jobTeams: world.jobTeams.withSources({ interviewers: feedbackStore }),
     stageInterviewers: createInMemoryStageInterviewers(feedbackStore),
     feedbackRequests: createInMemoryFeedbackRequests(feedbackStore),
     interviewFeedback: createInMemoryInterviewFeedback(feedbackStore),
-    erasure: createInMemoryErasure({ ...world, feedbackStore }),
+    erasure: createInMemoryErasure({ ...world, feedbackStore, dataExports }),
     retentionRuns: createInMemoryRetentionRuns(options.retentionRuns),
-    dataExports: createInMemoryDataExports(options.dataExports),
+    dataExports,
     zip: createFakeZipFactory(),
     providers: testProviders,
     ...options.privacyOverrides,

@@ -1,4 +1,5 @@
 import { and, eq, inArray, schema, sql } from '@tt/db';
+import { dataExportKey } from '@tt/domain';
 import type { ErasureStore, ErasureTransaction } from '../privacy-ports.js';
 import type { DbExecutor } from './db-executor.js';
 import { createDrizzleAuditLog } from './drizzle-audit-log.js';
@@ -9,7 +10,7 @@ import { createDrizzleOutbox } from './drizzle-outbox.js';
  * fails loudly instead of leaving data behind), every statement filters by `organization_id`.
  */
 export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
-  const { application, applicationStageEvent, candidate, candidateNote, consentToken, conversation, cvExtraction, feedbackRequest, interviewFeedback, message, notification, outboxEvent, responsePromise, task, webhookDelivery } = schema;
+  const { application, applicationStageEvent, candidate, candidateNote, consentToken, conversation, cvExtraction, dataExport, feedbackRequest, interviewFeedback, message, notification, outboxEvent, responsePromise, task, webhookDelivery } = schema;
 
   /** Outbox events (and their deliveries) whose data mentions one of these ids under `key`. */
   const deleteEvents = async (organizationId: string, key: 'applicationId' | 'candidateId', ids: readonly string[]): Promise<void> => {
@@ -72,6 +73,10 @@ export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
       await db.delete(applicationStageEvent).where(and(eq(applicationStageEvent.organizationId, organizationId), inArray(applicationStageEvent.applicationId, ids)));
       await db.delete(application).where(and(eq(application.organizationId, organizationId), inArray(application.id, ids)));
       return rows.map((row) => row.cvKey);
+    },
+    async deleteDataExports(organizationId) {
+      const rows = await db.delete(dataExport).where(eq(dataExport.organizationId, organizationId)).returning({ id: dataExport.id });
+      return rows.map((row) => dataExportKey(organizationId, row.id));
     },
     async deleteCandidate(organizationId, candidateId) {
       await db.delete(candidateNote).where(and(eq(candidateNote.organizationId, organizationId), eq(candidateNote.candidateId, candidateId)));

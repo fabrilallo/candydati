@@ -22,6 +22,7 @@ import { createDrizzleConsentTokens, createDrizzleImportAnalyses, createDrizzleI
 import { createDrizzleJobApprovals, createDrizzleJobRequests, createDrizzleOrganizationSettings, createDrizzleStaleJobs } from './drizzle-job-requests.js';
 import { createDrizzleJobTemplates } from './drizzle-job-templates.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
+import { createDrizzleJobTeams } from './drizzle-job-teams.js';
 import { createDrizzleMemberDirectory } from './drizzle-members.js';
 import { createDrizzleMessages } from './drizzle-messages.js';
 import { createDrizzleNotifications } from './drizzle-notifications.js';
@@ -36,6 +37,7 @@ import { createDrizzleUserDirectory } from './drizzle-user-directory.js';
 import { createDrizzleWebhookDeliveries, createDrizzleWebhookEndpoints } from './drizzle-webhooks.js';
 import { toSqlExecutor } from './sql-executor.js';
 import { createDrizzleStuckWork } from './drizzle-stuck-work.js';
+import { createDrizzleSecuritySettings } from './drizzle-security-settings.js';
 
 /** Jobs, organizations, approvals, automation and webhooks. */
 const jobRepositories = (db: DbExecutor) => {
@@ -43,6 +45,7 @@ const jobRepositories = (db: DbExecutor) => {
   return {
     auditLog: createDrizzleAuditLog(db),
     jobs: createDrizzleJobs(db),
+    jobTeams: createDrizzleJobTeams(db),
     jobTemplates: createDrizzleJobTemplates(db),
     applicationCounts: createDrizzleApplicationCounts(db),
     organizations: createDrizzleOrganizationDirectory(db),
@@ -53,6 +56,7 @@ const jobRepositories = (db: DbExecutor) => {
     outbox: createDrizzleOutbox(db),
     approvals: createDrizzleJobApprovals(db),
     organizationSettings: createDrizzleOrganizationSettings(db),
+    securitySettings: createDrizzleSecuritySettings(db),
     jobRequests: createDrizzleJobRequests(db),
     staleJobs: createDrizzleStaleJobs(db),
     endpoints: createDrizzleWebhookEndpoints(db),

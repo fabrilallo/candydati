@@ -27,6 +27,7 @@ import { createInMemoryJobRepository, createInMemoryOrganizationDirectory } from
 import { createInMemoryPrivacyNoticeRepository } from './in-memory-privacy.js';
 import { createInMemoryOutbox, type InMemoryOutbox } from './in-memory-automation.js';
 import { createInMemoryMessageRepository, createMessagingStore, type MessagingStore } from './in-memory-messaging.js';
+import { createInMemoryJobTeams, type InMemoryJobTeams } from './in-memory-job-teams.js';
 import { createInMemoryTransaction } from './in-memory-transaction.js';
 
 /** Everything the Phase 2 use cases may ask for, fully in memory, with a counter-based id generator and a fixed clock. */
@@ -42,6 +43,7 @@ export type TestCandidateDeps = CandidateDeps &
     readonly outbox: InMemoryOutbox;
     readonly store: CandidateStore;
     readonly messagingStore: MessagingStore;
+    readonly jobTeams: InMemoryJobTeams;
   };
 
 export function createTestCandidateDeps(overrides: Partial<TestCandidateDeps> = {}): TestCandidateDeps {
@@ -55,6 +57,7 @@ export function createTestCandidateDeps(overrides: Partial<TestCandidateDeps> = 
     auditLog,
     store,
     transaction: createInMemoryTransaction(),
+    jobTeams: createInMemoryJobTeams([], { store }),
     messagingStore,
     outbox,
     messages: createInMemoryMessageRepository(messagingStore),

@@ -81,7 +81,8 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
 
 <template>
   <div class="grid gap-6" data-testid="candidate-detail">
-    <div v-if="c.errorKey.value" class="grid gap-3">
+    <NotAccessible v-if="c.errorKey.value === 'errors.notFound'" back-to="/app/candidates" back-key="notAccessible.backCandidates" />
+    <div v-else-if="c.errorKey.value" class="grid gap-3">
       <FormAlert :message-key="c.errorKey.value" />
       <div><Button variant="outline" @click="() => c.refresh()">{{ t('common.retry') }}</Button></div>
     </div>
@@ -133,7 +134,7 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
 
       <UnderlineTabs v-model="tab" :items="tabs" :label="t('candidate.tabs.label')" />
 
-      <CandidateProfile v-if="tab === 'profile'" :detail="detail" :current="current" :now="now" />
+      <CandidateProfile v-if="tab === 'profile'" :detail="detail" :current="current" :now="now" :can-update="can(role, 'candidate:update')" @updated="c.replace" />
       <CvPanel v-else-if="tab === 'cv' && current" :application="current" />
       <NotesFeed
         v-else-if="tab === 'notes'"

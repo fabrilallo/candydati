@@ -46,14 +46,23 @@ export function createInMemoryJobRequests(initial: readonly JobRequest[] = []): 
   };
 }
 
-export function createInMemoryOrganizationSettings(initial: Readonly<Record<string, OrganizationSettings>> = {}): OrganizationSettingsRepository {
-  const rows = cell<Readonly<Record<string, OrganizationSettings>>>({ ...initial });
+const DEFAULT_SETTINGS: OrganizationSettings = { requireApproval: false, restrictRecruitersToTeam: false };
+
+export function createInMemoryOrganizationSettings(initial: Readonly<Record<string, Partial<OrganizationSettings>>> = {}): OrganizationSettingsRepository {
+  const rows = cell<Readonly<Record<string, OrganizationSettings>>>(
+    Object.fromEntries(Object.entries(initial).map(([id, settings]) => [id, { ...DEFAULT_SETTINGS, ...settings }])),
+  );
   return {
     async get(organizationId) {
-      return rows.get()[organizationId] ?? { requireApproval: false };
+      return rows.get()[organizationId] ?? DEFAULT_SETTINGS;
     },
     async setRequireApproval(organizationId, value) {
-      const next = { requireApproval: value };
+      const next = { ...(rows.get()[organizationId] ?? DEFAULT_SETTINGS), requireApproval: value };
+      rows.set({ ...rows.get(), [organizationId]: next });
+      return next;
+    },
+    async setRestrictRecruitersToTeam(organizationId, value) {
+      const next = { ...(rows.get()[organizationId] ?? DEFAULT_SETTINGS), restrictRecruitersToTeam: value };
       rows.set({ ...rows.get(), [organizationId]: next });
       return next;
     },

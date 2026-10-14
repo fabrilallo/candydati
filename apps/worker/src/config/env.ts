@@ -1,4 +1,4 @@
-import { loadPlatformConfig, type PlatformConfig } from '@tt/domain';
+import { loadPlatformConfig, productionIssues, type PlatformConfig } from '@tt/domain';
 import { loadEmailConfig, loadS3Config, type EmailConfig, type S3Config } from '@tt/providers';
 import { z } from 'zod';
 
@@ -72,6 +72,9 @@ export const loadEnv = (source: Readonly<Record<string, string | undefined>>): W
   if (!result.success) {
     throw new Error(`Invalid worker environment: ${describeIssues(result.error.issues, normalized)}`);
   }
+  // Weak secrets, an http PLATFORM_URL (links in emails) and EMAIL_PROVIDER=log are refused in production.
+  const refused = productionIssues(normalized, ['PLATFORM_URL']);
+  if (refused.length > 0) throw new Error(`Invalid worker environment: ${refused.join('; ')}`);
   return Object.freeze({
     ...result.data,
     s3: parseS3(normalized),

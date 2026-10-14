@@ -28,6 +28,9 @@ export const approveJobRequestPath = (id: string): string => `${jobRequestPath(i
 export const rejectJobRequestPath = (id: string): string => `${jobRequestPath(id)}/reject`
 export const convertJobRequestPath = (id: string): string => `${jobRequestPath(id)}/convert`
 export const APPROVAL_SETTINGS_PATH = '/api/v1/settings/approval'
+export const ACCESS_SETTINGS_PATH = '/api/v1/settings/access'
+export const jobTeamPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/team`
+export const jobTeamMemberPath = (jobId: string, userId: string): string => `${jobTeamPath(jobId)}/${enc(userId)}`
 export const jobApprovalPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/approval`
 export const jobApprovalRequestPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/approval-request`
 export const STALE_JOBS_PATH = '/api/v1/jobs/stale'

@@ -17,6 +17,8 @@ export interface World {
   readonly job: PublishedJob;
   /** Registers a user of the same organization with `role`. */
   member(role: string): Promise<TestUser>;
+  /** Puts `user` on the team of `jobId` (default: the world's job), as the owner would from the Team tab. */
+  joinTeam(user: TestUser, role: 'hiring_manager' | 'interviewer' | 'recruiter', jobId?: string): Promise<void>;
   /** Public application as a candidate: multipart with `data` and `cv`. */
   submit(form?: Record<string, unknown>, options?: ApplyOptions): ReturnType<FastifyInstance['inject']>;
 }
@@ -43,6 +45,14 @@ export async function publishJob(owner: TestUser, title = 'Backend Developer'): 
   return { id: job.id, slug: job.slug };
 }
 
+/** The user id behind a signed-in test user (Better Auth answers the session as plain JSON). */
+export async function userIdOf(user: TestUser): Promise<string> {
+  const session = (await user.get('/api/auth/get-session')).body as unknown as { user?: { id?: string } } | null;
+  const id = session?.user?.id;
+  if (!id) throw new Error('no session');
+  return id;
+}
+
 /** An organization with an owner, a privacy notice (v1) and one published job. */
 export async function createWorld(t: TestApp, orgName = 'Acme'): Promise<World> {
   const owner = await new TestUser(t.app, uniqueEmail('owner'), 'Owner').signUp();
@@ -66,5 +76,9 @@ export async function createWorld(t: TestApp, orgName = 'Acme'): Promise<World> 
     const user = await new TestUser(t.app, uniqueEmail(role), role).signUp();
     return user.joinAs(owner, role);
   };
-  return { t, owner, slug: owner.organizationSlug, job, member, submit };
+  const joinTeam: World['joinTeam'] = async (user, role, jobId = job.id) => {
+    const reply = await owner.put(`/api/v1/jobs/${jobId}/team/${await userIdOf(user)}`, { role });
+    if (reply.status !== 200) throw new Error(`join team failed: ${reply.status} ${JSON.stringify(reply.body)}`);
+  };
+  return { t, owner, slug: owner.organizationSlug, job, member, submit, joinTeam };
 }

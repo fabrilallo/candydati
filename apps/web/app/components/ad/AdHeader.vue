@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { JobContent } from '@tt/domain'
 import { formatDate } from '@/lib/format'
+import { safeImageUrl } from '@/lib/safe-url'
 
 const props = defineProps<{
   title: string
@@ -25,8 +26,8 @@ const roleLine = computed(() => {
   <header class="grid gap-4">
     <p class="flex items-center gap-2.5 text-sm font-medium text-muted-foreground">
       <img
-        v-if="organization.logo"
-        :src="organization.logo"
+        v-if="safeImageUrl(organization.logo)"
+        :src="safeImageUrl(organization.logo) ?? undefined"
         :alt="ad.x('careers.logo', { organization: organization.name })"
         class="size-8 rounded-md border bg-card object-contain"
         width="32"

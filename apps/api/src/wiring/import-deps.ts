@@ -25,7 +25,7 @@ export interface ImportInputs {
 /** Batches, items and tokens on Postgres. The commit itself runs in the worker. */
 export function createImportDeps({ uow, files, queue }: ImportInputs): ImportWiring {
   const r = uow.repositories;
-  const core = { auditLog: r.auditLog, transaction: uow.transaction };
+  const core = { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams };
   const clock = { newId: randomUUID, now: () => new Date() };
   const { jobs, candidates, applications, erasure } = r;
   return {

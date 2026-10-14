@@ -1,5 +1,5 @@
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
-import { linkIn, messagesTo } from './mailpit';
+import { linkIn, waitForMail } from './mailpit';
 import { identity, orgIdentity, type Identity } from './unique';
 import { PASSWORD } from './env';
 import { isolateClient } from './client';
@@ -10,13 +10,25 @@ export interface Workspace {
   readonly org: { readonly name: string; readonly slug: string };
 }
 
-/** Signs up through the UI and lands on onboarding. */
+/** Path and query of an absolute link from an email, so the app's router can open it. */
+const pathOf = (link: string): string => {
+  const url = new URL(link);
+  return `${url.pathname}${url.search}`;
+};
+
+/**
+ * Signs up through the UI, then confirms the address like a person: opens the link of the confirmation email from
+ * Mailpit, which signs in and lands on onboarding (no session exists before that).
+ */
 export const signUp = async (page: Page, who: Identity): Promise<void> => {
   await load(page, '/signup');
   await page.locator('#name').fill(who.name);
   await page.locator('#email').fill(who.email);
   await page.locator('#password').fill(who.password);
   await page.locator('form button[type=submit]').click();
+  await page.waitForURL(/\/verify-email/);
+  const mail = await waitForMail(who.email, { subject: /conferma|confirm/i });
+  await page.goto(pathOf(linkIn(mail, /\/api\/auth\/verify-email/)));
   await page.waitForURL(/\/(onboarding|app)/);
 };
 
@@ -55,22 +67,8 @@ export const newContext = async (browser: Browser): Promise<{ context: BrowserCo
   return { context, page: await context.newPage() };
 };
 
-/**
- * The accept link of an invitation. This stack logs invitations instead of emailing them (`createLogEmailSender`),
- * so, unless a mail with the link exists, it is read from the inviter's own organization through the auth api,
- * the same data the accept page uses: `/accept-invitation/{id}`.
- */
-export const invitationLink = async (inviter: Page, email: string): Promise<string> => {
-  const [mail] = await messagesTo(email);
-  if (mail) {
-    const response = await fetch(`${process.env.MAILPIT_URL ?? 'http://localhost:8025'}/api/v1/message/${mail.ID}`);
-    return linkIn((await response.json()) as never, /accept-invitation\//);
-  }
-  const body = await inviter.evaluate(async () => {
-    const response = await fetch('/api/auth/organization/get-full-organization', { credentials: 'same-origin' });
-    return (await response.json()) as { invitations?: { id: string; email: string; status: string }[] };
-  });
-  const invitation = body.invitations?.find((i) => i.email === email && i.status === 'pending');
-  if (!invitation) throw new Error(`No pending invitation for ${email}`);
-  return `/accept-invitation/${invitation.id}`;
+/** The accept link of an invitation, from the email the invitee received (Mailpit). `inviter` is kept for the call sites. */
+export const invitationLink = async (_inviter: Page, email: string): Promise<string> => {
+  const mail = await waitForMail(email, { subject: /invit/i });
+  return pathOf(linkIn(mail, /\/accept-invitation\//));
 };

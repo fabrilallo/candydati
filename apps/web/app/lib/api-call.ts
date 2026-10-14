@@ -28,6 +28,8 @@ const CODE_KEYS: Readonly<Record<string, string>> = {
   not_found: 'errors.notFound',
   forbidden: 'errors.forbidden',
   conflict: 'errors.conflict',
+  two_factor_required: 'errors.twoFactorRequired',
+  email_not_verified: 'errors.emailNotVerified',
 }
 
 /** Pure: translation key for a failure, by code first, then by HTTP status. */

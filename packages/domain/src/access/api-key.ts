@@ -6,6 +6,10 @@ export const API_KEY_SECRET_PREFIX = 'tt_';
 export const API_KEY_PREFIX_LENGTH = 8;
 export const API_KEY_RANDOM_LENGTH = 32;
 export const API_KEY_NAME_MAX = 80;
+/** A key lives this many days when its creator gives no expiry (the instance may lower it, API_KEY_DEFAULT_TTL_DAYS). */
+export const API_KEY_DEFAULT_TTL_DAYS = 90;
+/** No key lives longer than a year: a forgotten key dies on its own. */
+export const API_KEY_MAX_TTL_DAYS = 365;
 export const API_KEY_SECRET_PATTERN = new RegExp(
   `^${API_KEY_SECRET_PREFIX}([0-9A-Za-z]{${API_KEY_PREFIX_LENGTH}})_[0-9A-Za-z]{${API_KEY_RANDOM_LENGTH}}$`,
 );

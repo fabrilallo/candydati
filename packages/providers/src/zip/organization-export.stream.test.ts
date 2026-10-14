@@ -23,8 +23,15 @@ describe('organization export of a large organization', () => {
     let written = 0;
     let peak = 0;
     let archiveHead = new Uint8Array(0);
-    const baseline = () => process.memoryUsage().heapUsed + process.memoryUsage().arrayBuffers;
+    // Retained memory, not allocation churn: collect before each sample (the test file runs with --expose-gc), so
+    // garbage left by earlier tests in the same worker cannot fail it and real retention still would.
+    const gc = (globalThis as { gc?: () => void }).gc;
+    const baseline = () => {
+      gc?.();
+      return process.memoryUsage().heapUsed + process.memoryUsage().arrayBuffers;
+    };
     const start = baseline();
+    let chunks = 0;
     const streaming = {
       ...deps,
       zip: zipStreamFactory,
@@ -35,7 +42,8 @@ describe('organization export of a large organization', () => {
           for await (const chunk of source) {
             if (written === 0) archiveHead = chunk.slice(0, 4);
             written += chunk.byteLength;
-            peak = Math.max(peak, baseline() - start);
+            chunks += 1;
+            if (chunks % 64 === 0) peak = Math.max(peak, baseline() - start);
           }
           return written;
         },

@@ -1,7 +1,9 @@
 import { loadEmailConfig, loadS3Config, type EmailConfig, type S3Config } from '@tt/providers';
-import { loadPlatformConfig, type PlatformConfig } from '@tt/domain';
+import { API_KEY_MAX_TTL_DAYS, loadPlatformConfig, productionIssues, type PlatformConfig } from '@tt/domain';
 import { z } from 'zod';
 import { parseTrustProxy } from './trust-proxy.js';
+
+export const SIGNUP_MODES = ['open', 'invite_only'] as const;
 
 const splitList = (value: string | undefined): readonly string[] =>
   (value ?? '')
@@ -64,12 +66,28 @@ const envSchema = z.object({
   /** Applications the public form accepts per organization and per job in 24 hours. Above it the form answers 429. */
   APPLICATIONS_DAILY_MAX_PER_ORGANIZATION: dailyCap(500),
   APPLICATIONS_DAILY_MAX_PER_JOB: dailyCap(200),
+  /** Receipt emails the public form may queue per organization in 24 hours (the form is a way to mail strangers). */
+  RECEIPTS_DAILY_MAX_PER_ORGANIZATION: dailyCap(300),
+  /** Cloudflare Turnstile secret key. Set: the public application form needs a valid Turnstile answer. Empty = off (default). */
+  TURNSTILE_SECRET_KEY: z.string().trim().optional(),
+  /** `open`: anyone may create an account. `invite_only`: only with a pending invitation, or the very first account. */
+  SIGNUP_MODE: z.enum(SIGNUP_MODES).optional(),
+  /** Days a new API key lives when the caller gives no expiry (at most API_KEY_MAX_TTL_DAYS). */
+  API_KEY_DEFAULT_TTL_DAYS: z.coerce.number().int().min(1).max(API_KEY_MAX_TTL_DAYS).default(90),
+  /** MCP calls of model-backed tools (analyze_job_ad, publish_job) per API key and per organization in a day. */
+  MCP_MODEL_DAILY_BUDGET_PER_KEY: dailyCap(200),
+  MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION: dailyCap(1000),
+  /** Assistant chat requests per person and per organization in a day. */
+  ASSISTANT_DAILY_BUDGET_PER_USER: dailyCap(200),
+  ASSISTANT_DAILY_BUDGET_PER_ORGANIZATION: dailyCap(2000),
 }).refine(refuseOpenWebhooksInProduction, {
   path: ['WEBHOOKS_ALLOW_PRIVATE'],
   message: 'must not be true in production (it turns off the protection against requests to internal addresses)',
 });
 
-export type Env = Readonly<z.infer<typeof envSchema>> & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig };
+export type SignupMode = (typeof SIGNUP_MODES)[number];
+
+export type Env = Readonly<Omit<z.infer<typeof envSchema>, 'SIGNUP_MODE'>> & { readonly SIGNUP_MODE: SignupMode } & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig };
 
 type Source = Readonly<Record<string, string | undefined>>;
 
@@ -102,10 +120,14 @@ export function parseEnv(source: Source): Env {
   const clean = withoutEmptyStrings(source);
   const parsed = envSchema.safeParse(clean);
   if (!parsed.success) throw new Error(`Invalid environment: ${describeIssues(parsed.error)}`);
+  const refused = productionIssues(clean);
+  if (refused.length > 0) throw new Error(`Invalid environment: ${refused.join('; ')}`);
+  const production = parsed.data.NODE_ENV === 'production';
   return Object.freeze({
     ...parsed.data,
+    SIGNUP_MODE: parsed.data.SIGNUP_MODE ?? (production ? 'invite_only' : 'open'),
     platform: loadPlatformConfig(clean), s3: parseS3(clean),
-    email: parseEmail(clean, parsed.data.NODE_ENV === 'production'),
+    email: parseEmail(clean, production),
   });
 }
 

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { isPublicPath, loginLocation, resolveGuard, safeRedirect } from './auth-paths'
+import { isPublicPath, loginLocation, mayNeedTwoFactor, resolveGuard, safeRedirect, verificationCallback } from './auth-paths'
 
 const org = { id: 'o1', name: 'Acme', slug: 'acme' }
-const withOrg = { user: { id: 'u', name: 'Ada', email: 'a@b.co' }, organization: org, role: 'owner' as const }
+const withOrg = { user: { id: 'u', name: 'Ada', email: 'a@b.co', emailVerified: true, twoFactorEnabled: false }, organization: org, role: 'owner' as const }
 const withoutOrg = { ...withOrg, organization: null, role: null }
 
 describe('safeRedirect', () => {
@@ -62,6 +62,45 @@ describe('resolveGuard', () => {
   it('honours a safe redirect when a signed-in user lands on login', () => {
     expect(resolveGuard('/login', withoutOrg, '/accept-invitation/i1')).toBe('/accept-invitation/i1')
     expect(resolveGuard('/login', withoutOrg, '//evil.example')).toBe('/onboarding')
+  })
+})
+
+describe('account pages', () => {
+  it('lets anonymous visitors ask for a reset, reset, confirm the email and enter the second factor', () => {
+    for (const path of ['/forgot-password', '/reset-password', '/verify-email', '/two-factor']) expect(resolveGuard(path, null)).toBeNull()
+  })
+
+  it('keeps signed-in people out of the guest pages, but lets them reset or confirm', () => {
+    expect(resolveGuard('/forgot-password', withOrg)).toBe('/app')
+    expect(resolveGuard('/two-factor', withOrg)).toBe('/app')
+    expect(resolveGuard('/reset-password', withOrg)).toBeNull()
+    expect(resolveGuard('/verify-email', withOrg)).toBeNull()
+  })
+
+  it('sends a session of an unconfirmed address to the confirmation page, from everywhere', () => {
+    const unverified = { ...withOrg, user: { ...withOrg.user, emailVerified: false } }
+    expect(resolveGuard('/app/jobs', unverified)).toBe('/verify-email')
+    expect(resolveGuard('/', unverified)).toBe('/verify-email')
+    expect(resolveGuard('/login', unverified)).toBe('/verify-email')
+    expect(resolveGuard('/verify-email', unverified)).toBeNull()
+  })
+})
+
+describe('verificationCallback', () => {
+  it('lands on the inbox page with where to go next', () => {
+    expect(verificationCallback(null)).toBe('/verify-email?next=%2Fonboarding')
+    expect(verificationCallback('/accept-invitation/i1')).toBe('/verify-email?next=%2Faccept-invitation%2Fi1')
+  })
+})
+
+describe('mayNeedTwoFactor', () => {
+  it('is true for owners and admins without a second factor on app pages, except the security page itself', () => {
+    expect(mayNeedTwoFactor('/app/jobs', withOrg)).toBe(true)
+    expect(mayNeedTwoFactor('/app/settings/security', withOrg)).toBe(false)
+    expect(mayNeedTwoFactor('/onboarding', withOrg)).toBe(false)
+    expect(mayNeedTwoFactor('/app/jobs', { ...withOrg, role: 'recruiter' })).toBe(false)
+    expect(mayNeedTwoFactor('/app/jobs', { ...withOrg, user: { ...withOrg.user, twoFactorEnabled: true } })).toBe(false)
+    expect(mayNeedTwoFactor('/app/jobs', null)).toBe(false)
   })
 })
 

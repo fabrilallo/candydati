@@ -11,26 +11,31 @@ Variables without a default are required or optional as described; see `.env.exa
 | `AGENT_MODEL` | api |  | Mastra provider/model of the internal assistant. Empty: assistant off. |
 | `ANTHROPIC_API_KEY` | api, worker |  | API key for anthropic/* models. |
 | `API_HOST` | api | `0.0.0.0` | Address the api binds to. |
-| `API_KEY_RATE_LIMIT` | api |  | Requests per minute allowed to each API key. |
+| `API_KEY_DEFAULT_TTL_DAYS` | api | `90` | Days an API key lives when its creator gives no expiry (1-365). Every key expires, at most after a year. |
+| `API_KEY_RATE_LIMIT` | api |  | Requests per minute allowed to each API key (each MCP tool call counts as one). |
 | `API_PORT` | api | `4000` | Port the api listens on. |
 | `APPLICATIONS_DAILY_MAX_PER_JOB` | api |  | Applications the public form accepts per job in 24 hours. |
 | `APPLICATIONS_DAILY_MAX_PER_ORGANIZATION` | api |  | Applications the public form accepts per organization in 24 hours. |
-| `BETTER_AUTH_SECRET` | api |  | Session signing secret, at least 32 characters. |
-| `BETTER_AUTH_URL` | api |  | The WEB origin: the browser reaches the api through the web proxy. |
+| `ASSISTANT_DAILY_BUDGET_PER_ORGANIZATION` | api |  | Assistant chat requests per organization per UTC day. |
+| `ASSISTANT_DAILY_BUDGET_PER_USER` | api |  | Assistant chat requests per person per UTC day. |
+| `BETTER_AUTH_SECRET` | api |  | Session signing secret, at least 32 random characters. Production refuses example (change-me) and low-entropy values. |
+| `BETTER_AUTH_URL` | api |  | The WEB origin: the browser reaches the api through the web proxy. Must be https in production (Secure cookies). |
 | `CV_MODEL_DAILY_BUDGET` | worker | `1000` | Worker: CV extractions per organization and day that may call the model. |
-| `DATABASE_URL` | api, worker |  | Postgres connection string. |
+| `DATABASE_URL` | api, worker |  | Postgres connection string. In production its password must be at least 16 random characters, not the example. |
 | `DEEPSEEK_API_KEY` | api, worker |  | API key for deepseek/* models. |
 | `DELIVERY_LOG_RETENTION_DAYS` | worker | `30` | Days after which delivered outbox events and webhook delivery records are pruned by the daily job (default 30). |
 | `EMAIL_DOMAIN` | api, worker |  | Sending domain. |
 | `EMAIL_FROM_LOCAL` | api, worker | `noreply` | Local part of the default sender. |
 | `EMAIL_INBOUND_DOMAIN` | api, worker |  | Domain that receives replies (reply+<token>@<domain>). |
-| `EMAIL_PROVIDER` | api, worker | `log` | smtp, resend or log (log sends nothing). |
+| `EMAIL_PROVIDER` | api, worker | `log` | smtp, resend or log (log sends nothing; refused in production, where verification, reset and invitation emails must arrive). |
 | `FAST_MODEL` | api, worker |  | Mastra provider/model for the ad quality score and CV structuring. Empty: rules only, plain text extraction. |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | api, worker |  | API key for google/* models. |
 | `GROQ_API_KEY` | api, worker |  | API key for groq/* models. |
 | `IMPORT_STALE_DAYS` | worker | `7` | Worker: days after which an import never committed is purged. |
-| `INBOUND_WEBHOOK_SECRET` | api, worker |  | Inbound email webhook secret, at least 32 characters; required in production. |
+| `INBOUND_WEBHOOK_SECRET` | api, worker |  | Inbound email webhook secret, at least 32 random characters; required in production, where example and low-entropy values are refused. |
 | `LOG_LEVEL` | api, worker | `info` | Log level: fatal, error, warn, info, debug, trace or silent. |
+| `MCP_MODEL_DAILY_BUDGET_PER_KEY` | api |  | MCP calls of model-backed tools (analyze_job_ad, publish_job) per API key per UTC day, when FAST_MODEL is set. |
+| `MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION` | api |  | MCP calls of model-backed tools per organization per UTC day, when FAST_MODEL is set. |
 | `MISTRAL_API_KEY` | api, worker |  | API key for mistral/* models. |
 | `NODE_ENV` | api, worker | `development` | development, test or production. |
 | `NUXT_API_INTERNAL_URL` | web |  | Origin of the Fastify api that the web proxy forwards /api/** and /mcp to. |
@@ -41,6 +46,7 @@ Variables without a default are required or optional as described; see `.env.exa
 | `NUXT_PUBLIC_SITE_URL` | web |  | Public URL of the site (canonical links, sitemap). |
 | `NUXT_PUBLIC_SOURCE_URL` | web |  | Where repository files can be browsed (e.g. https://host/blob/main); empty: paths as text. |
 | `NUXT_PUBLIC_TIME_ZONE` | web |  | IANA time zone dates are shown in. |
+| `NUXT_PUBLIC_TURNSTILE_SITE_KEY` | web |  | Cloudflare Turnstile site key: the application form shows the check and the page policy allows challenges.cloudflare.com. Empty: off. |
 | `NUXT_TRUST_CLOUDFLARE` | web |  | true only when the site is reachable through Cloudflare alone: cf-connecting-ip is then the client IP. |
 | `OPENAI_API_KEY` | api, worker |  | API key for openai/* models. |
 | `OPENROUTER_API_KEY` | api, worker |  | API key for openrouter/* models. |
@@ -49,7 +55,8 @@ Variables without a default are required or optional as described; see `.env.exa
 | `PLATFORM_NAME` | api, worker | `PLATFORM_CODENAME` | Product name shown in the UI and emails. |
 | `PLATFORM_SUPPORT_EMAIL` | api, worker |  | Support address shown to users. |
 | `PLATFORM_TIME_ZONE` | api, worker |  | IANA time zone dates are shown in inside emails (default Europe/Rome). |
-| `PLATFORM_URL` | api, worker | `http://localhost:3000` | Public URL of the installation. |
+| `PLATFORM_URL` | api, worker | `http://localhost:3000` | Public URL of the installation (links in emails). Must be https in production. |
+| `RECEIPTS_DAILY_MAX_PER_ORGANIZATION` | api |  | Application receipt emails the public form may queue per organization in 24 hours (the form is otherwise a way to mail strangers). |
 | `RESEND_API_KEY` | api, worker |  | Resend API key (EMAIL_PROVIDER=resend). |
 | `RUN_MIGRATIONS` | api |  | Apply database migrations at api start. Any of false, 0, off, no turns it off. |
 | `S3_ACCESS_KEY` | api, worker |  | S3 access key. |
@@ -57,7 +64,8 @@ Variables without a default are required or optional as described; see `.env.exa
 | `S3_ENDPOINT` | api, worker |  | S3-compatible endpoint (MinIO in development and self-hosting). |
 | `S3_FORCE_PATH_STYLE` | api, worker | `false` | Path-style S3 URLs (needed by MinIO). |
 | `S3_REGION` | api, worker | `us-east-1` | S3 region. |
-| `S3_SECRET_KEY` | api, worker |  | S3 secret key. |
+| `S3_SECRET_KEY` | api, worker |  | S3 secret key. In production at least 16 random characters, not the example. |
+| `SIGNUP_MODE` | api |  | open (anyone may create an account) or invite_only (only with a pending invitation, plus the very first account). Default: invite_only in production, open elsewhere. |
 | `SMTP_HOST` | api, worker |  | SMTP host (EMAIL_PROVIDER=smtp). |
 | `SMTP_PASSWORD` | api, worker |  | SMTP password. |
 | `SMTP_PORT` | api, worker |  | SMTP port. |
@@ -65,6 +73,7 @@ Variables without a default are required or optional as described; see `.env.exa
 | `SMTP_USER` | api, worker |  | SMTP user. |
 | `TRUST_PROXY` | api |  | Proxies whose X-Forwarded-For is believed: a hop count or addresses/CIDRs. Empty: loopback only. Never "true". |
 | `TRUSTED_ORIGINS` | api |  | Extra browser origins allowed by CORS and Better Auth, comma-separated URLs. |
+| `TURNSTILE_SECRET_KEY` | api |  | Cloudflare Turnstile secret key. Set: the public application form needs a valid Turnstile answer (also set NUXT_PUBLIC_TURNSTILE_SITE_KEY). Empty: off. |
 | `WEB_ORIGIN` | api |  | Origin of the web app (CORS and trusted origin). |
 | `WEBHOOKS_ALLOW_PRIVATE` | api, worker |  | Development only: webhooks may target localhost and private addresses. Refused in production. |
 | `XAI_API_KEY` | api, worker |  | API key for xai/* models. |

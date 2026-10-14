@@ -17,6 +17,8 @@ export async function queryStageAdvances(db: DbExecutor, query: ReportAggregateQ
   const from = query.from.toISOString();
   const to = query.to.toISOString();
   const job = query.jobId === undefined ? sql`` : sql`and a.job_id = ${query.jobId}`;
+  const ids = query.jobIds;
+  const jobs = ids === undefined ? sql`` : ids.length === 0 ? sql`and false` : sql`and a.job_id in (${sql.join(ids.map((id) => sql`${id}`), sql`, `)})`;
   const result = await db.execute<AdvanceRow>(sql`
     select a.job_id, a.to_stage_id as from_stage_id,
       case when b.outcome = 'hired' then null else b.to_stage_id end as to_stage_id,
@@ -25,7 +27,7 @@ export async function queryStageAdvances(db: DbExecutor, query: ReportAggregateQ
     join application_stage_event b
       on b.organization_id = a.organization_id and b.application_id = a.application_id
       and b.id <> a.id and b.occurred_at >= a.occurred_at
-    where a.organization_id = ${query.organizationId} ${job}
+    where a.organization_id = ${query.organizationId} ${job} ${jobs}
       and a.to_stage_id is not null
       and a.occurred_at >= ${from}::timestamptz and a.occurred_at <= ${to}::timestamptz
       and b.occurred_at >= ${from}::timestamptz and b.occurred_at <= ${to}::timestamptz

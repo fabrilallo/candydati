@@ -298,7 +298,9 @@ describe('createDrizzleApplicationIntake: outbox in the same transaction', () =>
     );
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ type: 'application.received', response_due_at: D('2026-06-06T10:00:00Z') });
-    await expect(submitApplication(deps, submission)).rejects.toThrow();
+    const real = createDrizzleApplicationIntake(handle.db);
+    const failing = { ...deps, newId: () => randomUUID(), intake: { run: <T>(work: Parameters<typeof real.run<T>>[0]) => real.run(async (repositories) => { await work(repositories); throw new Error('boom after writes'); }) } };
+    await expect(submitApplication(failing, { ...submission, form: validApplicationForm({ email: 'other@example.com' }) })).rejects.toThrow('boom after writes');
     expect((await handle.pool.query('select 1 from outbox_event where organization_id = $1', [org])).rowCount).toBe(1);
   });
 });

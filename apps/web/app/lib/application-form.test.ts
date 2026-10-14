@@ -120,6 +120,15 @@ describe('submitApplication', () => {
     expect(JSON.parse(String(body.get('data')))).toEqual({ ...form, origin: 'linkedin' })
   })
 
+  it('adds the Turnstile answer only when there is one', async () => {
+    const request = vi.fn<JobApiRequest>(async () => ({ status: 201, body: { success: true, data: { received: true }, error: null } }))
+    await submitApplication(request, 'acme', 'b', form, file, undefined, 'tok')
+    await submitApplication(request, 'acme', 'b', form, file, undefined, '')
+    const data = (index: number) => JSON.parse(String((request.mock.calls[index]?.[1]?.body as FormData).get('data')))
+    expect(data(0)).toEqual({ ...form, turnstileToken: 'tok' })
+    expect(data(1)).toEqual(form)
+  })
+
   it('throws a mapped failure', async () => {
     const request = vi.fn<JobApiRequest>(async () => ({ status: 409, body: { success: false, data: null, error: { code: 'conflict', message: 'already_applied' } } }))
     await expect(submitApplication(request, 'acme', 'b', form, file)).rejects.toMatchObject({ key: 'apply.errors.alreadyApplied' })

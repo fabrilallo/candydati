@@ -1,4 +1,5 @@
 import type { CvMediaType } from '@tt/domain';
+import { isWithinOoxmlBudget } from '../zip/bounded-inflate.js';
 
 export const CV_TEXT_MAX_CHARS = 60_000;
 
@@ -26,6 +27,8 @@ async function pdfText(bytes: Uint8Array): Promise<string> {
 }
 
 async function docxText(bytes: Uint8Array): Promise<string> {
+  // mammoth inflates whatever the archive holds: count the real size first, with a cap (zip bombs lie in their headers).
+  if (!isWithinOoxmlBudget(bytes)) throw new Error('The DOCX inflates to more than allowed.');
   const mammoth = (await import('mammoth')).default;
   const { value } = await mammoth.extractRawText({ buffer: Buffer.from(bytes) });
   return value;

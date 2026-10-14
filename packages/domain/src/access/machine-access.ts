@@ -22,6 +22,8 @@ export const MACHINE_FORBIDDEN_PERMISSIONS: readonly Permission[] = PERMISSIONS.
       'api_key:manage',
       'import:manage',
       'job:approve',
+      // Who sees which candidates is an access decision: it stays with a person.
+      'job_team:manage',
     ].includes(permission),
 );
 

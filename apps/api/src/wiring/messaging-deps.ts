@@ -29,7 +29,7 @@ export interface MessagingInputs {
 /** Templates, settings, conversations and messages on Postgres; sender and identity are injected. */
 export function createMessagingDeps({ env, uow, queue, sender, identity, onReceiptError }: MessagingInputs): MessagingWiring {
   const r = uow.repositories;
-  const core = { auditLog: r.auditLog, transaction: uow.transaction };
+  const core = { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams };
   const config = toMessagingConfig(env.platform, env.email);
   const clock = { newId: randomUUID, now: () => new Date() };
   const { candidates, applications, conversations, messages, templates } = r;
@@ -54,6 +54,6 @@ export function createMessagingDeps({ env, uow, queue, sender, identity, onRecei
       ...clock,
     },
     inboundDeps: { ...core, candidates, applications, conversations, messages, ...clock },
-    receipts: { templates, conversations, messages, config, newToken: newConversationToken, onError: onReceiptError },
+    receipts: { templates, conversations, messages, config, newToken: newConversationToken, dailyMaxPerOrganization: env.RECEIPTS_DAILY_MAX_PER_ORGANIZATION, onError: onReceiptError },
   };
 }

@@ -1,6 +1,7 @@
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { AppContext } from '../app-context.js';
+import { mcpRequestCost } from './batch.js';
 import { buildMcpServer } from './server.js';
 
 export const MCP_PATH = '/mcp';
@@ -9,12 +10,15 @@ const NOT_ALLOWED = { jsonrpc: '2.0', error: { code: -32000, message: 'Method no
 
 /**
  * Streamable HTTP, stateless: a new server and transport per request, torn down when the response closes. API key
- * only (cookies are never read). Authentication, the per-key rate limit and every permission check happen before and
- * inside the use cases, exactly as on REST.
+ * only (cookies are never read). Authentication, the per-key rate limit (one unit per tool call, batches capped at
+ * MCP_MAX_BATCH) and every permission check happen before and inside the use cases, exactly as on REST.
  */
 export function registerMcpRoute(app: FastifyInstance, ctx: AppContext): void {
   app.post(MCP_PATH, async (request, reply) => {
-    const actor = await ctx.resolveKeyActor(request);
+    const verdict = mcpRequestCost(request.body);
+    if (!verdict.ok) return reply.status(verdict.status).send(verdict.body);
+    // Every tool call of a batch counts against the key's rate limit.
+    const actor = await ctx.resolveKeyActor(request, verdict.cost);
     const server = buildMcpServer(ctx.env.platform.name, { app: ctx, actor }, (error, tool) =>
       request.log.error({ err: error, tool }, 'mcp tool failed'),
     );

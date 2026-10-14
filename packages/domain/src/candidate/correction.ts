@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { httpUrlSchema } from '../url/http-url.js';
 import { personNameSchema } from './person-name.js';
 
 /** Fields a recruiter may correct on the candidate's request (GDPR art. 16). `null` clears phone or LinkedIn. */
@@ -17,7 +18,7 @@ export const candidateCorrectionSchema = z
       .regex(/^\+?[0-9 ()-]{6,20}$/, 'phone')
       .nullable()
       .optional(),
-    linkedinUrl: z.url().max(300).nullable().optional(),
+    linkedinUrl: httpUrlSchema.max(300).nullable().optional(),
   })
   .refine((value) => Object.values(value).some((field) => field !== undefined), 'at_least_one_field');
 export type CandidateCorrection = z.infer<typeof candidateCorrectionSchema>;

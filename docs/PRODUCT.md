@@ -80,7 +80,7 @@ Advanced career site builder, automatic CV screening or ranking, email campaigns
 
 ### 3.3 Deferred
 
-Scorecards and interview kits. Interview scheduling through an integration with a scheduling service rather than a proprietary calendar sync. Dedicated importers for individual ATS products.
+Scorecards and interview kits. Restricted stages (feedback and notes of a stage visible only to owners, admins and the hiring manager, §6.2). Interview scheduling through an integration with a scheduling service rather than a proprietary calendar sync. Dedicated importers for individual ATS products.
 
 ## 4. The job ad standard
 
@@ -165,11 +165,56 @@ Roles. The client company is the data controller. In the hosted offering the ser
 | Candidate rights | On request to the contact given in the notice; the recruiter carries them out from the candidate profile: data export, correction, erasure, consent withdrawal |
 | Audit log | Who viewed, changed, exported or deleted what. Append only |
 | Minimisation | No field for special-category data; CV extraction discards photo, date of birth, marital status |
-| Access | Permissions by role and by ad; restricted stages |
+| Access | Permissions by role and by ad (§6.2) |
 | Language models | Configurable provider, listed as a sub-processor; no data used for training; a local model is possible when self-hosting |
 | Automated decisions | None (§2.4) |
 | Documents | Data processing agreement template, sub-processor list, record of processing activities (`docs/legal/`) |
+| Public form | A submission never rewrites an existing person's profile: the typed contact data stays on the application and a recruiter reviews it ("new details from the application"). An existing open application is answered like a success (nothing reveals who applied), receipts have a per-recipient and a per-organization daily cap, and an optional Cloudflare Turnstile check can be switched on |
 | Imported data | Consent marked "to be renewed", with a reconfirmation email; imported candidates stay visible only in the pipeline of their import until they reconfirm, and their data is erased if they do not |
+
+### 6.1 What erasure cannot reach
+
+Erasure removes the candidate and everything hanging from the applications in the database and in file storage (CVs, and
+the organization exports generated so far, which are deleted whenever any candidate is erased: generate a new one). It
+cannot reach copies that left the system:
+
+- **Webhooks already delivered.** The receiving system keeps what it received (events carry ids and counts only, but
+  the receiver may have looked the person up).
+- **Emails already sent.** Receipts, replies and reconfirmation requests sit in the recipients' mailboxes and in the
+  sending provider's logs (SMTP server, Resend) for as long as that provider keeps them; Mailpit in development keeps
+  them until it is restarted.
+- **Provider copies.** A CV text sent to a language model for extraction or the assistant stays under the provider's
+  own retention (choose a provider with no training and short retention, or a local model).
+- **Exports and downloads people made.** A candidate export or an organization export that a recruiter saved to a
+  disk, and database backups, are the operator's to purge (backups age out with their rotation).
+
+The privacy notice template tells candidates the same.
+
+### 6.2 Access by role and by ad
+
+The organization role says what a person may do; the team of a job says on which jobs they may do it. This is enforced
+in core, on every surface (interface, API, MCP, assistant), for candidates, applications, CVs, messages, notes, feedback,
+tasks, notifications, the attention list, pipelines, search, exports, imports, automations and reports.
+
+- **Owners and admins** reach every job of the organization.
+- **Recruiters** reach every job too, unless the organization turns on "recruiters see only the jobs of their team"
+  (off by default); then they are scoped like the roles below.
+- **Hiring managers and interviewers** reach only the jobs whose team they are on. A person is on a job's team when
+  added to it (Team tab: hiring manager, interviewer or recruiter), when they created the job (added automatically,
+  also for a draft made from a hiring request, together with the requester), or when they interview at one of its stages
+  (implicitly, for as long as they are assigned to the stage).
+- A job outside one's scope does not exist: lists leave it out and opening it answers "not found". A candidate is visible
+  when at least one of their applications belongs to a reachable job, and the profile shows only those applications and
+  the notes, messages, feedback and tasks about them. A note on the candidate as a whole (not about an application) is
+  visible to scoped people only when they wrote it. Erasing a candidate as a scoped person erases only the applications
+  they reach. Exports of a candidate contain only what the exporter reaches; requests under the GDPR rights are best run
+  by an owner or admin, who reach everything.
+- **API keys and the assistant** have the scope of the person they act for, never more. Adding or removing team members
+  and the recruiter setting are decisions of a person: keys and the assistant cannot make them.
+- Team changes and the recruiter setting are in the audit log.
+- **Deferred: restricted stages.** Making the feedback and notes of a stage visible only to owners, admins and the job's
+  hiring manager is not implemented: notes are not tied to a stage today. Until then, everyone on a job's team sees all
+  of its feedback and notes.
 
 ## 7. Open source and hosted
 

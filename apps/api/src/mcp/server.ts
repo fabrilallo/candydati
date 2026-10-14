@@ -12,6 +12,7 @@ import {
   publishJobTool,
   updateJobTool,
 } from './tools-jobs.js';
+import { auditRead, spendModelBudget } from './tool-guards.js';
 import { failureOf, toolOk, type ToolContext, type ToolDefinition, type ToolResult } from './tool-support.js';
 
 export const MCP_SERVER_INSTRUCTIONS =
@@ -47,7 +48,11 @@ function register<S extends z.ZodRawShape>(
 ): void {
   const callback = async (args: unknown): Promise<ToolResult> => {
     try {
-      return toolOk(await definition.run(context, args as z.infer<z.ZodObject<S>>));
+      const refusal = definition.usesModel ? await spendModelBudget(context) : null;
+      if (refusal) return refusal;
+      const result = await definition.run(context, args as z.infer<z.ZodObject<S>>);
+      if (definition.readOnly) await auditRead(context, definition.name, args);
+      return toolOk(result);
     } catch (error) {
       const failure = failureOf(error);
       if (failure.unexpected) onUnexpected(error, definition.name);

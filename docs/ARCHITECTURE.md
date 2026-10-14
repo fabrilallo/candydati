@@ -55,8 +55,8 @@ only from loopback on the host.
 Every use case is declared with a `define*UseCase` helper (name, Zod input schema, required permission, audit descriptor,
 handler). The wrapper runs, in order:
 
-1. validate input;
-2. check the actor's permission (declared in `packages/domain/src/access/permissions.ts`, nowhere else);
+1. check the actor's permission on the role (declared in `packages/domain/src/access/permissions.ts`, nowhere else), before looking at the input: a role that may not do this learns nothing about the schema;
+2. validate input, then scope it to the actor's organization;
 3. open a unit of work (one DB transaction), except for read-only use cases and those declared with `transaction.skip`,
    which run without one;
 4. run the handler against ports (`deps.jobs`, `deps.applications`, ...);
@@ -67,12 +67,47 @@ handler). The wrapper runs, in order:
 REST routes, assistant tools and MCP tools call the same use cases, so permissions and audit are identical on every
 surface. Adapters contain no business rules.
 
+## Accounts and sign-in
+
+Better Auth (`apps/api/src/auth/create-auth.ts`) runs email + password with these rules:
+
+- **Verified address first.** Sign-up never creates a session: Better Auth emails a single-use link (24 hours) and the
+  link signs the person in. A sign-up with an address that already has an account answers exactly like a new one and
+  emails the owner instead, so sign-up reveals nothing. A session of an unconfirmed address (one older than this rule)
+  is refused by every `/api/v1` route with `403 email_not_verified`.
+- **Sign-up mode.** `SIGNUP_MODE=open` (default outside production) lets anyone register; `invite_only` (default in
+  production) accepts an address only with a pending invitation, plus the very first account of the instance, which
+  is how the first owner bootstraps it (`apps/api/src/auth/signup-policy.ts`).
+- **Invitations** are emailed through the configured EmailProvider (it/en) and accepted only by a confirmed account
+  whose address is the invited one. The accept link is never logged.
+- **Password reset**: `POST /api/auth/request-password-reset` always answers the same; the emailed token works once
+  for an hour and the reset signs out every session.
+- **Failed sign-ins** slow down further attempts instead of locking the account (`auth/sign-in-throttle.ts`): per
+  (email, client address) the wait doubles from 1 s up to 5 minutes after 5 failures; per account, across addresses,
+  up to 2 minutes after 20 failures, except for addresses that signed in to that account before, so a flood cannot
+  keep the owner out. After 10 failures the owner gets one email per hour. The counters live in Postgres
+  (`auth_throttle`), shared by every api instance; an in-memory store serves the tests.
+- **Two-factor (TOTP)** is optional, with backup codes (Better Auth `twoFactor` plugin). An organization can require it
+  for owners and admins (`organization_security_setting`); until they enrol, `/api/v1` answers them
+  `403 two_factor_required`.
+- **Account emails** (verification, reset, invitation, failed sign-ins) are sent in the background, so the answer's
+  timing does not depend on whether an address exists.
+- The routes that send email (sign-up, password reset, verification) have their own, smaller per-client budget.
+
 ## Organization isolation
 
 Every domain table has `organization_id`, and every adapter query filters by it. Organizations, members and
-invitations come from Better Auth's organization plugin. Roles map to permissions in one file; job-level and
-stage-level restrictions are checked in core. API keys belong to an organization and carry scopes, never more than the
-creating user's permissions.
+invitations come from Better Auth's organization plugin. Roles map to permissions in one file. API keys belong to an
+organization and carry scopes, never more than the creating user's permissions.
+
+Per-job access ([`PRODUCT.md`](PRODUCT.md) §6.2) is applied by the use case pipeline itself: before a handler runs,
+`scopeDeps` (`packages/core/src/access/scope-deps.ts`) replaces every repository of job or candidate data (`jobs`,
+`applications`, `candidates`, `candidateSearch`, `notes`, `messages`, `tasks`, `reports`, ...) with one limited to the jobs
+the actor reaches, resolved once per run from `job_team_member`, `job_stage_interviewer` and the organization setting
+(`access/job-scope.ts`). Owners, admins, unrestricted recruiters and the system get the repositories as they are. A
+handler cannot reach data outside the scope, and a job-scoped actor without the team repository fails closed. The test
+`access/job-scope-leak.test.ts` runs every use case a scoped role can run as the people of job A against the data of job
+B; a new use case must be added to it.
 
 ## Outbox and workers
 
@@ -95,6 +130,24 @@ and stale-job detection. Jobs are idempotent and keyed so a retry does not repea
 
 Public pages avoid unbounded query-string URL spaces and set cache headers and `noindex` where needed.
 
+## Web security headers and links
+
+- The web app sends, on every response, `X-Content-Type-Options: nosniff`, a `Permissions-Policy` and a `Referrer-Policy`
+  (`no-referrer` on `/consent`, `/feedback` and `/accept-invitation`, whose URLs carry a secret); HSTS when the site URL
+  is https. Pages also get a nonce-based CSP (`script-src 'self' 'nonce-...'`, no `unsafe-eval` in production,
+  `frame-ancestors 'none'`, `object-src 'none'`). `server/middleware/security-headers.ts` writes the headers and
+  `server/plugins/csp-nonce.ts` stamps the nonce on Nuxt's scripts. `/api/**` and `/mcp` keep the api's own headers (the CV
+  viewer is a same-origin frame). A CDN that caches HTML caches its nonce too: keep public HTML out of long shared caches.
+- Anything a stranger can type that ends up in a link is http(s) only (`httpUrlSchema` in `@tt/domain`), and templates
+  bind `href`/`src` from data only through `safeExternalUrl` / `safeImageUrl` (`app/lib/template-links.test.ts` fails on
+  any other binding). Organization logos are https only.
+- Logs never carry query parameters: the `err` serializer (`safeErrorSerializer`) logs a database error as SQLSTATE,
+  constraint and table only.
+- DOCX, XLSX and ZIP imports are inflated with the real output counted against a cap (`inflateBounded`), never trusting
+  the sizes in the archive headers.
+- The web proxy sets `X-Forwarded-Host`/`-Proto` from the configured site URL, never from the client's headers; the api
+  believes `X-Forwarded-For` only from the web container (`TT_WEB_IP` in the production compose).
+
 ## Assistant and MCP constraints
 
 - Models are reached only through Mastra with `provider/model` strings from env (`AGENT_MODEL`, `FAST_MODEL`). Empty
@@ -103,7 +156,13 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 - It never ranks, scores or rejects candidates. Any message to a candidate needs a person's confirmation.
 - CV and email content is data, not instructions. An adversarial eval suite checks this (`pnpm --filter @tt/api eval:agent`).
 - The conversation lives in the browser; the server stores nothing of it ([ADR 0007](adr/0007-stateless-assistant.md)).
-- MCP tools are thin wrappers on the same use cases, authorized by API key scopes.
+- MCP tools are thin wrappers on the same use cases, authorized by API key scopes. Each tool call of a JSON-RPC batch
+  counts against the key's per-minute limit and a batch holds at most 20 messages. Reads are audited as `mcp.read` with
+  the tool name and the ids asked for, never the returned data.
+- Paid model calls have daily budgets in Postgres (`usage_counter`, UTC day): MCP model-backed tools per key and per
+  organization (`MCP_MODEL_DAILY_BUDGET_*`), assistant chat requests per person and per organization
+  (`ASSISTANT_DAILY_BUDGET_*`), CV structuring per organization (`CV_MODEL_DAILY_BUDGET`).
+- API keys always expire: 90 days by default (`API_KEY_DEFAULT_TTL_DAYS`), at most a year.
 
 ## GDPR flows
 
@@ -123,8 +182,9 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 
 | Area | Tables |
 |---|---|
-| Auth and tenancy | `user`, `session`, `account`, `verification`, `organization`, `member`, `invitation`, `api_key`, `organization_setting` |
-| Jobs | `job`, `job_template`, `job_stage_interviewer`, `job_request`, `job_distribution`, `distribution_setting` |
+| Auth and tenancy | `user`, `session`, `account`, `verification`, `two_factor`, `organization`, `member`, `invitation`, `api_key`, `organization_setting`, `organization_security_setting` |
+| Abuse limits | `auth_throttle` (failed sign-ins), `usage_counter` (daily model budgets) |
+| Jobs | `job`, `job_team_member`, `job_template`, `job_stage_interviewer`, `job_request`, `job_distribution`, `distribution_setting` |
 | Candidates | `candidate`, `application`, `application_stage_event`, `candidate_note`, `cv_extraction`, `response_promise` |
 | Communication | `conversation`, `message`, `email_template`, `email_settings` |
 | Automation | `automation_rule`, `automation_execution`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |

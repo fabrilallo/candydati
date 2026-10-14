@@ -1,5 +1,6 @@
 import type { ApiError, PageMeta } from '@tt/domain';
 import type { FastifyInstance } from 'fastify';
+import { mailboxOf, pathOf } from './mailbox.js';
 import { PASSWORD, WEB_ORIGIN } from './test-app.js';
 
 export interface Reply<T = unknown> {
@@ -17,6 +18,16 @@ const cookieFrom = (setCookie: string | string[] | undefined): string | null => 
   const list = Array.isArray(setCookie) ? setCookie : setCookie ? [setCookie] : [];
   const pairs = list.map((c) => c.split(';')[0]!).filter((c) => !c.endsWith('='));
   return pairs.length > 0 ? pairs.join('; ') : null;
+};
+
+/** JSON bodies are parsed; a redirect or an HTML body becomes null. */
+const parseBody = (text: string): unknown => {
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
 };
 
 /** A browser-like client: keeps one session cookie and sends the web Origin as the web app's proxy does. */
@@ -41,7 +52,7 @@ export class TestUser {
     const next = cookieFrom(response.headers['set-cookie']);
     if (next) this.cookie = next;
     const text = response.body;
-    return { status: response.statusCode, body: (text ? JSON.parse(text) : null) as Reply<T>['body'], cookie: next };
+    return { status: response.statusCode, body: parseBody(text) as Reply<T>['body'], cookie: next };
   }
 
   /** The raw response (headers and bytes), for downloads. */
@@ -60,9 +71,19 @@ export class TestUser {
   put = <T = unknown>(url: string, body: unknown = {}) => this.request<T>('PUT', url, body);
   delete = <T = unknown>(url: string) => this.request<T>('DELETE', url);
 
+  /** Signs up, then opens the verification link from the email (as the person would): that link signs in. */
   async signUp(): Promise<this> {
     const reply = await this.post('/api/auth/sign-up/email', { email: this.email, password: PASSWORD, name: this.name });
     if (reply.status !== 200) throw new Error(`sign-up failed: ${reply.status} ${JSON.stringify(reply.body)}`);
+    return this.verifyEmail();
+  }
+
+  /** Opens the newest verification link sent to this user; the redirect it answers carries the session cookie. */
+  async verifyEmail(): Promise<this> {
+    const mailbox = mailboxOf(this.app);
+    if (!mailbox) throw new Error('this app has no recording mailbox (createTestApp registers one)');
+    const verified = await this.get(pathOf(mailbox.linkFor(this.email, 'verify_email')));
+    if (verified.status !== 302 || !this.cookie) throw new Error(`email verification failed: ${verified.status}`);
     return this;
   }
 

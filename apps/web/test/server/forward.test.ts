@@ -23,11 +23,11 @@ describe('forwardToApi (real http, fake api)', () => {
       request.on('data', (chunk: Buffer) => received.push(chunk))
       request.on('end', () => {
         response.setHeader('content-type', 'application/json')
-        response.end(JSON.stringify({ bytes: Buffer.concat(received).length, path: request.url }))
+        response.end(JSON.stringify({ bytes: Buffer.concat(received).length, path: request.url, forwarded: { host: request.headers['x-forwarded-host'], proto: request.headers['x-forwarded-proto'] } }))
       })
     })
     const apiUrl = await listen(api)
-    config = { apiInternalUrl: apiUrl, trustCloudflare: false, apiMaxBodyBytes: 100, apiTimeoutMs: 5000 }
+    config = { apiInternalUrl: apiUrl, trustCloudflare: false, apiMaxBodyBytes: 100, apiTimeoutMs: 5000, public: { siteUrl: 'https://jobs.example.com' } }
     vi.stubGlobal('useRuntimeConfig', () => config)
     web = createServer(toNodeListener(createApp().use(forwardToApi(isApiPath))))
     webUrl = await listen(web)
@@ -42,7 +42,7 @@ describe('forwardToApi (real http, fake api)', () => {
   it('streams a body under the cap to the api', async () => {
     const response = await fetch(`${webUrl}/api/v1/x?y=1`, { method: 'POST', body: 'a'.repeat(50) })
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({ bytes: 50, path: '/api/v1/x?y=1' })
+    expect(await response.json()).toMatchObject({ bytes: 50, path: '/api/v1/x?y=1' })
   })
 
   it('answers 413 for a body over the cap without reaching the api', async () => {
@@ -50,6 +50,11 @@ describe('forwardToApi (real http, fake api)', () => {
     expect(response.status).toBe(413)
     expect((await response.json()).error.code).toBe('payload_too_large')
     expect(received).toHaveLength(0)
+  })
+
+  it('drops the client x-forwarded-proto and host and sets its own from the site URL', async () => {
+    const response = await fetch(`${webUrl}/api/ping`, { headers: { 'x-forwarded-proto': 'http', 'x-forwarded-host': 'evil.test' } })
+    expect((await response.json()).forwarded).toEqual({ host: 'jobs.example.com', proto: 'https' })
   })
 
   it('passes GET through and ignores paths that are not the api', async () => {

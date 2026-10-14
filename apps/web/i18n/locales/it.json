@@ -49,7 +49,8 @@
     "distribution": "Distribuzione",
     "imports": "Import",
     "jobRequests": "Richieste",
-    "reports": "Report"
+    "reports": "Report",
+    "security": "Sicurezza"
   },
   "jobRequests": {
     "title": "Richieste di assunzione",
@@ -184,7 +185,8 @@
       "submit": "Accedi",
       "submitting": "Accesso in corso…",
       "noAccount": "Non hai un account?",
-      "signupLink": "Registrati"
+      "signupLink": "Registrati",
+      "forgot": "Password dimenticata?"
     },
     "signup": {
       "title": "Crea il tuo account",
@@ -193,6 +195,49 @@
       "submitting": "Creazione in corso…",
       "hasAccount": "Hai già un account?",
       "loginLink": "Accedi"
+    },
+    "verify": {
+      "title": "Controlla la posta",
+      "subtitle": "Abbiamo mandato un link di conferma a {email}. Aprilo per attivare l'account.",
+      "subtitleUnknown": "Ti abbiamo mandato un link di conferma. Aprilo per attivare l'account.",
+      "hint": "Il link vale 24 ore. Non lo trovi? Guarda nello spam o fattelo rimandare.",
+      "resend": "Rimanda il link",
+      "resending": "Invio…",
+      "resent": "Se l'indirizzo va confermato, un nuovo link è in arrivo.",
+      "expired": "Quel link di conferma non è più valido. Fattene mandare uno nuovo.",
+      "backToLogin": "Torna all'accesso"
+    },
+    "forgot": {
+      "title": "Reimposta la password",
+      "subtitle": "Scrivi l'email del tuo account: ti mandiamo un link per sceglierne una nuova.",
+      "submit": "Manda il link",
+      "submitting": "Invio…",
+      "sentTitle": "Controlla la posta",
+      "sentBody": "Se {email} ha un account, è in arrivo un link per reimpostare la password. Vale 1 ora.",
+      "backToLogin": "Torna all'accesso"
+    },
+    "reset": {
+      "title": "Scegli una nuova password",
+      "subtitle": "Dopo il cambio tutte le sessioni aperte vengono chiuse.",
+      "password": "Nuova password",
+      "submit": "Salva la password",
+      "submitting": "Salvataggio…",
+      "done": "Password cambiata: accedi con quella nuova",
+      "invalidTitle": "Questo link non funziona",
+      "invalidBody": "I link di reimpostazione valgono una volta sola e per 1 ora. Chiedine uno nuovo.",
+      "requestNew": "Chiedi un nuovo link"
+    },
+    "twoFactor": {
+      "title": "Verifica in due passaggi",
+      "subtitle": "Scrivi il codice di 6 cifre mostrato dall'app di autenticazione.",
+      "subtitleBackup": "Scrivi uno dei codici di riserva che hai salvato. Ognuno vale una volta.",
+      "code": "Codice",
+      "backupCode": "Codice di riserva",
+      "useBackup": "Usa un codice di riserva",
+      "useCode": "Usa l'app di autenticazione",
+      "submit": "Verifica",
+      "submitting": "Verifica…",
+      "backToLogin": "Torna all'accesso"
     }
   },
   "onboarding": {
@@ -362,7 +407,15 @@
     "inviting": "Invio in corso…",
     "invited": "Invito inviato a {email}",
     "noInvitePermission": "Il tuo ruolo non permette di invitare persone.",
-    "noRoleSelf": "Nessun ruolo"
+    "noRoleSelf": "Nessun ruolo",
+    "access": {
+      "title": "Accesso agli annunci",
+      "label": "I recruiter vedono solo gli annunci del loro team",
+      "on": "I recruiter vedono candidati e annunci solo dei team di cui fanno parte. Proprietari e amministratori vedono tutto.",
+      "off": "I recruiter vedono tutti gli annunci dell'organizzazione. Hiring manager e intervistatori vedono solo quelli del loro team.",
+      "saved": "Impostazione salvata",
+      "loadFailed": "Non siamo riusciti a leggere l'impostazione di accesso."
+    }
   },
   "audit": {
     "title": "Registro delle azioni",
@@ -415,7 +468,9 @@
         "updated": "Ha modificato l'organizzazione",
         "deleted": "Ha eliminato l'organizzazione",
         "exported": "Ha esportato tutti i dati dell'organizzazione",
-        "approval_setting_updated": "Ha cambiato l'obbligo di approvazione degli annunci"
+        "approval_setting_updated": "Ha cambiato l'obbligo di approvazione degli annunci",
+        "security_setting_updated": "Ha cambiato l'obbligo di verifica in due passaggi",
+        "access_setting_updated": "Ha cambiato chi vede quali annunci"
       },
       "invitation": {
         "created": "Ha invitato una persona",
@@ -437,7 +492,9 @@
         "published": "Ha pubblicato un annuncio",
         "closed": "Ha chiuso un annuncio",
         "distribution_synced": "Ha sincronizzato un annuncio con i canali di distribuzione",
-        "interviewers_updated": "Ha cambiato chi fa i colloqui di un annuncio"
+        "interviewers_updated": "Ha cambiato chi fa i colloqui di un annuncio",
+        "team_member_added": "Ha aggiunto una persona al team di un annuncio",
+        "team_member_removed": "Ha tolto una persona dal team di un annuncio"
       },
       "job_template": {
         "created": "Ha salvato un modello di annuncio",
@@ -511,6 +568,9 @@
         "approved": "Ha approvato una richiesta di apertura posizione",
         "rejected": "Ha rifiutato una richiesta di apertura posizione",
         "converted": "Ha creato un annuncio da una richiesta"
+      },
+      "mcp": {
+        "read": "Ha letto dati tramite MCP"
       }
     }
   },
@@ -535,7 +595,8 @@
     "nameMin": "Almeno 2 caratteri",
     "nameMax": "Troppo lungo",
     "slug": "Solo lettere minuscole, numeri e trattini singoli",
-    "role": "Scegli un ruolo"
+    "role": "Scegli un ruolo",
+    "code": "Scrivi il codice come lo vedi, solo cifre e lettere"
   },
   "errors": {
     "generic": "Qualcosa non ha funzionato. Riprova tra poco.",
@@ -552,7 +613,14 @@
     "notFound": "Non trovato",
     "tooManyRequests": "Troppe richieste, riprova tra poco",
     "unreachable": "Il servizio non è raggiungibile in questo momento",
-    "conflict": "L'operazione non è più possibile: qualcosa è cambiato nel frattempo"
+    "conflict": "L'operazione non è più possibile: qualcosa è cambiato nel frattempo",
+    "emailNotVerified": "Conferma prima il tuo indirizzo email: ti abbiamo mandato un link",
+    "signupInviteOnly": "Su questa installazione gli account si creano solo su invito. Chiedi a un amministratore di invitarti.",
+    "invalidResetLink": "Questo link non è più valido. Chiedine uno nuovo.",
+    "invalidCode": "Il codice non è corretto",
+    "tooManyAttempts": "Troppi tentativi. Aspetta qualche minuto e riprova.",
+    "twoFactorExpired": "L'accesso ha richiesto troppo tempo. Accedi di nuovo.",
+    "twoFactorRequired": "La tua organizzazione richiede la verifica in due passaggi: attivala per continuare"
   },
   "taxonomy": {
     "roleFamilies": {
@@ -1310,7 +1378,8 @@
       "candidates": "Candidati",
       "ad": "Annuncio",
       "automations": "Automazioni",
-      "distribution": "Distribuzione"
+      "distribution": "Distribuzione",
+      "team": "Team"
     },
     "received": "Ricevute",
     "receivedHint": "Nuove candidature, ancora da guardare",
@@ -1467,6 +1536,11 @@
       "title": "Scheda candidato",
       "description": "Profilo, CV e note della persona candidata",
       "fullPage": "Apri a pagina intera"
+    },
+    "submitted": {
+      "title": "Nuovi dati dalla candidatura",
+      "body": "Chi si è candidato ha inserito dati diversi da quelli del profilo. Il profilo non è stato modificato: controlla e aggiornalo solo se i dati sono della stessa persona.",
+      "apply": "Aggiorna il profilo"
     }
   },
   "candidates": {
@@ -2225,7 +2299,8 @@
       "nameHint": "Per riconoscerla dopo, per esempio \"Agente del team HR\".",
       "scopes": "Cosa può fare",
       "scopesHint": "Ti proponiamo solo quello che puoi fare anche tu.",
-      "expiry": "Scadenza"
+      "expiry": "Scadenza",
+      "expiryHint": "Ogni chiave scade: al massimo dopo un anno. Creane una nuova prima della scadenza."
     },
     "areas": {
       "jobs": "Annunci",
@@ -2260,6 +2335,10 @@
         "publish": "Pubblicare gli annunci",
         "close": "Chiudere gli annunci",
         "approve": "Approvare l'apertura delle posizioni"
+      },
+      "job_team": {
+        "read": "Vedere il team degli annunci",
+        "manage": "Cambiare il team degli annunci"
       },
       "job_template": {
         "read": "Leggere i template",
@@ -2322,7 +2401,7 @@
       "30": "Tra 30 giorni",
       "90": "Tra 90 giorni",
       "365": "Tra un anno",
-      "never": "Non scade"
+      "180": "Tra 6 mesi"
     },
     "create": "Crea chiave",
     "creating": "Creo",
@@ -3069,5 +3148,68 @@
       "emptyTitle": "Nessuna assunzione nel periodo",
       "emptyBody": "Quando una candidatura si chiude con un'assunzione, qui compaiono i giorni che ci sono voluti."
     }
+  },
+  "security": {
+    "pageTitle": "Sicurezza",
+    "pageDescription": "Proteggi il tuo account con un secondo fattore e decidi cosa richiede la tua organizzazione.",
+    "personal": {
+      "title": "Verifica in due passaggi",
+      "description": "Dopo la password, l'accesso chiede un codice da un'app di autenticazione (va bene qualsiasi app TOTP).",
+      "statusOn": "Attiva",
+      "statusOff": "Non attiva",
+      "required": "La tua organizzazione la richiede per il tuo ruolo: attivala per continuare a usare l'app.",
+      "password": "La tua password",
+      "passwordHint": "Serve per cambiare il modo in cui accedi.",
+      "enable": "Attiva",
+      "enabling": "Preparazione…",
+      "scan": "Aggiungi questo account all'app di autenticazione con la chiave qui sotto, oppure apri il link dal telefono.",
+      "secret": "Chiave",
+      "uri": "Link di configurazione",
+      "copy": "Copia",
+      "copied": "Copiato",
+      "code": "Codice dall'app",
+      "confirm": "Conferma",
+      "confirming": "Conferma…",
+      "backupTitle": "Codici di riserva",
+      "backupBody": "Conservali in un posto sicuro: ognuno ti fa accedere una volta se perdi il telefono. Li vedi solo adesso.",
+      "enabled": "La verifica in due passaggi è attiva",
+      "disable": "Disattiva",
+      "disabling": "Disattivazione…",
+      "disabled": "La verifica in due passaggi è disattivata"
+    },
+    "organization": {
+      "title": "Requisito dell'organizzazione",
+      "description": "Proprietari e amministratori devono avere la verifica in due passaggi attiva per usare l'app. A ognuno viene chiesto di attivarla alla visita successiva.",
+      "toggle": "Richiedi la verifica in due passaggi a proprietari e amministratori",
+      "saved": "Requisito salvato"
+    }
+  },
+  "jobTeam": {
+    "title": "Team",
+    "explain": "Chi vede i candidati di questo annuncio. Proprietari e amministratori vedono tutti gli annunci, e i recruiter anche, a meno che l'organizzazione non li limiti ai propri team. Hiring manager e intervistatori vedono solo gli annunci del cui team fanno parte. Chi conduce una fase è nel team in automatico.",
+    "listTitle": "Persone nel team",
+    "empty": "Nessuno nel team per ora.",
+    "interviewsAt": "Conduce: {stages}",
+    "fromStage": "Dalla fase",
+    "roleOf": "Ruolo nel team di {name}",
+    "remove": "Togli {name} dal team",
+    "addPerson": "Aggiungi una persona",
+    "choosePerson": "Scegli un membro…",
+    "role": "Ruolo nel team",
+    "add": "Aggiungi",
+    "saved": "Team aggiornato",
+    "removed": "Tolto dal team",
+    "saveFailed": "Non siamo riusciti a cambiare il team.",
+    "roles": {
+      "hiring_manager": "Hiring manager",
+      "interviewer": "Intervistatore",
+      "recruiter": "Recruiter"
+    }
+  },
+  "notAccessible": {
+    "title": "Non trovato o non accessibile",
+    "body": "Questa pagina non esiste più, oppure riguarda un annuncio del cui team non fai parte. Chiedi a chi gestisce l'annuncio di aggiungerti al team.",
+    "backCandidates": "Torna ai candidati",
+    "backJobs": "Torna agli annunci"
   }
 }

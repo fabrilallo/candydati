@@ -9,7 +9,7 @@ export const getApprovalSetting = defineJobRequestUseCase({
   input: z.object({}),
   permission: 'job:read',
   audit: { skip: 'read-only setting' },
-  handler: ({ deps, actor }) => deps.organizationSettings.get(actor.organizationId),
+  handler: async ({ deps, actor }) => ({ requireApproval: (await deps.organizationSettings.get(actor.organizationId)).requireApproval }),
 });
 
 /** Turns "publishing needs an approved budget" on or off for the organization. Owners and admins only (`job:approve`). */
@@ -22,7 +22,9 @@ export const setApprovalSetting = defineJobRequestUseCase({
     target: (_input, _result, actor) => ({ type: 'organization', id: actor.organizationId }),
     metadata: (input) => ({ requireApproval: input.requireApproval }),
   },
-  handler: ({ deps, actor, input }) => deps.organizationSettings.setRequireApproval(actor.organizationId, input.requireApproval, deps.now()),
+  handler: async ({ deps, actor, input }) => ({
+    requireApproval: (await deps.organizationSettings.setRequireApproval(actor.organizationId, input.requireApproval, deps.now())).requireApproval,
+  }),
 });
 
 export interface JobApprovalStatus {

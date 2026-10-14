@@ -10,6 +10,8 @@ export interface NotificationListQuery {
   readonly organizationId: string;
   readonly userId: string;
   readonly unreadOnly: boolean;
+  /** Only notifications about no job or about one of these jobs (per-job access). Absent: no job filter. */
+  readonly jobIds?: readonly string[] | undefined;
   /** 1-based. */
   readonly page: number;
   readonly limit: number;
@@ -26,7 +28,8 @@ export interface NotificationRepository {
   list(query: NotificationListQuery): Promise<{ readonly items: readonly Notification[]; readonly total: number }>;
   /** Marks as read (only the user's own, only the unread ones); `ids` undefined means all. Returns how many changed. */
   markRead(organizationId: string, userId: string, ids: readonly string[] | undefined, at: Date): Promise<number>;
-  unreadCount(organizationId: string, userId: string): Promise<number>;
+  /** `jobIds` as in `NotificationListQuery`. */
+  unreadCount(organizationId: string, userId: string, jobIds?: readonly string[]): Promise<number>;
   /**
    * Notifications of these kinds created since `since` that no digest email carried yet (`emailed_at` null), across
    * organizations. The digest is built from these, so a crash after the insert loses nothing.
@@ -44,6 +47,8 @@ export interface TaskListQuery {
   /** Absent: tasks of every assignee in the organization. */
   readonly assigneeId?: string | undefined;
   readonly openOnly: boolean;
+  /** Only tasks about no job or about one of these jobs (per-job access). Absent: no job filter. */
+  readonly jobIds?: readonly string[] | undefined;
   readonly limit: number;
 }
 

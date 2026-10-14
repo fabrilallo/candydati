@@ -24,6 +24,7 @@ import { createDrizzleCvExtractions } from './drizzle-cv-extractions.js';
 import { createDrizzleErasure } from './drizzle-erasure.js';
 import { createDrizzleFeedbackRequests, createDrizzleInterviewFeedback } from './drizzle-feedback.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
+import { createDrizzleJobTeams } from './drizzle-job-teams.js';
 import { createDrizzleMemberDirectory } from './drizzle-members.js';
 import { createDrizzleMessages } from './drizzle-messages.js';
 import { createDrizzleNotifications } from './drizzle-notifications.js';
@@ -129,6 +130,7 @@ async function buildWorld(): Promise<World> {
 const depsFor = (world: World, overrides: Partial<CandidateRightsDeps> = {}): CandidateRightsDeps => ({
   auditLog: createDrizzleAuditLog(handle.db),
   transaction: createDrizzleTransaction(handle.db),
+  jobTeams: createDrizzleJobTeams(handle.db),
   jobs: createDrizzleJobs(handle.db),
   candidates: createDrizzleCandidates(handle.db),
   applications: createDrizzleApplications(handle.db),

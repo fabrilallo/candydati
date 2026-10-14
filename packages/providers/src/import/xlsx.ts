@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs';
-import { readImportArchive } from './archive.js';
+import { isWithinOoxmlBudget } from '../zip/bounded-inflate.js';
+import { openImportArchive } from './archive.js';
 import { IMPORT_MAX_ROWS, ImportError } from './limits.js';
 import { isBlankRow, toRow, uniqueHeaders, type ParsedTable } from './table.js';
 
@@ -61,7 +62,8 @@ function toTable(rows: readonly (readonly string[])[]): ParsedTable | null {
  * run: the package is only used as a reader and the archive is validated (size, ratio) before it is opened.
  */
 export async function parseXlsx(bytes: Uint8Array): Promise<ParsedWorkbook> {
-  readImportArchive(bytes);
+  openImportArchive(bytes);
+  if (!isWithinOoxmlBudget(bytes)) throw new ImportError('too_large', 'The XLSX inflates to more than allowed.');
   const workbook = new ExcelJS.Workbook();
   try {
     await workbook.xlsx.load(bytes as unknown as ArrayBuffer);

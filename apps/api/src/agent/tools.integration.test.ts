@@ -33,7 +33,7 @@ beforeAll(async () => {
   const ctx = createAppContext({
     env: testEnv(),
     db: t.handle.db,
-    emailSender: { sendInvitation: async () => undefined },
+    mailer: { send: () => undefined },
     adQuality: fakeAdQualityAnalyzer(),
     files: createInMemoryFileStorage(),
     queue: createInMemoryTaskQueue(),
