@@ -4,6 +4,7 @@ import { ConflictError } from '../errors.js';
 import type { JobListQuery, JobRepository } from '../job-ports.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';
 import { countJobsByStatus, jobWeeklyActivity } from './drizzle-job-stats.js';
+import { sequential } from '../sequential.js';
 
 type Row = typeof schema.job.$inferSelect;
 
@@ -93,16 +94,17 @@ export function createDrizzleJobs(db: DbExecutor): JobRepository {
         eq(job.organizationId, query.organizationId),
         query.status === undefined ? undefined : eq(job.status, query.status),
       );
-      const [rows, totals] = await Promise.all([
-        db
-          .select()
-          .from(job)
-          .where(where)
-          .orderBy(desc(job.updatedAt), desc(job.id))
-          .limit(query.limit)
-          .offset((query.page - 1) * query.limit),
-        db.select({ total: count() }).from(job).where(where),
-      ]);
+      const [rows, totals] = await sequential(
+        () =>
+          db
+            .select()
+            .from(job)
+            .where(where)
+            .orderBy(desc(job.updatedAt), desc(job.id))
+            .limit(query.limit)
+            .offset((query.page - 1) * query.limit),
+        () => db.select({ total: count() }).from(job).where(where),
+      );
       return { items: rows.map(toJob), total: totals[0]?.total ?? 0 };
     },
 

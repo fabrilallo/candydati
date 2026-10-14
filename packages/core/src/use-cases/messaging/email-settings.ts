@@ -5,6 +5,7 @@ import type { DomainCheck, MessagingDeps } from '../../messaging-ports.js';
 import { defineMessagingUseCase } from './define.js';
 import { formatFrom, requireOrganization, senderIdentity } from './shared.js';
 import type { EmailSettingsView } from './views.js';
+import { sequential } from '../../sequential.js';
 
 const toView = (deps: Pick<MessagingDeps, 'config'>, organization: { name: string }, settings: EmailSettings | null): EmailSettingsView => ({
   senderName: settings?.senderName ?? organization.name,
@@ -32,10 +33,10 @@ export const getEmailSettings = defineMessagingUseCase({
   permission: 'message:read',
   audit: { skip: 'read of organization settings, no personal data' },
   handler: async ({ deps, actor }): Promise<EmailSettingsView> => {
-    const [organization, settings] = await Promise.all([
-      requireOrganization(deps, actor.organizationId),
-      deps.settings.find(actor.organizationId),
-    ]);
+    const [organization, settings] = await sequential(
+      () => requireOrganization(deps, actor.organizationId),
+      () => deps.settings.find(actor.organizationId),
+    );
     return toView(deps, organization, settings);
   },
 });
@@ -78,10 +79,10 @@ export const verifyEmailDomain = defineMessagingUseCase({
   permission: 'email_settings:manage',
   audit: settingsAudit,
   handler: async ({ deps, actor }): Promise<EmailSettingsView> => {
-    const [organization, existing] = await Promise.all([
-      requireOrganization(deps, actor.organizationId),
-      deps.settings.find(actor.organizationId),
-    ]);
+    const [organization, existing] = await sequential(
+      () => requireOrganization(deps, actor.organizationId),
+      () => deps.settings.find(actor.organizationId),
+    );
     if (!existing?.domain) throw new ConflictError('No own domain is configured.');
     const check = await deps.identity.domainStatus(existing.domain).catch(() => {
       throw new ConflictError('The domain status is not available right now.');

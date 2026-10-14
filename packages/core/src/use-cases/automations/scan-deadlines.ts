@@ -1,4 +1,6 @@
 import {
+  DEADLINE_DIGEST_KINDS,
+  DIGEST_MAX_AGE_DAYS,
   DUE_SOON_HOURS,
   HOUR_MS,
   needsEscalation,
@@ -10,7 +12,7 @@ import {
   type NotificationKind,
 } from '@tt/domain';
 import { z } from 'zod';
-import type { Member, ScanDeps } from '../../automation-ports.js';
+import type { Member, NotificationRepository, ScanDeps } from '../../automation-ports.js';
 import { defineSystemJob } from '../../use-case.js';
 
 export interface DigestEntry {
@@ -18,7 +20,7 @@ export interface DigestEntry {
   readonly userId: string;
   readonly email: string;
   readonly name: string;
-  /** Only the notifications created by THIS run. */
+  /** The notifications no digest email carried yet (this run's and any a crashed earlier run left behind). */
   readonly notifications: readonly Notification[];
   /** Titles of the jobs the notifications point to. */
   readonly jobTitles: Readonly<Record<string, string>>;
@@ -80,7 +82,6 @@ export const scanDeadlines = defineSystemJob<ScanDeps, z.ZodObject<{ now: z.ZodD
     const { now } = input;
     // Past-due promises become `missed` here, once an hour; they stay unanswered until someone replies.
     const missedPromises = await deps.promises.markOverdueMissedAcrossOrganizations(now);
-    const created: Notification[] = [];
     const contexts = new Map<string, OrganizationContext>();
     const context = (organizationId: string): OrganizationContext => {
       let found = contexts.get(organizationId);
@@ -91,8 +92,7 @@ export const scanDeadlines = defineSystemJob<ScanDeps, z.ZodObject<{ now: z.ZodD
       return found;
     };
     const notify = async (notification: Notification, key: string): Promise<void> => {
-      const stored = await deps.notifications.createIfAbsent(notification, key);
-      if (stored) created.push(stored);
+      await deps.notifications.createIfAbsent(notification, key);
     };
 
     const awaiting = await deps.applications.listAwaitingResponseAcrossOrganizations(new Date(now.getTime() + DUE_SOON_HOURS * HOUR_MS));
@@ -120,7 +120,7 @@ export const scanDeadlines = defineSystemJob<ScanDeps, z.ZodObject<{ now: z.ZodD
             createdAt: now,
             readAt: null,
           },
-          notificationDedupeKey(kind, application.id, application.stageId),
+          notificationDedupeKey(kind, application.id, application.stageId, application.responseDueAt),
         );
       }
     }
@@ -143,9 +143,24 @@ export const scanDeadlines = defineSystemJob<ScanDeps, z.ZodObject<{ now: z.ZodD
         `task_due:${task.id}`,
       );
     }
-    return { digests: await buildDigests(context, created), missedPromises };
+    return { digests: await unsentDigests(deps.notifications, context, DEADLINE_DIGEST_KINDS, now), missedPromises };
   },
 });
+
+/** The digests of notifications of `kinds` not yet emailed: built from what is stored, never from what this run inserted. */
+export async function unsentDigests(
+  notifications: Pick<NotificationRepository, 'listUnemailed'>,
+  context: (organizationId: string) => OrganizationContext,
+  kinds: readonly NotificationKind[],
+  now: Date,
+): Promise<readonly DigestEntry[]> {
+  return buildDigests(context, await notifications.listUnemailed(kinds, new Date(now.getTime() - DIGEST_MAX_AGE_DAYS * 24 * HOUR_MS)));
+}
+
+/** Marks what a digest email carried, so the next run does not send it again. Call it after the send succeeded. */
+export async function markDigestsEmailed(notifications: Pick<NotificationRepository, 'markEmailed'>, entries: readonly DigestEntry[], now: Date): Promise<void> {
+  for (const entry of entries) await notifications.markEmailed(entry.organizationId, entry.notifications.map((n) => n.id), now);
+}
 
 export async function buildDigests(
   context: (organizationId: string) => OrganizationContext,

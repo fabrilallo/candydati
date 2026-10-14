@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { PrivacyOverviewDeps, ConfiguredProviders } from '../../privacy-ports.js';
 import { defineUseCase, type UseCase, type UseCaseDefinition } from '../../use-case.js';
 import { loadRefs } from '../refs.js';
+import { sequential } from '../../sequential.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const UPCOMING_MAX = 200;
@@ -69,7 +70,7 @@ export const getProcessingRecord = defineOverviewUseCase({
   permission: 'privacy:manage',
   audit: { skip: 'read-only, organization settings and instance configuration' },
   handler: async ({ deps, actor }): Promise<ProcessingRecord> => {
-    const [organization, notice] = await Promise.all([deps.organizations.findById(actor.organizationId), deps.privacyNotices.findActive(actor.organizationId)]);
+    const [organization, notice] = await sequential(() => deps.organizations.findById(actor.organizationId), () => deps.privacyNotices.findActive(actor.organizationId));
     return {
       organizationName: organization?.name ?? '',
       contactEmail: notice?.contactEmail ?? null,

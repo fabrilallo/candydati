@@ -86,6 +86,23 @@ describe('deadlines.scan', () => {
     expect(sender.sent()).toHaveLength(1);
   });
 
+  it('keeps the digest of a failed send for the next scan and sends it once the mailbox answers', async () => {
+    const now = new Date('2026-06-01T10:00:00.000Z');
+    const deps = seedAutomationWorld({ applications: [buildApplication({ organizationId: ORG_A, responseDueAt: new Date(now.getTime() - 3_600_000) })] });
+    let down = true;
+    const sent: unknown[] = [];
+    const sender = { send: async (message: unknown) => { if (down) throw new Error('smtp down'); sent.push(message); return { messageId: 'm1' }; } } as unknown as ReturnType<typeof createFakeEmailSender>;
+    const queue = createDeadlinesScanQueue({ scan: deps, digest: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' }, now: () => now });
+    await queue.handle(job(null));
+    expect(sent).toHaveLength(0);
+    down = false;
+    await queue.handle(job(null));
+    expect(sent).toHaveLength(1);
+    expect(deps.notifications.snapshot()).toHaveLength(1);
+    await queue.handle(job(null));
+    expect(sent).toHaveLength(1);
+  });
+
   it('also reminds interviewers and flags ads idle for 90 days, with one digest per person', async () => {
     const now = new Date('2026-06-01T10:00:00.000Z');
     const day = 86_400_000;

@@ -1,6 +1,7 @@
+import { markDigestsEmailed } from '@tt/core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createWorld, personForm, type World } from './testing/candidate-world.js';
-import { scan, setResponseDue } from './testing/phase4.js';
+import { scan, scanDeps, setResponseDue } from './testing/phase4.js';
 import { createTestApp, uniqueEmail, type TestApp } from './testing/test-app.js';
 
 interface Item { applicationId: string; state: string; job: { id: string; title: string }; candidate: { firstName: string }; stage: { id: string }; responseDueAt: string; ownerName: string }
@@ -81,6 +82,8 @@ describe('the deadline scan and notifications', () => {
     expect(escalated[0]!.payload).toMatchObject({ escalated: true });
     expect((await recruiter.get<Note[]>('/api/v1/notifications')).body.data).toEqual([]);
 
+    // The worker emails the digest and marks it; only then does a later scan have nothing to send.
+    await markDigestsEmailed(scanDeps(t).notifications, first.digests, new Date());
     const second = await scan(t, new Date());
     expect(second.digests.flatMap((d) => d.notifications).filter((n) => [soon, late].includes(n.applicationId ?? ''))).toEqual([]);
     expect((await w.owner.get<Note[]>('/api/v1/notifications')).body.data).toHaveLength(2);

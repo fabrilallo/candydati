@@ -1,9 +1,10 @@
-import { dataExportKey, RETENTION_WARNING_DAYS, type Application, type Notification, type RetentionRun } from '@tt/domain';
+import { dataExportKey, RETENTION_DIGEST_KINDS, RETENTION_WARNING_DAYS, type Application, type RetentionRun } from '@tt/domain';
 import { z } from 'zod';
+import { groupBy } from '../../group-by.js';
 import type { RetentionDeps } from '../../privacy-ports.js';
 import { defineSystemJob } from '../../use-case.js';
-import { buildDigests, OrganizationContext, type DigestEntry } from '../automations/scan-deadlines.js';
-import { deleteFilesAfterErasure, eraseCandidateData } from './erase-candidate-data.js';
+import { OrganizationContext, unsentDigests, type DigestEntry } from '../automations/scan-deadlines.js';
+import { deleteFilesAfterErasure, eraseCandidateData, FileCleanupError } from './erase-candidate-data.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const RECIPIENT_ROLES = ['owner', 'admin'];
@@ -15,25 +16,21 @@ export interface RetentionFailure {
 }
 
 export interface RetentionResult {
-  /** Only the warnings created by THIS run, for the email digest. */
+  /** The warnings no digest email carried yet, for the email digest. */
   readonly digests: readonly DigestEntry[];
   /** One summary per organization that had something to warn about or erase. */
   readonly runs: readonly RetentionRun[];
   readonly exportsDeleted: number;
   /** Candidates whose erasure failed: they are retried by the next run. For the worker's logs. */
   readonly failures: readonly RetentionFailure[];
+  /** Erasures that committed but left stored files neither deleted nor queued (storage and queue down). For the worker's logs. */
+  readonly orphanedFiles: readonly { readonly organizationId: string; readonly keys: readonly string[] }[];
 }
 
 const SYSTEM_ACTOR = { type: 'system', id: null, onBehalfOfUserId: null } as const;
 
-const groupBy = <T>(items: readonly T[], keyOf: (item: T) => string): ReadonlyMap<string, readonly T[]> => {
-  const groups = new Map<string, T[]>();
-  for (const item of items) groups.set(keyOf(item), [...(groups.get(keyOf(item)) ?? []), item]);
-  return groups;
-};
-
-async function warn(deps: RetentionDeps, contexts: (org: string) => OrganizationContext, applications: readonly Application[], now: Date): Promise<readonly Notification[]> {
-  const created: Notification[] = [];
+async function warn(deps: RetentionDeps, contexts: (org: string) => OrganizationContext, applications: readonly Application[], now: Date): Promise<ReadonlyMap<string, ReadonlySet<string>>> {
+  const warned = new Map<string, Set<string>>();
   for (const application of applications) {
     const scope = contexts(application.organizationId);
     const recipients = (await scope.memberList()).filter((m) => m.roles.some((role) => RECIPIENT_ROLES.includes(role)));
@@ -53,15 +50,19 @@ async function warn(deps: RetentionDeps, contexts: (org: string) => Organization
         },
         `retention_expiring:${application.id}`,
       );
-      if (stored) created.push(stored);
+      if (stored) warned.set(application.organizationId, new Set([...(warned.get(application.organizationId) ?? []), application.id]));
     }
   }
-  return created;
+  return warned;
 }
 
-async function eraseExpired(deps: RetentionDeps, expired: readonly Application[]): Promise<{ erased: Map<string, number>; failures: RetentionFailure[] }> {
+async function eraseExpired(
+  deps: RetentionDeps,
+  expired: readonly Application[],
+): Promise<{ erased: Map<string, number>; failures: RetentionFailure[]; orphanedFiles: { organizationId: string; keys: readonly string[] }[] }> {
   const erased = new Map<string, number>();
   const failures: RetentionFailure[] = [];
+  const orphanedFiles: { organizationId: string; keys: readonly string[] }[] = [];
   // Imported data nobody reconfirmed within IMPORT_RECONFIRM_DAYS goes with its own reason.
   for (const [, group] of groupBy(expired, (a) => `${a.organizationId}\u0000${a.candidateId}\u0000${a.consentStatus}`)) {
     const first = group[0];
@@ -76,10 +77,16 @@ async function eraseExpired(deps: RetentionDeps, expired: readonly Application[]
       });
       erased.set(first.organizationId, (erased.get(first.organizationId) ?? 0) + result.applicationCount);
     } catch (error) {
+      if (error instanceof FileCleanupError) {
+        // The database erase committed: the people are gone and counted, so the next run must not retry them.
+        erased.set(first.organizationId, (erased.get(first.organizationId) ?? 0) + error.result.applicationCount);
+        orphanedFiles.push({ organizationId: first.organizationId, keys: error.keys });
+        continue;
+      }
       failures.push({ organizationId: first.organizationId, candidateId: first.candidateId, message: error instanceof Error ? error.message : String(error) });
     }
   }
-  return { erased, failures };
+  return { erased, failures, orphanedFiles };
 }
 
 async function deleteExpiredExports(deps: RetentionDeps, now: Date): Promise<number> {
@@ -118,9 +125,8 @@ export const runRetention = defineSystemJob<RetentionDeps, z.ZodObject<{ now: z.
       return found;
     };
     const warnings = await warn(deps, context, upcoming, now);
-    const { erased, failures } = await eraseExpired(deps, expired);
-    const warnedByOrganization = new Map<string, Set<string>>();
-    for (const w of warnings) warnedByOrganization.set(w.organizationId, new Set([...(warnedByOrganization.get(w.organizationId) ?? []), w.applicationId ?? '']));
+    const { erased, failures, orphanedFiles } = await eraseExpired(deps, expired);
+    const warnedByOrganization = warnings;
     const organizations = new Set([...erased.keys(), ...warnedByOrganization.keys()]);
     const runs: RetentionRun[] = [];
     for (const organizationId of organizations) {
@@ -134,6 +140,6 @@ export const runRetention = defineSystemJob<RetentionDeps, z.ZodObject<{ now: z.
         }),
       );
     }
-    return { digests: await buildDigests(context, warnings), runs, exportsDeleted: await deleteExpiredExports(deps, now), failures };
+    return { digests: await unsentDigests(deps.notifications, context, RETENTION_DIGEST_KINDS, now), runs, exportsDeleted: await deleteExpiredExports(deps, now), failures, orphanedFiles };
   },
 });

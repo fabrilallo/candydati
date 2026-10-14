@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { defineJobUseCase } from './define.js';
 import { buildProcess, buildQuality, buildReadiness, buildSalary, buildStatusCounts } from './job-stats.js';
 import { fillWeeks, firstWeekStart, weekStarts } from './job-stats-weeks.js';
+import { sequential } from '../../sequential.js';
 
 /** Overview of the actor's organization job ads. Every figure is computed from stored ads. */
 export const getJobStats = defineJobUseCase({
@@ -13,12 +14,12 @@ export const getJobStats = defineJobUseCase({
   handler: async ({ deps, actor }): Promise<JobStatsDto> => {
     const now = deps.now();
     const organizationId = actor.organizationId;
-    const [counts, activity, drafts, published] = await Promise.all([
-      deps.jobs.countByStatus(organizationId),
-      deps.jobs.weeklyActivity(organizationId, firstWeekStart(now, STATS_WEEKS)),
-      deps.jobs.listByStatus(organizationId, 'draft'),
-      deps.jobs.listByStatus(organizationId, 'published'),
-    ]);
+    const [counts, activity, drafts, published] = await sequential(
+      () => deps.jobs.countByStatus(organizationId),
+      () => deps.jobs.weeklyActivity(organizationId, firstWeekStart(now, STATS_WEEKS)),
+      () => deps.jobs.listByStatus(organizationId, 'draft'),
+      () => deps.jobs.listByStatus(organizationId, 'published'),
+    );
     return {
       generatedAt: now.toISOString(),
       statusCounts: buildStatusCounts(counts),

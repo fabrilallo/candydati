@@ -279,6 +279,15 @@ describe('the public form', () => {
     await expect(getFeedbackRequest(justBefore, { token: secret })).resolves.toBeDefined();
   });
 
+  it('expires a submitted link too: the CV and the answers are no longer readable', async () => {
+    const { deps, secret } = await asked();
+    await submitFeedback(deps, { token: secret, ...GOOD });
+    await expect(getFeedbackRequest(deps, { token: secret })).resolves.toBeDefined();
+    const expired = { ...deps, now: () => at(14 * DAY) };
+    await expect(openFeedbackCv(expired, { token: secret })).rejects.toBeInstanceOf(NotFoundError);
+    await expect(getFeedbackRequest(expired, { token: secret })).rejects.toBeInstanceOf(NotFoundError);
+  });
+
   it('closes the link when the application is gone', async () => {
     const { deps, secret } = await asked();
     const candidate = deps.store.read().candidates[0];

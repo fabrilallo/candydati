@@ -9,6 +9,7 @@ import {
   type FeedbackTarget,
   type RequestContext,
 } from './shared.js';
+import { sequential } from '../../sequential.js';
 
 export interface StageEntry {
   readonly organizationId: string;
@@ -29,11 +30,11 @@ export async function loadRequestContext(
 ): Promise<RequestContext | null> {
   const application = await deps.applications.findById(organizationId, applicationId);
   if (!application || application.consentStatus !== 'given') return null;
-  const [job, candidate, organization] = await Promise.all([
-    deps.jobs.findById(organizationId, application.jobId),
-    deps.candidates.findById(organizationId, application.candidateId),
-    deps.organizations.findById(organizationId),
-  ]);
+  const [job, candidate, organization] = await sequential(
+    () => deps.jobs.findById(organizationId, application.jobId),
+    () => deps.candidates.findById(organizationId, application.candidateId),
+    () => deps.organizations.findById(organizationId),
+  );
   if (!job || !candidate || !organization) return null;
   return { organization, job, application, candidate, stage: stageContextOf(job, stageId) };
 }

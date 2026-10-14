@@ -9,6 +9,7 @@ import type {
 import type { FileStorage, CvSniffer, TaskQueue } from './intake-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { MessagingDeps } from './messaging-ports.js';
+import type { StageEventRepository } from './report-ports.js';
 import type { CoreDeps } from './ports.js';
 import type { ErasureDeps } from './privacy-ports.js';
 
@@ -28,6 +29,11 @@ export interface ImportBatchRepository {
   lock(organizationId: string, id: string): Promise<ImportBatch | null>;
   /** Newest first. */
   list(organizationId: string): Promise<readonly ImportBatch[]>;
+  /**
+   * Across organizations, for the retention sweep: batches created before `before` that are not committed
+   * (`uploaded`, `analyzing`, `ready`, `importing`) or that still hold uploaded originals (an unfinished purge).
+   */
+  listStale(before: Date): Promise<readonly ImportBatch[]>;
 }
 
 export interface ImportItemQuery {
@@ -104,6 +110,8 @@ export interface ImportCommitRepositories {
   readonly applications: ApplicationRepository;
   readonly extractions: CvExtractionRepository;
   readonly notes: CandidateNoteRepository;
+  /** An imported application enters its stage at intake: the funnel counts it. */
+  readonly stageEvents: StageEventRepository;
   readonly importItems: ImportItemRepository;
   readonly consentTokens: ConsentTokenRepository;
 }

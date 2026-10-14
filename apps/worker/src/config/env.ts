@@ -20,6 +20,8 @@ const envSchema = z.object({
   FAST_MODEL: z.string().regex(/^[^/\s]+\/\S+$/, 'must look like provider/model').optional(),
   /** CV extractions per organization and day that may call the model; beyond it only the text is extracted. */
   CV_MODEL_DAILY_BUDGET: z.coerce.number().int().min(1).default(1000),
+  /** Days after which an import that was never committed is purged (proposed people, parsed CVs, uploaded files). */
+  IMPORT_STALE_DAYS: z.coerce.number().int().min(1).default(7),
 }).refine((env) => !(env.NODE_ENV === 'production' && env.WEBHOOKS_ALLOW_PRIVATE), {
   path: ['WEBHOOKS_ALLOW_PRIVATE'],
   message: 'must not be true in production (it turns off the protection against requests to internal addresses)',

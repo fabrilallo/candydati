@@ -1,7 +1,8 @@
 import { IMPORT_RECONFIRM_DAYS, isPlaceholderEmail } from '@tt/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError } from '../../errors.js';
-import { buildApplication, buildCandidate, ORG_A } from '../../testing/index.js';
+import { buildApplication, buildCandidate, createInMemoryTaskQueue, ORG_A } from '../../testing/index.js';
+import { commitImport } from './commit-import.js';
 import { answerConsentRequest } from './consent-request.js';
 import { getImportBatch, setImportItems } from './queries.js';
 import { requestImportCommit } from './request-commit.js';
@@ -44,6 +45,16 @@ describe('commitImport', () => {
     expect(deps.files.keys().filter((k) => k.includes('/imports/'))).toEqual([]);
     expect(deps.auditLog.events().find((e) => e.action === 'import.committed')).toMatchObject({ actor: { type: 'system' }, target: { id: batch.id }, metadata: { imported: 2, jobId: 'job_1' } });
     expect(JSON.stringify(deps.auditLog.events())).not.toMatch(/Mario|Rossi|mario@/);
+  });
+
+  it('records a stage event at intake for every imported application, so the funnel counts them', async () => {
+    const deps = importWorld();
+    const batch = await readyBatch(deps, [MARIO, GIULIA], [MARIO_ROW, GIULIA_ROW]);
+    const done = await commit(deps, batch.id);
+    const apps = deps.store.read().applications.filter((a) => a.importBatchId === batch.id);
+    const events = deps.store.read().stageEvents.filter((e) => apps.some((a) => a.id === e.applicationId));
+    expect(events).toHaveLength(2);
+    expect(events.every((e) => e.fromStageId === null && e.toStageId === 'received' && e.actorType === 'system' && e.outcome === null && !e.backfilled && e.occurredAt.getTime() === done.importedAt!.getTime())).toBe(true);
   });
 
   it('only imports included items, and a person without email gets no token and no email', async () => {
@@ -167,7 +178,27 @@ describe('undoImport', () => {
     expect(second).toMatchObject({ failed: 0, erased: 1, batch: { status: 'undone' } });
   });
 
-  it('only undoes a batch that is done', async () => {
+  it('counts an erasure whose files could not be deleted or queued as erased: the database commit stands', async () => {
+    const deps = importWorld();
+    const batch = await readyBatch(deps, [MARIO], [MARIO_ROW]);
+    await commit(deps, batch.id);
+    const broken = { ...deps, files: { ...deps.files, delete: async () => Promise.reject(new Error('s3 down')) }, queue: createInMemoryTaskQueue(new Error('queue down')) };
+    const result = await undoImport(broken, recruiter, { batchId: batch.id });
+    expect(result).toMatchObject({ erased: 1, failed: 0, batch: { status: 'undone', counts: { erased: 1 } } });
+    expect(deps.store.read().applications.filter((a) => a.importBatchId === batch.id)).toEqual([]);
+  });
+
+  it('can undo a failed batch that had already imported people', async () => {
+    const deps = importWorld();
+    const batch = await readyBatch(deps, [MARIO], [MARIO_ROW]);
+    await requestImportCommit(deps, recruiter, { batchId: batch.id });
+    await commitImport(deps, { organizationId: ORG_A, batchId: batch.id });
+    deps.importStore.write({ batches: deps.importStore.read().batches.map((b) => ({ ...b, status: 'failed' as const })) });
+    const result = await undoImport(deps, recruiter, { batchId: batch.id });
+    expect(result).toMatchObject({ erased: 1, batch: { status: 'undone' } });
+  });
+
+  it('only undoes a batch that is done or failed', async () => {
     const deps = importWorld();
     const batch = await readyBatch(deps, [MARIO], [MARIO_ROW]);
     expect(await rejection(undoImport(deps, recruiter, { batchId: batch.id }))).toBeInstanceOf(ConflictError);

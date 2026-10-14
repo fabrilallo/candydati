@@ -4,6 +4,7 @@ import {
   buildApplication,
   buildAutomationRule,
   buildEmailTemplate,
+  defaultMembers,
   seedAutomationWorld,
   systemActor,
   ORG_A,
@@ -24,6 +25,35 @@ const world = (options: AutomationSeedOptions = {}) =>
   });
 const sendRule = (overrides = {}) =>
   buildAutomationRule({ id: 'rule_send', action: { type: 'send_template', templateId: 'tpl_1' }, createdBy: 'recruiter_1', ...overrides });
+
+describe('runAutomations: creator of the rule', () => {
+  const without = (userId: string) => ({ [ORG_A]: defaultMembers.filter((m) => m.userId !== userId) });
+
+  it('skips the rule when its creator left the organization, sends nothing and tells owners and admins once', async () => {
+    const deps = world({ rules: [sendRule()], members: without('recruiter_1') });
+    expect(await runAutomations(deps, worker, input())).toEqual({ executed: 0, failed: 1, skipped: null });
+    expect(deps.messagingStore.read().messages).toEqual([]);
+    expect(deps.queue.jobs()).toEqual([]);
+    const alerts = deps.notifications.snapshot();
+    expect(alerts.map((n) => [n.userId, n.kind]).toSorted()).toEqual([['admin_1', 'automation_failed'], ['user_test', 'automation_failed']]);
+    expect(alerts[0]?.payload).toMatchObject({ ruleId: 'rule_send', reason: 'creator_not_authorized' });
+    deps.store.write({ applications: [buildApplication({ organizationId: ORG_A, stageId: 'stage-0', stageChangedAt: new Date('2026-06-02T00:00:00Z') })] });
+    await runAutomations(deps, worker, input());
+    expect(deps.notifications.snapshot()).toHaveLength(2);
+  });
+
+  it('skips the rule when the creator lost the permission its action needs (an interviewer cannot send)', async () => {
+    const demoted = defaultMembers.map((m) => (m.userId === 'recruiter_1' ? { ...m, roles: ['interviewer'] } : m));
+    const deps = world({ rules: [sendRule()], members: { [ORG_A]: demoted } });
+    expect(await runAutomations(deps, worker, input())).toMatchObject({ executed: 0, failed: 1 });
+    expect(deps.messagingStore.read().messages).toEqual([]);
+  });
+
+  it('runs with the creator’s current role: an admin creator still sends', async () => {
+    const deps = world({ rules: [sendRule({ createdBy: 'admin_1' })] });
+    expect(await runAutomations(deps, worker, input())).toMatchObject({ executed: 1, failed: 0 });
+  });
+});
 
 describe('runAutomations: send_template', () => {
   it('queues the message in the name of the rule creator and the message is delivered like any other', async () => {

@@ -82,6 +82,17 @@ describe('analysis', () => {
     expect(failed).toMatchObject({ status: 'failed', error: 'zip_bomb' });
   });
 
+  it('purges the personal data and the source files of a failed batch', async () => {
+    const deps = importWorld();
+    const batch = await readyBatch(deps, [MARIO], [MARIO_ROW]);
+    expect(deps.importStore.read().items).not.toEqual([]);
+    const failed = await failImportBatch(deps, { organizationId: ORG_A, batchId: batch.id, reason: 'commit_failed' });
+    expect(failed).toMatchObject({ status: 'failed', error: 'commit_failed', sourceFiles: [] });
+    expect(deps.importStore.read().items).toEqual([]);
+    expect(deps.importStore.read().analyses).toEqual([]);
+    expect(deps.files.keys().filter((k) => k.includes('/imports/'))).toEqual([]);
+  });
+
   it('marks people who already exist and does not touch them', async () => {
     const deps = importWorld({ candidates: [buildCandidate({ organizationId: ORG_A, id: 'cand_9', email: 'mario@example.com', firstName: 'Marione', lastName: 'Rossi' })], applications: [] });
     const batch = await readyBatch(deps, [MARIO], [MARIO_ROW]);

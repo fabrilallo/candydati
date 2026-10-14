@@ -16,6 +16,7 @@ import { defineMessagingUseCase } from './define.js';
 import { assertKnownVariables } from './email-templates.js';
 import { buildTemplateValues, DEFAULT_TEMPLATE_PREFIX, ensureConversation, oneLine, requireOrganization } from './shared.js';
 import type { SendMessageResult } from './views.js';
+import { mapSequential } from '../../sequential.js';
 
 const QUEUE_FAILED = 'queue_unavailable';
 
@@ -70,8 +71,9 @@ export const sendMessage = defineMessagingUseCase({
     const organization = await requireOrganization(deps, organizationId);
     const sentBy = actor.onBehalfOfUserId ?? actor.id ?? 'system';
     const now = deps.now();
-    const drafts = await Promise.all(
-      [...new Set(input.applicationIds)].map(async (applicationId): Promise<Message> => {
+    const drafts = await mapSequential(
+      [...new Set(input.applicationIds)],
+      async (applicationId): Promise<Message> => {
         const application = await deps.applications.findById(organizationId, applicationId);
         if (!application) throw new NotFoundError('Application not found.');
         const candidate = await requireCandidate(deps, organizationId, application.candidateId);
@@ -97,14 +99,14 @@ export const sendMessage = defineMessagingUseCase({
           unverifiedSender: false,
           inboundMessageId: null,
         };
-      }),
+      },
     );
     const stored: Message[] = [];
     for (const draft of drafts) {
       await ensureConversation(deps, organizationId, draft.applicationId);
       stored.push(await deps.messages.create(draft));
     }
-    const results = await Promise.all(stored.map((message) => enqueueDelivery(deps, message)));
+    const results = await mapSequential(stored, (message) => enqueueDelivery(deps, message));
     const queued = results.filter(Boolean).length;
     return { queued, failed: results.length - queued };
   },

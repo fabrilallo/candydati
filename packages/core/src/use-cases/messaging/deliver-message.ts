@@ -9,6 +9,7 @@ import { answerPromise } from '../reports/tracking.js';
 import { defineUseCase } from '../../use-case.js';
 import { ensureConversation, formatFrom, replyToAddress, senderIdentity } from './shared.js';
 import type { DeliverResult } from './views.js';
+import { sequential } from '../../sequential.js';
 
 export const DELIVERY_FAILED = 'delivery_failed';
 export const DELIVERY_REJECTED = 'delivery_rejected';
@@ -112,7 +113,7 @@ export const deliverMessage = defineUseCase<DeliverDeps, typeof inputSchema, Del
     if (!found || found.direction !== 'outbound') return 'skipped';
     const message = await claim(deps, actor, found, input.attempt);
     if (!message) return found.status === 'sending' && input.attempt > 1 ? 'failed' : 'skipped';
-    const [candidate, organization] = await Promise.all([deps.candidates.findById(organizationId, message.candidateId), deps.organizations.findById(organizationId)]);
+    const [candidate, organization] = await sequential(() => deps.candidates.findById(organizationId, message.candidateId), () => deps.organizations.findById(organizationId));
     if (!candidate || !organization) {
       await recordOutcome(deps, actor, message, { status: 'failed', error: RECIPIENT_MISSING });
       return 'failed';

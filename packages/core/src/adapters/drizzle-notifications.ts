@@ -1,7 +1,8 @@
-import { and, count, desc, eq, inArray, isNull, schema } from '@tt/db';
+import { and, asc, count, desc, eq, gte, inArray, isNull, schema } from '@tt/db';
 import type { Notification } from '@tt/domain';
 import type { NotificationRepository } from '../automation-ports.js';
 import type { DbExecutor } from './db-executor.js';
+import { sequential } from '../sequential.js';
 
 type Row = typeof schema.notification.$inferSelect;
 
@@ -33,16 +34,17 @@ export function createDrizzleNotifications(db: DbExecutor): NotificationReposito
     },
     async list(query) {
       const where = and(...own(query.organizationId, query.userId), ...(query.unreadOnly ? [isNull(notification.readAt)] : []));
-      const [items, totals] = await Promise.all([
-        db
-          .select()
-          .from(notification)
-          .where(where)
-          .orderBy(desc(notification.createdAt), desc(notification.id))
-          .limit(query.limit)
-          .offset((query.page - 1) * query.limit),
-        db.select({ total: count() }).from(notification).where(where),
-      ]);
+      const [items, totals] = await sequential(
+        () =>
+          db
+            .select()
+            .from(notification)
+            .where(where)
+            .orderBy(desc(notification.createdAt), desc(notification.id))
+            .limit(query.limit)
+            .offset((query.page - 1) * query.limit),
+        () => db.select({ total: count() }).from(notification).where(where),
+      );
       return { items: items.map(toNotification), total: totals[0]?.total ?? 0 };
     },
     async markRead(organizationId, userId, ids, at) {
@@ -51,6 +53,24 @@ export function createDrizzleNotifications(db: DbExecutor): NotificationReposito
         .update(notification)
         .set({ readAt: at })
         .where(and(...own(organizationId, userId), isNull(notification.readAt), ...(ids ? [inArray(notification.id, [...ids])] : [])))
+        .returning({ id: notification.id });
+      return rows.length;
+    },
+    async listUnemailed(kinds, since) {
+      if (kinds.length === 0) return [];
+      const rows = await db
+        .select()
+        .from(notification)
+        .where(and(isNull(notification.emailedAt), inArray(notification.kind, [...kinds]), gte(notification.createdAt, since)))
+        .orderBy(asc(notification.createdAt), asc(notification.id));
+      return rows.map(toNotification);
+    },
+    async markEmailed(organizationId, ids, at) {
+      if (ids.length === 0) return 0;
+      const rows = await db
+        .update(notification)
+        .set({ emailedAt: at })
+        .where(and(eq(notification.organizationId, organizationId), isNull(notification.emailedAt), inArray(notification.id, [...ids])))
         .returning({ id: notification.id });
       return rows.length;
     },

@@ -120,7 +120,7 @@ const main = async (): Promise<void> => {
     createImportCommitQueue(imports.commit),
     createFilesDeleteQueue(files),
     createOrganizationExportQueue(privacy.organizationExport),
-    createRetentionRunQueue({ retention: privacy.retention, digest, now: () => new Date() }),
+    createRetentionRunQueue({ retention: privacy.retention, imports: imports.commit, importStaleDays: env.IMPORT_STALE_DAYS, digest, now: () => new Date() }),
   ];
   const worker = await startWorker({ boss, logger, queues });
   for (const signal of SHUTDOWN_SIGNALS) {

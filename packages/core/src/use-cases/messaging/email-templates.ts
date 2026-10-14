@@ -22,6 +22,7 @@ import {
 import { requireJob } from '../jobs/shared.js';
 import { requireCandidate } from '../candidates/shared.js';
 import type { EmailTemplateView, MessagePreview } from './views.js';
+import { sequential } from '../../sequential.js';
 
 /** Unknown variables are refused when saving, so a stored template always renders completely. */
 export function assertKnownVariables(subject: string, body: string): void {
@@ -133,11 +134,11 @@ async function renderForApplication(
   input: z.infer<typeof renderInput>,
 ): Promise<MessagePreview> {
   const application = await requireApplicationInOrganization(deps, organizationId, input.applicationId);
-  const [organization, candidate, job] = await Promise.all([
-    requireOrganization(deps, organizationId),
-    requireCandidate(deps, organizationId, application.candidateId),
-    requireJob(deps, organizationId, application.jobId),
-  ]);
+  const [organization, candidate, job] = await sequential(
+    () => requireOrganization(deps, organizationId),
+    () => requireCandidate(deps, organizationId, application.candidateId),
+    () => requireJob(deps, organizationId, application.jobId),
+  );
   const values = buildTemplateValues({ config: deps.config, organization, job, candidate, stageId: application.stageId });
   const subject = renderTemplate(input.subject, values);
   const body = renderTemplate(input.body, values);

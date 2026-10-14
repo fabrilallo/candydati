@@ -111,6 +111,17 @@ describe('runDistributionSync', () => {
     expect(bad.calls().map((call) => call.kind)).toEqual(['publish', 'publish']);
   });
 
+  it('retries a failed update as an update, never as a second publication', async () => {
+    const deps = await world();
+    await sync(deps);
+    deps.channel.fail('503');
+    expect(await sync(deps)).toMatchObject({ failed: 1 });
+    expect(deps.distributions.snapshot()[0]).toMatchObject({ status: 'failed', externalId: 'ext-backend-developer-abc123' });
+    deps.channel.succeed();
+    expect(await sync(deps)).toMatchObject({ published: 1, failed: 0 });
+    expect(deps.channel.calls().map((call) => call.kind)).toEqual(['publish', 'update', 'update']);
+  });
+
   it('records a failed removal and a non-Error failure', async () => {
     const deps = await world();
     await sync(deps);

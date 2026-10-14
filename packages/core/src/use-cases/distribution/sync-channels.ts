@@ -21,7 +21,8 @@ type Outcome = 'published' | 'removed' | 'failed' | 'unchanged';
 
 async function publishOn(deps: DistributionDeps, channel: DistributionChannel, job: Job, organization: PublicOrganization, existing: JobDistribution | null): Promise<JobDistribution> {
   const view = toDistributionJobView(job, organization, deps.publicBaseUrl);
-  const known = existing?.status === 'published' ? existing : null;
+  // A failed update keeps its externalId: the ad is on the board, so the retry updates it and never publishes a second one.
+  const known = existing?.externalId ? existing : null;
   const result = known ? await channel.update(view, organization, { externalId: known.externalId, url: known.url }) : await channel.publish(view, organization);
   return {
     organizationId: job.organizationId,

@@ -1,4 +1,4 @@
-import { buildOrganizationExport, runRetention } from '@tt/core';
+import { buildOrganizationExport, markDigestsEmailed, runRetention } from '@tt/core';
 import { candidateExportSchema, dataExportKey } from '@tt/domain';
 import { strFromU8, unzipSync } from 'fflate';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -123,6 +123,7 @@ describe('retention job', () => {
     }
     expect((await (await w.member('recruiter')).get<{ kind: string }[]>('/api/v1/notifications')).body.data!.filter((n) => n.kind === 'retention_expiring')).toEqual([]);
 
+    await markDigestsEmailed(retentionDeps(t).notifications, result.digests, now);
     const again = await runRetention(retentionDeps(t), { now: new Date(now.getTime() + DAY) });
     expect(again.digests.filter((d) => d.organizationId === orgId)).toEqual([]);
     const after = (await w.owner.get<Retention>('/api/v1/privacy/retention')).body.data!;

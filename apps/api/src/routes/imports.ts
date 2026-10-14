@@ -1,5 +1,6 @@
 import multipart from '@fastify/multipart';
 import {
+  authorize,
   createImportBatch,
   getImportBatch,
   listImports,
@@ -11,7 +12,7 @@ import {
   updateImportMapping,
 } from '@tt/core';
 import { ok } from '@tt/domain';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { IMPORT_BODY_LIMIT, IMPORT_MULTIPART_LIMITS, readImportParts } from '../http/import-multipart.js';
 import { toBatchViews, toPageView } from './import-view.js';
@@ -31,7 +32,9 @@ export async function registerImportRoutes(app: FastifyInstance, ctx: AppContext
 
   await app.register(async (scope) => {
     await scope.register(multipart, { limits: IMPORT_MULTIPART_LIMITS });
-    scope.post('/api/v1/imports', { bodyLimit: IMPORT_BODY_LIMIT, config: importUploadRouteConfig(ctx) }, async (request, reply) => {
+    // Authorize before a byte of the body is read: up to 200 MB would otherwise be buffered for someone who may not import.
+    const mayImport = async (request: FastifyRequest): Promise<void> => authorize(await ctx.resolveSessionActor(request), 'import:manage');
+    scope.post('/api/v1/imports', { bodyLimit: IMPORT_BODY_LIMIT, config: importUploadRouteConfig(ctx), onRequest: mayImport }, async (request, reply) => {
       const actor = await ctx.resolveSessionActor(request);
       const upload = await readImportParts(request);
       const batch = await createImportBatch(deps, actor, upload);

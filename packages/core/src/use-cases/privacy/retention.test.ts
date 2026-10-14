@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { ForbiddenError, ValidationError } from '../../errors.js';
 import { buildApplication, buildCandidate, ERASED, ORG_A, ORG_B, seedPrivacyData, userActor, createInMemoryTaskQueue } from '../../testing/index.js';
 import { getProcessingRecord, getRetentionOverview } from './retention-overview.js';
+import { markDigestsEmailed } from '../automations/scan-deadlines.js';
 import { runRetention } from './run-retention.js';
 
 const DAY = 24 * 3600 * 1000;
@@ -33,6 +34,7 @@ describe('runRetention', () => {
     expect(warnings[0]?.payload).toEqual({ retentionExpiresAt: at(10).toISOString() });
     expect(first.digests.map((d) => d.userId).toSorted()).toEqual(['admin_1', 'user_test']);
     expect(first.runs).toMatchObject([{ organizationId: ORG_A, warned: 1, erased: 0 }]);
+    await markDigestsEmailed(deps.notifications, first.digests, NOW);
     const second = await runRetention(deps, { now: new Date(NOW.getTime() + DAY) });
     expect(second.digests).toEqual([]);
     expect(deps.notifications.snapshot().filter((n) => n.kind === 'retention_expiring')).toHaveLength(2);
@@ -50,6 +52,17 @@ describe('runRetention', () => {
     const events = deps.auditLog.events().filter((e) => e.action === 'candidate.erased');
     expect(events).toHaveLength(1);
     expect(events[0]).toMatchObject({ actor: { type: 'system', id: null }, metadata: { reason: 'retention', applicationCount: 2 } });
+  });
+
+  it('counts an erasure whose files could not be deleted or queued as erased, and reports the orphaned keys', async () => {
+    const seeded = await world({ app_1: at(-1), app_2: at(-5) });
+    const deps = { ...seeded, files: { ...seeded.files, delete: async () => Promise.reject(new Error('s3 down')) }, queue: createInMemoryTaskQueue(new Error('queue down')) };
+    const result = await runRetention(deps, { now: NOW });
+    expect(seeded.store.read().applications.map((a) => a.id)).toEqual(['app_3']);
+    expect(result.failures).toEqual([]);
+    expect(result.runs).toMatchObject([{ organizationId: ORG_A, erased: 2 }]);
+    expect(result.orphanedFiles).toEqual([{ organizationId: ORG_A, keys: ['organizations/org_a/applications/app_1/cv', 'organizations/org_a/applications/app_2/cv'] }]);
+    expect(await runRetention(deps, { now: NOW })).toMatchObject({ failures: [], orphanedFiles: [] });
   });
 
   it('keeps the candidate while one of their applications has not expired', async () => {

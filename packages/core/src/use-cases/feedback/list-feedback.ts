@@ -10,6 +10,7 @@ import { requireApplication } from '../candidates/shared.js';
 import { requireJob } from '../jobs/shared.js';
 import { defineFeedbackUseCase } from './define.js';
 import { stageContextOf, toRequestView, type FeedbackRequestView } from './shared.js';
+import { sequential } from '../../sequential.js';
 
 export interface FeedbackAnswerView {
   readonly questionId: string;
@@ -60,10 +61,10 @@ export const listApplicationFeedback = defineFeedbackUseCase({
   handler: async ({ deps, actor, input }): Promise<ApplicationFeedbackView> => {
     const application = await requireApplication(deps, actor.organizationId, input.applicationId);
     const job = await requireJob(deps, actor.organizationId, application.jobId);
-    const [requests, feedback] = await Promise.all([
-      deps.feedbackRequests.listByApplication(actor.organizationId, application.id),
-      deps.interviewFeedback.listByApplication(actor.organizationId, application.id),
-    ]);
+    const [requests, feedback] = await sequential(
+      () => deps.feedbackRequests.listByApplication(actor.organizationId, application.id),
+      () => deps.interviewFeedback.listByApplication(actor.organizationId, application.id),
+    );
     const now = deps.now();
     return {
       requests: requests.map((request) => toRequestView(request, job, now)),

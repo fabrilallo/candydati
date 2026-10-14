@@ -15,9 +15,22 @@ const inputSchema = z.object({ organizationId: z.string().min(1), applicationId:
 type Outcome = Pick<CvExtractionRecord, 'status' | 'text' | 'data' | 'source'>;
 const FAILED: Outcome = { status: 'failed', text: null, data: null, source: null };
 
-async function readText(deps: CvExtractionDeps, key: string, mediaType: CvMediaType): Promise<string | null> {
+/** A file that is gone is a final answer for this application; any other storage error is an outage and must retry. */
+async function readBytes(deps: CvExtractionDeps, key: string): Promise<Uint8Array | null> {
   try {
-    const text = cleanText(await deps.textExtractor.extractText(await deps.files.get(key), mediaType));
+    return await deps.files.get(key);
+  } catch (error) {
+    if (error instanceof Error && (error.name === 'FileNotFoundError' || error.name === 'InvalidStorageKeyError')) return null;
+    throw error;
+  }
+}
+
+/** Only the extractor's errors mean "no text": storage errors propagate so the job retries. */
+async function readText(deps: CvExtractionDeps, key: string, mediaType: CvMediaType): Promise<string | null> {
+  const bytes = await readBytes(deps, key);
+  if (bytes === null) return null;
+  try {
+    const text = cleanText(await deps.textExtractor.extractText(bytes, mediaType));
     return text === '' ? null : text;
   } catch {
     return null;

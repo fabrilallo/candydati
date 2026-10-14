@@ -13,7 +13,7 @@ export function createInMemoryFileStorage(initial: Readonly<Record<string, Uint8
     },
     async get(key) {
       const bytes = files[key];
-      if (!bytes) throw new Error(`No such file: ${key}`);
+      if (!bytes) throw Object.assign(new Error(`No such file: ${key}`), { name: 'FileNotFoundError' });
       return bytes;
     },
     async delete(key) {

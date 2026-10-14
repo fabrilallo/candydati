@@ -11,7 +11,7 @@ import { z } from 'zod';
 import type { ImportDeps } from '../../import-ports.js';
 import { ValidationError } from '../../errors.js';
 import { defineSystemJob } from '../../use-case.js';
-import { assertStatus, countOf, requireBatch, withCounts } from './shared.js';
+import { assertStatus, countOf, purgeBatchData, requireBatch, withCounts } from './shared.js';
 import { proposeItems } from './matching.js';
 
 /** CV text kept for search and for the stored extraction. */
@@ -72,13 +72,20 @@ export const recordImportAnalysis = defineSystemJob<AnalysisDeps, typeof analysi
 
 const failureInput = batchRef.extend({ reason: z.string().trim().min(1).max(300) });
 
-/** Worker: parsing failed for good (unreadable archive, limits exceeded). The reason is shown to the user. */
-export const failImportBatch = defineSystemJob<Pick<ImportDeps, 'imports' | 'files' | 'queue'>, typeof failureInput, ImportBatch>({
+type FailDeps = Pick<ImportDeps, 'imports' | 'importItems' | 'importAnalyses' | 'files' | 'queue'>;
+
+/**
+ * Worker: the batch failed for good (unreadable archive, limits exceeded, commit out of attempts). The reason is shown
+ * to the user. The proposed people, parsed CVs and uploaded originals are purged: a failed batch keeps no personal data.
+ */
+export const failImportBatch = defineSystemJob<FailDeps, typeof failureInput, ImportBatch>({
   name: 'failImportBatch',
   input: failureInput,
   handler: async ({ deps, input }) => {
     const batch = await requireBatch(deps, input.organizationId, input.batchId);
-    assertStatus(batch, ['uploaded', 'analyzing', 'importing']);
-    return deps.imports.save({ ...batch, status: 'failed', error: input.reason });
+    if (batch.status === 'failed') return purgeBatchData(deps, batch);
+    assertStatus(batch, ['uploaded', 'analyzing', 'ready', 'importing']);
+    const failed = await deps.imports.transition(batch.organizationId, batch.id, batch.status, { status: 'failed', error: input.reason });
+    return purgeBatchData(deps, failed);
   },
 });

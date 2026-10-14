@@ -5,6 +5,7 @@ import { ConflictError } from '../../errors.js';
 import { closeApplication } from './decide-application.js';
 import { defineCandidateUseCase } from './define.js';
 import { requireApplication } from './shared.js';
+import { mapSequential } from '../../sequential.js';
 
 export interface BulkDecisionResult {
   readonly decided: number;
@@ -26,7 +27,7 @@ export const decideApplications = defineCandidateUseCase({
   transaction: 'required',
   handler: async ({ deps, actor, input }): Promise<BulkDecisionResult> => {
     const ids = [...new Set(input.applicationIds)];
-    const applications = await Promise.all(ids.map((id) => requireApplication(deps, actor.organizationId, id)));
+    const applications = await mapSequential(ids, (id) => requireApplication(deps, actor.organizationId, id));
     if (applications.some((application) => application.outcome !== null)) {
       throw new ConflictError('At least one application is already decided.');
     }

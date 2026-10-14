@@ -1,21 +1,20 @@
-import { daysSince, staleCutoff, staleJobDedupeKey, type Notification } from '@tt/domain';
+import { daysSince, STALE_DIGEST_KINDS, staleCutoff, staleJobDedupeKey } from '@tt/domain';
 import { z } from 'zod';
 import type { StaleScanDeps } from '../../job-request-ports.js';
 import { defineSystemJob } from '../../use-case.js';
-import { buildDigests, OrganizationContext, type DeadlineScanResult } from '../automations/scan-deadlines.js';
+import { OrganizationContext, unsentDigests, type DeadlineScanResult } from '../automations/scan-deadlines.js';
 
 /**
  * Part of the hourly scan. Tells the owner of each published ad that went 90 days without activity (the owner left: owners
  * and admins). One notification per (user, ad, period): the period is identified by the last activity, so the same quiet
- * stretch is reported once and a new one, after fresh activity, is reported again. Never closes anything. Returns the new
- * notifications as digests, like the deadline scan.
+ * stretch is reported once and a new one, after fresh activity, is reported again. Never closes anything. Returns the
+ * notifications not yet emailed as digests, like the deadline scan.
  */
 export const scanStaleJobs = defineSystemJob<StaleScanDeps, z.ZodObject<{ now: z.ZodDate }>, DeadlineScanResult>({
   name: 'scanStaleJobs',
   input: z.object({ now: z.date() }),
   handler: async ({ deps, input }): Promise<DeadlineScanResult> => {
     const { now } = input;
-    const created: Notification[] = [];
     const contexts = new Map<string, OrganizationContext>();
     const context = (organizationId: string): OrganizationContext => {
       let found = contexts.get(organizationId);
@@ -27,7 +26,7 @@ export const scanStaleJobs = defineSystemJob<StaleScanDeps, z.ZodObject<{ now: z
     };
     for (const { job, lastActivityAt } of await deps.staleJobs.listStale(staleCutoff(now))) {
       for (const member of await context(job.organizationId).owners(job)) {
-        const stored = await deps.notifications.createIfAbsent(
+        await deps.notifications.createIfAbsent(
           {
             id: deps.newId(),
             organizationId: job.organizationId,
@@ -42,9 +41,8 @@ export const scanStaleJobs = defineSystemJob<StaleScanDeps, z.ZodObject<{ now: z
           },
           staleJobDedupeKey(job.id, lastActivityAt),
         );
-        if (stored) created.push(stored);
       }
     }
-    return { digests: await buildDigests(context, created) };
+    return { digests: await unsentDigests(deps.notifications, context, STALE_DIGEST_KINDS, now) };
   },
 });

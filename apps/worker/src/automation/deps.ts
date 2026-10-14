@@ -58,6 +58,7 @@ export function createPhase4WorkerDeps(wiring: AutomationWiring): Phase4WorkerDe
       executions: r.executions,
       tasks: r.tasks,
       notifications: r.notifications,
+      members: r.members,
       ...clock,
     },
     deliver: {

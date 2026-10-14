@@ -9,6 +9,7 @@ import type {
 } from '../job-request-ports.js';
 import type { DbExecutor } from './db-executor.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
+import { sequential } from '../sequential.js';
 
 type Row = typeof schema.jobRequest.$inferSelect;
 
@@ -69,10 +70,10 @@ export function createDrizzleJobRequests(db: DbExecutor): JobRequestRepository {
     },
     async list(query) {
       const where = and(eq(table.organizationId, query.organizationId), ...(query.status ? [eq(table.status, query.status)] : []));
-      const [items, totals] = await Promise.all([
-        db.select().from(table).where(where).orderBy(desc(table.createdAt), desc(table.id)).limit(query.limit).offset((query.page - 1) * query.limit),
-        db.select({ total: count() }).from(table).where(where),
-      ]);
+      const [items, totals] = await sequential(
+        () => db.select().from(table).where(where).orderBy(desc(table.createdAt), desc(table.id)).limit(query.limit).offset((query.page - 1) * query.limit),
+        () => db.select({ total: count() }).from(table).where(where),
+      );
       return { items: items.map(toRequest), total: totals[0]?.total ?? 0 };
     },
     async findOpenForJob(organizationId, jobId) {

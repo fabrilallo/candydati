@@ -7,6 +7,7 @@ import {
   buildJob,
   completeJobContent,
   buildNote,
+  createInMemoryTaskQueue,
   seedCandidateWorld,
   userActor,
   ORG_A,
@@ -15,6 +16,8 @@ import {
 import { decideApplication } from './decide-application.js';
 import { getPipeline } from './get-pipeline.js';
 import { moveApplication } from './move-application.js';
+import { AutomationEnqueueError } from '../automations/enqueue.js';
+import { createInMemoryTransaction } from '../../testing/in-memory-transaction.js';
 
 const recruiter = userActor({ role: 'recruiter', organizationId: ORG_A });
 const world = () =>
@@ -93,6 +96,19 @@ describe('moveApplication', () => {
       else await expect(run).rejects.toBeInstanceOf(ForbiddenError);
     },
   );
+});
+
+describe('moveApplication: automation queue failure', () => {
+  it('keeps the move and reports the failure with ids only, instead of swallowing it', async () => {
+    const reported: unknown[] = [];
+    const base = world();
+    const d = { ...base, queue: createInMemoryTaskQueue(new Error('redis password=hunter2 down')), transaction: createInMemoryTransaction((error) => reported.push(error)) };
+    await moveApplication(d, recruiter, { applicationId: 'app_1', stageId: 'stage-1' });
+    expect((await base.applications.findById(ORG_A, 'app_1'))?.stageId).toBe('stage-1');
+    expect(reported).toHaveLength(1);
+    expect(reported[0]).toBeInstanceOf(AutomationEnqueueError);
+    expect((reported[0] as AutomationEnqueueError).context).toEqual({ organizationId: ORG_A, applicationId: 'app_1', stageId: 'stage-1' });
+  });
 });
 
 describe('decideApplication', () => {

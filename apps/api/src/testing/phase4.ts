@@ -25,7 +25,7 @@ export function automationRunDeps(t: TestApp): AutomationRunDeps {
   const uow = createDrizzleUnitOfWork(t.handle.db);
   const r = uow.repositories;
   const { messagingDeps } = createMessagingDeps({ env: testEnv(), uow, queue: t.queue, sender: t.emailSender, identity: createFakeEmailIdentity(), onReceiptError: () => undefined });
-  return { ...messagingDeps, rules: r.rules, executions: r.executions, tasks: r.tasks, notifications: r.notifications, queue: t.queue };
+  return { ...messagingDeps, rules: r.rules, executions: r.executions, tasks: r.tasks, notifications: r.notifications, members: r.members, queue: t.queue };
 }
 
 export function scanDeps(t: TestApp): ScanDeps {

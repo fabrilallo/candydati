@@ -1,4 +1,4 @@
-import type { AutomationRule, Notification, Role, Task } from '@tt/domain';
+import type { AutomationRule, Notification, NotificationKind, Role, Task } from '@tt/domain';
 import type { ApplicationRepository, CandidateRepository, UserDirectory } from './candidate-ports.js';
 import type { TaskQueue } from './intake-ports.js';
 import type { JobRepository } from './job-ports.js';
@@ -27,6 +27,13 @@ export interface NotificationRepository {
   /** Marks as read (only the user's own, only the unread ones); `ids` undefined means all. Returns how many changed. */
   markRead(organizationId: string, userId: string, ids: readonly string[] | undefined, at: Date): Promise<number>;
   unreadCount(organizationId: string, userId: string): Promise<number>;
+  /**
+   * Notifications of these kinds created since `since` that no digest email carried yet (`emailed_at` null), across
+   * organizations. The digest is built from these, so a crash after the insert loses nothing.
+   */
+  listUnemailed(kinds: readonly NotificationKind[], since: Date): Promise<readonly Notification[]>;
+  /** Marks notifications of one organization as emailed. Returns how many changed. */
+  markEmailed(organizationId: string, ids: readonly string[], at: Date): Promise<number>;
 }
 
 export interface TaskListQuery {
@@ -143,5 +150,7 @@ export type AutomationRunDeps = MessagingDeps & {
   readonly executions: AutomationExecutionRepository;
   readonly tasks: TaskRepository;
   readonly notifications: NotificationRepository;
+  /** The creator of a rule must still be a member, with the permission the action needs, when the rule runs. */
+  readonly members: MemberDirectory;
   readonly queue: TaskQueue;
 };

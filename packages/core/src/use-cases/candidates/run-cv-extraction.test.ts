@@ -76,6 +76,14 @@ describe('runCvExtraction', () => {
     expect(await runCvExtraction(await world({}, false), worker, input)).toBe('failed');
   });
 
+  it('lets a storage outage propagate so the job retries, and stores nothing', async () => {
+    const deps = await world();
+    const broken = { ...deps, files: { ...deps.files, get: async () => { throw new Error('connect ECONNREFUSED minio'); } } };
+    await expect(runCvExtraction(broken, worker, input)).rejects.toThrow(/ECONNREFUSED/);
+    expect((await stored(deps))?.status).toBe('pending');
+    expect(await runCvExtraction(deps, worker, input)).toBe('text_only');
+  });
+
   it('bounds the stored text', async () => {
     const deps = await world({ textExtractor: fakeTextExtractor('a'.repeat(CV_TEXT_MAX_CHARS + 500)) });
     await runCvExtraction(deps, worker, input);

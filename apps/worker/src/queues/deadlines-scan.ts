@@ -1,4 +1,4 @@
-import { scanDeadlines, scanFeedbackReminders, scanStaleJobs, type FeedbackStageEntryDeps, type ScanDeps, type StaleScanDeps } from '@tt/core';
+import { markDigestsEmailed, scanDeadlines, scanFeedbackReminders, scanStaleJobs, type FeedbackStageEntryDeps, type ScanDeps, type StaleScanDeps } from '@tt/core';
 import { z } from 'zod';
 import { mergeDigests, sendDigests, type DigestSender } from '../deadlines/digest.js';
 import { defineQueue, type QueueDefinition } from './definitions.js';
@@ -31,7 +31,10 @@ export const createDeadlinesScanQueue = ({ scan, feedback, stale, digest, now }:
       const reminders = feedback ? await scanFeedbackReminders(feedback, { now: at }) : { reminded: 0, failed: 0 };
       const staleResult = stale ? await scanStaleJobs(stale, { now: at }) : { digests: [] };
       const digests = mergeDigests(deadlines.digests, staleResult.digests);
-      const result = await sendDigests(digest, digests);
+      const { delivered, ...result } = await sendDigests(digest, digests);
+      // Only what was emailed is marked: a failed send stays unsent and goes out with the next scan.
+      await markDigestsEmailed(scan.notifications, delivered, at);
+      if (stale && stale.notifications !== scan.notifications) await markDigestsEmailed(stale.notifications, delivered, at);
       logger.info({ jobId, digests: digests.length, missedPromises: deadlines.missedPromises, feedbackReminded: reminders.reminded, feedbackFailed: reminders.failed, ...result }, 'deadline scan finished');
     },
   });

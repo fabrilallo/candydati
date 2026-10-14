@@ -2,6 +2,7 @@ import { checkApproval, type JobApproval } from '@tt/domain';
 import { z } from 'zod';
 import { requireJob } from '../jobs/shared.js';
 import { defineJobRequestUseCase } from './define.js';
+import { sequential } from '../../sequential.js';
 
 export const getApprovalSetting = defineJobRequestUseCase({
   name: 'getApprovalSetting',
@@ -39,7 +40,7 @@ export const getJobApprovalStatus = defineJobRequestUseCase({
   audit: { skip: 'read-only' },
   handler: async ({ deps, actor, input }): Promise<JobApprovalStatus> => {
     const job = await requireJob(deps, actor.organizationId, input.jobId);
-    const [settings, approval] = await Promise.all([deps.organizationSettings.get(actor.organizationId), deps.approvals.find(actor.organizationId, job.id)]);
+    const [settings, approval] = await sequential(() => deps.organizationSettings.get(actor.organizationId), () => deps.approvals.find(actor.organizationId, job.id));
     return { requireApproval: settings.requireApproval, approval, publishable: checkApproval(settings.requireApproval, approval, job.content.salary) === null };
   },
 });

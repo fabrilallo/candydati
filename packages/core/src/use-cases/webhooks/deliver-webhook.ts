@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { defineUseCase } from '../../use-case.js';
 import type { WebhookDeliverDeps } from '../../webhook-ports.js';
 import { webhookHeaders } from './signature.js';
+import { sequential } from '../../sequential.js';
 
 export type WebhookDeliveryResult = 'delivered' | 'failed' | 'skipped';
 
@@ -51,10 +52,10 @@ export const deliverWebhook = defineUseCase<WebhookDeliverDeps, typeof inputSche
   audit: { skip: 'the delivery log is the record' },
   handler: async ({ deps, input }): Promise<WebhookDeliveryResult> => {
     const { organizationId } = input;
-    const [endpoint, event] = await Promise.all([
-      deps.endpoints.findById(organizationId, input.endpointId),
-      deps.outbox.findById(organizationId, input.eventId),
-    ]);
+    const [endpoint, event] = await sequential(
+      () => deps.endpoints.findById(organizationId, input.endpointId),
+      () => deps.outbox.findById(organizationId, input.eventId),
+    );
     if (!endpoint || !event || !endpoint.enabled || !subscribes(endpoint, event.type)) return 'skipped';
     // At most one success per (event, endpoint): a repeated task after a delivered attempt posts nothing.
     if (await deps.deliveries.hasSucceeded(organizationId, endpoint.id, event.id)) return 'skipped';

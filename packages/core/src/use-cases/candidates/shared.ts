@@ -3,6 +3,7 @@ import type { CandidateDeps } from '../../candidate-ports.js';
 import { NotFoundError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';
 import type { ApplicationCardView, CandidateDetailView, NoteView } from './views.js';
+import { mapSequential, sequential } from '../../sequential.js';
 
 const UNKNOWN_AUTHOR = 'Former member';
 
@@ -21,12 +22,12 @@ export async function requireCandidate(deps: Pick<CandidateDeps, 'candidates'>, 
 
 export async function loadCardView(deps: CandidateDeps, application: Application): Promise<ApplicationCardView> {
   const { organizationId } = application;
-  const [candidate, extraction, counts, job] = await Promise.all([
-    requireCandidate(deps, organizationId, application.candidateId),
-    deps.extractions.findByApplication(organizationId, application.id),
-    deps.notes.countByApplication(organizationId, [application.id]),
-    requireJob(deps, organizationId, application.jobId),
-  ]);
+  const [candidate, extraction, counts, job] = await sequential(
+    () => requireCandidate(deps, organizationId, application.candidateId),
+    () => deps.extractions.findByApplication(organizationId, application.id),
+    () => deps.notes.countByApplication(organizationId, [application.id]),
+    () => requireJob(deps, organizationId, application.jobId),
+  );
   const stageRemoved = !pipelineStagesOf(job.content.process).some((stage) => stage.id === application.stageId);
   return { application, candidate, extraction, noteCount: counts[application.id] ?? 0, stageRemoved, responseState: responseState(application, job, deps.now()) };
 }
@@ -54,7 +55,7 @@ export async function loadCandidateDetail(
   const extractions = await deps.extractions.findByApplications(organizationId, applications.map((a) => a.id));
   const messageCounts = await deps.messages.countByApplication(organizationId, applications.map((a) => a.id));
   const jobIds = [...new Set(applications.map((a) => a.jobId))];
-  const jobs = await Promise.all(jobIds.map((id) => requireJob(deps, organizationId, id)));
+  const jobs = await mapSequential(jobIds, (id) => requireJob(deps, organizationId, id));
   return {
     candidate,
     applications: applications.map((application) => {

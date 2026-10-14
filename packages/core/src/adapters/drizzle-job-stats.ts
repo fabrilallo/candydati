@@ -2,6 +2,7 @@ import { and, asc, count, eq, gte, schema, sql, type SQL } from '@tt/db';
 import type { DbExecutor } from './db-executor.js';
 import { JOB_STATUSES, type JobStatus } from '@tt/domain';
 import type { WeeklyActivity, WeeklyCount } from '../job-ports.js';
+import { sequential } from '../sequential.js';
 
 /** Aggregate queries behind the job overview. Every statement filters by `organization_id`. */
 
@@ -33,9 +34,9 @@ async function weeklyCounts(db: DbExecutor, organizationId: string, column: Time
 }
 
 export async function jobWeeklyActivity(db: DbExecutor, organizationId: string, since: Date): Promise<WeeklyActivity> {
-  const [created, published] = await Promise.all([
-    weeklyCounts(db, organizationId, job.createdAt, since),
-    weeklyCounts(db, organizationId, job.publishedAt, since),
-  ]);
+  const [created, published] = await sequential(
+    () => weeklyCounts(db, organizationId, job.createdAt, since),
+    () => weeklyCounts(db, organizationId, job.publishedAt, since),
+  );
   return { created, published };
 }

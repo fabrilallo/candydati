@@ -16,6 +16,7 @@ import {
   createInMemoryCandidateRepository,
   createInMemoryCvExtractionRepository,
 } from './in-memory-candidates.js';
+import { createInMemoryStageEvents } from './in-memory-reports.js';
 import { cell } from './in-memory-transaction.js';
 
 export interface ImportStoreState {
@@ -68,6 +69,10 @@ export function createInMemoryImportBatches(store: ImportStore): ImportBatchRepo
     },
     async list(organizationId) {
       return inOrg(organizationId).toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    },
+    async listStale(before) {
+      const open: readonly ImportBatch['status'][] = ['uploaded', 'analyzing', 'ready', 'importing'];
+      return store.read().batches.filter((b) => b.createdAt < before && (open.includes(b.status) || b.sourceFiles.length > 0));
     },
   };
 }
@@ -144,6 +149,7 @@ export function createInMemoryImportCommit(candidateStore: CandidateStore, impor
     applications: createInMemoryApplicationRepository(candidateStore),
     extractions: createInMemoryCvExtractionRepository(candidateStore),
     notes: createInMemoryCandidateNoteRepository(candidateStore),
+    stageEvents: createInMemoryStageEvents(candidateStore),
     importItems: createInMemoryImportItems(importStore),
     consentTokens: createInMemoryConsentTokens(importStore),
   };

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, isNull, schema, sql } from '@tt/db';
+import { and, asc, desc, eq, inArray, isNull, lt, or, schema, sql } from '@tt/db';
 import type { ImportAnalysis, ImportBatch, ImportItem } from '@tt/domain';
 import type { ConsentTokenRepository, ImportAnalysisRepository, ImportBatchRepository, ImportItemRepository } from '../import-ports.js';
 import { ConflictError } from '../errors.js';
@@ -83,6 +83,14 @@ export function createDrizzleImportBatches(db: DbExecutor): ImportBatchRepositor
     },
     async list(organizationId) {
       const rows = await db.select().from(importBatch).where(eq(importBatch.organizationId, organizationId)).orderBy(desc(importBatch.createdAt), desc(importBatch.id));
+      return rows.map(toBatch);
+    },
+    async listStale(before) {
+      const rows = await db
+        .select()
+        .from(importBatch)
+        .where(and(lt(importBatch.createdAt, before), or(inArray(importBatch.status, ['uploaded', 'analyzing', 'ready', 'importing']), sql`jsonb_array_length(${importBatch.sourceFiles}) > 0`)))
+        .orderBy(asc(importBatch.createdAt), asc(importBatch.id));
       return rows.map(toBatch);
     },
   };

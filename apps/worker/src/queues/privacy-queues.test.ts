@@ -1,5 +1,5 @@
-import { dataExportKey } from '@tt/domain';
-import { buildApplication, createFakeEmailSender, createInMemoryFileStorage, ORG_A, ORG_B, seedPrivacyData, userActor } from '@tt/core/testing';
+import { dataExportKey, emptyImportCounts } from '@tt/domain';
+import { buildApplication, createFakeEmailSender, createInMemoryFileStorage, ORG_A, ORG_B, seedImportWorld, seedPrivacyData, userActor } from '@tt/core/testing';
 import { requestOrganizationExport } from '@tt/core';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
@@ -54,6 +54,27 @@ describe('organization.export', () => {
   });
 });
 
+describe('retention.run: abandoned imports', () => {
+  it('purges the files and rows of a batch never committed after the configured days, and logs only ids', async () => {
+    const NOW = new Date('2027-06-01T03:00:00Z');
+    const key = `organizations/${ORG_A}/imports/b1/people.zip`;
+    const batch = { id: 'b1', organizationId: ORG_A, jobId: 'job_1', stageId: 'received', status: 'ready' as const, createdBy: 'u1', counts: emptyImportCounts(), mapping: null, headers: [], sourceFiles: [{ key, fileName: 'people.zip', sizeBytes: 1 }], error: null, createdAt: new Date(NOW.getTime() - 8 * DAY), importedAt: null, undoneAt: null };
+    const imports = seedImportWorld({ batches: [batch] });
+    await imports.files.put(key, new Uint8Array([1]), 'application/zip');
+    const retention = await seedPrivacyData();
+    const queue = createRetentionRunQueue({
+      retention,
+      imports,
+      importStaleDays: 7,
+      digest: { sender: createFakeEmailSender(), from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' },
+      now: () => NOW,
+    });
+    await queue.handle(job({}));
+    expect(imports.files.keys()).toEqual([]);
+    expect(await imports.imports.findById(ORG_A, 'b1')).toMatchObject({ status: 'failed', error: 'expired', sourceFiles: [] });
+  });
+});
+
 describe('retention.run', () => {
   const NOW = new Date('2027-06-01T03:00:00Z');
 
@@ -67,6 +88,8 @@ describe('retention.run', () => {
     const sender = createFakeEmailSender();
     const queue = createRetentionRunQueue({
       retention: deps,
+      imports: seedImportWorld(),
+      importStaleDays: 7,
       digest: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' },
       now: () => NOW,
     });

@@ -17,7 +17,7 @@ import { inTransaction } from '../../transaction.js';
 import { defineSystemJob } from '../../use-case.js';
 import { requireJob } from '../jobs/shared.js';
 import { queueReconfirmation } from './reconfirm-mail.js';
-import { assertStatus, deleteBatchFiles, requireBatch, SYSTEM_ACTOR } from './shared.js';
+import { assertStatus, purgeBatchData, requireBatch, SYSTEM_ACTOR } from './shared.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -131,6 +131,19 @@ async function writeItem(ctx: Context, repos: ImportCommitRepositories, prepared
   }
   const candidate = existing ?? (await repos.candidates.create(newCandidate(ctx, prepared)));
   const application = await repos.applications.create(newApplication(ctx, prepared, candidate.id));
+  // The application enters its stage now, like one from the careers page: without the event the funnel would not count it.
+  await repos.stageEvents.record({
+    id: deps.newId(),
+    organizationId,
+    applicationId: application.id,
+    jobId: batch.jobId,
+    fromStageId: null,
+    toStageId: application.stageId,
+    outcome: null,
+    occurredAt: ctx.importedAt,
+    actorType: 'system',
+    backfilled: false,
+  });
   const parsed = prepared.cv;
   await repos.extractions.upsert({
     applicationId: application.id,
@@ -229,19 +242,6 @@ async function commitChunk(ctx: Context, job: Job, items: readonly ImportItem[],
   await sendEmails(ctx, job, written.filter(isKept));
 }
 
-/**
- * Applications of the batch are done: the proposed people and parsed inputs are personal data, and go. Files first,
- * while the analysis still names them; every step can run again, so a retry after a crash finishes the purge.
- */
-async function purge(deps: ImportCommitDeps, batch: ImportBatch): Promise<ImportBatch> {
-  const analysis = await deps.importAnalyses.find(batch.organizationId, batch.id);
-  await deleteBatchFiles(deps, batch.organizationId, [...batch.sourceFiles.map((f) => f.key), ...(analysis?.cvs.map((cv) => cv.key) ?? [])]);
-  await deps.importItems.deleteByBatch(batch.organizationId, batch.id);
-  await deps.importAnalyses.delete(batch.organizationId, batch.id);
-  // Only the column: a full-row save from this snapshot would undo counts another run added meanwhile.
-  return batch.sourceFiles.length === 0 ? batch : deps.imports.transition(batch.organizationId, batch.id, batch.status, { sourceFiles: [] });
-}
-
 /** The final status and `import.committed` (counts only) in one transaction, BEFORE the purge: a crash after it only leaves a purge to redo. */
 async function finish(deps: ImportCommitDeps, batch: ImportBatch, importedAt: Date): Promise<ImportBatch> {
   const current = await requireBatch(deps, batch.organizationId, batch.id);
@@ -280,7 +280,7 @@ export const commitImport = defineSystemJob<ImportCommitDeps, typeof inputSchema
   input: inputSchema,
   handler: async ({ deps, input }) => {
     const batch = await requireBatch(deps, input.organizationId, input.batchId);
-    if (batch.status === 'done' || batch.status === 'failed') return purge(deps, batch);
+    if (batch.status === 'done' || batch.status === 'failed') return purgeBatchData(deps, batch);
     assertStatus(batch, ['importing']);
     const job = await requireJob(deps, batch.organizationId, batch.jobId);
     const analysis = await deps.importAnalyses.find(batch.organizationId, batch.id);
@@ -292,6 +292,6 @@ export const commitImport = defineSystemJob<ImportCommitDeps, typeof inputSchema
     for (let start = 0; start < pending.length; start += IMPORT_COMMIT_CHUNK) {
       await commitChunk(ctx, job, pending.slice(start, start + IMPORT_COMMIT_CHUNK), cvs);
     }
-    return purge(deps, await finish(deps, batch, importedAt));
+    return purgeBatchData(deps, await finish(deps, batch, importedAt));
   },
 });

@@ -1,4 +1,4 @@
-import { JOB_OWNER_ASSIGNEE, DAY_MS, type Application, type AutomationRule, type Job, type Task } from '@tt/domain';
+import { JOB_OWNER_ASSIGNEE, DAY_MS, isRole, roleHasPermission, type Application, type AutomationRule, type Job, type Permission, type Role, type Task } from '@tt/domain';
 import { z } from 'zod';
 import type { SystemActor } from '../../actor.js';
 import { toAuditActor } from '../../actor.js';
@@ -25,20 +25,53 @@ export interface AutomationRunResult {
   readonly skipped: AutomationSkipReason | null;
 }
 
-/** Messages go out in the name of the person who configured the rule: `sentBy = rule.createdBy`. */
-const ruleActor = (rule: AutomationRule): SystemActor => ({
+/** Messages go out in the name of the person who configured the rule: `sentBy = rule.createdBy`, with their CURRENT role. */
+const ruleActor = (rule: AutomationRule, role: Role): SystemActor => ({
   type: 'system',
   id: rule.createdBy,
   onBehalfOfUserId: null,
   organizationId: rule.organizationId,
-  // The least role that may send messages; the rule's creator needed more than that to create it.
-  role: 'recruiter',
+  role,
 });
 
-async function sendTemplate(deps: AutomationRunDeps, rule: AutomationRule, job: Job, applicationId: string, templateId: string): Promise<void> {
+const NEEDED: Readonly<Record<AutomationRule['action']['type'], Permission>> = { send_template: 'message:send', create_task: 'task:manage' };
+const ADMIN_ROLES = ['owner', 'admin'];
+
+/**
+ * The role the creator holds NOW that allows the rule's action, or null when they left the organization or lost the
+ * permission: a rule never acts with more than its creator has today.
+ */
+async function currentRole(deps: AutomationRunDeps, rule: AutomationRule): Promise<Role | null> {
+  const member = (await deps.members.list(rule.organizationId)).find((m) => m.userId === rule.createdBy);
+  return member?.roles.filter(isRole).find((role) => roleHasPermission(role, NEEDED[rule.action.type])) ?? null;
+}
+
+/** Owners and admins hear once per rule that it stopped running: its creator is gone or no longer allowed. */
+async function notifyCreatorUnauthorized(deps: AutomationRunDeps, rule: AutomationRule, applicationId: string): Promise<void> {
+  const admins = (await deps.members.list(rule.organizationId)).filter((m) => m.roles.some((role) => ADMIN_ROLES.includes(role)));
+  for (const admin of admins) {
+    await deps.notifications.createIfAbsent(
+      {
+        id: deps.newId(),
+        organizationId: rule.organizationId,
+        userId: admin.userId,
+        kind: 'automation_failed',
+        applicationId,
+        jobId: rule.jobId,
+        taskId: null,
+        payload: { ruleId: rule.id, action: rule.action.type, reason: 'creator_not_authorized' },
+        createdAt: deps.now(),
+        readAt: null,
+      },
+      `automation_creator_not_authorized:${rule.id}`,
+    );
+  }
+}
+
+async function sendTemplate(deps: AutomationRunDeps, rule: AutomationRule, role: Role, job: Job, applicationId: string, templateId: string): Promise<void> {
   const template = await resolveTemplate(deps, rule.organizationId, templateId, job.content.language);
   if (!template) throw new Error('template_missing');
-  const result = await sendMessage(deps, ruleActor(rule), {
+  const result = await sendMessage(deps, ruleActor(rule, role), {
     applicationIds: [applicationId],
     templateId,
     subject: template.subject,
@@ -72,9 +105,9 @@ async function createTaskFor(
   await notifyTaskAssigned(deps, task);
 }
 
-async function execute(deps: AutomationRunDeps, rule: AutomationRule, job: Job, applicationId: string): Promise<void> {
+async function execute(deps: AutomationRunDeps, rule: AutomationRule, role: Role, job: Job, applicationId: string): Promise<void> {
   const { action } = rule;
-  if (action.type === 'send_template') await sendTemplate(deps, rule, job, applicationId, action.templateId);
+  if (action.type === 'send_template') await sendTemplate(deps, rule, role, job, applicationId, action.templateId);
   else await createTaskFor(deps, rule, job, applicationId, action);
 }
 
@@ -113,7 +146,8 @@ const claimRun = (deps: AutomationRunDeps, rule: AutomationRule, application: Ap
  * Worker use case (system actor, task `automation.run`): runs the enabled rules of the stage the application just
  * entered. Re-checks everything when it runs: an application that moved on, was decided or is gone is skipped. Rules run
  * independently; a failing one notifies its creator (`automation_failed`) and never stops the others or undoes the
- * move. There is no rule that moves or decides, so this can never do either (PRODUCT.md §2, principle 4).
+ * move. A rule whose creator is no longer a member with the needed permission is skipped (admins are told once); the
+ * action runs with the creator's current role. There is no rule that moves or decides, so this can never do either (PRODUCT.md §2, principle 4).
  *
  * Idempotent: each rule records its run for this stage entry in the same transaction as what it does, so a redelivered
  * task finds the record and neither sends the template nor creates the task again.
@@ -139,12 +173,18 @@ export const runAutomations = defineUseCase<AutomationRunDeps, typeof inputSchem
       if (!(await claimRun(deps, rule, application))) continue;
       let ok = true;
       try {
-        await execute(deps, rule, job, application.id);
+        const role = await currentRole(deps, rule);
+        if (role === null) {
+          // Skipped, not sent in the name of someone who is gone: admins are told once.
+          await notifyCreatorUnauthorized(deps, rule, application.id);
+          throw new Error('creator_not_authorized');
+        }
+        await execute(deps, rule, role, job, application.id);
         executed += 1;
-      } catch {
+      } catch (error) {
         ok = false;
         failed += 1;
-        await notifyFailure(deps, rule, application.id);
+        if (!(error instanceof Error && error.message === 'creator_not_authorized')) await notifyFailure(deps, rule, application.id);
       }
       await deps.auditLog.append({
         organizationId,

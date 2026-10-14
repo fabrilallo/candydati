@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { requireJob } from '../jobs/shared.js';
 import { defineCandidateUseCase } from './define.js';
 import type { PipelineView } from './views.js';
+import { sequential } from '../../sequential.js';
 
 /** Open and decided applications of one job, with the stages generated from its declared process. */
 export const getPipeline = defineCandidateUseCase({
@@ -14,11 +15,11 @@ export const getPipeline = defineCandidateUseCase({
     const job = await requireJob(deps, actor.organizationId, input.jobId);
     const applications = await deps.applications.listByJob(actor.organizationId, job.id);
     const ids = applications.map((a) => a.id);
-    const [candidates, extractions, counts] = await Promise.all([
-      deps.candidates.findByIds(actor.organizationId, [...new Set(applications.map((a) => a.candidateId))]),
-      deps.extractions.findByApplications(actor.organizationId, ids),
-      deps.notes.countByApplication(actor.organizationId, ids),
-    ]);
+    const [candidates, extractions, counts] = await sequential(
+      () => deps.candidates.findByIds(actor.organizationId, [...new Set(applications.map((a) => a.candidateId))]),
+      () => deps.extractions.findByApplications(actor.organizationId, ids),
+      () => deps.notes.countByApplication(actor.organizationId, ids),
+    );
     const now = deps.now();
     const pipeline = pipelineStagesOf(job.content.process);
     const cards = applications.flatMap((application) => {

@@ -43,7 +43,11 @@ export async function deleteFilesAfterErasure(
 
 /** The erasure happened, but some stored files are neither deleted nor queued for deletion. `keys` is for the logs. */
 export class FileCleanupError extends Error {
-  constructor(readonly keys: readonly string[]) {
+  /** `result` is what the committed erasure did: callers count it as erased. */
+  constructor(
+    readonly keys: readonly string[],
+    readonly result: EraseResult,
+  ) {
     super(`${keys.length} stored file(s) could not be deleted or queued for deletion.`);
     this.name = 'FileCleanupError';
   }
@@ -82,6 +86,7 @@ export async function eraseCandidateData(deps: ErasureDeps, input: EraseInput): 
     return cvKeys;
   });
   const lost = await deleteFilesAfterErasure(deps, organizationId, keys);
-  if (lost.length > 0) throw new FileCleanupError(lost);
-  return { applicationCount: selected.length, candidateErased };
+  const result = { applicationCount: selected.length, candidateErased };
+  if (lost.length > 0) throw new FileCleanupError(lost, result);
+  return result;
 }

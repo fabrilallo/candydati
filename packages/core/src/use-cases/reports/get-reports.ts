@@ -3,10 +3,11 @@ import { NotFoundError } from '../../errors.js';
 import type { ReportDeps } from '../../report-ports.js';
 import { buildReports } from './build-reports.js';
 import { defineReportUseCase } from './define.js';
+import { sequential } from '../../sequential.js';
 
 /** Published and closed jobs (drafts cannot have applications); narrowed to `jobId` when given. A foreign or unknown job is "not found". */
 async function loadJobs(deps: ReportDeps, organizationId: string, jobId: string | undefined): Promise<readonly Job[]> {
-  const [published, closed] = await Promise.all([deps.jobs.listByStatus(organizationId, 'published'), deps.jobs.listByStatus(organizationId, 'closed')]);
+  const [published, closed] = await sequential(() => deps.jobs.listByStatus(organizationId, 'published'), () => deps.jobs.listByStatus(organizationId, 'closed'));
   const jobs = [...published, ...closed];
   if (jobId === undefined) return jobs;
   const found = jobs.filter((job) => job.id === jobId);

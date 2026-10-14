@@ -3,6 +3,7 @@ import type { DbExecutor } from './db-executor.js';
 import { and, count, desc, eq, schema, sql } from '@tt/db';
 import { auditEventSchema, newAuditEventSchema, type AuditEvent, type NewAuditEvent } from '@tt/domain';
 import type { AuditLogPage, AuditLogQuery, AuditLogRepository } from '../ports.js';
+import { sequential } from '../sequential.js';
 
 type Row = typeof schema.auditLog.$inferSelect;
 
@@ -48,16 +49,17 @@ export function createDrizzleAuditLog(db: DbExecutor): AuditLogRepository {
         eq(auditLog.organizationId, query.organizationId),
         query.action === undefined ? undefined : eq(auditLog.action, query.action),
       );
-      const [rows, totals] = await Promise.all([
-        db
-          .select()
-          .from(auditLog)
-          .where(where)
-          .orderBy(desc(auditLog.occurredAt), desc(auditLog.id))
-          .limit(query.limit)
-          .offset((query.page - 1) * query.limit),
-        db.select({ total: count() }).from(auditLog).where(where),
-      ]);
+      const [rows, totals] = await sequential(
+        () =>
+          db
+            .select()
+            .from(auditLog)
+            .where(where)
+            .orderBy(desc(auditLog.occurredAt), desc(auditLog.id))
+            .limit(query.limit)
+            .offset((query.page - 1) * query.limit),
+        () => db.select({ total: count() }).from(auditLog).where(where),
+      );
       return { items: rows.map(toEvent), total: totals[0]?.total ?? 0 };
     },
   };

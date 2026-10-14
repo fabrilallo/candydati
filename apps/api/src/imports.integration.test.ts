@@ -166,6 +166,14 @@ describe('import: access', () => {
     }
   });
 
+  it('refuses a role without import:manage with 403 before reading the body', async () => {
+    const w = await createWorld(t);
+    const member = await w.member('interviewer');
+    // Not even a multipart body: had the route read the parts first, this would be a 4xx about the body, not about the role.
+    const response = await t.app.inject({ method: 'POST', url: '/api/v1/imports', headers: { origin: WEB_ORIGIN, cookie: member.cookieHeader(), 'content-type': 'multipart/form-data; boundary=x' }, payload: 'garbage that never ends' });
+    expect(response.statusCode).toBe(403);
+  });
+
   it('refuses API keys on every import route', async () => {
     const w = await createWorld(t);
     const id = await importFlow(w);

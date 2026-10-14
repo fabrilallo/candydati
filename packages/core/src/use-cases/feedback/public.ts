@@ -17,6 +17,7 @@ import type { PublicFeedbackDeps } from '../../feedback-ports.js';
 import { definePublicFeedbackQuery } from './define.js';
 import { FEEDBACK_PAGE_ACTOR, stageContextOf } from './shared.js';
 import { inTransaction } from '../../transaction.js';
+import { sequential } from '../../sequential.js';
 
 const tokenInput = z.object({ token: z.string().min(16).max(200) });
 const NOT_VALID = 'This link is not valid.';
@@ -29,11 +30,11 @@ interface Resolved {
 
 /**
  * Unknown and expired links, and links of applications that are gone or not visible, are all "not found": nothing says
- * whether the link ever existed. A submitted link still opens, read-only.
+ * whether the link ever existed. Expiry always applies, also after submission: a forwarded link must not open the CV forever.
  */
 async function resolve(deps: PublicFeedbackDeps, secret: string): Promise<Resolved> {
   const request = await deps.feedbackRequests.findByTokenHash(deps.hash(secret));
-  if (!request || (request.submittedAt === null && request.expiresAt <= deps.now())) throw new NotFoundError(NOT_VALID);
+  if (!request || request.expiresAt <= deps.now()) throw new NotFoundError(NOT_VALID);
   const application = await deps.applications.findById(request.organizationId, request.applicationId);
   const job = await deps.jobs.findById(request.organizationId, request.jobId);
   if (!application || !job || application.consentStatus !== 'given') throw new NotFoundError(NOT_VALID);
@@ -65,11 +66,11 @@ export const getFeedbackRequest = definePublicFeedbackQuery({
   input: tokenInput,
   handler: async ({ deps, input }): Promise<PublicFeedbackView> => {
     const { request, application, job } = await resolve(deps, input.token);
-    const [candidate, organization, feedback] = await Promise.all([
-      deps.candidates.findById(request.organizationId, application.candidateId),
-      deps.organizations.findById(request.organizationId),
-      request.submittedAt === null ? null : deps.interviewFeedback.findByRequest(request.organizationId, request.id),
-    ]);
+    const [candidate, organization, feedback] = await sequential(
+      () => deps.candidates.findById(request.organizationId, application.candidateId),
+      () => deps.organizations.findById(request.organizationId),
+      async () => (request.submittedAt === null ? null : await deps.interviewFeedback.findByRequest(request.organizationId, request.id)),
+    );
     if (!candidate || !organization) throw new NotFoundError(NOT_VALID);
     const stage = stageContextOf(job, request.stageId);
     return {

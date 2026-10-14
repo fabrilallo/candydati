@@ -5,6 +5,7 @@ export default defineConfig({
     include: ['src/**/*.test.ts'],
     env: { NODE_ENV: 'test' },
     globalSetup: ['./src/testing/global-setup.ts'],
+    setupFiles: ['./src/testing/overlap-guard.setup.ts'],
     // Integration tests share one database; keep files sequential.
     fileParallelism: false,
     testTimeout: 20_000,

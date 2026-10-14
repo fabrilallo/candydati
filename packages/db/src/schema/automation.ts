@@ -50,6 +50,8 @@ export const notification = pgTable(
     payload: jsonb('payload').$type<Record<string, string | number | boolean | null>>().notNull().default(sql`'{}'::jsonb`),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     readAt: timestamp('read_at', { withTimezone: true }),
+    /** When the notification went out in an email digest. Null: still to send (a crash before the send loses nothing). */
+    emailedAt: timestamp('emailed_at', { withTimezone: true }),
   },
   (table) => [
     uniqueIndex('notification_org_user_dedupe_uidx').on(table.organizationId, table.userId, table.dedupeKey),

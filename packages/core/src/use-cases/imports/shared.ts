@@ -48,3 +48,19 @@ export async function deleteBatchFiles(deps: Pick<ImportDeps, 'files' | 'queue'>
     }
   }
 }
+
+type PurgeDeps = Pick<ImportDeps, 'imports' | 'importItems' | 'importAnalyses' | 'files' | 'queue'>;
+
+/**
+ * Deletes the working data of a batch that will never be committed (done, failed, expired): the proposed people and
+ * parsed inputs are personal data. Files first, while the analysis still names them; every step can run again, so a
+ * retry after a crash finishes the purge. The `sourceFiles` column goes last: while it is set, the purge is unfinished.
+ */
+export async function purgeBatchData(deps: PurgeDeps, batch: ImportBatch): Promise<ImportBatch> {
+  const analysis = await deps.importAnalyses.find(batch.organizationId, batch.id);
+  await deleteBatchFiles(deps, batch.organizationId, [...batch.sourceFiles.map((f) => f.key), ...(analysis?.cvs.map((cv) => cv.key) ?? [])]);
+  await deps.importItems.deleteByBatch(batch.organizationId, batch.id);
+  await deps.importAnalyses.delete(batch.organizationId, batch.id);
+  // Only the column: a full-row save from this snapshot would undo counts another run added meanwhile.
+  return batch.sourceFiles.length === 0 ? batch : deps.imports.transition(batch.organizationId, batch.id, batch.status, { sourceFiles: [] });
+}

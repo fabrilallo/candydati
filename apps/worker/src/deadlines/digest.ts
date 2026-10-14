@@ -100,6 +100,8 @@ export function mergeDigests(...groups: readonly (readonly DigestEntry[])[]): re
 export interface DigestResult {
   readonly sent: number;
   readonly failed: number;
+  /** The entries whose email was accepted: the caller marks their notifications as emailed. */
+  readonly delivered: readonly DigestEntry[];
 }
 
 /**
@@ -107,16 +109,16 @@ export interface DigestResult {
  * addresses never reach the logs, and one bad mailbox does not stop the others. In-app notifications exist regardless.
  */
 export async function sendDigests(config: DigestSender, entries: readonly DigestEntry[]): Promise<DigestResult> {
-  let sent = 0;
   let failed = 0;
+  const delivered: DigestEntry[] = [];
   for (const entry of entries) {
     const { subject, text, html } = buildDigestEmail(config, entry);
     try {
       await config.sender.send({ from: config.from, replyTo: config.from, to: entry.email, subject, text, html, headers: { 'Auto-Submitted': 'auto-generated' } });
-      sent += 1;
+      delivered.push(entry);
     } catch {
       failed += 1;
     }
   }
-  return { sent, failed };
+  return { sent: delivered.length, failed, delivered };
 }

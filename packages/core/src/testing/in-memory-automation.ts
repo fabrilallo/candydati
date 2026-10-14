@@ -34,6 +34,7 @@ export interface InMemoryNotifications extends NotificationRepository {
 export function createInMemoryNotifications(initial: readonly Notification[] = []): InMemoryNotifications {
   const rows = cell<readonly Notification[]>([...initial]);
   const keys = cell<ReadonlySet<string>>(new Set());
+  const emailed = cell<ReadonlySet<string>>(new Set());
   const own = (organizationId: string, userId: string) => rows.get().filter((n) => n.organizationId === organizationId && n.userId === userId);
   return {
     async createIfAbsent(notification, dedupeKey) {
@@ -56,6 +57,14 @@ export function createInMemoryNotifications(initial: readonly Notification[] = [
     },
     async unreadCount(organizationId, userId) {
       return own(organizationId, userId).filter((n) => n.readAt === null).length;
+    },
+    async listUnemailed(kinds, since) {
+      return rows.get().filter((n) => kinds.includes(n.kind) && n.createdAt >= since && !emailed.get().has(n.id));
+    },
+    async markEmailed(organizationId, ids, _at) {
+      const targets = rows.get().filter((n) => n.organizationId === organizationId && ids.includes(n.id) && !emailed.get().has(n.id));
+      emailed.set(new Set([...emailed.get(), ...targets.map((n) => n.id)]));
+      return targets.length;
     },
     snapshot: () => rows.get(),
     purge(doomed) {

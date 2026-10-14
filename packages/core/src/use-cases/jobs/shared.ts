@@ -12,6 +12,7 @@ import {
 } from '@tt/domain';
 import { NotFoundError, ValidationError } from '../../errors.js';
 import type { JobDeps } from '../../job-ports.js';
+import { sequential } from '../../sequential.js';
 
 /** A job of another organization is indistinguishable from a missing one: existence is never revealed. */
 export async function requireJob(deps: Pick<JobDeps, 'jobs'>, organizationId: string, jobId: string): Promise<Job> {
@@ -73,6 +74,6 @@ export async function approvalIssueOf(
   jobId: string,
   content: JobContent,
 ): Promise<ApprovalRule | null> {
-  const [settings, approval] = await Promise.all([deps.organizationSettings.get(organizationId), deps.approvals.find(organizationId, jobId)]);
+  const [settings, approval] = await sequential(() => deps.organizationSettings.get(organizationId), () => deps.approvals.find(organizationId, jobId));
   return checkApproval(settings.requireApproval, approval, content.salary);
 }

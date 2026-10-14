@@ -1,5 +1,6 @@
 import type { CandidateRepository, ApplicationRepository } from '../candidate-ports.js';
 import type { JobRepository } from '../job-ports.js';
+import { mapSequential } from '../sequential.js';
 
 export interface CandidateRef {
   readonly id: string;
@@ -21,10 +22,10 @@ export async function loadRefs(
   jobIds: readonly (string | null)[],
 ): Promise<Refs> {
   const appIds = [...new Set(applicationIds.filter((id): id is string => id !== null))];
-  const applications = (await Promise.all(appIds.map((id) => deps.applications.findById(organizationId, id)))).flatMap((a) => (a ? [a] : []));
+  const applications = (await mapSequential(appIds, (id) => deps.applications.findById(organizationId, id))).flatMap((a) => (a ? [a] : []));
   const candidates = await deps.candidates.findByIds(organizationId, [...new Set(applications.map((a) => a.candidateId))]);
   const wantedJobs = [...new Set([...jobIds, ...applications.map((a) => a.jobId)].filter((id): id is string => id !== null))];
-  const jobs = (await Promise.all(wantedJobs.map((id) => deps.jobs.findById(organizationId, id)))).flatMap((j) => (j ? [j] : []));
+  const jobs = (await mapSequential(wantedJobs, (id) => deps.jobs.findById(organizationId, id))).flatMap((j) => (j ? [j] : []));
   return {
     candidateOf: (applicationId) => {
       const application = applications.find((a) => a.id === applicationId);

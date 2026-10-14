@@ -5,6 +5,7 @@ import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import { definePublicQuery } from '../../use-case.js';
 import { eraseCandidateData } from '../privacy/erase-candidate-data.js';
 import { inTransaction } from '../../transaction.js';
+import { sequential } from '../../sequential.js';
 
 export const CONSENT_PAGE_ACTOR_ID = 'consent_page';
 const SYSTEM_ACTOR = { type: 'system', id: CONSENT_PAGE_ACTOR_ID, onBehalfOfUserId: null } as const;
@@ -46,11 +47,11 @@ export const getConsentRequest = definePublicQuery<ConsentDeps, typeof tokenInpu
   input: tokenInput,
   handler: async ({ deps, input }) => {
     const { token, application } = await resolve(deps, input.token);
-    const [organization, job, notice] = await Promise.all([
-      deps.organizations.findById(token.organizationId),
-      deps.jobs.findById(token.organizationId, application.jobId),
-      deps.privacyNotices.findActive(token.organizationId),
-    ]);
+    const [organization, job, notice] = await sequential(
+      () => deps.organizations.findById(token.organizationId),
+      () => deps.jobs.findById(token.organizationId, application.jobId),
+      () => deps.privacyNotices.findActive(token.organizationId),
+    );
     if (!organization || !job) throw new NotFoundError('This link is not valid.');
     if (!notice) throw new ConflictError('no_privacy_notice');
     return { organization: { name: organization.name, slug: organization.slug }, job: { title: job.content.title }, privacyNotice: notice, expiresAt: token.expiresAt };

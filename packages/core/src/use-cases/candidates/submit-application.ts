@@ -19,6 +19,7 @@ import { enqueueAutomations } from '../automations/enqueue.js';
 import { queueReceipt } from '../messaging/receipt.js';
 import { trackStageEntry } from '../reports/tracking.js';
 import { recordEvent } from '../webhooks/record-event.js';
+import { sequential } from '../../sequential.js';
 
 export const CAREERS_PAGE_ACTOR_ID = 'careers_page';
 
@@ -196,10 +197,10 @@ async function assertUnderDailyCaps(deps: SubmitApplicationDeps, organizationId:
   const caps = deps.dailyCaps;
   if (!caps) return;
   const since = new Date(now.getTime() - DAY_MS);
-  const [inOrganization, inJob] = await Promise.all([
-    caps.applications.countCreatedSince(organizationId, since),
-    caps.applications.countCreatedSince(organizationId, since, jobId),
-  ]);
+  const [inOrganization, inJob] = await sequential(
+    () => caps.applications.countCreatedSince(organizationId, since),
+    () => caps.applications.countCreatedSince(organizationId, since, jobId),
+  );
   if (inOrganization >= caps.perOrganization || inJob >= caps.perJob) throw new RateLimitedError(APPLICATIONS_BUSY_MESSAGE);
 }
 

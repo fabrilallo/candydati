@@ -35,13 +35,14 @@ describe('digest email', () => {
 
   it('sends one email per person from the platform identity and counts failures without stopping', async () => {
     const sender = createFakeEmailSender();
-    const result = await sendDigests(config(sender), [entry(), entry({ userId: 'u2', email: 'bob@acme.example' })]);
-    expect(result).toEqual({ sent: 2, failed: 0 });
+    const entries = [entry(), entry({ userId: 'u2', email: 'bob@acme.example' })];
+    const result = await sendDigests(config(sender), entries);
+    expect(result).toEqual({ sent: 2, failed: 0, delivered: entries });
     expect(sender.sent()).toHaveLength(2);
     expect(sender.sent()[0]).toMatchObject({ from: '"Platform" <noreply@mail.example>', to: 'olivia@acme.example' });
 
     const failing = createFakeEmailSender(new Error('smtp down'));
-    expect(await sendDigests(config(failing), [entry(), entry()])).toEqual({ sent: 0, failed: 2 });
+    expect(await sendDigests(config(failing), [entry(), entry()])).toEqual({ sent: 0, failed: 2, delivered: [] });
   });
 
   it('sanitizes the platform name in the From header', () => {

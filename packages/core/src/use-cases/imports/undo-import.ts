@@ -1,9 +1,10 @@
 import type { ImportBatch } from '@tt/domain';
 import { z } from 'zod';
+import { groupBy } from '../../group-by.js';
 import { toAuditActor } from '../../actor.js';
 import type { ImportUndoDeps } from '../../import-ports.js';
 import { defineUseCase, type UseCase } from '../../use-case.js';
-import { eraseCandidateData } from '../privacy/erase-candidate-data.js';
+import { eraseCandidateData, FileCleanupError } from '../privacy/erase-candidate-data.js';
 import { assertStatus, requireBatch, withCounts } from './shared.js';
 
 export interface UndoImportResult {
@@ -16,14 +17,8 @@ export interface UndoImportResult {
   readonly failed: number;
 }
 
-const groupBy = <T>(items: readonly T[], keyOf: (item: T) => string): ReadonlyMap<string, readonly T[]> => {
-  const groups = new Map<string, T[]>();
-  for (const item of items) groups.set(keyOf(item), [...(groups.get(keyOf(item)) ?? []), item]);
-  return groups;
-};
-
 /**
- * Undoes a whole import while it is `done` (PRODUCT.md §3.1): erases, through `eraseCandidateData` with reason `import_undone`,
+ * Undoes a whole import while it is `done` (or `failed` after part of it was imported) (PRODUCT.md §3.1): erases, through `eraseCandidateData` with reason `import_undone`,
  * every application the batch created that is still waiting for reconfirmation. A candidate the batch created goes
  * entirely (when nothing else of theirs remains); for someone who already existed only the applications, notes, files
  * and messages the batch added go. People who reconfirmed are skipped and counted. The batch becomes `undone`.
@@ -39,7 +34,7 @@ export const undoImport: UseCase<ImportUndoDeps, UndoImportResult> = defineUseCa
   },
   handler: async ({ deps, actor, input }): Promise<UndoImportResult> => {
     const batch = await requireBatch(deps, actor.organizationId, input.batchId);
-    assertStatus(batch, ['done']);
+    assertStatus(batch, ['done', 'failed']);
     const applications = await deps.applications.listByImportBatch(batch.organizationId, batch.id);
     let erased = 0;
     let skipped = 0;
@@ -59,8 +54,10 @@ export const undoImport: UseCase<ImportUndoDeps, UndoImportResult> = defineUseCa
           actor: toAuditActor(actor),
         });
         erased += result.applicationCount;
-      } catch {
-        failed += 1;
+      } catch (error) {
+        // The erasure committed; only stored files are left over (queued for deletion or reported). It is done.
+        if (error instanceof FileCleanupError) erased += error.result.applicationCount;
+        else failed += 1;
       }
     }
     const counts = { erased: batch.counts.erased + erased, skippedReconfirmed: skipped };

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError } from '../../errors.js';
 import { apiKeyActor, buildApplication, buildCandidate, buildJob, completeJobContent, ORG_A, ORG_B, seedHrWorld, userActor, type TestHrDeps } from '../../testing/index.js';
+import { markDigestsEmailed } from '../automations/scan-deadlines.js';
 import { scanStaleJobs } from './scan-stale-jobs.js';
 import { listStaleJobs } from './stale-jobs.js';
 
@@ -67,7 +68,8 @@ describe('scanStaleJobs', () => {
 
   it('never repeats itself within the same staleness period', async () => {
     const deps = world();
-    await scanStaleJobs(deps, { now: NOW });
+    const first = await scanStaleJobs(deps, { now: NOW });
+    await markDigestsEmailed(deps.notifications, first.digests, NOW);
     const again = await scanStaleJobs(deps, { now: new Date(NOW.getTime() + 3_600_000) });
     const muchLater = await scanStaleJobs(deps, { now: new Date(NOW.getTime() + 30 * DAY) });
     expect(deps.notifications.snapshot()).toHaveLength(1);

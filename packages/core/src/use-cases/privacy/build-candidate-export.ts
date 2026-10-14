@@ -4,6 +4,7 @@ import type { FeedbackRecords } from '../../feedback-ports.js';
 import type { FileStorage } from '../../intake-ports.js';
 import type { JobRepository } from '../../job-ports.js';
 import type { MessageRepository } from '../../messaging-ports.js';
+import { sequential } from '../../sequential.js';
 
 export interface ExportFile {
   /** Path inside the ZIP, as referenced by `applications[].cv.path`. */
@@ -49,22 +50,22 @@ export async function buildCandidateExport(sources: ExportSources, candidate: Ca
   const { organizationId } = candidate;
   const applications = (await sources.applications.listByCandidate(organizationId, candidate.id)).toSorted(oldestFirst);
   const ids = applications.map((a) => a.id);
-  const [extractions, notes] = await Promise.all([
-    sources.extractions.findByApplications(organizationId, ids),
-    sources.notes.listByCandidate(organizationId, candidate.id),
-  ]);
+  const [extractions, notes] = await sequential(
+    () => sources.extractions.findByApplications(organizationId, ids),
+    () => sources.notes.listByCandidate(organizationId, candidate.id),
+  );
   const files: ExportFile[] = [];
   const missingFiles: string[] = [];
   const exportedApplications: CandidateExport['applications'] = [];
   for (const application of applications) {
     const path = cvPathOf(application);
-    const [job, messages, bytes, feedback, feedbackRequests] = await Promise.all([
-      sources.jobs.findById(organizationId, application.jobId),
-      sources.messages.listByApplication(organizationId, application.id),
-      readFile(sources.files, application.cv.key),
-      sources.interviewFeedback.listByApplication(organizationId, application.id),
-      sources.feedbackRequests.listByApplication(organizationId, application.id),
-    ]);
+    const [job, messages, bytes, feedback, feedbackRequests] = await sequential(
+      () => sources.jobs.findById(organizationId, application.jobId),
+      () => sources.messages.listByApplication(organizationId, application.id),
+      () => readFile(sources.files, application.cv.key),
+      () => sources.interviewFeedback.listByApplication(organizationId, application.id),
+      () => sources.feedbackRequests.listByApplication(organizationId, application.id),
+    );
     if (bytes) files.push({ path, bytes });
     else missingFiles.push(path);
     const extraction = extractions.find((e) => e.applicationId === application.id) ?? null;

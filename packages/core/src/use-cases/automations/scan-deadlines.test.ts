@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ValidationError } from '../../errors.js';
 import { buildApplication, buildCandidate, buildJob, buildTask, seedAutomationWorld, ORG_A, ORG_B, type AutomationSeedOptions } from '../../testing/index.js';
 import { buildAutomationRule } from '../../testing/automation-fixtures.js';
-import { scanDeadlines } from './scan-deadlines.js';
+import { markDigestsEmailed, scanDeadlines } from './scan-deadlines.js';
 
 const HOUR = 3_600_000;
 const DAY = 24 * HOUR;
@@ -38,10 +38,39 @@ describe('scanDeadlines', () => {
 
   it('never repeats itself: a second run creates nothing and returns an empty digest', async () => {
     const deps = world({ applications: [buildApplication({ organizationId: ORG_A, responseDueAt: at(HOUR) })] });
-    await scanDeadlines(deps, { now: NOW });
+    const first = await scanDeadlines(deps, { now: NOW });
+    await markDigestsEmailed(deps.notifications, first.digests, NOW);
     const second = await scanDeadlines(deps, { now: at(HOUR) });
     expect(deps.notifications.snapshot()).toHaveLength(1);
     expect(second.digests).toEqual([]);
+  });
+
+  it('builds the digest from unsent notifications: a retry after a crash before the send still carries them', async () => {
+    const deps = world({ applications: [buildApplication({ organizationId: ORG_A, responseDueAt: at(HOUR) })] });
+    const crashed = await scanDeadlines(deps, { now: NOW });
+    expect(crashed.digests).toHaveLength(1);
+    // The worker died before sending: nothing was marked. The retry inserts nothing new, yet the digest is not lost.
+    const retry = await scanDeadlines(deps, { now: at(HOUR / 2) });
+    expect(deps.notifications.snapshot()).toHaveLength(1);
+    expect(retry.digests).toEqual([expect.objectContaining({ userId: 'user_test', notifications: [expect.objectContaining({ kind: 'response_due_soon' })] })]);
+    await markDigestsEmailed(deps.notifications, retry.digests, at(HOUR / 2));
+    expect((await scanDeadlines(deps, { now: at(HOUR / 4 * 3) })).digests).toEqual([]);
+  });
+
+  it('drops notifications older than the digest window instead of emailing them days later', async () => {
+    const deps = world({ applications: [buildApplication({ organizationId: ORG_A, responseDueAt: at(HOUR) })] });
+    await scanDeadlines(deps, { now: NOW });
+    expect((await scanDeadlines(deps, { now: at(10 * DAY) })).digests.every((d) => d.notifications.every((n) => n.kind !== 'response_due_soon'))).toBe(true);
+  });
+
+  it('alerts again when the application re-enters the same stage with a new response deadline', async () => {
+    const deps = world({ applications: [buildApplication({ organizationId: ORG_A, stageId: 'received', responseDueAt: at(HOUR) })] });
+    await scanDeadlines(deps, { now: NOW });
+    const [app] = deps.store.read().applications;
+    // Moved away and back: same application, same stage, a new promise with a new deadline.
+    deps.store.write({ applications: [{ ...app!, responseDueAt: at(5 * DAY + HOUR) }] });
+    await scanDeadlines(deps, { now: at(5 * DAY) });
+    expect(deps.notifications.snapshot().filter((n) => n.kind === 'response_due_soon')).toHaveLength(2);
   });
 
   it('notifies again on the overdue state, and when escalation starts, but only the new ones', async () => {
