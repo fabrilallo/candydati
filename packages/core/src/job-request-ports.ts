@@ -1,3 +1,4 @@
+import type { JobTeamRepository } from './job-team-ports.js';
 import type { Job, JobApproval, JobRequest, JobRequestStatus } from '@tt/domain';
 import type { MemberDirectory, NotificationRepository } from './automation-ports.js';
 import type { JobRepository } from './job-ports.js';
@@ -84,5 +85,7 @@ export interface StaleScanDeps {
   readonly jobs: JobRepository;
   readonly notifications: NotificationRepository;
   readonly members: MemberDirectory;
+  /** Job teams: the digest goes only to people who can still reach the job. */
+  readonly jobTeams: JobTeamRepository;
   readonly newId: () => string;
 }

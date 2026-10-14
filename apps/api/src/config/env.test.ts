@@ -130,3 +130,32 @@ describe('parseEnv email', () => {
     expect(() => parseEnv({ ...valid, INBOUND_WEBHOOK_SECRET: 'short' })).toThrow(/INBOUND_WEBHOOK_SECRET/);
   });
 });
+
+describe('parseEnv BOOTSTRAP_TOKEN', () => {
+  it('is optional and, when set, at least 32 characters', () => {
+    expect(parseEnv(valid).BOOTSTRAP_TOKEN).toBeUndefined();
+    expect(parseEnv({ ...valid, BOOTSTRAP_TOKEN: 'Zq8vN3kR7wLp2XsT9bYc4HdM6fJg1Ae5' }).BOOTSTRAP_TOKEN).toBe('Zq8vN3kR7wLp2XsT9bYc4HdM6fJg1Ae5');
+    expect(() => parseEnv({ ...valid, BOOTSTRAP_TOKEN: 'short' })).toThrow(/BOOTSTRAP_TOKEN/);
+  });
+});
+
+describe('parseEnv ORGANIZATION_CREATION', () => {
+  it('defaults to one organization per person when invite only, unrestricted when sign-up is open', () => {
+    expect(parseEnv(valid).ORGANIZATION_CREATION).toBe('open');
+    expect(parseEnv({ ...valid, SIGNUP_MODE: 'invite_only' }).ORGANIZATION_CREATION).toBe('one_per_user');
+    expect(parseEnv(PRODUCTION_ENV).ORGANIZATION_CREATION).toBe('one_per_user');
+  });
+
+  it('accepts instance admins by address, normalised', () => {
+    const env = parseEnv({ ...valid, ORGANIZATION_CREATION: 'instance_admins', INSTANCE_ADMIN_EMAILS: ' Ops@Acme.example , cto@acme.example' });
+    expect(env.ORGANIZATION_CREATION).toBe('instance_admins');
+    expect(env.INSTANCE_ADMIN_EMAILS).toEqual(['ops@acme.example', 'cto@acme.example']);
+    expect(() => parseEnv({ ...valid, ORGANIZATION_CREATION: 'everyone' })).toThrow(/ORGANIZATION_CREATION/);
+  });
+});
+
+describe('parseEnv MCP_MODEL_DAILY_BUDGET_PER_USER', () => {
+  it('has a per-person default', () => {
+    expect(parseEnv(valid).MCP_MODEL_DAILY_BUDGET_PER_USER).toBe(300);
+  });
+});

@@ -146,3 +146,8 @@ export function canAssignRole(actorRole: Role, targetRole: Role): boolean {
   if (!roleHasPermission(actorRole, 'member:update')) return false;
   return targetRole !== 'owner' || actorRole === 'owner';
 }
+
+/** Roles that must have two-factor authentication on when their organization requires it (every surface: app, auth, keys). */
+export const TWO_FACTOR_ROLES: readonly Role[] = ['owner', 'admin'];
+
+export const roleNeedsTwoFactor = (role: unknown): boolean => isRole(role) && TWO_FACTOR_ROLES.includes(role);

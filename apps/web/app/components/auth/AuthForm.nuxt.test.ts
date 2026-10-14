@@ -76,4 +76,16 @@ describe('AuthForm', () => {
     expect(mocks.navigateTo).toHaveBeenCalledWith({ path: '/two-factor', query: {} })
     expect(wrapper.find('[data-testid="forgot-password-link"]').attributes('href')).toBe('/forgot-password')
   })
+
+  it('asks the first owner for the setup token only on /signup?setup, and passes it on', async () => {
+    const plain = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup' })
+    expect(plain.find('#setup-token').exists()).toBe(false)
+    const wrapper = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup?setup' })
+    await wrapper.find('#name').setValue('Ada Lovelace')
+    await wrapper.find('#email').setValue('ada@example.com')
+    await wrapper.find('#password').setValue('long-enough-pw')
+    await wrapper.find('#setup-token').setValue('one-time-token')
+    await submit(wrapper)
+    expect(mocks.api.signUp).toHaveBeenCalledWith(expect.objectContaining({ email: 'ada@example.com', bootstrapToken: 'one-time-token' }))
+  })
 })

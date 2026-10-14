@@ -20,6 +20,7 @@ Variables without a default are required or optional as described; see `.env.exa
 | `ASSISTANT_DAILY_BUDGET_PER_USER` | api |  | Assistant chat requests per person per UTC day. |
 | `BETTER_AUTH_SECRET` | api |  | Session signing secret, at least 32 random characters. Production refuses example (change-me) and low-entropy values. |
 | `BETTER_AUTH_URL` | api |  | The WEB origin: the browser reaches the api through the web proxy. Must be https in production (Secure cookies). |
+| `BOOTSTRAP_TOKEN` | api |  | One-time secret for the first owner sign-up in invite_only mode (field on /signup?setup, sent as the x-bootstrap-token header). Required in production to bootstrap, at least 32 random characters; useless once a confirmed account exists, remove it then. |
 | `CV_MODEL_DAILY_BUDGET` | worker | `1000` | Worker: CV extractions per organization and day that may call the model. |
 | `DATABASE_URL` | api, worker |  | Postgres connection string. In production its password must be at least 16 random characters, not the example. |
 | `DEEPSEEK_API_KEY` | api, worker |  | API key for deepseek/* models. |
@@ -33,9 +34,11 @@ Variables without a default are required or optional as described; see `.env.exa
 | `GROQ_API_KEY` | api, worker |  | API key for groq/* models. |
 | `IMPORT_STALE_DAYS` | worker | `7` | Worker: days after which an import never committed is purged. |
 | `INBOUND_WEBHOOK_SECRET` | api, worker |  | Inbound email webhook secret, at least 32 random characters; required in production, where example and low-entropy values are refused. |
+| `INSTANCE_ADMIN_EMAILS` | api |  | Comma-separated addresses that may always create organizations (ORGANIZATION_CREATION). |
 | `LOG_LEVEL` | api, worker | `info` | Log level: fatal, error, warn, info, debug, trace or silent. |
 | `MCP_MODEL_DAILY_BUDGET_PER_KEY` | api |  | MCP calls of model-backed tools (analyze_job_ad, publish_job) per API key per UTC day, when FAST_MODEL is set. |
 | `MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION` | api |  | MCP calls of model-backed tools per organization per UTC day, when FAST_MODEL is set. |
+| `MCP_MODEL_DAILY_BUDGET_PER_USER` | api |  | MCP calls of model-backed tools per person (across all their keys and organizations) per UTC day, when FAST_MODEL is set. |
 | `MISTRAL_API_KEY` | api, worker |  | API key for mistral/* models. |
 | `NODE_ENV` | api, worker | `development` | development, test or production. |
 | `NUXT_API_INTERNAL_URL` | web |  | Origin of the Fastify api that the web proxy forwards /api/** and /mcp to. |
@@ -50,6 +53,7 @@ Variables without a default are required or optional as described; see `.env.exa
 | `NUXT_TRUST_CLOUDFLARE` | web |  | true only when the site is reachable through Cloudflare alone: cf-connecting-ip is then the client IP. |
 | `OPENAI_API_KEY` | api, worker |  | API key for openai/* models. |
 | `OPENROUTER_API_KEY` | api, worker |  | API key for openrouter/* models. |
+| `ORGANIZATION_CREATION` | api |  | Who may create organizations: open (anyone), one_per_user (a person who owns one cannot create another) or instance_admins (only the first owner and INSTANCE_ADMIN_EMAILS). Default: one_per_user when SIGNUP_MODE=invite_only, open otherwise. |
 | `PLATFORM_AD_QUALITY_THRESHOLD` | api, worker | `6` | Ad quality score (0-10) below which an ad is flagged, never blocked. |
 | `PLATFORM_DEFAULT_LOCALE` | api, worker | `DEFAULT_LOCALE` | Default language: it or en. |
 | `PLATFORM_NAME` | api, worker | `PLATFORM_CODENAME` | Product name shown in the UI and emails. |
@@ -65,7 +69,7 @@ Variables without a default are required or optional as described; see `.env.exa
 | `S3_FORCE_PATH_STYLE` | api, worker | `false` | Path-style S3 URLs (needed by MinIO). |
 | `S3_REGION` | api, worker | `us-east-1` | S3 region. |
 | `S3_SECRET_KEY` | api, worker |  | S3 secret key. In production at least 16 random characters, not the example. |
-| `SIGNUP_MODE` | api |  | open (anyone may create an account) or invite_only (only with a pending invitation, plus the very first account). Default: invite_only in production, open elsewhere. |
+| `SIGNUP_MODE` | api |  | open (anyone may create an account) or invite_only (only with a pending invitation, plus the first owner of an instance with no confirmed account). Default: invite_only in production, open elsewhere. |
 | `SMTP_HOST` | api, worker |  | SMTP host (EMAIL_PROVIDER=smtp). |
 | `SMTP_PASSWORD` | api, worker |  | SMTP password. |
 | `SMTP_PORT` | api, worker |  | SMTP port. |

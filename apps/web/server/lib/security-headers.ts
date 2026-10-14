@@ -82,3 +82,23 @@ export const buildSecurityHeaders = (input: SecurityHeaderInput): Record<string,
 /** Adds the nonce to every `<script` tag that has none (the tag name must end there: `<scripty>` is not a script). */
 export const addNonceToScripts = (html: string, nonce: string): string =>
   html.replace(/<script(?=[\s>])(?![^>]*\snonce=)/g, `<script nonce="${nonce}"`)
+
+/** The parts of a page as Nuxt's `render:html` hook hands them over. */
+export interface RenderedHtmlParts {
+  readonly head: readonly string[]
+  readonly bodyPrepend: readonly string[]
+  readonly body: readonly string[]
+  readonly bodyAppend: readonly string[]
+}
+
+/**
+ * Stamps the nonce only on the scripts Nuxt itself emits: `head` and `bodyAppend` are the output of the head manager
+ * (entry module, colour-mode bootstrap, payload, JSON-LD whose `<` is escaped). `body` is the rendered app and
+ * `bodyPrepend` carries teleported components: a script there can only come from content rendered as HTML, so it must
+ * stay blocked by the policy and never gets a nonce.
+ */
+export const stampNuxtScripts = <T extends RenderedHtmlParts>(parts: T, nonce: string): T => ({
+  ...parts,
+  head: parts.head.map((part) => addNonceToScripts(part, nonce)),
+  bodyAppend: parts.bodyAppend.map((part) => addNonceToScripts(part, nonce)),
+})

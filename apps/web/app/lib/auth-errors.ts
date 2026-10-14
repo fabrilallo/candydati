@@ -36,6 +36,8 @@ const CODE_KEYS: Readonly<Record<string, string>> = {
   INVITATION_LIMIT_REACHED: 'errors.tooManyRequests',
   EMAIL_NOT_VERIFIED: 'errors.emailNotVerified',
   SIGNUP_INVITE_ONLY: 'errors.signupInviteOnly',
+  TWO_FACTOR_REQUIRED: 'errors.twoFactorRequired',
+  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_ORGANIZATION: 'errors.organizationCreationRestricted',
   INVALID_TOKEN: 'errors.invalidResetLink',
   TOKEN_EXPIRED: 'errors.invalidResetLink',
   PASSWORD_TOO_LONG: 'validation.passwordMax',

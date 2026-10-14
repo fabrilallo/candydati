@@ -71,3 +71,40 @@ describe('MCP limits (M8)', () => {
     expect(Object.keys(read!.metadata).sort()).toEqual(['jobId', 'tool']);
   });
 });
+
+describe('MCP model budget per person (L2)', () => {
+  let perUser: TestApp;
+  let owner: World['owner'];
+  beforeAll(async () => {
+    perUser = await createTestApp({
+      rateLimit: { max: 100_000, authMax: 100_000, authEmailMax: 100_000 },
+      env: { FAST_MODEL: 'test/fake-model', MCP_MODEL_DAILY_BUDGET_PER_KEY: '2', MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION: '100', MCP_MODEL_DAILY_BUDGET_PER_USER: '3' },
+    });
+    owner = (await createWorld(perUser, 'Mcp Person Org')).owner;
+  });
+  afterAll(async () => {
+    await perUser.close();
+  });
+
+  it('a person cannot get around the key budget with more keys', async () => {
+    const analyze = async (secret: string) =>
+      results(
+        (
+          await perUser.app.inject({
+            method: 'POST',
+            url: '/mcp',
+            headers: { authorization: `Bearer ${secret}`, accept: 'application/json, text/event-stream', 'content-type': 'application/json' },
+            payload: rpc(1, 'analyze_job_ad', { content: completeJobContent() }),
+          })
+        ).body,
+      )[0].result;
+    const first = await createKey(owner, ['job:read', 'job:create', 'job:update']);
+    const second = await createKey(owner, ['job:read', 'job:create', 'job:update']);
+    expect((await analyze(first.secret)).isError).toBeFalsy();
+    expect((await analyze(first.secret)).isError).toBeFalsy();
+    expect((await analyze(second.secret)).isError).toBeFalsy();
+    const fourth = await analyze(second.secret);
+    expect(fourth.isError).toBe(true);
+    expect(fourth.content[0].text).toMatch(/rate_limited: .*the person/);
+  });
+});

@@ -28,6 +28,8 @@ check_secret BETTER_AUTH_SECRET 32
 check_secret INBOUND_WEBHOOK_SECRET 32
 check_secret POSTGRES_PASSWORD 16
 check_secret S3_SECRET_KEY 16
+# Optional: only needed for the first owner's sign-up, then it can be removed.
+if [ -n "${BOOTSTRAP_TOKEN:-}" ]; then check_secret BOOTSTRAP_TOKEN 32; fi
 
 case "${PLATFORM_URL:-}" in
   https://*) ;;

@@ -1,5 +1,6 @@
 import type { ApiKey, Role } from '@tt/domain';
 import type { CoreDeps } from './ports.js';
+import type { SecuritySettingsRepository, TwoFactorLookup } from './security-ports.js';
 
 export interface ApiKeyRepository {
   create(key: ApiKey): Promise<ApiKey>;
@@ -25,6 +26,9 @@ export interface MemberRoleLookup {
 export interface ApiKeyDeps extends CoreDeps {
   readonly apiKeys: ApiKeyRepository;
   readonly memberRoles: MemberRoleLookup;
+  /** The organization's 2FA requirement and the creator's 2FA: a key never gets around what its creator's session must pass. */
+  readonly securitySettings: Pick<SecuritySettingsRepository, 'get'>;
+  readonly twoFactor: TwoFactorLookup;
   /** A new secret from a CSPRNG in the format `tt_<prefix>_<random>`. Randomness lives in deps, never in core. */
   readonly newSecret: () => string;
   /** sha256 of the secret as hex. */
@@ -35,4 +39,4 @@ export interface ApiKeyDeps extends CoreDeps {
   readonly defaultTtlDays?: number | undefined;
 }
 
-export type ApiKeyAuthDeps = Pick<ApiKeyDeps, 'apiKeys' | 'memberRoles' | 'hash' | 'now'>;
+export type ApiKeyAuthDeps = Pick<ApiKeyDeps, 'apiKeys' | 'memberRoles' | 'securitySettings' | 'twoFactor' | 'hash' | 'now'>;

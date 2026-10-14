@@ -21,6 +21,8 @@ export function createApiKeyDeps(uow: DrizzleUnitOfWork, defaultTtlDays?: number
     jobTeams: uow.repositories.jobTeams,
     apiKeys: r.apiKeys,
     memberRoles: r.memberRoles,
+    securitySettings: r.securitySettings,
+    twoFactor: r.twoFactor,
     newSecret: newApiKeySecret,
     hash: sha256Hex,
     newId: randomUUID,

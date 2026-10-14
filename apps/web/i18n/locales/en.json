@@ -194,7 +194,9 @@
       "submit": "Create account",
       "submitting": "Creating account…",
       "hasAccount": "Already have an account?",
-      "loginLink": "Sign in"
+      "loginLink": "Sign in",
+      "setupToken": "Setup token",
+      "setupTokenHint": "Only for the first account of a new instance: the BOOTSTRAP_TOKEN set by whoever installed it."
     },
     "verify": {
       "title": "Check your inbox",
@@ -620,7 +622,8 @@
     "invalidCode": "The code is not correct",
     "tooManyAttempts": "Too many attempts. Wait a few minutes and try again.",
     "twoFactorExpired": "The sign-in took too long. Sign in again.",
-    "twoFactorRequired": "Your organization requires two-factor authentication: turn it on to continue"
+    "twoFactorRequired": "Your organization requires two-factor authentication: turn it on to continue",
+    "organizationCreationRestricted": "On this instance you cannot create another organization. Ask an administrator of the instance."
   },
   "taxonomy": {
     "roleFamilies": {

@@ -21,6 +21,7 @@ const keyValues = (organizationId: string, overrides: Partial<typeof apiKey.$inf
   hash: 'h',
   scopes: ['job:read'],
   createdBy: 'user_1',
+  expiresAt: new Date('2030-01-01T00:00:00Z'),
   ...overrides,
 });
 
@@ -34,12 +35,17 @@ describe('api_key table', () => {
     await handle.close();
   });
 
-  it('stores a key with scopes and null lifecycle dates by default', async () => {
+  it('refuses a key without an expiry: every key expires', async () => {
+    const org = await insertOrg();
+    await expect(handle.db.insert(apiKey).values({ ...keyValues(org), expiresAt: undefined as never })).rejects.toThrow();
+  });
+
+  it('stores a key with scopes and null usage and revocation dates by default', async () => {
     const org = await insertOrg();
     const values = keyValues(org, { scopes: ['job:read', 'job:create'] });
     await handle.db.insert(apiKey).values(values);
     const found = (await handle.db.select().from(apiKey).where(eq(apiKey.id, values.id))).at(0);
-    expect(found).toMatchObject({ scopes: ['job:read', 'job:create'], lastUsedAt: null, expiresAt: null, revokedAt: null });
+    expect(found).toMatchObject({ scopes: ['job:read', 'job:create'], lastUsedAt: null, expiresAt: new Date('2030-01-01T00:00:00Z'), revokedAt: null });
   });
 
   it('keeps the prefix unique across organizations', async () => {

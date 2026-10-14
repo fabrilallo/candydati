@@ -181,3 +181,4 @@ export * from './sequential.js';
 export * from './security-ports.js';
 export * from './use-cases/security/security-settings.js';
 export * from './adapters/drizzle-security-settings.js';
+export * from './adapters/drizzle-two-factor.js';

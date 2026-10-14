@@ -1,3 +1,4 @@
+import type { JobTeamRepository } from './job-team-ports.js';
 import type { ConsentStatus, DataExport, RetentionRun } from '@tt/domain';
 import type { ApplicationRepository, CandidateRepository, CandidateSearch, CandidateNoteRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
 import type { NotificationRepository, MemberDirectory } from './automation-ports.js';
@@ -157,6 +158,8 @@ export interface RetentionDeps extends ErasureDeps {
   readonly jobs: JobRepository;
   readonly notifications: NotificationRepository;
   readonly members: MemberDirectory;
+  /** Job teams: a retention digest names only jobs its reader can still reach. */
+  readonly jobTeams: JobTeamRepository;
   readonly retentionRuns: RetentionRunRepository;
   readonly dataExports: DataExportRepository;
 }

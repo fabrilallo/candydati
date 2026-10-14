@@ -61,17 +61,66 @@ What the code enforces, so an operator does not have to remember it:
 - **Accounts.** Every account confirms its email before the first sign-in; sign-up and password reset answer the
   same whether an address is registered or not. `SIGNUP_MODE=invite_only` is the production default: an account can be
   created only by an address with a pending invitation, which only a confirmed account with that address can accept.
-- **First owner (bootstrap).** On an instance with no account at all, `invite_only` still accepts one sign-up: the
-  first owner. Create it right after the first start (sign up, confirm the email, create the organization), before
-  the URL is public. From then on people join through invitations. To open sign-up on purpose, set `SIGNUP_MODE=open`.
+- **First owner (bootstrap).** On an instance with no confirmed account, `invite_only` still accepts one sign-up: the
+  first owner. In production it needs the one-time `BOOTSTRAP_TOKEN` from the environment (at least 32 random
+  characters, `openssl rand -base64 48`): open `/signup?setup`, type it in the "Setup token" field (sent as the
+  `x-bootstrap-token` header, never in a URL), confirm the email and create the organization. Without the token
+  configured nobody can bootstrap a production instance. Only confirmed accounts close the bootstrap, so an unconfirmed
+  sign-up cannot squat it: the claim is held by one address under a Postgres advisory lock (two concurrent sign-ups
+  cannot both get through) and lapses after 24 hours if never confirmed. Once the first owner is confirmed the token
+  opens nothing: remove it from `.env`. From then on people join through invitations. To open sign-up on purpose, set
+  `SIGNUP_MODE=open`.
+- **Organizations.** Each organization has its own model budgets, so who may create one is an instance setting
+  (`ORGANIZATION_CREATION`): `one_per_user` by default with `invite_only` (a person who already owns an organization
+  cannot create another), `instance_admins` (only the first owner and `INSTANCE_ADMIN_EMAILS`) or `open`.
 - **Failed sign-ins** slow down further attempts (per address, and softly per account) instead of locking the
   account; addresses that signed in before are not slowed by a flood, and the owner gets an email after 10 failures.
   The counters live in Postgres, so several api instances share them.
 - **Two-factor authentication** (TOTP with backup codes) is available to everyone under Settings, Security. Owners and
-  admins can require it for owners and admins of their organization.
-- **API keys** expire after 90 days by default (`API_KEY_DEFAULT_TTL_DAYS`) and never live longer than a year. MCP
-  counts each tool call of a batch against the key's rate limit, caps batches at 20 messages and audits reads as
-  `mcp.read`. Model-backed MCP tools and the assistant have daily budgets per key, person and organization.
+  admins can require it for owners and admins of their organization. The requirement holds on every surface: the app
+  (`/api/v1`, `403 two_factor_required`), Better Auth's own organization endpoints (inviting, removing and changing
+  members, cancelling invitations, renaming: `403 TWO_FACTOR_REQUIRED`) and API keys (below).
+- **API keys** expire after 90 days by default (`API_KEY_DEFAULT_TTL_DAYS`) and never live longer than a year; keys
+  created before every key had an expiry got one in migration 0023 (creation date plus 90 days, so the oldest are now
+  expired). The key of an owner or admin without 2FA stops working while their organization requires 2FA, and works
+  again once they enrol; turning the requirement on lists the keys it suspends in the audit entry. MCP counts each tool
+  call of a batch against the key's rate limit, caps batches at 20 messages and audits reads as `mcp.read`. Model-backed
+  MCP tools have daily budgets per key, per person (across all their keys and organizations) and per organization; the
+  assistant per person and per organization.
+- **Logs.** Request logs of the api never carry a secret of a link: password reset (`/api/auth/reset-password/<token>`),
+  email verification and account deletion (`?token=`), OAuth `code`/`state`, invitation ids and the public feedback and
+  consent links are written as `***`. Headers (cookies, bearer keys) are never logged.
+
+## Reverse proxy access logs
+
+The api masks its own logs, but a reverse proxy in front of the web container logs every URL first, and the emailed
+links carry their only credential in the URL (`/api/auth/reset-password/<token>`, `/reset-password?token=...`,
+`/api/auth/verify-email?token=...`, `/accept-invitation/<id>`, `/feedback/<token>`, `/consent/<token>`). Configure the
+same masking there, and do not log the `Referer`. With nginx, log the path without the query and mask the path tokens:
+
+```nginx
+# http { ... }
+map $uri $tt_loggable_path {
+    default $uri;
+    "~^(?<head>/(?:api/auth/reset-password|accept-invitation|feedback|consent|api/v1/public/(?:feedback|consent))/)[^/]+(?<tail>.*)$" "${head}***${tail}";
+}
+log_format tt_masked '$remote_addr [$time_local] "$request_method $tt_loggable_path" $status $body_bytes_sent "$http_user_agent"';
+access_log /var/log/nginx/access.log tt_masked;
+```
+
+With Caddy (the `filter` log encoder; Caddy already redacts cookies and authorization headers):
+
+```caddyfile
+ats.example.com {
+	reverse_proxy 127.0.0.1:3000
+	log {
+		format filter {
+			request>uri regexp "(/(?:api/auth/reset-password|accept-invitation|feedback|consent|api/v1/public/(?:feedback|consent))/)[^/?]+|([?&](?:token|secret|key|code|state|otp|cookies|id)=)[^&]*" "${1}${2}***"
+			request>headers>Referer delete
+		}
+	}
+}
+```
 
 ## Safe harbor
 

@@ -149,6 +149,7 @@ describe('scanDeadlines', () => {
         buildTask({ id: 't_free', assigneeId: 'hm_1', dueAt: null }),
       ],
     });
+    await deps.jobTeams.upsert({ organizationId: ORG_A, jobId: 'job_1', userId: 'hm_1', role: 'hiring_manager', addedBy: 'system', createdAt: NOW });
     const first = await scanDeadlines(deps, { now: NOW });
     await scanDeadlines(deps, { now: at(HOUR) });
     expect(deps.notifications.snapshot()).toEqual([expect.objectContaining({ userId: 'hm_1', kind: 'task_due', taskId: 't_soon' })]);
@@ -169,6 +170,33 @@ describe('scanDeadlines', () => {
     expect(digests).toHaveLength(1);
     expect(digests[0]?.notifications).toHaveLength(2);
     expect(deps.notifications.snapshot()).toHaveLength(3);
+  });
+
+  it('does not notify a job creator who left the job team: owners and admins get it instead (L4)', async () => {
+    const deps = world({
+      jobs: [buildJob({ id: 'job_1', organizationId: ORG_A, status: 'published', createdBy: 'hm_1' })],
+      applications: [buildApplication({ organizationId: ORG_A, responseDueAt: at(HOUR) })],
+    });
+    await deps.jobTeams.remove(ORG_A, 'job_1', 'hm_1');
+    const { digests } = await scanDeadlines(deps, { now: NOW });
+    expect(kinds(deps).map(([user]) => user).sort()).toEqual(['admin_1', 'user_test']);
+    expect(digests.map((d) => d.userId)).not.toContain('hm_1');
+  });
+
+  it('still notifies a scoped job creator who is on the job team (L4)', async () => {
+    const deps = world({
+      jobs: [buildJob({ id: 'job_1', organizationId: ORG_A, status: 'published', createdBy: 'hm_1' })],
+      applications: [buildApplication({ organizationId: ORG_A, responseDueAt: at(HOUR) })],
+    });
+    await scanDeadlines(deps, { now: NOW });
+    expect(kinds(deps)).toEqual([['hm_1', 'response_due_soon']]);
+  });
+
+  it('leaves out of a digest the jobs its person can no longer reach (removed from the team after the notification)', async () => {
+    const deps = world({ tasks: [buildTask({ id: 't_soon', assigneeId: 'hm_1', dueAt: at(5 * HOUR) })] });
+    const { digests } = await scanDeadlines(deps, { now: NOW });
+    expect(deps.notifications.snapshot()).toHaveLength(1);
+    expect(digests).toEqual([]);
   });
 
   it('validates its input', async () => {

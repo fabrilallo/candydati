@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addNonceToScripts, buildSecurityHeaders, newNonce, wantsDocumentPolicy } from '~~/server/lib/security-headers'
+import { addNonceToScripts, buildSecurityHeaders, newNonce, stampNuxtScripts, wantsDocumentPolicy } from '~~/server/lib/security-headers'
 
 const base = { pathname: '/app', nonce: 'abc123', dev: false, https: true, turnstileSiteKey: '' }
 
@@ -82,5 +82,36 @@ describe('nonce', () => {
     expect(addNonceToScripts(html, 'N')).toBe(
       '<script nonce="N">window.__NUXT__={}</script><script nonce="N" type="module" src="/_nuxt/a.js"></script><script nonce="x">1</script><scripty>no</scripty>',
     )
+  })
+})
+
+describe('stampNuxtScripts', () => {
+  const injected = '<div id="__nuxt"><p>Ada</p><p><script>alert(1)</script></p></div>'
+  const parts = {
+    head: ['<script type="module" src="/_nuxt/entry.js" crossorigin></script><script>(function(){/* colour mode */})()</script>'],
+    bodyPrepend: ['<div id="teleports"><script>alert(2)</script></div>'],
+    body: [injected, '<div id="teleports"></div>'],
+    bodyAppend: ['<script type="application/json" data-nuxt-data="nuxt-app" id="__NUXT_DATA__">[{"name":"\\u003Cscript>"}]</script><script>window.__NUXT__={}</script>'],
+  }
+
+  it('stamps the scripts Nuxt emits through the head manager (head and closing tags)', () => {
+    const stamped = stampNuxtScripts(parts, 'N')
+    expect(stamped.head[0]).toBe('<script nonce="N" type="module" src="/_nuxt/entry.js" crossorigin></script><script nonce="N">(function(){/* colour mode */})()</script>')
+    expect(stamped.bodyAppend[0]).toContain('<script nonce="N" type="application/json" data-nuxt-data="nuxt-app" id="__NUXT_DATA__">')
+    expect(stamped.bodyAppend[0]).toContain('<script nonce="N">window.__NUXT__={}</script>')
+  })
+
+  it('never stamps a script injected into the rendered app or a teleport (a data field rendered as HTML)', () => {
+    const stamped = stampNuxtScripts(parts, 'N')
+    expect(stamped.body).toEqual(parts.body)
+    expect(stamped.bodyPrepend).toEqual(parts.bodyPrepend)
+    expect(JSON.stringify([...stamped.body, ...stamped.bodyPrepend])).not.toContain('nonce')
+  })
+
+  it('returns new arrays and leaves the input alone', () => {
+    const before = JSON.stringify(parts)
+    const stamped = stampNuxtScripts(parts, 'N')
+    expect(JSON.stringify(parts)).toBe(before)
+    expect(stamped.head).not.toBe(parts.head)
   })
 })

@@ -4,19 +4,28 @@ import { toolError } from './tool-support.js';
 
 export const MCP_MODEL_KEY_SCOPE = 'mcp_model:key';
 export const MCP_MODEL_ORGANIZATION_SCOPE = 'mcp_model:organization';
+export const MCP_MODEL_USER_SCOPE = 'mcp_model:user';
+
+const WHOSE: Readonly<Record<string, string>> = {
+  [MCP_MODEL_KEY_SCOPE]: 'this API key',
+  [MCP_MODEL_USER_SCOPE]: 'the person behind this key',
+  [MCP_MODEL_ORGANIZATION_SCOPE]: 'the organization',
+};
 
 /**
- * A model-backed tool (one that may call FAST_MODEL) spends one unit of the key's and of the organization's daily
- * budget. Without a model configured the tool runs on rules only and costs nothing. Null when allowed.
+ * A model-backed tool (one that may call FAST_MODEL) spends one unit of the key's, of the person's (across all their
+ * keys and organizations) and of the organization's daily budget. Without a model configured the tool runs on rules
+ * only and costs nothing. Null when allowed.
  */
 export async function spendModelBudget({ app, actor }: ToolContext): Promise<ToolResult | null> {
   if (!app.env.FAST_MODEL) return null;
   const verdict = await app.budget.consume([
     { scope: MCP_MODEL_KEY_SCOPE, subject: actor.id ?? 'unknown', limit: app.env.MCP_MODEL_DAILY_BUDGET_PER_KEY },
+    { scope: MCP_MODEL_USER_SCOPE, subject: actor.onBehalfOfUserId ?? 'unknown', limit: app.env.MCP_MODEL_DAILY_BUDGET_PER_USER },
     { scope: MCP_MODEL_ORGANIZATION_SCOPE, subject: actor.organizationId, limit: app.env.MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION },
   ]);
   if (verdict.allowed) return null;
-  const whose = verdict.exhausted === MCP_MODEL_KEY_SCOPE ? 'this API key' : 'the organization';
+  const whose = WHOSE[verdict.exhausted ?? ''] ?? 'the organization';
   return toolError(`rate_limited: the daily budget of model-backed calls for ${whose} is used up. Try again tomorrow (UTC).`);
 }
 

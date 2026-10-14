@@ -62,3 +62,14 @@ export const twoFactor = pgTable(
 );
 
 export type OrganizationSecuritySettingRow = typeof organizationSecuritySetting.$inferSelect;
+
+/**
+ * The bootstrap of an instance in `invite_only` mode: the address that holds the single "first owner" sign-up. Claimed
+ * under an advisory lock, so two concurrent first sign-ups cannot both get through; a claim that was never confirmed
+ * lapses after the verification link's lifetime. One row at most (`slot = 'first_owner'`).
+ */
+export const instanceBootstrap = pgTable('instance_bootstrap', {
+  slot: text('slot').primaryKey(),
+  email: text('email').notNull(),
+  claimedAt: timestamp('claimed_at', { withTimezone: true }).notNull(),
+});

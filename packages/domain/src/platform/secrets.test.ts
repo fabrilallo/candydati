@@ -51,6 +51,11 @@ describe('productionSecretIssues', () => {
     expect(productionSecretIssues({ DATABASE_URL: `postgres://tt:${STRONG_16}@db:5432/x` })).toEqual([]);
     expect(productionSecretIssues({})).toEqual([]);
   });
+
+  it('checks BOOTSTRAP_TOKEN when it is set (it opens the first owner sign-up)', () => {
+    expect(productionSecretIssues({ BOOTSTRAP_TOKEN: 'change-me-bootstrap-token-of-the-instance' })[0]).toMatch(/^BOOTSTRAP_TOKEN: /);
+    expect(productionSecretIssues({ BOOTSTRAP_TOKEN: 'Zq8vN3kR7wLp2XsT9bYc4HdM6fJg1Ae5' })).toEqual([]);
+  });
 });
 
 describe('productionIssues', () => {

@@ -9,11 +9,16 @@ import {
   type InMemoryMemberRoles,
 } from './in-memory-api-keys.js';
 import { createInMemoryTransaction } from './in-memory-transaction.js';
+import { createInMemorySecuritySettings } from './in-memory-security-settings.js';
+import { createInMemoryTwoFactor, type InMemoryTwoFactor } from './in-memory-two-factor.js';
+import type { SecuritySettingsRepository } from '../security-ports.js';
 
 export type TestApiKeyDeps = ApiKeyDeps & {
   readonly auditLog: InMemoryAuditLog;
   readonly apiKeys: InMemoryApiKeys;
   readonly memberRoles: InMemoryMemberRoles;
+  readonly securitySettings: SecuritySettingsRepository;
+  readonly twoFactor: InMemoryTwoFactor;
   /** Moves the fixed clock. */
   readonly advance: (ms: number) => void;
 };
@@ -41,6 +46,8 @@ export function createTestApiKeyDeps(overrides: Partial<TestApiKeyDeps> = {}): T
       const n = String(counter).padStart(8, '0');
       return `tt_${n}_${'k'.repeat(24)}${n}`;
     },
+    securitySettings: createInMemorySecuritySettings(),
+    twoFactor: createInMemoryTwoFactor(),
     hash: sha256Hex,
     newId: () => `key_${String(counter)}`,
     now: () => new Date(now),

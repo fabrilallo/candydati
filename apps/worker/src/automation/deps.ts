@@ -71,6 +71,6 @@ export function createPhase4WorkerDeps(wiring: AutomationWiring): Phase4WorkerDe
       ...clock,
     },
     publish: { endpoints: r.endpoints, outbox: r.outbox, queue, transaction: uow.transaction, now: clock.now },
-    scan: { applications: r.applications, jobs: r.jobs, promises: r.promises, tasks: r.tasks, notifications: r.notifications, members: r.members, newId: clock.newId },
+    scan: { applications: r.applications, jobs: r.jobs, promises: r.promises, tasks: r.tasks, notifications: r.notifications, members: r.members, jobTeams: r.jobTeams, newId: clock.newId },
   };
 }

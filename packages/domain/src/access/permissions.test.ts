@@ -7,6 +7,7 @@ import {
   PERMISSIONS,
   permissionsOf,
   roleHasPermission,
+  roleNeedsTwoFactor,
   ROLE_GRANTS,
   ROLES,
   STATEMENTS,
@@ -195,5 +196,11 @@ describe('canAssignRole', () => {
     expect(roleHasPermission('owner', 'data:export')).toBe(true);
     expect(roleHasPermission('admin', 'data:export')).toBe(true);
     for (const role of ['recruiter', 'hiring_manager', 'interviewer'] as const) expect(roleHasPermission(role, 'data:export')).toBe(false);
+  });
+});
+
+describe('roleNeedsTwoFactor', () => {
+  it('is true for owners and admins only (the roles an organization can require 2FA of)', () => {
+    expect(['owner', 'admin', 'recruiter', 'hiring_manager', 'interviewer', 'member', null].map(roleNeedsTwoFactor)).toEqual([true, true, false, false, false, false, false]);
   });
 });

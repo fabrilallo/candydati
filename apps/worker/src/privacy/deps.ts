@@ -32,6 +32,7 @@ export function createPrivacyWorkerDeps({ uow, files, queue }: PrivacyWiring): P
       jobs: r.jobs,
       notifications: r.notifications,
       members: r.members,
+      jobTeams: r.jobTeams,
       retentionRuns: r.retentionRuns,
       dataExports: r.dataExports,
       ...clock,

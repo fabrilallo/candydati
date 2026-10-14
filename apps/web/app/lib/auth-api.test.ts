@@ -72,6 +72,12 @@ describe('createAuthApi', () => {
     expect(client.signUp.email).toHaveBeenCalledWith({ name: 'Ada', email: 'a@b.co', password: 'longpassword', callbackURL: '/onboarding' })
   })
 
+  it('sends the one-time setup token of the first owner as a header, never in the body or the URL', async () => {
+    const { client, api } = fakeClient()
+    await api.signUp({ name: 'Ada', email: 'a@b.co', password: 'longpassword', bootstrapToken: ' tok-123 ' })
+    expect(client.signUp.email).toHaveBeenCalledWith({ name: 'Ada', email: 'a@b.co', password: 'longpassword' }, { headers: { 'x-bootstrap-token': 'tok-123' } })
+  })
+
   it('resends the verification, asks and completes a password reset', async () => {
     const { client, api } = fakeClient()
     await api.sendVerificationEmail({ email: 'a@b.co', callbackURL: '/onboarding' })

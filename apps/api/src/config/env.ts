@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { parseTrustProxy } from './trust-proxy.js';
 
 export const SIGNUP_MODES = ['open', 'invite_only'] as const;
+/** Who may create an organization: anyone, each person once (default when invite only), or the instance admins. */
+export const ORGANIZATION_CREATION_MODES = ['open', 'one_per_user', 'instance_admins'] as const;
 
 const splitList = (value: string | undefined): readonly string[] =>
   (value ?? '')
@@ -72,11 +74,28 @@ const envSchema = z.object({
   TURNSTILE_SECRET_KEY: z.string().trim().optional(),
   /** `open`: anyone may create an account. `invite_only`: only with a pending invitation, or the very first account. */
   SIGNUP_MODE: z.enum(SIGNUP_MODES).optional(),
+  /**
+   * One-time secret for the first owner's sign-up in `invite_only` mode (sent as the `x-bootstrap-token` header, the
+   * sign-up form has a field for it). Required in production to bootstrap; useless once a confirmed account exists.
+   */
+  BOOTSTRAP_TOKEN: z.string().trim().min(32, 'must be at least 32 characters').optional(),
+  /**
+   * `open`: any confirmed account creates organizations. `one_per_user`: a person who already owns one cannot create
+   * another (default when SIGNUP_MODE=invite_only). `instance_admins`: only the first owner and INSTANCE_ADMIN_EMAILS.
+   */
+  ORGANIZATION_CREATION: z.enum(ORGANIZATION_CREATION_MODES).optional(),
+  /** Addresses allowed to create organizations when ORGANIZATION_CREATION=instance_admins (comma-separated). */
+  INSTANCE_ADMIN_EMAILS: z
+    .string()
+    .optional()
+    .transform((value) => splitList(value).map((email) => email.toLowerCase())),
   /** Days a new API key lives when the caller gives no expiry (at most API_KEY_MAX_TTL_DAYS). */
   API_KEY_DEFAULT_TTL_DAYS: z.coerce.number().int().min(1).max(API_KEY_MAX_TTL_DAYS).default(90),
   /** MCP calls of model-backed tools (analyze_job_ad, publish_job) per API key and per organization in a day. */
   MCP_MODEL_DAILY_BUDGET_PER_KEY: dailyCap(200),
   MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION: dailyCap(1000),
+  /** The same calls per person, across every key they created and every organization they belong to. */
+  MCP_MODEL_DAILY_BUDGET_PER_USER: dailyCap(300),
   /** Assistant chat requests per person and per organization in a day. */
   ASSISTANT_DAILY_BUDGET_PER_USER: dailyCap(200),
   ASSISTANT_DAILY_BUDGET_PER_ORGANIZATION: dailyCap(2000),
@@ -86,8 +105,9 @@ const envSchema = z.object({
 });
 
 export type SignupMode = (typeof SIGNUP_MODES)[number];
+export type OrganizationCreationMode = (typeof ORGANIZATION_CREATION_MODES)[number];
 
-export type Env = Readonly<Omit<z.infer<typeof envSchema>, 'SIGNUP_MODE'>> & { readonly SIGNUP_MODE: SignupMode } & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig };
+export type Env = Readonly<Omit<z.infer<typeof envSchema>, 'SIGNUP_MODE' | 'ORGANIZATION_CREATION'>> & { readonly SIGNUP_MODE: SignupMode; readonly ORGANIZATION_CREATION: OrganizationCreationMode } & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig };
 
 type Source = Readonly<Record<string, string | undefined>>;
 
@@ -123,9 +143,11 @@ export function parseEnv(source: Source): Env {
   const refused = productionIssues(clean);
   if (refused.length > 0) throw new Error(`Invalid environment: ${refused.join('; ')}`);
   const production = parsed.data.NODE_ENV === 'production';
+  const signupMode = parsed.data.SIGNUP_MODE ?? (production ? 'invite_only' : 'open');
   return Object.freeze({
     ...parsed.data,
-    SIGNUP_MODE: parsed.data.SIGNUP_MODE ?? (production ? 'invite_only' : 'open'),
+    SIGNUP_MODE: signupMode,
+    ORGANIZATION_CREATION: parsed.data.ORGANIZATION_CREATION ?? (signupMode === 'invite_only' ? 'one_per_user' : 'open'),
     platform: loadPlatformConfig(clean), s3: parseS3(clean),
     email: parseEmail(clean, production),
   });

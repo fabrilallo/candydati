@@ -17,6 +17,11 @@ describe('authErrorKey', () => {
     expect(authErrorKey({ code: 'ACCOUNT_TEMPORARILY_LOCKED', status: 429 })).toBe('errors.tooManyAttempts')
   })
 
+  it('maps the organization gates: 2FA required, organization creation restricted', () => {
+    expect(authErrorKey({ code: 'TWO_FACTOR_REQUIRED', status: 403 })).toBe('errors.twoFactorRequired')
+    expect(authErrorKey({ code: 'YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_ORGANIZATION', status: 403 })).toBe('errors.organizationCreationRestricted')
+  })
+
   it('falls back on the HTTP status', () => {
     expect(authErrorKey({ status: 403 })).toBe('errors.forbidden')
     expect(authErrorKey({ status: 401 })).toBe('errors.unauthenticated')

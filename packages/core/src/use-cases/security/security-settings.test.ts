@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { ForbiddenError } from '../../errors.js';
 import { createInMemoryAuditLog } from '../../testing/in-memory-audit-log.js';
 import { createInMemorySecuritySettings } from '../../testing/in-memory-security-settings.js';
+import { createInMemoryApiKeys, createInMemoryMemberRoles } from '../../testing/in-memory-api-keys.js';
+import { createInMemoryTwoFactor } from '../../testing/in-memory-two-factor.js';
 import { createInMemoryTransaction } from '../../testing/in-memory-transaction.js';
 import { userActor } from '../../testing/actors.js';
 import { ORG_A, ORG_B } from '../../testing/candidate-seed.js';
@@ -12,6 +14,9 @@ const deps = (): SecurityDeps & { auditLog: ReturnType<typeof createInMemoryAudi
   auditLog: createInMemoryAuditLog(),
   transaction: createInMemoryTransaction(),
   securitySettings: createInMemorySecuritySettings(),
+  apiKeys: createInMemoryApiKeys(),
+  memberRoles: createInMemoryMemberRoles(),
+  twoFactor: createInMemoryTwoFactor(),
   now: () => new Date('2026-10-14T10:00:00Z'),
 });
 
@@ -25,7 +30,7 @@ describe('security settings', () => {
   it('lets owners and admins require 2FA, audited, per organization', async () => {
     const d = deps();
     const admin = userActor({ id: 'u_a', role: 'admin', organizationId: ORG_A });
-    expect(await setSecuritySettings(d, admin, { requireTwoFactor: true })).toEqual({ requireTwoFactor: true });
+    expect(await setSecuritySettings(d, admin, { requireTwoFactor: true })).toEqual({ requireTwoFactor: true, suspendedApiKeys: [] });
     expect(await getSecuritySettings(d, admin, {})).toEqual({ requireTwoFactor: true });
     expect(await getSecuritySettings(d, userActor({ id: 'u_b', role: 'owner', organizationId: ORG_B }), {})).toEqual({ requireTwoFactor: false });
     expect(d.auditLog.events()[0]).toMatchObject({ action: 'organization.security_setting_updated', metadata: { requireTwoFactor: true } });

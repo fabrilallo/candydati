@@ -77,6 +77,9 @@ export interface InvitationInfo {
   readonly inviterEmail: string | null
 }
 
+/** Header of the first owner's one-time setup token (the api reads it on sign-up only). */
+export const BOOTSTRAP_TOKEN_HEADER = 'x-bootstrap-token'
+
 type Result = { readonly data: unknown; readonly error: RawAuthError | null }
 
 const settle = async (call: () => Promise<unknown>): Promise<unknown> => {
@@ -123,10 +126,14 @@ const accountMethods = (client: AuthClient) => ({
     const result = parse(signInSchema, await settle(() => client.signIn.email(payload)))
     return { twoFactor: result?.twoFactorRedirect === true }
   },
-  /** No session: the account starts once the address is confirmed through the emailed link, which lands on `callbackURL`. */
-  async signUp(input: { name: string; email: string; password: string; callbackURL?: string }): Promise<void> {
+  /**
+   * No session: the account starts once the address is confirmed through the emailed link, which lands on `callbackURL`.
+   * The first owner of a new instance adds the one-time setup token (BOOTSTRAP_TOKEN), sent as a header only.
+   */
+  async signUp(input: { name: string; email: string; password: string; callbackURL?: string; bootstrapToken?: string }): Promise<void> {
     const payload = { name: input.name, email: input.email, password: input.password, ...(input.callbackURL ? { callbackURL: input.callbackURL } : {}) }
-    await settle(() => client.signUp.email(payload))
+    const token = input.bootstrapToken?.trim() ?? ''
+    await settle(() => (token === '' ? client.signUp.email(payload) : client.signUp.email(payload, { headers: { [BOOTSTRAP_TOKEN_HEADER]: token } })))
   },
   async sendVerificationEmail(input: { email: string; callbackURL: string }): Promise<void> {
     await settle(() => client.sendVerificationEmail({ email: input.email, callbackURL: input.callbackURL }))

@@ -76,8 +76,12 @@ Better Auth (`apps/api/src/auth/create-auth.ts`) runs email + password with thes
   emails the owner instead, so sign-up reveals nothing. A session of an unconfirmed address (one older than this rule)
   is refused by every `/api/v1` route with `403 email_not_verified`.
 - **Sign-up mode.** `SIGNUP_MODE=open` (default outside production) lets anyone register; `invite_only` (default in
-  production) accepts an address only with a pending invitation, plus the very first account of the instance, which
-  is how the first owner bootstraps it (`apps/api/src/auth/signup-policy.ts`).
+  production) accepts an address only with a pending invitation, plus the first owner of an instance with no confirmed
+  account (`apps/api/src/auth/signup-policy.ts`). In production that bootstrap needs the one-time `BOOTSTRAP_TOKEN`
+  (`x-bootstrap-token` header, the `/signup?setup` field); the claim is taken under an advisory lock in
+  `instance_bootstrap` and lapses after 24 hours unconfirmed.
+- **Organization creation** is an instance setting (`ORGANIZATION_CREATION`, Better Auth `allowUserToCreateOrganization`,
+  `auth/organization-creation.ts`): one per person by default with `invite_only`, or only the instance admins.
 - **Invitations** are emailed through the configured EmailProvider (it/en) and accepted only by a confirmed account
   whose address is the invited one. The accept link is never logged.
 - **Password reset**: `POST /api/auth/request-password-reset` always answers the same; the emailed token works once
@@ -89,7 +93,11 @@ Better Auth (`apps/api/src/auth/create-auth.ts`) runs email + password with thes
   (`auth_throttle`), shared by every api instance; an in-memory store serves the tests.
 - **Two-factor (TOTP)** is optional, with backup codes (Better Auth `twoFactor` plugin). An organization can require it
   for owners and admins (`organization_security_setting`); until they enrol, `/api/v1` answers them
-  `403 two_factor_required`.
+  `403 two_factor_required`, the Better Auth organization endpoints that change members, invitations or settings answer
+  `403 TWO_FACTOR_REQUIRED` (a `hooks.before` step, `auth/organization-two-factor-gate.ts`, gated unless listed as a
+  read or one's own invitation) and their API keys are suspended (`authenticateApiKey`).
+- **Request logs** mask every token carried by a URL (`http/log-serializers.ts`): reset, verification, invitation,
+  OAuth and public links. A reverse proxy needs the same masking (SECURITY.md has nginx and Caddy examples).
 - **Account emails** (verification, reset, invitation, failed sign-ins) are sent in the background, so the answer's
   timing does not depend on whether an address exists.
 - The routes that send email (sign-up, password reset, verification) have their own, smaller per-client budget.

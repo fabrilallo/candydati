@@ -5,6 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { sha256Hex } from '../testing/in-memory-api-keys.js';
 import { authenticateApiKey } from '../use-cases/api-keys/authenticate-api-key.js';
+import { createDrizzleSecuritySettings } from './drizzle-security-settings.js';
+import { createDrizzleTwoFactor } from './drizzle-two-factor.js';
 import { createDrizzleApiKeys, createDrizzleMemberRoles, strongestRole } from './drizzle-api-keys.js';
 
 let handle: DbHandle;
@@ -33,7 +35,7 @@ const key = (organizationId: string, createdBy: string, overrides: Partial<ApiKe
   createdBy,
   createdAt: NOW,
   lastUsedAt: null,
-  expiresAt: null,
+  expiresAt: new Date('2030-01-01T00:00:00Z'),
   revokedAt: null,
   ...overrides,
 });
@@ -93,7 +95,12 @@ describe('authenticateApiKey on Postgres', () => {
     const prefix = 'Ab12Cd34';
     const secret = `tt_${prefix}_${'x'.repeat(32)}`;
     await repo.create(key(org, creator, { prefix, hash: sha256Hex(secret), scopes: ['job:read', 'job:create', 'candidate:decide'] }));
-    const deps = { apiKeys: repo, memberRoles: createDrizzleMemberRoles(handle.db), hash: sha256Hex, now: () => NOW };
+    const deps = { apiKeys: repo, memberRoles: createDrizzleMemberRoles(handle.db), securitySettings: createDrizzleSecuritySettings(handle.db), twoFactor: createDrizzleTwoFactor(handle.db), hash: sha256Hex, now: () => NOW };
+    expect((await authenticateApiKey(deps, secret))?.scopes).toEqual(['job:read', 'job:create']);
+    // The organization requires 2FA: the owner's key is suspended until they turn it on.
+    await deps.securitySettings.setRequireTwoFactor(org, true, NOW);
+    expect(await authenticateApiKey(deps, secret)).toBeNull();
+    await handle.pool.query(`update "user" set two_factor_enabled = true where id = $1`, [creator]);
     expect((await authenticateApiKey(deps, secret))?.scopes).toEqual(['job:read', 'job:create']);
     await handle.pool.query(`update member set role = 'interviewer' where user_id = $1`, [creator]);
     expect((await authenticateApiKey(deps, secret))?.scopes).toEqual(['job:read']);

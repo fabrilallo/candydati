@@ -194,7 +194,9 @@
       "submit": "Crea account",
       "submitting": "Creazione in corso…",
       "hasAccount": "Hai già un account?",
-      "loginLink": "Accedi"
+      "loginLink": "Accedi",
+      "setupToken": "Codice di configurazione",
+      "setupTokenHint": "Solo per il primo account di una nuova installazione: il BOOTSTRAP_TOKEN impostato da chi l’ha installata."
     },
     "verify": {
       "title": "Controlla la posta",
@@ -620,7 +622,8 @@
     "invalidCode": "Il codice non è corretto",
     "tooManyAttempts": "Troppi tentativi. Aspetta qualche minuto e riprova.",
     "twoFactorExpired": "L'accesso ha richiesto troppo tempo. Accedi di nuovo.",
-    "twoFactorRequired": "La tua organizzazione richiede la verifica in due passaggi: attivala per continuare"
+    "twoFactorRequired": "La tua organizzazione richiede la verifica in due passaggi: attivala per continuare",
+    "organizationCreationRestricted": "Su questa installazione non puoi creare un’altra organizzazione. Chiedi a un amministratore dell’installazione."
   },
   "taxonomy": {
     "roleFamilies": {

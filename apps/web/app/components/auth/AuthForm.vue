@@ -12,6 +12,9 @@ const route = useRoute()
 const { refresh } = useViewer()
 
 const isSignup = computed(() => props.mode === 'signup')
+/** `/signup?setup`: the first owner of a new instance types the one-time setup token (BOOTSTRAP_TOKEN). Never in the URL. */
+const askSetupToken = computed(() => isSignup.value && route.query.setup !== undefined)
+const setupToken = ref('')
 const form = isSignup.value
   ? useZodForm(signupSchema, { name: '', email: '', password: '' })
   : useZodForm(loginSchema, { email: '', password: '' })
@@ -29,7 +32,7 @@ const inbox = (email: string): Next => ({ path: VERIFY_EMAIL, query: redirect.va
 type Next = { readonly path: string; readonly query?: Record<string, string> } | string
 
 const signUp = async (data: { name: string; email: string; password: string }): Promise<Next> => {
-  await api.signUp({ ...data, callbackURL: callbackURL.value })
+  await api.signUp({ ...data, callbackURL: callbackURL.value, ...(askSetupToken.value && setupToken.value.trim() !== '' ? { bootstrapToken: setupToken.value } : {}) })
   return inbox(data.email)
 }
 
@@ -70,6 +73,11 @@ const onSubmit = async (): Promise<void> => {
     <FormField id="password" :label="t('auth.password')" :error="form.errors.value.password" :hint="isSignup ? t('auth.passwordHint') : undefined">
       <template #default="{ invalid, describedBy }">
         <Input id="password" type="password" :autocomplete="isSignup ? 'new-password' : 'current-password'" :model-value="values.password" :aria-invalid="invalid" :aria-describedby="describedBy" @update:model-value="set('password', $event)" />
+      </template>
+    </FormField>
+    <FormField v-if="askSetupToken" id="setup-token" :label="t('auth.signup.setupToken')" :hint="t('auth.signup.setupTokenHint')">
+      <template #default="{ describedBy }">
+        <Input id="setup-token" type="password" autocomplete="off" :model-value="setupToken" :aria-describedby="describedBy" data-testid="setup-token" @update:model-value="setupToken = String($event)" />
       </template>
     </FormField>
     <p v-if="!isSignup" class="-mt-2 text-sm">

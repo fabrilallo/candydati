@@ -169,7 +169,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
   const { auditLog } = uow.repositories;
   const core: CoreDeps = { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams };
-  const auth = createAuth({ env, db, core, mailer });
+  const auth = createAuth({ env, db, core, mailer, requiresTwoFactor: async (organizationId) => (await uow.repositories.securitySettings.get(organizationId)).requireTwoFactor });
   const messaging = createMessagingDeps({ env, uow, queue, sender, identity, onReceiptError });
   const resolveFromHeaders = createSessionResolver(auth, db, uow);
   const apiKeyDeps = createApiKeyDeps(uow, env.API_KEY_DEFAULT_TTL_DAYS);
@@ -200,7 +200,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     messagingDeps: messaging.messagingDeps,
     inboundDeps: messaging.inboundDeps,
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
-    securityDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, securitySettings: uow.repositories.securitySettings, now: () => new Date() },
+    securityDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, securitySettings: uow.repositories.securitySettings, apiKeys: uow.repositories.apiKeys, memberRoles: uow.repositories.memberRoles, twoFactor: uow.repositories.twoFactor, now: () => new Date() },
     mailer,
     budget: createDailyBudget(budgetStore ?? createPgBudgetStore(db)),
     rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,

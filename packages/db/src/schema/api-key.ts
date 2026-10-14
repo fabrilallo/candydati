@@ -21,7 +21,8 @@ export const apiKey = pgTable(
     createdBy: text('created_by').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
-    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    /** Every key expires (default 90 days, at most a year); keys older than that rule were backfilled by 0023. */
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     revokedAt: timestamp('revoked_at', { withTimezone: true }),
   },
   (table) => [uniqueIndex('api_key_prefix_idx').on(table.prefix), index('api_key_org_idx').on(table.organizationId)],

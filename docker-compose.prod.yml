@@ -65,6 +65,7 @@ services:
       INBOUND_WEBHOOK_SECRET: ${INBOUND_WEBHOOK_SECRET:-}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
       S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      BOOTSTRAP_TOKEN: ${BOOTSTRAP_TOKEN:-}
       PLATFORM_URL: ${PLATFORM_URL:-}
       EMAIL_PROVIDER: ${EMAIL_PROVIDER:-log}
     network_mode: none
@@ -134,11 +135,17 @@ services:
       RECEIPTS_DAILY_MAX_PER_ORGANIZATION: ${RECEIPTS_DAILY_MAX_PER_ORGANIZATION:-300}
       TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
       INBOUND_WEBHOOK_SECRET: ${INBOUND_WEBHOOK_SECRET:?imposta INBOUND_WEBHOOK_SECRET (almeno 32 caratteri)}
-      # invite_only (default in production): accounts only through an invitation, plus the very first one (SECURITY.md).
+      # invite_only (default in production): accounts only through an invitation, plus the first owner (SECURITY.md).
       SIGNUP_MODE: ${SIGNUP_MODE:-invite_only}
+      # One-time secret of the first owner's sign-up (/signup?setup). Needed once to bootstrap, then remove it from .env.
+      BOOTSTRAP_TOKEN: ${BOOTSTRAP_TOKEN:-}
+      # Who may create organizations: empty = one_per_user with invite_only (open | one_per_user | instance_admins).
+      ORGANIZATION_CREATION: ${ORGANIZATION_CREATION:-}
+      INSTANCE_ADMIN_EMAILS: ${INSTANCE_ADMIN_EMAILS:-}
       API_KEY_DEFAULT_TTL_DAYS: ${API_KEY_DEFAULT_TTL_DAYS:-90}
       MCP_MODEL_DAILY_BUDGET_PER_KEY: ${MCP_MODEL_DAILY_BUDGET_PER_KEY:-200}
       MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION: ${MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION:-1000}
+      MCP_MODEL_DAILY_BUDGET_PER_USER: ${MCP_MODEL_DAILY_BUDGET_PER_USER:-300}
       ASSISTANT_DAILY_BUDGET_PER_USER: ${ASSISTANT_DAILY_BUDGET_PER_USER:-200}
       ASSISTANT_DAILY_BUDGET_PER_ORGANIZATION: ${ASSISTANT_DAILY_BUDGET_PER_ORGANIZATION:-2000}
     ports:

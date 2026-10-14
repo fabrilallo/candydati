@@ -1,9 +1,6 @@
 import type { Actor } from '@tt/core';
-import { isRole } from '@tt/domain';
+import { isRole, roleNeedsTwoFactor } from '@tt/domain';
 import { AccountGateError, ForbiddenError, UnauthenticatedError } from './errors.js';
-
-/** Roles that must have two-factor authentication on when their organization requires it. */
-export const TWO_FACTOR_ROLES: ReadonlySet<string> = new Set(['owner', 'admin']);
 
 export interface SessionInfo {
   readonly userId: string;
@@ -32,7 +29,7 @@ export function createActorResolver({ getSession, findRole, requiresTwoFactor }:
     if (!organizationId) throw new ForbiddenError('No active organization.');
     const role = await findRole(session.userId, organizationId);
     if (!isRole(role)) throw new ForbiddenError('You are not a member of this organization.');
-    if (TWO_FACTOR_ROLES.has(role) && !session.twoFactorEnabled && (await requiresTwoFactor(organizationId))) {
+    if (roleNeedsTwoFactor(role) && !session.twoFactorEnabled && (await requiresTwoFactor(organizationId))) {
       throw new AccountGateError('two_factor_required', 'This organization requires two-factor authentication for your role.');
     }
     return { type: 'user', id: session.userId, organizationId, role, onBehalfOfUserId: null };

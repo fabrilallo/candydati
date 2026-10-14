@@ -9,6 +9,7 @@ export const SECRET_MIN_LENGTHS = {
   INBOUND_WEBHOOK_SECRET: 32,
   S3_SECRET_KEY: 16,
   DATABASE_URL: 16,
+  BOOTSTRAP_TOKEN: 32,
 } as const;
 
 /** Values shipped in `.env.example` and the usual defaults: never acceptable in production, whatever their length. */
@@ -55,6 +56,7 @@ export function productionSecretIssues(env: Source): readonly string[] {
     ['BETTER_AUTH_SECRET', env.BETTER_AUTH_SECRET],
     ['INBOUND_WEBHOOK_SECRET', env.INBOUND_WEBHOOK_SECRET],
     ['S3_SECRET_KEY', env.S3_SECRET_KEY],
+    ['BOOTSTRAP_TOKEN', env.BOOTSTRAP_TOKEN],
     ['DATABASE_URL', env.DATABASE_URL === undefined ? undefined : (databasePasswordOf(env.DATABASE_URL) ?? '')],
   ];
   return candidates.flatMap(([name, value]) => {

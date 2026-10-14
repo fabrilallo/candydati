@@ -72,6 +72,13 @@ describe('scanStaleJobs', () => {
     expect(digests).toEqual([expect.objectContaining({ userId: 'recruiter_1', email: 'rita@acme.example', jobTitles: { stale: 'Job stale' } })]);
   });
 
+  it('does not tell a job creator who left the job team: owners and admins instead (L4)', async () => {
+    const deps = seedHrWorld({ jobs: [published('stale', 120, { createdBy: 'hm_1' })], candidates: [buildCandidate({ organizationId: ORG_A })], overrides: { now: () => NOW } });
+    await deps.jobTeams.remove(ORG_A, 'stale', 'hm_1');
+    const { digests } = await scanStaleJobs(deps, { now: NOW });
+    expect(digests.map((d) => d.userId).sort()).toEqual(['admin_1', 'user_test']);
+  });
+
   it('never repeats itself within the same staleness period', async () => {
     const deps = world();
     const first = await scanStaleJobs(deps, { now: NOW });

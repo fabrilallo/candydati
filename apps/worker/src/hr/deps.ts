@@ -42,6 +42,6 @@ export function createHrWorkerDeps({ uow, sender, config, onMailError }: HrWirin
       onError: onMailError,
       ...clock,
     },
-    stale: { staleJobs: r.staleJobs, jobs: r.jobs, notifications: r.notifications, members: r.members, newId: clock.newId },
+    stale: { staleJobs: r.staleJobs, jobs: r.jobs, notifications: r.notifications, members: r.members, jobTeams: r.jobTeams, newId: clock.newId },
   };
 }

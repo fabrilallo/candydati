@@ -36,7 +36,8 @@ export interface ApiKey {
   readonly createdBy: string;
   readonly createdAt: Date;
   readonly lastUsedAt: Date | null;
-  readonly expiresAt: Date | null;
+  /** Every key expires (default 90 days, at most a year). */
+  readonly expiresAt: Date;
   readonly revokedAt: Date | null;
 }
 

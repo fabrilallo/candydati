@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { grantablePermissions, parseApiKeySecret } from '@tt/domain';
+import { grantablePermissions, parseApiKeySecret, roleNeedsTwoFactor, type Role } from '@tt/domain';
 import type { DelegatedActor } from '../../actor.js';
 import type { ApiKeyAuthDeps } from '../../api-key-ports.js';
 
@@ -14,7 +14,9 @@ const sameHash = (a: string, b: string): boolean => timingSafeEqual(digest(a), d
  * Turns a presented secret into the actor it stands for, or null (a 401 for the caller, never a reason). The key is
  * dead when it is malformed, unknown, revoked, expired, its creator is no longer a member, or none of its scopes is
  * left. The creator's role is read now, not at creation: scopes the role no longer grants are dropped, and the
- * machine forbidden list is applied again, so a key never has more than its creator has today.
+ * machine forbidden list is applied again, so a key never has more than its creator has today. When the organization
+ * requires 2FA of owners and admins, the key of an owner or admin without 2FA is suspended until they enrol: a key never
+ * gets around what its creator's session must pass.
  */
 export async function authenticateApiKey(deps: ApiKeyAuthDeps, secret: string): Promise<DelegatedActor | null> {
   const parsed = parseApiKeySecret(secret);
@@ -23,9 +25,10 @@ export async function authenticateApiKey(deps: ApiKeyAuthDeps, secret: string): 
   if (!key || !sameHash(key.hash, deps.hash(secret))) return null;
   const now = deps.now();
   if (key.revokedAt !== null) return null;
-  if (key.expiresAt !== null && key.expiresAt.getTime() <= now.getTime()) return null;
+  if (key.expiresAt.getTime() <= now.getTime()) return null;
   const role = await deps.memberRoles.roleOf(key.organizationId, key.createdBy);
   if (role === null) return null;
+  if (await suspendedByTwoFactor(deps, key.organizationId, key.createdBy, role)) return null;
   const grantable = grantablePermissions(role, 'api_key');
   const scopes = key.scopes.filter((scope) => grantable.includes(scope));
   if (scopes.length === 0) return null;
@@ -33,4 +36,11 @@ export async function authenticateApiKey(deps: ApiKeyAuthDeps, secret: string): 
     await deps.apiKeys.touch(key.organizationId, key.id, now);
   }
   return { type: 'api_key', id: key.id, organizationId: key.organizationId, role, onBehalfOfUserId: key.createdBy, scopes };
+}
+
+/** True when the organization requires 2FA of the creator's role and the creator has not turned it on. */
+export async function suspendedByTwoFactor(deps: Pick<ApiKeyAuthDeps, 'securitySettings' | 'twoFactor'>, organizationId: string, userId: string, role: Role): Promise<boolean> {
+  if (!roleNeedsTwoFactor(role)) return false;
+  if (!(await deps.securitySettings.get(organizationId)).requireTwoFactor) return false;
+  return !(await deps.twoFactor.enabled(userId));
 }

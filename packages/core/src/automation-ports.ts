@@ -1,3 +1,4 @@
+import type { JobTeamRepository } from './job-team-ports.js';
 import type { AutomationRule, Notification, NotificationKind, Role, Task } from '@tt/domain';
 import type { ApplicationRepository, CandidateRepository, UserDirectory } from './candidate-ports.js';
 import type { TaskQueue } from './intake-ports.js';
@@ -127,6 +128,8 @@ export interface ScanDeps {
   readonly tasks: TaskRepository;
   readonly notifications: NotificationRepository;
   readonly members: MemberDirectory;
+  /** Job teams: a notification or digest goes only to people who can still reach the job. */
+  readonly jobTeams: JobTeamRepository;
   /** Overdue open promises are flipped to missed on every run. */
   readonly promises: ResponsePromiseRepository;
   readonly newId: () => string;

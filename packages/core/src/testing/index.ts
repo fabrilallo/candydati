@@ -33,3 +33,4 @@ export * from './in-memory-job-teams.js';
 export * from './report-dataset.js';
 export * from './report-random.js';
 export * from './in-memory-security-settings.js';
+export * from './in-memory-two-factor.js';

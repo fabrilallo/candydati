@@ -7,6 +7,7 @@ import {
   notificationDedupeKey,
   responseState,
   TASK_DUE_SOON_HOURS,
+  isRole,
   type Job,
   type Notification,
   type NotificationKind,
@@ -14,6 +15,7 @@ import {
 import { z } from 'zod';
 import type { Member, NotificationRepository, ScanDeps } from '../../automation-ports.js';
 import { defineSystemJob } from '../../use-case.js';
+import { createJobScopeContext, type JobScopeContext } from '../../access/job-scope.js';
 
 export interface DigestEntry {
   readonly organizationId: string;
@@ -37,11 +39,27 @@ const ESCALATION_ROLES = ['owner', 'admin'];
 export class OrganizationContext {
   private members: Promise<readonly Member[]> | null = null;
   private readonly jobs = new Map<string, Promise<Job | null>>();
+  private readonly scopes = new Map<string, JobScopeContext | null>();
 
   constructor(
-    private readonly deps: Pick<ScanDeps, 'members' | 'jobs'>,
+    private readonly deps: Pick<ScanDeps, 'members' | 'jobs' | 'jobTeams'>,
     readonly organizationId: string,
   ) {}
+
+  /**
+   * The member can open the job today, by the same rule as every use case (`job-scope.ts`): owners, admins and
+   * unrestricted recruiters reach every job, the others only the jobs of their teams. A null job id is not about a job.
+   */
+  async canReach(member: Member, jobId: string | null): Promise<boolean> {
+    if (jobId === null) return true;
+    let scope = this.scopes.get(member.userId);
+    if (scope === undefined) {
+      const role = member.roles.find(isRole);
+      scope = role ? createJobScopeContext(this.deps.jobTeams, { type: 'user', id: member.userId, organizationId: this.organizationId, role, onBehalfOfUserId: null }) : null;
+      this.scopes.set(member.userId, scope);
+    }
+    return scope !== null && scope.allowsJob(jobId);
+  }
 
   memberList(): Promise<readonly Member[]> {
     this.members ??= this.deps.members.list(this.organizationId);
@@ -57,11 +75,14 @@ export class OrganizationContext {
     return found;
   }
 
-  /** The job owner if still a member; otherwise owners and admins, so a notification never goes nowhere. */
+  /**
+   * The job owner if still a member who can reach the job (a hiring manager taken off the team cannot); otherwise
+   * owners and admins, so a notification never goes nowhere.
+   */
   async owners(job: Job): Promise<readonly Member[]> {
     const members = await this.memberList();
     const owner = members.find((m) => m.userId === job.createdBy);
-    return owner ? [owner] : this.escalation();
+    return owner && (await this.canReach(owner, job.id)) ? [owner] : this.escalation();
   }
 
   async escalation(): Promise<readonly Member[]> {
@@ -170,6 +191,13 @@ export async function markDigestsEmailed(notifications: Pick<NotificationReposit
   for (const entry of entries) await notifications.markEmailed(entry.organizationId, entry.notifications.map((n) => n.id), now);
 }
 
+/** The notifications whose job the member can still reach: a digest never names a job its reader cannot open. */
+async function reachable(scope: OrganizationContext, member: Member, notifications: readonly Notification[]): Promise<readonly Notification[]> {
+  const kept: Notification[] = [];
+  for (const notification of notifications) if (await scope.canReach(member, notification.jobId)) kept.push(notification);
+  return kept;
+}
+
 export async function buildDigests(
   context: (organizationId: string) => OrganizationContext,
   created: readonly Notification[],
@@ -180,12 +208,14 @@ export async function buildDigests(
     groups.set(key, [...(groups.get(key) ?? []), notification]);
   }
   const digests: DigestEntry[] = [];
-  for (const notifications of groups.values()) {
-    const first = notifications[0];
+  for (const group of groups.values()) {
+    const first = group[0];
     if (!first) continue;
     const scope = context(first.organizationId);
     const member = (await scope.memberList()).find((m) => m.userId === first.userId);
     if (!member) continue;
+    const notifications = await reachable(scope, member, group);
+    if (notifications.length === 0) continue;
     const titles: Record<string, string> = {};
     for (const jobId of new Set(notifications.flatMap((n) => (n.jobId ? [n.jobId] : [])))) {
       const job = await scope.job(jobId);

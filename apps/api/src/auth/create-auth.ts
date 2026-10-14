@@ -3,6 +3,7 @@ import type { Db } from '@tt/db';
 import { schema } from '@tt/db';
 import { CREATOR_ROLE, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@tt/domain';
 import { betterAuth } from 'better-auth';
+import { createAuthMiddleware } from 'better-auth/api';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { organization, twoFactor } from 'better-auth/plugins';
 import type { Env } from '../config/env.js';
@@ -12,7 +13,10 @@ import { createActorLookups, type SessionUserResolver } from './actor-lookups.js
 import { createAuditHooks } from './audit-hooks.js';
 import { createAuthEmails, type AuthEmails } from './auth-emails.js';
 import { roleGuardHooks } from './role-guards.js';
-import { createSignupLookups, signupPolicyHook } from './signup-policy.js';
+import { createOrganizationGateLookups, organizationTwoFactorCheck } from './organization-two-factor-gate.js';
+import { findMemberRole } from './member-role.js';
+import { createOrganizationCreationLookups, organizationCreationAllowed } from './organization-creation.js';
+import { createSignupLookups, signupPolicyCheck } from './signup-policy.js';
 
 export const INVITATION_TTL_SECONDS = 7 * 24 * 60 * 60;
 export const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
@@ -27,6 +31,8 @@ export interface AuthDependencies {
   readonly core: CoreDeps;
   /** Account emails (verify, reset, invitation) through the configured EmailProvider. */
   readonly mailer: AccountMailer;
+  /** The organization requires 2FA of owners and admins: the same setting the actor resolver reads. */
+  readonly requiresTwoFactor: (organizationId: string) => Promise<boolean>;
 }
 
 /** Email + password: no session until the address is confirmed, a known address answers like a new one, reset by email. */
@@ -51,17 +57,30 @@ const credentialOptions = (emails: AuthEmails) => ({
   },
 });
 
+/** Every `hooks.before` step, in order: the sign-up policy, then the 2FA requirement on organization changes. */
+const beforeHooks = (env: Env, db: Db, requiresTwoFactor: AuthDependencies['requiresTwoFactor']) => {
+  const policy = { mode: env.SIGNUP_MODE, bootstrapToken: env.BOOTSTRAP_TOKEN ?? null, requireBootstrapToken: env.NODE_ENV === 'production' };
+  const signup = signupPolicyCheck(policy, createSignupLookups(db));
+  const twoFactor = organizationTwoFactorCheck(createOrganizationGateLookups(db, requiresTwoFactor, (userId, organizationId) => findMemberRole(db, userId, organizationId)));
+  return createAuthMiddleware(async (ctx) => {
+    await signup(ctx);
+    await twoFactor(ctx);
+  });
+};
+
 /**
  * Email + password with a verified address, password reset, optional TOTP, organizations with the domain's roles,
  * and an audit event for every organization action. The auth base URL is the WEB origin: the browser reaches this
  * api through the web app's /api/** proxy, so the links in the emails go through it too.
  */
-export function createAuth({ env, db, core, mailer }: AuthDependencies) {
+export function createAuth({ env, db, core, mailer, requiresTwoFactor }: AuthDependencies) {
   const { ac, roles } = buildAccessControl();
   // The hooks need the session of the request being served, which only exists once `auth` is built.
   let resolveSessionUser: SessionUserResolver = async () => null;
   const lookups = createActorLookups(db, () => resolveSessionUser);
   const emails = createAuthEmails(mailer, env.platform);
+  const creationPolicy = { mode: env.ORGANIZATION_CREATION, instanceAdmins: env.INSTANCE_ADMIN_EMAILS };
+  const creationLookups = createOrganizationCreationLookups(db);
 
   const auth = betterAuth({
     appName: env.platform.name,
@@ -77,12 +96,14 @@ export function createAuth({ env, db, core, mailer }: AuthDependencies) {
     database: drizzleAdapter(db, { provider: 'pg', schema }),
     ...credentialOptions(emails),
     session: { expiresIn: SESSION_TTL_SECONDS, updateAge: 24 * 60 * 60 },
-    hooks: { before: signupPolicyHook(env.SIGNUP_MODE, createSignupLookups(db)) },
+    hooks: { before: beforeHooks(env, db, requiresTwoFactor) },
     plugins: [
       organization({
         ac,
         roles,
         creatorRole: CREATOR_ROLE,
+        // Each organization has its own model budgets: who may create one is an instance setting (ORGANIZATION_CREATION).
+        allowUserToCreateOrganization: (user) => organizationCreationAllowed(creationPolicy, user, creationLookups),
         invitationExpiresIn: INVITATION_TTL_SECONDS,
         // Only a confirmed account whose address is the invited one can accept (Better Auth checks the address too).
         requireEmailVerificationOnInvitation: true,
