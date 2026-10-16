@@ -70,6 +70,23 @@ La cancellazione è automatica: un job giornaliero avvisa prima della scadenza, 
 - Backup e ripristino: [descrizione].
 - Gestione delle violazioni: procedura di notifica entro 72 ore al Garante quando dovuta (art. 33).
 
+## Migrazione da un altro ATS [se effettuata]
+
+Attività del titolare, non del gestore: l'azienda trasferisce nella piattaforma lo storico di selezione tenuto nel
+sistema precedente (posizioni, candidati, candidature con esiti e date, note, storico delle fasi, email, curriculum e
+allegati), per le stesse finalità e con la stessa base giuridica del trattamento di origine.
+
+- Data della migrazione e sistema di origine: [gg/mm/aaaa], [nome del sistema].
+- Chi ha preparato il pacchetto: [connettore integrato / agente AI o strumento terzo, con il fornitore del modello]. Un
+  agente AI o uno strumento terzo scelto dal titolare è un suo sub-responsabile, da nominare e coprire con i suoi accordi.
+- Dati esclusi per scelta del prodotto: punteggi, valutazioni, voti delle schede di colloquio, valutazioni automatiche,
+  dati demografici o di categorie particolari, foto, date di nascita.
+- Consenso: le date di consenso e i termini di conservazione presenti nella fonte vengono ripresi; chi non ha una data
+  di consenso riceve la richiesta di riconferma; chi ha la conservazione già scaduta non viene trasferito.
+- Dichiarazioni: prima della conferma un owner o admin dichiara titolarità, base giuridica e scelta dell'eventuale
+  agente o strumento; le dichiarazioni sono salvate nel registro delle azioni.
+- La migrazione è annullabile per intero; il pacchetto caricato è cancellato entro [7] giorni dalla conclusione.
+
 ## Decisioni automatizzate
 
 Nessuna. I modelli linguistici sono usati solo per estrarre dati strutturati dai curriculum e supportare gli utenti, con verifica umana.

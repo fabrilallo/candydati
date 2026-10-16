@@ -64,6 +64,7 @@ The code is open. A complete export in an open, documented format is available a
 | Access | Organizations, roles, per-ad selection team, append-only audit log |
 | Reports | Time to hire, conversion per stage, source, response times and share of applications with an outcome |
 | Import / export | Import from CVs and unstructured data with preview and confirmation, undoable as a whole; complete export |
+| Migration from another ATS | A company's whole recruiting history (jobs, stages, candidates, applications with outcomes and dates, notes, stage history, emails, CVs and attachments) moved in from its previous ATS through one public, versioned migration package, produced by a built-in source connector (beta until verified on a real account) or by an agent skill. Previewed before anything is written, confirmed by an owner or admin who declares their responsibility, undoable as a whole. Scores, ratings and special-category data are never carried over |
 | HR tools | Interview feedback without login (see below), hiring needs intake form, optional approval of budget and salary before publication, flagging of stalled ads |
 | Agent | Internal process assistant, public API, MCP server, webhooks (§5) |
 
@@ -80,7 +81,7 @@ A free-form career site builder (custom HTML, CSS or scripts, arbitrary layouts,
 
 ### 3.3 Deferred
 
-Scorecards and interview kits. Restricted stages (feedback and notes of a stage visible only to owners, admins and the hiring manager, §6.2). Interview scheduling through an integration with a scheduling service rather than a proprietary calendar sync. Dedicated importers for individual ATS products.
+Scorecards and interview kits. Restricted stages (feedback and notes of a stage visible only to owners, admins and the hiring manager, §6.2). Interview scheduling through an integration with a scheduling service rather than a proprietary calendar sync.
 
 ### 3.4 Careers page builder
 
@@ -202,6 +203,7 @@ Roles. The client company is the data controller. In the hosted offering the ser
 | Documents | Data processing agreement template, sub-processor list, record of processing activities (`docs/legal/`) |
 | Public form | A submission never rewrites an existing person's profile: the typed contact data stays on the application and a recruiter reviews it ("new details from the application"). An existing open application is answered like a success (nothing reveals who applied), receipts have a per-recipient and a per-organization daily cap, and an optional Cloudflare Turnstile check can be switched on |
 | Imported data | Consent marked "to be renewed", with a reconfirmation email; imported candidates stay visible only in the pipeline of their import until they reconfirm, and their data is erased if they do not |
+| Migrated data | From the organization's previous ATS (same controller): consent dates and retention carry over; people with no consent date get the reconfirmation of imported data; people whose retention already expired are left out. The operator confirms in the app that they are the controller, that they may transfer the data, and that any AI agent used to prepare it is their own sub-processor |
 
 ### 6.1 What erasure cannot reach
 
