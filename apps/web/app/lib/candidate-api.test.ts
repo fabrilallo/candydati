@@ -3,6 +3,7 @@ import { card, detail, note, notice, pipeline, summary } from '~~/test/fixtures/
 import {
   addNote,
   candidatesUrl,
+  attachmentUrl,
   cvUrl,
   decideApplication,
   candidateUrl,
@@ -88,6 +89,7 @@ describe('candidate calls', () => {
   it('points at the cv through the same-origin proxy', () => {
     expect(cvUrl('a/1', 'inline')).toBe('/api/v1/applications/a%2F1/cv?disposition=inline')
     expect(cvUrl('a1', 'attachment')).toBe('/api/v1/applications/a1/cv?disposition=attachment')
+    expect(attachmentUrl('a/1', 'f 1')).toBe('/api/v1/applications/a%2F1/attachments/f%201?disposition=attachment')
   })
 })
 

@@ -518,6 +518,7 @@
         "viewed": "Opened a candidate profile",
         "updated": "Updated a candidate",
         "cv_downloaded": "Opened or downloaded a CV",
+        "attachment_downloaded": "Opened or downloaded an attachment of an application",
         "erased": "Erased a candidate's data",
         "exported": "Exported a candidate's data",
         "corrected": "Corrected a candidate's data",
@@ -1461,6 +1462,7 @@
       "label": "Profile sections",
       "profile": "Profile",
       "cv": "CV",
+      "cvDocuments": "CV and documents",
       "notes": "Notes",
       "messages": "Messages",
       "tasks": "Tasks",
@@ -1536,6 +1538,18 @@
       "previewTitle": "Preview of {name}",
       "noPreview": "Previews are available for PDFs only. Download the file to open it.",
       "none": "No CV: this application comes from another ATS, where it had no résumé."
+    },
+    "attachments": {
+      "title": "Attachments",
+      "kind": {
+        "cover_letter": "Cover letter",
+        "other": "Other document"
+      },
+      "downloadNamed": "Download {name}"
+    },
+    "answers": {
+      "title": "Application form answers",
+      "source": "As they were in the previous ATS the application was migrated from."
     },
     "notes": {
       "label": "New note",
