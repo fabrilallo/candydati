@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MessageDto } from '@tt/domain'
+import type { MessageDto } from '@candydati/domain'
 import { TriangleAlertIcon } from '@lucide/vue'
 import { formatDateTime } from '@/lib/format'
 import { messageView } from '@/lib/message-view'

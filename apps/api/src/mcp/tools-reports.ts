@@ -1,4 +1,4 @@
-import { getReports } from '@tt/core';
+import { getReports } from '@candydati/core';
 import { z } from 'zod';
 import type { ToolDefinition } from './tool-support.js';
 

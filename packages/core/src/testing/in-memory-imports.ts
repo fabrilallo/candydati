@@ -1,4 +1,4 @@
-import type { ImportAnalysis, ImportBatch, ImportItem } from '@tt/domain';
+import type { ImportAnalysis, ImportBatch, ImportItem } from '@candydati/domain';
 import type {
   ConsentToken,
   ConsentTokenRepository,

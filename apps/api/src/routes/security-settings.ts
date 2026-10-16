@@ -1,5 +1,5 @@
-import { getSecuritySettings, setSecuritySettings } from '@tt/core';
-import { ok } from '@tt/domain';
+import { getSecuritySettings, setSecuritySettings } from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 

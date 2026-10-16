@@ -1,4 +1,4 @@
-import { CHANNEL_ID_PATTERN, FEED_CHANNEL_ID } from '@tt/domain';
+import { CHANNEL_ID_PATTERN, FEED_CHANNEL_ID } from '@candydati/domain';
 import type { DistributionChannel, DistributionRegistry } from './distribution-ports.js';
 
 /** Fails at startup, not at the first publication: a malformed or duplicated id is a configuration bug. */

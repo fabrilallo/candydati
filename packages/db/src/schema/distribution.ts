@@ -1,4 +1,4 @@
-import type { DistributionStatus } from '@tt/domain';
+import type { DistributionStatus } from '@candydati/domain';
 import { index, boolean, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { job } from './job.js';

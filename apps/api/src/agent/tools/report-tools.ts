@@ -1,5 +1,5 @@
 import { createTool } from '@mastra/core/tools';
-import { getReports, type ReportDeps } from '@tt/core';
+import { getReports, type ReportDeps } from '@candydati/core';
 import { z } from 'zod';
 import { readAgentIdentity } from '../request-context.js';
 import { runTool } from '../tool-result.js';

@@ -1,6 +1,6 @@
-import { signWebhook } from '@tt/core';
-import { createFakeHttpPoster } from '@tt/core/testing';
-import { createHostGuard } from '@tt/providers';
+import { signWebhook } from '@candydati/core';
+import { createFakeHttpPoster } from '@candydati/core/testing';
+import { createHostGuard } from '@candydati/providers';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { TestUser } from './testing/client.js';
 import { createWorld, personForm, type World } from './testing/candidate-world.js';
@@ -162,7 +162,7 @@ describe('automations', () => {
 describe('webhooks', () => {
   it('returns the secret only on creation and never again', async () => {
     const w = await createWorld(t);
-    const created = await w.owner.post<Hook>('/api/v1/webhooks', { url: 'https://hooks.example.com/tt', events: ['application.moved', 'application.moved', 'job.closed'] });
+    const created = await w.owner.post<Hook>('/api/v1/webhooks', { url: 'https://hooks.example.com/candydati', events: ['application.moved', 'application.moved', 'job.closed'] });
     expect(created.status).toBe(201);
     expect(created.body.data!.secret).toMatch(/^whsec_/);
     expect(created.body.data).toMatchObject({ events: ['application.moved', 'job.closed'], enabled: true });
@@ -183,15 +183,15 @@ describe('webhooks', () => {
 
   it('is for owners and admins, validates URLs and stays inside the organization', async () => {
     const w = await createWorld(t);
-    const body = { url: 'https://hooks.example.com/tt', events: ['job.closed'] };
+    const body = { url: 'https://hooks.example.com/candydati', events: ['job.closed'] };
     expect((await (await w.member('admin')).post('/api/v1/webhooks', body)).status).toBe(201);
     for (const role of ['recruiter', 'hiring_manager', 'interviewer']) {
       const user = await w.member(role);
       expect((await user.post('/api/v1/webhooks', body)).status).toBe(403);
       expect((await user.get('/api/v1/webhooks')).status).toBe(403);
     }
-    expect((await w.owner.post('/api/v1/webhooks', { ...body, url: 'http://hooks.example.com/tt' })).status).toBe(422);
-    expect((await w.owner.post('/api/v1/webhooks', { ...body, url: 'http://localhost:9999/tt' })).status).toBe(422);
+    expect((await w.owner.post('/api/v1/webhooks', { ...body, url: 'http://hooks.example.com/candydati' })).status).toBe(422);
+    expect((await w.owner.post('/api/v1/webhooks', { ...body, url: 'http://localhost:9999/candydati' })).status).toBe(422);
     expect((await w.owner.post('/api/v1/webhooks', { ...body, url: 'https://user:pw@hooks.example.com' })).status).toBe(422);
     expect((await w.owner.post('/api/v1/webhooks', { ...body, events: [] })).status).toBe(422);
     expect((await w.owner.post('/api/v1/webhooks', { ...body, events: ['candidate.deleted'] })).status).toBe(422);
@@ -206,7 +206,7 @@ describe('webhooks', () => {
 
   it('delivers a signed application.moved with ids only, and logs the attempt', async () => {
     const w = await createWorld(t);
-    const created = (await w.owner.post<Hook>('/api/v1/webhooks', { url: 'https://hooks.example.com/tt', events: ['application.moved'] })).body.data!;
+    const created = (await w.owner.post<Hook>('/api/v1/webhooks', { url: 'https://hooks.example.com/candydati', events: ['application.moved'] })).body.data!;
     const applicationId = await applyOne(w);
     await publishOutbox(t);
     const before = deliveryJobs(t).length;
@@ -219,8 +219,8 @@ describe('webhooks', () => {
     expect(await deliver(t, jobs[0]!, poster, createHostGuard({ allowPrivate: false, resolve: async () => ['93.184.216.34'] }))).toBe('delivered');
     const [request] = poster.requests();
     const headers = request!.headers;
-    expect(headers['x-tt-event']).toBe('application.moved');
-    expect(headers['x-tt-signature']).toBe(signWebhook(created.secret!, headers['x-tt-timestamp']!, request!.body));
+    expect(headers['x-candydati-event']).toBe('application.moved');
+    expect(headers['x-candydati-signature']).toBe(signWebhook(created.secret!, headers['x-candydati-timestamp']!, request!.body));
     const payload = JSON.parse(request!.body) as { type: string; organizationId: string; data: Record<string, unknown> };
     expect(payload).toMatchObject({ type: 'application.moved', data: { applicationId } });
     expect(request!.body).not.toMatch(/@example\.com|Giulia|Bianchi/);

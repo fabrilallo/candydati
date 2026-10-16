@@ -1,4 +1,4 @@
-import { QUALITY_CATEGORIES } from '@tt/domain';
+import { QUALITY_CATEGORIES } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ENGLISH_PHRASES, ITALIAN_PHRASES } from './index.js';
 

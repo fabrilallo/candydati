@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { createDb, type DbHandle } from '@tt/db';
+import { createDb, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createPgThrottleStore } from '../auth/pg-throttle-store.js';
 import { createSignInThrottle, NOTIFY_AFTER_FAILURES, PAIR_FREE_FAILURES } from '../auth/sign-in-throttle.js';

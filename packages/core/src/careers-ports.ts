@@ -1,4 +1,4 @@
-import type { CareersPageDocument, Locale, LocalizedText, MediaKind } from '@tt/domain';
+import type { CareersPageDocument, Locale, LocalizedText, MediaKind } from '@candydati/domain';
 import type { FileStorage, TaskQueue } from './intake-ports.js';
 import type { OrganizationDirectory } from './job-ports.js';
 import type { CoreDeps } from './ports.js';
@@ -58,7 +58,7 @@ export interface TranscodedImage {
   readonly variants: readonly { readonly width: number; readonly bytes: Uint8Array }[];
 }
 
-/** Implemented with sharp in `@tt/providers`. Throws `ImageRejectedError` for an image it will not decode. */
+/** Implemented with sharp in `@candydati/providers`. Throws `ImageRejectedError` for an image it will not decode. */
 export interface ImageTranscoder {
   /** Width and height as the file declares them, read from the header only (no decoding). Null when unreadable. */
   probe(bytes: Uint8Array): Promise<{ readonly width: number; readonly height: number } | null>;

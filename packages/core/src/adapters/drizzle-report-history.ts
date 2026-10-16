@@ -1,5 +1,5 @@
-import { and, asc, eq, isNull, lt, schema } from '@tt/db';
-import type { ResponsePromise, StageEvent } from '@tt/domain';
+import { and, asc, eq, isNull, lt, schema } from '@candydati/db';
+import type { ResponsePromise, StageEvent } from '@candydati/domain';
 import type { ResponsePromiseRepository, StageEventRepository } from '../report-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

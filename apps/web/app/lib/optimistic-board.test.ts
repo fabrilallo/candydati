@@ -1,4 +1,4 @@
-import type { ApplicationCardDto } from '@tt/domain'
+import type { ApplicationCardDto } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { card, pipeline } from '../../test/fixtures/candidate-fixtures'
 import { decideCard, moveCard } from './pipeline-board'

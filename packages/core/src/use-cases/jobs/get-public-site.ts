@@ -1,4 +1,4 @@
-import { careersUrl, feedUrl, type PublicFeedDto, type PublicOrganizationSummaryDto } from '@tt/domain';
+import { careersUrl, feedUrl, type PublicFeedDto, type PublicOrganizationSummaryDto } from '@candydati/domain';
 import { z } from 'zod';
 import { NotFoundError } from '../../errors.js';
 import type { PublicSiteDeps } from '../../distribution-ports.js';

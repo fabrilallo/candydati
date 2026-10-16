@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { and, eq, gt, schema, sql, type Db } from '@tt/db';
+import { and, eq, gt, schema, sql, type Db } from '@candydati/db';
 import { APIError } from 'better-auth/api';
 import type { SignupMode } from '../config/env.js';
 import { normalizeEmail } from './sign-in-throttle.js';

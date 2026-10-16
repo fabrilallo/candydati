@@ -1,4 +1,4 @@
-import { interviewerInputSchema } from '@tt/domain';
+import { interviewerInputSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { toAuditActor } from '../../actor.js';
 import { NotFoundError, ValidationError } from '../../errors.js';

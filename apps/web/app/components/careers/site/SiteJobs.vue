@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SectionOf } from '@tt/domain'
+import type { SectionOf } from '@candydati/domain'
 
 /** The open positions: always on the page, exactly once. Its anchor (`#posizioni`) is where the hero's button leads. */
 const props = defineProps<{ section: SectionOf<'jobs'>; first: boolean }>()

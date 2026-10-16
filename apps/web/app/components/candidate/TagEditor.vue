@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { PlusIcon, XIcon } from '@lucide/vue'
-import { TAG_MAX } from '@tt/domain'
+import { TAG_MAX } from '@candydati/domain'
 import { addTag, removeTag } from '@/lib/candidate-view'
 
 /** Tags as small pills, edited in place: Enter adds, the cross removes. Read-only without `candidate:update`. */

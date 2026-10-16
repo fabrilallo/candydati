@@ -1,4 +1,4 @@
-import type { Job } from '@tt/domain';
+import type { Job } from '@candydati/domain';
 import { z } from 'zod';
 import { defineJobUseCase } from './define.js';
 import { requireJob } from './shared.js';

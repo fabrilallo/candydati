@@ -1,4 +1,4 @@
-import type { VaguePhrase } from '@tt/domain'
+import type { VaguePhrase } from '@candydati/domain'
 
 /** Anything highlighted by its literal text: a vague phrase, a compliance finding. */
 interface Phrase {

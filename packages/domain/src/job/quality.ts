@@ -62,7 +62,7 @@ export const assess = (report: AdQualityReport, threshold: number): AdQualityAss
   belowThreshold: isBelowQualityThreshold(report, threshold),
 });
 
-/** Implemented by `@tt/ad-quality`; `@tt/core` depends only on this port. Must never throw for a valid content. */
+/** Implemented by `@candydati/ad-quality`; `@candydati/core` depends only on this port. Must never throw for a valid content. */
 export interface AdQualityAnalyzer {
   analyze(content: JobContent): Promise<AdQualityReport>;
 }

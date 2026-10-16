@@ -7,7 +7,7 @@ import { careersUrl, jobUrl } from './urls.js';
 import { cdataElement, escapeXml, textElement, XML_DECLARATION } from './xml.js';
 
 /** Namespace of our extension elements. A URN: it names the format, not the product. */
-export const TT_FEED_NAMESPACE = 'urn:tt:jobs-feed:1';
+export const CANDYDATI_FEED_NAMESPACE = 'urn:candydati:jobs-feed:1';
 
 /** Section titles of the description, per language of the ad. */
 export const FEED_HEADINGS: Readonly<Record<Locale, JobPostingHeadings>> = {
@@ -82,29 +82,29 @@ const jobElement = (job: PublicJobDto, input: JobsFeedInput): string => {
     line('salary', salaryText(content)),
     line('jobtype', JOB_TYPE[content.contractType]),
     line('remotetype', REMOTE_TYPE[content.workMode]),
-    line('tt:salaryMin', content.salary.min),
-    line('tt:salaryMax', content.salary.max),
-    line('tt:currency', content.salary.currency),
-    line('tt:period', content.salary.period),
-    line('tt:responseDays', content.responseDays),
-    line('tt:stages', content.process.length),
-    line('tt:language', content.language),
-    line('tt:role', content.role),
-    line('tt:seniority', content.seniority),
-    line('tt:contractType', content.contractType),
-    line('tt:workMode', content.workMode),
-    ...optional('tt:ccnl', employment?.ccnl === 'altro' ? (employment.ccnlOther ?? 'altro') : employment?.ccnl),
-    ...optional('tt:level', employment?.level),
-    ...optional('tt:monthlyPayments', employment?.monthlyPayments),
-    ...optional('tt:mealVoucher', employment?.mealVoucher === undefined ? undefined : `${employment.mealVoucher.amountPerDay} ${content.salary.currency} per day (${employment.mealVoucher.type})`),
-    ...optional('tt:welfare', employment?.welfareAnnual === undefined ? undefined : `${employment.welfareAnnual} ${content.salary.currency} per year`),
-    line('tt:updated', rfc822(job.updatedAt)),
+    line('candydati:salaryMin', content.salary.min),
+    line('candydati:salaryMax', content.salary.max),
+    line('candydati:currency', content.salary.currency),
+    line('candydati:period', content.salary.period),
+    line('candydati:responseDays', content.responseDays),
+    line('candydati:stages', content.process.length),
+    line('candydati:language', content.language),
+    line('candydati:role', content.role),
+    line('candydati:seniority', content.seniority),
+    line('candydati:contractType', content.contractType),
+    line('candydati:workMode', content.workMode),
+    ...optional('candydati:ccnl', employment?.ccnl === 'altro' ? (employment.ccnlOther ?? 'altro') : employment?.ccnl),
+    ...optional('candydati:level', employment?.level),
+    ...optional('candydati:monthlyPayments', employment?.monthlyPayments),
+    ...optional('candydati:mealVoucher', employment?.mealVoucher === undefined ? undefined : `${employment.mealVoucher.amountPerDay} ${content.salary.currency} per day (${employment.mealVoucher.type})`),
+    ...optional('candydati:welfare', employment?.welfareAnnual === undefined ? undefined : `${employment.welfareAnnual} ${content.salary.currency} per year`),
+    line('candydati:updated', rfc822(job.updatedAt)),
     '    </job>',
   ].join('\n');
 };
 
 /**
- * The XML feed of an organization's published ads: Indeed-compatible `<source><job>` structure plus our own `tt:`
+ * The XML feed of an organization's published ads: Indeed-compatible `<source><job>` structure plus our own `candydati:`
  * elements. Every value is escaped (invalid XML characters dropped) and the description is CDATA, split on `]]>`.
  * The caller serves it with `Content-Type: application/xml; charset=utf-8`.
  */
@@ -112,7 +112,7 @@ export function buildJobsFeedXml(input: JobsFeedInput): string {
   const { organization, jobs, baseUrl, now } = input;
   return [
     XML_DECLARATION,
-    `<source xmlns:tt="${escapeXml(TT_FEED_NAMESPACE)}">`,
+    `<source xmlns:candydati="${escapeXml(CANDYDATI_FEED_NAMESPACE)}">`,
     `  <publisher>${escapeXml(organization.name)}</publisher>`,
     `  <publisherurl>${escapeXml(careersUrl(baseUrl, organization.slug))}</publisherurl>`,
     `  <lastBuildDate>${escapeXml(now.toUTCString())}</lastBuildDate>`,

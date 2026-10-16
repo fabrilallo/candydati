@@ -1,4 +1,4 @@
-import type { CareersPageEditorDto } from '@tt/domain'
+import type { CareersPageEditorDto } from '@candydati/domain'
 import type { ComputedRef, Ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'

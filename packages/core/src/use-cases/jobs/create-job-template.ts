@@ -1,4 +1,4 @@
-import { jobContentSchema, TEMPLATE_NAME_MAX, type JobTemplate } from '@tt/domain';
+import { jobContentSchema, TEMPLATE_NAME_MAX, type JobTemplate } from '@candydati/domain';
 import { z } from 'zod';
 import { defineJobUseCase } from './define.js';
 import { withStageIds } from './shared.js';

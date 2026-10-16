@@ -1,4 +1,4 @@
-import type { AuditEvent } from '@tt/domain';
+import type { AuditEvent } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { toAuditEventDto, userActorIds } from './audit-dto.js';
 

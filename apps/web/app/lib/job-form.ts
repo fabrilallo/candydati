@@ -1,4 +1,4 @@
-import { checkCompliance, checkPublishable, jobContentSchema, type ComplianceIssue, type JobContent, type PublishIssue, type SelectionStage } from '@tt/domain'
+import { checkCompliance, checkPublishable, jobContentSchema, type ComplianceIssue, type JobContent, type PublishIssue, type SelectionStage } from '@candydati/domain'
 import { emptyEmployment, employmentToForm, employmentToInput, type EmploymentForm } from './employment-form'
 
 /** One stage as typed in the editor: numbers stay strings until the form is turned into content. */

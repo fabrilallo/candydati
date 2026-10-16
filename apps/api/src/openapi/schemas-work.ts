@@ -10,7 +10,7 @@ import {
   cvExtractionSchema,
   jobStatsDtoSchema,
   selectionStageSchema,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type {
   ApplicationCardDto,
   AttentionItemDto,
@@ -20,7 +20,7 @@ import type {
   NotificationDto,
   PipelineDto,
   TaskDto,
-} from '@tt/core';
+} from '@candydati/core';
 import { z } from 'zod';
 
 const isoDate = z.iso.datetime();

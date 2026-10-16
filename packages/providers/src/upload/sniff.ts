@@ -1,4 +1,4 @@
-import type { CvMediaType } from '@tt/domain';
+import type { CvMediaType } from '@candydati/domain';
 import { safeFileName } from './file-name.js';
 import { isWithinOoxmlBudget } from '../zip/bounded-inflate.js';
 import { zipHasEntry } from './zip.js';

@@ -1,4 +1,4 @@
-import type { ApplicationCardDto, StageRef } from '@tt/domain'
+import type { ApplicationCardDto, StageRef } from '@candydati/domain'
 import type { Ref } from 'vue'
 
 export interface BoardDragOptions {

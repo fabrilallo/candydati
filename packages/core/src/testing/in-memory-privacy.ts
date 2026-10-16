@@ -1,4 +1,4 @@
-import type { PrivacyNotice } from '@tt/domain';
+import type { PrivacyNotice } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import type { PrivacyNoticeRepository } from '../candidate-ports.js';
 import { cell } from './in-memory-transaction.js';

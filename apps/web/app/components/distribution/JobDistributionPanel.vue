@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ExternalLinkIcon, RefreshCwIcon } from '@lucide/vue'
-import type { JobDto } from '@tt/domain'
+import type { JobDto } from '@candydati/domain'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'

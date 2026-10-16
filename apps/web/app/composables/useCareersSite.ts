@@ -1,4 +1,4 @@
-import type { CareersMediaDto, CareersPageDocument, Locale, LocalizedText, PublicCareersDto } from '@tt/domain'
+import type { CareersMediaDto, CareersPageDocument, Locale, LocalizedText, PublicCareersDto } from '@candydati/domain'
 import type { ComputedRef, InjectionKey } from 'vue'
 import { textIn } from '@/lib/careers-site'
 

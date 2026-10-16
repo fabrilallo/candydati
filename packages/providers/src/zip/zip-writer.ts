@@ -1,4 +1,4 @@
-import type { ZipWriter, ZipWriterFactory } from '@tt/core';
+import type { ZipWriter, ZipWriterFactory } from '@candydati/core';
 import { zipSync, type Zippable } from 'fflate';
 
 const DEFLATE_LEVEL = 6;

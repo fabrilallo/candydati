@@ -1,4 +1,4 @@
-import { sql, type SQL } from '@tt/db';
+import { sql, type SQL } from '@candydati/db';
 import type { SqlExecutor } from '../intake-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

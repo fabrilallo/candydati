@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defaultCareersPage, type PublicCareersPageDto } from '@tt/domain'
+import { defaultCareersPage, type PublicCareersPageDto } from '@candydati/domain'
 import { fetchPublicCareersPage } from '@/lib/careers-page-api'
 import { careersPageSeo } from '@/lib/careers-seo'
 import { fetchCareers } from '@/lib/job-api'

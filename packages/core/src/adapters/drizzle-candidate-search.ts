@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, schema, sql, type SQL } from '@tt/db';
+import { and, asc, eq, gt, schema, sql, type SQL } from '@candydati/db';
 import type { CandidateSearch, CandidateSearchQuery } from '../candidate-ports.js';
 import { toCandidate } from './drizzle-candidates.js';
 import type { DbExecutor } from './db-executor.js';

@@ -1,6 +1,6 @@
 import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { fail } from '@tt/domain';
+import { fail } from '@candydati/domain';
 import type { Auth } from './create-auth.js';
 import { createInMemoryThrottleStore, createSignInThrottle, type SignInThrottle } from './sign-in-throttle.js';
 import { runWithRequestHeaders } from './request-context.js';

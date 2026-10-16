@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobSummaryDto } from '@tt/domain'
+import type { JobSummaryDto } from '@candydati/domain'
 import { CheckIcon, CircleAlertIcon } from '@lucide/vue'
 import { Badge } from '@/components/ui/badge'
 import { jobFacts, readinessOf, relativeTime } from '@/lib/job-list-view'

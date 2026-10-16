@@ -1,4 +1,4 @@
-import { buildJob, createFakeDistributionChannel, createTestDistributionDeps, DISTRIBUTION_ORG } from '@tt/core/testing';
+import { buildJob, createFakeDistributionChannel, createTestDistributionDeps, DISTRIBUTION_ORG } from '@candydati/core/testing';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
 import { createDistributionSyncQueue, distributionSyncPayload } from './distribution-sync.js';

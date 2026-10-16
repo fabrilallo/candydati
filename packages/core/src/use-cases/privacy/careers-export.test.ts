@@ -1,4 +1,4 @@
-import { careersPageDocumentSchema, careersPageFixture, defaultCareersPage } from '@tt/domain';
+import { careersPageDocumentSchema, careersPageFixture, defaultCareersPage } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import type { CareersMediaRecord } from '../../careers-ports.js';
 import { ORG_A, ORG_B, seedPrivacyData, userActor } from '../../testing/index.js';

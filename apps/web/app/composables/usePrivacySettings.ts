@@ -1,4 +1,4 @@
-import type { PrivacyNoticeDto, Locale, PrivacyNoticeInput  } from '@tt/domain'
+import type { PrivacyNoticeDto, Locale, PrivacyNoticeInput  } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { loaded } from '@/lib/job-api'

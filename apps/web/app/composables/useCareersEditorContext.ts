@@ -1,4 +1,4 @@
-import type { CareersMediaAssetDto, Locale, MediaKind } from '@tt/domain'
+import type { CareersMediaAssetDto, Locale, MediaKind } from '@candydati/domain'
 import type { ComputedRef, InjectionKey } from 'vue'
 
 /**

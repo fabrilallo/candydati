@@ -1,5 +1,5 @@
-import { and, asc, count, desc, eq, gt, inArray, schema } from '@tt/db';
-import { adQualityReportSchema, jobContentSchema, type Job } from '@tt/domain';
+import { and, asc, count, desc, eq, gt, inArray, schema } from '@candydati/db';
+import { adQualityReportSchema, jobContentSchema, type Job } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import type { JobListQuery, JobRepository } from '../job-ports.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';

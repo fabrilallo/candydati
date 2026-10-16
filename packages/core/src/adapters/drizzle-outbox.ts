@@ -1,5 +1,5 @@
-import { and, asc, eq, isNotNull, isNull, lt, lte, or, schema } from '@tt/db';
-import type { OutboxEvent } from '@tt/domain';
+import { and, asc, eq, isNotNull, isNull, lt, lte, or, schema } from '@candydati/db';
+import type { OutboxEvent } from '@candydati/domain';
 import type { OutboxRepository, PendingOutboxEvent } from '../webhook-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

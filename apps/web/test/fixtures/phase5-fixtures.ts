@@ -1,4 +1,4 @@
-import type { DataExportDto, ProcessingRecordDto, RetentionOverviewDto, RetentionRunDto, RetentionUpcomingDto } from '@tt/domain'
+import type { DataExportDto, ProcessingRecordDto, RetentionOverviewDto, RetentionRunDto, RetentionUpcomingDto } from '@candydati/domain'
 
 export const upcoming = (id: string, overrides: Partial<RetentionUpcomingDto> = {}): RetentionUpcomingDto => ({
   applicationId: id,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SectionOf } from '@tt/domain'
+import type { SectionOf } from '@candydati/domain'
 import { ExternalLinkIcon } from '@lucide/vue'
 import { imageSources, mediaOf, safeMediaUrl, watchUrl } from '@/lib/careers-site'
 import { safeExternalUrl } from '@/lib/safe-url'

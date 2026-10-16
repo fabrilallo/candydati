@@ -10,7 +10,7 @@ describe('api_key.expires_at backfill (keys created before every key expired)', 
   let client: pg.Client;
 
   beforeAll(async () => {
-    db = await scratchDatabaseAt(`tt_key_expiry_${process.pid}_test`, '0022_auth_security');
+    db = await scratchDatabaseAt(`candydati_key_expiry_${process.pid}_test`, '0022_auth_security');
     client = db.client;
     await client.query(`INSERT INTO organization (id, name, slug, created_at) VALUES ('org_1', 'Org', 'org-1', now())`);
     await client.query(`INSERT INTO api_key (id, organization_id, name, prefix, hash, scopes, created_by, created_at, expires_at) VALUES

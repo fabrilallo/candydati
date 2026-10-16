@@ -11,7 +11,7 @@ import type {
   ResponseState,
   SelectionStage,
   SubmittedContact,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type { CandidateSummary } from '../candidate-ports.js';
 import type { CandidatePage } from '../use-cases/candidates/search-candidates.js';
 import type { ApplicationCardView, CandidateDetailView, NoteView, PipelineView } from '../use-cases/candidates/views.js';

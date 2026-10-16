@@ -1,4 +1,4 @@
-import { and, eq, gte, isNotNull, or, schema, sql, type Db } from '@tt/db';
+import { and, eq, gte, isNotNull, or, schema, sql, type Db } from '@candydati/db';
 import { APIError } from 'better-auth/api';
 import type { OrganizationCreationMode } from '../config/env.js';
 

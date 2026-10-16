@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobStatus } from '@tt/domain'
+import type { JobStatus } from '@candydati/domain'
 import { Badge } from '@/components/ui/badge'
 import { statusTone } from '@/lib/job-view'
 

@@ -4,7 +4,7 @@ import {
   HOUR_MS,
   type ResponsePromise,
   type StageEvent,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type { ReportAggregateQuery, ReportAggregates, ReportRepository, ResponsePromiseRepository, StageEventRepository } from '../report-ports.js';
 import type { CandidateStore } from './in-memory-candidates.js';
 

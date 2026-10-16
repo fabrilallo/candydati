@@ -1,5 +1,5 @@
-import { schema, eq } from '@tt/db';
-import { signHmacPayload } from '@tt/providers';
+import { schema, eq } from '@candydati/db';
+import { signHmacPayload } from '@candydati/providers';
 import type { FastifyInstance } from 'fastify';
 import type { TestApp } from './test-app.js';
 import { WEBHOOK_SECRET } from './test-app.js';
@@ -42,7 +42,7 @@ export const postRaw = (app: FastifyInstance, body: string, signature: string | 
   app.inject({
     method: 'POST',
     url: '/api/v1/inbound/email/raw',
-    headers: { 'content-type': 'message/rfc822', ...(signature ? { 'x-tt-signature': signature } : {}), ...(timestamp ? { 'x-tt-timestamp': timestamp } : {}) },
+    headers: { 'content-type': 'message/rfc822', ...(signature ? { 'x-candydati-signature': signature } : {}), ...(timestamp ? { 'x-candydati-timestamp': timestamp } : {}) },
     payload: body,
   });
 

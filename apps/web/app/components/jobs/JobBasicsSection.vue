@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { JOB_ROLE_FAMILIES, CONTRACT_TYPES, SENIORITY_LEVELS, SUPPORTED_LOCALES } from '@tt/domain'
+import { JOB_ROLE_FAMILIES, CONTRACT_TYPES, SENIORITY_LEVELS, SUPPORTED_LOCALES } from '@candydati/domain'
 import { Input } from '@/components/ui/input'
 import { fieldIdOf } from '@/lib/job-issues'
 import type { FieldErrors, JobForm } from '@/lib/job-form'

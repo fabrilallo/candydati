@@ -1,4 +1,4 @@
-import type { CareersMediaAssetDto } from '@tt/domain'
+import type { CareersMediaAssetDto } from '@candydati/domain'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { deleteCareersMedia, listCareersMedia, uploadCareersMedia, type MediaUploadInput, type UploadXhr } from '@/lib/careers-page-api'
 import type { JobApiRequest } from '@/lib/job-api'

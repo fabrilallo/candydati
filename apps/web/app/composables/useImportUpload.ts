@@ -1,4 +1,4 @@
-import type { JobSummaryDto } from '@tt/domain'
+import type { JobSummaryDto } from '@candydati/domain'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { uploadImport, type XhrLike } from '@/lib/import-upload'
 import { listJobs, loaded } from '@/lib/job-api'

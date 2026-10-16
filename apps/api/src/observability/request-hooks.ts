@@ -1,5 +1,5 @@
-import { acceptRequestId, REQUEST_ID_HEADER } from '@tt/domain';
-import { runWithRequestId } from '@tt/providers';
+import { acceptRequestId, REQUEST_ID_HEADER } from '@candydati/domain';
+import { runWithRequestId } from '@candydati/providers';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { ApiMetrics } from './api-metrics.js';
 

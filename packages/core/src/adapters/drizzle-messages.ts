@@ -1,5 +1,5 @@
-import { and, asc, count, eq, gte, inArray, schema } from '@tt/db';
-import { SYSTEM_SENDER, type Message } from '@tt/domain';
+import { and, asc, count, eq, gte, inArray, schema } from '@candydati/db';
+import { SYSTEM_SENDER, type Message } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import type { MessageRepository } from '../messaging-ports.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';

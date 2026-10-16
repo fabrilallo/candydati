@@ -1,4 +1,4 @@
-import type { ParsedImportCvInput } from '@tt/domain';
+import type { ParsedImportCvInput } from '@candydati/domain';
 import { extractCvText } from '../cv/extract-text.js';
 import type { CvExtractor } from '../cv/extractor.js';
 import { extractContacts } from './contacts.js';

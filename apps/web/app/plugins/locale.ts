@@ -1,6 +1,6 @@
-import { isLocale } from '@tt/domain'
+import { isLocale } from '@candydati/domain'
 
-const LOCALE_COOKIE = 'tt.locale'
+const LOCALE_COOKIE = 'candydati.locale'
 const ONE_YEAR = 60 * 60 * 24 * 365
 
 /** Remembers the language the user picked; without the cookie the platform default applies. */

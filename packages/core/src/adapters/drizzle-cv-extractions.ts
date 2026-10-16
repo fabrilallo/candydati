@@ -1,5 +1,5 @@
-import { and, count, eq, gte, inArray, schema } from '@tt/db';
-import { cvExtractionSchema, type CvExtractionRecord } from '@tt/domain';
+import { and, count, eq, gte, inArray, schema } from '@candydati/db';
+import { cvExtractionSchema, type CvExtractionRecord } from '@candydati/domain';
 import type { CvExtractionRepository } from '../candidate-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

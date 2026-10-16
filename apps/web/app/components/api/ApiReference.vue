@@ -15,7 +15,7 @@ const request = useJobsApi()
 const { data, refresh, status } = useAsyncData('openapi-spec', () => loaded(() => getOpenApiSpec(request)), { lazy: true, server: false })
 const groups = computed(() => (data.value?.data ? referenceGroups(data.value.data) : null))
 const version = computed(() => data.value?.data?.info.version ?? '')
-const example = 'Authorization: Bearer tt_…'
+const example = 'Authorization: Bearer candydati_…'
 const envelope = `{ "success": true, "data": { … }, "error": null }
 { "success": false, "data": null, "error": { "code": "forbidden", "message": "…" } }`
 </script>

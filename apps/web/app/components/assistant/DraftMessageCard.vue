@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { MailIcon, SendIcon } from '@lucide/vue'
 import { can } from '@/lib/permissions-ui'
-import type { DraftMessageOutput } from '@tt/domain'
+import type { DraftMessageOutput } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

@@ -1,4 +1,4 @@
-import type { ImportConfidence } from '@tt/domain'
+import type { ImportConfidence } from '@candydati/domain'
 import type { ImportItemView, ItemsInput } from '@/lib/import-item-view'
 
 /**

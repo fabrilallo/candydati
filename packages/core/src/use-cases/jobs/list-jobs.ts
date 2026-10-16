@@ -1,4 +1,4 @@
-import { JOB_STATUSES, type Job, type PageMeta } from '@tt/domain';
+import { JOB_STATUSES, type Job, type PageMeta } from '@candydati/domain';
 import { z } from 'zod';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../list-audit-log.js';
 import { defineJobUseCase } from './define.js';

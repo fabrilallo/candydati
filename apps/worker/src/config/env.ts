@@ -1,5 +1,5 @@
-import { loadObservabilityConfig, loadPlatformConfig, productionIssues, type ObservabilityConfig, type PlatformConfig } from '@tt/domain';
-import { loadEmailConfig, loadS3Config, type EmailConfig, type S3Config } from '@tt/providers';
+import { loadObservabilityConfig, loadPlatformConfig, productionIssues, type ObservabilityConfig, type PlatformConfig } from '@candydati/domain';
+import { loadEmailConfig, loadS3Config, type EmailConfig, type S3Config } from '@candydati/providers';
 import { z } from 'zod';
 
 const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;

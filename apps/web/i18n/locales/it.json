@@ -2442,7 +2442,7 @@
       "expires": "Scade il {date}",
       "noExpiry": "Non scade"
     },
-    "prefixLabel": "Inizia con tt_{prefix}",
+    "prefixLabel": "Inizia con candydati_{prefix}",
     "revoke": "Revoca",
     "revokeTitle": "Revocare la chiave?",
     "revokeBody": "{name} smette subito di funzionare. Le integrazioni che la usano riceveranno un errore.",
@@ -2463,7 +2463,7 @@
     "config": "Configurazione per il client",
     "copyConfig": "Copia la configurazione",
     "configHint": "Sostituisci il segnaposto con la tua chiave. Non condividere mai il file con la chiave dentro.",
-    "tokenPlaceholder": "tt_LA_TUA_CHIAVE",
+    "tokenPlaceholder": "candydati_LA_TUA_CHIAVE",
     "toolsTitle": "Strumenti disponibili",
     "toolsNote": "Non ci sono strumenti per spostare, valutare, scartare o scrivere ai candidati: restano decisioni di una persona.",
     "tools": {

@@ -2,7 +2,7 @@
 
 This document explains what the product is, the principles it will not trade away, and the rules the code enforces to honour them. Code and other documents cite it as `PRODUCT.md §n`.
 
-`team-tracker` is a code name. The product name is read from platform configuration (`loadPlatformConfig`) and is never written in code.
+The product is Candydati ([candydati.it](https://candydati.it), [candydati.com](https://candydati.com)). The code reads the name from platform configuration (`loadPlatformConfig`), so a deployment can show its own name.
 
 ## 1. What it is
 

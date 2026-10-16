@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ReportsView } from '@tt/domain'
+import type { ReportsView } from '@candydati/domain'
 import { formatDaysValue, NO_VALUE, timeRows } from '@/lib/report-view'
 
 /**

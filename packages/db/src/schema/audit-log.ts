@@ -3,7 +3,7 @@ import { index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 
 /**
- * Append-only record of actions (see `AuditEvent` in @tt/domain). UPDATE and DELETE are rejected by a
+ * Append-only record of actions (see `AuditEvent` in @candydati/domain). UPDATE and DELETE are rejected by a
  * database trigger (custom migration), so the log cannot be edited even with direct database access.
  *
  * - `organization_id` references `organization` with ON DELETE RESTRICT: an organization that has history
@@ -19,11 +19,11 @@ export const auditLog = pgTable(
     organizationId: text('organization_id')
       .notNull()
       .references(() => organization.id, { onDelete: 'restrict' }),
-    /** One of ACTOR_TYPES in @tt/domain: user, agent, api_key, system. */
+    /** One of ACTOR_TYPES in @candydati/domain: user, agent, api_key, system. */
     actorType: text('actor_type').notNull(),
     actorId: text('actor_id'),
     onBehalfOfUserId: text('on_behalf_of_user_id'),
-    /** One of AUDIT_ACTIONS in @tt/domain. */
+    /** One of AUDIT_ACTIONS in @candydati/domain. */
     action: text('action').notNull(),
     targetType: text('target_type').notNull(),
     targetId: text('target_id').notNull(),

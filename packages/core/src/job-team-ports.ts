@@ -1,4 +1,4 @@
-import type { JobTeamMember } from '@tt/domain';
+import type { JobTeamMember } from '@candydati/domain';
 
 /**
  * Job teams and the lookups behind per-job access (PRODUCT.md §6). Every method filters by organization.

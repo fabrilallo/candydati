@@ -1,4 +1,4 @@
-import { candidateCorrectionSchema, CORRECTABLE_FIELDS, type Candidate, type CorrectableField } from '@tt/domain';
+import { candidateCorrectionSchema, CORRECTABLE_FIELDS, type Candidate, type CorrectableField } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError } from '../../errors.js';
 import { defineCandidateUseCase } from '../candidates/define.js';

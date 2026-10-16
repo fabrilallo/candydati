@@ -1,4 +1,4 @@
-import { careersUrl, FEED_CHANNEL_ID, feedUrl, llmsTxtUrl, type DistributionStatus, type JobDistributionDto } from '@tt/domain'
+import { careersUrl, FEED_CHANNEL_ID, feedUrl, llmsTxtUrl, type DistributionStatus, type JobDistributionDto } from '@candydati/domain'
 import { safeExternalUrl } from './safe-url'
 
 /** Public machine-readable addresses of an organization. Pure: the site URL is passed in, never read here. */

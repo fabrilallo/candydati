@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { isLocale, loadPlatformConfig, PLATFORM_CODENAME } from './config.js';
+import { isLocale, loadPlatformConfig, DEFAULT_PLATFORM_NAME } from './config.js';
 
 describe('loadPlatformConfig', () => {
-  it('falls back to the codename and Italian when nothing is set', () => {
+  it('falls back to the default name and Italian when nothing is set', () => {
     expect(loadPlatformConfig({})).toEqual({
-      name: PLATFORM_CODENAME,
+      name: DEFAULT_PLATFORM_NAME,
       url: 'http://localhost:3000',
       supportEmail: null,
       defaultLocale: 'it',
@@ -42,7 +42,7 @@ describe('loadPlatformConfig', () => {
   });
 
   it('treats blank values as not set', () => {
-    expect(loadPlatformConfig({ PLATFORM_NAME: '  ', PLATFORM_SUPPORT_EMAIL: '' }).name).toBe(PLATFORM_CODENAME);
+    expect(loadPlatformConfig({ PLATFORM_NAME: '  ', PLATFORM_SUPPORT_EMAIL: '' }).name).toBe(DEFAULT_PLATFORM_NAME);
   });
 
   it('fails fast on an unsupported locale or a malformed URL', () => {

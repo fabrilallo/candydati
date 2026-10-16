@@ -1,4 +1,4 @@
-import { roleHasPermission, type Permission } from '@tt/domain';
+import { roleHasPermission, type Permission } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import type { Actor } from '../actor.js';
 import * as core from '../index.js';

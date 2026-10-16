@@ -1,4 +1,4 @@
-import type { MessageDto } from '@tt/domain'
+import type { MessageDto } from '@candydati/domain'
 import { attempt } from '@/lib/load-result'
 import { listMessages } from '@/lib/message-api'
 import { threadOf } from '@/lib/message-view'

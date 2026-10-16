@@ -1,4 +1,4 @@
-import { MACHINE_FORBIDDEN_PERMISSIONS, isPermission } from '@tt/domain';
+import { MACHINE_FORBIDDEN_PERMISSIONS, isPermission } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createTestApp, type TestApp } from '../testing/test-app.js';

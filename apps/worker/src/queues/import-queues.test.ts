@@ -1,5 +1,5 @@
-import { createImportBatch } from '@tt/core';
-import { buildJob, ORG_A, seedImportWorld, userActor } from '@tt/core/testing';
+import { createImportBatch } from '@candydati/core';
+import { buildJob, ORG_A, seedImportWorld, userActor } from '@candydati/core/testing';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
 import { createImportAnalyzeQueue, importPayload } from './import-analyze.js';

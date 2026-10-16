@@ -11,7 +11,7 @@ registerEndpoint('/api/v1/api-keys', async (event) => {
   if (event.method !== 'POST') return ok([apiKey('k1'), apiKey('k0', { name: 'Vecchia', revokedAt: '2026-10-02T09:00:00.000Z' })])
   const body = await readBody<{ name: string; scopes: string[] }>(event)
   state.created.push(body)
-  return ok({ key: apiKey('k2', { name: body.name, scopes: body.scopes, lastUsedAt: null }), secret: 'tt_Zz99Yy88_once' })
+  return ok({ key: apiKey('k2', { name: body.name, scopes: body.scopes, lastUsedAt: null }), secret: 'candydati_Zz99Yy88_once' })
 })
 registerEndpoint('/api/v1/api-keys/k1', { method: 'DELETE', handler: () => (state.revoked += 1, ok(apiKey('k1', { revokedAt: '2026-10-13T10:00:00.000Z' }))) })
 
@@ -36,7 +36,7 @@ describe('api keys', () => {
     const wrapper = await mountPanel()
     const [first, second] = wrapper.findAll('[data-testid="api-key-item"]')
     expect(first?.text()).toContain('Integrazione CI')
-    expect(first?.text()).toContain('tt_Ab12Cd34')
+    expect(first?.text()).toContain('candydati_Ab12Cd34')
     expect(first?.text()).toContain('Leggere gli annunci')
     expect(first?.text()).toContain('Creata da Ada Lovelace')
     expect(first?.text()).toContain('Ultimo uso il')
@@ -68,7 +68,7 @@ describe('api keys', () => {
     byTestId<HTMLInputElement>('api-key-scope-job:create')?.click()
     await flushPromises()
     document.body.querySelector<HTMLFormElement>('#api-key-form')?.requestSubmit()
-    await vi.waitFor(() => expect(byTestId('api-key-secret')?.textContent).toBe('tt_Zz99Yy88_once'))
+    await vi.waitFor(() => expect(byTestId('api-key-secret')?.textContent).toBe('candydati_Zz99Yy88_once'))
     // Every key expires: 90 days unless another choice is made.
     expect(state.created).toEqual([{ name: 'Agente HR', scopes: ['job:read', 'job:create'], expiresAt: expect.any(String) }])
     const days = (Date.parse((state.created[0] as { expiresAt: string }).expiresAt) - Date.now()) / 86_400_000
@@ -80,7 +80,7 @@ describe('api keys', () => {
     byTestId<HTMLButtonElement>('api-key-done')?.click()
     await vi.waitFor(() => expect(byTestId('api-key-secret')).toBeNull())
     expect(wrapper.findAll('[data-testid="api-key-item"]').map((item) => item.attributes('data-key-id'))).toEqual(['k2', 'k1', 'k0'])
-    expect(wrapper.text()).not.toContain('tt_Zz99Yy88_once')
+    expect(wrapper.text()).not.toContain('candydati_Zz99Yy88_once')
   })
 
   it('revokes a key after a confirmation and keeps it in the list as revoked', async () => {

@@ -1,4 +1,4 @@
-import type { PageMeta } from '@tt/domain'
+import type { PageMeta } from '@candydati/domain'
 import { z } from 'zod'
 import { AppError, authErrorKey, errorKeyOf } from './auth-errors'
 import type { AuditEventView } from './audit-view'

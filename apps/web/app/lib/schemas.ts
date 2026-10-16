@@ -1,4 +1,4 @@
-import { isValidOrganizationSlug, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, ROLES } from '@tt/domain'
+import { isValidOrganizationSlug, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, ROLES } from '@candydati/domain'
 import { z } from 'zod'
 
 /**

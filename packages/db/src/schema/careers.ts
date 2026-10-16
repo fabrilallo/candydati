@@ -1,4 +1,4 @@
-import type { CareersPageDocument, LocalizedText, MediaKind } from '@tt/domain';
+import type { CareersPageDocument, LocalizedText, MediaKind } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { check, index, integer, jsonb, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';

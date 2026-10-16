@@ -1,4 +1,4 @@
-import { CONSENT_SCOPES, retentionExpiry, type Application, type PrivacyNotice } from '@tt/domain';
+import { CONSENT_SCOPES, retentionExpiry, type Application, type PrivacyNotice } from '@candydati/domain';
 import { z } from 'zod';
 import { toAuditActor } from '../../actor.js';
 import { authorize } from '../../authorization.js';

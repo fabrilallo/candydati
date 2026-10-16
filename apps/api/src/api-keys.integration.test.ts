@@ -1,5 +1,5 @@
-import { completeJobContent } from '@tt/core/testing';
-import { and, eq, schema } from '@tt/db';
+import { completeJobContent } from '@candydati/core/testing';
+import { and, eq, schema } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createKey, withKey } from './testing/api-keys.js';
 import { TestUser } from './testing/client.js';
@@ -29,7 +29,7 @@ describe('creating keys', () => {
   it('returns the secret once and never the hash, and lists the key without it', async () => {
     const reply = await owner.post<{ key: Record<string, unknown>; secret: string }>('/api/v1/api-keys', { name: 'CI', scopes: ['job:read'] });
     expect(reply.status).toBe(201);
-    expect(reply.body.data!.secret).toMatch(/^tt_[0-9A-Za-z]{8}_[0-9A-Za-z]{32}$/);
+    expect(reply.body.data!.secret).toMatch(/^candydati_[0-9A-Za-z]{8}_[0-9A-Za-z]{32}$/);
     expect(reply.body.data!.key).toMatchObject({ name: 'CI', scopes: ['job:read'], revokedAt: null });
     expect(JSON.stringify(reply.body)).not.toContain('hash');
     const list = await owner.get<{ id: string }[]>('/api/v1/api-keys');
@@ -62,8 +62,8 @@ describe('bearer authentication', () => {
 
   it.each([
     ['no secret after Bearer', 'Bearer '],
-    ['a malformed key', 'Bearer tt_nope'],
-    ['an unknown well-formed key', `Bearer tt_${'a'.repeat(8)}_${'b'.repeat(32)}`],
+    ['a malformed key', 'Bearer candydati_nope'],
+    ['an unknown well-formed key', `Bearer candydati_${'a'.repeat(8)}_${'b'.repeat(32)}`],
   ])('answers 401 in the envelope for %s', async (_label, header) => {
     const response = await t.app.inject({ method: 'GET', url: '/api/v1/jobs', headers: { authorization: header } });
     expect(response.statusCode).toBe(401);
@@ -74,7 +74,7 @@ describe('bearer authentication', () => {
     const response = await t.app.inject({
       method: 'GET',
       url: '/api/v1/jobs',
-      headers: { authorization: `Bearer tt_${'a'.repeat(8)}_${'b'.repeat(32)}`, cookie: owner.cookieHeader() },
+      headers: { authorization: `Bearer candydati_${'a'.repeat(8)}_${'b'.repeat(32)}`, cookie: owner.cookieHeader() },
     });
     expect(response.statusCode).toBe(401);
   });

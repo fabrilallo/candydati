@@ -21,7 +21,7 @@ export default defineNuxtConfig({
   css: ['@fontsource-variable/geist/wght.css', '@fontsource-variable/geist-mono/wght.css', '~/assets/css/tailwind.css'],
   vite: { plugins: [tailwindcss()] },
   shadcn: { prefix: '', componentDir: './app/components/ui' },
-  colorMode: { classSuffix: '', preference: 'system', fallback: 'light', storageKey: 'tt.theme', disableTransition: true },
+  colorMode: { classSuffix: '', preference: 'system', fallback: 'light', storageKey: 'candydati.theme', disableTransition: true },
   i18n: {
     strategy: 'no_prefix',
     defaultLocale: DEFAULT_LOCALE,

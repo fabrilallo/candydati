@@ -13,7 +13,7 @@ export const SECRET_MIN_LENGTHS = {
 } as const;
 
 /** Values shipped in `.env.example` and the usual defaults: never acceptable in production, whatever their length. */
-const EXAMPLE_MARKERS = ['change-me', 'changeme', 'change_me', 'tt-minio-secret', 'minioadmin', 'example'];
+const EXAMPLE_MARKERS = ['change-me', 'changeme', 'change_me', 'candydati-minio-secret', 'minioadmin', 'example'];
 
 const MIN_DISTINCT_CHARACTERS = 8;
 /** Bits per character (Shannon, over the value itself). Random base62/hex of 16+ characters is well above 3. */

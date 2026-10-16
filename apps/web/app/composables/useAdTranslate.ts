@@ -1,4 +1,4 @@
-import type { Locale } from '@tt/domain'
+import type { Locale } from '@candydati/domain'
 import type { Params, Translate } from '@/lib/ad-text'
 
 /**

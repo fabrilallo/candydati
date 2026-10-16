@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobStatsDto } from '@tt/domain'
+import type { JobStatsDto } from '@candydati/domain'
 import { StackedBar } from '@unovis/ts'
 import { VisAxis, VisPlotline, VisStackedBar, VisTooltip, VisXYContainer } from '@unovis/vue'
 import { Badge } from '@/components/ui/badge'
@@ -23,7 +23,7 @@ const yTick = (i: number | Date): string => (typeof i === 'number' && Number.isI
 const fmt = (value: number): string => formatDecimal(value, locale.value)
 const triggers = {
   [StackedBar.selectors.bar]: (d: Row) =>
-    `<div class="tt-tip"><p class="tt-tip-title">${escapeHtml(d.title)}</p><p>${t('dashboard.stats.quality.score')} <b>${fmt(d.total)} / 10</b></p></div>`,
+    `<div class="candydati-tip"><p class="candydati-tip-title">${escapeHtml(d.title)}</p><p>${t('dashboard.stats.quality.score')} <b>${fmt(d.total)} / 10</b></p></div>`,
 }
 </script>
 
@@ -39,7 +39,7 @@ const triggers = {
         <Badge v-else variant="success" class="mb-1.5">{{ t('dashboard.stats.quality.allAbove') }}</Badge>
       </div>
     </template>
-    <div v-if="rows.length > 0" class="tt-chart" :style="{ height: `${height}px` }" aria-hidden="true">
+    <div v-if="rows.length > 0" class="candydati-chart" :style="{ height: `${height}px` }" aria-hidden="true">
       <ClientOnly>
         <VisXYContainer :data="rows" :duration="duration" :height="height" :x-domain="[0, 10]" y-direction="south" :padding="{ top: 4, right: 8 }">
           <VisStackedBar :x="x" :y="y" :color="color" orientation="horizontal" :bar-max-width="10" :rounded-corners="5" :bar-padding="0.4" />

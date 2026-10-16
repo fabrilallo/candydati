@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { createDb, schema, type DbHandle } from '@tt/db';
-import type { ApiKey } from '@tt/domain';
+import { createDb, schema, type DbHandle } from '@candydati/db';
+import type { ApiKey } from '@candydati/domain';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { sha256Hex } from '../testing/in-memory-api-keys.js';
@@ -93,7 +93,7 @@ describe('authenticateApiKey on Postgres', () => {
     const creator = await insertMember(org, 'owner');
     const repo = createDrizzleApiKeys(handle.db);
     const prefix = 'Ab12Cd34';
-    const secret = `tt_${prefix}_${'x'.repeat(32)}`;
+    const secret = `candydati_${prefix}_${'x'.repeat(32)}`;
     await repo.create(key(org, creator, { prefix, hash: sha256Hex(secret), scopes: ['job:read', 'job:create', 'candidate:decide'] }));
     const deps = { apiKeys: repo, memberRoles: createDrizzleMemberRoles(handle.db), securitySettings: createDrizzleSecuritySettings(handle.db), twoFactor: createDrizzleTwoFactor(handle.db), hash: sha256Hex, now: () => NOW };
     expect((await authenticateApiKey(deps, secret))?.scopes).toEqual(['job:read', 'job:create']);

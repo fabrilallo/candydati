@@ -1,6 +1,6 @@
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
-import { rate, type ReportsDto } from '@tt/domain'
+import { rate, type ReportsDto } from '@candydati/domain'
 import { getQuery, setResponseStatus } from 'h3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { emptyReportsFixture, reportsFixture } from '~~/test/fixtures/phase10-fixtures'

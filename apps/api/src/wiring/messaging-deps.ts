@@ -7,9 +7,9 @@ import {
   type MessagingDeps,
   type ReceiptDeps,
   type TaskQueue,
-} from '@tt/core';
+} from '@candydati/core';
 import type { Env } from '../config/env.js';
-import { newConversationToken, toMessagingConfig } from '@tt/providers';
+import { newConversationToken, toMessagingConfig } from '@candydati/providers';
 
 export interface MessagingWiring {
   readonly messagingDeps: MessagingDeps;

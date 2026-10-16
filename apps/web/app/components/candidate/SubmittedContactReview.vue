@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CandidateCorrection } from '@tt/domain'
+import type { CandidateCorrection } from '@candydati/domain'
 import { InfoIcon } from '@lucide/vue'
 import type { ContactChange } from '@/lib/submitted-contact'
 import { correctionOf } from '@/lib/submitted-contact'

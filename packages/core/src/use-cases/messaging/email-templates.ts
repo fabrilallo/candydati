@@ -5,7 +5,7 @@ import {
   renderTemplate,
   type EmailTemplate,
   type EmailTemplateKind,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import type { MessagingDeps } from '../../messaging-ports.js';

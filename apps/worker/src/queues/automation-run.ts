@@ -1,4 +1,4 @@
-import { runAutomations, type Actor, type AutomationRunDeps } from '@tt/core';
+import { runAutomations, type Actor, type AutomationRunDeps } from '@candydati/core';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

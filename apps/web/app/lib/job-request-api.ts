@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'
-import { approvalSettingsSchema, jobRequestSchema, jobSchema, type JobRequestDto, type JobRequestInput } from '@tt/domain'
+import { approvalSettingsSchema, jobRequestSchema, jobSchema, type JobRequestDto, type JobRequestInput } from '@candydati/domain'
 import { APPROVAL_SETTINGS_PATH, approveJobRequestPath, convertJobRequestPath, JOB_REQUESTS_PATH, jobRequestPath, rejectJobRequestPath } from './api-paths'
 
 /** Job requests and the approval setting. */

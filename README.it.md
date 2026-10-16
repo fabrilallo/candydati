@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.svg">
-    <img alt="team-tracker" src="docs/assets/logo.svg" height="44">
+    <img alt="Candydati" src="docs/assets/logo.svg" height="44">
   </picture>
 </p>
 
@@ -9,15 +9,13 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="Licenza: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1F47D6"></a>
-  <a href="https://github.com/fabrilallo/team-tracker/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/fabrilallo/team-tracker/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/fabrilallo/candydati/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/fabrilallo/candydati/actions/workflows/ci.yml/badge.svg"></a>
   <a href="CONTRIBUTING.md"><img alt="PR benvenute" src="https://img.shields.io/badge/PRs-welcome-1F47D6"></a>
   <img alt="Node 24+" src="https://img.shields.io/badge/node-%3E%3D24-1F47D6">
 </p>
 
 <p align="center"><a href="README.md">English</a> · <a href="docs/PRODUCT.md">Prodotto</a> · <a href="docs/ARCHITECTURE.md">Architettura</a> · <a href="CONTRIBUTING.md">Contribuire</a></p>
 
-> **Nome in codice.** `team-tracker` è un nome di lavoro. Il nome del prodotto non è ancora deciso: si legge dalla configurazione (`PLATFORM_*`), non è mai scritto nel codice.
->
 > La documentazione tecnica in `docs/` è in inglese.
 
 ## Perché
@@ -26,7 +24,7 @@
 fuori le persone prima che qualcuno le legga. Il software fa quello che decide chi lo gestisce: lo stesso strumento
 può lasciare i candidati senza risposta oppure rispondere a tutti. La differenza sta in come lo si configura e lo si usa.
 
-Per questo il codice di team-tracker è pubblico. Le regole che applica sono codice che chiunque può leggere, verificare e
+Per questo il codice di Candydati è pubblico. Le regole che applica sono codice che chiunque può leggere, verificare e
 migliorare, e le buone pratiche sono parte del prodotto invece di essere lasciate alla buona volontà. La maggior parte
 degli strumenti di selezione nasconde a chi si candida la retribuzione, il processo e l'esito; qui la trasparenza è
 strutturale, non opzionale: un'installazione non può disattivare questi principi.
@@ -74,7 +72,7 @@ Stato: pre-1.0 (vedi il [changelog](CHANGELOG.md)). Definizione completa del pro
 | <img src="docs/assets/screenshots/pipeline.png" alt="Pipeline di un annuncio con i candidati nelle varie fasi" width="100%"><br>**Pipeline**: i candidati nelle fasi dichiarate dell'annuncio | <img src="docs/assets/screenshots/job-editor.png" alt="Editor dell'annuncio con l'anteprima dal vivo accanto al modulo" width="100%"><br>**Editor dell'annuncio**: RAL e processo obbligatori, anteprima dal vivo |
 | <img src="docs/assets/screenshots/careers.png" alt="Pagina carriere pubblica con immagine di copertina e numeri dell'azienda" width="100%"><br>**Pagina carriere**: sezioni costruite con l'editor e anteprima dal vivo | <img src="docs/assets/screenshots/candidate.png" alt="Scheda del candidato con fase, tag e feedback del colloquio" width="100%"><br>**Candidato**: fase, note e feedback dei colloqui, senza punteggi |
 
-I dati sono inventati. Per rigenerarle: `pnpm --filter @tt/e2e screenshots` con lo stack di sviluppo avviato.
+I dati sono inventati. Per rigenerarle: `pnpm --filter @candydati/e2e screenshots` con lo stack di sviluppo avviato.
 
 ## Avvio rapido (sviluppo)
 

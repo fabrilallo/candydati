@@ -30,7 +30,7 @@ import {
   UsersIcon,
   ZapIcon,
 } from '@lucide/vue'
-import type { ValueIcon } from '@tt/domain'
+import type { ValueIcon } from '@candydati/domain'
 import type { Component } from 'vue'
 
 /** The curated icons of "values / perks" (`VALUE_ICONS`): the only ones a page can show. */

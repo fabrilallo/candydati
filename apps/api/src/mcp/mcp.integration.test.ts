@@ -1,6 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { completeJobContent } from '@tt/core/testing';
+import { completeJobContent } from '@candydati/core/testing';
 import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createKey, withKey } from '../testing/api-keys.js';
@@ -198,7 +198,7 @@ describe('MCP endpoint authentication', () => {
     expect((await withKey(t.app, key.secret, 'POST', '/mcp', { body: rpc, headers })).status).toBe(200);
     await world.owner.post(`/api/v1/api-keys/${key.id}/revoke`);
     expect((await withKey(t.app, key.secret, 'POST', '/mcp', { body: rpc, headers })).status).toBe(401);
-    expect((await withKey(t.app, `tt_${'a'.repeat(8)}_${'b'.repeat(32)}`, 'POST', '/mcp', { body: rpc, headers })).status).toBe(401);
+    expect((await withKey(t.app, `candydati_${'a'.repeat(8)}_${'b'.repeat(32)}`, 'POST', '/mcp', { body: rpc, headers })).status).toBe(401);
   });
 
   it('is stateless and POST only', async () => {

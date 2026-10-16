@@ -1,5 +1,5 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { grantablePermissions, parseApiKeySecret, roleNeedsTwoFactor, type Role } from '@tt/domain';
+import { grantablePermissions, parseApiKeySecret, roleNeedsTwoFactor, type Role } from '@candydati/domain';
 import type { DelegatedActor } from '../../actor.js';
 import type { ApiKeyAuthDeps } from '../../api-key-ports.js';
 

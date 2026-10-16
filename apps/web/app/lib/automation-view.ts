@@ -1,4 +1,4 @@
-import { type AutomationRuleDto, type WebhookDeliveryDto, checkWebhookUrl, JOB_OWNER_ASSIGNEE, MAX_DUE_IN_DAYS, TASK_TITLE_MAX, WEBHOOK_EVENT_TYPES, type AutomationActionType    } from '@tt/domain';
+import { type AutomationRuleDto, type WebhookDeliveryDto, checkWebhookUrl, JOB_OWNER_ASSIGNEE, MAX_DUE_IN_DAYS, TASK_TITLE_MAX, WEBHOOK_EVENT_TYPES, type AutomationActionType    } from '@candydati/domain';
 import type { RuleInput } from './automation-api'
 
 /** Pure: the rules of each stage, in the order of the stages and then of creation. Rules of unknown stages are left out. */

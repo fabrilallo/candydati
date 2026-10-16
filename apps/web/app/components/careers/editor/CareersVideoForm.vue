@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ShieldCheckIcon } from '@lucide/vue'
-import { CAREERS_LIMITS, externalWatchUrl, parseExternalVideoUrl, type SectionOf, type VideoSource } from '@tt/domain'
+import { CAREERS_LIMITS, externalWatchUrl, parseExternalVideoUrl, type SectionOf, type VideoSource } from '@candydati/domain'
 import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'
 import type { SectionPatch } from '@/lib/careers-editor'

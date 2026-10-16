@@ -9,8 +9,8 @@ import {
   toJobSummaryDto,
   toPublishJobResultDto,
   updateJob,
-} from '@tt/core';
-import { JOB_STATUSES, jobContentSchema, type PublishRule } from '@tt/domain';
+} from '@candydati/core';
+import { JOB_STATUSES, jobContentSchema, type PublishRule } from '@candydati/domain';
 import { z } from 'zod';
 import { toMcpPipeline } from './pipeline-view.js';
 import type { ToolDefinition } from './tool-support.js';

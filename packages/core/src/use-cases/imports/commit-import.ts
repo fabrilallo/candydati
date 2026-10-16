@@ -1,4 +1,4 @@
-import { DAY_MS, IMPORT_COMMIT_CHUNK, IMPORT_RECONFIRM_DAYS, type ImportBatch, type ImportItem, type ParsedImportCv } from '@tt/domain';
+import { DAY_MS, IMPORT_COMMIT_CHUNK, IMPORT_RECONFIRM_DAYS, type ImportBatch, type ImportItem, type ParsedImportCv } from '@candydati/domain';
 import { z } from 'zod';
 import type { ImportCommitDeps, ImportCommitRepositories } from '../../import-ports.js';
 import { ConflictError, isTransientError, NotFoundError } from '../../errors.js';

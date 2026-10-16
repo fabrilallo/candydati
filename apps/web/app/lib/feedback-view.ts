@@ -9,7 +9,7 @@ import {
   type FeedbackSubmission,
   type InterviewerInput,
   type StageType,
-} from '@tt/domain'
+} from '@candydati/domain'
 import { z } from 'zod'
 
 /** Pure helpers of the interview feedback screens (phase 9): no score anywhere, only words and an opinion. */

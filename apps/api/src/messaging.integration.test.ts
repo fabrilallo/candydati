@@ -221,7 +221,7 @@ describe('inbound email', () => {
 
   it('is not subject to the origin check', async () => {
     const body = rawReply({ token: 'b'.repeat(32), from: 'x@example.com' });
-    const reply = await t.app.inject({ method: 'POST', url: '/api/v1/inbound/email/raw', headers: { origin: 'https://evil.example', 'content-type': 'message/rfc822', 'x-tt-signature': sign(body), 'x-tt-timestamp': TIMESTAMP }, payload: body });
+    const reply = await t.app.inject({ method: 'POST', url: '/api/v1/inbound/email/raw', headers: { origin: 'https://evil.example', 'content-type': 'message/rfc822', 'x-candydati-signature': sign(body), 'x-candydati-timestamp': TIMESTAMP }, payload: body });
     expect(reply.statusCode).toBe(202);
   });
 });

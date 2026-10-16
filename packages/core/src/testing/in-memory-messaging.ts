@@ -1,4 +1,4 @@
-import { isSingletonKind, type EmailSettings, type EmailTemplate, type Message } from '@tt/domain';
+import { isSingletonKind, type EmailSettings, type EmailTemplate, type Message } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import type {
   Conversation,

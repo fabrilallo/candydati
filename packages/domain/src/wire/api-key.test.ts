@@ -10,7 +10,7 @@ describe('api key wire schemas', () => {
   });
 
   it('reads the creation answer with its secret', () => {
-    expect(apiKeyCreatedSchema.parse({ key, secret: 'tt_x' }).secret).toBe('tt_x');
-    expect(apiKeyCreatedSchema.safeParse({ ...key, secret: 'tt_x' }).success).toBe(false);
+    expect(apiKeyCreatedSchema.parse({ key, secret: 'candydati_x' }).secret).toBe('candydati_x');
+    expect(apiKeyCreatedSchema.safeParse({ ...key, secret: 'candydati_x' }).success).toBe(false);
   });
 });

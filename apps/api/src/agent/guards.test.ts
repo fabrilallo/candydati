@@ -12,8 +12,8 @@ import {
   publishJob,
   sendMessage,
   type UserActor,
-} from '@tt/core';
-import { PERMISSIONS, ROLES } from '@tt/domain';
+} from '@candydati/core';
+import { PERMISSIONS, ROLES } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { AGENT_TOOL_PERMISSIONS, agentScopes, toAgentActor } from './agent-actor.js';
 import { agentStatus, hasProviderKey, providerOf } from './config.js';

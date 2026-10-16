@@ -1,4 +1,4 @@
-import { INTERVIEWERS_PER_STAGE_MAX, interviewerInputSchema, stageInterviewersSchema, type InterviewerDto, type InterviewerInput } from '@tt/domain'
+import { INTERVIEWERS_PER_STAGE_MAX, interviewerInputSchema, stageInterviewersSchema, type InterviewerDto, type InterviewerInput } from '@candydati/domain'
 import { z } from 'zod'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'

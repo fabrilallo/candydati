@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { newAuditEventSchema, type AuditEvent, type NewAuditEvent } from '@tt/domain';
+import { newAuditEventSchema, type AuditEvent, type NewAuditEvent } from '@candydati/domain';
 import type { AuditLogPage, AuditLogQuery, AuditLogRepository } from '../ports.js';
 import { cell } from './in-memory-transaction.js';
 

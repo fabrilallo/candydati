@@ -1,4 +1,4 @@
-import { careersPageDocumentSchema, careersPageFixture, contrastRatio, DEFAULT_CAREERS_THEME, type CareersMediaDto } from '@tt/domain'
+import { careersPageDocumentSchema, careersPageFixture, contrastRatio, DEFAULT_CAREERS_THEME, type CareersMediaDto } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { absoluteMediaUrl, hasHero, headingFontFamily, imageSources, mediaOf, safeEmbedUrl, safeMediaUrl, textIn, themeStyle, watchUrl } from './careers-site'
 

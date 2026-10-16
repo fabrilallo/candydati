@@ -1,5 +1,5 @@
-import { and, asc, eq, gt, isNull, schema } from '@tt/db';
-import type { FeedbackRequest, InterviewFeedback, StageInterviewer } from '@tt/domain';
+import { and, asc, eq, gt, isNull, schema } from '@candydati/db';
+import type { FeedbackRequest, InterviewFeedback, StageInterviewer } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import type { FeedbackRequestRepository, InterviewFeedbackRepository, StageInterviewerRepository } from '../feedback-ports.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';

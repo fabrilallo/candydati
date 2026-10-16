@@ -1,4 +1,4 @@
-import { CONSENT_LINK, IMPORT_RECONFIRM_DAYS } from '@tt/domain';
+import { CONSENT_LINK, IMPORT_RECONFIRM_DAYS } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { createFakeEmailSender, ORG_A, systemActor } from '../../testing/index.js';
 import { commit, deliverQueued, GIULIA, GIULIA_ROW, importWorld, MARIO, MARIO_ROW, readyBatch } from '../../testing/import-fixtures.js';

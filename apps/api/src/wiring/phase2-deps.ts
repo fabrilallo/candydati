@@ -8,8 +8,8 @@ import {
   type ReceiptDeps,
   type SubmitApplicationDeps,
   type TaskQueue,
-} from '@tt/core';
-import { sniffCv } from '@tt/providers';
+} from '@candydati/core';
+import { sniffCv } from '@candydati/providers';
 
 export interface Phase2Deps {
   readonly candidateDeps: CandidateDeps;

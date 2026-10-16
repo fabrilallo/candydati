@@ -38,7 +38,7 @@ import {
   careersMediaAssetSchema,
   careersPageEditorSchema,
   publicCareersPageSchema,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { auditEventSchema } from './schemas-admin.js';
 
 /** Schemas of the DTOs, documented once under `components.schemas` and referenced from every response. */

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { inbound, message, template, TEMPLATES } from '~~/test/fixtures/message-fixtures'
 import { deliveryErrorKey, messageTotal, messageView, outcomeTemplateKind, sampleValues, templateForKind, templateGroups, threadOf } from './message-view'
-import { renderTemplate } from '@tt/domain'
+import { renderTemplate } from '@candydati/domain'
 
 describe('messageView', () => {
   it('shows an outbound message on our side with who sent it and its status', () => {

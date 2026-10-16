@@ -1,6 +1,6 @@
 import { toImportDetail, type ImportDetail, type ItemsInput } from '@/lib/import-item-view'
 import { importCommitPath, importItemsPath, importMappingPath, importPath, IMPORTS_PATH, importUndoPath, publicConsentPath } from '@/lib/api-paths'
-import { IMPORT_ITEMS_PAGE_MAX, IMPORT_LIMITS, consentAnswerSchema, importBatchSchema, importBatchPageSchema, publicConsentSchema, undoImportSchema, type ImportBatchDto, type ImportMapping, type PublicConsentDto, type UndoImportDto } from '@tt/domain'
+import { IMPORT_ITEMS_PAGE_MAX, IMPORT_LIMITS, consentAnswerSchema, importBatchSchema, importBatchPageSchema, publicConsentSchema, undoImportSchema, type ImportBatchDto, type ImportMapping, type PublicConsentDto, type UndoImportDto } from '@candydati/domain'
 import { z } from 'zod'
 import { ApiFailure, callApi } from './api-call'
 import type { JobApiRequest } from './job-api'

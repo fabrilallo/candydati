@@ -1,4 +1,4 @@
-import { jobContentSchema, QUALITY_CATEGORIES, type AdQualityAssessment, type JobContent, type JobDto, type Role } from '@tt/domain'
+import { jobContentSchema, QUALITY_CATEGORIES, type AdQualityAssessment, type JobContent, type JobDto, type Role } from '@candydati/domain'
 
 export const NOW = '2026-10-13T10:00:00.000Z'
 

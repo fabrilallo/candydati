@@ -1,4 +1,4 @@
-import type { CareersSection, Locale, LocalizedText, SectionType } from '@tt/domain'
+import type { CareersSection, Locale, LocalizedText, SectionType } from '@candydati/domain'
 
 /**
  * Content of a section just added: text where the schema requires it, written in the editing language, so the

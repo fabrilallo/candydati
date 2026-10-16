@@ -1,4 +1,4 @@
-import { completeJobContent, fakePdfBytes, validApplicationForm } from '@tt/core/testing';
+import { completeJobContent, fakePdfBytes, validApplicationForm } from '@candydati/core/testing';
 import type { FastifyInstance } from 'fastify';
 import { TestUser } from './client.js';
 import { multipartBody, type FieldPart, type FilePart } from './multipart.js';

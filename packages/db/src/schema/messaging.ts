@@ -1,4 +1,4 @@
-import type { DomainRecord, DomainStatus, EmailTemplateKind, MessageDirection, MessageStatus } from '@tt/domain';
+import type { DomainRecord, DomainStatus, EmailTemplateKind, MessageDirection, MessageStatus } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { boolean, index, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';

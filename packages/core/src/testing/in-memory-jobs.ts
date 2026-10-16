@@ -1,4 +1,4 @@
-import { JOB_STATUSES, type Job, type JobStatus, type JobTemplate } from '@tt/domain';
+import { JOB_STATUSES, type Job, type JobStatus, type JobTemplate } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import { bucketByWeek } from '../use-cases/jobs/job-stats-weeks.js';
 import type {

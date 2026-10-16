@@ -1,4 +1,4 @@
-import { DAY_MS, defaultEmailTemplate, renderTemplate, SYSTEM_SENDER, type Job, type Message } from '@tt/domain';
+import { DAY_MS, defaultEmailTemplate, renderTemplate, SYSTEM_SENDER, type Job, type Message } from '@candydati/domain';
 import type { TaskQueue } from '../../intake-ports.js';
 import type { ReceiptDeps } from '../../messaging-ports.js';
 import { enqueueDelivery } from './send-message.js';

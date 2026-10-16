@@ -1,4 +1,4 @@
-import type { Notification } from '@tt/domain';
+import type { Notification } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import type { EmailSender } from '../../messaging-ports.js';
 import { buildNotification, createFakeEmailSender, createInMemoryNotifications } from '../../testing/index.js';

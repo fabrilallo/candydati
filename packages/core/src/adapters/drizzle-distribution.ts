@@ -1,5 +1,5 @@
-import { and, eq, schema } from '@tt/db';
-import type { DistributionSetting, JobDistribution } from '@tt/domain';
+import { and, eq, schema } from '@candydati/db';
+import type { DistributionSetting, JobDistribution } from '@candydati/domain';
 import type { DistributionSettingRepository, JobDistributionRepository } from '../distribution-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

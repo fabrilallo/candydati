@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { EyeIcon, PencilLineIcon } from '@lucide/vue'
-import { mediaReferences, type CareersMediaAssetDto, type CareersTheme, type Locale, type MediaKind, type SectionType } from '@tt/domain'
+import { mediaReferences, type CareersMediaAssetDto, type CareersTheme, type Locale, type MediaKind, type SectionType } from '@candydati/domain'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'

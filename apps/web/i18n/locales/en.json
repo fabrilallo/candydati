@@ -2442,7 +2442,7 @@
       "expires": "Expires on {date}",
       "noExpiry": "Never expires"
     },
-    "prefixLabel": "Starts with tt_{prefix}",
+    "prefixLabel": "Starts with candydati_{prefix}",
     "revoke": "Revoke",
     "revokeTitle": "Revoke the key?",
     "revokeBody": "{name} stops working right away. Integrations using it will get an error.",
@@ -2463,7 +2463,7 @@
     "config": "Client configuration",
     "copyConfig": "Copy the configuration",
     "configHint": "Replace the placeholder with your key. Never share the file with the key in it.",
-    "tokenPlaceholder": "tt_YOUR_KEY",
+    "tokenPlaceholder": "candydati_YOUR_KEY",
     "toolsTitle": "Available tools",
     "toolsNote": "There are no tools to move, assess, reject or write to candidates: those stay a person's decision.",
     "tools": {

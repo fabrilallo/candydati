@@ -1,5 +1,5 @@
 {
-  "name": "@tt/ad-quality",
+  "name": "@candydati/ad-quality",
   "version": "0.1.0",
   "private": true,
   "license": "BUSL-1.1",
@@ -23,7 +23,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@tt/domain": "workspace:*",
+    "@candydati/domain": "workspace:*",
     "zod": "4.5.4"
   },
   "devDependencies": {

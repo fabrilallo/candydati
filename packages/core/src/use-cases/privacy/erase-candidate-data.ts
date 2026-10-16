@@ -1,4 +1,4 @@
-import type { AuditActor, ErasureReason } from '@tt/domain';
+import type { AuditActor, ErasureReason } from '@candydati/domain';
 import type { ErasableApplication, ErasureDeps } from '../../privacy-ports.js';
 import { afterCommitOrNow, baseDeps, type TransactionalDeps } from '../../transaction.js';
 import { recordEvent } from '../webhooks/record-event.js';

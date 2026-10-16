@@ -1,4 +1,4 @@
-import { type JobRequest, type Notification, type NotificationKind } from '@tt/domain';
+import { type JobRequest, type Notification, type NotificationKind } from '@candydati/domain';
 import { NotFoundError } from '../../errors.js';
 import type { JobRequestDeps } from '../../job-request-ports.js';
 

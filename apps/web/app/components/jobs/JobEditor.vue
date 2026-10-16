@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { BriefcaseBusinessIcon, ExternalLinkIcon, EyeIcon, HistoryIcon, LockIcon, PencilLineIcon } from '@lucide/vue'
-import type { JobDto, JobTemplateDto } from '@tt/domain'
+import type { JobDto, JobTemplateDto } from '@candydati/domain'
 import { gapList } from '@/lib/ad-gaps'
 import { APPROVAL_ERROR_KEYS, approvalState } from '@/lib/approval-view'
 import { complianceMarks } from '@/lib/compliance-view'

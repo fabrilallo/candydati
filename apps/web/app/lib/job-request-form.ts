@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, HEADCOUNT_MAX, JOB_ROLES, SUPPORTED_LOCALES, type JobRequestInput, type JobRole, type Locale } from '@tt/domain'
+import { DEFAULT_LOCALE, HEADCOUNT_MAX, JOB_ROLES, SUPPORTED_LOCALES, type JobRequestInput, type JobRole, type Locale } from '@candydati/domain'
 
 /** Form state: every field is a string until the form is turned into the wire input. Updates are `{ ...form, ...patch }`. */
 export interface JobRequestForm {

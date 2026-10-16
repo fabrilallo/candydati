@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { MailCheckIcon } from '@lucide/vue'
-import type { SelectionStage } from '@tt/domain'
+import type { SelectionStage } from '@candydati/domain'
 import { processSummaryText } from '@/lib/ad-facts'
 import { formatDuration } from '@/lib/job-view'
 

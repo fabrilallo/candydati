@@ -14,7 +14,7 @@ export const migrationsUpTo = (lastTag: string): string => {
   const journal = JSON.parse(readFileSync(join(MIGRATIONS_FOLDER, 'meta', '_journal.json'), 'utf8')) as { entries: JournalEntry[] };
   const last = journal.entries.findIndex((entry) => entry.tag === lastTag);
   const entries = journal.entries.slice(0, last + 1);
-  const folder = mkdtempSync(join(tmpdir(), 'tt-migrations-upto-'));
+  const folder = mkdtempSync(join(tmpdir(), 'candydati-migrations-upto-'));
   mkdirSync(join(folder, 'meta'));
   writeFileSync(join(folder, 'meta', '_journal.json'), JSON.stringify({ ...journal, entries }));
   for (const entry of entries) copyFileSync(join(MIGRATIONS_FOLDER, `${entry.tag}.sql`), join(folder, `${entry.tag}.sql`));

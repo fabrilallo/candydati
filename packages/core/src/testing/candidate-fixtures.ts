@@ -1,4 +1,4 @@
-import type { Application, Candidate, CandidateNote, CvExtractionRecord, PrivacyNotice, PrivacyNoticeInput } from '@tt/domain';
+import type { Application, Candidate, CandidateNote, CvExtractionRecord, PrivacyNotice, PrivacyNoticeInput } from '@candydati/domain';
 
 const DATE = new Date('2026-01-01T00:00:00.000Z');
 

@@ -1,4 +1,4 @@
-import type { DeliveredEventType, WebhookDelivery, WebhookDeliveryStatus, WebhookEndpoint, WebhookEventType } from '@tt/domain';
+import type { DeliveredEventType, WebhookDelivery, WebhookDeliveryStatus, WebhookEndpoint, WebhookEventType } from '@candydati/domain';
 import type { CreatedWebhook } from '../use-cases/webhooks/endpoints.js';
 
 /** There is deliberately no `secret` here: no read ever returns it. */

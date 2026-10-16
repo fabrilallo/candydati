@@ -9,7 +9,7 @@ describe('environment reference', () => {
     expect(names).toEqual(expect.arrayContaining(['DATABASE_URL', 'IMPORT_STALE_DAYS', 'NUXT_PUBLIC_TIME_ZONE', 'MISTRAL_API_KEY']));
   });
 
-  it('docs/ENVIRONMENT.md is up to date (run `pnpm --filter @tt/tools env-docs`)', () => {
+  it('docs/ENVIRONMENT.md is up to date (run `pnpm --filter @candydati/tools env-docs`)', () => {
     expect(readFileSync(join(ROOT, 'docs', 'ENVIRONMENT.md'), 'utf8')).toBe(renderEnvDocs());
   });
 

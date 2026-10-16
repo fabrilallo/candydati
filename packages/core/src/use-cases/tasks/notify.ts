@@ -1,4 +1,4 @@
-import type { Task } from '@tt/domain';
+import type { Task } from '@candydati/domain';
 import type { NotificationRepository } from '../../automation-ports.js';
 
 /** `task_assigned` to the assignee, unless they gave the task to themselves. One per task. */

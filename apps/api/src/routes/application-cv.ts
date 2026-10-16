@@ -1,4 +1,4 @@
-import { openCv } from '@tt/core';
+import { openCv } from '@candydati/core';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { contentDisposition, wantsInline } from '../http/content-disposition.js';

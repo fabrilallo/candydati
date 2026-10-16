@@ -24,9 +24,9 @@ import {
   type SubmitApplicationDeps,
   type TaskQueue,
   type BindableTaskQueue,
-} from '@tt/core';
-import type { AdQualityAnalyzer } from '@tt/domain';
-import { sql, type Db } from '@tt/db';
+} from '@candydati/core';
+import type { AdQualityAnalyzer } from '@candydati/domain';
+import { sql, type Db } from '@candydati/db';
 import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyRequest } from 'fastify';
 import { createAuth, type Auth } from './auth/create-auth.js';
@@ -40,10 +40,10 @@ import { createPhase2Deps } from './wiring/phase2-deps.js';
 import { createPhase4Deps } from './wiring/phase4-deps.js';
 import { configuredProviders } from './wiring/configured-providers.js';
 import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
-import { zipStreamFactory } from '@tt/providers';
+import { zipStreamFactory } from '@candydati/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
-import type { Actor, ApiKeyDeps, DelegatedActor, SecurityDeps } from '@tt/core';
-import { authenticateApiKey, withStorageErrors } from '@tt/core';
+import type { Actor, ApiKeyDeps, DelegatedActor, SecurityDeps } from '@candydati/core';
+import { authenticateApiKey, withStorageErrors } from '@candydati/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
 import { createApiKeyDeps } from './wiring/api-key-deps.js';
@@ -52,7 +52,7 @@ import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
 import { createCareersDeps, type CareersWiring } from './wiring/careers-deps.js';
 import { createHrDeps, type HrWiring } from './wiring/hr-deps.js';
 import { createTeamDeps, type TeamWiring } from './wiring/team-deps.js';
-import { toMessagingConfig } from '@tt/providers';
+import { toMessagingConfig } from '@candydati/providers';
 
 export interface RateLimitSettings {
   /** Requests per minute per client on every route. */

@@ -1,4 +1,4 @@
-import { DAY_MS, type Outcome } from '@tt/domain';
+import { DAY_MS, type Outcome } from '@candydati/domain';
 import { buildApplication, buildCandidate } from './candidate-fixtures.js';
 import { buildJob, completeJobContent } from './job-fixtures.js';
 import type { DatasetRepositories } from './report-dataset.js';

@@ -1,4 +1,4 @@
-import { careersPageDocumentSchema, SUPPORTED_LOCALES, type CareersPageDocument } from '@tt/domain'
+import { careersPageDocumentSchema, SUPPORTED_LOCALES, type CareersPageDocument } from '@candydati/domain'
 
 /**
  * Validation of the draft, shaped for the editor: each issue of `careersPageDocumentSchema` lands on its section and

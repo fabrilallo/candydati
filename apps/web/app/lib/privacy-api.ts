@@ -1,4 +1,4 @@
-import { type Locale, type PrivacyNoticeInput, privacyNoticeSchema, privacyTemplateSchema, type PrivacyNoticeDto    } from '@tt/domain';
+import { type Locale, type PrivacyNoticeInput, privacyNoticeSchema, privacyTemplateSchema, type PrivacyNoticeDto    } from '@candydati/domain';
 import { z } from 'zod'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'

@@ -3,7 +3,7 @@ import { CircleAlertIcon, XIcon } from '@lucide/vue'
 import { stageName } from '@/lib/pipeline-board'
 import { formatBytes } from '@/lib/cv-file'
 import { pathOf } from '@/lib/import-files'
-import { IMPORT_LIMITS } from '@tt/domain'
+import { IMPORT_LIMITS } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { NativeSelect } from '@/components/ui/native-select'
 

@@ -1,5 +1,5 @@
-import type { ProcessingRecord, RetentionOverview } from '@tt/core';
-import type { DataExport, RetentionRun } from '@tt/domain';
+import type { ProcessingRecord, RetentionOverview } from '@candydati/core';
+import type { DataExport, RetentionRun } from '@candydati/domain';
 
 export const toRetentionRunDto = (run: RetentionRun) => ({ id: run.id, startedAt: run.startedAt.toISOString(), warned: run.warned, erased: run.erased });
 

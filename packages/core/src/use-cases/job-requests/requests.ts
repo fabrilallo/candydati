@@ -1,4 +1,4 @@
-import { jobRequestInputSchema, JOB_REQUEST_STATUSES, type JobRequest, type PageMeta } from '@tt/domain';
+import { jobRequestInputSchema, JOB_REQUEST_STATUSES, type JobRequest, type PageMeta } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';

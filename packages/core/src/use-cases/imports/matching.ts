@@ -1,4 +1,4 @@
-import { collectImportEmails, matchImport, type ImportAnalysis, type ImportBatch, type ImportExistingRef, type ImportItem, type ImportMapping } from '@tt/domain';
+import { collectImportEmails, matchImport, type ImportAnalysis, type ImportBatch, type ImportExistingRef, type ImportItem, type ImportMapping } from '@candydati/domain';
 import type { ImportDeps } from '../../import-ports.js';
 
 /** Existing candidates of the organization by lowercase email, for the emails found in the batch. */

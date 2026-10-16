@@ -1,4 +1,4 @@
-import { commitImport, ConflictError, failImportBatch, type ImportCommitDeps } from '@tt/core';
+import { commitImport, ConflictError, failImportBatch, type ImportCommitDeps } from '@candydati/core';
 import { importPayload } from './import-analyze.js';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

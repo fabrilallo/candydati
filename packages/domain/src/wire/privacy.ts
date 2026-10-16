@@ -8,7 +8,7 @@ export const erasedSchema = z.object({ erased: z.literal(true) });
 
 const retentionDaysSchema = z.object({ selection: z.number().int().positive(), talent_pool: z.number().int().positive() });
 
-/** `PrivacyNoticeDto` of `@tt/core`'s candidate mapper. */
+/** `PrivacyNoticeDto` of `@candydati/core`'s candidate mapper. */
 export const privacyNoticeSchema = z.object({
   id: z.string(),
   version: z.number().int().positive(),

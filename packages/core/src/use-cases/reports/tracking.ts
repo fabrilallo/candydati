@@ -1,4 +1,4 @@
-import { statusWhenAnswered, type ActorType, type Application, type Outcome } from '@tt/domain';
+import { statusWhenAnswered, type ActorType, type Application, type Outcome } from '@candydati/domain';
 import type { ResponsePromiseRepository, TrackingDeps } from '../../report-ports.js';
 
 /**

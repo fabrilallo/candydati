@@ -3,7 +3,7 @@ import type { ImportItemView } from '@/lib/import-item-view'
 import { FileTextIcon, MailXIcon, Rows3Icon, UserCheckIcon } from '@lucide/vue'
 import { itemProblems } from '@/lib/import-preview'
 import { sourceText } from '@/lib/import-view'
-import { IMPORT_RECONFIRM_DAYS } from '@tt/domain'
+import { IMPORT_RECONFIRM_DAYS } from '@candydati/domain'
 
 /**
  * One proposed candidate: checkbox, name and contacts, confidence, sources (files and rows), and what to look at:

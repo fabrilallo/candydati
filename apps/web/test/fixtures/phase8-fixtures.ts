@@ -1,4 +1,4 @@
-/** Wire shapes of the imports and the public reconfirmation, as the api sends them (`@tt/domain` `wire/import`, `wire/consent`). */
+/** Wire shapes of the imports and the public reconfirmation, as the api sends them (`@candydati/domain` `wire/import`, `wire/consent`). */
 const counts = { files: 12, cvs: 10, rows: 8, items: 11, included: 10, imported: 10, merged: 3, failed: 0, noEmail: 1, emailsQueued: 9, skippedReconfirmed: 0, erased: 0 }
 
 export const batch = (over: Record<string, unknown> = {}) => ({

@@ -1,4 +1,4 @@
-import { daysSince, STALE_DIGEST_KINDS, staleCutoff, staleJobDedupeKey } from '@tt/domain';
+import { daysSince, STALE_DIGEST_KINDS, staleCutoff, staleJobDedupeKey } from '@candydati/domain';
 import { z } from 'zod';
 import type { StaleScanDeps } from '../../job-request-ports.js';
 import { defineSystemJob } from '../../use-case.js';

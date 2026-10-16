@@ -1,4 +1,4 @@
-import { CONSENT_LINK, IMPORT_RECONFIRM_DAYS, isPlaceholderEmail } from '@tt/domain';
+import { CONSENT_LINK, IMPORT_RECONFIRM_DAYS, isPlaceholderEmail } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError } from '../../errors.js';
 import { buildApplication, buildCandidate, createInMemoryTaskQueue, ORG_A } from '../../testing/index.js';

@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { createDb, type DbHandle } from '@tt/db';
+import { createDb, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildApplication, buildCandidate, fakePdfBytes } from '../testing/index.js';
 import { buildImportWorld, deliverQueued, newPerson, readyBatch, recruiterOf, runCommit, type Person, type World } from '../testing/import-postgres.js';

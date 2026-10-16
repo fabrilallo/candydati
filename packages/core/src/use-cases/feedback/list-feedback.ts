@@ -4,7 +4,7 @@ import {
   type FeedbackRecommendation,
   type InterviewFeedback,
   type Job,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import { requireApplication } from '../candidates/shared.js';
 import { requireJob } from '../jobs/shared.js';

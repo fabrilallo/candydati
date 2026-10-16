@@ -1,4 +1,4 @@
-import type { JobTeamMember } from '@tt/domain';
+import type { JobTeamMember } from '@candydati/domain';
 import type { OrganizationSettingsRepository } from '../job-request-ports.js';
 import type { JobTeamRepository } from '../job-team-ports.js';
 import type { CandidateStore } from './in-memory-candidates.js';

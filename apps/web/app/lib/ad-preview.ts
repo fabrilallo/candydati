@@ -1,4 +1,4 @@
-import { employmentSchema, jobContentSchema, locationSchema, salarySchema, selectionStageSchema, type Employment, type JobContent, type SelectionStage } from '@tt/domain'
+import { employmentSchema, jobContentSchema, locationSchema, salarySchema, selectionStageSchema, type Employment, type JobContent, type SelectionStage } from '@candydati/domain'
 import { employmentToInput } from './employment-form'
 import type { JobForm, StageForm } from './job-form'
 

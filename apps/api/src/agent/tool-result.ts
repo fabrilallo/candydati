@@ -1,4 +1,4 @@
-import { isCoreError } from '@tt/core';
+import { isCoreError } from '@candydati/core';
 import { z } from 'zod';
 
 /** What a tool returns when the use case refused: the model reads the code and explains it, the chat keeps going. */

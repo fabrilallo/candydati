@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CAREERS_LIMITS, LINK_KINDS, type LinkKind, type SectionOf } from '@tt/domain'
+import { CAREERS_LIMITS, LINK_KINDS, type LinkKind, type SectionOf } from '@candydati/domain'
 import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'
 import { moveItem, removeAt, replaceAt, type SectionPatch } from '@/lib/careers-editor'

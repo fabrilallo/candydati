@@ -1,8 +1,8 @@
-import { createInMemoryFileStorage } from '@tt/core/testing';
-import type { Db } from '@tt/db';
+import { createInMemoryFileStorage } from '@candydati/core/testing';
+import type { Db } from '@candydati/db';
 import { describe, expect, it, vi } from 'vitest';
 import { createCvExtractionDeps } from './deps.js';
-import { createDrizzleUnitOfWork } from '@tt/core';
+import { createDrizzleUnitOfWork } from '@candydati/core';
 
 const db = {} as Db;
 

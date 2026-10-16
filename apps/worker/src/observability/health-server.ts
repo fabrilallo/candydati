@@ -1,5 +1,5 @@
 import { createServer, type Server } from 'node:http';
-import { isMetricsAuthorized, METRICS_CONTENT_TYPE, type MetricsRegistry } from '@tt/providers';
+import { isMetricsAuthorized, METRICS_CONTENT_TYPE, type MetricsRegistry } from '@candydati/providers';
 
 export interface HealthServerOptions {
   readonly port: number;

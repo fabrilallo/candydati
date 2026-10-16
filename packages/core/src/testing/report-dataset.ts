@@ -1,4 +1,4 @@
-import type { FunnelStageDto, Outcome, ReportsDto, ResponsePromise, StageEvent } from '@tt/domain';
+import type { FunnelStageDto, Outcome, ReportsDto, ResponsePromise, StageEvent } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository } from '../candidate-ports.js';
 import type { JobRepository } from '../job-ports.js';
 import type { ResponsePromiseRepository, StageEventRepository } from '../report-ports.js';

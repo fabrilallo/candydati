@@ -2,9 +2,9 @@ import { randomUUID } from 'node:crypto';
 import {
   createDrizzleUnitOfWork,
   type RetentionDeps,
-} from '@tt/core';
-import { eq, schema } from '@tt/db';
-import { zipStreamFactory } from '@tt/providers';
+} from '@candydati/core';
+import { eq, schema } from '@candydati/db';
+import { zipStreamFactory } from '@candydati/providers';
 import { createExportDeps } from '../wiring/phase5-deps.js';
 import { createWorld, personForm, type World } from './candidate-world.js';
 import type { TestApp } from './test-app.js';

@@ -1,4 +1,4 @@
-import { IMPORT_CONFIDENCES, IMPORT_ITEMS_PAGE_MAX, importItemSelectionSchema, importMappingSchema } from '@tt/domain';
+import { IMPORT_CONFIDENCES, IMPORT_ITEMS_PAGE_MAX, importItemSelectionSchema, importMappingSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { importUploadBody } from './schemas-import.js';
 import type { RouteSpec } from './spec.js';

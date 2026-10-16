@@ -1,4 +1,4 @@
-import { buildErrorEnvelope, parseDsn, type ReportTags } from '@tt/domain'
+import { buildErrorEnvelope, parseDsn, type ReportTags } from '@candydati/domain'
 
 export interface WebErrorReporter {
   readonly enabled: boolean
@@ -20,7 +20,7 @@ const SEND_TIMEOUT_MS = 5_000
 
 /**
  * Server errors of the web app to a Sentry-compatible collector. Off unless a valid DSN is given. The report is built by
- * `@tt/domain` (the same builder as the api and the worker): error type, scrubbed message, code locations and a few tags.
+ * `@candydati/domain` (the same builder as the api and the worker): error type, scrubbed message, code locations and a few tags.
  * Never a request body, header, cookie, URL or user.
  */
 export const createWebErrorReporter = (options: WebErrorReporterOptions): WebErrorReporter => {

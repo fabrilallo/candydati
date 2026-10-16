@@ -1,4 +1,4 @@
-import { rate } from '@tt/domain'
+import { rate } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { emptyReportsFixture, reportsFixture } from '~~/test/fixtures/phase10-fixtures'
 import { formatDaysValue, formatRate, funnelRows, headlines, isReportEmpty, percentOf, responseTime, sourceRows, stageTypeRows, timeRows } from './report-view'

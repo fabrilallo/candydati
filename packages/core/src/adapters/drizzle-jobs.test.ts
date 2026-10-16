@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { createDb, schema, type DbHandle } from '@tt/db';
+import { createDb, schema, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ConflictError } from '../errors.js';
 import { buildJob, buildJobTemplate, completeJobContent, fixedQualityReport } from '../testing/index.js';

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SectionOf } from '@tt/domain'
+import type { SectionOf } from '@candydati/domain'
 import { initials } from '@/lib/initials'
 
 /** What the people who work there say. One quote becomes a large pull quote; more sit in two columns. */

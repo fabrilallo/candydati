@@ -1,4 +1,4 @@
-import { inArray, schema, sql, type Db } from '@tt/db';
+import { inArray, schema, sql, type Db } from '@candydati/db';
 import type { ThrottleCounter, ThrottleStore } from './sign-in-throttle.js';
 
 const table = schema.authThrottle;

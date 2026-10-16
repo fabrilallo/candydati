@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { cvExtractionSchema } from '@tt/domain';
+import { cvExtractionSchema } from '@candydati/domain';
 import { createCvExtractor } from './extractor.js';
 import { buildCvPrompt, CV_DATA_END, CV_DATA_START } from './prompt.js';
 import { looksSensitive } from './privacy-filter.js';

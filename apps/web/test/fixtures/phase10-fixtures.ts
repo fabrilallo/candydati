@@ -1,4 +1,4 @@
-import { rate, type ReportKey, type ReportsDto } from '@tt/domain'
+import { rate, type ReportKey, type ReportsDto } from '@candydati/domain'
 
 /** The report as the web reads it: the api answer plus the sections that failed validation (none here). */
 export type ReportsFixture = ReportsDto & { readonly invalid: readonly ReportKey[] }

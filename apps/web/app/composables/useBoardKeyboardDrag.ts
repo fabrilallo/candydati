@@ -1,4 +1,4 @@
-import type { ApplicationCardDto } from '@tt/domain'
+import type { ApplicationCardDto } from '@candydati/domain'
 import { adjacentStage } from '@/lib/pipeline-board'
 import type { BoardDragOptions } from './useBoardDrag'
 

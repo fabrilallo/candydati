@@ -1,4 +1,4 @@
-import type { ComplianceIssue, PublishIssue } from '@tt/domain'
+import type { ComplianceIssue, PublishIssue } from '@candydati/domain'
 import { fixesFor, type ComplianceFix } from './compliance-fix'
 import { fieldIdOf, isComplianceRule } from './job-issues'
 import type { JobForm } from './job-form'

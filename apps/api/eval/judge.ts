@@ -1,4 +1,4 @@
-import { createMastraGenerator } from '@tt/providers';
+import { createMastraGenerator } from '@candydati/providers';
 import { z } from 'zod';
 import type { EvalCase } from './cases.js';
 

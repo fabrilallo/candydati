@@ -1,4 +1,4 @@
-import type { CvMediaType } from '@tt/domain';
+import type { CvMediaType } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { ReceiptDeps } from './messaging-ports.js';
@@ -12,7 +12,7 @@ export interface StoredFileStream {
   readonly sizeBytes: number | null;
 }
 
-/** Binary storage for CVs. Keys are chosen by core; `@tt/providers` implements it (local disk, S3/MinIO). */
+/** Binary storage for CVs. Keys are chosen by core; `@candydati/providers` implements it (local disk, S3/MinIO). */
 export interface FileStorage {
   put(key: string, bytes: Uint8Array, mediaType: string): Promise<void>;
   /** Stores what `source` yields without holding it all in memory; returns the bytes written. Nothing is stored when `source` throws. */

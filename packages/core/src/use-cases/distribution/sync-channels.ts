@@ -1,4 +1,4 @@
-import { DISTRIBUTION_ERROR_MAX, type Job, type JobDistribution } from '@tt/domain';
+import { DISTRIBUTION_ERROR_MAX, type Job, type JobDistribution } from '@candydati/domain';
 import type { DistributionChannel, DistributionDeps } from '../../distribution-ports.js';
 import type { PublicOrganization } from '../../job-ports.js';
 import { toDistributionJobView } from '../../mappers/distribution-dto.js';

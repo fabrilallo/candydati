@@ -1,4 +1,4 @@
-import type { CandidateDetailDto, CandidateCorrection, ConsentScope  } from '@tt/domain'
+import type { CandidateDetailDto, CandidateCorrection, ConsentScope  } from '@candydati/domain'
 import type { MaybeRefOrGetter } from 'vue'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'

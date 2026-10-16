@@ -1,4 +1,4 @@
-import { taskInputSchema, type Task } from '@tt/domain';
+import { taskInputSchema, type Task } from '@candydati/domain';
 import { z } from 'zod';
 import { toActorUserId } from '../../actor-user.js';
 import type { TaskDeps } from '../../automation-ports.js';

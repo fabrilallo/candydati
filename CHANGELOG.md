@@ -13,7 +13,7 @@ Phases 0 to 10 of the roadmap are implemented. Nothing has been released yet.
 - **Foundations (phase 0):** pnpm and Turborepo monorepo, Postgres 17 with Drizzle, Better Auth with organizations, roles
   and invitations, permission check and append-only audit log in every use case, Italian and English UI.
 - **Job ad and publication standard (phase 1):** structured editor, mandatory salary range and declared selection process
-  before publishing, ad quality score (`@tt/ad-quality`), templates, public careers page with JSON-LD.
+  before publishing, ad quality score (`@candydati/ad-quality`), templates, public careers page with JSON-LD.
 - **Applications and pipeline (phase 2):** application form without registration, versioned consent, CV upload and
   extraction, pipeline stages taken from the declared process, candidate record, notes, search.
 - **Communication (phase 3):** emails on behalf of the company, replies attached to the application, templates, bulk
@@ -23,7 +23,7 @@ Phases 0 to 10 of the roadmap are implemented. Nothing has been released yet.
 - **GDPR (phase 5):** automatic retention with warning and erasure, data subject rights from the candidate record,
   candidate and organization exports with a public schema, legal templates in `docs/legal`.
 - **Agent, API and MCP (phase 6):** scoped API keys, OpenAPI at `/api/v1/openapi.json`, MCP server at `/mcp`, stateless
-  internal assistant, adversarial eval suite (`pnpm --filter @tt/api eval:agent`).
+  internal assistant, adversarial eval suite (`pnpm --filter @candydati/api eval:agent`).
 - **Distribution (phase 7):** XML feeds, `llms.txt` and sitemap per organization, read-only public API, distribution
   channel interface.
 - **Import (phase 8):** ZIP or folders of CVs, CSV, Excel, Notion exports, matching, preview, consent to renew by email,

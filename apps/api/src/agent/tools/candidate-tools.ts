@@ -1,6 +1,6 @@
 import { createTool } from '@mastra/core/tools';
-import { getCandidate, getPipeline, listAttention, listMessages, type CandidateDeps, type CandidateDetailView, type MessagingDeps } from '@tt/core';
-import { ATTENTION_STATES, OUTCOMES, type PipelineStage } from '@tt/domain';
+import { getCandidate, getPipeline, listAttention, listMessages, type CandidateDeps, type CandidateDetailView, type MessagingDeps } from '@candydati/core';
+import { ATTENTION_STATES, OUTCOMES, type PipelineStage } from '@candydati/domain';
 import { z } from 'zod';
 import { truncate, wrapCandidateData } from '../candidate-data.js';
 import { readAgentIdentity } from '../request-context.js';

@@ -1,4 +1,4 @@
-import { completeJobContent } from '@tt/core/testing';
+import { completeJobContent } from '@candydati/core/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createKey } from '../testing/api-keys.js';
 import { createWorld, type World } from '../testing/candidate-world.js';

@@ -1,7 +1,7 @@
-import { createInMemoryFileStorage, createInMemoryTaskQueue } from '@tt/core/testing';
-import { createDb } from '@tt/db';
-import { createErrorReporter, runWithRequestId, currentRequestId } from '@tt/providers';
-import { safeErrorSerializer } from '@tt/core';
+import { createInMemoryFileStorage, createInMemoryTaskQueue } from '@candydati/core/testing';
+import { createDb } from '@candydati/db';
+import { createErrorReporter, runWithRequestId, currentRequestId } from '@candydati/providers';
+import { safeErrorSerializer } from '@candydati/core';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { buildServer } from './server.js';
 import { createTestApp, testEnv, type TestApp } from './testing/test-app.js';
@@ -98,9 +98,9 @@ describe('GET /metrics', () => {
     const response = await t.app.inject({ method: 'GET', url: '/metrics', headers: { authorization: `Bearer ${TOKEN}` } });
     expect(response.statusCode).toBe(200);
     expect(response.headers['content-type']).toContain('text/plain');
-    expect(response.body).toContain('tt_http_requests_total{method="GET",route="/api/health",status="200"}');
-    expect(response.body).toContain('tt_http_requests_total{method="GET",route="unmatched",status="404"}');
-    expect(response.body).toContain('tt_http_request_duration_seconds_bucket{method="GET",route="/api/health",status_class="2xx",le="0.1"}');
+    expect(response.body).toContain('candydati_http_requests_total{method="GET",route="/api/health",status="200"}');
+    expect(response.body).toContain('candydati_http_requests_total{method="GET",route="unmatched",status="404"}');
+    expect(response.body).toContain('candydati_http_request_duration_seconds_bucket{method="GET",route="/api/health",status_class="2xx",le="0.1"}');
     expect(response.body).toContain('process_resident_memory_bytes');
     expect(response.body).not.toContain('abc123');
   });

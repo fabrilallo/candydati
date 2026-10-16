@@ -1,10 +1,10 @@
 /**
  * Adversarial eval of the internal assistant against the real model (AGENT_MODEL) on the TEST database.
- * `pnpm --filter @tt/api eval:agent`. Skips (exit 0) without AGENT_MODEL or its provider key; exits 1 when a case fails.
+ * `pnpm --filter @candydati/api eval:agent`. Skips (exit 0) without AGENT_MODEL or its provider key; exits 1 when a case fails.
  */
 import { writeFile } from 'node:fs/promises';
-import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer } from '@tt/core/testing';
-import { createDb, runMigrations } from '@tt/db';
+import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer } from '@candydati/core/testing';
+import { createDb, runMigrations } from '@candydati/db';
 import { agentStatus } from '../src/agent/config.js';
 import { buildServer } from '../src/server.js';
 import { testEnv, WEB_ORIGIN, type TestApp } from '../src/testing/test-app.js';

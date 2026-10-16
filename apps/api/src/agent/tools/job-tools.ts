@@ -1,6 +1,6 @@
 import { createTool } from '@mastra/core/tools';
-import { analyzeJobAd, ConflictError, draftJobContent, getJob, JOB_BRIEF_MAX, listJobTemplates, listJobs, updateJob, ValidationError, type JobDeps } from '@tt/core';
-import { checkPublishable, JOB_STATUSES, jobContentSchema, type Job } from '@tt/domain';
+import { analyzeJobAd, ConflictError, draftJobContent, getJob, JOB_BRIEF_MAX, listJobTemplates, listJobs, updateJob, ValidationError, type JobDeps } from '@candydati/core';
+import { checkPublishable, JOB_STATUSES, jobContentSchema, type Job } from '@candydati/domain';
 import { z } from 'zod';
 import type { JobDrafter } from '../job-drafter.js';
 import { readAgentIdentity } from '../request-context.js';

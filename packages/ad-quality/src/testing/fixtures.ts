@@ -1,4 +1,4 @@
-import { jobContentSchema, type JobContent, type JobContentInput } from '@tt/domain';
+import { jobContentSchema, type JobContent, type JobContentInput } from '@candydati/domain';
 
 export const draft = (input: Partial<JobContentInput> = {}): JobContent => jobContentSchema.parse({ title: 'Backend Developer', ...input });
 

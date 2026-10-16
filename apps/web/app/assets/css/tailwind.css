@@ -190,7 +190,7 @@
   --chart-track: var(--muted);
 }
 /* Scoped on the chart wrapper: @unovis injects its own `:root` defaults, which would win over ours. */
-.tt-chart {
+.candydati-chart {
   --vis-font-family: var(--font-sans);
   --vis-axis-font-family: var(--font-sans);
   --vis-axis-tick-label-color: var(--muted-foreground);
@@ -221,31 +221,31 @@
   --vis-grouped-bar-stroke-color: transparent;
   --vis-stacked-bar-stroke-color: transparent;
 }
-.tt-chart text {
+.candydati-chart text {
   font-variant-numeric: tabular-nums;
 }
-.tt-tip {
+.candydati-tip {
   display: grid;
   gap: 2px;
   font-size: 12px;
   line-height: 1.4;
   font-variant-numeric: tabular-nums;
 }
-.tt-tip p {
+.candydati-tip p {
   display: flex;
   align-items: center;
   gap: 6px;
 }
-.tt-tip b {
+.candydati-tip b {
   margin-left: auto;
   padding-left: 12px;
   font-weight: 600;
 }
-.tt-tip-title {
+.candydati-tip-title {
   font-weight: 600;
   margin-bottom: 2px;
 }
-.tt-dot {
+.candydati-dot {
   width: 8px;
   height: 8px;
   border-radius: 2px;
@@ -253,17 +253,17 @@
 }
 
 /* Toasts (vue-sonner): same font, tinted shadow, quiet type. */
-[data-sonner-toaster] [data-sonner-toast].tt-toast {
+[data-sonner-toaster] [data-sonner-toast].candydati-toast {
   font-family: var(--font-sans);
   box-shadow: var(--shadow-lg);
   gap: 0.625rem;
   padding: 0.875rem 1rem;
 }
-[data-sonner-toaster] [data-sonner-toast].tt-toast [data-title] {
+[data-sonner-toaster] [data-sonner-toast].candydati-toast [data-title] {
   font-weight: 500;
   font-size: 0.875rem;
   line-height: 1.35;
 }
-[data-sonner-toaster] [data-sonner-toast].tt-toast [data-description] {
+[data-sonner-toaster] [data-sonner-toast].candydati-toast [data-description] {
   color: var(--muted-foreground);
 }

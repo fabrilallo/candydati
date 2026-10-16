@@ -1,4 +1,4 @@
-# @tt/e2e
+# @candydati/e2e
 
 End-to-end tests (Playwright, Chromium only) for the critical flows. One spec per flow:
 
@@ -21,9 +21,9 @@ PDFs, ZIP and CSV are generated in code.
 Against the running dev stack (`pnpm infra:up`, `pnpm dev`):
 
 ```sh
-pnpm --filter @tt/e2e install:browsers   # once: downloads Chromium
-pnpm test:e2e                            # from the root, or: pnpm --filter @tt/e2e test
-pnpm --filter @tt/e2e exec playwright test 03   # one spec
+pnpm --filter @candydati/e2e install:browsers   # once: downloads Chromium
+pnpm test:e2e                            # from the root, or: pnpm --filter @candydati/e2e test
+pnpm --filter @candydati/e2e exec playwright test 03   # one spec
 ```
 
 | Variable | Default | Meaning |
@@ -49,7 +49,7 @@ A first run against `nuxt dev` is slow (the browser loads thousands of modules):
 
 ## README screenshots
 
-`pnpm --filter @tt/e2e screenshots` builds a demo organization through the app (owner `giulia.rossi@example.com`, four
+`pnpm --filter @candydati/e2e screenshots` builds a demo organization through the app (owner `giulia.rossi@example.com`, four
 published ads, ten applicants, notes, external interviewer feedback, a published careers page with locally generated
 images) and writes `docs/assets/screenshots/{pipeline,job-editor,careers,candidate}.png` (1440 px wide, light theme,
 palette PNGs under 600 KB). It uses its own config (`playwright.screenshots.config.ts`, files in `screenshots/`), so

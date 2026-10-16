@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CandidateSummaryDto } from '@tt/domain'
+import type { CandidateSummaryDto } from '@candydati/domain'
 import { fullName, retentionState } from '@/lib/candidate-view'
 import { formatDate } from '@/lib/format'
 import { relativeTime } from '@/lib/job-list-view'

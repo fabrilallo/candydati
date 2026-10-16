@@ -1,4 +1,4 @@
-import { SYSTEM_SENDER } from '@tt/domain';
+import { SYSTEM_SENDER } from '@candydati/domain';
 import { z } from 'zod';
 import { defineMessagingUseCase } from './define.js';
 import { requireApplicationInOrganization } from './shared.js';

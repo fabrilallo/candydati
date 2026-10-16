@@ -1,4 +1,4 @@
-import type { Application, Candidate, CandidateNote } from '@tt/domain';
+import type { Application, Candidate, CandidateNote } from '@candydati/domain';
 import type {
   ApplicationRepository,
   CandidateNoteRepository,

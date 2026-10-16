@@ -1,4 +1,4 @@
-import { type Outcome, type PageMeta, applicationCardSchema, candidateDetailSchema, candidateSummarySchema, noteSchema, pipelineSchema, type ApplicationCardDto, type CandidateDetailDto, type CandidateSummaryDto, type NoteDto, type PipelineDto    } from '@tt/domain';
+import { type Outcome, type PageMeta, applicationCardSchema, candidateDetailSchema, candidateSummarySchema, noteSchema, pipelineSchema, type ApplicationCardDto, type CandidateDetailDto, type CandidateSummaryDto, type NoteDto, type PipelineDto    } from '@candydati/domain';
 import { z } from 'zod'
 import { callApi } from './api-call'
 import { AppError } from './auth-errors'

@@ -6,7 +6,7 @@ describe('0025: organization creation quota and bootstrap owner backfill', () =>
   let db: ScratchDatabase;
 
   beforeAll(async () => {
-    db = await scratchDatabaseAt(`tt_creation_quota_${process.pid}_test`, '0024_instance_bootstrap');
+    db = await scratchDatabaseAt(`candydati_creation_quota_${process.pid}_test`, '0024_instance_bootstrap');
     await db.client.query(`INSERT INTO "user" (id, name, email, email_verified, created_at, updated_at) VALUES
       ('u_founder', 'F', 'founder@acme.test', true, now() - interval '30 days', now()),
       ('u_two', 'T', 'two@acme.test', true, now() - interval '20 days', now()),

@@ -1,4 +1,4 @@
-import { pickLocale, roleLabel, type Locale, type PlatformConfig } from '@tt/domain';
+import { pickLocale, roleLabel, type Locale, type PlatformConfig } from '@candydati/domain';
 import { acceptInvitationUrl, type AccountMailer } from './account-mailer.js';
 
 /** Web pages the account emails lead to (relative to PLATFORM_URL). */

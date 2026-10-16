@@ -10,8 +10,8 @@ import {
   setApprovalSetting,
   submitJobRequest,
   toJobDto,
-} from '@tt/core';
-import { ok } from '@tt/domain';
+} from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { asNumber, bodyOf, paramOf, queryOf } from './request.js';

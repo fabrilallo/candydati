@@ -1,5 +1,5 @@
 {
-  "name": "@tt/worker",
+  "name": "@candydati/worker",
   "version": "0.1.0",
   "private": true,
   "license": "BUSL-1.1",
@@ -17,10 +17,10 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@tt/core": "workspace:*",
-    "@tt/db": "workspace:*",
-    "@tt/domain": "workspace:*",
-    "@tt/providers": "workspace:*",
+    "@candydati/core": "workspace:*",
+    "@candydati/db": "workspace:*",
+    "@candydati/domain": "workspace:*",
+    "@candydati/providers": "workspace:*",
     "pg-boss": "12.30.0",
     "pino": "10.3.1",
     "zod": "4.5.4"

@@ -1,4 +1,4 @@
-import { familyOfRole, WORK_MODES, type JobRoleFamily, type PublicJobSummaryDto } from '@tt/domain'
+import { familyOfRole, WORK_MODES, type JobRoleFamily, type PublicJobSummaryDto } from '@candydati/domain'
 
 type WorkMode = PublicJobSummaryDto['workMode']
 

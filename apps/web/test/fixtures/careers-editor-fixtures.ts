@@ -7,7 +7,7 @@ import {
   type CareersPageDocument,
   type CareersPageEditorDto,
   type PublicCareersDto,
-} from '@tt/domain'
+} from '@candydati/domain'
 
 export const NOW = '2026-10-13T10:00:00.000Z'
 

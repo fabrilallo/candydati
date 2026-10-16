@@ -1,4 +1,4 @@
-import { CV_MAX_BYTES } from '@tt/domain'
+import { CV_MAX_BYTES } from '@candydati/domain'
 import { describe, expect, it, vi } from 'vitest'
 import { applicationErrorKey, applicationsUrl, emptyApplyValues, needsNoticeReload, submitApplication, toApplicationForm } from './application-form'
 import { ApiFailure } from './api-call'

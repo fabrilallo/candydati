@@ -1,4 +1,4 @@
-import { AUDIT_ACTIONS } from '@tt/domain'
+import { AUDIT_ACTIONS } from '@candydati/domain'
 
 /** Event as the API returns it (`AuditEventDto`); `action` and `actor.type` stay open so a newer api never breaks the page. */
 export interface AuditEventView {

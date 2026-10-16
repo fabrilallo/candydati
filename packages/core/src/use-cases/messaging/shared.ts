@@ -11,8 +11,8 @@ import {
   type Locale,
   type TemplateValues,
   stageDisplayName,
-} from '@tt/domain';
-import { pipelineStagesOf, RECEIVED_STAGE_ID } from '@tt/domain';
+} from '@candydati/domain';
+import { pipelineStagesOf, RECEIVED_STAGE_ID } from '@candydati/domain';
 import { NotFoundError } from '../../errors.js';
 import type { Conversation, MessagingConfig, MessagingDeps } from '../../messaging-ports.js';
 import type { EmailTemplateView } from './views.js';

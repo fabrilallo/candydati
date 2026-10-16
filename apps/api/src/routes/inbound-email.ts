@@ -6,9 +6,9 @@ import {
   parseResendInbound,
   verifyHmacSignature,
   verifyResendSignature,
-} from '@tt/providers';
-import { fail } from '@tt/domain';
-import { receiveInboundEmail, type InboundEmail } from '@tt/core';
+} from '@candydati/providers';
+import { fail } from '@candydati/domain';
+import { receiveInboundEmail, type InboundEmail } from '@candydati/core';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import type { AppContext } from '../app-context.js';
@@ -30,8 +30,8 @@ interface InboundHandlerDeps {
 
 const handleRaw = ({ log, secret, store }: InboundHandlerDeps) => async (request: FastifyRequest, reply: FastifyReply) => {
   const body = rawBody(request);
-  const header = request.headers['x-tt-signature'];
-  const timestamp = request.headers['x-tt-timestamp'];
+  const header = request.headers['x-candydati-signature'];
+  const timestamp = request.headers['x-candydati-timestamp'];
   const signed = verifyHmacSignature(body, typeof header === 'string' ? header : undefined, secret ?? '', typeof timestamp === 'string' ? timestamp : undefined);
   if (!secret || !signed) {
     return reply.status(401).send(fail('unauthorized', 'Invalid signature.'));

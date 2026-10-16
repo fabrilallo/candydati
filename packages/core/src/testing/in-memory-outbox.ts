@@ -1,4 +1,4 @@
-import type { OutboxEvent } from '@tt/domain';
+import type { OutboxEvent } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import type { OutboxRepository, OutboxRetryState, PendingOutboxEvent } from '../webhook-ports.js';
 import { cell } from './in-memory-transaction.js';

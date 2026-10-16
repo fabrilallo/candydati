@@ -1,6 +1,6 @@
-import { isTemplateVariable } from '@tt/domain'
+import { isTemplateVariable } from '@candydati/domain'
 
-/** `{{ name }}`, spaces optional; the same placeholders `renderTemplate` of `@tt/domain` looks at. */
+/** `{{ name }}`, spaces optional; the same placeholders `renderTemplate` of `@candydati/domain` looks at. */
 const VARIABLE_PATTERN = /\{\{([^{}]*)\}\}/g
 
 /** Pure: a variable in the template syntax. */

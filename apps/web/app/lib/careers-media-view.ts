@@ -1,4 +1,4 @@
-import { IMAGE_SOURCE_TYPES, maxBytesOf, VIDEO_TYPES, type CareersMediaAssetDto, type CareersMediaDto, type MediaKind } from '@tt/domain'
+import { IMAGE_SOURCE_TYPES, maxBytesOf, VIDEO_TYPES, type CareersMediaAssetDto, type CareersMediaDto, type MediaKind } from '@candydati/domain'
 
 /** Pure helpers of the media library in the careers page editor. */
 

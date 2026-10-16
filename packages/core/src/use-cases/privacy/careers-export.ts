@@ -1,4 +1,4 @@
-import { careersMediaKey, MEDIA_LIMITS } from '@tt/domain';
+import { careersMediaKey, MEDIA_LIMITS } from '@candydati/domain';
 import type { OrganizationExportDeps } from '../../privacy-ports.js';
 import { fileNamesOf } from '../careers/media-file.js';
 

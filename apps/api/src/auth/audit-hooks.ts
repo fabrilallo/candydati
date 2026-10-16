@@ -1,5 +1,5 @@
-import { recordAuditEvent, type Actor, type CoreDeps } from '@tt/core';
-import { isRole, type AuditAction, type AuditTarget, type Role } from '@tt/domain';
+import { recordAuditEvent, type Actor, type CoreDeps } from '@candydati/core';
+import { isRole, type AuditAction, type AuditTarget, type Role } from '@candydati/domain';
 
 /** Who is acting. Both lookups are answered from the request that triggered the hook. */
 export interface ActorLookups {

@@ -1,12 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { createDb, eq, schema, type DbHandle } from '@tt/db';
+import { createDb, eq, schema, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { prepareTestDatabase } from '../testing/test-database.js';
 import { createOrganizationCreationLookups } from './organization-creation.js';
 import { BOOTSTRAP_CLAIM_TTL_MS, createSignupLookups } from './signup-policy.js';
 
 /** A database of its own: the bootstrap is about an instance with no confirmed account at all. */
-const URL_ = 'postgres://tt:tt@localhost:5434/team_tracker_api_bootstrap_test';
+const URL_ = 'postgres://candydati:candydati@localhost:5434/candydati_api_bootstrap_test';
 let handle: DbHandle;
 
 beforeAll(async () => {

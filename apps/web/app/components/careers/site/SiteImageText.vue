@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { paragraphsOf, type SectionOf } from '@tt/domain'
+import { paragraphsOf, type SectionOf } from '@candydati/domain'
 
 /** An image and a short text side by side (stacked on a phone); the image goes left or right as chosen. */
 const props = defineProps<{ section: SectionOf<'image_text'>; first: boolean }>()

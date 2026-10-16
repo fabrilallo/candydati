@@ -1,6 +1,6 @@
-import { correctCandidate, eraseCandidate, exportCandidate, toCandidateDetailDto, zipCandidateExport } from '@tt/core';
-import { ok } from '@tt/domain';
-import { zipWriterFactory } from '@tt/providers';
+import { correctCandidate, eraseCandidate, exportCandidate, toCandidateDetailDto, zipCandidateExport } from '@candydati/core';
+import { ok } from '@candydati/domain';
+import { zipWriterFactory } from '@candydati/providers';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { sendZip } from '../http/zip-download.js';

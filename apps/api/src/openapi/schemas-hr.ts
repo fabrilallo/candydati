@@ -4,7 +4,7 @@ import {
   JOB_REQUEST_STATUSES,
   SUPPORTED_LOCALES,
   jobRequestInputSchema,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import { jobSummarySchema } from './schemas-jobs.js';
 

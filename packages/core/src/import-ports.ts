@@ -1,4 +1,4 @@
-import type { ImportAnalysis, ImportBatch, ImportConfidence, ImportCounts, ImportItem, ImportItemStatus, ImportStatus } from '@tt/domain';
+import type { ImportAnalysis, ImportBatch, ImportConfidence, ImportCounts, ImportItem, ImportItemStatus, ImportStatus } from '@candydati/domain';
 import type {
   ApplicationRepository,
   CandidateNoteRepository,

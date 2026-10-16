@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArchiveIcon, DownloadIcon, LoaderCircleIcon } from '@lucide/vue'
-import { DATA_EXPORT_TTL_DAYS } from '@tt/domain'
+import { DATA_EXPORT_TTL_DAYS } from '@candydati/domain'
 import { formatBytes } from '@/lib/cv-file'
 import { formatDate, formatDateTime } from '@/lib/format'
 import { dataExportUrl } from '@/lib/gdpr-api'

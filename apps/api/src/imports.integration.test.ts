@@ -1,6 +1,6 @@
-import type { ConsentRequestDto, ImportBatchDto, ImportBatchPageDto, UndoImportDto } from '@tt/core';
-import { schema, eq } from '@tt/db';
-import { makeXlsx, makeZip } from '@tt/providers/testing';
+import type { ConsentRequestDto, ImportBatchDto, ImportBatchPageDto, UndoImportDto } from '@candydati/core';
+import { schema, eq } from '@candydati/db';
+import { makeXlsx, makeZip } from '@candydati/providers/testing';
 import { strToU8, zipSync } from 'fflate';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createKey } from './testing/api-keys.js';

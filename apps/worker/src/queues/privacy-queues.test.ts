@@ -1,7 +1,7 @@
-import { dataExportKey, emptyImportCounts } from '@tt/domain';
-import { buildApplication, createFakeEmailSender, createInMemoryFileStorage, ORG_A, ORG_B, seedImportWorld, seedPrivacyData, userActor, createInMemoryTransaction } from '@tt/core/testing';
-import { formatDigestFrom } from '@tt/core';
-import { requestOrganizationExport } from '@tt/core';
+import { dataExportKey, emptyImportCounts } from '@candydati/domain';
+import { buildApplication, createFakeEmailSender, createInMemoryFileStorage, ORG_A, ORG_B, seedImportWorld, seedPrivacyData, userActor, createInMemoryTransaction } from '@candydati/core/testing';
+import { formatDigestFrom } from '@candydati/core';
+import { requestOrganizationExport } from '@candydati/core';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
 import { createFilesDeleteQueue } from './files-delete.js';

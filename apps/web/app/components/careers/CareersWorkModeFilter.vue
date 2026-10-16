@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PublicJobSummaryDto } from '@tt/domain'
+import type { PublicJobSummaryDto } from '@candydati/domain'
 
 type WorkMode = PublicJobSummaryDto['workMode']
 defineProps<{ modes: readonly { readonly workMode: WorkMode; readonly count: number }[]; total: number; selected: WorkMode | null }>()

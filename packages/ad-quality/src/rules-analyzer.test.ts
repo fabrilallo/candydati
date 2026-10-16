@@ -1,4 +1,4 @@
-import { QUALITY_CATEGORIES, adQualityReportSchema, jobContentSchema, type JobContent } from '@tt/domain';
+import { QUALITY_CATEGORIES, adQualityReportSchema, jobContentSchema, type JobContent } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { analyzeWithRules, createRulesAnalyzer } from './rules-analyzer.js';
 import { draft, richAd } from './testing/fixtures.js';

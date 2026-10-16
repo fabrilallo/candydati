@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VALUE_ICONS, type ValueIcon } from '@tt/domain'
+import { VALUE_ICONS, type ValueIcon } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { valueIcon } from '@/lib/careers-icons'

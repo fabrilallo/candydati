@@ -13,7 +13,7 @@ import {
   type PublicOrganizationDto,
   type PublishJobResultDto,
   type PublishedJobContent,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type { PublicOrganization } from '../job-ports.js';
 import type { PublishJobResult } from '../use-cases/jobs/publish-job.js';
 

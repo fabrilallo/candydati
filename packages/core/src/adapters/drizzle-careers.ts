@@ -1,5 +1,5 @@
-import { careersPageDocumentSchema, MEDIA_KINDS, optionalLocalizedSchema, type CareersPageDocument } from '@tt/domain';
-import { and, count, desc, eq, inArray, schema, sql } from '@tt/db';
+import { careersPageDocumentSchema, MEDIA_KINDS, optionalLocalizedSchema, type CareersPageDocument } from '@candydati/domain';
+import { and, count, desc, eq, inArray, schema, sql } from '@candydati/db';
 import { z } from 'zod';
 import type { CareersMediaRecord, CareersMediaRepository, CareersPageRecord, CareersPageRepository } from '../careers-ports.js';
 import type { DbExecutor } from './db-executor.js';

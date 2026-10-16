@@ -1,4 +1,4 @@
-import { apiKeyCreatedSchema, apiKeySchema, type ApiKeyCreatedDto, type ApiKeyDto, type Permission } from '@tt/domain'
+import { apiKeyCreatedSchema, apiKeySchema, type ApiKeyCreatedDto, type ApiKeyDto, type Permission } from '@candydati/domain'
 import { z } from 'zod'
 import { ApiFailure, callApi, defaultFailureKey, type FailureInfo } from './api-call'
 import { AppError } from './auth-errors'

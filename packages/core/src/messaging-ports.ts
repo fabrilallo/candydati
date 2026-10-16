@@ -8,7 +8,7 @@ import type {
   Locale,
   Message,
   MessageStatus,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository, UserDirectory } from './candidate-ports.js';
 import type { TaskQueue } from './intake-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
@@ -79,7 +79,7 @@ export interface DomainCheck {
   readonly records: readonly DomainRecord[];
 }
 
-/** Sending-domain verification. Implemented by `@tt/providers` (SMTP answers `unsupported`). */
+/** Sending-domain verification. Implemented by `@candydati/providers` (SMTP answers `unsupported`). */
 export interface EmailIdentity {
   domainStatus(domain: string): Promise<DomainCheck>;
 }

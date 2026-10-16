@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NAME_MAX, type CandidateCorrection, type CandidateDetailDto } from '@tt/domain'
+import { NAME_MAX, type CandidateCorrection, type CandidateDetailDto } from '@candydati/domain'
 import { correctionChanges, PHONE_MAX, URL_MAX, validateCorrection, type CorrectionErrors, type CorrectionForm } from '@/lib/gdpr-view'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'

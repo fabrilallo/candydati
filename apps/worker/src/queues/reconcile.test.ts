@@ -1,4 +1,4 @@
-import { createInMemoryTaskQueue } from '@tt/core/testing';
+import { createInMemoryTaskQueue } from '@candydati/core/testing';
 import pino from 'pino';
 import { describe, expect, it, vi } from 'vitest';
 import { createReconcileQueue, RECONCILE_CRON, RECONCILE_QUEUE } from './reconcile.js';

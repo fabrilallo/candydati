@@ -1,4 +1,4 @@
-import type { Db } from '@tt/db';
+import type { Db } from '@candydati/db';
 
 /** A `Db` or a transaction of it: the adapters only use these methods, so one factory serves both. */
 export type DbExecutor = Pick<Db, 'select' | 'insert' | 'update' | 'delete' | 'execute' | 'transaction'>;

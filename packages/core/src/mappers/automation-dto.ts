@@ -4,7 +4,7 @@ import type {
   AutomationRule,
   NotificationKind,
   Task,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type { AttentionItemView, AttentionPage } from '../use-cases/candidates/list-attention.js';
 import type { NotificationView } from '../use-cases/notifications/notifications.js';
 import type { TaskView } from '../use-cases/tasks/tasks.js';

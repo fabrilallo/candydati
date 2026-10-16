@@ -1,5 +1,5 @@
-import { listNotifications, markNotificationsRead, toNotificationDto, unreadNotificationCount } from '@tt/core';
-import { ok } from '@tt/domain';
+import { listNotifications, markNotificationsRead, toNotificationDto, unreadNotificationCount } from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { asBoolean, asNumber, bodyOf, queryOf } from './request.js';

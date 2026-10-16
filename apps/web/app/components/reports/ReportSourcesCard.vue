@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ORIGIN_DIRECT, ORIGIN_IMPORT, ORIGIN_MANUAL, type ReportsDto } from '@tt/domain'
+import { ORIGIN_DIRECT, ORIGIN_IMPORT, ORIGIN_MANUAL, type ReportsDto } from '@candydati/domain'
 import { formatRate, sourceRows } from '@/lib/report-view'
 
 /** Applications by origin as a short ranked list with HTML bars, and the hires each origin led to. */

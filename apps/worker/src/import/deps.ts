@@ -4,9 +4,9 @@ import {
   type FileStorage,
   type ImportCommitDeps,
   type TaskQueue,
-} from '@tt/core';
-import type { PlatformConfig } from '@tt/domain';
-import { createCvExtractor, createMastraGenerator, newConversationToken, sniffCv, toMessagingConfig, type CvExtractor, type EmailConfig, type ImportAnalysisDeps } from '@tt/providers';
+} from '@candydati/core';
+import type { PlatformConfig } from '@candydati/domain';
+import { createCvExtractor, createMastraGenerator, newConversationToken, sniffCv, toMessagingConfig, type CvExtractor, type EmailConfig, type ImportAnalysisDeps } from '@candydati/providers';
 
 export interface ImportWorkerWiring {
   readonly uow: DrizzleUnitOfWork;

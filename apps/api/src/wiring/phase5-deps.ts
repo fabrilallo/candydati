@@ -10,7 +10,7 @@ import {
   type PrivacyOverviewDeps,
   type TaskQueue,
   type ZipStreamFactory,
-} from '@tt/core';
+} from '@candydati/core';
 
 export interface Phase5Deps {
   /** Export, correction, erasure and consent withdrawal of one candidate. */

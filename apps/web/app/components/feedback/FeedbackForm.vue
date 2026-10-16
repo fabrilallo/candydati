@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CircleCheckIcon, LoaderCircleIcon } from '@lucide/vue'
-import { FEEDBACK_ANSWER_MAX, type FeedbackRecommendation, type PublicFeedbackDto } from '@tt/domain'
+import { FEEDBACK_ANSWER_MAX, type FeedbackRecommendation, type PublicFeedbackDto } from '@candydati/domain'
 import type { Translate } from '@/lib/ad-text'
 import { buildSubmission, checkSubmission, type SubmitIssue } from '@/lib/feedback-view'
 import { feedbackFailure, submitPublicFeedback, type FeedbackFailure } from '@/lib/feedback-api'

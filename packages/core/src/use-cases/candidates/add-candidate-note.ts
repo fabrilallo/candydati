@@ -1,4 +1,4 @@
-import { NOTE_MAX, type CandidateNote } from '@tt/domain';
+import { NOTE_MAX, type CandidateNote } from '@candydati/domain';
 import { z } from 'zod';
 import { NotFoundError } from '../../errors.js';
 import { defineCandidateUseCase } from './define.js';

@@ -1,4 +1,4 @@
-import type { OutboxEvent, WebhookEventType } from '@tt/domain';
+import type { OutboxEvent, WebhookEventType } from '@candydati/domain';
 import type { OutboxRepository } from '../../webhook-ports.js';
 
 export type EventData = OutboxEvent['data'];

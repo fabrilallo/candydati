@@ -1,4 +1,4 @@
-import type { Notification } from '@tt/domain';
+import type { Notification } from '@candydati/domain';
 import { z } from 'zod';
 import { toActorUserId } from '../../actor-user.js';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../list-audit-log.js';

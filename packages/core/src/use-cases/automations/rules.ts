@@ -5,7 +5,7 @@ import {
   type AutomationAction,
   type AutomationRule,
   type Job,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import type { AutomationRuleDeps } from '../../automation-ports.js';
 import { toActorUserId } from '../../actor-user.js';

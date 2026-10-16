@@ -1,6 +1,6 @@
-import { safeErrorCode } from '@tt/core';
-import { requestIdOfPayload } from '@tt/domain';
-import { disabledErrorReporter, runWithRequestId, type ErrorReporter } from '@tt/providers';
+import { safeErrorCode } from '@candydati/core';
+import { requestIdOfPayload } from '@candydati/domain';
+import { disabledErrorReporter, runWithRequestId, type ErrorReporter } from '@candydati/providers';
 import type { Logger } from 'pino';
 import { noopJobObserver, type JobObserver } from './observability/worker-metrics.js';
 import type { QueueDefinition } from './queues/definitions.js';

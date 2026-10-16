@@ -1,5 +1,5 @@
-import { createApiKey, listApiKeys, revokeApiKey } from '@tt/core';
-import { ok } from '@tt/domain';
+import { createApiKey, listApiKeys, revokeApiKey } from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { toApiKeyDto } from './api-key-dto.js';

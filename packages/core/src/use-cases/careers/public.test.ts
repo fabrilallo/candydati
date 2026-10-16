@@ -1,4 +1,4 @@
-import { careersPageDocumentSchema, careersPageFixture, type CareersMediaRecord } from '@tt/domain';
+import { careersPageDocumentSchema, careersPageFixture, type CareersMediaRecord } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError, NotFoundError } from '../../errors.js';
 import { apiKeyActor, userActor } from '../../testing/actors.js';

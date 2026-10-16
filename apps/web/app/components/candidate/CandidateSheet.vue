@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApplicationCardDto } from '@tt/domain'
+import type { ApplicationCardDto } from '@candydati/domain'
 import { Maximize2Icon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'

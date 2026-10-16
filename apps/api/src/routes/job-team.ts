@@ -1,5 +1,5 @@
-import { addJobTeamMember, getAccessSetting, getJobTeam, removeJobTeamMember, setAccessSetting } from '@tt/core';
-import { ok } from '@tt/domain';
+import { addJobTeamMember, getAccessSetting, getJobTeam, removeJobTeamMember, setAccessSetting } from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { bodyOf, paramOf } from './request.js';

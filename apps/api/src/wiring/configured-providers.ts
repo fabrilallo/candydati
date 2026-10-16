@@ -1,4 +1,4 @@
-import type { ConfiguredProviders } from '@tt/core';
+import type { ConfiguredProviders } from '@candydati/core';
 import type { Env } from '../config/env.js';
 
 export const NO_MODEL = 'nessuno';

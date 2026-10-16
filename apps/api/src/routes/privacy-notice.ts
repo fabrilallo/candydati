@@ -1,5 +1,5 @@
-import { getActivePrivacyNotice, listPrivacyNotices, privacyNoticeTemplate, publishPrivacyNotice, toPrivacyNoticeDto } from '@tt/core';
-import { ok } from '@tt/domain';
+import { getActivePrivacyNotice, listPrivacyNotices, privacyNoticeTemplate, publishPrivacyNotice, toPrivacyNoticeDto } from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { bodyOf, queryOf } from './request.js';

@@ -1,4 +1,4 @@
-import { CONSENT_SCOPES, httpUrlSchema, receivedSchema } from '@tt/domain';
+import { CONSENT_SCOPES, httpUrlSchema, receivedSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { consentAnswerBody } from './schemas-import.js';
 import { submitFeedbackBody } from './schemas-hr.js';

@@ -1,4 +1,4 @@
-import { BULK_MESSAGE_MAX, EMAIL_TEMPLATE_BODY_MAX, EMAIL_TEMPLATE_SUBJECT_MAX, findUnknownVariables, type EmailTemplateDto } from '@tt/domain'
+import { BULK_MESSAGE_MAX, EMAIL_TEMPLATE_BODY_MAX, EMAIL_TEMPLATE_SUBJECT_MAX, findUnknownVariables, type EmailTemplateDto } from '@candydati/domain'
 
 export interface ComposerOptions {
   readonly applicationIds: () => readonly string[]

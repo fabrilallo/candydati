@@ -6,7 +6,7 @@ export function registerProcessMetrics(registry: MetricsRegistry, service: strin
   const startedAt = Date.now() / 1000;
   const loop = monitorEventLoopDelay({ resolution: 20 });
   loop.enable();
-  const info = registry.gauge('tt_build_info', 'Constant 1, labelled with the service and the Node.js version.', ['service', 'node']);
+  const info = registry.gauge('candydati_build_info', 'Constant 1, labelled with the service and the Node.js version.', ['service', 'node']);
   const cpu = registry.counter('process_cpu_seconds_total', 'User and system CPU time spent, in seconds.');
   const memory = registry.gauge('process_resident_memory_bytes', 'Resident memory size in bytes.');
   const heap = registry.gauge('nodejs_heap_used_bytes', 'V8 heap in use, in bytes.');

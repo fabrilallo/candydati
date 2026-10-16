@@ -1,4 +1,4 @@
-import type { AdQualityAnalyzer } from '@tt/domain';
+import type { AdQualityAnalyzer } from '@candydati/domain';
 import type { StructuredGenerator } from './generator.js';
 import { createModelAnalyzer } from './model-analyzer.js';
 import { createRulesAnalyzer } from './rules-analyzer.js';

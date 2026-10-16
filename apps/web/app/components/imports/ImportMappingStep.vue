@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TriangleAlertIcon } from '@lucide/vue'
-import { IMPORT_FIELDS, type ImportField, type ImportMapping } from '@tt/domain'
+import { IMPORT_FIELDS, type ImportField, type ImportMapping } from '@candydati/domain'
 import { mappingView } from '@/lib/import-mapping'
 import { Button } from '@/components/ui/button'
 import { NativeSelect } from '@/components/ui/native-select'

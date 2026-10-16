@@ -1,8 +1,8 @@
-import { createDrizzleUnitOfWork } from '@tt/core';
-import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, testMessagingConfig } from '@tt/core/testing';
-import type { Db } from '@tt/db';
-import { loadPlatformConfig } from '@tt/domain';
-import { loadEmailConfig } from '@tt/providers';
+import { createDrizzleUnitOfWork } from '@candydati/core';
+import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, testMessagingConfig } from '@candydati/core/testing';
+import type { Db } from '@candydati/db';
+import { loadPlatformConfig } from '@candydati/domain';
+import { loadEmailConfig } from '@candydati/providers';
 import { describe, expect, it, vi } from 'vitest';
 import { createPhase4WorkerDeps } from './automation/deps.js';
 import { createDeliverDeps } from './email/deps.js';

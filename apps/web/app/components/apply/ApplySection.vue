@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PublicPrivacyNoticeDto } from '@tt/domain'
+import type { PublicPrivacyNoticeDto } from '@candydati/domain'
 import { CircleCheckIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 

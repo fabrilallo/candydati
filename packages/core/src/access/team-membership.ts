@@ -1,4 +1,4 @@
-import { teamRoleFor, type Job } from '@tt/domain';
+import { teamRoleFor, type Job } from '@candydati/domain';
 import type { Actor } from '../actor.js';
 import type { CoreDeps } from '../ports.js';
 

@@ -6,7 +6,7 @@ import {
   parsedImportRowSchema,
   IMPORT_LIMITS,
   type ImportBatch,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import type { ImportDeps } from '../../import-ports.js';
 import { ValidationError } from '../../errors.js';

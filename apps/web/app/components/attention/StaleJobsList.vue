@@ -5,7 +5,7 @@ import { errorKeyOf } from '@/lib/auth-errors'
 import { formatDate } from '@/lib/format'
 import { closeJob } from '@/lib/job-api'
 import { can } from '@/lib/permissions-ui'
-import { STALE_JOB_DAYS, type StaleJobDto } from '@tt/domain'
+import { STALE_JOB_DAYS, type StaleJobDto } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronsUpDownIcon, LogOutIcon } from '@lucide/vue'
-import type { Role } from '@tt/domain'
+import type { Role } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'

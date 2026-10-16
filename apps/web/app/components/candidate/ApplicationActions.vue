@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronDownIcon } from '@lucide/vue'
-import { OUTCOMES, type Outcome, type StageRef } from '@tt/domain'
+import { OUTCOMES, type Outcome, type StageRef } from '@candydati/domain'
 import { stageName, stageTone } from '@/lib/pipeline-board'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'

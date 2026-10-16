@@ -1,4 +1,4 @@
-import type { DomainRecord, DomainStatus, EmailTemplateKind, Message } from '@tt/domain';
+import type { DomainRecord, DomainStatus, EmailTemplateKind, Message } from '@candydati/domain';
 
 /** A stored template or an untouched default (`isDefault`, id `default:<kind>`, `updatedAt` null). */
 export interface EmailTemplateView {

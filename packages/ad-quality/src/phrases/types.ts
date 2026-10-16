@@ -1,4 +1,4 @@
-import type { QualityCategory } from '@tt/domain';
+import type { QualityCategory } from '@candydati/domain';
 
 export interface PhraseEntry {
   /** The stock phrase in natural spelling; matching is case- and accent-insensitive. */

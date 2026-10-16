@@ -1,4 +1,4 @@
-import { totalOf, type AdQualityAnalyzer, type AdQualityReport, type JobContent } from '@tt/domain';
+import { totalOf, type AdQualityAnalyzer, type AdQualityReport, type JobContent } from '@candydati/domain';
 import { annotate, vaguePhrasesOf } from './detect.js';
 import { evaluate, improvementsOf, scoresOf } from './rules/evaluate.js';
 

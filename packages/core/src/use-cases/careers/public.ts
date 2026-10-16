@@ -1,4 +1,4 @@
-import { defaultCareersPage, visibleSections, type PublicCareersPageDto } from '@tt/domain';
+import { defaultCareersPage, visibleSections, type PublicCareersPageDto } from '@candydati/domain';
 import { z } from 'zod';
 import { mediaFileInput, openMediaFile, type CareersMediaFile } from './media-file.js';
 import { NotFoundError } from '../../errors.js';

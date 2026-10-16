@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PublicPrivacyNoticeDto } from '@tt/domain'
+import type { PublicPrivacyNoticeDto } from '@candydati/domain'
 import { ChevronRightIcon } from '@lucide/vue'
 import type { Translate } from '@/lib/ad-text'
 import { retentionCopy } from '@/lib/consent-copy'

@@ -1,5 +1,5 @@
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
-import type { CareersPageDocument } from '@tt/domain'
+import type { CareersPageDocument } from '@candydati/domain'
 import { flushPromises } from '@vue/test-utils'
 import { readBody, setResponseStatus, type H3Event } from 'h3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'
-import { channelSettingSchema, distributionOverviewSchema, jobDistributionSchema, type DistributionChannelDto, type DistributionOverviewDto, type JobDistributionDto } from '@tt/domain'
+import { channelSettingSchema, distributionOverviewSchema, jobDistributionSchema, type DistributionChannelDto, type DistributionOverviewDto, type JobDistributionDto } from '@candydati/domain'
 import { channelSettingPath, DISTRIBUTION_PATH, jobDistributionPath, jobDistributionSyncPath } from './api-paths'
 
 /** Distribution (phase 7): the status of one job per channel, a new sync, and the organization's channel toggles. */

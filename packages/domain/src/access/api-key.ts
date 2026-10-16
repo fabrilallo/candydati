@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { isPermission, type Permission } from './permissions.js';
 
-/** Secret format: `tt_<prefix>_<random>`, base62 parts. The prefix is stored and shown; the rest only hashed. */
-export const API_KEY_SECRET_PREFIX = 'tt_';
+/** Secret format: `candydati_<prefix>_<random>`, base62 parts. The prefix is stored and shown; the rest only hashed. */
+export const API_KEY_SECRET_PREFIX = 'candydati_';
 export const API_KEY_PREFIX_LENGTH = 8;
 export const API_KEY_RANDOM_LENGTH = 32;
 export const API_KEY_NAME_MAX = 80;
@@ -28,7 +28,7 @@ export interface ApiKey {
   readonly id: string;
   readonly organizationId: string;
   readonly name: string;
-  /** First characters of the secret after `tt_`, shown in listings to recognise a key. */
+  /** First characters of the secret after `candydati_`, shown in listings to recognise a key. */
   readonly prefix: string;
   /** sha256 of the full secret, hex. */
   readonly hash: string;

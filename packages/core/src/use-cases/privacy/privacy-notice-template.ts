@@ -1,4 +1,4 @@
-import { SUPPORTED_LOCALES } from '@tt/domain';
+import { SUPPORTED_LOCALES } from '@candydati/domain';
 import { z } from 'zod';
 import { NotFoundError } from '../../errors.js';
 import { definePrivacyUseCase } from './define.js';

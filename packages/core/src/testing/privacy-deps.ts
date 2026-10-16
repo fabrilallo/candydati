@@ -1,4 +1,4 @@
-import type { DataExport, RetentionRun } from '@tt/domain';
+import type { DataExport, RetentionRun } from '@candydati/domain';
 import type { ConfiguredProviders, CandidateRightsDeps, OrganizationExportDeps, PrivacyOverviewDeps, RetentionDeps } from '../privacy-ports.js';
 import type { FeedbackRecords, StageInterviewerRepository } from '../feedback-ports.js';
 import { seedAutomationWorld, type AutomationSeedOptions, type TestAutomationDeps } from './automation-deps.js';

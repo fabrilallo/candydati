@@ -1,6 +1,6 @@
-import { stripQuotedReply, type EmailConfig } from '@tt/providers';
-import type { InboundEmail as ParsedEmail } from '@tt/providers';
-import type { InboundEmail } from '@tt/core';
+import { stripQuotedReply, type EmailConfig } from '@candydati/providers';
+import type { InboundEmail as ParsedEmail } from '@candydati/providers';
+import type { InboundEmail } from '@candydati/core';
 
 /** Cap of the raw body of an inbound webhook. */
 export const INBOUND_BODY_LIMIT = 5 * 1024 * 1024;

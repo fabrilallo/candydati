@@ -5,12 +5,12 @@ import {
   deliverMessage,
   type DeliverDeps,
   type ImportCommitDeps,
-} from '@tt/core';
-import { createFakeEmailSender, systemActor } from '@tt/core/testing';
-import { eq, schema } from '@tt/db';
-import { CONSENT_LINK } from '@tt/domain';
-import { newConversationToken, runImportAnalysis, sniffCv, toMessagingConfig } from '@tt/providers';
-import { makePdf } from '@tt/providers/testing';
+} from '@candydati/core';
+import { createFakeEmailSender, systemActor } from '@candydati/core/testing';
+import { eq, schema } from '@candydati/db';
+import { CONSENT_LINK } from '@candydati/domain';
+import { newConversationToken, runImportAnalysis, sniffCv, toMessagingConfig } from '@candydati/providers';
+import { makePdf } from '@candydati/providers/testing';
 import { testEnv, type TestApp } from './test-app.js';
 import { multipartBody, type FieldPart, type FilePart } from './multipart.js';
 import { WEB_ORIGIN } from './test-app.js';

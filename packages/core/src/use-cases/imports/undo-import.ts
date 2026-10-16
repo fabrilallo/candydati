@@ -1,4 +1,4 @@
-import type { ImportBatch } from '@tt/domain';
+import type { ImportBatch } from '@candydati/domain';
 import { z } from 'zod';
 import { groupBy } from '../../group-by.js';
 import { toAuditActor } from '../../actor.js';

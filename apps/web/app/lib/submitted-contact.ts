@@ -1,4 +1,4 @@
-import type { CandidateCorrection, SubmittedContact } from '@tt/domain'
+import type { CandidateCorrection, SubmittedContact } from '@candydati/domain'
 
 type ContactField = keyof SubmittedContact
 

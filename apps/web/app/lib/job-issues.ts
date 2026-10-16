@@ -1,4 +1,4 @@
-import { COMPLIANCE_BLOCKING_RULES, type ComplianceBlockingRule, type PublishIssue, type PublishRule } from '@tt/domain'
+import { COMPLIANCE_BLOCKING_RULES, type ComplianceBlockingRule, type PublishIssue, type PublishRule } from '@candydati/domain'
 
 /** A publish issue about the wording of the ad (not a missing element): blocks publication, but is fixed in place. */
 export const isComplianceRule = (rule: string): rule is ComplianceBlockingRule => (COMPLIANCE_BLOCKING_RULES as readonly string[]).includes(rule)

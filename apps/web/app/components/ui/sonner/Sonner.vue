@@ -23,7 +23,7 @@ const props = defineProps<ToasterProps>()
       '--error-border': 'var(--border)',
     }"
     v-bind="props"
-    :toast-options="{ ...props.toastOptions, class: cn('tt-toast', props.toastOptions?.class) }"
+    :toast-options="{ ...props.toastOptions, class: cn('candydati-toast', props.toastOptions?.class) }"
   >
     <template #success-icon>
       <CircleCheckIcon class="size-4 text-success" />

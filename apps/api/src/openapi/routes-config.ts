@@ -12,7 +12,7 @@ import {
   apiKeyCreatedSchema,
   webhookCreatedSchema,
   AUDIT_ACTIONS,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import { deletedResult } from './schemas-admin.js';
 import { idResult, page, type RouteSpec } from './spec.js';
@@ -79,7 +79,7 @@ export const configRoutes: readonly RouteSpec[] = [
   },
   {
     method: 'post', path: '/api/v1/api-keys', tag: 'API keys', summary: 'Create an API key', scope: 'api_key:manage', sessionOnly: true, status: 201,
-    description: 'The only response that carries the secret (`tt_...`): it cannot be read again. A key never has more than its creator.',
+    description: 'The only response that carries the secret (`candydati_...`): it cannot be read again. A key never has more than its creator.',
     body: z.object({ name: z.string().min(1).max(80), scopes: z.array(z.enum(PERMISSIONS)).min(1), expiresAt: z.iso.datetime().optional() }), response: { schema: apiKeyCreatedSchema },
   },
   { method: 'post', path: '/api/v1/api-keys/:id/revoke', tag: 'API keys', summary: 'Revoke an API key', scope: 'api_key:manage', sessionOnly: true, response: { schema: 'ApiKey' } },

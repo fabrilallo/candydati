@@ -1,4 +1,4 @@
-import type { PublicJobSummaryDto } from '@tt/domain'
+import type { PublicJobSummaryDto } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { careersStats, filterCareers, groupCareers, workModesOf } from './careers-view'
 

@@ -1,5 +1,5 @@
-import { createErrorReporter, currentRequestId, withRequestId } from '@tt/providers';
-import type { BindableTaskQueue } from '@tt/core';
+import { createErrorReporter, currentRequestId, withRequestId } from '@candydati/providers';
+import type { BindableTaskQueue } from '@candydati/core';
 import pino from 'pino';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
@@ -44,8 +44,8 @@ describe('job metrics, request id and error reporting', () => {
 
   it('counts a completed job and times it', async () => {
     const { text } = await run(async () => undefined, job({ value: 1 }));
-    expect(text).toContain('tt_jobs_total{queue="test.queue",outcome="completed"} 1');
-    expect(text).toContain('tt_job_duration_seconds_count{queue="test.queue"} 1');
+    expect(text).toContain('candydati_jobs_total{queue="test.queue",outcome="completed"} 1');
+    expect(text).toContain('candydati_job_duration_seconds_count{queue="test.queue"} 1');
   });
 
   it('counts a retry without reporting it, and a final failure with a scrubbed report', async () => {
@@ -108,20 +108,20 @@ describe('backlog metrics', () => {
     const { registry } = createWorkerMetrics();
     registerBacklogMetrics(registry, reader());
     const text = await registry.render();
-    expect(text).toContain('tt_queue_jobs{queue="email.send",state="queued"} 4');
-    expect(text).toContain('tt_queue_jobs{queue="email.send",state="failed"} 3');
-    expect(text).toContain('tt_queue_oldest_waiting_seconds{queue="email.send"} 12.5');
-    expect(text).toContain('tt_outbox_pending_events 5');
-    expect(text).toContain('tt_outbox_dead_events 2');
-    expect(text).toContain('tt_outbox_oldest_pending_seconds 90');
-    expect(text).toContain('tt_email_failed_messages_24h 7');
+    expect(text).toContain('candydati_queue_jobs{queue="email.send",state="queued"} 4');
+    expect(text).toContain('candydati_queue_jobs{queue="email.send",state="failed"} 3');
+    expect(text).toContain('candydati_queue_oldest_waiting_seconds{queue="email.send"} 12.5');
+    expect(text).toContain('candydati_outbox_pending_events 5');
+    expect(text).toContain('candydati_outbox_dead_events 2');
+    expect(text).toContain('candydati_outbox_oldest_pending_seconds 90');
+    expect(text).toContain('candydati_email_failed_messages_24h 7');
   });
 
   it('still answers when the database does not', async () => {
     const onError = vi.fn();
     const { registry } = createWorkerMetrics(onError);
     registerBacklogMetrics(registry, { query: () => Promise.reject(new Error('down')) });
-    expect(await registry.render()).toContain('tt_build_info');
+    expect(await registry.render()).toContain('candydati_build_info');
     expect(onError).toHaveBeenCalled();
   });
 });
@@ -156,7 +156,7 @@ describe('health server', () => {
     const stopping = await start({ ready: false });
     expect((await fetch(`${stopping.base}/ready`)).status).toBe(503);
     await stopping.close();
-    const down = await start({ db: () => Promise.reject(new Error('password authentication failed for user tt')) });
+    const down = await start({ db: () => Promise.reject(new Error('password authentication failed for user candydati')) });
     const response = await fetch(`${down.base}/ready`);
     expect(response.status).toBe(503);
     expect(await response.text()).not.toContain('password');
@@ -168,7 +168,7 @@ describe('health server', () => {
     expect((await fetch(`${base}/metrics`)).status).toBe(401);
     const ok = await fetch(`${base}/metrics`, { headers: { authorization: 'Bearer metrics-token-metrics-token' } });
     expect(ok.status).toBe(200);
-    expect(await ok.text()).toContain('tt_jobs_total');
+    expect(await ok.text()).toContain('candydati_jobs_total');
     await close();
     const off = await start({ token: null });
     expect((await fetch(`${off.base}/metrics`, { headers: { authorization: 'Bearer anything' } })).status).toBe(404);

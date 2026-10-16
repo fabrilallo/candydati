@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { salaryFigure, salaryLabelKey } from '@/lib/ad-facts'
 import { employmentFacts } from '@/lib/employment-view'
-import type { JobContent } from '@tt/domain'
+import type { JobContent } from '@candydati/domain'
 import { placeLine } from '@/lib/job-view'
 
 /**

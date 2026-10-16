@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SUPPORTED_LOCALES, type Locale } from '@tt/domain'
+import { SUPPORTED_LOCALES, type Locale } from '@candydati/domain'
 import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'
 

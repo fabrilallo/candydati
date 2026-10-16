@@ -25,7 +25,7 @@ export const importCountsSchema = z.object({
 export const columnSamplesSchema = z.record(z.string(), z.array(z.string()).max(3));
 
 /**
- * The batch as the api sends it: `ImportBatchDto` of `@tt/core` plus what the api route adds (`toBatchViews`): the job
+ * The batch as the api sends it: `ImportBatchDto` of `@candydati/core` plus what the api route adds (`toBatchViews`): the job
  * (null when it is gone), the author by name, and the column samples on the preview page only.
  */
 export const importBatchSchema = z.object({

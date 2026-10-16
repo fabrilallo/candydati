@@ -1,4 +1,4 @@
-import type { ActorType, AuditActor, Permission, Role } from '@tt/domain';
+import type { ActorType, AuditActor, Permission, Role } from '@candydati/domain';
 
 interface ActorBase {
   readonly organizationId: string;

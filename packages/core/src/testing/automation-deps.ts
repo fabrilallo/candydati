@@ -1,4 +1,4 @@
-import type { AutomationRule, Notification, OutboxEvent, Task, WebhookEndpoint } from '@tt/domain';
+import type { AutomationRule, Notification, OutboxEvent, Task, WebhookEndpoint } from '@candydati/domain';
 import type { AutomationRuleDeps, AutomationRunDeps, NotificationDeps, ScanDeps, TaskDeps, Member } from '../automation-ports.js';
 import type { JobDeps } from '../job-ports.js';
 import type { WebhookDeliverDeps, WebhookDeps, WebhookPublishDeps } from '../webhook-ports.js';

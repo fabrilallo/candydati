@@ -1,5 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { checkPublishable, type JobContent } from '@tt/domain'
+import { checkPublishable, type JobContent } from '@candydati/domain'
 import { flushPromises } from '@vue/test-utils'
 import { afterEach, describe, expect, it } from 'vitest'
 import { completeContent, incompleteContent } from '~~/test/fixtures/job-fixtures'

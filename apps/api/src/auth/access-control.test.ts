@@ -1,4 +1,4 @@
-import { ROLES, ROLE_GRANTS, STATEMENTS } from '@tt/domain';
+import { ROLES, ROLE_GRANTS, STATEMENTS } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { buildAccessControl } from './access-control.js';
 

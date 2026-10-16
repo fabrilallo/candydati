@@ -1,4 +1,4 @@
-import { DUE_SOON_HOURS, type Outcome, type ResponseState } from '@tt/domain'
+import { DUE_SOON_HOURS, type Outcome, type ResponseState } from '@candydati/domain'
 import { displayTimeZone } from './format'
 
 /** What the countdown needs of an application (a board card or an application of the candidate detail). */

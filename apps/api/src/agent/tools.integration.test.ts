@@ -1,7 +1,7 @@
 import { RequestContext } from '@mastra/core/request-context';
-import type { UserActor } from '@tt/core';
-import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer, completeJobContent } from '@tt/core/testing';
-import { and, eq, schema } from '@tt/db';
+import type { UserActor } from '@candydati/core';
+import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer, completeJobContent } from '@candydati/core/testing';
+import { and, eq, schema } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { CV_INJECTION, REPLY_INJECTION, seedAgentWorld, type AgentWorld } from '../../eval/seed.js';
 import { createAppContext } from '../app-context.js';

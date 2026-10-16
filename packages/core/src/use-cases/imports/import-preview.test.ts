@@ -1,4 +1,4 @@
-import { importFilePrefix } from '@tt/domain';
+import { importFilePrefix } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import { buildCandidate, fakePdfBytes, ORG_A } from '../../testing/index.js';

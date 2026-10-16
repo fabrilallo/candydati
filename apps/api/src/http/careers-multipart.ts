@@ -1,5 +1,5 @@
-import { ValidationError } from '@tt/core';
-import { careersMediaUploadFieldsSchema, MEDIA_LIMITS, type CareersMediaError } from '@tt/domain';
+import { ValidationError } from '@candydati/core';
+import { careersMediaUploadFieldsSchema, MEDIA_LIMITS, type CareersMediaError } from '@candydati/domain';
 import type { MultipartFile, MultipartValue } from '@fastify/multipart';
 import type { FastifyRequest } from 'fastify';
 

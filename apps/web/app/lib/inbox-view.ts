@@ -1,7 +1,7 @@
-import { NOTIFICATION_KINDS, TASK_TITLE_MAX } from '@tt/domain'
+import { NOTIFICATION_KINDS, TASK_TITLE_MAX } from '@candydati/domain'
 import { fullName } from './candidate-view'
 import { retentionNotice } from './gdpr-view'
-import type { NotificationDto, TaskDto } from '@tt/domain'
+import type { NotificationDto, TaskDto } from '@candydati/domain'
 import { calendarDays } from './response-countdown'
 
 /** Pure: translation key of a notification's wording; kinds the web does not know read as a generic one. */

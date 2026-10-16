@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { EyeIcon } from '@lucide/vue'
-import type { PublishIssue, VaguePhrase, JobContent  } from '@tt/domain'
+import type { PublishIssue, VaguePhrase, JobContent  } from '@candydati/domain'
 import type { ComplianceFix } from '@/lib/compliance-fix'
 import type { ComplianceMark } from '@/lib/compliance-view'
 

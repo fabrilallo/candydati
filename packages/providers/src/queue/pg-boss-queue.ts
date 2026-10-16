@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { BindableTaskQueue, EnqueueOptions, SqlExecutor, TaskName, TaskQueue } from '@tt/core';
+import type { BindableTaskQueue, EnqueueOptions, SqlExecutor, TaskName, TaskQueue } from '@candydati/core';
 
 export interface RetryPolicy {
   readonly retryLimit: number;

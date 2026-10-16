@@ -1,5 +1,5 @@
-import { DAY_MS } from '@tt/domain';
-import type { JobStatsDto } from '@tt/domain';
+import { DAY_MS } from '@candydati/domain';
+import type { JobStatsDto } from '@candydati/domain';
 import type { WeeklyActivity, WeeklyCount } from '../../job-ports.js';
 import { groupBy } from './group-by.js';
 

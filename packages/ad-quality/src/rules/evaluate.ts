@@ -1,4 +1,4 @@
-import { QUALITY_CATEGORIES, type JobContent, type Locale, type QualityCategory } from '@tt/domain';
+import { QUALITY_CATEGORIES, type JobContent, type Locale, type QualityCategory } from '@candydati/domain';
 import type { AnnotatedFragment } from '../detect.js';
 import { IMPROVEMENT_MESSAGES } from './messages.js';
 import type { CategoryResult } from './result.js';

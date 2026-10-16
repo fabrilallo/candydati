@@ -1,4 +1,4 @@
-import type { Application, Candidate, CandidateExport, CandidateNote, CvExtractionRecord, Job, Message } from '@tt/domain';
+import type { Application, Candidate, CandidateExport, CandidateNote, CvExtractionRecord, Job, Message } from '@candydati/domain';
 import type { FeedbackRecords } from '../../feedback-ports.js';
 
 type Records<K extends keyof FeedbackRecords> = Awaited<ReturnType<FeedbackRecords[K]['listByApplication']>>;

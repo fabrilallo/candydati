@@ -11,7 +11,7 @@ import {
   type Job,
   type Notification,
   type NotificationKind,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import type { Member, NotificationRepository, ScanDeps } from '../../automation-ports.js';
 import { defineSystemJob } from '../../use-case.js';

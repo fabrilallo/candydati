@@ -1,4 +1,4 @@
-import type { UserDirectory } from '@tt/core';
+import type { UserDirectory } from '@candydati/core';
 import { describe, expect, it } from 'vitest';
 import { createUserNameLookup } from './user-names.js';
 

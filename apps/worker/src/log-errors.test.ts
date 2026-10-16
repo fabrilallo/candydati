@@ -1,4 +1,4 @@
-import { safeErrorSerializer } from '@tt/core';
+import { safeErrorSerializer } from '@candydati/core';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
 

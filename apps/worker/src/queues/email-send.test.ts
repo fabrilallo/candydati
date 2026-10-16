@@ -1,4 +1,4 @@
-import { createFakeEmailSender, seedMessagingWorld, buildMessage } from '@tt/core/testing';
+import { createFakeEmailSender, seedMessagingWorld, buildMessage } from '@candydati/core/testing';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
 import { createEmailSendQueue } from './email-send.js';

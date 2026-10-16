@@ -1,4 +1,4 @@
-import type { FeedbackRecommendation, InterviewerKind } from '@tt/domain';
+import type { FeedbackRecommendation, InterviewerKind } from '@candydati/domain';
 import { index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { application } from './candidate.js';

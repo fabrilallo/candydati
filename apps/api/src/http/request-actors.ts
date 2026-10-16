@@ -1,4 +1,4 @@
-import type { Actor, DelegatedActor } from '@tt/core';
+import type { Actor, DelegatedActor } from '@candydati/core';
 import type { FastifyRequest } from 'fastify';
 import { bearerOf } from './bearer.js';
 import { ForbiddenError, UnauthenticatedError } from './errors.js';

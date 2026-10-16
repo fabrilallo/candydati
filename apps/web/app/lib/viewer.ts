@@ -1,4 +1,4 @@
-import type { Role } from '@tt/domain'
+import type { Role } from '@candydati/domain'
 import type { AuthApi, OrganizationSummary, SessionUser } from './auth-api'
 import { parseMemberRole } from './permissions-ui'
 

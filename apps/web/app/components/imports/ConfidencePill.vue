@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ImportConfidence } from '@tt/domain'
+import type { ImportConfidence } from '@candydati/domain'
 import { Badge } from '@/components/ui/badge'
 
 /**

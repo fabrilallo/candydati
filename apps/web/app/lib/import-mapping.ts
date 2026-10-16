@@ -1,4 +1,4 @@
-import { IMPORT_FIELDS, type ImportField, type ImportMapping } from '@tt/domain'
+import { IMPORT_FIELDS, type ImportField, type ImportMapping } from '@candydati/domain'
 
 /**
  * The "Colonne" step in pure functions. The domain mapping points each field to one header (`ImportMapping`); the

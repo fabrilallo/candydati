@@ -1,5 +1,5 @@
-import type { AdQualityAssessment } from '@tt/domain'
-import { QUALITY_CATEGORIES } from '@tt/domain'
+import type { AdQualityAssessment } from '@candydati/domain'
+import { QUALITY_CATEGORIES } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { formatScore, levelOf, needsConfirmation, toQualityView } from './quality-view'
 

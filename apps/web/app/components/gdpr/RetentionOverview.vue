@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RETENTION_WARNING_DAYS } from '@tt/domain'
+import { RETENTION_WARNING_DAYS } from '@candydati/domain'
 import { retentionCopy } from '@/lib/consent-copy'
 import { formatDate, formatDateTime } from '@/lib/format'
 import { retentionDaysLeft, sortUpcoming } from '@/lib/gdpr-view'

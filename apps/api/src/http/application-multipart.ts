@@ -1,5 +1,5 @@
-import { ValidationError } from '@tt/core';
-import { CV_MAX_BYTES } from '@tt/domain';
+import { ValidationError } from '@candydati/core';
+import { CV_MAX_BYTES } from '@candydati/domain';
 import type { MultipartFile, MultipartValue } from '@fastify/multipart';
 import type { FastifyRequest } from 'fastify';
 

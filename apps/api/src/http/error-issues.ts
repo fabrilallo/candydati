@@ -1,4 +1,4 @@
-import { isCoreError, ValidationError } from '@tt/core';
+import { isCoreError, ValidationError } from '@candydati/core';
 
 export interface ErrorIssue {
   readonly path: string;

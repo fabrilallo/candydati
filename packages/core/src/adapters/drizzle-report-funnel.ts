@@ -1,4 +1,4 @@
-import { sql } from '@tt/db';
+import { sql } from '@candydati/db';
 import type { ReportAggregateQuery, ReportAggregates } from '../report-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

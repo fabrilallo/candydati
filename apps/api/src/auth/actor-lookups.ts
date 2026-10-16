@@ -1,4 +1,4 @@
-import type { Db } from '@tt/db';
+import type { Db } from '@candydati/db';
 import type { ActorLookups } from './audit-hooks.js';
 import { findMemberRole } from './member-role.js';
 import { currentRequestHeaders } from './request-context.js';

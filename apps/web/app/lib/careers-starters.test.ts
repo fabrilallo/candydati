@@ -1,4 +1,4 @@
-import { careersSectionSchema, SECTION_TYPES, type SectionType } from '@tt/domain'
+import { careersSectionSchema, SECTION_TYPES, type SectionType } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { starterSection } from './careers-starters'
 

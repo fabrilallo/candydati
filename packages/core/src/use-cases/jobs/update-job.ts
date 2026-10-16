@@ -1,4 +1,4 @@
-import { jobContentSchema, pipelineStagesOf, type Job } from '@tt/domain';
+import { jobContentSchema, pipelineStagesOf, type Job } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, ForbiddenError, ValidationError } from '../../errors.js';
 import type { JobDeps } from '../../job-ports.js';

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { formatDate } from '@/lib/format'
 import { recommendationKey } from '@/lib/feedback-view'
-import type { InterviewFeedbackDto } from '@tt/domain'
+import type { InterviewFeedbackDto } from '@candydati/domain'
 
 /** One submitted feedback: the questions with the answers, then the interviewer's opinion, clearly labelled as such. */
 defineProps<{ item: InterviewFeedbackDto; stageName: string }>()

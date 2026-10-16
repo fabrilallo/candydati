@@ -1,5 +1,5 @@
 import { createHmac } from 'node:crypto';
-import { WEBHOOK_HEADERS, type WebhookEventPayload } from '@tt/domain';
+import { WEBHOOK_HEADERS, type WebhookEventPayload } from '@candydati/domain';
 
 /** `sha256=<hex HMAC-SHA256 of "<timestamp>.<body>">`, keyed with the endpoint secret. The timestamp is in the header too. */
 export const signWebhook = (secret: string, timestamp: string, body: string): string =>

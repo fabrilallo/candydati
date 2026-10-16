@@ -1,4 +1,4 @@
-import type { CareersPageEditorDto, Locale, PublicCareersDto } from '@tt/domain'
+import type { CareersPageEditorDto, Locale, PublicCareersDto } from '@candydati/domain'
 import type { Ref } from 'vue'
 import { getCareersPageEditor } from '@/lib/careers-page-api'
 import type { EditorDocument } from '@/lib/careers-editor'

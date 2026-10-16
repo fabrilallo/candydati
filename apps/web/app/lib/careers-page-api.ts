@@ -7,7 +7,7 @@ import {
   type CareersPageDocumentInput,
   type CareersPageEditorDto,
   type PublicCareersPageDto,
-} from '@tt/domain'
+} from '@candydati/domain'
 import { z } from 'zod'
 import { ApiFailure, callApi, defaultFailureKey, type FailureInfo } from './api-call'
 import { AppError } from './auth-errors'

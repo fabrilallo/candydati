@@ -1,4 +1,4 @@
-import { pipelineStagesOf, responseState, type Application, type Candidate } from '@tt/domain';
+import { pipelineStagesOf, responseState, type Application, type Candidate } from '@candydati/domain';
 import type { CandidateDeps } from '../../candidate-ports.js';
 import { NotFoundError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';

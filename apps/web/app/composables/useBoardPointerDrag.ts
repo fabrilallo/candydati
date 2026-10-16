@@ -1,4 +1,4 @@
-import type { ApplicationCardDto } from '@tt/domain'
+import type { ApplicationCardDto } from '@candydati/domain'
 import { usePreferredReducedMotion } from '@vueuse/core'
 import type { BoardDragOptions } from './useBoardDrag'
 

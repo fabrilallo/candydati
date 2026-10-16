@@ -1,4 +1,4 @@
-import { accentForeground, contrastRatio, MIN_TEXT_CONTRAST } from '@tt/domain'
+import { accentForeground, contrastRatio, MIN_TEXT_CONTRAST } from '@candydati/domain'
 
 const HEX = /^#[0-9a-f]{6}$/i
 

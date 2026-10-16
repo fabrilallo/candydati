@@ -1,8 +1,8 @@
-import { createFakeDistributionChannel } from '@tt/core/testing';
-import { loadPlatformConfig } from '@tt/domain';
+import { createFakeDistributionChannel } from '@candydati/core/testing';
+import { loadPlatformConfig } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { createDistributionWorkerDeps } from './deps.js';
-import { createDrizzleUnitOfWork } from '@tt/core';
+import { createDrizzleUnitOfWork } from '@candydati/core';
 
 const platform = loadPlatformConfig({ PLATFORM_URL: 'https://jobs.example.com/' });
 

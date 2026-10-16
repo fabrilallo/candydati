@@ -1,4 +1,4 @@
-import { type CandidateCorrection, type ConsentScope, type DataExportStatus, candidateDetailSchema, type CandidateDetailDto, dataExportCreatedSchema, dataExportSchema, erasedSchema, processingRecordSchema, retentionOverviewSchema, type DataExportDto, type ProcessingRecordDto, type RetentionOverviewDto    } from '@tt/domain';
+import { type CandidateCorrection, type ConsentScope, type DataExportStatus, candidateDetailSchema, type CandidateDetailDto, dataExportCreatedSchema, dataExportSchema, erasedSchema, processingRecordSchema, retentionOverviewSchema, type DataExportDto, type ProcessingRecordDto, type RetentionOverviewDto    } from '@candydati/domain';
 import { z } from 'zod'
 import { ApiFailure, callApi } from './api-call'
 import type { JobApiRequest } from './job-api'

@@ -1,4 +1,4 @@
-import { createMetricsRegistry, registerProcessMetrics, type Counter, type Histogram, type MetricsRegistry } from '@tt/providers';
+import { createMetricsRegistry, registerProcessMetrics, type Counter, type Histogram, type MetricsRegistry } from '@candydati/providers';
 
 export interface ApiMetrics {
   readonly registry: MetricsRegistry;
@@ -14,8 +14,8 @@ export function createApiMetrics(onCollectorError?: (error: unknown) => void): A
   registerProcessMetrics(registry, 'api');
   return {
     registry,
-    httpRequests: registry.counter('tt_http_requests_total', 'HTTP requests answered, by method, route pattern and status code.', ['method', 'route', 'status']),
-    httpDuration: registry.histogram('tt_http_request_duration_seconds', 'HTTP request duration in seconds, by method, route pattern and status class.', ['method', 'route', 'status_class']),
-    emailFailures: registry.counter('tt_email_failures_total', 'Emails sent by the api that failed, by kind.', ['kind']),
+    httpRequests: registry.counter('candydati_http_requests_total', 'HTTP requests answered, by method, route pattern and status code.', ['method', 'route', 'status']),
+    httpDuration: registry.histogram('candydati_http_request_duration_seconds', 'HTTP request duration in seconds, by method, route pattern and status class.', ['method', 'route', 'status_class']),
+    emailFailures: registry.counter('candydati_email_failures_total', 'Emails sent by the api that failed, by kind.', ['kind']),
   };
 }

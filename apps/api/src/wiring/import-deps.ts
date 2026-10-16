@@ -7,7 +7,7 @@ import {
   type ImportSummaryDeps,
   type ImportUndoDeps,
   type TaskQueue,
-} from '@tt/core';
+} from '@candydati/core';
 
 export interface ImportWiring {
   /** Upload, preview, mapping, confirm and undo (recruiter side). */

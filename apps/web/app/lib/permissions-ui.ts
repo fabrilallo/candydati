@@ -1,4 +1,4 @@
-import { canAssignRole, DEFAULT_INVITE_ROLE, isRole, roleHasPermission, ROLES, type Permission, type Role } from '@tt/domain'
+import { canAssignRole, DEFAULT_INVITE_ROLE, isRole, roleHasPermission, ROLES, type Permission, type Role } from '@candydati/domain'
 
 /** Better Auth stores roles as a comma-separated string; the most powerful (first in `ROLES`) wins. */
 export const parseMemberRole = (raw: unknown): Role | null => {

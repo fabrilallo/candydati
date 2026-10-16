@@ -1,4 +1,4 @@
-import { CAREERS_LIMITS, type CareersSection } from '@tt/domain'
+import { CAREERS_LIMITS, type CareersSection } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { defaultDocument, fixtureDocument } from '~~/test/fixtures/careers-editor-fixtures'
 import {

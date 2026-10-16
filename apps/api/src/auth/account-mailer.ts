@@ -1,5 +1,5 @@
-import type { EmailSender } from '@tt/core';
-import { buildAccountEmail, type AccountEmailInput, type AccountEmailKind } from '@tt/domain';
+import type { EmailSender } from '@candydati/core';
+import { buildAccountEmail, type AccountEmailInput, type AccountEmailKind } from '@candydati/domain';
 
 /**
  * Account emails (verify, reset, invitation, failed sign-ins) through the configured EmailProvider. Sending is

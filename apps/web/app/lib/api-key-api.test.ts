@@ -23,12 +23,12 @@ describe('api keys api', () => {
   })
 
   it('creates a key and returns the secret once', async () => {
-    const nested = send(ok({ key: apiKey('k3'), secret: 'tt_Ab12Cd34_secret' }))
+    const nested = send(ok({ key: apiKey('k3'), secret: 'candydati_Ab12Cd34_secret' }))
     const created = await createApiKey(nested, { name: 'CI', scopes: ['job:read'], expiresAt: null })
     expect(nested.mock.calls[0]).toEqual(['/api/v1/api-keys', { method: 'POST', body: { name: 'CI', scopes: ['job:read'] } }])
-    expect(created).toMatchObject({ key: { id: 'k3' }, secret: 'tt_Ab12Cd34_secret' })
+    expect(created).toMatchObject({ key: { id: 'k3' }, secret: 'candydati_Ab12Cd34_secret' })
 
-    const withExpiryRequest = send(ok({ key: apiKey('k4'), secret: 'tt_other' }))
+    const withExpiryRequest = send(ok({ key: apiKey('k4'), secret: 'candydati_other' }))
     const withExpiry = await createApiKey(withExpiryRequest, { name: 'CI', scopes: ['job:read'], expiresAt: '2026-11-12T10:00:00.000Z' })
     expect(withExpiryRequest.mock.calls[0]?.[1]).toEqual({ method: 'POST', body: { name: 'CI', scopes: ['job:read'], expiresAt: '2026-11-12T10:00:00.000Z' } })
     expect(withExpiry.key.id).toBe('k4')

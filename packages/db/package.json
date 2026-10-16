@@ -1,5 +1,5 @@
 {
-  "name": "@tt/db",
+  "name": "@candydati/db",
   "version": "0.1.0",
   "private": true,
   "license": "BUSL-1.1",
@@ -29,7 +29,7 @@
     "studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@tt/domain": "workspace:*",
+    "@candydati/domain": "workspace:*",
     "drizzle-orm": "0.45.2",
     "pg": "8.23.0"
   },

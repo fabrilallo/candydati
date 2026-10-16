@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { DbExecutor } from './db-executor.js';
-import { and, count, desc, eq, schema, sql } from '@tt/db';
-import { auditEventSchema, newAuditEventSchema, type AuditEvent, type NewAuditEvent } from '@tt/domain';
+import { and, count, desc, eq, schema, sql } from '@candydati/db';
+import { auditEventSchema, newAuditEventSchema, type AuditEvent, type NewAuditEvent } from '@candydati/domain';
 import type { AuditLogPage, AuditLogQuery, AuditLogRepository } from '../ports.js';
 import { sequential } from '../sequential.js';
 

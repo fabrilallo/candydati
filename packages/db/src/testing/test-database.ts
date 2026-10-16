@@ -1,4 +1,4 @@
-export const DEFAULT_TEST_DATABASE_URL = 'postgres://tt:tt@localhost:5434/team_tracker_test';
+export const DEFAULT_TEST_DATABASE_URL = 'postgres://candydati:candydati@localhost:5434/candydati_test';
 
 /** Connection string of the dedicated test database (never the dev one). */
 export const testDatabaseUrl = (): string => process.env.TEST_DATABASE_URL ?? DEFAULT_TEST_DATABASE_URL;

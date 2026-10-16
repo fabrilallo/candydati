@@ -1,6 +1,6 @@
-import type { Actor, DelegatedActor } from '@tt/core';
-import { ForbiddenError } from '@tt/core';
-import { grantablePermissions, type Permission } from '@tt/domain';
+import type { Actor, DelegatedActor } from '@candydati/core';
+import { ForbiddenError } from '@candydati/core';
+import { grantablePermissions, type Permission } from '@candydati/domain';
 
 /** Audit id of the internal assistant: every action it takes is recorded as `agent:assistant` on behalf of a user. */
 export const AGENT_ID = 'assistant';

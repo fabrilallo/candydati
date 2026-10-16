@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CAREERS_LIMITS, type SectionOf } from '@tt/domain'
+import { CAREERS_LIMITS, type SectionOf } from '@candydati/domain'
 import { moveItem, removeAt, replaceAt, type SectionPatch } from '@/lib/careers-editor'
 import type { FieldIssues } from '@/lib/careers-editor-issues'
 

@@ -16,7 +16,7 @@ sudo apt-get install -y caddy git               # Caddy from the distribution, o
 ## 2. Configure
 
 ```bash
-git clone <your repository url> team-tracker && cd team-tracker
+git clone <your repository url> candydati && cd candydati
 cp .env.example .env && chmod 600 .env
 ```
 
@@ -28,7 +28,7 @@ PLATFORM_NAME=Your name
 BETTER_AUTH_SECRET=$(openssl rand -base64 48)
 INBOUND_WEBHOOK_SECRET=$(openssl rand -base64 48)
 POSTGRES_PASSWORD=$(openssl rand -base64 36)
-S3_ACCESS_KEY=tt-minio
+S3_ACCESS_KEY=candydati-minio
 S3_SECRET_KEY=$(openssl rand -base64 36)
 BOOTSTRAP_TOKEN=$(openssl rand -base64 48)      # first start only
 EMAIL_PROVIDER=smtp                             # or resend
@@ -89,13 +89,13 @@ Migrations run at api start. Rollback notes: OPERATIONS.md, "Upgrades and rollba
 - **Published ports.** Only `web` is published on the host (`WEB_PORT`, default 3000). Postgres, MinIO and the
   worker stay on the internal network; the api is reachable only from `127.0.0.1` (`API_PUBLISH`). Browsers always
   talk to the web, which forwards `/api/**` and `/mcp` to the api.
-- **Trusted proxy.** The compose file pins the internal network (`TT_SUBNET`, default `172.31.77.0/24`) and a fixed
-  address for the web (`TT_WEB_IP`, default `172.31.77.10`). The api uses that address as `TRUST_PROXY`, so only the
+- **Trusted proxy.** The compose file pins the internal network (`CANDYDATI_SUBNET`, default `172.31.77.0/24`) and a fixed
+  address for the web (`CANDYDATI_WEB_IP`, default `172.31.77.10`). The api uses that address as `TRUST_PROXY`, so only the
   web can set the client IP. If the subnet clashes with another stack, change both variables together.
 - **Data.** The volumes `pgdata` (database) and `miniodata` (CVs and files) are what to back up. `down` keeps them,
   `down -v` deletes them.
 - **Several instances on one host.** Give each its own `COMPOSE_PROJECT_NAME`, `WEB_PORT`, `API_PUBLISH` and
-  `TT_SUBNET`/`TT_WEB_IP`.
+  `CANDYDATI_SUBNET`/`CANDYDATI_WEB_IP`.
 - **Behind Cloudflare.** Set `NUXT_TRUST_CLOUDFLARE=true` only if the origin is reachable from Cloudflare alone.
 - **Startup checks.** The stack refuses to start with the example secrets, a `PLATFORM_URL` over http or
   `EMAIL_PROVIDER=log` (`docker/config-check.sh`, then api and worker). Database migrations and the MinIO bucket are
@@ -109,6 +109,6 @@ Migrations run at api start. Rollback notes: OPERATIONS.md, "Upgrades and rollba
 
 ```bash
 docker compose -f docker-compose.prod.yml logs -f api worker      # JSON logs; filter by "reqId"
-docker compose -f docker-compose.prod.yml exec postgres psql -U tt team_tracker
+docker compose -f docker-compose.prod.yml exec postgres psql -U candydati candydati
 docker compose -f docker-compose.prod.yml down                    # stops, keeps volumes (never add -v)
 ```

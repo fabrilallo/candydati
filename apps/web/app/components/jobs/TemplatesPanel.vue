@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobTemplateDto } from '@tt/domain'
+import type { JobTemplateDto } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'

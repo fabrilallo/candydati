@@ -1,4 +1,4 @@
-import { DAY_MS, cvExtractionSchema, type CvExtractionRecord, type CvMediaType } from '@tt/domain';
+import { DAY_MS, cvExtractionSchema, type CvExtractionRecord, type CvMediaType } from '@candydati/domain';
 import { z } from 'zod';
 import type { CvExtractionDeps } from '../../intake-ports.js';
 import { defineUseCase } from '../../use-case.js';

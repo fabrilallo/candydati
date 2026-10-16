@@ -1,4 +1,4 @@
-import { type JobStatus, reportsSchema, type ReportsView  } from '@tt/domain'
+import { type JobStatus, reportsSchema, type ReportsView  } from '@candydati/domain'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'
 import { REPORTS_CSV_PATH, REPORTS_PATH } from './api-paths'

@@ -1,4 +1,4 @@
-import type { AutomationRule, Notification, Task, WebhookDelivery, WebhookEndpoint } from '@tt/domain';
+import type { AutomationRule, Notification, Task, WebhookDelivery, WebhookEndpoint } from '@candydati/domain';
 import type {
   AutomationExecution,
   AutomationExecutionRepository,

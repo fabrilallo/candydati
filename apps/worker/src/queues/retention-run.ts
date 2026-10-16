@@ -1,4 +1,4 @@
-import { runRetentionJob, type RetentionJobDeps } from '@tt/core';
+import { runRetentionJob, type RetentionJobDeps } from '@candydati/core';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

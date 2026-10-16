@@ -1,5 +1,5 @@
-import { ImageRejectedError, type ImageTranscoder, type TranscodedImage } from '@tt/core';
-import { MEDIA_LIMITS } from '@tt/domain';
+import { ImageRejectedError, type ImageTranscoder, type TranscodedImage } from '@candydati/core';
+import { MEDIA_LIMITS } from '@candydati/domain';
 import sharp, { type Metadata } from 'sharp';
 
 const WEBP_OPTIONS = { quality: 80, effort: 4 } as const;

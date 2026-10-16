@@ -1,4 +1,4 @@
-import { jobContentSchema } from '@tt/domain'
+import { jobContentSchema } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { completeContent } from '~~/test/fixtures/job-fixtures'
 import { contentToForm, emptyForm } from './job-form'

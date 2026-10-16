@@ -1,4 +1,4 @@
-import type { ImportBatchDto, ImportBatchPageDto, ImportItemDto } from '@tt/domain'
+import type { ImportBatchDto, ImportBatchPageDto, ImportItemDto } from '@candydati/domain'
 
 /** Where an item comes from: a file by its path or a data row (counted from 0). */
 export type ItemSource = { readonly kind: 'file'; readonly name: string } | { readonly kind: 'row'; readonly row: number }

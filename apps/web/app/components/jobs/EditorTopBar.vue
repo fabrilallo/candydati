@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { BookmarkPlusIcon, EllipsisIcon, SendIcon, XCircleIcon } from '@lucide/vue'
-import type { JobStatus } from '@tt/domain'
+import type { JobStatus } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import type { Gap } from '@/lib/ad-gaps'

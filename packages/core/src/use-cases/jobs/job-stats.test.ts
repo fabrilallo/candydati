@@ -1,4 +1,4 @@
-import type { JobContent } from '@tt/domain';
+import type { JobContent } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { buildJob, completeJobContent, fixedQualityReport } from '../../testing/index.js';
 import { buildProcess, buildQuality, buildReadiness, buildSalary, buildStatusCounts, median } from './job-stats.js';

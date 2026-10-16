@@ -1,4 +1,4 @@
-import type { JobContent, JobStatus, PublishedJobContent } from '@tt/domain'
+import type { JobContent, JobStatus, PublishedJobContent } from '@candydati/domain'
 import type { Translate } from './ad-text'
 import { countryName } from './countries'
 

@@ -1,5 +1,5 @@
-import { desc, eq, schema } from '@tt/db';
-import { privacyNoticeInputSchema, type PrivacyNotice } from '@tt/domain';
+import { desc, eq, schema } from '@candydati/db';
+import { privacyNoticeInputSchema, type PrivacyNotice } from '@candydati/domain';
 import type { PrivacyNoticeRepository } from '../candidate-ports.js';
 import { ConflictError } from '../errors.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';

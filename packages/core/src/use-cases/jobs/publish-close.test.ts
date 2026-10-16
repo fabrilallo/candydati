@@ -1,4 +1,4 @@
-import { PUBLISH_RULES, type AdQualityReport } from '@tt/domain';
+import { PUBLISH_RULES, type AdQualityReport } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
 import {

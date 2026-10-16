@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FilmIcon, ImageIcon, XIcon } from '@lucide/vue'
-import type { CareersMediaAssetDto, MediaKind } from '@tt/domain'
+import type { CareersMediaAssetDto, MediaKind } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { issueKey } from '@/lib/careers-editor-issues'
 import { formatSize, thumbnailUrl } from '@/lib/careers-media-view'

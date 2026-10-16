@@ -1,4 +1,4 @@
-import { careersPageDocumentSchema, type Locale } from '@tt/domain';
+import { careersPageDocumentSchema, type Locale } from '@candydati/domain';
 import {
   ImageRejectedError,
   type CareersDeps,

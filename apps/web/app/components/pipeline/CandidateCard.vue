@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApplicationCardDto, StageRef, Outcome  } from '@tt/domain'
+import type { ApplicationCardDto, StageRef, Outcome  } from '@candydati/domain'
 import { BriefcaseIcon, MapPinIcon, MessageSquareTextIcon } from '@lucide/vue'
 import { fullName } from '@/lib/candidate-view'
 import { relativeTime } from '@/lib/job-list-view'

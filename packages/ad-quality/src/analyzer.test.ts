@@ -1,4 +1,4 @@
-import { QUALITY_CATEGORIES, adQualityReportSchema, totalOf } from '@tt/domain';
+import { QUALITY_CATEGORIES, adQualityReportSchema, totalOf } from '@candydati/domain';
 import { describe, expect, it, vi } from 'vitest';
 import { createAdQualityAnalyzer } from './analyzer.js';
 import type { StructuredGenerator } from './generator.js';

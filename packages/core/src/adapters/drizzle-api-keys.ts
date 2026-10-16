@@ -1,5 +1,5 @@
-import { and, desc, eq, schema } from '@tt/db';
-import { ROLES, type ApiKey, type Role } from '@tt/domain';
+import { and, desc, eq, schema } from '@candydati/db';
+import { ROLES, type ApiKey, type Role } from '@candydati/domain';
 import type { ApiKeyRepository, MemberRoleLookup } from '../api-key-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

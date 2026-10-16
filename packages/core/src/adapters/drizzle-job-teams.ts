@@ -1,5 +1,5 @@
-import { and, asc, eq, inArray, isNotNull, schema } from '@tt/db';
-import { JOB_TEAM_ROLES, type JobTeamMember, type JobTeamRole } from '@tt/domain';
+import { and, asc, eq, inArray, isNotNull, schema } from '@candydati/db';
+import { JOB_TEAM_ROLES, type JobTeamMember, type JobTeamRole } from '@candydati/domain';
 import type { JobTeamRepository } from '../job-team-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

@@ -8,7 +8,7 @@ describe('hasSessionCookie', () => {
   })
 
   it('ignores other cookies, values that merely mention it, and empty headers', () => {
-    expect(hasSessionCookie('tt.locale=it; tt.theme=dark')).toBe(false)
+    expect(hasSessionCookie('candydati.locale=it; candydati.theme=dark')).toBe(false)
     expect(hasSessionCookie('x=better-auth.session_token')).toBe(false)
     expect(hasSessionCookie('')).toBe(false)
     expect(hasSessionCookie(undefined)).toBe(false)

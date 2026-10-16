@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApplicationCardDto, EmailTemplateKind, Outcome  } from '@tt/domain'
+import type { ApplicationCardDto, EmailTemplateKind, Outcome  } from '@candydati/domain'
 import { FileTextIcon, ListTodoIcon, MailIcon, MessagesSquareIcon, MessageSquareTextIcon, ShieldCheckIcon, UserRoundIcon } from '@lucide/vue'
 import { applicationStatus, currentApplication, fullName, stageOf } from '@/lib/candidate-view'
 import { renewalDeadline } from '@/lib/import-view'

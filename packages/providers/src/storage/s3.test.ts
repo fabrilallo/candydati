@@ -8,9 +8,9 @@ import { FileNotFoundError, InvalidStorageKeyError } from './types.js';
 
 const config: S3Config = loadS3Config({
   S3_ENDPOINT: process.env['S3_ENDPOINT'] ?? 'http://localhost:9000',
-  S3_BUCKET: process.env['S3_BUCKET'] ?? 'team-tracker-test',
-  S3_ACCESS_KEY: process.env['S3_ACCESS_KEY'] ?? 'tt-minio',
-  S3_SECRET_KEY: process.env['S3_SECRET_KEY'] ?? 'tt-minio-secret',
+  S3_BUCKET: process.env['S3_BUCKET'] ?? 'candydati-test',
+  S3_ACCESS_KEY: process.env['S3_ACCESS_KEY'] ?? 'candydati-minio',
+  S3_SECRET_KEY: process.env['S3_SECRET_KEY'] ?? 'candydati-minio-secret',
   S3_FORCE_PATH_STYLE: 'true',
 });
 
@@ -120,7 +120,7 @@ describe.skipIf(!up)('createS3FileStorage (MinIO)', () => {
   });
 
   it('creates a missing bucket', async () => {
-    const bucket = `tt-fresh-${randomUUID().slice(0, 8)}`;
+    const bucket = `candydati-fresh-${randomUUID().slice(0, 8)}`;
     const fresh = createS3FileStorage({ ...config, bucket });
     try {
       await fresh.ensureBucket();

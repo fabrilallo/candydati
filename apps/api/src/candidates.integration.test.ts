@@ -1,5 +1,5 @@
-import { createDrizzleCvExtractions } from '@tt/core';
-import { completePrivacyNoticeInput } from '@tt/core/testing';
+import { createDrizzleCvExtractions } from '@candydati/core';
+import { completePrivacyNoticeInput } from '@candydati/core/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { TestUser } from './testing/client.js';
 import { createWorld, personForm, publishJob, type World } from './testing/candidate-world.js';

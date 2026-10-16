@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobTemplateDto } from '@tt/domain'
+import type { JobTemplateDto } from '@candydati/domain'
 import { Trash2Icon } from '@lucide/vue'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

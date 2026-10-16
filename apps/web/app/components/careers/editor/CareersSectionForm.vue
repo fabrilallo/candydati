@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CareersSection, SectionType } from '@tt/domain'
+import type { CareersSection, SectionType } from '@candydati/domain'
 import type { Component } from 'vue'
 import type { SectionPatch } from '@/lib/careers-editor'
 import { issueKey, type FieldIssues } from '@/lib/careers-editor-issues'

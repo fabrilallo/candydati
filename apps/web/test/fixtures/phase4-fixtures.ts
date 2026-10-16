@@ -1,5 +1,5 @@
 import { jobSummary } from './phase8-fixtures'
-import type { AttentionItemDto, AutomationRuleDto, NotificationDto, TaskDto, WebhookEndpointDto } from '@tt/domain'
+import type { AttentionItemDto, AutomationRuleDto, NotificationDto, TaskDto, WebhookEndpointDto } from '@candydati/domain'
 
 /** Phase 4 DTOs as the api would send them (phase 4 contract). */
 export const P4_NOW = '2026-10-13T10:00:00.000Z'
@@ -59,7 +59,7 @@ export const taskAction = (title: string, assignee = 'job_owner', dueInDays?: nu
 
 export const webhook = (id: string, overrides: Partial<WebhookEndpointDto> = {}): WebhookEndpointDto => ({
   id,
-  url: 'https://hooks.example.com/tt',
+  url: 'https://hooks.example.com/candydati',
   events: ['application.received', 'job.closed'],
   enabled: true,
   createdAt: P4_NOW,

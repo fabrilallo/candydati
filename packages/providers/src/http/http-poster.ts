@@ -2,7 +2,7 @@ import { lookup as dnsLookup } from 'node:dns/promises';
 import { request as httpRequest, type ClientRequest, type RequestOptions } from 'node:http';
 import { request as httpsRequest } from 'node:https';
 import { isIP, type LookupFunction } from 'node:net';
-import type { HttpPoster } from '@tt/core';
+import type { HttpPoster } from '@candydati/core';
 import { isPublicAddress } from './ip-ranges.js';
 
 type RequestFn = (options: RequestOptions) => ClientRequest;

@@ -3,12 +3,12 @@ import { parseEnv } from './env.js';
 import { PRODUCTION_ENV } from '../testing/production-env.js';
 
 const valid = {
-  DATABASE_URL: 'postgres://tt:tt@localhost:5434/team_tracker',
+  DATABASE_URL: 'postgres://candydati:candydati@localhost:5434/candydati',
   BETTER_AUTH_SECRET: 'a'.repeat(32),
   BETTER_AUTH_URL: 'http://localhost:3000',
   WEB_ORIGIN: 'http://localhost:3000',
   S3_ENDPOINT: 'http://localhost:9000',
-  S3_BUCKET: 'team-tracker-test',
+  S3_BUCKET: 'candydati-test',
   S3_ACCESS_KEY: 'key',
   S3_SECRET_KEY: 'secret',
 };
@@ -57,7 +57,7 @@ describe('parseEnv', () => {
       RUN_MIGRATIONS: true,
       TRUSTED_ORIGINS: [],
     });
-    expect(env.platform.name).toBe('team-tracker');
+    expect(env.platform.name).toBe('Candydati');
   });
 
   it('treats empty strings as unset (a blank line in .env)', () => {
@@ -110,7 +110,7 @@ describe('parseEnv', () => {
 
 describe('parseEnv S3', () => {
   it('parses the storage settings', () => {
-    expect(parseEnv(valid).s3).toMatchObject({ endpoint: 'http://localhost:9000', bucket: 'team-tracker-test', forcePathStyle: false });
+    expect(parseEnv(valid).s3).toMatchObject({ endpoint: 'http://localhost:9000', bucket: 'candydati-test', forcePathStyle: false });
   });
 
   it('is required and names the variable, never the value', () => {

@@ -1,4 +1,4 @@
-import type { JobTemplate } from '@tt/domain';
+import type { JobTemplate } from '@candydati/domain';
 import { z } from 'zod';
 import { defineJobUseCase } from './define.js';
 

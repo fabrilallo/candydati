@@ -1,5 +1,5 @@
-import type { PublicJobPageDto, PublishedJobContent } from '@tt/domain'
-import { jobContentSchema } from '@tt/domain'
+import type { PublicJobPageDto, PublishedJobContent } from '@candydati/domain'
+import { jobContentSchema } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { translatorFor } from '~~/test/fixtures/ad-translate'
 import { adHeadings, buildJobSeo } from './job-seo'

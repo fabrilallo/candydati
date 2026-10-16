@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { careersPageDocumentSchema, careersPageFixture, defaultCareersPage } from '@tt/domain';
-import { createDb, eq, schema, type DbHandle } from '@tt/db';
+import { careersPageDocumentSchema, careersPageFixture, defaultCareersPage } from '@candydati/domain';
+import { createDb, eq, schema, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { CareersMediaRecord } from '../careers-ports.js';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';

@@ -62,7 +62,7 @@ describe('metrics registry', () => {
     const registry = createMetricsRegistry();
     registerProcessMetrics(registry, 'api');
     const text = await registry.render();
-    for (const name of ['tt_build_info{service="api"', 'process_cpu_seconds_total', 'process_resident_memory_bytes', 'nodejs_eventloop_lag_p99_seconds', 'process_start_time_seconds']) {
+    for (const name of ['candydati_build_info{service="api"', 'process_cpu_seconds_total', 'process_resident_memory_bytes', 'nodejs_eventloop_lag_p99_seconds', 'process_start_time_seconds']) {
       expect(text).toContain(name);
     }
   });

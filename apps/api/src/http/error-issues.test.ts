@@ -1,4 +1,4 @@
-import { ConflictError, ValidationError } from '@tt/core';
+import { ConflictError, ValidationError } from '@candydati/core';
 import { describe, expect, it } from 'vitest';
 import { issuesOf } from './error-issues.js';
 

@@ -1,6 +1,6 @@
-import { and, desc, eq, schema } from '@tt/db';
+import { and, desc, eq, schema } from '@candydati/db';
 import type { DbExecutor } from './db-executor.js';
-import { jobContentSchema, type JobTemplate } from '@tt/domain';
+import { jobContentSchema, type JobTemplate } from '@candydati/domain';
 import type { JobTemplateRepository } from '../job-ports.js';
 
 type Row = typeof schema.jobTemplate.$inferSelect;

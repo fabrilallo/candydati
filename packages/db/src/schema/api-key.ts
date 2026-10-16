@@ -1,4 +1,4 @@
-import type { Permission } from '@tt/domain';
+import type { Permission } from '@candydati/domain';
 import { index, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 

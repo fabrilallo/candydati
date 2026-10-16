@@ -1,4 +1,4 @@
-import { careersMediaKey, isMediaFileName, mediaFileName } from '@tt/domain';
+import { careersMediaKey, isMediaFileName, mediaFileName } from '@candydati/domain';
 import { z } from 'zod';
 import type { CareersMediaRecord, PublicCareersDeps } from '../../careers-ports.js';
 import { NotFoundError } from '../../errors.js';

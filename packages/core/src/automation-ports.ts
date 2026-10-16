@@ -1,5 +1,5 @@
 import type { JobTeamRepository } from './job-team-ports.js';
-import type { AutomationRule, Notification, NotificationKind, Role, Task } from '@tt/domain';
+import type { AutomationRule, Notification, NotificationKind, Role, Task } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository, UserDirectory } from './candidate-ports.js';
 import type { TaskQueue } from './intake-ports.js';
 import type { JobRepository } from './job-ports.js';

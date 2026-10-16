@@ -1,4 +1,4 @@
-import { SUPPORTED_LOCALES, type Locale, type VaguePhrase } from '@tt/domain'
+import { SUPPORTED_LOCALES, type Locale, type VaguePhrase } from '@candydati/domain'
 import type { ComputedRef, InjectionKey, MaybeRefOrGetter } from 'vue'
 import type { Gaps } from '@/lib/ad-gaps'
 import type { ComplianceFix } from '@/lib/compliance-fix'

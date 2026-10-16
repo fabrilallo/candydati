@@ -1,4 +1,4 @@
-import { applicationsBusyMessage } from '@tt/domain';
+import { applicationsBusyMessage } from '@candydati/domain';
 import { afterAll, describe, expect, it } from 'vitest';
 import { ACCOUNT_FREE_FAILURES, PAIR_FREE_FAILURES } from './auth/sign-in-throttle.js';
 import { createWorld, personForm } from './testing/candidate-world.js';

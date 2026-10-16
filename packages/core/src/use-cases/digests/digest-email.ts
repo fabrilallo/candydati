@@ -1,4 +1,4 @@
-import { textToHtml, type Locale, type NotificationKind } from '@tt/domain';
+import { textToHtml, type Locale, type NotificationKind } from '@candydati/domain';
 import type { EmailSender } from '../../messaging-ports.js';
 import type { DigestEntry } from '../automations/scan-deadlines.js';
 

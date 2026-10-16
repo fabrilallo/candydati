@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PublishIssue, VaguePhrase, JobContent  } from '@tt/domain'
+import type { PublishIssue, VaguePhrase, JobContent  } from '@candydati/domain'
 import { gapsBySlot } from '@/lib/ad-gaps'
 import type { ComplianceFix } from '@/lib/compliance-fix'
 import type { ComplianceMark } from '@/lib/compliance-view'

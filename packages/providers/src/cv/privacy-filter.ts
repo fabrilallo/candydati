@@ -1,4 +1,4 @@
-import { cvExtractionSchema, type CvExtraction } from '@tt/domain';
+import { cvExtractionSchema, type CvExtraction } from '@candydati/domain';
 
 const SENSITIVE_PATTERNS: readonly RegExp[] = [
   /\bnat[oa]\s+(il|a|in|nel)\b/i,

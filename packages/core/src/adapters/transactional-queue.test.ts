@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { createDb, sql, type DbHandle } from '@tt/db';
+import { createDb, sql, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { BindableTaskQueue, SqlExecutor } from '../intake-ports.js';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';

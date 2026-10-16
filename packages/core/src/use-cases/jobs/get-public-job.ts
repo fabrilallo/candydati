@@ -1,4 +1,4 @@
-import type { PublicJobPageDto } from '@tt/domain';
+import type { PublicJobPageDto } from '@candydati/domain';
 import { toPublicPrivacyNoticeDto, type PublicPrivacyNoticeDto } from '../../mappers/candidate-dto.js';
 import { z } from 'zod';
 import { NotFoundError } from '../../errors.js';

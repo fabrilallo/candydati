@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { salaryFigure } from '@/lib/ad-facts'
 import { APPROVAL_REASON_MAX, approvalRequestPath, type ApprovalState } from '@/lib/approval-view'
 import { formatDate } from '@/lib/format'
-import type { JobApprovalDto } from '@tt/domain'
+import type { JobApprovalDto } from '@candydati/domain'
 
 /**
  * Where the ad stands with approval, when the organization asks for it: approved (by whom, which range), missing (with

@@ -1,4 +1,4 @@
-import type { ApplicationCardDto, PipelineDto, Outcome  } from '@tt/domain'
+import type { ApplicationCardDto, PipelineDto, Outcome  } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { decideApplication, moveApplication } from '@/lib/candidate-api'

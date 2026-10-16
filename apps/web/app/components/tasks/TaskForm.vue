@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { PlusIcon } from '@lucide/vue'
-import { TASK_TITLE_MAX } from '@tt/domain'
+import { TASK_TITLE_MAX } from '@candydati/domain'
 import { validateTaskForm, type TaskFormErrors } from '@/lib/inbox-view'
 import type { MemberRow } from '@/lib/auth-api'
 import { Button } from '@/components/ui/button'

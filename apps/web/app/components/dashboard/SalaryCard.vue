@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobStatsDto } from '@tt/domain'
+import type { JobStatsDto } from '@candydati/domain'
 import { StackedBar } from '@unovis/ts'
 import { VisAxis, VisPlotline, VisStackedBar, VisTooltip, VisXYContainer } from '@unovis/vue'
 import { formatMoney } from '@/lib/job-view'
@@ -34,7 +34,7 @@ const yTick = (i: number | Date): string => (typeof i === 'number' && Number.isI
 const roleOf = (row: SalaryRow): string => t(`taxonomy.roles.${row.role}`)
 const triggers = {
   [StackedBar.selectors.bar]: (d: SalaryRow) =>
-    `<div class="tt-tip"><p class="tt-tip-title">${escapeHtml(d.title)}</p><p>${escapeHtml(roleOf(d))}</p><p>${money(d.min)} - ${money(d.max)}</p></div>`,
+    `<div class="candydati-tip"><p class="candydati-tip-title">${escapeHtml(d.title)}</p><p>${escapeHtml(roleOf(d))}</p><p>${money(d.min)} - ${money(d.max)}</p></div>`,
 }
 </script>
 
@@ -52,7 +52,7 @@ const triggers = {
         </div>
       </dl>
     </template>
-    <div v-if="rows.length > 0" class="tt-chart" :style="{ height: `${height}px` }" aria-hidden="true">
+    <div v-if="rows.length > 0" class="candydati-chart" :style="{ height: `${height}px` }" aria-hidden="true">
       <ClientOnly>
         <VisXYContainer :data="rows" :duration="duration" :height="height" :x-domain="domain" y-direction="south" :padding="{ top: 4, right: 12 }">
           <VisStackedBar :x="x" :y="y" :color="color" orientation="horizontal" :bar-max-width="10" :rounded-corners="5" :bar-padding="0.4" />

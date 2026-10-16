@@ -1,4 +1,4 @@
-import { sql, type Db } from '@tt/db';
+import { sql, type Db } from '@candydati/db';
 
 /**
  * Daily budgets of paid model calls. A budget line is "at most `limit` per `subject` per UTC day" for one `scope`

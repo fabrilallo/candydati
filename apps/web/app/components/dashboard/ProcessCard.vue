@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobStatsDto } from '@tt/domain'
+import type { JobStatsDto } from '@candydati/domain'
 import { formatDuration } from '@/lib/job-view'
 import { formatDecimal } from '@/lib/stats-view'
 

@@ -1,7 +1,7 @@
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import type { DOMWrapper } from '@vue/test-utils'
 import { flushPromises } from '@vue/test-utils'
-import { CV_MAX_BYTES } from '@tt/domain'
+import { CV_MAX_BYTES } from '@candydati/domain'
 import { setResponseStatus } from 'h3'
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { completeContent, ok } from '~~/test/fixtures/job-fixtures'

@@ -1,4 +1,4 @@
-import { emptyImportCounts, IMPORT_ITEMS_PAGE_MAX, type ImportBatch, type ImportCounts, type ImportItem } from '@tt/domain';
+import { emptyImportCounts, IMPORT_ITEMS_PAGE_MAX, type ImportBatch, type ImportCounts, type ImportItem } from '@candydati/domain';
 import { ConflictError, NotFoundError } from '../../errors.js';
 import type { ImportDeps } from '../../import-ports.js';
 import type { ImportBatchView } from './views.js';

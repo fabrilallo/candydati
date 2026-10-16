@@ -1,7 +1,7 @@
 import { errorKeyOf } from '@/lib/auth-errors'
 import { createWebhook, deleteWebhook, listWebhooks, testWebhook, updateWebhook, type WebhookInput } from '@/lib/automation-api'
 import { loaded } from '@/lib/job-api'
-import type { WebhookCreatedDto, WebhookEndpointDto } from '@tt/domain'
+import type { WebhookCreatedDto, WebhookEndpointDto } from '@candydati/domain'
 
 /** The organization's webhook endpoints (`webhook:manage`). The secret of a new one is returned once and never kept. */
 export const useWebhooks = () => {

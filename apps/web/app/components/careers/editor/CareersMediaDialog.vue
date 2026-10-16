@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CareersMediaAssetDto, MediaKind } from '@tt/domain'
+import type { CareersMediaAssetDto, MediaKind } from '@candydati/domain'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { assetsOfKind, usedIn, type UsedIn } from '@/lib/careers-media-view'
 import type { CareersMediaLibrary } from '@/composables/useCareersMediaLibrary'

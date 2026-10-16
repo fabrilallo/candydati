@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { defineConfig } from 'drizzle-kit';
 
 // Local dev default only (docker-compose.yml); real environments set DATABASE_URL.
-const DEV_DATABASE_URL = 'postgres://tt:tt@localhost:5434/team_tracker';
+const DEV_DATABASE_URL = 'postgres://candydati:candydati@localhost:5434/candydati';
 
 export default defineConfig({
   dialect: 'postgresql',

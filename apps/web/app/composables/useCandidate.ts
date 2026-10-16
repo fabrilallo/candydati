@@ -1,4 +1,4 @@
-import type { ApplicationCardDto, CandidateDetailDto, Outcome } from '@tt/domain'
+import type { ApplicationCardDto, CandidateDetailDto, Outcome } from '@candydati/domain'
 import type { MaybeRefOrGetter } from 'vue'
 import { addNote, decideApplication, getCandidate, moveApplication, updateCandidateTags } from '@/lib/candidate-api'
 import { loaded } from '@/lib/job-api'

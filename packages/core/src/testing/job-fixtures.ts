@@ -6,7 +6,7 @@ import {
   type JobContent,
   type JobContentInput,
   type JobTemplate,
-} from '@tt/domain';
+} from '@candydati/domain';
 
 /** A content that passes `checkPublishable`. Overrides are parsed, so defaults apply. */
 export const completeJobContent = (overrides: JobContentInput = { title: 'Backend Developer' }): JobContent =>

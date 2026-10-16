@@ -1,5 +1,5 @@
-import type { Locale } from '@tt/domain';
-import type { QualityCategory } from '@tt/domain';
+import type { Locale } from '@candydati/domain';
+import type { QualityCategory } from '@candydati/domain';
 
 /** Default rewrite hint per category: it asks for the missing fact instead of inventing one. */
 export const DEFAULT_SUGGESTIONS: Record<Locale, Record<QualityCategory, string>> = {

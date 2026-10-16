@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PublicConsentDto } from '@tt/domain'
+import type { PublicConsentDto } from '@candydati/domain'
 import { CircleCheckIcon, LoaderCircleIcon, Trash2Icon } from '@lucide/vue'
 import type { Translate } from '@/lib/ad-text'
 import { answerConsent, consentAnswer, consentFailure, type ConsentFailure } from '@/lib/import-api'

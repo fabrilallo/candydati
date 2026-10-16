@@ -1,4 +1,4 @@
-import { IMPORT_CONFIDENCES, importMappingSchema, importItemSelectionSchema, unknownMappingHeaders, IMPORT_ITEMS_PAGE_MAX, IMPORT_LIMITS, pipelineStagesOf, type ImportBatch } from '@tt/domain';
+import { IMPORT_CONFIDENCES, importMappingSchema, importItemSelectionSchema, unknownMappingHeaders, IMPORT_ITEMS_PAGE_MAX, IMPORT_LIMITS, pipelineStagesOf, type ImportBatch } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';

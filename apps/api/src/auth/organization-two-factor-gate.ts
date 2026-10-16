@@ -1,5 +1,5 @@
-import { eq, schema, type Db } from '@tt/db';
-import { roleNeedsTwoFactor } from '@tt/domain';
+import { eq, schema, type Db } from '@candydati/db';
+import { roleNeedsTwoFactor } from '@candydati/domain';
 import { APIError, getSessionFromCtx } from 'better-auth/api';
 
 /** Error code of a refused organization change; the web app translates it like the app's `two_factor_required`. */

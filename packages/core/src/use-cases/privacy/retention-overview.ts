@@ -1,4 +1,4 @@
-import { DAY_MS, RETENTION_WARNING_DAYS, type RetentionRun } from '@tt/domain';
+import { DAY_MS, RETENTION_WARNING_DAYS, type RetentionRun } from '@candydati/domain';
 import { z } from 'zod';
 import type { PrivacyOverviewDeps, ConfiguredProviders } from '../../privacy-ports.js';
 import { defineUseCase, type UseCase, type UseCaseDefinition } from '../../use-case.js';

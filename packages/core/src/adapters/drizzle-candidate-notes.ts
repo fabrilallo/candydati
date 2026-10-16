@@ -1,4 +1,4 @@
-import { and, count, desc, eq, inArray, schema } from '@tt/db';
+import { and, count, desc, eq, inArray, schema } from '@candydati/db';
 import type { CandidateNoteRepository } from '../candidate-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

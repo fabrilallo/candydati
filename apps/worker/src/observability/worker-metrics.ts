@@ -1,4 +1,4 @@
-import { createMetricsRegistry, registerProcessMetrics, type Counter, type Histogram, type MetricsRegistry } from '@tt/providers';
+import { createMetricsRegistry, registerProcessMetrics, type Counter, type Histogram, type MetricsRegistry } from '@candydati/providers';
 
 export type JobOutcome = 'completed' | 'retry' | 'failed' | 'invalid_payload';
 
@@ -18,8 +18,8 @@ export const noopJobObserver: JobObserver = Object.freeze({ jobFinished: () => u
 export function createWorkerMetrics(onCollectorError?: (error: unknown) => void): WorkerMetrics {
   const registry = createMetricsRegistry({ onCollectorError });
   registerProcessMetrics(registry, 'worker');
-  const jobs: Counter = registry.counter('tt_jobs_total', 'Jobs processed by this worker, by queue and outcome (completed, retry, failed = out of attempts, invalid_payload).', ['queue', 'outcome']);
-  const duration: Histogram = registry.histogram('tt_job_duration_seconds', 'Time a job handler took, in seconds, by queue.', ['queue']);
+  const jobs: Counter = registry.counter('candydati_jobs_total', 'Jobs processed by this worker, by queue and outcome (completed, retry, failed = out of attempts, invalid_payload).', ['queue', 'outcome']);
+  const duration: Histogram = registry.histogram('candydati_job_duration_seconds', 'Time a job handler took, in seconds, by queue.', ['queue']);
   return {
     registry,
     observer: {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { paragraphsOf, type SectionOf } from '@tt/domain'
+import { paragraphsOf, type SectionOf } from '@candydati/domain'
 
 /** Editorial text block: the title on the left, the paragraphs on the right from the tablet up. Plain text, never HTML. */
 const props = defineProps<{ section: SectionOf<'text'>; first: boolean }>()

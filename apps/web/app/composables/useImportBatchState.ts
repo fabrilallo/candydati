@@ -1,4 +1,4 @@
-import type { ImportMapping } from '@tt/domain'
+import type { ImportMapping } from '@candydati/domain'
 import type { ImportDetail } from '@/lib/import-item-view'
 import { getImport } from '@/lib/import-api'
 import { emptyMapping } from '@/lib/import-mapping'

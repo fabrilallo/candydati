@@ -1,4 +1,4 @@
-import { isForbiddenFor, roleHasPermission, type Permission } from '@tt/domain';
+import { isForbiddenFor, roleHasPermission, type Permission } from '@candydati/domain';
 import type { Actor } from './actor.js';
 import { ForbiddenError } from './errors.js';
 

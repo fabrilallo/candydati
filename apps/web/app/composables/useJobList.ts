@@ -1,4 +1,4 @@
-import type { JobStatus } from '@tt/domain'
+import type { JobStatus } from '@candydati/domain'
 import { JOB_PAGE_SIZE, listJobs, loaded } from '@/lib/job-api'
 
 /**

@@ -1,7 +1,7 @@
 import { createApiKey, listApiKeys, revokeApiKey, type ApiKeyCreateInput } from '@/lib/api-key-api'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { loaded } from '@/lib/job-api'
-import type { ApiKeyCreatedDto, ApiKeyDto } from '@tt/domain'
+import type { ApiKeyCreatedDto, ApiKeyDto } from '@candydati/domain'
 
 /** The organization's API keys (`api_key:manage`). The secret of a new key is returned once and never kept here. */
 export const useApiKeys = () => {

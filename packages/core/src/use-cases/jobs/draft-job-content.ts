@@ -1,4 +1,4 @@
-import { checkPublishable, jobContentSchema, type JobContent, type PublishIssue } from '@tt/domain';
+import { checkPublishable, jobContentSchema, type JobContent, type PublishIssue } from '@candydati/domain';
 import { z } from 'zod';
 import type { JobDeps } from '../../job-ports.js';
 import { defineUseCase } from '../../use-case.js';

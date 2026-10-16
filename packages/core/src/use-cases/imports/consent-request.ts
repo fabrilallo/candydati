@@ -1,4 +1,4 @@
-import { CONSENT_SCOPES, retentionExpiry, type Application, type ConsentScope, type PrivacyNotice } from '@tt/domain';
+import { CONSENT_SCOPES, retentionExpiry, type Application, type ConsentScope, type PrivacyNotice } from '@candydati/domain';
 import { z } from 'zod';
 import type { ConsentDeps, ConsentToken } from '../../import-ports.js';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';

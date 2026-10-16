@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { LinkKind, SectionOf } from '@tt/domain'
+import type { LinkKind, SectionOf } from '@candydati/domain'
 import { ArrowUpRightIcon } from '@lucide/vue'
 import { safeExternalUrl } from '@/lib/safe-url'
 

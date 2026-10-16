@@ -2,7 +2,7 @@ import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { createRule, deleteRule, listRules, updateRule, type RuleInput } from '@/lib/automation-api'
 import { loaded } from '@/lib/job-api'
-import type { AutomationRuleDto } from '@tt/domain'
+import type { AutomationRuleDto } from '@candydati/domain'
 
 /** The automation rules of one job: list, add, edit, pause and delete (`automation:manage`). */
 export const useAutomations = (jobId: string) => {

@@ -10,7 +10,7 @@ import { FEATURED, PEOPLE } from './people';
 import { seed, type Seeded } from './seed';
 
 /**
- * The four README screenshots, from a fresh organization built through the app (`pnpm --filter @tt/e2e screenshots`).
+ * The four README screenshots, from a fresh organization built through the app (`pnpm --filter @candydati/e2e screenshots`).
  * Set SCREENSHOTS_REUSE=1 to capture again from the organization of the previous run (it keeps the session in .results).
  */
 

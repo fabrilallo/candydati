@@ -1,6 +1,6 @@
 import { Readable } from 'node:stream';
-import { unsatisfiedRangeSize, type CareersMediaFile } from '@tt/core';
-import { fail } from '@tt/domain';
+import { unsatisfiedRangeSize, type CareersMediaFile } from '@candydati/core';
+import { fail } from '@candydati/domain';
 import type { FastifyReply } from 'fastify';
 
 /** Files of the published page: the name carries the content hash and the width, so the bytes behind a URL never change. */

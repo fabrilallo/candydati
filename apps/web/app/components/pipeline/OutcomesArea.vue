@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApplicationCardDto, StageRef } from '@tt/domain'
+import type { ApplicationCardDto, StageRef } from '@candydati/domain'
 import { ChevronDownIcon } from '@lucide/vue'
 import type { OutcomeGroup } from '@/lib/pipeline-board'
 

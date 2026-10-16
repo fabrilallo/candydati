@@ -1,4 +1,4 @@
-import type { Application, Candidate, CandidateNote, CvExtractionRecord, CvMediaType, Job, PipelineStage, ResponseState } from '@tt/domain';
+import type { Application, Candidate, CandidateNote, CvExtractionRecord, CvMediaType, Job, PipelineStage, ResponseState } from '@candydati/domain';
 
 /** What the use cases return: domain objects. The mappers in `mappers/candidate-dto.ts` turn them into DTOs. */
 export interface ApplicationCardView {

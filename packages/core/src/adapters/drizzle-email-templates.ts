@@ -1,4 +1,4 @@
-import { and, desc, eq, schema } from '@tt/db';
+import { and, desc, eq, schema } from '@candydati/db';
 import type { EmailTemplateRepository } from '../messaging-ports.js';
 import { ConflictError } from '../errors.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArchiveIcon, CircleCheckIcon, LayersIcon, PencilLineIcon } from '@lucide/vue'
-import type { JobStatus } from '@tt/domain'
+import type { JobStatus } from '@candydati/domain'
 import type { JobCounts } from '@/lib/job-counts'
 import type { TabItem } from '@/lib/tabs'
 

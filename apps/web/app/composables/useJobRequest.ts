@@ -1,4 +1,4 @@
-import type { JobRequestDto } from '@tt/domain'
+import type { JobRequestDto } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { loaded } from '@/lib/job-api'
 import { approveJobRequest, convertJobRequest, getJobRequest, rejectJobRequest } from '@/lib/job-request-api'

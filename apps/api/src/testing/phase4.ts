@@ -11,10 +11,10 @@ import {
   type HttpPoster,
   type ScanDeps,
   type WebhookDeliverDeps,
-} from '@tt/core';
-import { createFakeEmailIdentity } from '@tt/core/testing';
-import { eq, schema } from '@tt/db';
-import { createHostGuard } from '@tt/providers';
+} from '@candydati/core';
+import { createFakeEmailIdentity } from '@candydati/core/testing';
+import { eq, schema } from '@candydati/db';
+import { createHostGuard } from '@candydati/providers';
 import { testEnv, type TestApp } from './test-app.js';
 import { createMessagingDeps } from '../wiring/messaging-deps.js';
 

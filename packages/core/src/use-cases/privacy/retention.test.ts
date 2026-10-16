@@ -1,4 +1,4 @@
-import type { DataExport } from '@tt/domain';
+import type { DataExport } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError, ValidationError } from '../../errors.js';
 import { buildApplication, buildCandidate, ERASED, ORG_A, ORG_B, seedPrivacyData, seedPrivacyWorld, userActor, createInMemoryTaskQueue } from '../../testing/index.js';

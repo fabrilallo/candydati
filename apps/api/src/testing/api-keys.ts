@@ -1,4 +1,4 @@
-import type { Permission } from '@tt/domain';
+import type { Permission } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { TestUser } from './client.js';
 

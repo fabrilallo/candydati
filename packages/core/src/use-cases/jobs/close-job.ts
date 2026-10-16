@@ -1,4 +1,4 @@
-import type { Job } from '@tt/domain';
+import type { Job } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import { recordEvent } from '../webhooks/record-event.js';

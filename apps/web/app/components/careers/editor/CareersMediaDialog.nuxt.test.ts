@@ -1,5 +1,5 @@
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
-import { MEDIA_LIMITS } from '@tt/domain'
+import { MEDIA_LIMITS } from '@candydati/domain'
 import { DOMWrapper, flushPromises } from '@vue/test-utils'
 import { setResponseStatus } from 'h3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

@@ -1,4 +1,4 @@
-import { hasOrganizationWideAccess, isJobScopedRole, ORGANIZATION_SCOPE, type JobScope } from '@tt/domain';
+import { hasOrganizationWideAccess, isJobScopedRole, ORGANIZATION_SCOPE, type JobScope } from '@candydati/domain';
 import type { Actor } from '../actor.js';
 import type { JobTeamRepository } from '../job-team-ports.js';
 

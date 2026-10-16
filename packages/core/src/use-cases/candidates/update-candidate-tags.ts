@@ -1,4 +1,4 @@
-import { TAG_MAX, TAGS_PER_CANDIDATE_MAX } from '@tt/domain';
+import { TAG_MAX, TAGS_PER_CANDIDATE_MAX } from '@candydati/domain';
 import { z } from 'zod';
 import { defineCandidateUseCase } from './define.js';
 import { loadCandidateDetail, requireCandidate } from './shared.js';

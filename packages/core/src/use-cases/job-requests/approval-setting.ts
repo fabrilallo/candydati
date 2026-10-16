@@ -1,4 +1,4 @@
-import { checkApproval, type JobApproval } from '@tt/domain';
+import { checkApproval, type JobApproval } from '@candydati/domain';
 import { z } from 'zod';
 import { requireJob } from '../jobs/shared.js';
 import { defineJobRequestUseCase } from './define.js';

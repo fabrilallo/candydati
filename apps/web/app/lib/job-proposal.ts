@@ -1,4 +1,4 @@
-import type { JobContent } from '@tt/domain'
+import type { JobContent } from '@candydati/domain'
 import { contentToForm, type JobForm, type StageForm } from './job-form'
 
 /**

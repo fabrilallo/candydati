@@ -1,4 +1,4 @@
-import { httpUrlOrNull } from '@tt/domain'
+import { httpUrlOrNull } from '@candydati/domain'
 
 /** Only an http(s) address becomes a link: stored data can hold anything (`javascript:` is script on our origin). */
 export const safeExternalUrl = (url: string | null | undefined): string | null => httpUrlOrNull(url)

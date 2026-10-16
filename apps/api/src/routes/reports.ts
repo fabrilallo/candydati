@@ -1,5 +1,5 @@
-import { exportReportsCsv, getReports } from '@tt/core';
-import { ok } from '@tt/domain';
+import { exportReportsCsv, getReports } from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { contentDisposition } from '../http/content-disposition.js';

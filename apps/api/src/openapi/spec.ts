@@ -1,4 +1,4 @@
-import type { Permission } from '@tt/domain';
+import type { Permission } from '@candydati/domain';
 import { z } from 'zod';
 import type { ComponentName } from './components.js';
 

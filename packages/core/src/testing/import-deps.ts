@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { ImportBatch } from '@tt/domain';
+import type { ImportBatch } from '@candydati/domain';
 import type { ConsentDeps, ImportCommitDeps, ImportDeps, ImportUndoDeps } from '../import-ports.js';
 import { createInMemoryErasure } from './in-memory-privacy-ops.js';
 import {

@@ -1,4 +1,4 @@
-import type { ExtractionDto, CvExtraction  } from '@tt/domain'
+import type { ExtractionDto, CvExtraction  } from '@candydati/domain'
 
 /**
  * What the profile shows of the automatic CV extraction. Always a suggestion next to the original document, which

@@ -1,6 +1,6 @@
-import type { ImportBatchDto, ImportBatchPageDto, ImportBatchSummary } from '@tt/core';
-import { describeImportBatches, toImportBatchDto } from '@tt/core';
-import type { ImportBatch } from '@tt/domain';
+import type { ImportBatchDto, ImportBatchPageDto, ImportBatchSummary } from '@candydati/core';
+import { describeImportBatches, toImportBatchDto } from '@candydati/core';
+import type { ImportBatch } from '@candydati/domain';
 import type { AppContext } from '../app-context.js';
 
 /** The batch as the web shows it: the DTO plus the core read model (target job, author by name, column samples). */

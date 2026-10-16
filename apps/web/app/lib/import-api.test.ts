@@ -1,4 +1,4 @@
-import { importBatchSchema, undoImportSchema } from '@tt/domain'
+import { importBatchSchema, undoImportSchema } from '@candydati/domain'
 import { describe, expect, it, vi } from 'vitest'
 import { batch, importDetail, importItem, publicConsent } from '~~/test/fixtures/phase8-fixtures'
 import { ApiFailure } from './api-call'

@@ -1,4 +1,4 @@
-import type { PlatformConfig } from '@tt/domain'
+import type { PlatformConfig } from '@candydati/domain'
 import { platformFromPublicConfig } from '@/lib/platform'
 
 /**

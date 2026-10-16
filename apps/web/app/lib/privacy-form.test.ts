@@ -1,4 +1,4 @@
-import { DEFAULT_RETENTION_DAYS } from '@tt/domain'
+import { DEFAULT_RETENTION_DAYS } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { notice, PRIVACY_TEXT } from '~~/test/fixtures/candidate-fixtures'
 import { initialPrivacyForm, validatePrivacyForm } from './privacy-form'

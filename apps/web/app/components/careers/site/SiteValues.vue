@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SectionOf } from '@tt/domain'
+import type { SectionOf } from '@candydati/domain'
 import { valueIcon } from '@/lib/careers-icons'
 
 /** Values or perks as a ruled list in two columns (not a row of identical cards), each with its icon. */

@@ -1,5 +1,5 @@
-import { IMPORT_LIMITS, type ParsedImportRow } from '@tt/domain';
-import type { CvMediaType } from '@tt/domain';
+import { IMPORT_LIMITS, type ParsedImportRow } from '@candydati/domain';
+import type { CvMediaType } from '@candydati/domain';
 import { sniffCv } from '../upload/sniff.js';
 import { zipHasEntry } from '../upload/zip.js';
 import { openImportArchive, type ImportEntry } from './archive.js';

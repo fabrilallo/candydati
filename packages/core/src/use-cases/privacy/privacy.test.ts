@@ -1,4 +1,4 @@
-import { privacyNoticeInputSchema } from '@tt/domain';
+import { privacyNoticeInputSchema } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
 import {

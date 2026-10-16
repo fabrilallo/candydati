@@ -1,4 +1,4 @@
-import { IMPORT_RECONFIRM_DAYS } from '@tt/domain';
+import { IMPORT_RECONFIRM_DAYS } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
 import { buildApplication, buildCandidate, fakePdfBytes, ORG_A } from '../../testing/index.js';

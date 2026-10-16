@@ -14,7 +14,7 @@ import {
   type Job,
   type PrivacyNotice,
   type SubmittedContact,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, NotFoundError, RateLimitedError, ValidationError } from '../../errors.js';
 import type { IntakeRepositories, SniffedCv, SubmitApplicationDeps } from '../../intake-ports.js';

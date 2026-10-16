@@ -105,7 +105,7 @@ browser -> web (Nuxt, proxies /api/** and /mcp) -> api (Fastify)
   -> authenticate (session cookie or API key) -> build an Actor (user, organization, role/scopes)
   -> route validates input with Zod -> calls a use case in packages/core
   -> use case: permission check -> handler (inside a transaction) -> audit entry -> outbox event
-  -> response in the { ok, data | error } envelope from @tt/domain
+  -> response in the { ok, data | error } envelope from @candydati/domain
 ```
 
 ### Envelope exceptions
@@ -252,7 +252,7 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
   `frame-ancestors 'none'`, `object-src 'none'`). `server/middleware/security-headers.ts` writes the headers and
   `server/plugins/csp-nonce.ts` stamps the nonce on Nuxt's scripts. `/api/**` and `/mcp` keep the api's own headers (the CV
   viewer is a same-origin frame). A CDN that caches HTML caches its nonce too: keep public HTML out of long shared caches.
-- Anything a stranger can type that ends up in a link is http(s) only (`httpUrlSchema` in `@tt/domain`), and templates
+- Anything a stranger can type that ends up in a link is http(s) only (`httpUrlSchema` in `@candydati/domain`), and templates
   bind `href`/`src` from data only through `safeExternalUrl` / `safeImageUrl` (`app/lib/template-links.test.ts` fails on
   any other binding). Organization logos are https only.
 - Logs never carry query parameters: the `err` serializer (`safeErrorSerializer`) logs a database error as SQLSTATE,
@@ -260,7 +260,7 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 - DOCX, XLSX and ZIP imports are inflated with the real output counted against a cap (`inflateBounded`), never trusting
   the sizes in the archive headers.
 - The web proxy sets `X-Forwarded-Host`/`-Proto` from the configured site URL, never from the client's headers; the api
-  believes `X-Forwarded-For` only from the web container (`TT_WEB_IP` in the production compose).
+  believes `X-Forwarded-For` only from the web container (`CANDYDATI_WEB_IP` in the production compose).
 
 ## Assistant and MCP constraints
 
@@ -268,7 +268,7 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
   means the assistant is off and no model is called.
 - The assistant acts with the permissions of the user it works for, and its actions are logged as agent actions.
 - It never ranks, scores or rejects candidates. Any message to a candidate needs a person's confirmation.
-- CV and email content is data, not instructions. An adversarial eval suite checks this (`pnpm --filter @tt/api eval:agent`).
+- CV and email content is data, not instructions. An adversarial eval suite checks this (`pnpm --filter @candydati/api eval:agent`).
 - The conversation lives in the browser; the server stores nothing of it ([ADR 0007](adr/0007-stateless-assistant.md)).
 - MCP tools are thin wrappers on the same use cases, authorized by API key scopes. Each tool call of a JSON-RPC batch
   counts against the key's per-minute limit and a batch holds at most 20 messages. Reads are audited as `mcp.read` with

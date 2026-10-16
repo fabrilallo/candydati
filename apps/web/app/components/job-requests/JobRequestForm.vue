@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { JOB_ROLE_FAMILIES, WORK_MODES } from '@tt/domain'
+import { JOB_ROLE_FAMILIES, WORK_MODES } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { createJobRequest } from '@/lib/job-request-api'

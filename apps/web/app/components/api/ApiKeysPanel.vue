@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { PlusIcon } from '@lucide/vue'
 import type { ApiKeyCreateInput } from '@/lib/api-key-api'
-import type { ApiKeyDto } from '@tt/domain'
+import type { ApiKeyDto } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 

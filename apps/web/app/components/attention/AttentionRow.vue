@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { StageRef, AttentionItemDto  } from '@tt/domain'
+import type { StageRef, AttentionItemDto  } from '@candydati/domain'
 import { MailIcon, PanelRightOpenIcon } from '@lucide/vue'
 import { fullName } from '@/lib/candidate-view'
 import { formatDate } from '@/lib/format'

@@ -1,5 +1,5 @@
-import type { PipelineView } from '@tt/core';
-import type { JobStatus, ResponseState } from '@tt/domain';
+import type { PipelineView } from '@candydati/core';
+import type { JobStatus, ResponseState } from '@candydati/domain';
 
 /**
  * What the MCP `get_pipeline` returns: names, stage and response state, and nothing a candidate wrote (no message, no

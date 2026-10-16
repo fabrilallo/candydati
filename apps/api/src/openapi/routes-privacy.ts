@@ -1,4 +1,4 @@
-import { SUPPORTED_LOCALES, erasedSchema, privacyNoticeInputSchema, processingRecordSchema, retentionOverviewSchema, dataExportCreatedSchema, privacyTemplateSchema, httpUrlSchema } from '@tt/domain';
+import { SUPPORTED_LOCALES, erasedSchema, privacyNoticeInputSchema, processingRecordSchema, retentionOverviewSchema, dataExportCreatedSchema, privacyTemplateSchema, httpUrlSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { confirmNameBody } from './schemas-admin.js';
 import type { RouteSpec } from './spec.js';

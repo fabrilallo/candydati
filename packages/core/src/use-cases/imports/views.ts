@@ -1,4 +1,4 @@
-import type { ImportBatch, ImportItem } from '@tt/domain';
+import type { ImportBatch, ImportItem } from '@candydati/domain';
 
 export interface ImportBatchView {
   readonly batch: ImportBatch;

@@ -4,9 +4,9 @@ import {
   createDrizzleJobs,
   createDrizzleResponsePromises,
   createDrizzleStageEvents,
-} from '@tt/core';
-import { expectedReports, REPORT_FROM, REPORT_NOW, REPORT_TO, seedReportDataset, type DatasetIds } from '@tt/core/testing';
-import { schema } from '@tt/db';
+} from '@candydati/core';
+import { expectedReports, REPORT_FROM, REPORT_NOW, REPORT_TO, seedReportDataset, type DatasetIds } from '@candydati/core/testing';
+import { schema } from '@candydati/db';
 import { eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createKey, withKey } from './testing/api-keys.js';

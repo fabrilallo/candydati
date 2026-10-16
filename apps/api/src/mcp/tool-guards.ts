@@ -1,4 +1,4 @@
-import { recordAuditEvent } from '@tt/core';
+import { recordAuditEvent } from '@candydati/core';
 import type { ToolContext, ToolResult } from './tool-support.js';
 import { toolError } from './tool-support.js';
 

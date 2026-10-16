@@ -1,4 +1,4 @@
-// Writes the public, versioned schemas (job ad, candidate export) to docs/schema. Run with `pnpm --filter @tt/domain schema`.
+// Writes the public, versioned schemas (job ad, candidate export) to docs/schema. Run with `pnpm --filter @candydati/domain schema`.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import process from 'node:process';
 import { dirname, resolve } from 'node:path';

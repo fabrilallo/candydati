@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type AutomationRuleDto, AUTOMATION_ACTIONS, JOB_OWNER_ASSIGNEE, MAX_DUE_IN_DAYS, TASK_TITLE_MAX, type EmailTemplateDto    } from '@tt/domain';
+import { type AutomationRuleDto, AUTOMATION_ACTIONS, JOB_OWNER_ASSIGNEE, MAX_DUE_IN_DAYS, TASK_TITLE_MAX, type EmailTemplateDto    } from '@candydati/domain';
 import type { MemberRow } from '@/lib/auth-api'
 import type { RuleInput } from '@/lib/automation-api'
 import { EMPTY_RULE_FORM, ruleToForm, validateRuleForm, type RuleForm, type RuleFormErrors } from '@/lib/automation-view'

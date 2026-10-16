@@ -6,7 +6,7 @@ import {
   setChannelEnabledInputSchema,
   type DistributionChannelDto,
   type DistributionOverviewDto,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import { NotFoundError, ValidationError } from '../../errors.js';
 import { requireOrganization } from './organization.js';

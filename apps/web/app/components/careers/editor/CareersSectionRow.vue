@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowDownIcon, ArrowUpIcon, EyeIcon, EyeOffIcon, GripVerticalIcon, Trash2Icon } from '@lucide/vue'
-import type { CareersSection } from '@tt/domain'
+import type { CareersSection } from '@candydati/domain'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { SECTION_ICONS } from '@/lib/careers-section-icons'

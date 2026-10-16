@@ -1,4 +1,4 @@
-import { and, eq, inArray, or, schema } from '@tt/db';
+import { and, eq, inArray, or, schema } from '@candydati/db';
 import { exists } from 'drizzle-orm';
 import type { UserDirectory } from '../candidate-ports.js';
 import type { DbExecutor } from './db-executor.js';

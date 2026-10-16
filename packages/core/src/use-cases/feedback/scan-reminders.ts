@@ -1,4 +1,4 @@
-import { DAY_MS, FEEDBACK_REMINDER_DAYS, type FeedbackRequest } from '@tt/domain';
+import { DAY_MS, FEEDBACK_REMINDER_DAYS, type FeedbackRequest } from '@candydati/domain';
 import { z } from 'zod';
 import type { FeedbackStageEntryDeps } from '../../feedback-ports.js';
 import { defineSystemJob } from '../../use-case.js';

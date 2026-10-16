@@ -1,4 +1,4 @@
-import { emailSettingsInputSchema, type DomainStatus, type EmailSettings } from '@tt/domain';
+import { emailSettingsInputSchema, type DomainStatus, type EmailSettings } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError } from '../../errors.js';
 import type { DomainCheck, MessagingDeps } from '../../messaging-ports.js';

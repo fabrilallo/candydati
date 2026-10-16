@@ -1,4 +1,4 @@
-import type { ImportBatch } from '@tt/domain';
+import type { ImportBatch } from '@candydati/domain';
 import type { UserDirectory } from '../../candidate-ports.js';
 import type { ImportDeps } from '../../import-ports.js';
 

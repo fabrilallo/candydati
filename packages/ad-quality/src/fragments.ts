@@ -1,4 +1,4 @@
-import { employmentBenefitLines, type JobContent } from '@tt/domain';
+import { employmentBenefitLines, type JobContent } from '@candydati/domain';
 
 export type FragmentKey =
   | 'title'

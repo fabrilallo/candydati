@@ -1,4 +1,4 @@
-import type { ImportAnalysis, ImportCounts, ImportItemProposal, ImportItemStatus, ImportMapping, ImportSourceFile, ImportStatus } from '@tt/domain';
+import type { ImportAnalysis, ImportCounts, ImportItemProposal, ImportItemStatus, ImportMapping, ImportSourceFile, ImportStatus } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { boolean, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';

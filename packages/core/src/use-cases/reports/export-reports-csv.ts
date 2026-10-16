@@ -1,4 +1,4 @@
-import { reportQuerySchema } from '@tt/domain';
+import { reportQuerySchema } from '@candydati/domain';
 import { defineReportUseCase } from './define.js';
 import { getReports } from './get-reports.js';
 import { reportsToCsv } from './csv.js';

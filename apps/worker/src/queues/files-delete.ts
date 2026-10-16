@@ -1,4 +1,4 @@
-import type { FileStorage } from '@tt/core';
+import type { FileStorage } from '@candydati/core';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

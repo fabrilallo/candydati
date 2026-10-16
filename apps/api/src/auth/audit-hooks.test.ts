@@ -1,4 +1,4 @@
-import { createInMemoryAuditLog, createInMemoryTransaction, failingAuditLog, type InMemoryAuditLog } from '@tt/core/testing';
+import { createInMemoryAuditLog, createInMemoryTransaction, failingAuditLog, type InMemoryAuditLog } from '@candydati/core/testing';
 import { describe, expect, it } from 'vitest';
 import { createAuditHooks, type ActorLookups } from './audit-hooks.js';
 

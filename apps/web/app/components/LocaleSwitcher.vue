@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SUPPORTED_LOCALES } from '@tt/domain'
+import { SUPPORTED_LOCALES } from '@candydati/domain'
 
 const { t, locale, setLocale } = useI18n()
 </script>

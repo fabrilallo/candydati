@@ -1,4 +1,4 @@
-import { ATTENTION_STATES, NOTE_MAX, TAG_MAX, TAGS_PER_CANDIDATE_MAX, taskInputSchema } from '@tt/domain';
+import { ATTENTION_STATES, NOTE_MAX, TAG_MAX, TAGS_PER_CANDIDATE_MAX, taskInputSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { page, type RouteSpec } from './spec.js';
 

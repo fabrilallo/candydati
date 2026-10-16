@@ -1,4 +1,4 @@
-import { ACTOR_TYPES, AUDIT_ACTIONS } from '@tt/domain';
+import { ACTOR_TYPES, AUDIT_ACTIONS } from '@candydati/domain';
 import { z } from 'zod';
 
 /** One event of the append-only audit log, as `GET /audit-log` returns it (`AuditEventDto` of the api). */

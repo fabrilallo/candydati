@@ -19,7 +19,7 @@ Dokploy's own documentation: <https://docs.dokploy.com/docs/core/docker-compose>
 2. **Provider**: Git, your repository and branch (or a tag: pin releases). **Compose Path**: `./docker-compose.prod.yml`.
 3. In **Advanced**, turn on **Isolated Deployments**: Dokploy then gives the stack its own network and attaches
    what Traefik needs. Our compose file keeps its internal `internal` network (with the fixed web address used by the api's
-   `TRUST_PROXY`) next to it; if `172.31.77.0/24` clashes with another stack, change `TT_SUBNET` and `TT_WEB_IP` together.
+   `TRUST_PROXY`) next to it; if `172.31.77.0/24` clashes with another stack, change `CANDYDATI_SUBNET` and `CANDYDATI_WEB_IP` together.
 
 ## 2. Environment variables (Dokploy's Environment tab)
 
@@ -32,7 +32,7 @@ PLATFORM_NAME=Your name
 BETTER_AUTH_SECRET=<openssl rand -base64 48>
 INBOUND_WEBHOOK_SECRET=<openssl rand -base64 48>
 POSTGRES_PASSWORD=<openssl rand -base64 36>
-S3_ACCESS_KEY=tt-minio
+S3_ACCESS_KEY=candydati-minio
 S3_SECRET_KEY=<openssl rand -base64 36>
 EMAIL_PROVIDER=smtp
 SMTP_HOST=...
@@ -167,5 +167,5 @@ Give the agent Dokploy's documentation index, <https://docs.dokploy.com/llms.txt
   `EMAIL_PROVIDER` not smtp/resend). Fix it in the Environment tab, redeploy.
 - **404 from Traefik after adding the domain**: redeploy (labels are read at deploy), check service `web` and port 3000.
 - **Port already allocated**: another service uses `WEB_PORT`; change it (the domain still works, Traefik uses the Docker network).
-- **Subnet overlap**: change `TT_SUBNET` and `TT_WEB_IP`.
+- **Subnet overlap**: change `CANDYDATI_SUBNET` and `CANDYDATI_WEB_IP`.
 - **Build killed**: not enough memory; add swap or build images elsewhere.

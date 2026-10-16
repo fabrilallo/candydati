@@ -1,5 +1,5 @@
 import { useDebounceFn } from '@vueuse/core'
-import type { TemplatePreviewDto } from '@tt/domain'
+import type { TemplatePreviewDto } from '@candydati/domain'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { previewMessage } from '@/lib/message-api'
 import type { ComposerOptions } from './useMessageComposer'

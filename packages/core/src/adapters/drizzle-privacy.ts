@@ -1,5 +1,5 @@
-import { and, asc, desc, eq, lte, schema } from '@tt/db';
-import type { DataExport, RetentionRun } from '@tt/domain';
+import { and, asc, desc, eq, lte, schema } from '@candydati/db';
+import type { DataExport, RetentionRun } from '@candydati/domain';
 import type { DataExportRepository, RetentionRunRepository } from '../privacy-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

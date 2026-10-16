@@ -1,5 +1,5 @@
 {
-  "name": "@tt/web",
+  "name": "@candydati/web",
   "version": "0.1.0",
   "private": true,
   "license": "BUSL-1.1",
@@ -28,7 +28,7 @@
     "@nuxtjs/color-mode": "4.0.1",
     "@nuxtjs/i18n": "10.6.0",
     "@tailwindcss/vite": "4.3.3",
-    "@tt/domain": "workspace:*",
+    "@candydati/domain": "workspace:*",
     "@unovis/ts": "1.7.1",
     "@unovis/vue": "1.7.1",
     "@vueuse/core": "14.4.0",

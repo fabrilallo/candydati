@@ -1,4 +1,4 @@
-import type { JobTeamRole } from '@tt/domain';
+import type { JobTeamRole } from '@candydati/domain';
 import { index, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { job } from './job.js';

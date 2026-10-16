@@ -50,8 +50,8 @@ export const signHmacPayload = (rawBody: RawBody, timestamp: string, secret: str
   `sha256=${hmacOf(secret, timestamp, rawBody).toString('hex')}`;
 
 /**
- * Generic webhook: `x-tt-signature: sha256=<hex>` over `<timestamp>.<raw body>`, with the unix-seconds timestamp in
- * `x-tt-timestamp`, secret used as-is. A timestamp older than 5 minutes or more than 1 minute ahead is refused, so a
+ * Generic webhook: `x-candydati-signature: sha256=<hex>` over `<timestamp>.<raw body>`, with the unix-seconds timestamp in
+ * `x-candydati-timestamp`, secret used as-is. A timestamp older than 5 minutes or more than 1 minute ahead is refused, so a
  * captured request cannot be replayed later.
  */
 export function verifyHmacSignature(

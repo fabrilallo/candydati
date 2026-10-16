@@ -1,4 +1,4 @@
-import type { AuditEvent } from '@tt/domain';
+import type { AuditEvent } from '@candydati/domain';
 
 export interface AuditEventDto {
   readonly id: string;

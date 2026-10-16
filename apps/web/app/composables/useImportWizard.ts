@@ -1,4 +1,4 @@
-import type { ImportConfidence, ImportField } from '@tt/domain'
+import type { ImportConfidence, ImportField } from '@candydati/domain'
 import { emptyMapping, mappingChanged, setHeaderField } from '@/lib/import-mapping'
 import { setByConfidence, toggleItem, type PreviewFilters } from '@/lib/import-preview'
 import type { WizardStep } from '@/lib/import-view'

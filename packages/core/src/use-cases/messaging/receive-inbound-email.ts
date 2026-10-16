@@ -4,7 +4,7 @@ import {
   MESSAGE_BODY_MAX,
   RAW_TEXT_MAX,
   type Message,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError } from '../../errors.js';
 import type { InboundDeps } from '../../messaging-ports.js';

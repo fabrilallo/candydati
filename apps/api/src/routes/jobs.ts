@@ -1,5 +1,5 @@
-import { closeJob, createJob, getJob, listJobs, publishJob, toJobDto, toJobSummaryDto, toPublishJobResultDto, updateJob } from '@tt/core';
-import { ok } from '@tt/domain';
+import { closeJob, createJob, getJob, listJobs, publishJob, toJobDto, toJobSummaryDto, toPublishJobResultDto, updateJob } from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { AD_BODY_LIMIT } from './limits.js';

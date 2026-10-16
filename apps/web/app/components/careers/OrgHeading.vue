@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PublicOrganizationDto } from '@tt/domain'
+import type { PublicOrganizationDto } from '@candydati/domain'
 import { initials } from '@/lib/initials'
 import { safeImageUrl } from '@/lib/safe-url'
 

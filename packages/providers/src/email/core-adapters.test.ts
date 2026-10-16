@@ -1,5 +1,5 @@
 import { EmailSendError, type EmailProvider } from './types.js';
-import { loadPlatformConfig } from '@tt/domain';
+import { loadPlatformConfig } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { newConversationToken, toEmailSender, toMessagingConfig } from './core-adapters.js';
 

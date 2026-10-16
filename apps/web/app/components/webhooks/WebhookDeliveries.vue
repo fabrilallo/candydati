@@ -3,7 +3,7 @@ import { errorKeyOf } from '@/lib/auth-errors'
 import { listDeliveries } from '@/lib/automation-api'
 import { deliveryTone } from '@/lib/automation-view'
 import { formatDateTime } from '@/lib/format'
-import type { WebhookDeliveryDto } from '@tt/domain'
+import type { WebhookDeliveryDto } from '@candydati/domain'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 

@@ -1,5 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import type { PublicCareersDto, PublicJobSummaryDto } from '@tt/domain'
+import type { PublicCareersDto, PublicJobSummaryDto } from '@candydati/domain'
 import { afterEach, describe, expect, it } from 'vitest'
 import CareersList from './CareersList.vue'
 

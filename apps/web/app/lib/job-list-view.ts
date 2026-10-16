@@ -1,4 +1,4 @@
-import type { JobSummaryDto } from '@tt/domain'
+import type { JobSummaryDto } from '@candydati/domain'
 
 export type Readiness = { readonly kind: 'ready' } | { readonly kind: 'missing'; readonly count: number }
 

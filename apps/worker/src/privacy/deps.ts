@@ -5,8 +5,8 @@ import {
   type OrganizationExportDeps,
   type RetentionDeps,
   type TaskQueue,
-} from '@tt/core';
-import { zipStreamFactory } from '@tt/providers';
+} from '@candydati/core';
+import { zipStreamFactory } from '@candydati/providers';
 
 export interface PrivacyWorkerDeps {
   readonly retention: RetentionDeps;

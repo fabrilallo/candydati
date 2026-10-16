@@ -1,4 +1,4 @@
-import { eq, schema, sql, type Db } from '@tt/db';
+import { eq, schema, sql, type Db } from '@candydati/db';
 import type { AuthEmails } from './auth-emails.js';
 import { normalizeEmail } from './sign-in-throttle.js';
 

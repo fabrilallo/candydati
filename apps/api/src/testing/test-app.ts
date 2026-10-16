@@ -1,13 +1,13 @@
 import { randomUUID } from 'node:crypto';
-import type { DistributionChannel } from '@tt/core';
-import type { AdQualityAnalyzer } from '@tt/domain';
-import { createDb, type DbHandle } from '@tt/db';
+import type { DistributionChannel } from '@candydati/core';
+import type { AdQualityAnalyzer } from '@candydati/domain';
+import { createDb, type DbHandle } from '@candydati/db';
 import type { FastifyInstance } from 'fastify';
 import type { AccountMailer } from '../auth/account-mailer.js';
 import { createRecordingMailer, registerMailbox, type RecordingMailer } from './mailbox.js';
 import type { RateLimitSettings } from '../app-context.js';
 import { parseEnv, type Env } from '../config/env.js';
-import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer, type FakeEmailSender, type InMemoryFileStorage, type InMemoryTaskQueue } from '@tt/core/testing';
+import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer, type FakeEmailSender, type InMemoryFileStorage, type InMemoryTaskQueue } from '@candydati/core/testing';
 import { createInMemoryThrottleStore, type ThrottleStore } from '../auth/sign-in-throttle.js';
 import { buildServer } from '../server.js';
 import { apiTestDatabaseUrl } from './test-database.js';
@@ -26,7 +26,7 @@ export const testEnv = (overrides: Record<string, string> = {}): Env =>
     TRUSTED_ORIGINS: 'http://localhost:3100',
     PLATFORM_URL: WEB_ORIGIN,
     S3_ENDPOINT: 'http://localhost:9000',
-    S3_BUCKET: 'team-tracker-test',
+    S3_BUCKET: 'candydati-test',
     S3_ACCESS_KEY: 'test',
     S3_SECRET_KEY: 'test-secret',
     EMAIL_DOMAIN: 'mail.test.example',

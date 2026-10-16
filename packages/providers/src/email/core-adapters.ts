@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
-import type { EmailIdentity, EmailSender, MessagingConfig } from '@tt/core';
-import type { PlatformConfig } from '@tt/domain';
+import type { EmailIdentity, EmailSender, MessagingConfig } from '@candydati/core';
+import type { PlatformConfig } from '@candydati/domain';
 import type { EmailConfig } from './config.js';
 import { EmailSendError, type EmailProvider } from './types.js';
 

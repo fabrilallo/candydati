@@ -1,9 +1,9 @@
-import { createDb, runMigrations } from '@tt/db';
-import { createS3FileStorage } from '@tt/providers';
+import { createDb, runMigrations } from '@candydati/db';
+import { createS3FileStorage } from '@candydati/providers';
 import { PgBoss } from 'pg-boss';
 import { loadEnv } from './config/env.js';
-import { createErrorReporter, createPgBossQueue, withRequestId, type ErrorReporter } from '@tt/providers';
-import { safeErrorSerializer } from '@tt/core';
+import { createErrorReporter, createPgBossQueue, withRequestId, type ErrorReporter } from '@candydati/providers';
+import { safeErrorSerializer } from '@candydati/core';
 import { buildServer } from './server.js';
 
 const PG_BOSS_SCHEMA = 'pgboss';

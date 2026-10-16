@@ -1,4 +1,4 @@
-import { applicationFeedbackSchema, publicFeedbackSchema } from '@tt/domain'
+import { applicationFeedbackSchema, publicFeedbackSchema } from '@candydati/domain'
 
 /** What the api sends to the public form (technical interview, CV available): the core `PublicFeedbackView`. */
 export const publicFeedback = (overrides: Record<string, unknown> = {}) =>

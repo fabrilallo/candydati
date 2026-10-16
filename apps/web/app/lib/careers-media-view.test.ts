@@ -1,4 +1,4 @@
-import { MEDIA_LIMITS } from '@tt/domain'
+import { MEDIA_LIMITS } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { fixtureAssets, imageAsset, videoAsset } from '~~/test/fixtures/careers-editor-fixtures'
 import { ACCEPT, assetsOfKind, fileProblem, formatSize, mediaMap, megabytes, thumbnailUrl, usedIn } from './careers-media-view'

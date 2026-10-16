@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CandidateApplicationDto } from '@tt/domain'
+import type { CandidateApplicationDto } from '@candydati/domain'
 import { MessageSquarePlusIcon } from '@lucide/vue'
 import { feedbackStageName, groupRequests } from '@/lib/feedback-view'
 import { formatDate } from '@/lib/format'

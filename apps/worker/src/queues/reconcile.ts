@@ -1,4 +1,4 @@
-import { reconcileQueuedWork, type ReconcileDeps } from '@tt/core';
+import { reconcileQueuedWork, type ReconcileDeps } from '@candydati/core';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

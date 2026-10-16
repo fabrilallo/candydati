@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PublicCareersDto, PublicJobSummaryDto } from '@tt/domain'
+import type { PublicCareersDto, PublicJobSummaryDto } from '@candydati/domain'
 import { careersStats, filterCareers, groupCareers, workModesOf } from '@/lib/careers-view'
 
 /**

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { createDb, schema, type DbHandle } from '@tt/db';
-import type { FeedbackRequest, InterviewFeedback, JobRequest, StageInterviewer } from '@tt/domain';
+import { createDb, schema, type DbHandle } from '@candydati/db';
+import type { FeedbackRequest, InterviewFeedback, JobRequest, StageInterviewer } from '@candydati/domain';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ConflictError } from '../errors.js';
 import { buildApplication, buildCandidate, buildJob } from '../testing/index.js';

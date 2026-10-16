@@ -1,5 +1,5 @@
-import { seedHrWorld, createFakeEmailSender, createFakeHostGuard, createFakeHttpPoster, buildApplication, buildAutomationRule, buildJob, buildEmailTemplate, buildOutboxEvent, buildWebhookEndpoint, seedAutomationWorld, ORG_A, createInMemoryTransaction } from '@tt/core/testing';
-import { formatDigestFrom } from '@tt/core';
+import { seedHrWorld, createFakeEmailSender, createFakeHostGuard, createFakeHttpPoster, buildApplication, buildAutomationRule, buildJob, buildEmailTemplate, buildOutboxEvent, buildWebhookEndpoint, seedAutomationWorld, ORG_A, createInMemoryTransaction } from '@candydati/core/testing';
+import { formatDigestFrom } from '@candydati/core';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
 import { createAutomationRunQueue } from './automation-run.js';

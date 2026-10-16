@@ -7,7 +7,7 @@ import type {
   CandidateNote,
   CvExtractionRecord,
   PrivacyNotice,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { MessageRepository } from './messaging-ports.js';
 import type { CoreDeps } from './ports.js';

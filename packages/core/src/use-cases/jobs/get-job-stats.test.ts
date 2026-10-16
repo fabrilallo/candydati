@@ -1,4 +1,4 @@
-import { jobStatsDtoSchema, ROLES, STATS_WEEKS, type Job } from '@tt/domain';
+import { jobStatsDtoSchema, ROLES, STATS_WEEKS, type Job } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { buildJob, completeJobContent, createInMemoryJobRepository, createTestJobDeps, fixedQualityReport, userActor } from '../../testing/index.js';
 import { getJobStats } from './get-job-stats.js';

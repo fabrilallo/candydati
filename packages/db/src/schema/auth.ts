@@ -111,7 +111,7 @@ export const member = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    // Free text: the list of valid roles lives in @tt/domain ROLES.
+    // Free text: the list of valid roles lives in @candydati/domain ROLES.
     role: text("role").default("member").notNull(),
     createdAt: timestamp("created_at").notNull(),
   },

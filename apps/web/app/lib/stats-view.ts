@@ -1,4 +1,4 @@
-import type { JobStatsDto, JobStatus } from '@tt/domain'
+import type { JobStatsDto, JobStatus } from '@candydati/domain'
 
 /** Pure view helpers for the overview charts. Inputs come from `JobStatsDto`; nothing here invents a figure. */
 

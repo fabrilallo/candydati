@@ -6,7 +6,7 @@ import type {
   Outcome,
   PrivacyNotice,
   SubmittedContact,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { boolean, customType, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';

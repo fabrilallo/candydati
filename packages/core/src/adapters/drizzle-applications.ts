@@ -1,5 +1,5 @@
-import { and, asc, count, desc, eq, gte, isNotNull, isNull, lte, schema, sql } from '@tt/db';
-import { CV_MEDIA_TYPES, type Application, type CvMediaType } from '@tt/domain';
+import { and, asc, count, desc, eq, gte, isNotNull, isNull, lte, schema, sql } from '@candydati/db';
+import { CV_MEDIA_TYPES, type Application, type CvMediaType } from '@candydati/domain';
 import type { ApplicationRepository, RetentionPage } from '../candidate-ports.js';
 import { ConflictError, NotFoundError } from '../errors.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';

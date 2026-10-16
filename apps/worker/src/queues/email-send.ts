@@ -1,4 +1,4 @@
-import { deliverMessage, type Actor, type DeliverDeps } from '@tt/core';
+import { deliverMessage, type Actor, type DeliverDeps } from '@candydati/core';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

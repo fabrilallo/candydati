@@ -1,4 +1,4 @@
-import type { DistributionJobView, DistributionSetting, JobDistribution, PublicOrganizationDto } from '@tt/domain';
+import type { DistributionJobView, DistributionSetting, JobDistribution, PublicOrganizationDto } from '@candydati/domain';
 import type { PublicJobDeps, JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { CoreDeps } from './ports.js';
 

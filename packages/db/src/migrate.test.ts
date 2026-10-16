@@ -16,7 +16,7 @@ let clock = 1_700_000_000_000;
 const makeFolder = (steps: readonly Step[]): string => {
   clock += 100_000;
   const base = clock;
-  const folder = mkdtempSync(join(tmpdir(), 'tt-migrations-'));
+  const folder = mkdtempSync(join(tmpdir(), 'candydati-migrations-'));
   mkdirSync(join(folder, 'meta'));
   const entries = steps.map((step, idx) => ({
     idx,
@@ -31,7 +31,7 @@ const makeFolder = (steps: readonly Step[]): string => {
 };
 
 describe('runMigrations', () => {
-  const scratchName = `tt_migrate_${process.pid}_test`;
+  const scratchName = `candydati_migrate_${process.pid}_test`;
   const admin = new pg.Client({ connectionString: maintenanceDatabaseUrl(testDatabaseUrl()) });
   let url = '';
 

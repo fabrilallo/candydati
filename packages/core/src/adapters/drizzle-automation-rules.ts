@@ -1,5 +1,5 @@
-import { and, asc, eq, inArray, schema } from '@tt/db';
-import { automationActionSchema, type AutomationRule } from '@tt/domain';
+import { and, asc, eq, inArray, schema } from '@candydati/db';
+import { automationActionSchema, type AutomationRule } from '@candydati/domain';
 import type { AutomationExecutionRepository, AutomationRuleRepository } from '../automation-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

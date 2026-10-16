@@ -1,4 +1,4 @@
-import { assess, checkPublishable, complianceWarnings, jobContentSchema, type AdQualityAssessment, type PublishIssue } from '@tt/domain';
+import { assess, checkPublishable, complianceWarnings, jobContentSchema, type AdQualityAssessment, type PublishIssue } from '@candydati/domain';
 import { z } from 'zod';
 import { defineJobUseCase } from './define.js';
 

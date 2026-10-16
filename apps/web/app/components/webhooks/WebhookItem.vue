@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ChevronDownIcon, SendIcon, Trash2Icon } from '@lucide/vue'
-import type { WebhookEndpointDto } from '@tt/domain'
+import type { WebhookEndpointDto } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 
 /** One endpoint: address, events, a switch to pause it, "Invia una prova", the delivery log and delete. */

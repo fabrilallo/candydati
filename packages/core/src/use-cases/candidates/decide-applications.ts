@@ -1,4 +1,4 @@
-import { BULK_MESSAGE_MAX, OUTCOMES } from '@tt/domain';
+import { BULK_MESSAGE_MAX, OUTCOMES } from '@candydati/domain';
 import { z } from 'zod';
 import { toAuditActor } from '../../actor.js';
 import { ConflictError } from '../../errors.js';

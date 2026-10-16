@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { distributionOverviewSchema, jobDistributionSchema } from '@tt/domain'
+import { distributionOverviewSchema, jobDistributionSchema } from '@candydati/domain'
 import { curlExample, feedUrl, hasRegisteredChannels, jobRows, llmsUrl, publicApiUrl, publicJobApiUrl, rowStatusLabelKey, safeExternalUrl, sitemapUrl, statusLabelKey, statusTone } from './distribution-view'
 
 const SITE = 'https://ats.example.com/'

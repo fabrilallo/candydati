@@ -1,4 +1,4 @@
-import { EXTERNAL_VIDEO_ORIGINS } from '@tt/domain'
+import { EXTERNAL_VIDEO_ORIGINS } from '@candydati/domain'
 
 /**
  * Security headers of the web app. Pure: the middleware and the Nitro plugin call these, and the tests exercise them

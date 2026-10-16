@@ -1,4 +1,4 @@
-import type { StageRef } from '@tt/domain'
+import type { StageRef } from '@candydati/domain'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { getPipeline } from '@/lib/candidate-api'
 

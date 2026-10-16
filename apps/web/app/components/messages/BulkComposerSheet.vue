@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApplicationCardDto, EmailTemplateKind  } from '@tt/domain'
+import type { ApplicationCardDto, EmailTemplateKind  } from '@candydati/domain'
 import { fullName } from '@/lib/candidate-view'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 

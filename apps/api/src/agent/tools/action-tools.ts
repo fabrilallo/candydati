@@ -1,6 +1,6 @@
 import { createTool } from '@mastra/core/tools';
-import { createTask, renderMessageDraft, type MessagingDeps, type TaskDeps } from '@tt/core';
-import { TASK_TITLE_MAX } from '@tt/domain';
+import { createTask, renderMessageDraft, type MessagingDeps, type TaskDeps } from '@candydati/core';
+import { TASK_TITLE_MAX } from '@candydati/domain';
 import { z } from 'zod';
 import { readAgentIdentity } from '../request-context.js';
 import { runTool } from '../tool-result.js';

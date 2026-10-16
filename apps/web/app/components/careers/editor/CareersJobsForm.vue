@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { InfoIcon } from '@lucide/vue'
-import { CAREERS_LIMITS, type SectionOf } from '@tt/domain'
+import { CAREERS_LIMITS, type SectionOf } from '@candydati/domain'
 import type { SectionPatch } from '@/lib/careers-editor'
 import type { FieldIssues } from '@/lib/careers-editor-issues'
 

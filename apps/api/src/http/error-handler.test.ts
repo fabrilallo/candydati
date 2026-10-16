@@ -1,4 +1,4 @@
-import { AuditWriteError, ValidationError } from '@tt/core';
+import { AuditWriteError, ValidationError } from '@candydati/core';
 import Fastify from 'fastify';
 import { describe, expect, it } from 'vitest';
 import { registerErrorHandler } from './error-handler.js';
@@ -31,7 +31,7 @@ describe('error handler', () => {
   });
 
   it('answers anything unexpected with a generic 500 that leaks nothing', async () => {
-    const response = await appThrowing(new Error('connect ECONNREFUSED postgres://tt:tt@db/secret')).inject({ url: '/boom' });
+    const response = await appThrowing(new Error('connect ECONNREFUSED postgres://candydati:candydati@db/secret')).inject({ url: '/boom' });
     expect(response.statusCode).toBe(500);
     expect(response.json()).toEqual({ success: false, data: null, error: { code: 'internal_error', message: 'Internal server error.' } });
   });

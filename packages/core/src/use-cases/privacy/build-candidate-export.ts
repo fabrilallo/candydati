@@ -1,4 +1,4 @@
-import { candidateExportSchema, type Candidate, type CandidateExport } from '@tt/domain';
+import { candidateExportSchema, type Candidate, type CandidateExport } from '@candydati/domain';
 import type { ApplicationRepository, CandidateNoteRepository, CvExtractionRepository } from '../../candidate-ports.js';
 import type { FeedbackRecords } from '../../feedback-ports.js';
 import type { FileStorage } from '../../intake-ports.js';

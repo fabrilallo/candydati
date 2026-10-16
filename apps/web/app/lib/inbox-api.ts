@@ -1,4 +1,4 @@
-import { notificationSchema, taskSchema, unreadCountSchema, type NotificationDto, type PageMeta, type TaskDto } from '@tt/domain'
+import { notificationSchema, taskSchema, unreadCountSchema, type NotificationDto, type PageMeta, type TaskDto } from '@candydati/domain'
 import { z } from 'zod'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'

@@ -7,7 +7,7 @@ import {
   buildNote,
   buildPrivacyNotice,
 } from '../testing/index.js';
-import { pipelineStagesOf } from '@tt/domain';
+import { pipelineStagesOf } from '@candydati/domain';
 import {
   toApplicationCardDto,
   toCandidateDetailDto,

@@ -1,4 +1,4 @@
-import { JOB_STATUSES, type JobStatus } from '@tt/domain'
+import { JOB_STATUSES, type JobStatus } from '@candydati/domain'
 import { listJobs, type JobApiRequest } from './job-api'
 
 /** How many jobs the organization has per status, plus the total. Real numbers only, read from the jobs api. */

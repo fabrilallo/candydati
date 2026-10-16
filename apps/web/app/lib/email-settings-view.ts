@@ -1,4 +1,4 @@
-import type { EmailSettingsDto, DomainStatus  } from '@tt/domain'
+import type { EmailSettingsDto, DomainStatus  } from '@candydati/domain'
 import { z } from 'zod'
 import type { EmailSettingsInput } from './message-api'
 

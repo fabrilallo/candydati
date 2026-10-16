@@ -1,4 +1,4 @@
-import type { DistributionChannelDto } from '@tt/domain'
+import type { DistributionChannelDto } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { getDistribution, setChannelEnabled } from '@/lib/distribution-api'

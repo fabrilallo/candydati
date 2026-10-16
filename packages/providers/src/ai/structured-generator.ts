@@ -1,4 +1,4 @@
-import type { StructuredGenerator } from '@tt/ad-quality';
+import type { StructuredGenerator } from '@candydati/ad-quality';
 
 export const GENERATOR_TIMEOUT_MS = 20_000;
 export const GENERATOR_TEMPERATURE = 0.1;

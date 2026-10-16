@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildSubmission, checkRequestForm, checkSubmission, feedbackStageName, groupRequests, recommendationKey } from './feedback-view'
-import { FEEDBACK_TEMPLATES, type FeedbackRequestDto } from '@tt/domain'
+import { FEEDBACK_TEMPLATES, type FeedbackRequestDto } from '@candydati/domain'
 
 const req = (id: string, status: FeedbackRequestDto['status']): FeedbackRequestDto => ({
   id,

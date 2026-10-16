@@ -1,4 +1,4 @@
-import { IMPORT_RECONFIRM_DAYS, isConsentRequestBody, renderConsentLink, SYSTEM_SENDER, DAY_MS, type Message } from '@tt/domain';
+import { IMPORT_RECONFIRM_DAYS, isConsentRequestBody, renderConsentLink, SYSTEM_SENDER, DAY_MS, type Message } from '@candydati/domain';
 import type { DeliverDeps } from '../../messaging-ports.js';
 
 /** The person answered (or was erased) since the message was queued: nothing to ask any more. */

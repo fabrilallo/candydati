@@ -120,7 +120,7 @@ describe('automations and webhooks api', () => {
 
   it('manages webhooks, with the secret only on create', async () => {
     const list = send(ok([webhook('w1')]))
-    expect((await listWebhooks(list))[0]?.url).toBe('https://hooks.example.com/tt')
+    expect((await listWebhooks(list))[0]?.url).toBe('https://hooks.example.com/candydati')
     const created = await createWebhook(send(ok({ ...webhook('w1'), secret: 'whsec_1' })), { url: 'https://x.test', events: ['job.closed'], enabled: true })
     expect(created.secret).toBe('whsec_1')
     const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined)

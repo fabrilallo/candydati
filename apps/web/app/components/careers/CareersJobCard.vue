@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PublicJobSummaryDto } from '@tt/domain'
+import type { PublicJobSummaryDto } from '@candydati/domain'
 import { ArrowRightIcon, ListChecksIcon } from '@lucide/vue'
 import { placeLine, publicJobPath, salaryRange } from '@/lib/job-view'
 

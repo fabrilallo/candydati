@@ -1,4 +1,4 @@
-import { JOB_STATUSES, jobContentSchema } from '@tt/domain';
+import { JOB_STATUSES, jobContentSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { idResult, page, type RouteSpec } from './spec.js';
 

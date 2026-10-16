@@ -1,4 +1,4 @@
-import type { JobRequestInput, JobRequestStatus } from '@tt/domain';
+import type { JobRequestInput, JobRequestStatus } from '@candydati/domain';
 import { boolean, index, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { job } from './job.js';

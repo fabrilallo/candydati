@@ -1,4 +1,4 @@
-import type { ZipStream, ZipStreamFactory } from '@tt/core';
+import type { ZipStream, ZipStreamFactory } from '@candydati/core';
 import { AsyncZipDeflate, Zip, ZipDeflate, ZipPassThrough } from 'fflate';
 import { BoundedChunkQueue, HIGH_WATER_BYTES } from './bounded-queue.js';
 import { assertZipPath } from './zip-writer.js';

@@ -3,7 +3,7 @@ import {
   type DrizzleUnitOfWork,
   type DistributionChannel,
   type DistributionDeps,
-} from '@tt/core';
+} from '@candydati/core';
 
 export interface DistributionInputs {
   readonly uow: DrizzleUnitOfWork;

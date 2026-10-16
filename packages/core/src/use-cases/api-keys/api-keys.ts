@@ -1,4 +1,4 @@
-import { API_KEY_DEFAULT_TTL_DAYS, API_KEY_MAX_TTL_DAYS, apiKeyInputSchema, grantablePermissions, parseApiKeySecret, type ApiKeyView } from '@tt/domain';
+import { API_KEY_DEFAULT_TTL_DAYS, API_KEY_MAX_TTL_DAYS, apiKeyInputSchema, grantablePermissions, parseApiKeySecret, type ApiKeyView } from '@candydati/domain';
 import { z } from 'zod';
 import { toActorUserId } from '../../actor-user.js';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';

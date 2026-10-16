@@ -1,5 +1,5 @@
-import { formatDigestFrom, type DrizzleUnitOfWork, type FileStorage, type TaskQueue } from '@tt/core';
-import { createEmailProvider, toEmailIdentity, toEmailSender, toMessagingConfig } from '@tt/providers';
+import { formatDigestFrom, type DrizzleUnitOfWork, type FileStorage, type TaskQueue } from '@candydati/core';
+import { createEmailProvider, toEmailIdentity, toEmailSender, toMessagingConfig } from '@candydati/providers';
 import type { WorkerEnv } from './config/env.js';
 import { createDeliverDeps } from './email/deps.js';
 import { createHrWorkerDeps } from './hr/deps.js';

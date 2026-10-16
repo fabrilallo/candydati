@@ -1,4 +1,4 @@
-import type { DurationStat, Outcome, ResponsePromise, StageEvent } from '@tt/domain';
+import type { DurationStat, Outcome, ResponsePromise, StageEvent } from '@candydati/domain';
 import type { JobRepository } from './job-ports.js';
 import type { CoreDeps } from './ports.js';
 

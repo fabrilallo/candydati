@@ -3,7 +3,7 @@ import { loadS3Config } from './config.js';
 
 const env = {
   S3_ENDPOINT: 'http://localhost:9000',
-  S3_BUCKET: 'team-tracker',
+  S3_BUCKET: 'candydati',
   S3_ACCESS_KEY: 'key',
   S3_SECRET_KEY: 'super-secret-value',
   S3_FORCE_PATH_STYLE: 'true',
@@ -14,7 +14,7 @@ describe('loadS3Config', () => {
     expect(loadS3Config(env)).toEqual({
       endpoint: 'http://localhost:9000',
       region: 'us-east-1',
-      bucket: 'team-tracker',
+      bucket: 'candydati',
       accessKeyId: 'key',
       secretAccessKey: 'super-secret-value',
       forcePathStyle: true,

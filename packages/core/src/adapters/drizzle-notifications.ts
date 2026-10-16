@@ -1,5 +1,5 @@
-import { and, asc, count, desc, eq, gte, inArray, isNull, or, schema } from '@tt/db';
-import type { Notification } from '@tt/domain';
+import { and, asc, count, desc, eq, gte, inArray, isNull, or, schema } from '@candydati/db';
+import type { Notification } from '@candydati/domain';
 import type { NotificationRepository } from '../automation-ports.js';
 import type { DbExecutor } from './db-executor.js';
 import { sequential } from '../sequential.js';

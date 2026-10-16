@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobContent } from '@tt/domain'
+import type { JobContent } from '@candydati/domain'
 import { formatDate } from '@/lib/format'
 import { safeImageUrl } from '@/lib/safe-url'
 

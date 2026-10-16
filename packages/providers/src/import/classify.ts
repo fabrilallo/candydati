@@ -1,6 +1,6 @@
 import { sniffCv } from '../upload/sniff.js';
 import { zipHasEntry } from '../upload/zip.js';
-import type { CvMediaType } from '@tt/domain';
+import type { CvMediaType } from '@candydati/domain';
 import type { ImportEntry } from './archive.js';
 import { decodeText } from './csv.js';
 import { findNotionExport } from './notion.js';

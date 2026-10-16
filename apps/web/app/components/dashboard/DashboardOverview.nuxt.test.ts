@@ -1,5 +1,5 @@
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
-import type { JobStatsDto } from '@tt/domain'
+import type { JobStatsDto } from '@candydati/domain'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { emptyJobStats, jobStatsFixture } from '~~/test/fixtures/job-stats'
 import DashboardOverview from './DashboardOverview.vue'

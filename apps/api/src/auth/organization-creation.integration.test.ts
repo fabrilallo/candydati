@@ -1,4 +1,4 @@
-import { eq, schema } from '@tt/db';
+import { eq, schema } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { TestUser } from '../testing/client.js';
 import { createTestApp, uniqueEmail, type TestApp } from '../testing/test-app.js';

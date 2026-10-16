@@ -1,4 +1,4 @@
-import type { JobRequestDto, JobRequestStatus, Role } from '@tt/domain'
+import type { JobRequestDto, JobRequestStatus, Role } from '@candydati/domain'
 import { formatMoney } from './job-view'
 import { can } from './permissions-ui'
 

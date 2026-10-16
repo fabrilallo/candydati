@@ -1,5 +1,5 @@
-import { completeJobContent } from '@tt/core/testing';
-import { jobStatsDtoSchema, STATS_WEEKS, type JobStatsDto } from '@tt/domain';
+import { completeJobContent } from '@candydati/core/testing';
+import { jobStatsDtoSchema, STATS_WEEKS, type JobStatsDto } from '@candydati/domain';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { TestUser } from './testing/client.js';
 import { userIdOf } from './testing/candidate-world.js';

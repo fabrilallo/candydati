@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # One Dockerfile with three final targets: api, worker, web.
-#   docker build --target api -t tt-api .
+#   docker build --target api -t candydati-api .
 # No secret in the image: all configuration comes from the environment at runtime.
 
 # Base images are pinned by digest (the tag only says what it is); Dependabot (docker ecosystem) bumps tag and digest together.
@@ -25,13 +25,13 @@ ARG NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE=it
 ENV NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE=$NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE
 COPY . .
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm install --frozen-lockfile --offline
-RUN pnpm exec turbo run build --filter=@tt/api --filter=@tt/worker --filter=@tt/web
+RUN pnpm exec turbo run build --filter=@candydati/api --filter=@candydati/worker --filter=@candydati/web
 # Production dependencies of each service only, at the versions of the lockfile. The 7-day
 # minimumReleaseAge gate applies when new versions enter the lockfile (pnpm add, update), not here: `deploy --legacy` re-checks
 # every package against the clock, so a lockfile updated last week would otherwise stop building.
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm --config.minimum-release-age=0 --filter @tt/api deploy --prod --legacy --frozen-lockfile /out/api \
- && pnpm --config.minimum-release-age=0 --filter @tt/worker deploy --prod --legacy --frozen-lockfile /out/worker \
+    pnpm --config.minimum-release-age=0 --filter @candydati/api deploy --prod --legacy --frozen-lockfile /out/api \
+ && pnpm --config.minimum-release-age=0 --filter @candydati/worker deploy --prod --legacy --frozen-lockfile /out/worker \
  && rm -rf /out/api/src /out/api/eval /out/worker/src
 
 # ---------- shared runtime ----------

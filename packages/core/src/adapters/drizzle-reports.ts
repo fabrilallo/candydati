@@ -1,5 +1,5 @@
-import { and, eq, gte, inArray, isNotNull, lte, ne, schema, sql, type SQL } from '@tt/db';
-import { EMPTY_DURATION, type DurationStat, type Outcome } from '@tt/domain';
+import { and, eq, gte, inArray, isNotNull, lte, ne, schema, sql, type SQL } from '@candydati/db';
+import { EMPTY_DURATION, type DurationStat, type Outcome } from '@candydati/domain';
 import type { ReportAggregateQuery, ReportAggregates, ReportRepository } from '../report-ports.js';
 import type { DbExecutor } from './db-executor.js';
 import { queryStageAdvances } from './drizzle-report-funnel.js';

@@ -3,7 +3,7 @@ import { ConflictError, ValidationError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';
 import { defineImportUseCase } from './define.js';
 import { assertStatus, requireBatch } from './shared.js';
-import type { ImportBatch } from '@tt/domain';
+import type { ImportBatch } from '@candydati/domain';
 
 /**
  * The user confirms the preview: the batch goes to `importing` and `import.commit` is queued. Nothing is written about

@@ -20,7 +20,7 @@ describe('weakSecretReason', () => {
     expect(weakSecretReason('change-me-at-least-32-characters-long', 32)).toMatch(/example/);
     expect(weakSecretReason('change-me-webhook-secret-at-least-32-chars', 32)).toMatch(/example/);
     expect(weakSecretReason('CHANGEME-postgres-password-very-long', 16)).toMatch(/example/);
-    expect(weakSecretReason('tt-minio-secret-tt-minio-secret', 16)).toMatch(/example/);
+    expect(weakSecretReason('candydati-minio-secret-candydati-minio-secret', 16)).toMatch(/example/);
   });
 
   it('refuses low entropy values', () => {
@@ -32,8 +32,8 @@ describe('weakSecretReason', () => {
 
 describe('databasePasswordOf', () => {
   it('reads the decoded password of a postgres URL, or null', () => {
-    expect(databasePasswordOf('postgres://tt:s%40cret@db:5432/x')).toBe('s@cret');
-    expect(databasePasswordOf('postgres://tt@db:5432/x')).toBeNull();
+    expect(databasePasswordOf('postgres://candydati:s%40cret@db:5432/x')).toBe('s@cret');
+    expect(databasePasswordOf('postgres://candydati@db:5432/x')).toBeNull();
     expect(databasePasswordOf('not a url')).toBeNull();
   });
 });
@@ -47,8 +47,8 @@ describe('productionSecretIssues', () => {
   });
 
   it('checks the password inside DATABASE_URL and skips variables that are not set', () => {
-    expect(productionSecretIssues({ DATABASE_URL: 'postgres://tt:tt@db:5432/x' })[0]).toMatch(/^DATABASE_URL: /);
-    expect(productionSecretIssues({ DATABASE_URL: `postgres://tt:${STRONG_16}@db:5432/x` })).toEqual([]);
+    expect(productionSecretIssues({ DATABASE_URL: 'postgres://candydati:candydati@db:5432/x' })[0]).toMatch(/^DATABASE_URL: /);
+    expect(productionSecretIssues({ DATABASE_URL: `postgres://candydati:${STRONG_16}@db:5432/x` })).toEqual([]);
     expect(productionSecretIssues({})).toEqual([]);
   });
 

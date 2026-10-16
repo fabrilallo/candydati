@@ -1,4 +1,4 @@
-import type { PageMeta } from '@tt/domain'
+import type { PageMeta } from '@candydati/domain'
 import { z } from 'zod'
 import { AppError, authErrorKey } from './auth-errors'
 import type { ApiCall, JobApiRequest } from './job-api'

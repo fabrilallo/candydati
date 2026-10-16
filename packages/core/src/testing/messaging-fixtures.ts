@@ -1,4 +1,4 @@
-import type { EmailSettings, EmailTemplate, Message } from '@tt/domain';
+import type { EmailSettings, EmailTemplate, Message } from '@candydati/domain';
 
 const DATE = new Date('2026-01-01T00:00:00.000Z');
 

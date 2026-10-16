@@ -1,4 +1,4 @@
-import type { AdQualityReport, JobContent, JobStatus } from '@tt/domain';
+import type { AdQualityReport, JobContent, JobStatus } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';

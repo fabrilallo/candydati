@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.svg">
-    <img alt="team-tracker" src="docs/assets/logo.svg" height="44">
+    <img alt="Candydati" src="docs/assets/logo.svg" height="44">
   </picture>
 </p>
 
@@ -9,14 +9,12 @@
 
 <p align="center">
   <a href="LICENSE"><img alt="License: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1F47D6"></a>
-  <a href="https://github.com/fabrilallo/team-tracker/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/fabrilallo/team-tracker/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/fabrilallo/candydati/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/fabrilallo/candydati/actions/workflows/ci.yml/badge.svg"></a>
   <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-1F47D6"></a>
   <img alt="Node 24+" src="https://img.shields.io/badge/node-%3E%3D24-1F47D6">
 </p>
 
 <p align="center"><a href="README.it.md">Italiano</a> · <a href="docs/PRODUCT.md">Product</a> · <a href="docs/ARCHITECTURE.md">Architecture</a> · <a href="CONTRIBUTING.md">Contributing</a></p>
-
-> **Codename.** `team-tracker` is a working name. The product name is not decided yet: it is read from configuration (`PLATFORM_*`), never hard-coded.
 
 ## Why
 
@@ -24,7 +22,7 @@
 CV or filters them out before a person reads it. Software does what the people running it decide: the same tool can
 leave applicants in silence or answer every one of them. The difference lies in how it is set up and used.
 
-That is why the source of team-tracker is public. The rules it applies are code anyone can read, check and improve, and the
+That is why the source of Candydati is public. The rules it applies are code anyone can read, check and improve, and the
 good practices are built into the product instead of being left to goodwill. Most hiring tools hide the salary, the
 process and the outcome from the people who apply; here transparency is structural, not optional: a deployment cannot
 switch these principles off.
@@ -72,7 +70,7 @@ Status: pre-1.0 (see the [changelog](CHANGELOG.md)). Full product definition: [d
 | <img src="docs/assets/screenshots/pipeline.png" alt="Pipeline of a job with candidates across stages" width="100%"><br>**Pipeline**: candidates across the declared stages of a job | <img src="docs/assets/screenshots/job-editor.png" alt="Job ad editor with the live preview next to the form" width="100%"><br>**Job ad editor**: salary and process required, live preview |
 | <img src="docs/assets/screenshots/careers.png" alt="Public careers page with a hero image and company numbers" width="100%"><br>**Careers page**: sections built in the page builder with a live preview | <img src="docs/assets/screenshots/candidate.png" alt="Candidate detail with stage, tags and interview feedback" width="100%"><br>**Candidate**: stage, notes and interview feedback, no scores |
 
-Demo data is invented. Regenerate with `pnpm --filter @tt/e2e screenshots` against a running dev stack.
+Demo data is invented. Regenerate with `pnpm --filter @candydati/e2e screenshots` against a running dev stack.
 
 ## Quick start (development)
 

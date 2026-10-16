@@ -1,4 +1,4 @@
-import type { OutboxEvent, WebhookDelivery, WebhookEndpoint, WebhookEventType } from '@tt/domain';
+import type { OutboxEvent, WebhookDelivery, WebhookEndpoint, WebhookEventType } from '@candydati/domain';
 import type { TaskQueue } from './intake-ports.js';
 import type { CoreDeps } from './ports.js';
 import type { TransactionalDeps } from './transaction.js';

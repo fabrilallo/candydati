@@ -1,4 +1,4 @@
-import { runDistributionSync, type Actor, type DistributionDeps } from '@tt/core';
+import { runDistributionSync, type Actor, type DistributionDeps } from '@candydati/core';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

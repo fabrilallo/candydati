@@ -10,7 +10,7 @@ import {
   type ImportItem,
   type Job,
   type ParsedImportCv,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { ConflictError, CoreError } from '../../errors.js';
 import type { ImportCommitDeps, ImportCommitRepositories } from '../../import-ports.js';
 import { ensureConversation, oneLine } from '../messaging/shared.js';

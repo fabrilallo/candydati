@@ -5,7 +5,7 @@ import {
   renderTemplate,
   type Job,
   type Message,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import { ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
 import type { TaskQueue } from '../../intake-ports.js';

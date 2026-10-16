@@ -1,4 +1,4 @@
-import { careersDraftSaveSchema, careersPublishSchema, MEDIA_LIMITS } from '@tt/domain';
+import { careersDraftSaveSchema, careersPublishSchema, MEDIA_LIMITS } from '@candydati/domain';
 import { z } from 'zod';
 import { idResult, type RouteSpec } from './spec.js';
 

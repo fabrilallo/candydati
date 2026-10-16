@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SectionOf } from '@tt/domain'
+import type { SectionOf } from '@candydati/domain'
 import { ArrowDownIcon } from '@lucide/vue'
 import { imageSources, mediaOf, safeMediaUrl } from '@/lib/careers-site'
 

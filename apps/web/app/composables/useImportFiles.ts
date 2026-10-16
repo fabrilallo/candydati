@@ -1,4 +1,4 @@
-import { IMPORT_LIMITS } from '@tt/domain'
+import { IMPORT_LIMITS } from '@candydati/domain'
 import { checkImportFiles, mergeFiles, pathOf } from '@/lib/import-files'
 
 /** The files and folders picked for an import and the client-side limits check. */

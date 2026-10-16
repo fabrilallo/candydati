@@ -1,4 +1,4 @@
-import { runCvExtraction, type Actor, type CvExtractionDeps } from '@tt/core';
+import { runCvExtraction, type Actor, type CvExtractionDeps } from '@candydati/core';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

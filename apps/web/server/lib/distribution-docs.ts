@@ -1,4 +1,4 @@
-import { buildJobsFeedXml, buildLlmsTxt, buildSitemapXml, careersSitemapEntries, DEFAULT_LOCALE, isLocale, type Locale, type PublicFeedDto } from '@tt/domain'
+import { buildJobsFeedXml, buildLlmsTxt, buildSitemapXml, careersSitemapEntries, DEFAULT_LOCALE, isLocale, type Locale, type PublicFeedDto } from '@candydati/domain'
 import { z } from 'zod'
 import type { FetchLike } from './api-proxy'
 

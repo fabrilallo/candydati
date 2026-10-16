@@ -1,4 +1,4 @@
-import type { ApiKey, Role } from '@tt/domain';
+import type { ApiKey, Role } from '@candydati/domain';
 import type { CoreDeps } from './ports.js';
 import type { SecuritySettingsRepository, TwoFactorLookup } from './security-ports.js';
 
@@ -29,7 +29,7 @@ export interface ApiKeyDeps extends CoreDeps {
   /** The organization's 2FA requirement and the creator's 2FA: a key never gets around what its creator's session must pass. */
   readonly securitySettings: Pick<SecuritySettingsRepository, 'get'>;
   readonly twoFactor: TwoFactorLookup;
-  /** A new secret from a CSPRNG in the format `tt_<prefix>_<random>`. Randomness lives in deps, never in core. */
+  /** A new secret from a CSPRNG in the format `candydati_<prefix>_<random>`. Randomness lives in deps, never in core. */
   readonly newSecret: () => string;
   /** sha256 of the secret as hex. */
   readonly hash: (secret: string) => string;

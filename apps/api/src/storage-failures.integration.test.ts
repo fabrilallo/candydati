@@ -1,4 +1,4 @@
-import type { ImportBatchDto } from '@tt/core';
+import type { ImportBatchDto } from '@candydati/core';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createWorld } from './testing/candidate-world.js';
 import { cvPdf, uploadImport } from './testing/import-world.js';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { EyeIcon, MonitorIcon, SmartphoneIcon } from '@lucide/vue'
-import type { CareersMediaDto, CareersPageDocument, Locale, PublicCareersDto } from '@tt/domain'
+import type { CareersMediaDto, CareersPageDocument, Locale, PublicCareersDto } from '@candydati/domain'
 
 /**
  * The live preview: the public page component itself, in preview mode, at desktop width or in a phone-wide frame

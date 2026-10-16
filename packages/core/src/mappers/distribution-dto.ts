@@ -8,7 +8,7 @@ import {
   type Job,
   type JobDistribution,
   type JobDistributionDto,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type { DistributionChannel } from '../distribution-ports.js';
 import type { PublicOrganization } from '../job-ports.js';
 

@@ -1,4 +1,4 @@
-import { importFileKey, type ImportBatch, type ParsedImportCvInput, type ParsedImportRow } from '@tt/domain';
+import { importFileKey, type ImportBatch, type ParsedImportCvInput, type ParsedImportRow } from '@candydati/domain';
 import { buildJob, fakeDocxBytes, fakePdfBytes, ORG_A, seedImportWorld, userActor, type ImportSeedOptions, type TestImportDeps } from './index.js';
 import { createImportBatch } from '../use-cases/imports/create-import-batch.js';
 import { recordImportAnalysis, startImportAnalysis } from '../use-cases/imports/analyze.js';

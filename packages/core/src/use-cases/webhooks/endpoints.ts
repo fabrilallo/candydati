@@ -1,4 +1,4 @@
-import { checkWebhookUrl, webhookEndpointInputSchema, type WebhookDelivery, type WebhookEndpoint } from '@tt/domain';
+import { checkWebhookUrl, webhookEndpointInputSchema, type WebhookDelivery, type WebhookEndpoint } from '@candydati/domain';
 import { z } from 'zod';
 import { NotFoundError, ValidationError } from '../../errors.js';
 import type { WebhookDeps } from '../../webhook-ports.js';

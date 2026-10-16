@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { WEBHOOK_HEADERS } from '@tt/domain'
+import { WEBHOOK_HEADERS } from '@candydati/domain'
 
 /** Short developer note: the headers of every delivery and how to check the signature. */
 const { t } = useI18n()

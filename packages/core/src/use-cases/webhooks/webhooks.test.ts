@@ -37,16 +37,16 @@ const issues = async (promise: Promise<unknown>) => ((await promise.catch((e: un
 describe('webhook endpoints', () => {
   it('creates an endpoint with a generated secret returned once, and audits without it', async () => {
     const deps = world();
-    const created = await createWebhook(deps, admin, { url: 'https://hooks.example.com/tt', events: ['job.closed', 'job.closed', 'application.moved'] });
+    const created = await createWebhook(deps, admin, { url: 'https://hooks.example.com/candydati', events: ['job.closed', 'job.closed', 'application.moved'] });
     expect(created.secret).toBe('whsec_test_1');
-    expect(created.endpoint).toMatchObject({ organizationId: ORG_A, url: 'https://hooks.example.com/tt', events: ['job.closed', 'application.moved'], enabled: true, createdAt: NOW });
+    expect(created.endpoint).toMatchObject({ organizationId: ORG_A, url: 'https://hooks.example.com/candydati', events: ['job.closed', 'application.moved'], enabled: true, createdAt: NOW });
     expect(JSON.stringify(deps.auditLog.events())).not.toContain('whsec_');
     expect(deps.auditLog.events()[0]).toMatchObject({ action: 'webhook.saved', target: { type: 'webhook_endpoint', id: created.endpoint.id } });
   });
 
   it('never returns the secret after creation: list, update and DTOs drop it', async () => {
     const deps = world();
-    const created = await createWebhook(deps, admin, { url: 'https://hooks.example.com/tt', events: ['job.closed'] });
+    const created = await createWebhook(deps, admin, { url: 'https://hooks.example.com/candydati', events: ['job.closed'] });
     expect(toCreatedWebhookDto(created).secret).toBe(created.secret);
     const listed = (await listWebhooks(deps, admin, {})).map(toWebhookEndpointDto);
     const updated = toWebhookEndpointDto(await updateWebhook(deps, admin, { endpointId: created.endpoint.id, url: 'https://hooks.example.com/v2', events: ['job.closed'], enabled: false }));
@@ -175,7 +175,7 @@ describe('deliverWebhook', () => {
     expect(await run(deps)).toBe('delivered');
     const [request] = deps.poster.requests();
     const timestamp = String(Math.floor(NOW.getTime() / 1000));
-    expect(request).toMatchObject({ url: 'https://hooks.example.com/tt', timeoutMs: 10_000 });
+    expect(request).toMatchObject({ url: 'https://hooks.example.com/candydati', timeoutMs: 10_000 });
     expect(JSON.parse(request?.body ?? '')).toEqual({
       id: 'evt_1',
       type: 'application.received',
@@ -186,12 +186,12 @@ describe('deliverWebhook', () => {
     const expected = `sha256=${createHmac('sha256', 'whsec_test_secret').update(`${timestamp}.${request?.body}`).digest('hex')}`;
     expect(request?.headers).toMatchObject({
       'content-type': 'application/json',
-      'x-tt-event': 'application.received',
-      'x-tt-timestamp': timestamp,
-      'x-tt-signature': expected,
-      'x-tt-delivery': expect.any(String),
+      'x-candydati-event': 'application.received',
+      'x-candydati-timestamp': timestamp,
+      'x-candydati-signature': expected,
+      'x-candydati-delivery': expect.any(String),
     });
-    expect(request?.headers['x-tt-signature']).toMatch(/^sha256=[0-9a-f]{64}$/);
+    expect(request?.headers['x-candydati-signature']).toMatch(/^sha256=[0-9a-f]{64}$/);
     expect(deps.deliveries.snapshot()).toEqual([expect.objectContaining({ status: 'success', responseCode: 200, attempt: 1, error: null, endpointId: 'hook_1', eventId: 'evt_1' })]);
   });
 
@@ -206,7 +206,7 @@ describe('deliverWebhook', () => {
     expect(await run(deps, { lastAttempt: false })).toBe('failed');
     expect(deps.poster.requests()).toEqual([]);
     expect(deps.deliveries.snapshot()[0]).toMatchObject({ status: 'failed', error: 'host_blocked', responseCode: null });
-    expect(deps.hostGuard.asked()).toEqual(['https://hooks.example.com/tt']);
+    expect(deps.hostGuard.asked()).toEqual(['https://hooks.example.com/candydati']);
   });
 
   it('logs a non-2xx answer (a redirect included) and rethrows while retries remain', async () => {

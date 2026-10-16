@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'
-import { staleJobSchema, type StaleJobDto } from '@tt/domain'
+import { staleJobSchema, type StaleJobDto } from '@candydati/domain'
 import { STALE_JOBS_PATH } from './api-paths'
 
 /** The published ads without activity for `STALE_JOB_DAYS` days, most idle first. Read only: an ad is never closed here. */

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { PopoverContent, PopoverPortal, PopoverRoot, PopoverTrigger } from 'reka-ui'
-import type { VaguePhrase } from '@tt/domain'
+import type { VaguePhrase } from '@candydati/domain'
 import type { ComplianceMark } from '@/lib/compliance-view'
 import { splitHighlights } from '@/lib/vague-highlight'
 

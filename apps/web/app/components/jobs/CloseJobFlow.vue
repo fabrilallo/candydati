@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BULK_MESSAGE_MAX, type ApplicationCardDto } from '@tt/domain'
+import { BULK_MESSAGE_MAX, type ApplicationCardDto } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { decideApplications } from '@/lib/attention-api'
 import { errorKeyOf } from '@/lib/auth-errors'

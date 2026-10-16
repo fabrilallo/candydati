@@ -1,4 +1,4 @@
-import { TEMPLATE_NAME_MAX } from '@tt/domain';
+import { TEMPLATE_NAME_MAX } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
 import { buildJobTemplate, createInMemoryJobTemplateRepository, createTestJobDeps, userActor } from '../../testing/index.js';

@@ -1,4 +1,4 @@
-import { STATS_WEEKS, type JobStatsDto } from '@tt/domain';
+import { STATS_WEEKS, type JobStatsDto } from '@candydati/domain';
 import { z } from 'zod';
 import { defineJobUseCase } from './define.js';
 import { buildProcess, buildQuality, buildReadiness, buildSalary, buildStatusCounts } from './job-stats.js';

@@ -1,5 +1,5 @@
-import { and, eq, inArray, schema, sql } from '@tt/db';
-import type { Candidate } from '@tt/domain';
+import { and, eq, inArray, schema, sql } from '@candydati/db';
+import type { Candidate } from '@candydati/domain';
 import type { CandidateRepository } from '../candidate-ports.js';
 import { ConflictError } from '../errors.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';

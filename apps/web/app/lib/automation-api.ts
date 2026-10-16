@@ -8,7 +8,7 @@ import {
   type WebhookCreatedDto,
   type WebhookDeliveryDto,
   type WebhookEndpointDto,
-} from '@tt/domain'
+} from '@candydati/domain'
 import { z } from 'zod'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'

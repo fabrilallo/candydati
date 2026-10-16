@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { EMAIL_TEMPLATE_BODY_MAX, EMAIL_TEMPLATE_SUBJECT_MAX } from '@tt/domain'
+import { EMAIL_TEMPLATE_BODY_MAX, EMAIL_TEMPLATE_SUBJECT_MAX } from '@candydati/domain'
 import { insertAtCursor } from '@/lib/template-text'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

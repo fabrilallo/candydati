@@ -1,4 +1,4 @@
-import { fail } from '@tt/domain';
+import { fail } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import { hasBearer } from '../http/bearer.js';
 

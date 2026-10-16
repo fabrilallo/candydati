@@ -1,4 +1,4 @@
-import { jobContentSchema } from '@tt/domain'
+import { jobContentSchema } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { translatorFor } from '~~/test/fixtures/ad-translate'
 import { templateFacts, templateSummary } from './template-summary'

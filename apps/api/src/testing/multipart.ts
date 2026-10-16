@@ -14,7 +14,7 @@ export interface FilePart {
 
 /** A multipart/form-data body for `app.inject`: no network, no extra dependency. */
 export function multipartBody(parts: readonly (FieldPart | FilePart)[]): { payload: Buffer; headers: Record<string, string> } {
-  const boundary = `----tt-${randomUUID()}`;
+  const boundary = `----candydati-${randomUUID()}`;
   const chunks = parts.flatMap((part) => {
     const head =
       'bytes' in part

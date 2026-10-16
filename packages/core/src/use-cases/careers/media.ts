@@ -11,7 +11,7 @@ import {
   sniffMediaType,
   type CareersMediaAssetDto,
   type CareersMediaError,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import type { Actor } from '../../actor.js';
 import { ImageRejectedError, type CareersDeps, type CareersMediaRecord } from '../../careers-ports.js';

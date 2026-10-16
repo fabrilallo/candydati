@@ -4,8 +4,8 @@
  * see. Used by the agent integration tests and by the model-backed eval. Test database only.
  */
 import { randomUUID } from 'node:crypto';
-import { completeJobContent } from '@tt/core/testing';
-import { and, eq, schema } from '@tt/db';
+import { completeJobContent } from '@candydati/core/testing';
+import { and, eq, schema } from '@candydati/db';
 import type { TestUser } from '../src/testing/client.js';
 import { createWorld, personForm, type World } from '../src/testing/candidate-world.js';
 import type { TestApp } from '../src/testing/test-app.js';

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { SendIcon } from '@lucide/vue'
 import { templateForKind, templateGroups } from '@/lib/message-view'
-import { BULK_MESSAGE_MAX, type EmailTemplateKind } from '@tt/domain'
+import { BULK_MESSAGE_MAX, type EmailTemplateKind } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'

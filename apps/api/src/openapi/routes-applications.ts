@@ -1,4 +1,4 @@
-import { BULK_MESSAGE_MAX, CONSENT_SCOPES, OUTCOMES, decidedSchema, erasedSchema, sendResultSchema } from '@tt/domain';
+import { BULK_MESSAGE_MAX, CONSENT_SCOPES, OUTCOMES, decidedSchema, erasedSchema, sendResultSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { confirmNameBody } from './schemas-admin.js';
 import { candidateDetailSchema } from './schemas-work.js';

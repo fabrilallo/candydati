@@ -6,8 +6,8 @@ import {
   type TaskDeps,
   type TaskQueue,
   type WebhookDeps,
-} from '@tt/core';
-import { WEBHOOK_SECRET_PREFIX } from '@tt/domain';
+} from '@candydati/core';
+import { WEBHOOK_SECRET_PREFIX } from '@candydati/domain';
 
 export interface Phase4Deps {
   readonly notificationDeps: NotificationDeps;

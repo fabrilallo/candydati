@@ -1,5 +1,5 @@
-import { fail, ok } from '@tt/domain';
-import { isMetricsAuthorized, METRICS_CONTENT_TYPE } from '@tt/providers';
+import { fail, ok } from '@candydati/domain';
+import { isMetricsAuthorized, METRICS_CONTENT_TYPE } from '@candydati/providers';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import type { ApiMetrics } from '../observability/api-metrics.js';

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { SALARY_CURRENCIES, SALARY_PERIODS } from '@tt/domain'
+import { SALARY_CURRENCIES, SALARY_PERIODS } from '@candydati/domain'
 import { currencySymbol } from '@/lib/ad-facts'
 import { fieldIdOf } from '@/lib/job-issues'
 import type { FieldErrors, JobForm } from '@/lib/job-form'

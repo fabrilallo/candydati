@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'node:crypto';
-import type { CareersDeps, DrizzleUnitOfWork, FileStorage, ImageTranscoder, PublicCareersDeps, TaskQueue } from '@tt/core';
-import { createSharpImageTranscoder } from '@tt/providers';
-import type { Locale } from '@tt/domain';
+import type { CareersDeps, DrizzleUnitOfWork, FileStorage, ImageTranscoder, PublicCareersDeps, TaskQueue } from '@candydati/core';
+import { createSharpImageTranscoder } from '@candydati/providers';
+import type { Locale } from '@candydati/domain';
 
 export interface CareersWiring {
   /** The page builder and its media library (owners and admins, session only). */

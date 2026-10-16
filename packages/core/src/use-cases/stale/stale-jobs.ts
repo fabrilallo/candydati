@@ -1,4 +1,4 @@
-import { daysSince, staleCutoff, STALE_JOB_DAYS, type Job } from '@tt/domain';
+import { daysSince, staleCutoff, STALE_JOB_DAYS, type Job } from '@candydati/domain';
 import { z } from 'zod';
 import { defineUseCase, type UseCase, type UseCaseDefinition } from '../../use-case.js';
 import type { StaleJobDeps } from '../../job-request-ports.js';

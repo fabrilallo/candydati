@@ -2,8 +2,8 @@ import {
   type DrizzleUnitOfWork,
   type CvExtractionDeps,
   type FileStorage,
-} from '@tt/core';
-import { createCvExtractor, createMastraGenerator, extractCvText } from '@tt/providers';
+} from '@candydati/core';
+import { createCvExtractor, createMastraGenerator, extractCvText } from '@candydati/providers';
 
 export interface CvExtractionWiring {
   readonly uow: DrizzleUnitOfWork;

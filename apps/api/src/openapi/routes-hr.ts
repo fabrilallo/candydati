@@ -1,4 +1,4 @@
-import { JOB_REQUEST_STATUSES, interviewerInputSchema, jobRequestInputSchema } from '@tt/domain';
+import { JOB_REQUEST_STATUSES, interviewerInputSchema, jobRequestInputSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { page, type RouteSpec } from './spec.js';
 

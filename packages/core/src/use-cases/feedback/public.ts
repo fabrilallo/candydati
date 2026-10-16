@@ -10,7 +10,7 @@ import {
   type Job,
   type LocalizedQuestion,
   type Locale,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import type { PublicFeedbackDeps } from '../../feedback-ports.js';

@@ -1,4 +1,4 @@
-import { and, eq, schema, type Db } from '@tt/db';
+import { and, eq, schema, type Db } from '@candydati/db';
 
 /** Raw role of a user in an organization, or null when they are not a member. */
 export async function findMemberRole(db: Db, userId: string, organizationId: string): Promise<string | null> {

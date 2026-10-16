@@ -26,7 +26,7 @@ export type TestApiKeyDeps = ApiKeyDeps & {
 export const API_KEY_TEST_NOW = new Date('2026-06-01T10:00:00.000Z');
 
 /**
- * API key ports in memory with a movable clock and deterministic secrets (`tt_` + 8 + 32 base62 characters). Members:
+ * API key ports in memory with a movable clock and deterministic secrets (`candydati_` + 8 + 32 base62 characters). Members:
  * `user_test` owner and `user_rec` recruiter in `org_a`; `user_b` owner in `org_b`.
  */
 export function createTestApiKeyDeps(overrides: Partial<TestApiKeyDeps> = {}): TestApiKeyDeps {
@@ -44,7 +44,7 @@ export function createTestApiKeyDeps(overrides: Partial<TestApiKeyDeps> = {}): T
     newSecret: () => {
       counter += 1;
       const n = String(counter).padStart(8, '0');
-      return `tt_${n}_${'k'.repeat(24)}${n}`;
+      return `candydati_${n}_${'k'.repeat(24)}${n}`;
     },
     securitySettings: createInMemorySecuritySettings(),
     twoFactor: createInMemoryTwoFactor(),

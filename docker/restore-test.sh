@@ -3,7 +3,7 @@
 # <database>_restore_test, compares the row count of every table of the public schema, drops the temporary database.
 # Exit 0 only when every count matches. The source database is only read.
 #
-#   DATABASE_URL=postgres://tt:tt@localhost:5434/team_tracker docker/restore-test.sh
+#   DATABASE_URL=postgres://candydati:candydati@localhost:5434/candydati docker/restore-test.sh
 #
 # Needs pg_dump, pg_restore and psql (the version of the server or newer). Run it on a quiet database (the api
 # stopped, or no one working): rows written between the dump and the count make the comparison fail on purpose.

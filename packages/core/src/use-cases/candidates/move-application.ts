@@ -1,4 +1,4 @@
-import { computeResponseDueAt, pipelineStagesOf, type Application } from '@tt/domain';
+import { computeResponseDueAt, pipelineStagesOf, type Application } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
 import { enqueueAutomations } from '../automations/enqueue.js';

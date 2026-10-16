@@ -4,8 +4,8 @@ export const SUPPORTED_LOCALES = ['it', 'en'] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'it';
 
-/** Codename shown only when PLATFORM_NAME is not set. The product name is never written in code. */
-export const PLATFORM_CODENAME = 'team-tracker';
+/** Product name used when PLATFORM_NAME is not set. Copy reads the name from config, so a deployment can rebrand. */
+export const DEFAULT_PLATFORM_NAME = 'Candydati';
 
 export const DEFAULT_TIME_ZONE = 'Europe/Rome';
 
@@ -19,7 +19,7 @@ function isTimeZone(value: string): boolean {
 }
 
 const platformEnvSchema = z.object({
-  PLATFORM_NAME: z.string().trim().min(1).default(PLATFORM_CODENAME),
+  PLATFORM_NAME: z.string().trim().min(1).default(DEFAULT_PLATFORM_NAME),
   PLATFORM_URL: z.url().default('http://localhost:3000'),
   PLATFORM_SUPPORT_EMAIL: z.email().optional(),
   PLATFORM_DEFAULT_LOCALE: z.enum(SUPPORTED_LOCALES).default(DEFAULT_LOCALE),

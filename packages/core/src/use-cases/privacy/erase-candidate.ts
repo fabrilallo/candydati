@@ -1,4 +1,4 @@
-import type { Candidate } from '@tt/domain';
+import type { Candidate } from '@candydati/domain';
 import { z } from 'zod';
 import { toAuditActor } from '../../actor.js';
 import { ValidationError } from '../../errors.js';

@@ -1,4 +1,4 @@
-import { completePrivacyNoticeInput } from '@tt/core/testing';
+import { completePrivacyNoticeInput } from '@candydati/core/testing';
 import type { TestUser } from './client.js';
 
 /** Publishes the organization's privacy notice (version 1 when none exists): jobs cannot be published without it. */

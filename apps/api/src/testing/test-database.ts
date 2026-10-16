@@ -1,6 +1,6 @@
-import { createDb, runMigrations } from '@tt/db';
+import { createDb, runMigrations } from '@candydati/db';
 
-export const API_TEST_DATABASE_URL = 'postgres://tt:tt@localhost:5434/team_tracker_api_test';
+export const API_TEST_DATABASE_URL = 'postgres://candydati:candydati@localhost:5434/candydati_api_test';
 
 export const apiTestDatabaseUrl = (): string => process.env.API_TEST_DATABASE_URL ?? API_TEST_DATABASE_URL;
 

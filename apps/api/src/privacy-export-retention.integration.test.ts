@@ -1,5 +1,5 @@
-import { buildOrganizationExport, markDigestsEmailed, runRetention } from '@tt/core';
-import { candidateExportSchema, dataExportKey } from '@tt/domain';
+import { buildOrganizationExport, markDigestsEmailed, runRetention } from '@candydati/core';
+import { candidateExportSchema, dataExportKey } from '@candydati/domain';
 import { strFromU8, unzipSync } from 'fflate';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { applyAs, createWorld, exportDeps, leftovers, retentionDeps, setRetention } from './testing/privacy-world.js';

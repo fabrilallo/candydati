@@ -1,5 +1,5 @@
-import { getFeedbackRequest, openFeedbackCv, submitFeedback } from '@tt/core';
-import { ok } from '@tt/domain';
+import { getFeedbackRequest, openFeedbackCv, submitFeedback } from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { contentDisposition } from '../http/content-disposition.js';

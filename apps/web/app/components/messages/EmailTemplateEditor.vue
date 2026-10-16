@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { TemplateInput } from '@/lib/message-api'
 import { sampleValues } from '@/lib/message-view'
-import { EMAIL_TEMPLATE_NAME_MAX, emailTemplateInputSchema, findUnknownVariables, renderTemplate, type EmailTemplateDto } from '@tt/domain'
+import { EMAIL_TEMPLATE_NAME_MAX, emailTemplateInputSchema, findUnknownVariables, renderTemplate, type EmailTemplateDto } from '@candydati/domain'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

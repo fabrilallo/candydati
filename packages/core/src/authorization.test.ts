@@ -1,4 +1,4 @@
-import { AGENT_EXTRA_FORBIDDEN, MACHINE_FORBIDDEN_PERMISSIONS, PERMISSIONS, ROLES, roleHasPermission } from '@tt/domain';
+import { AGENT_EXTRA_FORBIDDEN, MACHINE_FORBIDDEN_PERMISSIONS, PERMISSIONS, ROLES, roleHasPermission } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { authorize, can } from './authorization.js';
 import { ForbiddenError } from './errors.js';

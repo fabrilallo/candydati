@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { PlusIcon } from '@lucide/vue'
-import type { SectionType } from '@tt/domain'
+import type { SectionType } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { SECTION_ICONS } from '@/lib/careers-section-icons'

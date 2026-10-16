@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { WORK_MODES } from '@tt/domain'
+import { WORK_MODES } from '@candydati/domain'
 import { Input } from '@/components/ui/input'
 import { countryOptions } from '@/lib/countries'
 import { fieldIdOf } from '@/lib/job-issues'

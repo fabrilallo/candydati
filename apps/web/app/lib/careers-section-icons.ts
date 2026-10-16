@@ -1,5 +1,5 @@
 import { AlignLeftIcon, BriefcaseBusinessIcon, ClapperboardIcon, HashIcon, ImagesIcon, LayoutPanelLeftIcon, LinkIcon, PanelTopIcon, QuoteIcon, SparklesIcon } from '@lucide/vue'
-import type { SectionType } from '@tt/domain'
+import type { SectionType } from '@candydati/domain'
 import type { Component } from 'vue'
 
 /** One icon per section type, shared by the list of sections and the add menu. */

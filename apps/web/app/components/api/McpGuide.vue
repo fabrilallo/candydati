@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { mcpConfigSnippet, mcpEndpoint } from '@/lib/api-keys'
-import { MCP_TOOL_NAMES } from '@tt/domain'
+import { MCP_TOOL_NAMES } from '@candydati/domain'
 
 /** How to connect an external agent: the endpoint, a config block for MCP clients, and what each tool does. */
 const { t } = useI18n()

@@ -1,4 +1,4 @@
-import { API_KEY_NAME_MAX, grantablePermissions, type Permission, type Resource, type Role } from '@tt/domain'
+import { API_KEY_NAME_MAX, grantablePermissions, type Permission, type Resource, type Role } from '@candydati/domain'
 
 /** Areas of the scope picker, in order, and the resources each one gathers. */
 const AREAS = [

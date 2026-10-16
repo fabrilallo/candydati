@@ -1,4 +1,4 @@
-import type { CvMediaType } from '@tt/domain';
+import type { CvMediaType } from '@candydati/domain';
 
 export const FILE_NAME_MAX = 120;
 const EXTENSIONS: Readonly<Record<CvMediaType, string>> = {

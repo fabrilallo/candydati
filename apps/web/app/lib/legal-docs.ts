@@ -1,4 +1,4 @@
-import type { ProcessingRecordDto } from '@tt/domain'
+import type { ProcessingRecordDto } from '@candydati/domain'
 /** The templates in the repository (`docs/legal/`), with the translation key of their one-line description. */
 export const LEGAL_DOCUMENTS = [
   { path: 'docs/legal/README.md', key: 'readme' },

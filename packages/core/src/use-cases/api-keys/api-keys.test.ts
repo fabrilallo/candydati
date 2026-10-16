@@ -1,4 +1,4 @@
-import { grantablePermissions, type ApiKey, type Permission } from '@tt/domain';
+import { grantablePermissions, type ApiKey, type Permission } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
 import { authorize } from '../../authorization.js';
@@ -19,7 +19,7 @@ describe('createApiKey', () => {
   it('returns the secret once, stores only the hash and audits without the secret', async () => {
     const deps = createTestApiKeyDeps();
     const { key, secret } = await make(deps, ['job:read', 'job:read', 'candidate:read']);
-    expect(secret).toMatch(/^tt_/);
+    expect(secret).toMatch(/^candydati_/);
     expect(key).toMatchObject({ name: 'CI', scopes: ['job:read', 'candidate:read'], createdBy: 'user_test', organizationId: ORG_A });
     expect(key.prefix).toBe(secret.split('_')[1]);
     expect(key).not.toHaveProperty('hash');
@@ -131,7 +131,7 @@ describe('authenticateApiKey', () => {
     const { secret } = await make(deps);
     expect(await authenticateApiKey(deps, 'nope')).toBeNull();
     expect(await authenticateApiKey(deps, '')).toBeNull();
-    expect(await authenticateApiKey(deps, `tt_zzzzzzzz_${'a'.repeat(32)}`)).toBeNull();
+    expect(await authenticateApiKey(deps, `candydati_zzzzzzzz_${'a'.repeat(32)}`)).toBeNull();
     expect(await authenticateApiKey(deps, `${secret.slice(0, -1)}${secret.endsWith('0') ? '1' : '0'}`)).toBeNull();
   });
 

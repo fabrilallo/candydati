@@ -1,4 +1,4 @@
-import type { PrivacyNotice } from '@tt/domain';
+import type { PrivacyNotice } from '@candydati/domain';
 import { z } from 'zod';
 import { definePrivacyUseCase } from './define.js';
 

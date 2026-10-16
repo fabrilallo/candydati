@@ -1,4 +1,4 @@
-import { JOB_TEAM_ROLES } from '@tt/domain';
+import { JOB_TEAM_ROLES } from '@candydati/domain';
 import { z } from 'zod';
 import type { RouteSpec } from './spec.js';
 

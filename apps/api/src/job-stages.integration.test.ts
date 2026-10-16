@@ -1,4 +1,4 @@
-import { completeJobContent } from '@tt/core/testing';
+import { completeJobContent } from '@candydati/core/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createWorld, personForm } from './testing/candidate-world.js';
 import { createTestApp, type TestApp } from './testing/test-app.js';

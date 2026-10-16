@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { UploadIcon } from '@lucide/vue'
-import { maxBytesOf, MEDIA_LIMITS, type CareersMediaAssetDto, type MediaKind } from '@tt/domain'
+import { maxBytesOf, MEDIA_LIMITS, type CareersMediaAssetDto, type MediaKind } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'

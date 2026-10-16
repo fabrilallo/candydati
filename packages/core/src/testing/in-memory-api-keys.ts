@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { ApiKey, Role } from '@tt/domain';
+import type { ApiKey, Role } from '@candydati/domain';
 import type { ApiKeyRepository, MemberRoleLookup } from '../api-key-ports.js';
 import { cell } from './in-memory-transaction.js';
 

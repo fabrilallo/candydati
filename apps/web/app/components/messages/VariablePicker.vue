@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { BracesIcon } from '@lucide/vue'
-import { TEMPLATE_VARIABLES, type TemplateVariable } from '@tt/domain'
+import { TEMPLATE_VARIABLES, type TemplateVariable } from '@candydati/domain'
 import { variableToken } from '@/lib/template-text'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'

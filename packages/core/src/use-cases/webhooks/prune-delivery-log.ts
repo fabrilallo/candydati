@@ -1,4 +1,4 @@
-import { DAY_MS } from '@tt/domain';
+import { DAY_MS } from '@candydati/domain';
 import { z } from 'zod';
 import { defineSystemJob } from '../../use-case.js';
 import type { OutboxRepository, WebhookDeliveryRepository } from '../../webhook-ports.js';

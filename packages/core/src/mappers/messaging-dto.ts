@@ -1,4 +1,4 @@
-import { SYSTEM_SENDER, type DomainRecord, type DomainStatus, type EmailTemplateKind, type MessageDirection, type MessageStatus } from '@tt/domain';
+import { SYSTEM_SENDER, type DomainRecord, type DomainStatus, type EmailTemplateKind, type MessageDirection, type MessageStatus } from '@candydati/domain';
 import type { EmailSettingsView, EmailTemplateView, MessageView } from '../use-cases/messaging/views.js';
 
 export interface EmailTemplateDto {

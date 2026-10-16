@@ -1,4 +1,4 @@
-import { dataExportKey, type DataExport, type RetentionRun } from '@tt/domain';
+import { dataExportKey, type DataExport, type RetentionRun } from '@candydati/domain';
 import type { DataExportRepository, ErasureTransaction, RetentionRunRepository, ZipStream, ZipStreamFactory, ZipWriter, ZipWriterFactory } from '../privacy-ports.js';
 import type { AuditLogRepository } from '../ports.js';
 import type { CandidateStore } from './in-memory-candidates.js';

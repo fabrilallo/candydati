@@ -1,5 +1,5 @@
-import { and, desc, eq, lt, schema, sql } from '@tt/db';
-import type { WebhookEndpoint } from '@tt/domain';
+import { and, desc, eq, lt, schema, sql } from '@candydati/db';
+import type { WebhookEndpoint } from '@candydati/domain';
 import type { WebhookDeliveryRepository, WebhookEndpointRepository } from '../webhook-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

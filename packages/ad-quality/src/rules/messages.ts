@@ -1,4 +1,4 @@
-import type { Locale, QualityCategory } from '@tt/domain';
+import type { Locale, QualityCategory } from '@candydati/domain';
 import type { Issue } from './result.js';
 
 type Lines = Readonly<Partial<Record<Issue, string>>> & { readonly missing: string; readonly partial: string };

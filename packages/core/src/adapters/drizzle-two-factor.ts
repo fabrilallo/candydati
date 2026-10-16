@@ -1,4 +1,4 @@
-import { eq, schema } from '@tt/db';
+import { eq, schema } from '@candydati/db';
 import type { TwoFactorLookup } from '../security-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

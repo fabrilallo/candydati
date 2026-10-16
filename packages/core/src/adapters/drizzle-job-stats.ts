@@ -1,6 +1,6 @@
-import { and, asc, count, eq, gte, schema, sql, type SQL } from '@tt/db';
+import { and, asc, count, eq, gte, schema, sql, type SQL } from '@candydati/db';
 import type { DbExecutor } from './db-executor.js';
-import { JOB_STATUSES, type JobStatus } from '@tt/domain';
+import { JOB_STATUSES, type JobStatus } from '@candydati/domain';
 import type { WeeklyActivity, WeeklyCount } from '../job-ports.js';
 import { sequential } from '../sequential.js';
 

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { addInterviewer, availableMembers, checkExternal, INTERVIEWERS_MAX, memberInterviewer, removeInterviewer, type MemberOption } from '@/lib/interviewers'
-import type { InterviewerDto } from '@tt/domain'
+import type { InterviewerDto } from '@candydati/domain'
 
 /**
  * "Chi fa il colloquio" for one stage: members of the team (picker) and people outside it (name and email). They get

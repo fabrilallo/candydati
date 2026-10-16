@@ -3,7 +3,7 @@ import { DOMAIN_STATUSES, MESSAGE_DIRECTIONS, MESSAGE_STATUSES } from '../messag
 import { EMAIL_TEMPLATE_KINDS } from '../messaging/template.js';
 import { isoDate } from './common.js';
 
-/** `MessageDto` of `@tt/core`. `sentBy` is null for inbound mail and `{ id: 'system', name: 'system' }` for the automatic receipt. */
+/** `MessageDto` of `@candydati/core`. `sentBy` is null for inbound mail and `{ id: 'system', name: 'system' }` for the automatic receipt. */
 export const messageSchema = z.object({
   id: z.string(),
   direction: z.enum(MESSAGE_DIRECTIONS),
@@ -41,7 +41,7 @@ export const emailSettingsSchema = z.object({
 });
 export type EmailSettingsDto = z.infer<typeof emailSettingsSchema>;
 
-/** `MessagePreview` of `@tt/core`, returned as is by the api. */
+/** `MessagePreview` of `@candydati/core`, returned as is by the api. */
 export const templatePreviewSchema = z.object({ subject: z.string(), body: z.string(), unknownVariables: z.array(z.string()) });
 export type TemplatePreviewDto = z.infer<typeof templatePreviewSchema>;
 

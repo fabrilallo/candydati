@@ -9,7 +9,7 @@ import {
   type Job,
   type JobContent,
   type PublishIssue,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { NotFoundError, ValidationError } from '../../errors.js';
 import type { JobDeps } from '../../job-ports.js';
 import { sequential } from '../../sequential.js';

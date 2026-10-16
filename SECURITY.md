@@ -51,7 +51,7 @@ What the code enforces, so an operator does not have to remember it:
 
 - **Secrets.** With `NODE_ENV=production` the api and the worker refuse to start when `BETTER_AUTH_SECRET`,
   `INBOUND_WEBHOOK_SECRET`, `S3_SECRET_KEY` or the password in `DATABASE_URL` is an example value from `.env.example`
-  (`change-me...`, `tt-minio-secret`), too short (32 characters for the first two, 16 for the others) or not random
+  (`change-me...`, `candydati-minio-secret`), too short (32 characters for the first two, 16 for the others) or not random
   enough. `docker-compose.prod.yml` runs the same check (`docker/config-check.sh`) before any other service starts.
   Generate each one with `openssl rand -base64 48`.
 - **Transport.** Production requires `https` for `BETTER_AUTH_URL` and `PLATFORM_URL`, so the session cookie is
@@ -108,12 +108,12 @@ same masking there, and do not log the `Referer`. With nginx, log the path witho
 
 ```nginx
 # http { ... }
-map $uri $tt_loggable_path {
+map $uri $candydati_loggable_path {
     default $uri;
     "~^(?<head>/(?:api/auth/reset-password|accept-invitation|feedback|consent|api/v1/public/(?:feedback|consent))/)[^/]+(?<tail>.*)$" "${head}***${tail}";
 }
-log_format tt_masked '$remote_addr [$time_local] "$request_method $tt_loggable_path" $status $body_bytes_sent "$http_user_agent"';
-access_log /var/log/nginx/access.log tt_masked;
+log_format candydati_masked '$remote_addr [$time_local] "$request_method $candydati_loggable_path" $status $body_bytes_sent "$http_user_agent"';
+access_log /var/log/nginx/access.log candydati_masked;
 ```
 
 With Caddy (the `filter` log encoder; Caddy already redacts cookies and authorization headers):

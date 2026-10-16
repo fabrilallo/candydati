@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildJobsFeedXml, FEED_HEADINGS, TT_FEED_NAMESPACE } from './jobs-feed.js';
+import { buildJobsFeedXml, FEED_HEADINGS, CANDYDATI_FEED_NAMESPACE } from './jobs-feed.js';
 import { BASE_URL, ORGANIZATION, publicJob } from './testing.js';
 import { childText, childrenNamed, parseXml, type XmlElement } from './xml-reader.js';
 
@@ -8,10 +8,10 @@ const build = (jobs = [publicJob()], organization = ORGANIZATION) => buildJobsFe
 const jobsOf = (root: XmlElement) => childrenNamed(root, 'job');
 
 describe('buildJobsFeedXml', () => {
-  it('is well-formed and has the Indeed structure plus the tt namespace', () => {
+  it('is well-formed and has the Indeed structure plus the candydati namespace', () => {
     const root = parseXml(build());
     expect(root.name).toBe('source');
-    expect(root.attributes['xmlns:tt']).toBe(TT_FEED_NAMESPACE);
+    expect(root.attributes['xmlns:candydati']).toBe(CANDYDATI_FEED_NAMESPACE);
     expect(childText(root, 'publisher')).toBe('Acme');
     expect(childText(root, 'publisherurl')).toBe('https://jobs.example.com/careers/acme');
     expect(childText(root, 'lastBuildDate')).toBe('Thu, 15 Oct 2026 08:30:00 GMT');
@@ -31,14 +31,14 @@ describe('buildJobsFeedXml', () => {
     expect(field('salary')).toBe('45000-60000 EUR per year');
     expect(field('jobtype')).toBe('fulltime');
     expect(field('remotetype')).toBe('Hybrid');
-    expect(field('tt:salaryMin')).toBe('45000');
-    expect(field('tt:salaryMax')).toBe('60000');
-    expect(field('tt:currency')).toBe('EUR');
-    expect(field('tt:period')).toBe('year');
-    expect(field('tt:responseDays')).toBe('7');
-    expect(field('tt:stages')).toBe('2');
-    expect(field('tt:role')).toBe('backend_developer');
-    expect(field('tt:updated')).toBe('Wed, 14 Oct 2026 09:00:00 GMT');
+    expect(field('candydati:salaryMin')).toBe('45000');
+    expect(field('candydati:salaryMax')).toBe('60000');
+    expect(field('candydati:currency')).toBe('EUR');
+    expect(field('candydati:period')).toBe('year');
+    expect(field('candydati:responseDays')).toBe('7');
+    expect(field('candydati:stages')).toBe('2');
+    expect(field('candydati:role')).toBe('backend_developer');
+    expect(field('candydati:updated')).toBe('Wed, 14 Oct 2026 09:00:00 GMT');
   });
 
   it('puts the same escaped HTML as the JSON-LD in the description, in the language of the ad', () => {
@@ -75,7 +75,7 @@ describe('buildJobsFeedXml', () => {
     expect(childText(job, 'city')).toBeUndefined();
     expect(childText(job, 'remotetype')).toBe('Fully remote');
     expect(childText(job, 'jobtype')).toBe('parttime');
-    expect(childText(job, 'tt:contractType')).toBe('part_time_permanent');
+    expect(childText(job, 'candydati:contractType')).toBe('part_time_permanent');
   });
 
   it('is a valid, empty feed without ads and escapes slugs in URLs', () => {
@@ -105,13 +105,13 @@ describe('buildJobsFeedXml', () => {
     };
     const jobOf = (overrides: Record<string, unknown>) => jobsOf(parseXml(build([publicJob(overrides)])))[0]!;
 
-    it('writes the tt elements', () => {
+    it('writes the candydati elements', () => {
       const job = jobOf({ employment });
-      expect(childText(job, 'tt:ccnl')).toBe('commercio_terziario');
-      expect(childText(job, 'tt:level')).toBe('5° livello');
-      expect(childText(job, 'tt:monthlyPayments')).toBe('14');
-      expect(childText(job, 'tt:mealVoucher')).toBe('8 EUR per day (electronic)');
-      expect(childText(job, 'tt:welfare')).toBe('1200 EUR per year');
+      expect(childText(job, 'candydati:ccnl')).toBe('commercio_terziario');
+      expect(childText(job, 'candydati:level')).toBe('5° livello');
+      expect(childText(job, 'candydati:monthlyPayments')).toBe('14');
+      expect(childText(job, 'candydati:mealVoucher')).toBe('8 EUR per day (electronic)');
+      expect(childText(job, 'candydati:welfare')).toBe('1200 EUR per year');
     });
 
     it('puts CCNL, structured benefits and the legal sentence in the description', () => {
@@ -123,10 +123,10 @@ describe('buildJobsFeedXml', () => {
       expect(description).toContain('collocamento mirato ai sensi della L. 68/99');
     });
 
-    it('names the other CCNL and omits every tt element when there are no terms', () => {
-      expect(childText(jobOf({ employment: { ccnl: 'altro', ccnlOther: 'CCNL Agricoltura' } }), 'tt:ccnl')).toBe('CCNL Agricoltura');
+    it('names the other CCNL and omits every candydati element when there are no terms', () => {
+      expect(childText(jobOf({ employment: { ccnl: 'altro', ccnlOther: 'CCNL Agricoltura' } }), 'candydati:ccnl')).toBe('CCNL Agricoltura');
       const plain = jobOf({});
-      for (const name of ['tt:ccnl', 'tt:level', 'tt:monthlyPayments', 'tt:mealVoucher', 'tt:welfare']) {
+      for (const name of ['candydati:ccnl', 'candydati:level', 'candydati:monthlyPayments', 'candydati:mealVoucher', 'candydati:welfare']) {
         expect(childrenNamed(plain, name)).toHaveLength(0);
       }
       expect(childText(plain, 'description')).not.toContain('CCNL');

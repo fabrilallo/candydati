@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { createDb, schema, sql, type DbHandle } from '@tt/db';
+import { createDb, schema, sql, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { AutomationRunDeps } from '../automation-ports.js';
 import {

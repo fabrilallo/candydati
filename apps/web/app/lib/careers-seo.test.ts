@@ -1,4 +1,4 @@
-import { careersPageDocumentSchema, careersPageFixture, CAREERS_FIXTURE_MEDIA, defaultCareersPage, type CareersMediaDto, type PublicCareersPageDto } from '@tt/domain'
+import { careersPageDocumentSchema, careersPageFixture, CAREERS_FIXTURE_MEDIA, defaultCareersPage, type CareersMediaDto, type PublicCareersPageDto } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { careersPageSeo } from './careers-seo'
 

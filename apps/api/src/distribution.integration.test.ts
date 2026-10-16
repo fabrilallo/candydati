@@ -1,5 +1,5 @@
-import { completeJobContent, createFakeDistributionChannel, type FakeDistributionChannel } from '@tt/core/testing';
-import { buildJobsFeedXml, childText, childrenNamed, parseXml, type DistributionChannelDto, type DistributionOverviewDto, type JobDistributionDto, type PublicFeedDto } from '@tt/domain';
+import { completeJobContent, createFakeDistributionChannel, type FakeDistributionChannel } from '@candydati/core/testing';
+import { buildJobsFeedXml, childText, childrenNamed, parseXml, type DistributionChannelDto, type DistributionOverviewDto, type JobDistributionDto, type PublicFeedDto } from '@candydati/domain';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createKey, withKey } from './testing/api-keys.js';
 import { userIdOf } from './testing/candidate-world.js';

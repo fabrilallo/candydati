@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, lt, schema } from '@tt/db';
+import { and, asc, eq, inArray, lt, schema } from '@candydati/db';
 import type { StuckWorkRepository } from '../reconcile-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

@@ -1,4 +1,4 @@
-import { buildOrganizationExport, type OrganizationExportDeps } from '@tt/core';
+import { buildOrganizationExport, type OrganizationExportDeps } from '@candydati/core';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

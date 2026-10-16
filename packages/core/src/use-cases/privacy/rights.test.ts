@@ -5,7 +5,7 @@ import { correctCandidate } from './correct-candidate.js';
 import { exportCandidate } from './export-candidate.js';
 import { zipCandidateExport } from './build-candidate-export.js';
 import { withdrawConsent } from './withdraw-consent.js';
-import { candidateExportSchema } from '@tt/domain';
+import { candidateExportSchema } from '@candydati/domain';
 
 const recruiter = userActor({ id: 'user_r', role: 'recruiter', organizationId: ORG_A });
 const rejection = (promise: Promise<unknown>) => promise.catch((e: unknown) => e);

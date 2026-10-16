@@ -1,5 +1,5 @@
 import { addToJobTeam } from '../../access/team-membership.js';
-import { jobContentFromRequest, jobSlug, type Job, type JobRequest } from '@tt/domain';
+import { jobContentFromRequest, jobSlug, type Job, type JobRequest } from '@candydati/domain';
 import { z } from 'zod';
 import { toAuditActor } from '../../actor.js';
 import { ConflictError, ValidationError } from '../../errors.js';

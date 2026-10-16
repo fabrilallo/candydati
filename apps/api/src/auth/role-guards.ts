@@ -1,4 +1,4 @@
-import { httpUrlOrNull, isRole } from '@tt/domain';
+import { httpUrlOrNull, isRole } from '@candydati/domain';
 import { APIError } from 'better-auth/api';
 
 const assertDomainRole = (role: unknown): void => {

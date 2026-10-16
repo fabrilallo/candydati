@@ -1,4 +1,4 @@
-import { runImportAnalysis, type ImportAnalysisDeps, type CvExtractor, DEFAULT_ANALYSIS_BUDGET_MS, DEFAULT_ANALYSIS_CONCURRENCY } from '@tt/providers';
+import { runImportAnalysis, type ImportAnalysisDeps, type CvExtractor, DEFAULT_ANALYSIS_BUDGET_MS, DEFAULT_ANALYSIS_CONCURRENCY } from '@candydati/providers';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

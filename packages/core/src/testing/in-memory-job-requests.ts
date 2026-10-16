@@ -1,4 +1,4 @@
-import type { JobApproval, JobRequest } from '@tt/domain';
+import type { JobApproval, JobRequest } from '@candydati/domain';
 import type {
   JobApprovalRepository,
   JobRequestRepository,

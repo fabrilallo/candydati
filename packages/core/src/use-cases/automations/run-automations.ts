@@ -1,4 +1,4 @@
-import { JOB_OWNER_ASSIGNEE, DAY_MS, isRole, roleHasPermission, type Application, type AutomationRule, type Job, type Permission, type Role, type Task } from '@tt/domain';
+import { JOB_OWNER_ASSIGNEE, DAY_MS, isRole, roleHasPermission, type Application, type AutomationRule, type Job, type Permission, type Role, type Task } from '@candydati/domain';
 import { z } from 'zod';
 import type { SystemActor } from '../../actor.js';
 import { toAuditActor, type Actor } from '../../actor.js';

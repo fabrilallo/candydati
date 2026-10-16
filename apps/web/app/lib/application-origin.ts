@@ -1,4 +1,4 @@
-import { pickOrigin } from '@tt/domain'
+import { pickOrigin } from '@candydati/domain'
 
 /**
  * Where an application came from, as a short label for the "sources" report: never a full URL, never personal data.

@@ -1,5 +1,5 @@
-import { autoMapColumns, importFileKey, type ImportBatch, type ImportMapping } from '@tt/domain';
-import { failImportBatch, recordImportAnalysis, startImportAnalysis, type ImportDeps } from '@tt/core';
+import { autoMapColumns, importFileKey, type ImportBatch, type ImportMapping } from '@candydati/domain';
+import { failImportBatch, recordImportAnalysis, startImportAnalysis, type ImportDeps } from '@candydati/core';
 import { gatherSources, type FoundCv, type SourceFile } from './gather.js';
 import { ImportError } from './limits.js';
 import { createCvParser, type ParseCvOptions } from './parse-cvs.js';

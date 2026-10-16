@@ -3,7 +3,7 @@ import { CircleCheckBigIcon, CircleIcon, CalendarClockIcon, UserRoundIcon } from
 import { fullName } from '@/lib/candidate-view'
 import { formatDate } from '@/lib/format'
 import { taskGroup } from '@/lib/inbox-view'
-import type { TaskDto } from '@tt/domain'
+import type { TaskDto } from '@candydati/domain'
 
 /** One task: a round toggle (done or open), the title, due date, assignee and, in "Le mie attività", whose task it is. */
 const props = defineProps<{ task: TaskDto; now: Date; assigneeName: string | null; canToggle: boolean; busy?: boolean; showContext?: boolean }>()

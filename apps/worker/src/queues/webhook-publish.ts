@@ -1,4 +1,4 @@
-import { publishWebhookEvents, type WebhookPublishDeps } from '@tt/core';
+import { publishWebhookEvents, type WebhookPublishDeps } from '@candydati/core';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

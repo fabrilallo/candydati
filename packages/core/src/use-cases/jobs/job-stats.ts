@@ -6,7 +6,7 @@ import {
   type JobStatus,
   type PublishedJobContent,
   type PublishIssue,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { groupBy } from './group-by.js';
 
 /** Pure aggregations behind `getJobStats`: no I/O, inputs are never modified. */

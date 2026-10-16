@@ -1,4 +1,4 @@
-import { buildJobPostingJsonLd, serializeJsonLd, type JobPostingHeadings, type PublicJobPageDto } from '@tt/domain'
+import { buildJobPostingJsonLd, serializeJsonLd, type JobPostingHeadings, type PublicJobPageDto } from '@candydati/domain'
 import type { Translate } from './ad-text'
 import { absoluteUrl, publicJobPath, salaryLine } from './job-view'
 

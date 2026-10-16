@@ -1,4 +1,4 @@
-import type { ResponsePromise } from '@tt/domain';
+import type { ResponsePromise } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import {
   buildApplication,

@@ -1,4 +1,4 @@
-import type { JobDistributionDto, Job } from '@tt/domain';
+import type { JobDistributionDto, Job } from '@candydati/domain';
 import { z } from 'zod';
 import type { DistributionDeps } from '../../distribution-ports.js';
 import type { PublicOrganization } from '../../job-ports.js';

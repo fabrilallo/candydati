@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { DnsRecordDto } from '@tt/domain'
+import type { DnsRecordDto } from '@candydati/domain'
 import { CheckIcon, CopyIcon } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'

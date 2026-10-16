@@ -5,7 +5,7 @@ import {
   createTestCandidateDeps,
   fakeModelExtractor,
   fakeTextExtractor,
-} from '@tt/core/testing';
+} from '@candydati/core/testing';
 import pino from 'pino';
 import { describe, expect, it, vi } from 'vitest';
 import { createCvExtractQueue, cvExtractPayload } from './cv-extract.js';

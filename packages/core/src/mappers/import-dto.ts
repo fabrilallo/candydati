@@ -9,7 +9,7 @@ import type {
   ImportItemStatus,
   ImportMapping,
   ImportStatus,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type { ConsentAnswerResult, ConsentRequest } from '../use-cases/imports/consent-request.js';
 import type { UndoImportResult } from '../use-cases/imports/undo-import.js';
 import type { ImportBatchView } from '../use-cases/imports/views.js';

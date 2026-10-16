@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SectionOf } from '@tt/domain'
+import type { SectionOf } from '@candydati/domain'
 
 /** Two to four big figures with their label: numbers in evidence, tabular, in the heading font. */
 const props = defineProps<{ section: SectionOf<'numbers'>; first: boolean }>()

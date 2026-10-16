@@ -1,4 +1,4 @@
-import { deliverWebhook, type Actor, type WebhookDeliverDeps } from '@tt/core';
+import { deliverWebhook, type Actor, type WebhookDeliverDeps } from '@candydati/core';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

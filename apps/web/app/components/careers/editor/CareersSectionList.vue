@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SectionType } from '@tt/domain'
+import type { SectionType } from '@candydati/domain'
 import { addableTypes, canAddSection, canMoveTo, sectionTitle, type EditorDocument } from '@/lib/careers-editor'
 import type { EditorIssues } from '@/lib/careers-editor-issues'
 

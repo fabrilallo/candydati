@@ -1,4 +1,4 @@
-import type { FeedbackRequest, InterviewFeedback, StageInterviewer } from '@tt/domain';
+import type { FeedbackRequest, InterviewFeedback, StageInterviewer } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository } from './candidate-ports.js';
 import type { MemberDirectory } from './automation-ports.js';
 import type { FileStorage } from './intake-ports.js';

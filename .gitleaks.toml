@@ -1,7 +1,7 @@
 # Secret scanning (gitleaks, .github/workflows/security.yml). The default rules stay on; this file only adds an
 # allowlist for values that are public on purpose. Keep it small: a real secret in the history must be rotated, not
 # allowlisted.
-title = "team-tracker gitleaks config"
+title = "candydati gitleaks config"
 
 [extend]
 useDefault = true

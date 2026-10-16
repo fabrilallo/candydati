@@ -14,7 +14,7 @@ import {
   STAGE_CONDUCTORS,
   STAGE_TYPES,
   WORK_MODES,
-} from '@tt/domain'
+} from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import en from '../../i18n/locales/en.json'
 import it_ from '../../i18n/locales/it.json'

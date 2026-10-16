@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { StageRef, AttentionItemDto  } from '@tt/domain'
+import type { StageRef, AttentionItemDto  } from '@candydati/domain'
 import { AlarmClockIcon, HourglassIcon, PartyPopperIcon, TimerIcon } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 import { pageCount } from '@/lib/audit-api'

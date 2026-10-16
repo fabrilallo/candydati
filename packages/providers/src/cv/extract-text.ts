@@ -1,4 +1,4 @@
-import type { CvMediaType } from '@tt/domain';
+import type { CvMediaType } from '@candydati/domain';
 import { isWithinOoxmlBudget } from '../zip/bounded-inflate.js';
 
 export const CV_TEXT_MAX_CHARS = 60_000;

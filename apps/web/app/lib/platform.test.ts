@@ -7,8 +7,8 @@ describe('platformFromPublicConfig', () => {
     expect(platform).toMatchObject({ name: 'Acme ATS', defaultLocale: 'en', url: 'https://ats.example' })
   })
 
-  it('falls back to the codename when the name is blank', () => {
-    expect(platformFromPublicConfig({ platformName: '', platformDefaultLocale: 'it', siteUrl: '' }).name).toBe('team-tracker')
+  it('falls back to the default name when the name is blank', () => {
+    expect(platformFromPublicConfig({ platformName: '', platformDefaultLocale: 'it', siteUrl: '' }).name).toBe('Candydati')
   })
 
   it('is frozen so no screen can mutate it', () => {

@@ -1,4 +1,4 @@
-import type { ImportBatchDto } from '@tt/domain'
+import type { ImportBatchDto } from '@candydati/domain'
 import { useDocumentVisibility, useIntervalFn } from '@vueuse/core'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'

@@ -3,7 +3,7 @@ import type { TaskQueue } from '../../intake-ports.js';
 import { safeErrorCode } from '../../safe-error.js';
 import { baseDeps, inSavepoint, inTransaction, queuesInTransaction } from '../../transaction.js';
 import { defineSystemJob } from '../../use-case.js';
-import type { WebhookEventType } from '@tt/domain';
+import type { WebhookEventType } from '@candydati/domain';
 import type { PendingOutboxEvent, WebhookPublishDeps } from '../../webhook-ports.js';
 
 /** An event whose fan-out failed this run. `code` is safe to log; `dead`: it ran out of attempts and is parked. */

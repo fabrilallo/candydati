@@ -1,4 +1,4 @@
-import type { ApiError, PageMeta } from '@tt/domain';
+import type { ApiError, PageMeta } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import { mailboxOf, pathOf } from './mailbox.js';
 import { PASSWORD, WEB_ORIGIN } from './test-app.js';

@@ -1,4 +1,4 @@
-import { runDeadlineScan, type DeadlineScanJobDeps } from '@tt/core';
+import { runDeadlineScan, type DeadlineScanJobDeps } from '@candydati/core';
 import { z } from 'zod';
 import { defineQueue, type QueueDefinition } from './definitions.js';
 

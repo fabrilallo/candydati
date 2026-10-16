@@ -10,7 +10,7 @@ import { createInMemoryJobRepository, createInMemoryOrganizationDirectory } from
 import { createInMemoryJobTeams } from './in-memory-job-teams.js';
 import { createInMemoryPrivacyNoticeRepository } from './in-memory-privacy.js';
 import { buildJob } from './job-fixtures.js';
-import type { Application, Candidate, CandidateNote, CvExtractionRecord, Job } from '@tt/domain';
+import type { Application, Candidate, CandidateNote, CvExtractionRecord, Job } from '@candydati/domain';
 
 export const ORG_A = 'org_a';
 export const ORG_B = 'org_b';

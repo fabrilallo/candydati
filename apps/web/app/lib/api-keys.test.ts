@@ -1,4 +1,4 @@
-import { MACHINE_FORBIDDEN_PERMISSIONS, PERMISSIONS } from '@tt/domain'
+import { MACHINE_FORBIDDEN_PERMISSIONS, PERMISSIONS } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { DEFAULT_EXPIRY, EXPIRY_CHOICES, expiryDate, keyStatus, mcpConfigSnippet, mcpEndpoint, scopeGroups, scopeLabelKey, toggleScope, validateKeyForm } from './api-keys'
 
@@ -79,10 +79,10 @@ describe('mcp', () => {
   })
 
   it('writes a client config with a bearer header and a slug server name', () => {
-    const snippet = mcpConfigSnippet({ serverName: 'Il Mio ATS!', url: 'https://ats.example.com/mcp', token: 'tt_LA_TUA_CHIAVE' })
+    const snippet = mcpConfigSnippet({ serverName: 'Il Mio ATS!', url: 'https://ats.example.com/mcp', token: 'candydati_LA_TUA_CHIAVE' })
     const parsed = JSON.parse(snippet) as { mcpServers: Record<string, { type: string; url: string; headers: Record<string, string> }> }
     expect(Object.keys(parsed.mcpServers)).toEqual(['il-mio-ats'])
-    expect(parsed.mcpServers['il-mio-ats']).toEqual({ type: 'http', url: 'https://ats.example.com/mcp', headers: { Authorization: 'Bearer tt_LA_TUA_CHIAVE' } })
+    expect(parsed.mcpServers['il-mio-ats']).toEqual({ type: 'http', url: 'https://ats.example.com/mcp', headers: { Authorization: 'Bearer candydati_LA_TUA_CHIAVE' } })
   })
 
   it('falls back to a neutral server name', () => {

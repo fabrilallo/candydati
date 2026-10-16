@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { fieldIdOf } from '@/lib/job-issues'
 import type { InterviewersBinding } from '@/lib/interviewers'
 import { appendItem, emptyStage, moveItem, removeItem, replaceItem, type FieldErrors, type JobForm, type StageForm } from '@/lib/job-form'
-import type { InterviewerDto } from '@tt/domain'
+import type { InterviewerDto } from '@candydati/domain'
 
 const props = defineProps<{
   form: JobForm

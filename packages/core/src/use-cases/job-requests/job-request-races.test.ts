@@ -1,4 +1,4 @@
-import type { JobRequest } from '@tt/domain';
+import type { JobRequest } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError } from '../../errors.js';
 import { ORG_A, seedHrWorld, userActor, type TestHrDeps } from '../../testing/index.js';

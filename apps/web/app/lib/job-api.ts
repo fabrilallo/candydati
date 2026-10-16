@@ -20,7 +20,7 @@ import {
   qualityResultSchema,
   templateSchema,
   type PublicJobPage
-} from '@tt/domain'
+} from '@candydati/domain'
 import { z } from 'zod'
 import { approvalErrorKey } from './approval-view'
 import { AppError, authErrorKey, errorKeyOf } from './auth-errors'

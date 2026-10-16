@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { VideoSource } from '@tt/domain'
+import type { VideoSource } from '@candydati/domain'
 import { PlayIcon } from '@lucide/vue'
 import { safeEmbedUrl, safeMediaUrl, type ImageSources } from '@/lib/careers-site'
 

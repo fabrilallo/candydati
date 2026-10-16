@@ -1,4 +1,4 @@
-import { completeJobContent, fixedQualityReport, throwingAdQualityAnalyzer } from '@tt/core/testing';
+import { completeJobContent, fixedQualityReport, throwingAdQualityAnalyzer } from '@candydati/core/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { TestUser } from './testing/client.js';
 import { publishNotice } from './testing/privacy.js';

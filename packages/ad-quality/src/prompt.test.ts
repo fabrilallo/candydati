@@ -1,4 +1,4 @@
-import { QUALITY_CATEGORIES } from '@tt/domain';
+import { QUALITY_CATEGORIES } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { AD_BEGIN, AD_END, buildQualityPrompt } from './prompt.js';
 import { draft, richAd } from './testing/fixtures.js';

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { StageRef } from '@tt/domain'
+import type { StageRef } from '@candydati/domain'
 import { ArrowRightLeftIcon } from '@lucide/vue'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { getPipeline } from '@/lib/candidate-api'

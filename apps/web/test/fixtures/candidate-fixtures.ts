@@ -1,4 +1,4 @@
-import type { ApplicationCardDto, CandidateDetailDto, CandidateSummaryDto, NoteDto, PipelineDto, PrivacyNoticeDto, PublicPrivacyNoticeDto } from '@tt/domain'
+import type { ApplicationCardDto, CandidateDetailDto, CandidateSummaryDto, NoteDto, PipelineDto, PrivacyNoticeDto, PublicPrivacyNoticeDto } from '@candydati/domain'
 
 export const T0 = '2026-10-13T10:00:00.000Z'
 export const PRIVACY_TEXT = `${'Titolare del trattamento: Acme. '.repeat(5)}\n\nI tuoi dati servono solo per la selezione. ${'Puoi chiedere accesso e cancellazione. '.repeat(3)}`

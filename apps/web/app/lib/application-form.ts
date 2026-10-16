@@ -1,4 +1,4 @@
-import { applicationFormSchema, type ApplicationForm, type ConsentScope, receivedSchema } from '@tt/domain'
+import { applicationFormSchema, type ApplicationForm, type ConsentScope, receivedSchema } from '@candydati/domain'
 import { ApiFailure, callApi, type FailureInfo } from './api-call'
 import type { JobApiRequest } from './job-api'
 

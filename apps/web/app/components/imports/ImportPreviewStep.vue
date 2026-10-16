@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ImportItemView } from '@/lib/import-item-view'
 import { confidenceCounts, filterItems, PROBLEM_FILTERS, type ConfidenceFilter, type PreviewFilters, type ProblemFilter, type Selection } from '@/lib/import-preview'
-import { IMPORT_CONFIDENCES as CONFIDENCES, type ImportConfidence } from '@tt/domain'
+import { IMPORT_CONFIDENCES as CONFIDENCES, type ImportConfidence } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { NativeSelect } from '@/components/ui/native-select'
 

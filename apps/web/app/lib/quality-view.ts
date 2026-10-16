@@ -1,4 +1,4 @@
-import { QUALITY_CATEGORIES, QUALITY_MAX_TOTAL, type AdQualityAssessment, type QualityCategory, type VaguePhrase } from '@tt/domain'
+import { QUALITY_CATEGORIES, QUALITY_MAX_TOTAL, type AdQualityAssessment, type QualityCategory, type VaguePhrase } from '@candydati/domain'
 
 export type ScoreLevel = 'low' | 'mid' | 'high'
 

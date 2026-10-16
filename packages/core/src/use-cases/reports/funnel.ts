@@ -1,4 +1,4 @@
-import { pipelineStagesOf, rate, STAGE_TYPES, type FunnelStageDto, type FunnelStageType, type Job } from '@tt/domain';
+import { pipelineStagesOf, rate, STAGE_TYPES, type FunnelStageDto, type FunnelStageType, type Job } from '@candydati/domain';
 import type { ReportAggregates } from '../../report-ports.js';
 
 /** Stage id -> type for one job; `received` is its own type. Stages removed from the job are unknown. */

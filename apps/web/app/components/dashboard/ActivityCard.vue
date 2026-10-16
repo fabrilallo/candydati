@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobStatsDto } from '@tt/domain'
+import type { JobStatsDto } from '@candydati/domain'
 import { VisAxis, VisCrosshair, VisGroupedBar, VisTooltip, VisXYContainer } from '@unovis/vue'
 import { CHART_COLORS, hasActivity, integerTick, weeklySeries, type WeekPoint } from '@/lib/stats-view'
 
@@ -17,9 +17,9 @@ const y = [(d: WeekPoint): number => d.created, (d: WeekPoint): number => d.publ
 const color = [CHART_COLORS.neutral, CHART_COLORS.main]
 const xTick = (i: number | Date): string => (typeof i === 'number' ? (series.value[i]?.label ?? '') : '')
 const tooltip = (d: WeekPoint): string =>
-  `<div class="tt-tip"><p class="tt-tip-title">${t('dashboard.stats.activity.weekOf', { date: d.label })}</p>` +
-  `<p><span class="tt-dot" style="background:${CHART_COLORS.neutral}"></span>${t('dashboard.stats.activity.created')} <b>${d.created}</b></p>` +
-  `<p><span class="tt-dot" style="background:${CHART_COLORS.main}"></span>${t('dashboard.stats.activity.published')} <b>${d.published}</b></p></div>`
+  `<div class="candydati-tip"><p class="candydati-tip-title">${t('dashboard.stats.activity.weekOf', { date: d.label })}</p>` +
+  `<p><span class="candydati-dot" style="background:${CHART_COLORS.neutral}"></span>${t('dashboard.stats.activity.created')} <b>${d.created}</b></p>` +
+  `<p><span class="candydati-dot" style="background:${CHART_COLORS.main}"></span>${t('dashboard.stats.activity.published')} <b>${d.published}</b></p></div>`
 </script>
 
 <template>
@@ -36,7 +36,7 @@ const tooltip = (d: WeekPoint): string =>
         </div>
       </div>
     </template>
-    <div v-if="active" class="tt-chart h-48" aria-hidden="true">
+    <div v-if="active" class="candydati-chart h-48" aria-hidden="true">
       <ClientOnly>
         <VisXYContainer :data="series" :duration="duration" :padding="{ top: 8, right: 4 }" :height="192">
           <VisGroupedBar :x="x" :y="y" :color="color" :rounded-corners="3" :group-padding="0.3" :bar-padding="0.12" />

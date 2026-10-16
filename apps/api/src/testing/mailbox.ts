@@ -1,4 +1,4 @@
-import type { AccountEmailInput, AccountEmailKind } from '@tt/domain';
+import type { AccountEmailInput, AccountEmailKind } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AccountMailer } from '../auth/account-mailer.js';
 

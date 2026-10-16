@@ -15,7 +15,7 @@ import {
   type Job,
   type SelectionStage,
   type StageInterviewer,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type { FeedbackMailParts, FeedbackStageEntryDeps } from '../../feedback-ports.js';
 import type { PublicOrganization } from '../../job-ports.js';
 import { afterCommitOrNow, type TransactionalDeps } from '../../transaction.js';

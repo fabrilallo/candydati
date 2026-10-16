@@ -1,4 +1,4 @@
-import { ForbiddenError, isCoreError, ValidationError, type ErrorCode } from '@tt/core';
+import { ForbiddenError, isCoreError, ValidationError, type ErrorCode } from '@candydati/core';
 
 export { ForbiddenError };
 

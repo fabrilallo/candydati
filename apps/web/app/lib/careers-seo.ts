@@ -1,4 +1,4 @@
-import { serializeJsonLd, type Locale, type PublicCareersPageDto } from '@tt/domain'
+import { serializeJsonLd, type Locale, type PublicCareersPageDto } from '@candydati/domain'
 import { absoluteMediaUrl, imageSources, mediaOf, textIn } from './careers-site'
 import { safeExternalUrl, safeImageUrl } from './safe-url'
 

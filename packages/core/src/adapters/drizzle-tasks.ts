@@ -1,5 +1,5 @@
-import { and, asc, desc, eq, inArray, isNotNull, isNull, lte, or, schema, sql } from '@tt/db';
-import type { Task } from '@tt/domain';
+import { and, asc, desc, eq, inArray, isNotNull, isNull, lte, or, schema, sql } from '@candydati/db';
+import type { Task } from '@candydati/domain';
 import type { TaskRepository } from '../automation-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CandidateApplicationDto } from '@tt/domain'
+import type { CandidateApplicationDto } from '@candydati/domain'
 import { DownloadIcon, FileTextIcon } from '@lucide/vue'
 import { cvUrl } from '@/lib/candidate-api'
 import { cvKind, formatBytes } from '@/lib/cv-file'

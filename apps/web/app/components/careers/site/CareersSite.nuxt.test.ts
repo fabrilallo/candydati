@@ -8,7 +8,7 @@ import {
   type CareersPageDocument,
   type PublicCareersDto,
   type PublicJobSummaryDto,
-} from '@tt/domain'
+} from '@candydati/domain'
 import { afterEach, describe, expect, it } from 'vitest'
 import CareersSite from './CareersSite.vue'
 

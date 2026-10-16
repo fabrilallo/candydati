@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ShieldCheckIcon, TriangleAlertIcon } from '@lucide/vue'
-import { API_KEY_NAME_MAX, type Permission } from '@tt/domain'
+import { API_KEY_NAME_MAX, type Permission } from '@candydati/domain'
 import type { ApiKeyCreateInput } from '@/lib/api-key-api'
 import { DEFAULT_EXPIRY, EXPIRY_CHOICES, expiryDate, scopeGroups, scopeLabelKey, toggleScope, validateKeyForm, type KeyForm, type KeyFormErrors } from '@/lib/api-keys'
 import { Button } from '@/components/ui/button'

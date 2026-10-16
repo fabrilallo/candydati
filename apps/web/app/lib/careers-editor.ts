@@ -1,4 +1,4 @@
-import { CAREERS_LIMITS, resolveText, SECTION_TYPES, type CareersPageDocument, type CareersSection, type Locale, type LocalizedText, type SectionOf, type SectionType } from '@tt/domain'
+import { CAREERS_LIMITS, resolveText, SECTION_TYPES, type CareersPageDocument, type CareersSection, type Locale, type LocalizedText, type SectionOf, type SectionType } from '@candydati/domain'
 
 /**
  * Pure editing of a careers page document (the editor's draft). Every function returns a new document and never

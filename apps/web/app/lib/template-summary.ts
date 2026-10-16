@@ -1,4 +1,4 @@
-import type { JobContent } from '@tt/domain'
+import type { JobContent } from '@candydati/domain'
 import type { Translate } from './ad-text'
 
 export type TemplateFactKey = 'salary' | 'stages' | 'requirements' | 'responsibilities' | 'benefits'

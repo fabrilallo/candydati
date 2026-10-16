@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CircleAlertIcon, InfoIcon } from '@lucide/vue'
-import { MESSAGE_MAX, NAME_MAX, type PublicPrivacyNoticeDto } from '@tt/domain'
+import { MESSAGE_MAX, NAME_MAX, type PublicPrivacyNoticeDto } from '@candydati/domain'
 import type { ApplyField as Field } from '@/lib/application-form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

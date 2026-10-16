@@ -11,7 +11,7 @@ import {
   type Locale,
   type LocalizedText,
   type VideoSource,
-} from '@tt/domain'
+} from '@candydati/domain'
 
 /**
  * Pure helpers of the public careers page and its live preview: theme variables, the visitor's text, responsive

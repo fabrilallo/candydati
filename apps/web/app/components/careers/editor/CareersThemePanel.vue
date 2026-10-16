@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { CheckIcon, CircleAlertIcon } from '@lucide/vue'
-import { CORNER_STYLES, HEADING_FONTS, type CareersTheme, type CornerStyle, type HeadingFont } from '@tt/domain'
+import { CORNER_STYLES, HEADING_FONTS, type CareersTheme, type CornerStyle, type HeadingFont } from '@candydati/domain'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'

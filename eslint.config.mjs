@@ -6,9 +6,9 @@ import tseslint from 'typescript-eslint';
 /** Workspace packages other than the one named in `allowed`, as a `no-restricted-imports` list. */
 const ALL_WORKSPACE_PACKAGES = ['domain', 'db', 'core', 'providers', 'ad-quality', 'api', 'worker', 'web'];
 const forbid = (...names) =>
-  names.flatMap((name) => [`@tt/${name}`, `@tt/${name}/*`]).map((pattern) => ({
+  names.flatMap((name) => [`@candydati/${name}`, `@candydati/${name}/*`]).map((pattern) => ({
     group: [pattern],
-    message: `Import boundary: this package must not depend on @tt/${pattern.slice(4).split('/')[0]} (see CONTRIBUTING.md).`,
+    message: `Import boundary: this package must not depend on @candydati/${pattern.slice(4).split('/')[0]} (see CONTRIBUTING.md).`,
   }));
 
 const boundary = (files, allowed) => ({
@@ -32,14 +32,14 @@ const importBoundaries = [
   boundary(['apps/worker/**'], ['domain', 'db', 'core', 'providers', 'ad-quality']),
 ];
 
-// Cross-package deep imports (`@tt/core/src/...`) are never allowed, only the declared entry points.
+// Cross-package deep imports (`@candydati/core/src/...`) are never allowed, only the declared entry points.
 const noDeepImports = {
   files: ['packages/**', 'apps/api/**', 'apps/worker/**'],
   rules: {
     'no-restricted-syntax': [
       'error',
       {
-        selector: 'ImportDeclaration[source.value=/^@tt\\/[^/]+\\/(src|dist)\\//]',
+        selector: 'ImportDeclaration[source.value=/^@candydati\\/[^/]+\\/(src|dist)\\//]',
         message: 'Import a workspace package through its entry point, not its internals.',
       },
     ],

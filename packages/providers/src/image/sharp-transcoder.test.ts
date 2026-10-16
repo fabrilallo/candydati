@@ -1,4 +1,4 @@
-import { ImageRejectedError } from '@tt/core';
+import { ImageRejectedError } from '@candydati/core';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 import { createSharpImageTranscoder } from './sharp-transcoder.js';

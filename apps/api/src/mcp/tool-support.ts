@@ -1,5 +1,5 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import type { Actor } from '@tt/core';
+import type { Actor } from '@candydati/core';
 import type { z } from 'zod';
 import type { AppContext } from '../app-context.js';
 import { toHttpFailure } from '../http/errors.js';

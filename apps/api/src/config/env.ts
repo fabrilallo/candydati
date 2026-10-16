@@ -1,5 +1,5 @@
-import { loadEmailConfig, loadS3Config, type EmailConfig, type S3Config } from '@tt/providers';
-import { API_KEY_MAX_TTL_DAYS, loadObservabilityConfig, loadPlatformConfig, productionIssues, type ObservabilityConfig, type PlatformConfig } from '@tt/domain';
+import { loadEmailConfig, loadS3Config, type EmailConfig, type S3Config } from '@candydati/providers';
+import { API_KEY_MAX_TTL_DAYS, loadObservabilityConfig, loadPlatformConfig, productionIssues, type ObservabilityConfig, type PlatformConfig } from '@candydati/domain';
 import { z } from 'zod';
 import { parseTrustProxy } from './trust-proxy.js';
 

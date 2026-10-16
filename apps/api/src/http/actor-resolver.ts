@@ -1,5 +1,5 @@
-import type { Actor } from '@tt/core';
-import { isRole, roleNeedsTwoFactor } from '@tt/domain';
+import type { Actor } from '@candydati/core';
+import { isRole, roleNeedsTwoFactor } from '@candydati/domain';
 import { AccountGateError, ForbiddenError, UnauthenticatedError } from './errors.js';
 
 export interface SessionInfo {

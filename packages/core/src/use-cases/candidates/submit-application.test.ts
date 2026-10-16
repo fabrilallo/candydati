@@ -1,4 +1,4 @@
-import { applicationsBusyMessage, CV_MAX_BYTES } from '@tt/domain';
+import { applicationsBusyMessage, CV_MAX_BYTES } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError, NotFoundError, RateLimitedError, ValidationError } from '../../errors.js';
 import {

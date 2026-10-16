@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
-import { createDrizzleUnitOfWork, inTransaction } from '@tt/core';
-import { createDb, sql, type DbHandle } from '@tt/db';
-import { createPgBossQueue } from '@tt/providers';
+import { createDrizzleUnitOfWork, inTransaction } from '@candydati/core';
+import { createDb, sql, type DbHandle } from '@candydati/db';
+import { createPgBossQueue } from '@candydati/providers';
 import { PgBoss } from 'pg-boss';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { apiTestDatabaseUrl } from './testing/test-database.js';

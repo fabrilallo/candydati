@@ -1,4 +1,4 @@
-import { jobContentSchema, type JobContent } from '@tt/domain';
+import { jobContentSchema, type JobContent } from '@candydati/domain';
 import type { MastraModelConfig } from '@mastra/core/llm';
 
 export const DRAFT_TIMEOUT_MS = 90_000;

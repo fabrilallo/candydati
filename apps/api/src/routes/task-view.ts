@@ -1,5 +1,5 @@
-import { loadRefs, toTaskDto, type TaskDeps, type TaskDto } from '@tt/core';
-import type { Task } from '@tt/domain';
+import { loadRefs, toTaskDto, type TaskDeps, type TaskDto } from '@candydati/core';
+import type { Task } from '@candydati/domain';
 
 const UNKNOWN_MEMBER = 'Former member';
 

@@ -3,7 +3,7 @@ import { FilePenLineIcon } from '@lucide/vue'
 import { salaryFigure } from '@/lib/ad-facts'
 import { proposalFacts } from '@/lib/job-proposal'
 import { can } from '@/lib/permissions-ui'
-import type { DraftJobOutput } from '@tt/domain'
+import type { DraftJobOutput } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 
 /**

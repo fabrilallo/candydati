@@ -1,4 +1,4 @@
-import type { ImportMapping } from '@tt/domain'
+import type { ImportMapping } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { commitImport, saveItems, saveMapping } from '@/lib/import-api'

@@ -1,4 +1,4 @@
-import { CV_MAX_BYTES } from '@tt/domain'
+import { CV_MAX_BYTES } from '@candydati/domain'
 
 /** Extensions offered in the picker; the api checks the magic bytes anyway. */
 export const CV_EXTENSIONS = ['.pdf', '.docx'] as const

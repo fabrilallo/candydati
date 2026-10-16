@@ -1,4 +1,4 @@
-import type { DistributionSetting, JobDistribution } from '@tt/domain';
+import type { DistributionSetting, JobDistribution } from '@candydati/domain';
 import type {
   DistributionChannel,
   DistributionChannelResult,

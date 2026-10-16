@@ -1,4 +1,4 @@
-import { candidateExportSchema, dataExportKey } from '@tt/domain';
+import { candidateExportSchema, dataExportKey } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError, ForbiddenError, NotFoundError } from '../../errors.js';
 import { ERASED, ORG_A, ORG_B, buildCandidate, createInMemoryTaskQueue, seedPrivacyData, userActor } from '../../testing/index.js';

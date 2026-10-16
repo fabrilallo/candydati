@@ -2,10 +2,10 @@ import {
   type DrizzleUnitOfWork,
   type DeliverDeps,
   type EmailSender,
-} from '@tt/core';
-import type { PlatformConfig } from '@tt/domain';
-import type { EmailConfig } from '@tt/providers';
-import { newConversationToken, toMessagingConfig } from '@tt/providers';
+} from '@candydati/core';
+import type { PlatformConfig } from '@candydati/domain';
+import type { EmailConfig } from '@candydati/providers';
+import { newConversationToken, toMessagingConfig } from '@candydati/providers';
 import { hashConsentSecret, newConsentSecret } from '../import/deps.js';
 
 export interface EmailDeliveryWiring {

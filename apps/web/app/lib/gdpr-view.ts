@@ -1,4 +1,4 @@
-import { candidateCorrectionSchema, RETENTION_WARNING_DAYS, type CandidateCorrection, type ConsentScope, type DataExportStatus, type DataExportDto, type RetentionUpcomingDto } from '@tt/domain'
+import { candidateCorrectionSchema, RETENTION_WARNING_DAYS, type CandidateCorrection, type ConsentScope, type DataExportStatus, type DataExportDto, type RetentionUpcomingDto } from '@candydati/domain'
 import { calendarDays } from './response-countdown'
 
 const parse = (iso: string | null): Date | null => {

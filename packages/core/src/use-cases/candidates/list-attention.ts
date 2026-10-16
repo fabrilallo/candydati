@@ -1,4 +1,4 @@
-import { ATTENTION_STATES, DUE_SOON_HOURS, HOUR_MS, responseState, type AttentionState, type Application, type Candidate, type Job } from '@tt/domain';
+import { ATTENTION_STATES, DUE_SOON_HOURS, HOUR_MS, responseState, type AttentionState, type Application, type Candidate, type Job } from '@candydati/domain';
 import { z } from 'zod';
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../list-audit-log.js';
 import { stageName } from '../messaging/shared.js';

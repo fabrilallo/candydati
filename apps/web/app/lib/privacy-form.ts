@@ -1,4 +1,4 @@
-import { DEFAULT_RETENTION_DAYS, privacyNoticeInputSchema, SUPPORTED_LOCALES, type Locale, type PrivacyNoticeInput, type PrivacyNoticeDto } from '@tt/domain'
+import { DEFAULT_RETENTION_DAYS, privacyNoticeInputSchema, SUPPORTED_LOCALES, type Locale, type PrivacyNoticeInput, type PrivacyNoticeDto } from '@candydati/domain'
 
 /** The privacy settings editor. Days are `null` while the field is empty. */
 export interface PrivacyFormValues {

@@ -1,4 +1,4 @@
-import { completeJobContent } from '@tt/core/testing';
+import { completeJobContent } from '@candydati/core/testing';
 import { MockLanguageModelV3, simulateReadableStream } from 'ai/test';
 import { describe, expect, it } from 'vitest';
 import { createModelJobDrafter, draftPrompt } from './job-drafter.js';

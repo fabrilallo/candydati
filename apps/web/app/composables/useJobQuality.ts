@@ -1,4 +1,4 @@
-import type { AdQualityAssessment, JobContent } from '@tt/domain'
+import type { AdQualityAssessment, JobContent } from '@candydati/domain'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { analyzeQuality, type JobApiRequest } from '@/lib/job-api'
 import { toQualityView } from '@/lib/quality-view'

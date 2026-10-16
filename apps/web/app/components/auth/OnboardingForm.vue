@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import type { OrganizationSummary } from '@/lib/auth-api'
 import { createOrganizationSchema } from '@/lib/schemas'
-import { slugify } from '@tt/domain'
+import { slugify } from '@candydati/domain'
 
 const emit = defineEmits<{ created: [organization: OrganizationSummary] }>()
 const { t } = useI18n()

@@ -1,4 +1,4 @@
-import { ROLES, ROLE_GRANTS, STATEMENTS, type Role } from '@tt/domain';
+import { ROLES, ROLE_GRANTS, STATEMENTS, type Role } from '@candydati/domain';
 import { createAccessControl } from 'better-auth/plugins/access';
 
 /**

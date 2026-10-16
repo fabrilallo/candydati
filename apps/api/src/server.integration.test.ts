@@ -1,5 +1,5 @@
-import { createInMemoryFileStorage, createInMemoryTaskQueue } from '@tt/core/testing';
-import { createDb } from '@tt/db';
+import { createInMemoryFileStorage, createInMemoryTaskQueue } from '@candydati/core/testing';
+import { createDb } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { buildServer } from './server.js';
 import { TestUser } from './testing/client.js';

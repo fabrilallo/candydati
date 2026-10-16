@@ -1,4 +1,4 @@
-import type { AuditAction, AuditEvent, NewAuditEvent } from '@tt/domain';
+import type { AuditAction, AuditEvent, NewAuditEvent } from '@candydati/domain';
 import type { JobTeamRepository } from './job-team-ports.js';
 import type { TransactionalDeps } from './transaction.js';
 

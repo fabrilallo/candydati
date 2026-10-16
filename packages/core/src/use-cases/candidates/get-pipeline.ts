@@ -1,4 +1,4 @@
-import { pipelineStagesOf, responseState } from '@tt/domain';
+import { pipelineStagesOf, responseState } from '@candydati/domain';
 import { z } from 'zod';
 import { requireJob } from '../jobs/shared.js';
 import { defineCandidateUseCase } from './define.js';

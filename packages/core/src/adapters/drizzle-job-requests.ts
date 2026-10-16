@@ -1,5 +1,5 @@
-import { and, count, desc, eq, schema, sql } from '@tt/db';
-import type { JobApproval, JobRequest } from '@tt/domain';
+import { and, count, desc, eq, schema, sql } from '@candydati/db';
+import type { JobApproval, JobRequest } from '@candydati/domain';
 import type {
   JobApprovalRepository,
   JobRequestRepository,

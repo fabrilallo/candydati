@@ -1,4 +1,4 @@
-import { jobTeamMemberInputSchema, type JobTeamMember, type JobTeamRole, type JobTeamSource } from '@tt/domain';
+import { jobTeamMemberInputSchema, type JobTeamMember, type JobTeamRole, type JobTeamSource } from '@candydati/domain';
 import { z } from 'zod';
 import { toActorUserId } from '../../actor-user.js';
 import type { MemberDirectory } from '../../automation-ports.js';

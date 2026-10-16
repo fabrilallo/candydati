@@ -1,5 +1,5 @@
-import type { StructuredRequest } from '@tt/ad-quality';
-import { cvExtractionSchema } from '@tt/domain';
+import type { StructuredRequest } from '@candydati/ad-quality';
+import { cvExtractionSchema } from '@candydati/domain';
 
 export const CV_DATA_START = '<<<CV_DATA';
 export const CV_DATA_END = 'CV_DATA>>>';

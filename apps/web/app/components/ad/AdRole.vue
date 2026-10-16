@@ -2,7 +2,7 @@
 import { CheckIcon, PlusIcon } from '@lucide/vue'
 import { optionalHints, type OptionalKey } from '@/lib/ad-gaps'
 import { employmentBenefits } from '@/lib/employment-view'
-import type { JobContent } from '@tt/domain'
+import type { JobContent } from '@candydati/domain'
 
 /** The role: introduction, what you will do, requirements split in two, technologies as tags, benefits. */
 const props = defineProps<{ content: JobContent }>()

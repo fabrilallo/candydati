@@ -1,4 +1,4 @@
-import type { ApplicationCardDto, PipelineDto } from '@tt/domain'
+import type { ApplicationCardDto, PipelineDto } from '@candydati/domain'
 import { replaceCard } from './pipeline-board'
 
 type Change = (current: PipelineDto) => PipelineDto

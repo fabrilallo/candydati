@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Role } from '@tt/domain'
+import type { Role } from '@candydati/domain'
 import { NativeSelect } from '@/components/ui/native-select'
 
 defineProps<{ id: string; modelValue: string; roles: readonly Role[]; disabled?: boolean; invalid?: boolean; describedBy?: string | undefined }>()

@@ -1,4 +1,4 @@
-import { privacyNoticeInputSchema, type PrivacyNotice } from '@tt/domain';
+import { privacyNoticeInputSchema, type PrivacyNotice } from '@candydati/domain';
 import { definePrivacyUseCase } from './define.js';
 
 /** Every save is a new immutable version: previous consents keep pointing at the text they agreed to. */

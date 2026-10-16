@@ -1,4 +1,4 @@
-import type { AccessSettingDeps, DrizzleUnitOfWork, JobTeamDeps } from '@tt/core';
+import type { AccessSettingDeps, DrizzleUnitOfWork, JobTeamDeps } from '@candydati/core';
 
 export interface TeamWiring {
   /** Job teams: who sees which job's candidates (PRODUCT.md §6). */

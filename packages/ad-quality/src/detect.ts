@@ -1,4 +1,4 @@
-import type { JobContent, Locale, QualityCategory, VaguePhrase } from '@tt/domain';
+import type { JobContent, Locale, QualityCategory, VaguePhrase } from '@candydati/domain';
 import { ENGLISH_PHRASES, ITALIAN_PHRASES, DEFAULT_SUGGESTIONS, type PhraseEntry } from './phrases/index.js';
 import { fragmentsOf, type Fragment } from './fragments.js';
 import { fold, isWordChar } from './text.js';

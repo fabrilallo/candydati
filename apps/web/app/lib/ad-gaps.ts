@@ -1,4 +1,4 @@
-import type { PublishIssue } from '@tt/domain'
+import type { PublishIssue } from '@candydati/domain'
 import { fieldIdOf, isComplianceRule } from './job-issues'
 
 /** Where a missing §5.1 element shows up in the ad preview. Ordered like the form. */

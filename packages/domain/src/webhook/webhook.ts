@@ -71,10 +71,10 @@ export interface WebhookEventPayload {
 }
 
 export const WEBHOOK_HEADERS = {
-  event: 'x-tt-event',
-  delivery: 'x-tt-delivery',
-  signature: 'x-tt-signature',
-  timestamp: 'x-tt-timestamp',
+  event: 'x-candydati-event',
+  delivery: 'x-candydati-delivery',
+  signature: 'x-candydati-signature',
+  timestamp: 'x-candydati-timestamp',
 } as const;
 
 /** Stored endpoint. `secret` exists only inside the platform: no DTO, log or audit event ever carries it after creation. */

@@ -1,8 +1,8 @@
-import { completeJobContent } from '@tt/core/testing';
+import { completeJobContent } from '@candydati/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 import { createConfiguredAnalyzer } from './ad-quality.js';
 
-vi.mock('@tt/providers', () => ({
+vi.mock('@candydati/providers', () => ({
   createMastraGenerator: () => async () => {
     throw new Error('model unavailable');
   },

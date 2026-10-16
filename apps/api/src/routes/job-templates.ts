@@ -1,5 +1,5 @@
-import { createJobTemplate, deleteJobTemplate, listJobTemplates, toJobTemplateDto } from '@tt/core';
-import { ok } from '@tt/domain';
+import { createJobTemplate, deleteJobTemplate, listJobTemplates, toJobTemplateDto } from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { AD_BODY_LIMIT } from './limits.js';

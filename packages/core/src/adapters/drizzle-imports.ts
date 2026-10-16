@@ -1,5 +1,5 @@
-import { and, asc, desc, eq, inArray, isNull, lt, or, schema, sql } from '@tt/db';
-import type { ImportAnalysis, ImportBatch, ImportItem } from '@tt/domain';
+import { and, asc, desc, eq, inArray, isNull, lt, or, schema, sql } from '@candydati/db';
+import type { ImportAnalysis, ImportBatch, ImportItem } from '@candydati/domain';
 import type { ConsentTokenRepository, ImportAnalysisRepository, ImportBatchRepository, ImportItemRepository } from '../import-ports.js';
 import { ConflictError } from '../errors.js';
 import type { DbExecutor } from './db-executor.js';

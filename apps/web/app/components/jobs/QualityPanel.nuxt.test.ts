@@ -1,5 +1,5 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import { QUALITY_CATEGORIES, type AdQualityAssessment } from '@tt/domain'
+import { QUALITY_CATEGORIES, type AdQualityAssessment } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { toQualityView } from '@/lib/quality-view'
 import QualityPanel from './QualityPanel.vue'

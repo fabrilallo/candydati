@@ -10,7 +10,7 @@ import {
   type JobRef,
   type OutcomeCounts,
   type ReportsDto,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type { ReportAggregates } from '../../report-ports.js';
 import { buildFunnel, stageTypesOf } from './funnel.js';
 

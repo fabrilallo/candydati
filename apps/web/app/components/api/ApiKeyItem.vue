@@ -2,7 +2,7 @@
 import { KeyRoundIcon } from '@lucide/vue'
 import { keyStatus, scopeLabelKey } from '@/lib/api-keys'
 import { formatDate } from '@/lib/format'
-import type { ApiKeyDto } from '@tt/domain'
+import type { ApiKeyDto } from '@candydati/domain'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 
@@ -29,7 +29,7 @@ const meta = computed(() => {
     <div class="grid min-w-0 flex-1 gap-2">
       <p class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
         <span class="truncate text-[0.9375rem] font-medium" :class="status === 'active' ? '' : 'text-muted-foreground'">{{ apiKey.name }}</span>
-        <code class="font-mono text-xs text-muted-foreground" :aria-label="t('apiKeys.prefixLabel', { prefix: apiKey.prefix })">tt_{{ apiKey.prefix }}…</code>
+        <code class="font-mono text-xs text-muted-foreground" :aria-label="t('apiKeys.prefixLabel', { prefix: apiKey.prefix })">candydati_{{ apiKey.prefix }}…</code>
         <Badge :variant="tone[status]" data-testid="api-key-status">{{ t(`apiKeys.status.${status}`) }}</Badge>
       </p>
       <ul class="flex flex-wrap gap-1" :aria-label="t('apiKeys.fields.scopes')">

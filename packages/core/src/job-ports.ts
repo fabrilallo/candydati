@@ -1,4 +1,4 @@
-import type { AdQualityAnalyzer, Job, JobStatus, JobTemplate } from '@tt/domain';
+import type { AdQualityAnalyzer, Job, JobStatus, JobTemplate } from '@candydati/domain';
 import type { PrivacyNoticeRepository } from './candidate-ports.js';
 import type { AutomationRuleRepository } from './automation-ports.js';
 import type { JobApprovalRepository, OrganizationSettingsRepository } from './job-request-ports.js';

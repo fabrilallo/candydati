@@ -149,7 +149,7 @@ export function buildOpenApiDocument(info: OpenApiInfo, routes: readonly RouteSp
     components: {
       securitySchemes: {
         sessionCookie: { type: 'apiKey', in: 'cookie', name: 'better-auth.session_token', description: 'The browser session. Used by the routes that no API key may call (imports, decisions, messages, erasure, settings).' },
-        bearerAuth: { type: 'http', scheme: 'bearer', description: 'An API key (`tt_...`), created in the settings by an owner or admin.' },
+        bearerAuth: { type: 'http', scheme: 'bearer', description: 'An API key (`candydati_...`), created in the settings by an owner or admin.' },
       },
       schemas: {
         ...schemas,

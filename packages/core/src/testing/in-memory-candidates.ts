@@ -1,4 +1,4 @@
-import type { Application, Candidate, CandidateNote, CvExtractionRecord, ResponsePromise, StageEvent } from '@tt/domain';
+import type { Application, Candidate, CandidateNote, CvExtractionRecord, ResponsePromise, StageEvent } from '@candydati/domain';
 import { ConflictError, NotFoundError } from '../errors.js';
 import type {
   ApplicationRepository,

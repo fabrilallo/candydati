@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { jobRequestSchema } from '@tt/domain'
+import { jobRequestSchema } from '@candydati/domain'
 import { jobRequestAction, canDecide, canConvert, locationLine, newestFirst, noteOr, requestBudget, requestStatusTone, requestSummary, requestsEmptyKey } from './job-request-view'
 import { jobRequest } from '../../test/fixtures/job-request-fixtures'
 

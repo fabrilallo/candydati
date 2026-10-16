@@ -12,8 +12,8 @@ import {
   type OrganizationSettingsRepository,
   type PublicFeedbackDeps,
   type StaleJobDeps,
-} from '@tt/core';
-import { newConversationToken } from '@tt/providers';
+} from '@candydati/core';
+import { newConversationToken } from '@candydati/providers';
 
 export interface HrWiring {
   readonly feedbackDeps: FeedbackDeps;

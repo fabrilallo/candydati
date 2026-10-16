@@ -1,4 +1,4 @@
-import { APPROVAL_RULES, checkApproval, jobApprovalStatusSchema, salarySchema, type JobApprovalDto, type JobApprovalStatusDto } from '@tt/domain'
+import { APPROVAL_RULES, checkApproval, jobApprovalStatusSchema, salarySchema, type JobApprovalDto, type JobApprovalStatusDto } from '@candydati/domain'
 import { z } from 'zod'
 import { jobApprovalPath, jobApprovalRequestPath } from './api-paths'
 import { callApi } from './api-call'

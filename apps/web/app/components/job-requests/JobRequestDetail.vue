@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobRequestDto } from '@tt/domain'
+import type { JobRequestDto } from '@candydati/domain'
 import { CheckIcon, ExternalLinkIcon, SparklesIcon, XIcon } from '@lucide/vue'
 import { formatDate, formatDateTime } from '@/lib/format'
 import { jobRequestAction, locationLine, noteOr, requestBudget } from '@/lib/job-request-view'

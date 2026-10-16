@@ -1,4 +1,4 @@
-import { JOB_STATUSES, type Job, type JobStatus } from '@tt/domain';
+import { JOB_STATUSES, type Job, type JobStatus } from '@candydati/domain';
 import { NotFoundError } from '../errors.js';
 import type { JobRepository } from '../job-ports.js';
 import type { StaleJobRepository } from '../job-request-ports.js';

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CareersMediaDto } from '@tt/domain'
+import type { CareersMediaDto } from '@candydati/domain'
 import { PauseIcon, PlayIcon } from '@lucide/vue'
 import { usePreferredReducedMotion } from '@vueuse/core'
 import { safeMediaUrl } from '@/lib/careers-site'

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { FilmIcon, Trash2Icon } from '@lucide/vue'
-import { resolveText, type CareersMediaAssetDto } from '@tt/domain'
+import { resolveText, type CareersMediaAssetDto } from '@candydati/domain'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatSize, thumbnailUrl, type UsedIn } from '@/lib/careers-media-view'

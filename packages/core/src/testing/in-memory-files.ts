@@ -1,4 +1,4 @@
-import type { CvMediaType } from '@tt/domain';
+import type { CvMediaType } from '@candydati/domain';
 import type { CvModelExtractor, CvSniffer, CvTextExtractor, FileStorage, QueuedTask, TaskQueue } from '../intake-ports.js';
 
 export interface InMemoryFileStorage extends FileStorage {

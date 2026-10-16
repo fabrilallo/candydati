@@ -1,5 +1,5 @@
-import { getPublicCareersMedia, getPublicCareersPage } from '@tt/core';
-import { ok } from '@tt/domain';
+import { getPublicCareersMedia, getPublicCareersPage } from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { parseByteRange } from '../http/byte-range.js';

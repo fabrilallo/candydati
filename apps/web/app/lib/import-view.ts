@@ -1,4 +1,4 @@
-import type { ImportCounts, ImportStatus, ConsentStatus } from '@tt/domain'
+import type { ImportCounts, ImportStatus, ConsentStatus } from '@candydati/domain'
 import type { ItemSource } from '@/lib/import-item-view'
 
 export type BatchTone = 'secondary' | 'default' | 'success' | 'destructive' | 'outline'

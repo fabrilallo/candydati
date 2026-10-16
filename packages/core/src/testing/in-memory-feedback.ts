@@ -1,4 +1,4 @@
-import type { FeedbackRequest, InterviewFeedback, StageInterviewer } from '@tt/domain';
+import type { FeedbackRequest, InterviewFeedback, StageInterviewer } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import type { FeedbackRequestRepository, InterviewFeedbackRepository, StageInterviewerRepository } from '../feedback-ports.js';
 import { cell } from './in-memory-transaction.js';

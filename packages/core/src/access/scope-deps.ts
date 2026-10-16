@@ -1,4 +1,4 @@
-import { isJobScopedRole } from '@tt/domain';
+import { isJobScopedRole } from '@candydati/domain';
 import type { Actor } from '../actor.js';
 import type { JobTeamRepository } from '../job-team-ports.js';
 import { createJobScopeContext, type JobScopeContext } from './job-scope.js';

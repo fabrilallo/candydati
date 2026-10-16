@@ -5,8 +5,8 @@ import {
   type FeedbackStageEntryDeps,
   type MessagingConfig,
   type StaleScanDeps,
-} from '@tt/core';
-import { newConversationToken } from '@tt/providers';
+} from '@candydati/core';
+import { newConversationToken } from '@candydati/providers';
 
 export interface HrWorkerDeps {
   readonly feedback: FeedbackStageEntryDeps;

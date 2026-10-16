@@ -1,5 +1,5 @@
-import { CONSENT_SCOPES, IMPORT_CONFIDENCES, IMPORT_FLAGS, IMPORT_ITEM_STATUSES, IMPORT_STATUSES, SUPPORTED_LOCALES, importMappingSchema } from '@tt/domain';
-import type { ConsentRequestDto } from '@tt/core';
+import { CONSENT_SCOPES, IMPORT_CONFIDENCES, IMPORT_FLAGS, IMPORT_ITEM_STATUSES, IMPORT_STATUSES, SUPPORTED_LOCALES, importMappingSchema } from '@candydati/domain';
+import type { ConsentRequestDto } from '@candydati/core';
 import { z } from 'zod';
 
 const isoDate = z.iso.datetime();

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EmailTemplateDto } from '@tt/domain'
+import type { EmailTemplateDto } from '@candydati/domain'
 import { PlusIcon } from '@lucide/vue'
 import type { TemplateInput } from '@/lib/message-api'
 import { templateGroups } from '@/lib/message-view'

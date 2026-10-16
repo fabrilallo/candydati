@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Captures the README screenshots against a running stack (`pnpm --filter @tt/e2e screenshots`). Separate from the
+ * Captures the README screenshots against a running stack (`pnpm --filter @candydati/e2e screenshots`). Separate from the
  * suite on purpose: it lives outside `tests/`, so `playwright test` and CI never pick it up.
  */
 export default defineConfig({

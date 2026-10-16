@@ -193,7 +193,7 @@ The structural model, in words: a pipeline board of fixed-width columns on a sof
 
 - **Library:** `@unovis/vue` + `@unovis/ts` 1.7.1 (exact versions, `apps/web` only), the same one shadcn-vue charts build on. Always inside `<ClientOnly>` with a fallback of the same height.
 - **Data:** only from the `getJobStats` use case (`GET /api/v1/stats/jobs`, `JobStatsDto` validated with Zod). No invented, estimated or sample numbers: with no data there is an empty state (`ChartEmpty`), and candidate metrics are declared "coming soon" until they exist.
-- **Colours:** main series `primary`, others `--chart-neutral`; `success`, `warning` and `input` only to encode a state (ad status, below threshold). The `--vis-*` variables are bound to the tokens on `.tt-chart` (unovis injects its defaults on `:root`), so both themes work without redrawing.
+- **Colours:** main series `primary`, others `--chart-neutral`; `success`, `warning` and `input` only to encode a state (ad status, below threshold). The `--vis-*` variables are bound to the tokens on `.candydati-chart` (unovis injects its defaults on `:root`), so both themes work without redrawing.
 - **Card:** `StatCard` with title `text-sm font-semibold`, hint in `text-xs muted`, key figure `text-3xl` / `text-4xl` `figure`, then the chart. Bento grid on 12 columns from `lg` with cells of different sizes (5/7, 7/5, 8/4, 12), one column below.
 - **Accessibility:** every chart is `aria-hidden` and has a text alternative (`sr-only` table in the card, or the legend itself as a `dl`). HTML tooltips always pass user text through `escapeHtml`. `tabular-nums` figures on the axes too.
 - **Motion:** 450ms duration, zero under `prefers-reduced-motion` (`usePreferredReducedMotion`).

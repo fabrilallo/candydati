@@ -1,4 +1,4 @@
-import { EMAIL_TEMPLATE_KINDS, SYSTEM_SENDER, type EmailTemplateKind, type MessageStatus, type Outcome, type TemplateVariable, type EmailTemplateDto, type MessageDto } from '@tt/domain'
+import { EMAIL_TEMPLATE_KINDS, SYSTEM_SENDER, type EmailTemplateKind, type MessageStatus, type Outcome, type TemplateVariable, type EmailTemplateDto, type MessageDto } from '@candydati/domain'
 
 export type MessageTone = 'secondary' | 'success' | 'destructive'
 

@@ -1,4 +1,4 @@
-import { installQueryOverlapGuard } from '@tt/db';
+import { installQueryOverlapGuard } from '@candydati/db';
 import { afterEach, expect } from 'vitest';
 
 /** Every test that talks to Postgres fails when two queries overlapped on one connection (a transaction's, typically). */

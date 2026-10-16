@@ -1,10 +1,10 @@
-import type { DelegatedActor, UserActor } from '@tt/core';
+import type { DelegatedActor, UserActor } from '@candydati/core';
 import { RequestContext } from '@mastra/core/request-context';
 import { z } from 'zod';
 
-const ACTOR_KEY = 'tt.agentActor';
-const USER_KEY = 'tt.user';
-const PAGE_KEY = 'tt.page';
+const ACTOR_KEY = 'candydati.agentActor';
+const USER_KEY = 'candydati.user';
+const PAGE_KEY = 'candydati.page';
 
 const ID = z.string().trim().min(1).max(100).regex(/^[\w-]+$/, 'id');
 

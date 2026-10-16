@@ -1,4 +1,4 @@
-import { STATS_WEEKS, type JobStatsDto } from '@tt/domain'
+import { STATS_WEEKS, type JobStatsDto } from '@candydati/domain'
 
 const weeks = (): JobStatsDto['weekly'] =>
   Array.from({ length: STATS_WEEKS }, (_, index) => {

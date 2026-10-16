@@ -30,7 +30,7 @@ beforeEach(() => {
   respond = (res) => res.writeHead(200).end('secret response body');
 });
 
-const request = (url: string, timeoutMs = 10_000) => ({ url, headers: { 'x-tt-event': 'ping' }, body: '{"a":1}', timeoutMs });
+const request = (url: string, timeoutMs = 10_000) => ({ url, headers: { 'x-candydati-event': 'ping' }, body: '{"a":1}', timeoutMs });
 
 describe('createPinnedLookup', () => {
   it('answers only with the pinned addresses, whatever the hostname', () => {
@@ -61,7 +61,7 @@ describe('createHttpPoster pinning', () => {
     expect(resolve).toHaveBeenCalledTimes(1);
     expect(seen[0]?.headers.host).toBe(`hooks.example.com:${port}`);
     expect(seen[0]).toMatchObject({ body: '{"a":1}', url: '/in?x=1' });
-    expect(seen[0]?.headers).toMatchObject({ 'content-type': 'application/json', 'x-tt-event': 'ping' });
+    expect(seen[0]?.headers).toMatchObject({ 'content-type': 'application/json', 'x-candydati-event': 'ping' });
   });
 
   it('never reaches 127.0.0.1 when the validated set is public: a later rebind answer is not consulted', async () => {

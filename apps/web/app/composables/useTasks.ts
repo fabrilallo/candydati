@@ -3,7 +3,7 @@ import { errorKeyOf } from '@/lib/auth-errors'
 import { createTask, listApplicationTasks, listMyTasks, setTaskDone, type TaskInput } from '@/lib/inbox-api'
 import { replaceTask } from '@/lib/inbox-view'
 import { loaded } from '@/lib/job-api'
-import type { TaskDto } from '@tt/domain'
+import type { TaskDto } from '@candydati/domain'
 
 /**
  * Tasks of one application, or the open tasks of the signed-in person (`applicationId` null). Completing keeps the

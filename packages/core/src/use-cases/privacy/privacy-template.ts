@@ -1,4 +1,4 @@
-import type { Locale } from '@tt/domain';
+import type { Locale } from '@candydati/domain';
 
 export interface TemplateParams {
   readonly language: Locale;

@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
-import type { BindableTaskQueue, TaskQueue } from '@tt/core';
-import { REQUEST_ID_PAYLOAD_FIELD } from '@tt/domain';
+import type { BindableTaskQueue, TaskQueue } from '@candydati/core';
+import { REQUEST_ID_PAYLOAD_FIELD } from '@candydati/domain';
 
 const storage = new AsyncLocalStorage<string>();
 

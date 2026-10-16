@@ -2,7 +2,7 @@
 
 > **Modello da far rivedere a un legale.** Questo documento è un template di partenza e non costituisce consulenza legale. I segnaposto tra parentesi quadre vanno compilati e il testo adattato al caso concreto prima dell'uso.
 
-Questa cartella contiene i modelli di documento per l'uso del prodotto in una selezione del personale. Il nome del prodotto non è deciso: nei testi compare come [Nome della piattaforma].
+Questa cartella contiene i modelli di documento per l'uso del prodotto in una selezione del personale. Il nome compare come [Nome della piattaforma]: Candydati, o il nome configurato dall'installazione (`PLATFORM_NAME`).
 
 ## Ruoli
 

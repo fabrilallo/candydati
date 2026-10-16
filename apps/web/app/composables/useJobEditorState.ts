@@ -1,4 +1,4 @@
-import type { JobDto, JobTemplateDto, Role } from '@tt/domain'
+import type { JobDto, JobTemplateDto, Role } from '@candydati/domain'
 import { AppError, errorKeyOf } from '@/lib/auth-errors'
 import { contentToForm, emptyForm, snapshotOf } from '@/lib/job-form'
 import { blockedStageIds } from '@/lib/job-issues'

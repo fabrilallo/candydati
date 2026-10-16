@@ -1,4 +1,4 @@
-import { SYSTEM_SENDER, textToHtml, type Candidate, type Message } from '@tt/domain';
+import { SYSTEM_SENDER, textToHtml, type Candidate, type Message } from '@candydati/domain';
 import { z } from 'zod';
 import { toAuditActor, type Actor } from '../../actor.js';
 import { ConflictError } from '../../errors.js';

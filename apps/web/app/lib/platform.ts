@@ -1,4 +1,4 @@
-import { loadPlatformConfig, type PlatformConfig } from '@tt/domain'
+import { loadPlatformConfig, type PlatformConfig } from '@candydati/domain'
 
 export interface PublicPlatformConfig {
   readonly platformName?: string | undefined

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { STAGE_CONDUCTORS, STAGE_TYPES } from '@tt/domain'
+import { STAGE_CONDUCTORS, STAGE_TYPES } from '@candydati/domain'
 import { Input } from '@/components/ui/input'
 import { durationOptions } from '@/lib/editor-inputs'
 import type { StageForm } from '@/lib/job-form'

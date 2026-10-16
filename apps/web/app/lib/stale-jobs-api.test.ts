@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import type { StaleJobDto } from '@tt/domain'
+import type { StaleJobDto } from '@candydati/domain'
 import { STALE_JOBS_PATH } from './api-paths'
 import type { JobApiRequest } from './job-api'
 import { listStaleJobs, staleDaysById } from './stale-jobs-api'

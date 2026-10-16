@@ -1,5 +1,5 @@
-import { candidateExportSchema } from '@tt/domain';
-import { fakePdfBytes } from '@tt/core/testing';
+import { candidateExportSchema } from '@candydati/domain';
+import { fakePdfBytes } from '@candydati/core/testing';
 import { strFromU8, unzipSync } from 'fflate';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { applyAs, auditMentions, createWorld, uniquePerson } from './testing/privacy-world.js';

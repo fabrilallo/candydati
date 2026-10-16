@@ -1,4 +1,4 @@
-import type { ApiKeyView, Permission } from '@tt/domain';
+import type { ApiKeyView, Permission } from '@candydati/domain';
 import type { UserNames } from '../http/audit-dto.js';
 
 export interface ApiKeyDto {

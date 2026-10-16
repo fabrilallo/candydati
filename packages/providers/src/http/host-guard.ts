@@ -1,6 +1,6 @@
 import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
-import type { HostGuard } from '@tt/core';
+import type { HostGuard } from '@candydati/core';
 import { isPublicAddress } from './ip-ranges.js';
 
 export interface HostGuardOptions {

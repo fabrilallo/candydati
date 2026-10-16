@@ -6,8 +6,8 @@ import {
   toCandidateSummaryDtos,
   toNoteDto,
   updateCandidateTags,
-} from '@tt/core';
-import { ok } from '@tt/domain';
+} from '@candydati/core';
+import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { asBoolean, asNumber, bodyOf, paramOf, queryOf } from './request.js';

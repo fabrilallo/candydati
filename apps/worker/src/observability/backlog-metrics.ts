@@ -1,4 +1,4 @@
-import type { MetricsRegistry } from '@tt/providers';
+import type { MetricsRegistry } from '@candydati/providers';
 
 /** The part of a pg pool the backlog queries use. */
 export interface SqlReader {
@@ -24,12 +24,12 @@ const num = (value: unknown): number => (typeof value === 'number' ? value : Num
  * these, so a scrape of several instances does not count them twice. Counts only: no row content leaves the database.
  */
 export function registerBacklogMetrics(registry: MetricsRegistry, db: SqlReader): void {
-  const jobs = registry.gauge('tt_queue_jobs', 'Jobs per queue and state, from pg-boss: queued (ready), deferred (scheduled or retrying later), active, failed (kept by pg-boss).', ['queue', 'state']);
-  const oldest = registry.gauge('tt_queue_oldest_waiting_seconds', 'Age of the oldest job that is ready to run and has not started, per queue.', ['queue']);
-  const pending = registry.gauge('tt_outbox_pending_events', 'Outbox events not yet published to webhooks and automations.');
-  const outboxAge = registry.gauge('tt_outbox_oldest_pending_seconds', 'Age of the oldest pending outbox event, in seconds (0 when none).');
-  const dead = registry.gauge('tt_outbox_dead_events', 'Outbox events parked after their last attempt (dead letters): need a look.');
-  const emailFailed = registry.gauge('tt_email_failed_messages_24h', 'Outbound candidate messages whose delivery failed in the last 24 hours.');
+  const jobs = registry.gauge('candydati_queue_jobs', 'Jobs per queue and state, from pg-boss: queued (ready), deferred (scheduled or retrying later), active, failed (kept by pg-boss).', ['queue', 'state']);
+  const oldest = registry.gauge('candydati_queue_oldest_waiting_seconds', 'Age of the oldest job that is ready to run and has not started, per queue.', ['queue']);
+  const pending = registry.gauge('candydati_outbox_pending_events', 'Outbox events not yet published to webhooks and automations.');
+  const outboxAge = registry.gauge('candydati_outbox_oldest_pending_seconds', 'Age of the oldest pending outbox event, in seconds (0 when none).');
+  const dead = registry.gauge('candydati_outbox_dead_events', 'Outbox events parked after their last attempt (dead letters): need a look.');
+  const emailFailed = registry.gauge('candydati_email_failed_messages_24h', 'Outbound candidate messages whose delivery failed in the last 24 hours.');
   registry.onCollect(async () => {
     const [counts, ages, outbox, email] = await Promise.all([db.query(QUEUE_COUNTS), db.query(QUEUE_OLDEST), db.query(OUTBOX), db.query(EMAIL_FAILED)]);
     jobs.reset();

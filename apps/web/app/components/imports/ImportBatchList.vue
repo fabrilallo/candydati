@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ImportBatchDto } from '@tt/domain'
+import type { ImportBatchDto } from '@candydati/domain'
 import { FileUpIcon, LoaderCircleIcon, Undo2Icon } from '@lucide/vue'
 import { formatDateTime } from '@/lib/format'
 import { batchFigures, batchTone, isWorking } from '@/lib/import-view'

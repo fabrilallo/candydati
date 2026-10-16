@@ -1,4 +1,4 @@
-import type { UserDirectory } from '@tt/core';
+import type { UserDirectory } from '@candydati/core';
 import type { UserNames } from './audit-dto.js';
 
 export type UserNameLookup = (organizationId: string, userIds: readonly string[]) => Promise<UserNames>;

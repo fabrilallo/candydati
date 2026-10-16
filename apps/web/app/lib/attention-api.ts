@@ -1,4 +1,4 @@
-import { attentionItemSchema, decidedSchema, OPEN_APPLICATIONS_PREFIX, type AttentionItemDto, type Outcome, type PageMeta } from '@tt/domain'
+import { attentionItemSchema, decidedSchema, OPEN_APPLICATIONS_PREFIX, type AttentionItemDto, type Outcome, type PageMeta } from '@candydati/domain'
 import { z } from 'zod'
 import { ApiFailure, callApi } from './api-call'
 import { AppError } from './auth-errors'

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { createDrizzleJobs, createDrizzleMemberDirectory, createDrizzleNotifications, createDrizzleStaleJobs, scanStaleJobs } from '@tt/core';
-import { completeJobContent } from '@tt/core/testing';
+import { createDrizzleJobs, createDrizzleMemberDirectory, createDrizzleNotifications, createDrizzleStaleJobs, scanStaleJobs } from '@candydati/core';
+import { completeJobContent } from '@candydati/core/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createKey, withKey } from './testing/api-keys.js';
 import { publishJob, type World } from './testing/candidate-world.js';

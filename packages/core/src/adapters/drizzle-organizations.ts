@@ -1,4 +1,4 @@
-import { eq, schema } from '@tt/db';
+import { eq, schema } from '@candydati/db';
 import type { DbExecutor } from './db-executor.js';
 import type { OrganizationDirectory } from '../job-ports.js';
 

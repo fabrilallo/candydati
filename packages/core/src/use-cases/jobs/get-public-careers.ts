@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { toPublicJobSummaryDto, toPublicOrganizationDto } from '../../mappers/job-dto.js';
 import { NotFoundError } from '../../errors.js';
 import { definePublicJobQuery } from './define.js';
-import type { PublicCareersDto } from '@tt/domain';
+import type { PublicCareersDto } from '@candydati/domain';
 
 /** The careers page of an organization: published jobs only, newest first. */
 export const getPublicCareers = definePublicJobQuery({

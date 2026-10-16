@@ -50,19 +50,19 @@ importers:
       '@modelcontextprotocol/sdk':
         specifier: 1.32.1
         version: 1.32.1(zod@4.5.4)
-      '@tt/ad-quality':
+      '@candydati/ad-quality':
         specifier: workspace:*
         version: link:../../packages/ad-quality
-      '@tt/core':
+      '@candydati/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@tt/db':
+      '@candydati/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@tt/domain':
+      '@candydati/domain':
         specifier: workspace:*
         version: link:../../packages/domain
-      '@tt/providers':
+      '@candydati/providers':
         specifier: workspace:*
         version: link:../../packages/providers
       ai:
@@ -147,7 +147,7 @@ importers:
       '@tailwindcss/vite':
         specifier: 4.3.3
         version: 4.3.3(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
-      '@tt/domain':
+      '@candydati/domain':
         specifier: workspace:*
         version: link:../../packages/domain
       '@unovis/ts':
@@ -244,16 +244,16 @@ importers:
 
   apps/worker:
     dependencies:
-      '@tt/core':
+      '@candydati/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@tt/db':
+      '@candydati/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@tt/domain':
+      '@candydati/domain':
         specifier: workspace:*
         version: link:../../packages/domain
-      '@tt/providers':
+      '@candydati/providers':
         specifier: workspace:*
         version: link:../../packages/providers
       pg-boss:
@@ -308,7 +308,7 @@ importers:
 
   packages/ad-quality:
     dependencies:
-      '@tt/domain':
+      '@candydati/domain':
         specifier: workspace:*
         version: link:../domain
       zod:
@@ -327,10 +327,10 @@ importers:
 
   packages/core:
     dependencies:
-      '@tt/db':
+      '@candydati/db':
         specifier: workspace:*
         version: link:../db
-      '@tt/domain':
+      '@candydati/domain':
         specifier: workspace:*
         version: link:../domain
       drizzle-orm:
@@ -355,7 +355,7 @@ importers:
 
   packages/db:
     dependencies:
-      '@tt/domain':
+      '@candydati/domain':
         specifier: workspace:*
         version: link:../domain
       drizzle-orm:
@@ -411,13 +411,13 @@ importers:
       '@mastra/core':
         specifier: 1.64.0
         version: 1.64.0(ai@7.0.97(zod@4.5.4))(express@5.3.0)(zod@4.5.4)
-      '@tt/ad-quality':
+      '@candydati/ad-quality':
         specifier: workspace:*
         version: link:../ad-quality
-      '@tt/core':
+      '@candydati/core':
         specifier: workspace:*
         version: link:../core
-      '@tt/domain':
+      '@candydati/domain':
         specifier: workspace:*
         version: link:../domain
       csv-parse:

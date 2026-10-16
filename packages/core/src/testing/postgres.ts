@@ -1,6 +1,6 @@
-import { createDb, runMigrations, type DbHandle } from '@tt/db';
+import { createDb, runMigrations, type DbHandle } from '@candydati/db';
 
-export const CORE_TEST_DATABASE_URL = 'postgres://tt:tt@localhost:5434/team_tracker_core_test';
+export const CORE_TEST_DATABASE_URL = 'postgres://candydati:candydati@localhost:5434/candydati_core_test';
 
 export const coreTestDatabaseUrl = (): string => process.env.CORE_TEST_DATABASE_URL ?? CORE_TEST_DATABASE_URL;
 

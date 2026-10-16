@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Role } from '@tt/domain'
+import type { Role } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

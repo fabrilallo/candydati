@@ -8,7 +8,7 @@ import {
   type CareersMediaDto,
   type CareersPageDocument,
   type CareersPageEditorDto,
-} from '@tt/domain';
+} from '@candydati/domain';
 import type { CareersDeps, CareersMediaRecord, CareersPageRecord, PublicCareersDeps } from '../../careers-ports.js';
 import { NotFoundError, ValidationError } from '../../errors.js';
 import type { PublicOrganization } from '../../job-ports.js';

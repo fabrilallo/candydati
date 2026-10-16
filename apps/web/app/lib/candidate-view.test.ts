@@ -1,4 +1,4 @@
-import { TAG_MAX, TAGS_PER_CANDIDATE_MAX } from '@tt/domain'
+import { TAG_MAX, TAGS_PER_CANDIDATE_MAX } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { detail, T0 } from '~~/test/fixtures/candidate-fixtures'
 import { addTag, applicationStatus, currentApplication, fullName, normalizeTag, removeTag, retentionState, stageOf } from './candidate-view'

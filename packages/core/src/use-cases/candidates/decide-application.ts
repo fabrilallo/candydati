@@ -1,4 +1,4 @@
-import { OUTCOMES, type ActorType, type Application, type Outcome } from '@tt/domain';
+import { OUTCOMES, type ActorType, type Application, type Outcome } from '@candydati/domain';
 import { z } from 'zod';
 import type { CandidateDeps } from '../../candidate-ports.js';
 import { ConflictError } from '../../errors.js';

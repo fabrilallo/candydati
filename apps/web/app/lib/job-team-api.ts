@@ -1,4 +1,4 @@
-import { JOB_TEAM_ROLES, type JobTeamRole } from '@tt/domain'
+import { JOB_TEAM_ROLES, type JobTeamRole } from '@candydati/domain'
 import { z } from 'zod'
 import { callApi } from './api-call'
 import { ACCESS_SETTINGS_PATH, jobTeamMemberPath, jobTeamPath } from './api-paths'

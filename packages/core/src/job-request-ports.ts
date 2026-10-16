@@ -1,5 +1,5 @@
 import type { JobTeamRepository } from './job-team-ports.js';
-import type { Job, JobApproval, JobRequest, JobRequestStatus } from '@tt/domain';
+import type { Job, JobApproval, JobRequest, JobRequestStatus } from '@candydati/domain';
 import type { MemberDirectory, NotificationRepository } from './automation-ports.js';
 import type { JobRepository } from './job-ports.js';
 import type { CoreDeps } from './ports.js';

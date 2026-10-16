@@ -1,4 +1,4 @@
-import { AUDIT_ACTIONS, type AuditEvent, type PageMeta } from '@tt/domain';
+import { AUDIT_ACTIONS, type AuditEvent, type PageMeta } from '@candydati/domain';
 import { z } from 'zod';
 import { defineUseCase } from '../use-case.js';
 

@@ -1,4 +1,4 @@
-import type { PublicPrivacyNoticeDto } from '@tt/domain'
+import type { PublicPrivacyNoticeDto } from '@candydati/domain'
 import type { Ref } from 'vue'
 import { ApiFailure } from '@/lib/api-call'
 import { applicationOrigin } from '@/lib/application-origin'

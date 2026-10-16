@@ -2,7 +2,7 @@
 import type { ImportItemView } from '@/lib/import-item-view'
 import { MailXIcon } from '@lucide/vue'
 import { previewSummary, type Selection } from '@/lib/import-preview'
-import { IMPORT_RECONFIRM_DAYS } from '@tt/domain'
+import { IMPORT_RECONFIRM_DAYS } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 
 /**

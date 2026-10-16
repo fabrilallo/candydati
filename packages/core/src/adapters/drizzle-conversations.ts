@@ -1,4 +1,4 @@
-import { and, eq, schema } from '@tt/db';
+import { and, eq, schema } from '@candydati/db';
 import type { ConversationRepository } from '../messaging-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

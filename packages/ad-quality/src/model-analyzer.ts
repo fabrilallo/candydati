@@ -6,7 +6,7 @@ import {
   type JobContent,
   type QualityCategory,
   type VaguePhrase,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import { annotate, occursInAd, type AnnotatedFragment } from './detect.js';
 import type { StructuredGenerator } from './generator.js';

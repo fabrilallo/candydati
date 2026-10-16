@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { loadEnv } from './env.js';
 
-const VALID_DATABASE_URL = 'postgres://tt:tt@localhost:5434/team_tracker';
-const S3 = { S3_ENDPOINT: 'http://localhost:9000', S3_BUCKET: 'team-tracker', S3_ACCESS_KEY: 'key', S3_SECRET_KEY: 'secret' };
+const VALID_DATABASE_URL = 'postgres://candydati:candydati@localhost:5434/candydati';
+const S3 = { S3_ENDPOINT: 'http://localhost:9000', S3_BUCKET: 'candydati', S3_ACCESS_KEY: 'key', S3_SECRET_KEY: 'secret' };
 
 /** Passes every production rule: strong secrets, https PLATFORM_URL, a real email provider. */
 const PRODUCTION = {
   ...S3,
   NODE_ENV: 'production',
-  DATABASE_URL: 'postgres://tt:r7Kp2XwN9vLq4TsB@postgres:5432/team_tracker',
+  DATABASE_URL: 'postgres://candydati:r7Kp2XwN9vLq4TsB@postgres:5432/candydati',
   S3_SECRET_KEY: 'u5Hq9ZpW3kXv7NcR',
   PLATFORM_URL: 'https://ats.example.org',
   EMAIL_PROVIDER: 'smtp',
@@ -27,9 +27,9 @@ describe('loadEnv in production', () => {
       }
     };
     expect(fails({})).toBe('');
-    expect(fails({ DATABASE_URL: 'postgres://tt:change-me-postgres-password@postgres:5432/x' })).toMatch(/DATABASE_URL/);
-    expect(fails({ S3_SECRET_KEY: 'tt-minio-secret' })).toMatch(/S3_SECRET_KEY/);
-    expect(fails({ S3_SECRET_KEY: 'tt-minio-secret' })).not.toContain('tt-minio-secret');
+    expect(fails({ DATABASE_URL: 'postgres://candydati:change-me-postgres-password@postgres:5432/x' })).toMatch(/DATABASE_URL/);
+    expect(fails({ S3_SECRET_KEY: 'candydati-minio-secret' })).toMatch(/S3_SECRET_KEY/);
+    expect(fails({ S3_SECRET_KEY: 'candydati-minio-secret' })).not.toContain('candydati-minio-secret');
     expect(fails({ PLATFORM_URL: 'http://ats.example.org' })).toMatch(/PLATFORM_URL/);
     expect(fails({ EMAIL_PROVIDER: 'log' })).toMatch(/EMAIL_PROVIDER/);
   });
@@ -90,7 +90,7 @@ describe('loadEnv', () => {
 describe('loadEnv storage and model', () => {
   it('parses S3 and the optional FAST_MODEL', () => {
     const env = loadEnv({ ...S3, DATABASE_URL: VALID_DATABASE_URL, FAST_MODEL: 'openai/some-model' });
-    expect(env.s3).toMatchObject({ bucket: 'team-tracker', endpoint: 'http://localhost:9000' });
+    expect(env.s3).toMatchObject({ bucket: 'candydati', endpoint: 'http://localhost:9000' });
     expect(env.FAST_MODEL).toBe('openai/some-model');
     expect(loadEnv({ ...S3, DATABASE_URL: VALID_DATABASE_URL, FAST_MODEL: '' }).FAST_MODEL).toBeUndefined();
     expect(() => loadEnv({ ...S3, DATABASE_URL: VALID_DATABASE_URL, FAST_MODEL: 'nope' })).toThrow(/FAST_MODEL/);

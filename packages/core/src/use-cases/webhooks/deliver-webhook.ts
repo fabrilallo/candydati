@@ -5,7 +5,7 @@ import {
   type WebhookDelivery,
   type WebhookEndpoint,
   type WebhookEventPayload,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 import { defineUseCase } from '../../use-case.js';
 import type { WebhookDeliverDeps } from '../../webhook-ports.js';

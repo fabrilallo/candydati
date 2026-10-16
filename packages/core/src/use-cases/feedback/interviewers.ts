@@ -1,4 +1,4 @@
-import { INTERVIEWERS_PER_STAGE_MAX, interviewerInputSchema, pipelineStagesOf, type StageInterviewer } from '@tt/domain';
+import { INTERVIEWERS_PER_STAGE_MAX, interviewerInputSchema, pipelineStagesOf, type StageInterviewer } from '@candydati/domain';
 import { z } from 'zod';
 import { ValidationError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';

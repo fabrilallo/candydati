@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
-import { buildOrganizationExport, requestOrganizationExport } from '@tt/core';
-import { buildApplication, buildCandidate, ORG_A, seedPrivacyData, userActor } from '@tt/core/testing';
+import { buildOrganizationExport, requestOrganizationExport } from '@candydati/core';
+import { buildApplication, buildCandidate, ORG_A, seedPrivacyData, userActor } from '@candydati/core/testing';
 import { describe, expect, it } from 'vitest';
 import { zipStreamFactory } from './zip-stream.js';
 

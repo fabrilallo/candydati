@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PrivacyNoticeDto } from '@tt/domain'
+import type { PrivacyNoticeDto } from '@candydati/domain'
 import { ChevronRightIcon } from '@lucide/vue'
 import { retentionCopy } from '@/lib/consent-copy'
 import { formatDateTime } from '@/lib/format'

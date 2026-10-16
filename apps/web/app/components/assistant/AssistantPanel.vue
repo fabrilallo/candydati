@@ -2,7 +2,7 @@
 import { useEventListener } from '@vueuse/core'
 import { BotIcon, RotateCcwIcon, ShieldCheckIcon } from '@lucide/vue'
 import { isAssistantShortcut, pageContextOf, suggestionKeys } from '@/lib/page-context'
-import type { DraftMessageOutput } from '@tt/domain'
+import type { DraftMessageOutput } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 

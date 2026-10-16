@@ -26,13 +26,13 @@ describe('apiKeyInputSchema', () => {
 describe('api key secret', () => {
   it('formats and parses the prefix', () => {
     const secret = formatApiKeySecret('Ab12Cd34', RANDOM);
-    expect(secret).toBe(`tt_Ab12Cd34_${RANDOM}`);
+    expect(secret).toBe(`candydati_Ab12Cd34_${RANDOM}`);
     expect(parseApiKeySecret(secret)).toEqual({ prefix: 'Ab12Cd34' });
     expect(isApiKeySecret(secret)).toBe(true);
   });
 
   it('refuses malformed secrets', () => {
-    for (const bad of ['', 'tt_short_x', `xx_Ab12Cd34_${RANDOM}`, `tt_Ab12Cd34_${RANDOM}!`, `tt_Ab12Cd3_${RANDOM}`]) {
+    for (const bad of ['', 'candydati_short_x', `xx_Ab12Cd34_${RANDOM}`, `candydati_Ab12Cd34_${RANDOM}!`, `candydati_Ab12Cd3_${RANDOM}`]) {
       expect(parseApiKeySecret(bad)).toBeNull();
     }
     expect(isApiKeySecret(42)).toBe(false);

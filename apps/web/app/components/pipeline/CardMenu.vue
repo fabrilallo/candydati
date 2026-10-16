@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowRightLeftIcon, CircleCheckBigIcon, EllipsisVerticalIcon, PanelRightOpenIcon } from '@lucide/vue'
-import { OUTCOMES, type Outcome, type StageRef } from '@tt/domain'
+import { OUTCOMES, type Outcome, type StageRef } from '@candydati/domain'
 import { stageName, stageTone } from '@/lib/pipeline-board'
 import {
   DropdownMenu,

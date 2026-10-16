@@ -1,4 +1,4 @@
-import { and, count, eq, isNull, schema } from '@tt/db';
+import { and, count, eq, isNull, schema } from '@candydati/db';
 import type { OpenApplicationCounts } from '../job-ports.js';
 import type { DbExecutor } from './db-executor.js';
 

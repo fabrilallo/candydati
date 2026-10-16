@@ -1,5 +1,5 @@
 {
-  "name": "@tt/core",
+  "name": "@candydati/core",
   "version": "0.1.0",
   "private": true,
   "license": "BUSL-1.1",
@@ -26,8 +26,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@tt/db": "workspace:*",
-    "@tt/domain": "workspace:*",
+    "@candydati/db": "workspace:*",
+    "@candydati/domain": "workspace:*",
     "drizzle-orm": "0.45.2",
     "zod": "4.5.4"
   },

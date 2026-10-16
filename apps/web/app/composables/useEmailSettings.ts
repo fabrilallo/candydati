@@ -1,4 +1,4 @@
-import type { EmailSettingsDto } from '@tt/domain'
+import type { EmailSettingsDto } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { loaded } from '@/lib/job-api'

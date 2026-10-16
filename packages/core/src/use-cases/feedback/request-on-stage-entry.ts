@@ -1,4 +1,4 @@
-import { type AuditActor } from '@tt/domain';
+import { type AuditActor } from '@candydati/domain';
 import type { FeedbackStageEntryDeps } from '../../feedback-ports.js';
 import {
   identityOf,

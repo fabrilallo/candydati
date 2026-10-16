@@ -1,4 +1,4 @@
-import { acceptRequestId, REQUEST_ID_HEADER } from '@tt/domain'
+import { acceptRequestId, REQUEST_ID_HEADER } from '@candydati/domain'
 import { defineEventHandler, getRequestHeader, setResponseHeader } from 'h3'
 
 /**

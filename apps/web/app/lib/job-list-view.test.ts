@@ -1,4 +1,4 @@
-import type { JobSummaryDto } from '@tt/domain'
+import type { JobSummaryDto } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { jobFacts, readinessOf, relativeTime } from './job-list-view'
 

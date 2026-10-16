@@ -1,4 +1,4 @@
-import type { AutomationActionType, DeliveredEventType, NotificationKind, WebhookEventType } from '@tt/domain';
+import type { AutomationActionType, DeliveredEventType, NotificationKind, WebhookEventType } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { boolean, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FunnelStageType, ReportsDto } from '@tt/domain'
+import type { FunnelStageType, ReportsDto } from '@candydati/domain'
 import { formatDaysValue, formatRate, NO_VALUE, responseTime, stageTypeRows } from '@/lib/report-view'
 
 /**

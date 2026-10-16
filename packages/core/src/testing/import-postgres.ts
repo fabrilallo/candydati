@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { schema, type DbHandle } from '@tt/db';
-import { importFileKey, type ParsedImportCvInput } from '@tt/domain';
+import { schema, type DbHandle } from '@candydati/db';
+import { importFileKey, type ParsedImportCvInput } from '@candydati/domain';
 import type { ConsentDeps, ImportCommitDeps, ImportUndoDeps } from '../import-ports.js';
 import type { RetentionDeps } from '../privacy-ports.js';
 import { createDrizzleApplications } from '../adapters/drizzle-applications.js';

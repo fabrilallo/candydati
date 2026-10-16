@@ -16,7 +16,7 @@ check_secret() {
   eval "value=\${$name:-}"
   lowered=$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')
   case "$lowered" in
-    *change-me* | *changeme* | *change_me* | *tt-minio-secret* | *minioadmin* | *example*)
+    *change-me* | *changeme* | *change_me* | *candydati-minio-secret* | *minioadmin* | *example*)
       refuse "$name is an example value: generate one with: openssl rand -base64 48"
       return
       ;;

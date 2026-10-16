@@ -1,4 +1,4 @@
-import { DAY_MS, dataExportKey, RETENTION_DIGEST_KINDS, RETENTION_WARNING_DAYS, type Application, type RetentionRun } from '@tt/domain';
+import { DAY_MS, dataExportKey, RETENTION_DIGEST_KINDS, RETENTION_WARNING_DAYS, type Application, type RetentionRun } from '@candydati/domain';
 import { z } from 'zod';
 import { groupBy } from '../../group-by.js';
 import type { RetentionDeps } from '../../privacy-ports.js';

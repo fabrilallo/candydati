@@ -1,6 +1,6 @@
-import type { Actor, UserActor } from '@tt/core';
-import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer } from '@tt/core/testing';
-import { and, eq, schema, sql } from '@tt/db';
+import type { Actor, UserActor } from '@candydati/core';
+import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer } from '@candydati/core/testing';
+import { and, eq, schema, sql } from '@candydati/db';
 import { MockLanguageModelV3, simulateReadableStream } from 'ai/test';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';

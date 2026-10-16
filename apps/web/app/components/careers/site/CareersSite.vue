@@ -2,7 +2,7 @@
 import '@fontsource-variable/fraunces/wght.css'
 import '@fontsource-variable/bricolage-grotesque/wght.css'
 import '@fontsource-variable/newsreader/wght.css'
-import type { CareersMediaDto, CareersPageDocument, CareersSection, Locale, PublicCareersDto } from '@tt/domain'
+import type { CareersMediaDto, CareersPageDocument, CareersSection, Locale, PublicCareersDto } from '@candydati/domain'
 import type { Component } from 'vue'
 import type { CareersSiteMode } from '@/composables/useCareersSite'
 import { hasHero, themeStyle } from '@/lib/careers-site'

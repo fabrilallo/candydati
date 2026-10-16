@@ -1,4 +1,4 @@
-import { importBatchRefSchema } from '@tt/domain'
+import { importBatchRefSchema } from '@candydati/domain'
 import { IMPORTS_PATH } from '@/lib/api-paths'
 import { ApiFailure, defaultFailureKey, type FailureInfo } from './api-call'
 import { AppError } from './auth-errors'

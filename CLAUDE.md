@@ -1,7 +1,8 @@
-# team-tracker
+# Candydati
 
-Code name of a source-available, agentic ATS (BUSL-1.1, see `LICENSE`). The product name is NOT decided: never write it
-in code. It is read from `loadPlatformConfig` (`@tt/domain`), fed by `PLATFORM_*` / `NUXT_PUBLIC_PLATFORM_*`.
+Source-available, agentic ATS (BUSL-1.1, see `LICENSE`); domains candydati.it and candydati.com. Never write the product
+name in UI or email copy: read it from `loadPlatformConfig` (`@candydati/domain`), fed by `PLATFORM_*` /
+`NUXT_PUBLIC_PLATFORM_*`, so a deployment can rebrand.
 Principles and scope: `docs/PRODUCT.md`. Design system: `docs/DESIGN-SYSTEM.md`. Architecture: `docs/ARCHITECTURE.md`.
 
 ## Layout
@@ -27,7 +28,7 @@ Principles and scope: `docs/PRODUCT.md`. Design system: `docs/DESIGN-SYSTEM.md`.
 - Immutable data: return new objects, never modify inputs.
 - Files < 400 lines, functions < 50. Tests next to the code (`*.test.ts`), Vitest, written first; coverage ≥ 80%.
 - Zod validation at every boundary (HTTP, agent tools, files, model responses).
-- API responses use the `@tt/domain` envelope (`ok` / `fail`).
+- API responses use the `@candydati/domain` envelope (`ok` / `fail`).
 - Conventional commits (`feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`).
 
 ## Commands

@@ -1,4 +1,4 @@
-import { OUTCOMES } from '@tt/domain';
+import { OUTCOMES } from '@candydati/domain';
 import { z } from 'zod';
 
 const duration = z.object({ count: z.number().int(), median: z.number().nullable(), p75: z.number().nullable() });

@@ -19,7 +19,7 @@ describe('parseEnv in production: secrets', () => {
   it.each([
     ['BETTER_AUTH_SECRET', 'change-me-at-least-32-characters-long'],
     ['INBOUND_WEBHOOK_SECRET', 'change-me-webhook-secret-at-least-32-chars'],
-    ['S3_SECRET_KEY', 'tt-minio-secret'],
+    ['S3_SECRET_KEY', 'candydati-minio-secret'],
     ['BETTER_AUTH_SECRET', 'a'.repeat(40)],
   ])('refuses the weak %s without echoing it', (name, value) => {
     const message = messageOf({ ...PRODUCTION, [name]: value });
@@ -28,7 +28,7 @@ describe('parseEnv in production: secrets', () => {
   });
 
   it('refuses the example database password', () => {
-    const message = messageOf({ ...PRODUCTION, DATABASE_URL: 'postgres://tt:change-me-postgres-password@postgres:5432/x' });
+    const message = messageOf({ ...PRODUCTION, DATABASE_URL: 'postgres://candydati:change-me-postgres-password@postgres:5432/x' });
     expect(message).toMatch(/DATABASE_URL: the password/);
     expect(message).not.toContain('change-me-postgres');
   });

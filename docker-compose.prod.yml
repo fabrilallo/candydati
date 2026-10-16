@@ -11,14 +11,14 @@
 x-app-env: &app-env
   NODE_ENV: production
   LOG_LEVEL: ${LOG_LEVEL:-info}
-  DATABASE_URL: postgres://${POSTGRES_USER:-tt}:${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-team_tracker}
+  DATABASE_URL: postgres://${POSTGRES_USER:-candydati}:${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-candydati}
   S3_ENDPOINT: http://minio:9000
   S3_REGION: ${S3_REGION:-us-east-1}
-  S3_BUCKET: ${S3_BUCKET:-team-tracker}
+  S3_BUCKET: ${S3_BUCKET:-candydati}
   S3_ACCESS_KEY: ${S3_ACCESS_KEY:?imposta S3_ACCESS_KEY}
   S3_SECRET_KEY: ${S3_SECRET_KEY:?imposta S3_SECRET_KEY}
   S3_FORCE_PATH_STYLE: "true"
-  PLATFORM_NAME: ${PLATFORM_NAME:-team-tracker}
+  PLATFORM_NAME: ${PLATFORM_NAME:-Candydati}
   PLATFORM_URL: ${PLATFORM_URL:?imposta PLATFORM_URL}
   PLATFORM_SUPPORT_EMAIL: ${PLATFORM_SUPPORT_EMAIL:-support@example.com}
   PLATFORM_DEFAULT_LOCALE: ${PLATFORM_DEFAULT_LOCALE:-it}
@@ -52,9 +52,9 @@ x-app-env: &app-env
   METRICS_TOKEN: ${METRICS_TOKEN:-}
   SENTRY_DSN: ${SENTRY_DSN:-}
   SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT:-}
-  SENTRY_RELEASE: ${SENTRY_RELEASE:-${TT_VERSION:-}}
+  SENTRY_RELEASE: ${SENTRY_RELEASE:-${CANDYDATI_VERSION:-}}
 
-name: ${COMPOSE_PROJECT_NAME:-team-tracker-prod}
+name: ${COMPOSE_PROJECT_NAME:-candydati-prod}
 
 services:
   # Refuses to start the stack with the example secrets of .env.example, short secrets, an http PLATFORM_URL or
@@ -81,9 +81,9 @@ services:
     depends_on:
       config-check: { condition: service_completed_successfully }
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-tt}
+      POSTGRES_USER: ${POSTGRES_USER:-candydati}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB:-team_tracker}
+      POSTGRES_DB: ${POSTGRES_DB:-candydati}
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks: [internal]
@@ -117,7 +117,7 @@ services:
 
   api:
     build: { context: ., target: api }
-    image: team-tracker-api:${TT_VERSION:-local}
+    image: candydati-api:${CANDYDATI_VERSION:-local}
     restart: unless-stopped
     depends_on:
       postgres: { condition: service_healthy }
@@ -132,9 +132,9 @@ services:
       WEB_ORIGIN: ${PLATFORM_URL}
       TRUSTED_ORIGINS: ${TRUSTED_ORIGINS:-}
       API_KEY_RATE_LIMIT: ${API_KEY_RATE_LIMIT:-}
-      # The api trusts x-forwarded-for only from the web container, which has a fixed address (TT_WEB_IP, inside TT_SUBNET).
+      # The api trusts x-forwarded-for only from the web container, which has a fixed address (CANDYDATI_WEB_IP, inside CANDYDATI_SUBNET).
       # Never a whole subnet and never "true": anything else on the network could forge a client address.
-      TRUST_PROXY: ${TRUST_PROXY:-${TT_WEB_IP:-172.31.77.10}}
+      TRUST_PROXY: ${TRUST_PROXY:-${CANDYDATI_WEB_IP:-172.31.77.10}}
       APPLICATIONS_DAILY_MAX_PER_ORGANIZATION: ${APPLICATIONS_DAILY_MAX_PER_ORGANIZATION:-500}
       APPLICATIONS_DAILY_MAX_PER_JOB: ${APPLICATIONS_DAILY_MAX_PER_JOB:-200}
       RECEIPTS_DAILY_MAX_PER_ORGANIZATION: ${RECEIPTS_DAILY_MAX_PER_ORGANIZATION:-300}
@@ -159,7 +159,7 @@ services:
 
   worker:
     build: { context: ., target: worker }
-    image: team-tracker-worker:${TT_VERSION:-local}
+    image: candydati-worker:${CANDYDATI_VERSION:-local}
     restart: unless-stopped
     depends_on:
       api: { condition: service_healthy }
@@ -182,14 +182,14 @@ services:
       target: web
       args:
         NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE: ${PLATFORM_DEFAULT_LOCALE:-it}
-    image: team-tracker-web:${TT_VERSION:-local}
+    image: candydati-web:${CANDYDATI_VERSION:-local}
     restart: unless-stopped
     depends_on:
       api: { condition: service_healthy }
     environment:
       NODE_ENV: production
       NUXT_API_INTERNAL_URL: http://api:4000
-      NUXT_PUBLIC_PLATFORM_NAME: ${PLATFORM_NAME:-team-tracker}
+      NUXT_PUBLIC_PLATFORM_NAME: ${PLATFORM_NAME:-Candydati}
       NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE: ${PLATFORM_DEFAULT_LOCALE:-it}
       NUXT_PUBLIC_SITE_URL: ${PLATFORM_URL}
       NUXT_PUBLIC_TIME_ZONE: ${NUXT_PUBLIC_TIME_ZONE:-Europe/Rome}
@@ -204,7 +204,7 @@ services:
       - "${WEB_BIND:-0.0.0.0}:${WEB_PORT:-3000}:3000"
     networks:
       internal:
-        ipv4_address: ${TT_WEB_IP:-172.31.77.10}
+        ipv4_address: ${CANDYDATI_WEB_IP:-172.31.77.10}
 
   # Scheduled pg_dump (custom format) with retention, optionally uploaded to S3 (docs/OPERATIONS.md, Backups):
   #   docker compose -f docker-compose.prod.yml --profile backup up -d
@@ -212,7 +212,7 @@ services:
   backup:
     profiles: [backup]
     build: { context: ./docker, dockerfile: backup.Dockerfile }
-    image: team-tracker-backup:${TT_VERSION:-local}
+    image: candydati-backup:${CANDYDATI_VERSION:-local}
     restart: unless-stopped
     command: ["backup.sh", "loop"]
     depends_on:
@@ -220,9 +220,9 @@ services:
       api: { condition: service_healthy }
     environment:
       PGHOST: postgres
-      PGUSER: ${POSTGRES_USER:-tt}
+      PGUSER: ${POSTGRES_USER:-candydati}
       PGPASSWORD: ${POSTGRES_PASSWORD:?imposta POSTGRES_PASSWORD}
-      PGDATABASE: ${POSTGRES_DB:-team_tracker}
+      PGDATABASE: ${POSTGRES_DB:-candydati}
       BACKUP_AT: ${BACKUP_AT:-02:30}
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-14}
       BACKUP_ENCRYPTION_PASSPHRASE: ${BACKUP_ENCRYPTION_PASSPHRASE:-}
@@ -230,7 +230,7 @@ services:
       BACKUP_UPLOAD: ${BACKUP_UPLOAD:-true}
       BACKUP_S3_ENDPOINT: ${BACKUP_S3_ENDPOINT:-http://minio:9000}
       BACKUP_S3_REGION: ${BACKUP_S3_REGION:-${S3_REGION:-us-east-1}}
-      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-${S3_BUCKET:-team-tracker}}
+      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-${S3_BUCKET:-candydati}}
       BACKUP_S3_ACCESS_KEY: ${BACKUP_S3_ACCESS_KEY:-${S3_ACCESS_KEY:-}}
       BACKUP_S3_SECRET_KEY: ${BACKUP_S3_SECRET_KEY:-${S3_SECRET_KEY:-}}
       BACKUP_S3_PREFIX: ${BACKUP_S3_PREFIX:-backups/}
@@ -252,7 +252,7 @@ networks:
   internal:
     ipam:
       config:
-        - subnet: ${TT_SUBNET:-172.31.77.0/24}
+        - subnet: ${CANDYDATI_SUBNET:-172.31.77.0/24}
 
 volumes:
   pgdata:

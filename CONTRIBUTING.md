@@ -26,9 +26,9 @@ pnpm dev           # web on :3000, api on :4100
 | `pnpm dev` | run web, api and worker |
 | `pnpm test` | unit and integration tests (need `pnpm infra:up`) |
 | `pnpm test:coverage` | tests with coverage (CI requires at least 80% per package, see Tests first) |
-| `pnpm test:e2e` | Playwright flows (`pnpm --filter @tt/e2e install:browsers` once) |
+| `pnpm test:e2e` | Playwright flows (`pnpm --filter @candydati/e2e install:browsers` once) |
 | `pnpm typecheck`, `pnpm lint` | static checks (lint also enforces file and function size and import boundaries) |
-| `pnpm --filter @tt/tools env-docs` | regenerate `docs/ENVIRONMENT.md` after changing an env schema (a test fails if it is stale) |
+| `pnpm --filter @candydati/tools env-docs` | regenerate `docs/ENVIRONMENT.md` after changing an env schema (a test fails if it is stale) |
 | `pnpm db:generate && pnpm db:migrate` | create and apply Drizzle migrations |
 
 ## Architecture rules
@@ -44,14 +44,15 @@ These are enforced in review.
   vendor SDK.
 - The assistant never ranks, scores or rejects candidates, and never messages one without a person's confirmation.
 - Validate with Zod at every boundary (HTTP, tool input, files, model output).
-- API responses use the `ok` / `fail` envelope from `@tt/domain`.
+- API responses use the `ok` / `fail` envelope from `@candydati/domain`.
 - Immutable data: return new objects, do not mutate inputs.
 - Files under 400 lines, functions under 50 (`max-lines`, `max-lines-per-function`, test code exempt). The only
   exceptions are listed, with the reason, in `eslint.config.mjs`; do not add to them.
 - Import direction is enforced by ESLint: `domain` imports nothing internal, `db` only `domain`, `core` only `domain`
   and `db`, `providers` only `domain`, `core` and `ad-quality`; the apps never import each other, and nobody imports
   another package's `src/` or `dist/`.
-- The product name is not decided: never write it in code; read it with `loadPlatformConfig`.
+- Never write the product name (Candydati) in UI or email copy; read it with `loadPlatformConfig`, so a deployment can
+  rebrand.
 
 ## Tests first
 

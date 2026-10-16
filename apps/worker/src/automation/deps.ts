@@ -8,9 +8,9 @@ import {
   type TaskQueue,
   type WebhookDeliverDeps,
   type WebhookPublishDeps,
-} from '@tt/core';
-import type { PlatformConfig } from '@tt/domain';
-import { createHostGuard, createHttpPoster, newConversationToken, toMessagingConfig, type EmailConfig } from '@tt/providers';
+} from '@candydati/core';
+import type { PlatformConfig } from '@candydati/domain';
+import { createHostGuard, createHttpPoster, newConversationToken, toMessagingConfig, type EmailConfig } from '@candydati/providers';
 
 export interface AutomationWiring {
   readonly uow: DrizzleUnitOfWork;

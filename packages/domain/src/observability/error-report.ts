@@ -131,7 +131,7 @@ export function buildErrorEnvelope(dsn: ParsedDsn, input: ErrorReportInput): Err
     url: `${dsn.origin}/api/${dsn.projectId}/envelope/`,
     headers: {
       'content-type': 'application/x-sentry-envelope',
-      'x-sentry-auth': `Sentry sentry_version=7, sentry_client=tt-error-report/1.0, sentry_key=${dsn.publicKey}`,
+      'x-sentry-auth': `Sentry sentry_version=7, sentry_client=candydati-error-report/1.0, sentry_key=${dsn.publicKey}`,
     },
     body,
   };

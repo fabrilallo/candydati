@@ -14,7 +14,7 @@ import {
   type JobSummaryDto,
   type JobTemplateDto,
   type PublishJobResultDto,
-} from '@tt/domain';
+} from '@candydati/domain';
 import { z } from 'zod';
 
 const isoDate = z.iso.datetime();

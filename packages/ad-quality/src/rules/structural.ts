@@ -1,4 +1,4 @@
-import type { JobContent } from '@tt/domain';
+import type { JobContent } from '@candydati/domain';
 import type { CategoryResult } from './result.js';
 import { result } from './result.js';
 

@@ -1,6 +1,6 @@
-import { and, eq, schema } from '@tt/db';
-import { careersPageFixture, type CareersMediaAssetDto, type CareersPageEditorDto, type PublicCareersPageDto } from '@tt/domain';
-import { sharp } from '@tt/providers/testing';
+import { and, eq, schema } from '@candydati/db';
+import { careersPageFixture, type CareersMediaAssetDto, type CareersPageEditorDto, type PublicCareersPageDto } from '@candydati/domain';
+import { sharp } from '@candydati/providers/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createKey } from './testing/api-keys.js';
 import { createWorld, type World } from './testing/candidate-world.js';

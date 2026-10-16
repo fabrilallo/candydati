@@ -1,5 +1,5 @@
-import { fail } from '@tt/domain';
-import type { ErrorReporter } from '@tt/providers';
+import { fail } from '@candydati/domain';
+import type { ErrorReporter } from '@candydati/providers';
 import type { FastifyInstance } from 'fastify';
 import { issuesOf } from './error-issues.js';
 import { toHttpFailure } from './errors.js';

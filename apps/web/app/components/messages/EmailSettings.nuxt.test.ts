@@ -1,4 +1,4 @@
-import type { EmailSettingsDto } from '@tt/domain'
+import type { EmailSettingsDto } from '@candydati/domain'
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { readBody } from 'h3'

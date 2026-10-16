@@ -1,7 +1,7 @@
-import type { CoreDeps } from '@tt/core';
-import type { Db } from '@tt/db';
-import { schema } from '@tt/db';
-import { CREATOR_ROLE, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@tt/domain';
+import type { CoreDeps } from '@candydati/core';
+import type { Db } from '@candydati/db';
+import { schema } from '@candydati/db';
+import { CREATOR_ROLE, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@candydati/domain';
 import { betterAuth } from 'better-auth';
 import { createAuthMiddleware } from 'better-auth/api';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';

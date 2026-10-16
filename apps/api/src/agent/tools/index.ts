@@ -1,4 +1,4 @@
-import type { CandidateDeps, JobDeps, MessagingDeps, ReportDeps, TaskDeps } from '@tt/core';
+import type { CandidateDeps, JobDeps, MessagingDeps, ReportDeps, TaskDeps } from '@candydati/core';
 import type { JobDrafter } from '../job-drafter.js';
 import { createCreateTaskTool, createDraftMessageTool } from './action-tools.js';
 import { createCandidateBriefTool, createListAttentionTool, createPipelineSummaryTool } from './candidate-tools.js';

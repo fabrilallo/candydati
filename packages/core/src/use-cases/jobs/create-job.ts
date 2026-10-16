@@ -1,4 +1,4 @@
-import { jobSlug, type Job } from '@tt/domain';
+import { jobSlug, type Job } from '@candydati/domain';
 import { z } from 'zod';
 import { addToJobTeam } from '../../access/team-membership.js';
 import { NotFoundError } from '../../errors.js';

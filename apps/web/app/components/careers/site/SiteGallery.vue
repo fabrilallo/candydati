@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SectionOf } from '@tt/domain'
+import type { SectionOf } from '@candydati/domain'
 
 /**
  * Photos in a bento grid: with three or more, the first one is large. Every image has its own description (required

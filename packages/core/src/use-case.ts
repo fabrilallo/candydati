@@ -1,6 +1,6 @@
-import type { AuditAction, AuditActor, AuditTarget, Permission } from '@tt/domain';
+import type { AuditAction, AuditActor, AuditTarget, Permission } from '@candydati/domain';
 import type { z } from 'zod';
-import type { JobScope } from '@tt/domain';
+import type { JobScope } from '@candydati/domain';
 import { jobScopeOf, scopeDeps, unscopedDeps } from './access/scope-deps.js';
 import { toAuditActor, type Actor } from './actor.js';
 import { assertSameOrganization, authorize } from './authorization.js';

@@ -1,4 +1,4 @@
-import { type EmailTemplateKind, emailSettingsSchema, emailTemplateSchema, messageSchema, sendResultSchema, templatePreviewSchema, type EmailSettingsDto, type EmailTemplateDto, type MessageDto, type TemplatePreviewDto    } from '@tt/domain';
+import { type EmailTemplateKind, emailSettingsSchema, emailTemplateSchema, messageSchema, sendResultSchema, templatePreviewSchema, type EmailSettingsDto, type EmailTemplateDto, type MessageDto, type TemplatePreviewDto    } from '@candydati/domain';
 import { z } from 'zod'
 import { ApiFailure, callApi, defaultFailureKey, type FailureKey } from './api-call'
 import type { JobApiRequest } from './job-api'

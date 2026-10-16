@@ -1,4 +1,4 @@
-import type { ConsentScope } from '@tt/domain'
+import type { ConsentScope } from '@candydati/domain'
 import type { Translate } from './ad-text'
 
 export interface RetentionPeriod {

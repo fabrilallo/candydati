@@ -1,5 +1,5 @@
-import { and, eq, inArray, schema, sql } from '@tt/db';
-import { dataExportKey } from '@tt/domain';
+import { and, eq, inArray, schema, sql } from '@candydati/db';
+import { dataExportKey } from '@candydati/domain';
 import type { ErasureStore, ErasureTransaction } from '../privacy-ports.js';
 import type { DbExecutor } from './db-executor.js';
 import { createDrizzleAuditLog } from './drizzle-audit-log.js';

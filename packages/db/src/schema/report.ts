@@ -1,4 +1,4 @@
-import type { ActorType, Outcome, PromiseStatus } from '@tt/domain';
+import type { ActorType, Outcome, PromiseStatus } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
@@ -38,7 +38,7 @@ export const applicationStageEvent = pgTable(
   ],
 );
 
-/** "We answer within N days" for one stage of one application: see `ResponsePromise` in @tt/domain. */
+/** "We answer within N days" for one stage of one application: see `ResponsePromise` in @candydati/domain. */
 export const responsePromise = pgTable(
   'response_promise',
   {

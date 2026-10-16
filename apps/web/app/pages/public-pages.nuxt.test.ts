@@ -1,6 +1,6 @@
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { setResponseStatus, type H3Event } from 'h3'
-import { defaultCareersPage, type PublicCareersDto, type PublicCareersPageDto, type PublishedJobContent, type PublicJobPage } from '@tt/domain'
+import { defaultCareersPage, type PublicCareersDto, type PublicCareersPageDto, type PublishedJobContent, type PublicJobPage } from '@candydati/domain'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { completeContent, ok } from '~~/test/fixtures/job-fixtures'
 import { publicConsent } from '~~/test/fixtures/phase8-fixtures'

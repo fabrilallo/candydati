@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { pipelineStagesOf, type JobDto } from '@tt/domain'
+import { pipelineStagesOf, type JobDto } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { NativeSelect } from '@/components/ui/native-select'
 import { stageName } from '@/lib/pipeline-board'

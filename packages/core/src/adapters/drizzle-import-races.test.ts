@@ -1,4 +1,4 @@
-import { createDb, type DbHandle } from '@tt/db';
+import { createDb, type DbHandle } from '@candydati/db';
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ConflictError } from '../errors.js';

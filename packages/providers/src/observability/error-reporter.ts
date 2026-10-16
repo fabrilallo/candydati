@@ -1,4 +1,4 @@
-import { buildErrorEnvelope, parseDsn, type ParsedDsn, type ReportTags, type ErrorReportInput } from '@tt/domain';
+import { buildErrorEnvelope, parseDsn, type ParsedDsn, type ReportTags, type ErrorReportInput } from '@candydati/domain';
 
 export interface ErrorReporter {
   readonly enabled: boolean;

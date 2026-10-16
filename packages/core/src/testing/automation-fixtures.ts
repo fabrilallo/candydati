@@ -1,4 +1,4 @@
-import type { AutomationRule, Notification, OutboxEvent, Task, WebhookDelivery, WebhookEndpoint } from '@tt/domain';
+import type { AutomationRule, Notification, OutboxEvent, Task, WebhookDelivery, WebhookEndpoint } from '@candydati/domain';
 import type { Member } from '../automation-ports.js';
 
 const DATE = new Date('2026-01-01T00:00:00.000Z');
@@ -46,7 +46,7 @@ export const buildAutomationRule = (overrides: Partial<AutomationRule> = {}): Au
 export const buildWebhookEndpoint = (overrides: Partial<WebhookEndpoint> = {}): WebhookEndpoint => ({
   id: 'hook_1',
   organizationId: 'org_a',
-  url: 'https://hooks.example.com/tt',
+  url: 'https://hooks.example.com/candydati',
   secret: 'whsec_test_secret',
   events: ['application.received', 'application.moved', 'application.decided', 'job.published', 'job.closed'],
   enabled: true,

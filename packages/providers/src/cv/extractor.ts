@@ -1,5 +1,5 @@
-import type { StructuredGenerator } from '@tt/ad-quality';
-import { cvExtractionSchema, type CvExtraction } from '@tt/domain';
+import type { StructuredGenerator } from '@candydati/ad-quality';
+import { cvExtractionSchema, type CvExtraction } from '@candydati/domain';
 import { buildCvPrompt } from './prompt.js';
 import { dropBirthAndAge } from './privacy-filter.js';
 

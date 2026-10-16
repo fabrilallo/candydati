@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobStatus } from '@tt/domain'
+import type { JobStatus } from '@candydati/domain'
 import { FilePlusIcon, FileTextIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 

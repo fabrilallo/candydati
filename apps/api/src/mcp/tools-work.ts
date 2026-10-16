@@ -7,8 +7,8 @@ import {
   toAttentionItemDtos,
   toJobTemplateDto,
   toNoteDto,
-} from '@tt/core';
-import { ATTENTION_STATES, NOTE_MAX, TASK_TITLE_MAX } from '@tt/domain';
+} from '@candydati/core';
+import { ATTENTION_STATES, NOTE_MAX, TASK_TITLE_MAX } from '@candydati/domain';
 import { z } from 'zod';
 import { toTaskResponse } from '../routes/task-view.js';
 import type { ToolDefinition } from './tool-support.js';

@@ -1,4 +1,4 @@
-import { AGENT_DISABLED_CODE, draftJobOutputSchema, draftMessageOutputSchema, isAgentToolName, type DraftJobOutput, type DraftMessageOutput } from '@tt/domain'
+import { AGENT_DISABLED_CODE, draftJobOutputSchema, draftMessageOutputSchema, isAgentToolName, type DraftJobOutput, type DraftMessageOutput } from '@candydati/domain'
 
 /**
  * From the parts of an AI SDK UI message to what the assistant panel shows: text, compact tool steps ("Ho letto

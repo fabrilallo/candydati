@@ -1,5 +1,5 @@
-import { CV_MAX_BYTES } from '@tt/domain';
-import { completeJobContent, completePrivacyNoticeInput, fakePdfBytes } from '@tt/core/testing';
+import { CV_MAX_BYTES } from '@candydati/domain';
+import { completeJobContent, completePrivacyNoticeInput, fakePdfBytes } from '@candydati/core/testing';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { createWorld, personForm, type World } from './testing/candidate-world.js';
 import { TestUser } from './testing/client.js';

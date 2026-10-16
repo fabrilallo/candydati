@@ -1,6 +1,6 @@
 import multipart from '@fastify/multipart';
-import { submitApplication, ValidationError } from '@tt/core';
-import { ok, sanitizeOrigin } from '@tt/domain';
+import { submitApplication, ValidationError } from '@candydati/core';
+import { ok, sanitizeOrigin } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { verifyTurnstile } from '../http/turnstile.js';

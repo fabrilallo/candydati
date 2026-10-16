@@ -1,5 +1,5 @@
-import { ValidationError, type FileStorage } from '@tt/core';
-import { importFileKey, IMPORT_LIMITS } from '@tt/domain';
+import { ValidationError, type FileStorage } from '@candydati/core';
+import { importFileKey, IMPORT_LIMITS } from '@candydati/domain';
 import type { MultipartFile, MultipartValue } from '@fastify/multipart';
 import type { FastifyRequest } from 'fastify';
 

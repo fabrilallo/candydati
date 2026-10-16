@@ -1,4 +1,4 @@
-import type { Role } from '@tt/domain'
+import type { Role } from '@candydati/domain'
 import { z } from 'zod'
 import type { AuthClient } from './auth-client'
 import { AppError, toAppError, type RawAuthError } from './auth-errors'
@@ -103,7 +103,7 @@ const parse = <S extends z.ZodType>(schema: S, data: unknown): z.output<S> => {
   return parsed.data
 }
 
-/** The client types roles from its own access-control config; ours live in `@tt/domain` and are enforced by the api. */
+/** The client types roles from its own access-control config; ours live in `@candydati/domain` and are enforced by the api. */
 type InviteRole = Parameters<AuthClient['organization']['inviteMember']>[0]['role']
 
 const asIso = (value: string | Date): string => (value instanceof Date ? value.toISOString() : value)

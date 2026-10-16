@@ -1,4 +1,4 @@
-import { markDigestsEmailed } from '@tt/core';
+import { markDigestsEmailed } from '@candydati/core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createWorld, personForm, type World } from './testing/candidate-world.js';
 import { scan, scanDeps, setResponseDue } from './testing/phase4.js';

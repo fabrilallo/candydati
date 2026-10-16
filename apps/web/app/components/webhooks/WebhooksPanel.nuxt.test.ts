@@ -1,4 +1,4 @@
-import type { WebhookEventType } from '@tt/domain'
+import type { WebhookEventType } from '@candydati/domain'
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { flushPromises } from '@vue/test-utils'
 import { readBody } from 'h3'
@@ -52,10 +52,10 @@ afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
 describe('webhooks', () => {
   it('lists endpoints with their events and documents the signature header', async () => {
     const wrapper = await mountPanel()
-    expect(wrapper.find('[data-testid="webhook-item"]').text()).toContain('https://hooks.example.com/tt')
+    expect(wrapper.find('[data-testid="webhook-item"]').text()).toContain('https://hooks.example.com/candydati')
     expect(wrapper.find('[data-testid="webhook-item"]').text()).toContain('Candidatura ricevuta')
-    expect(wrapper.find('[data-testid="webhook-docs"]').text()).toContain('x-tt-signature')
-    expect(wrapper.find('[data-testid="webhook-docs"]').text()).toContain('x-tt-timestamp')
+    expect(wrapper.find('[data-testid="webhook-docs"]').text()).toContain('x-candydati-signature')
+    expect(wrapper.find('[data-testid="webhook-docs"]').text()).toContain('x-candydati-timestamp')
   })
 
   it('creates an endpoint and shows the secret once, with a warning, until confirmed', async () => {
@@ -105,11 +105,11 @@ describe('webhooks', () => {
   it('pauses and deletes an endpoint after confirmation', async () => {
     const wrapper = await mountPanel()
     await wrapper.find('[data-testid="webhook-toggle"]').trigger('click')
-    await vi.waitFor(() => expect(state.puts).toEqual([{ url: 'https://hooks.example.com/tt', events: ['application.received', 'job.closed'], enabled: false }]))
+    await vi.waitFor(() => expect(state.puts).toEqual([{ url: 'https://hooks.example.com/candydati', events: ['application.received', 'job.closed'], enabled: false }]))
     await vi.waitFor(() => expect(wrapper.find('[data-testid="webhook-item"]').text()).toContain('In pausa'))
     await wrapper.find('[data-testid="webhook-delete"]').trigger('click')
     await vi.waitFor(() => expect(byTestId('confirm')).not.toBeNull())
-    expect(document.body.textContent).toContain('https://hooks.example.com/tt non riceverà più eventi')
+    expect(document.body.textContent).toContain('https://hooks.example.com/candydati non riceverà più eventi')
     byTestId('confirm')?.click()
     await vi.waitFor(() => expect(state.deletes).toBe(1))
     await vi.waitFor(() => expect(wrapper.find('[data-testid="webhooks-empty"]').exists()).toBe(true))

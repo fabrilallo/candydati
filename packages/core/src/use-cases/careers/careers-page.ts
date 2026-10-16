@@ -1,4 +1,4 @@
-import { careersDraftSaveSchema, careersPublishSchema, type CareersPageEditorDto } from '@tt/domain';
+import { careersDraftSaveSchema, careersPublishSchema, type CareersPageEditorDto } from '@candydati/domain';
 import type { CareersPageRecord } from '../../careers-ports.js';
 import { StaleRevisionError } from '../../errors.js';
 import { z } from 'zod';

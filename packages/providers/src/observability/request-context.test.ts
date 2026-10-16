@@ -1,4 +1,4 @@
-import type { BindableTaskQueue } from '@tt/core';
+import type { BindableTaskQueue } from '@candydati/core';
 import { describe, expect, it, vi } from 'vitest';
 import { isMetricsAuthorized } from './metrics-auth.js';
 import { currentRequestId, runWithRequestId, withRequestId } from './request-context.js';

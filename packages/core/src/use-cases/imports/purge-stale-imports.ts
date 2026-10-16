@@ -1,4 +1,4 @@
-import { DAY_MS } from '@tt/domain';
+import { DAY_MS } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError } from '../../errors.js';
 import type { ImportDeps } from '../../import-ports.js';

@@ -1,6 +1,6 @@
 import type { CareersMediaRepository, CareersPageRepository } from './careers-ports.js';
 import type { JobTeamRepository } from './job-team-ports.js';
-import type { ConsentStatus, DataExport, RetentionRun } from '@tt/domain';
+import type { ConsentStatus, DataExport, RetentionRun } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository, CandidateSearch, CandidateNoteRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
 import type { NotificationRepository, MemberDirectory } from './automation-ports.js';
 import type { FeedbackRecords } from './feedback-ports.js';

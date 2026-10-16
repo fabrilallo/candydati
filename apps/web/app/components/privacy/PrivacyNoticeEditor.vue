@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PRIVACY_TEXT_MAX, RETENTION_MAX_DAYS, RETENTION_MIN_DAYS, SUPPORTED_LOCALES, type Locale, type PrivacyNoticeInput } from '@tt/domain'
+import { PRIVACY_TEXT_MAX, RETENTION_MAX_DAYS, RETENTION_MIN_DAYS, SUPPORTED_LOCALES, type Locale, type PrivacyNoticeInput } from '@candydati/domain'
 import { FileTextIcon } from '@lucide/vue'
 import { retentionCopy } from '@/lib/consent-copy'
 import { validatePrivacyForm, type PrivacyErrors, type PrivacyFormValues } from '@/lib/privacy-form'

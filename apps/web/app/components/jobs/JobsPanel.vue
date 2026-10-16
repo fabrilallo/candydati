@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobSummaryDto } from '@tt/domain'
+import type { JobSummaryDto } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { pageCount } from '@/lib/audit-api'
 import { can } from '@/lib/permissions-ui'

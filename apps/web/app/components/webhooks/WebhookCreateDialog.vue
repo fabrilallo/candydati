@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TriangleAlertIcon } from '@lucide/vue'
-import { WEBHOOK_EVENT_TYPES, WEBHOOK_URL_MAX } from '@tt/domain'
+import { WEBHOOK_EVENT_TYPES, WEBHOOK_URL_MAX } from '@candydati/domain'
 import type { WebhookInput } from '@/lib/automation-api'
 import { toggleEvent, validateWebhookForm, type WebhookForm } from '@/lib/automation-view'
 import { Button } from '@/components/ui/button'

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { JobStatsDto, JobStatus } from '@tt/domain'
+import type { JobStatsDto, JobStatus } from '@candydati/domain'
 import { Donut } from '@unovis/ts'
 import { VisDonut, VisSingleContainer, VisTooltip } from '@unovis/vue'
 import { CHART_COLORS, statusSlices } from '@/lib/stats-view'
@@ -22,7 +22,7 @@ const dot = { published: 'bg-success', draft: 'bg-[var(--chart-neutral)]', close
       <NuxtLink to="/app/jobs" class="shrink-0 text-sm font-medium text-primary underline-offset-4 hover:underline">{{ t('dashboard.stats.status.all') }}</NuxtLink>
     </template>
     <div class="grid h-full grid-cols-[7rem_minmax(0,1fr)] content-center items-center gap-4 sm:grid-cols-[10rem_minmax(0,1fr)] xl:grid-cols-[11.5rem_minmax(0,1fr)] xl:gap-7">
-      <div class="tt-chart aspect-square" aria-hidden="true">
+      <div class="candydati-chart aspect-square" aria-hidden="true">
         <ClientOnly>
           <VisSingleContainer :data="slices" :duration="duration" class="size-full">
             <VisTooltip :triggers="triggers" />

@@ -1,4 +1,4 @@
-import { applicationFeedbackSchema, publicFeedbackSchema, type ApplicationFeedbackDto, type FeedbackSubmission, type PublicFeedbackDto } from '@tt/domain'
+import { applicationFeedbackSchema, publicFeedbackSchema, type ApplicationFeedbackDto, type FeedbackSubmission, type PublicFeedbackDto } from '@candydati/domain'
 import { z } from 'zod'
 import { applicationFeedbackPath, publicFeedbackPath, requestFeedbackPath } from './api-paths'
 import { callApi } from './api-call'

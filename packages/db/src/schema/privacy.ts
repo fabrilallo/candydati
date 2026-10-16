@@ -1,4 +1,4 @@
-import type { DataExportStatus } from '@tt/domain';
+import type { DataExportStatus } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { bigint, index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';

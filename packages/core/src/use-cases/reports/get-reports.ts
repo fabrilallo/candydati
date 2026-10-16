@@ -1,4 +1,4 @@
-import { reportQuerySchema, type Job, type ReportsDto } from '@tt/domain';
+import { reportQuerySchema, type Job, type ReportsDto } from '@candydati/domain';
 import { NotFoundError } from '../../errors.js';
 import type { ReportDeps } from '../../report-ports.js';
 import { buildReports } from './build-reports.js';

@@ -3,8 +3,8 @@ import {
   type DrizzleUnitOfWork,
   type DistributionChannel,
   type DistributionDeps,
-} from '@tt/core';
-import type { PlatformConfig } from '@tt/domain';
+} from '@candydati/core';
+import type { PlatformConfig } from '@candydati/domain';
 
 export interface DistributionWiring {
   readonly uow: DrizzleUnitOfWork;

@@ -1,4 +1,4 @@
-# @tt/ad-quality
+# @candydati/ad-quality
 
 Scores a job ad (never candidates) on ten categories, 0..1 each, total 0..10. No network, no LLM SDK.
 

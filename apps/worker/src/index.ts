@@ -1,6 +1,6 @@
-import { createDrizzleUnitOfWork, safeErrorSerializer } from '@tt/core';
-import { createDb } from '@tt/db';
-import { createErrorReporter, createPgBossQueue, createS3FileStorage, withRequestId, type ErrorReporter } from '@tt/providers';
+import { createDrizzleUnitOfWork, safeErrorSerializer } from '@candydati/core';
+import { createDb } from '@candydati/db';
+import { createErrorReporter, createPgBossQueue, createS3FileStorage, withRequestId, type ErrorReporter } from '@candydati/providers';
 import { PgBoss } from 'pg-boss';
 import pino from 'pino';
 import type { Server } from 'node:http';
