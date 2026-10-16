@@ -15,7 +15,7 @@ describe('mapSheet', () => {
   const result = mapped();
 
   it('groups jobs by title and code, with stages in order of first appearance and outcome words left out', () => {
-    expect(result.jobs.map((job) => [job.ref, job.title, job.status, job.stages.map((stage) => stage.name)])).toEqual([
+    expect(result.jobs.map((job) => [job.ref, job.title, job.status, job.stages?.map((stage) => stage.name)])).toEqual([
       ['job-1', 'Backend Developer', 'draft', ['Colloquio HR']],
       ['job-2', 'Designer', 'draft', ['Candidatura', 'Colloquio tecnico', 'Colloquio HR']],
     ]);

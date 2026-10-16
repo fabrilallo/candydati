@@ -39,6 +39,6 @@ describe('Recruitee mapping', () => {
     const hit = parse(searchHit({ placements: [placement({ stage: null }), placement({ id: 2, stage: null, offer: { id: 7, title: ' ', status: 'draft' } })] }));
     for (const p of hit.placements!) jobs.notePlacement(p, '2025-03-01T00:00:00.000Z');
     jobs.notePlacement({ id: '3' }, '2025-03-01T00:00:00.000Z');
-    expect(jobs.jobs().map((j) => [j.ref, j.title, j.status, j.stages[0]?.ref])).toEqual([['offer-501', 'Backend Developer', 'open', 'applied'], ['offer-7', 'Offer 7', 'draft', 'applied']]);
+    expect(jobs.jobs().map((j) => [j.ref, j.title, j.status, j.stages?.[0]?.ref])).toEqual([['offer-501', 'Backend Developer', 'open', 'applied'], ['offer-7', 'Offer 7', 'draft', 'applied']]);
   });
 });

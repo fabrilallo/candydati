@@ -82,7 +82,7 @@ describe('downloadPublicFile against a local server (loopback test option)', () 
   });
 
   it('follows a redirect to another host, re-resolving it, with no credentials', async () => {
-    const resolve = vi.fn(async () => ['127.0.0.1']);
+    const resolve = vi.fn(async (_host: string) => ['127.0.0.1']);
     handlers = [status(302, { location: `http://cdn.example.org:${port}/signed/cv.pdf?sig=abc` }), file('data', 'text/plain')];
     expect(await reader({ resolve }).downloadPublicFile(`http://${STORAGE}:${port}/f`, keep)).toEqual({ bytes: 4, mediaType: 'text/plain' });
     expect(seen.map((r) => r.headers.host)).toEqual([`${STORAGE}:${port}`, `cdn.example.org:${port}`]);

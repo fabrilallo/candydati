@@ -1,9 +1,9 @@
 import type { MigrationPartCounts } from '@candydati/core';
-import { MIGRATION_PACKAGE_FORMAT, type MIGRATION_LIMITS, type MigrationPackage } from '@candydati/domain';
+import { MIGRATION_PACKAGE_FORMAT, type MigrationPackage } from '@candydati/domain';
 import { PackageBuilderError, type CollectedPackage } from './package-builder.js';
 
 /** The limits one package must respect (MIGRATION_LIMITS; tests pass smaller ones). */
-export type PartLimits = Pick<typeof MIGRATION_LIMITS, 'users' | 'jobs' | 'candidates' | 'applications' | 'notes' | 'messages' | 'files' | 'totalBytes' | 'manifestBytes'>;
+export type PartLimits = Readonly<Record<'users' | 'jobs' | 'candidates' | 'applications' | 'notes' | 'messages' | 'files' | 'totalBytes' | 'manifestBytes', number>>;
 
 export interface PackagePart {
   readonly manifest: MigrationPackage;

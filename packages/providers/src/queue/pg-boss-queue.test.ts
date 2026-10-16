@@ -108,7 +108,7 @@ describe('createPgBossQueue', () => {
   });
 
   it('never retries a migration fetch (its credentials are gone) and lets it run for hours', async () => {
-    const boss = { send: vi.fn(async () => 'id'), createQueue: vi.fn(async () => undefined), getJobById: vi.fn(async () => null), deleteJob: vi.fn(async () => undefined) };
+    const boss = { send: vi.fn(async (_name: string, _data: object, _options: object) => 'id'), createQueue: vi.fn(async () => undefined), getJobById: vi.fn(async () => null), deleteJob: vi.fn(async () => undefined) };
     await createPgBossQueue(boss).enqueue('migration.fetch', { organizationId: 'o', batchId: 'b' }, { singletonKey: 'b' });
     expect(boss.send.mock.calls[0]?.[2]).toMatchObject({ retryLimit: 0, expireInSeconds: 12 * 60 * 60, singletonKey: 'b' });
     expect(MIGRATION_FETCH_RETRY.retryLimit).toBe(0);
