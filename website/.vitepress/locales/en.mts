@@ -21,6 +21,7 @@ export const en: LocaleSpecificConfig<DefaultTheme.Config> = {
           operations: 'Day-to-day operations',
           configuration: 'Configuration',
           trackedLinks: 'Tracked links and sources',
+          migration: 'Migrating from another ATS',
           otherDeployments: 'Other ways to deploy',
           api: 'API, webhooks and MCP',
           security: 'Security and privacy',

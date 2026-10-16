@@ -18,6 +18,7 @@ export interface PageTitles {
   readonly operations: string;
   readonly configuration: string;
   readonly trackedLinks: string;
+  readonly migration: string;
   readonly otherDeployments: string;
   readonly api: string;
   readonly security: string;
@@ -44,6 +45,7 @@ export function sidebar(prefix: string, groups: SidebarLabels, pages: PageTitles
         { text: pages.operations, link: link('operations') },
         { text: pages.configuration, link: link('configuration') },
         { text: pages.trackedLinks, link: link('tracked-links') },
+        { text: pages.migration, link: link('migration') },
         { text: pages.otherDeployments, link: link('other-deployments') },
       ],
     },
