@@ -9,6 +9,8 @@ End-to-end tests (Playwright, Chromium only) for the critical flows. One spec pe
 4. `04-candidate-rights` ZIP export, erasure by typing the name, gone from search
 5. `05-interview-feedback` external interviewer link from email, no session, phone viewport
 6. `06-import` ZIP + CSV import, preview with confidence, confirm, undo
+11. `11-migration` migration package (built in code by `support/migration.ts`): preview, bulk stage mapping, the three
+   declarations, closed jobs with their history, undo
 
 Every test creates its own user, organization and data with unique emails and never touches anything else.
 Signing up sends a confirmation email: `signUp` opens its link from Mailpit, which signs the person in (there is no
