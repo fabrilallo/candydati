@@ -217,10 +217,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     submitDeps: withDailyCaps(env, phase2),
     timelineDeps: { ...phase2.candidateDeps, interviewFeedback: hr.feedbackRecords.interviewFeedback },
-    feedbackDeps: hr.feedbackDeps,
-    publicFeedbackDeps: hr.publicFeedbackDeps,
-    jobRequestDeps: hr.jobRequestDeps,
-    staleJobDeps: hr.staleJobDeps,
+    ...hrContext(hr),
     ...createTeamDeps(uow),
     messagingDeps: messaging.messagingDeps,
     inboundDeps: messaging.inboundDeps,
@@ -237,6 +234,14 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
   };
 }
+
+/** The HR dependencies the routes read from the context, by name. */
+const hrContext = (hr: ReturnType<typeof createHrDeps>) => ({
+  feedbackDeps: hr.feedbackDeps,
+  publicFeedbackDeps: hr.publicFeedbackDeps,
+  jobRequestDeps: hr.jobRequestDeps,
+  staleJobDeps: hr.staleJobDeps,
+});
 
 /** Asks the storage for a key: "missing" is the answer we want (the in-memory storage of the tests only names its error). */
 const storageProbe =
