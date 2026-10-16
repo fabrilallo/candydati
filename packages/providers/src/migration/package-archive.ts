@@ -41,8 +41,8 @@ export interface MigrationArchiveLimits extends ImportLimits {
 
 /** Room for the manifest and the directory entries a ZIP tool adds next to the files. */
 const DIRECTORY_ENTRIES_ALLOWANCE = 10_000;
-/** Most compressed bytes read from a stream into memory. ZIP32 cannot address more than 4 GiB anyway. */
-export const MIGRATION_ARCHIVE_MAX_BYTES = 4 * 1024 ** 3 - 1;
+/** Most compressed bytes read from a stream into memory: a package never inflates past MIGRATION_LIMITS.totalBytes. */
+export const MIGRATION_ARCHIVE_MAX_BYTES = MIGRATION_LIMITS.totalBytes;
 const DETAILS_MAX = 100;
 
 export const DEFAULT_MIGRATION_ARCHIVE_LIMITS: MigrationArchiveLimits = {

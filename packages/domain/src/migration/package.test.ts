@@ -235,7 +235,7 @@ describe('parseMigrationPackage', () => {
 
   it('caps the collections', () => {
     expect(MIGRATION_LIMITS.candidates).toBeGreaterThanOrEqual(50_000);
-    expect(MIGRATION_LIMITS.totalBytes).toBe(20 * 1024 ** 3);
+    expect(MIGRATION_LIMITS.totalBytes).toBe(1024 ** 3);
     const many = Array.from({ length: MIGRATION_LIMITS.jobs + 1 }, (_, index) => ({ ...job, ref: `j${index}` }));
     expect(issuesOf({ ...minimal, jobs: many })).toContain('too_big');
   });

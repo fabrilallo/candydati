@@ -14,13 +14,16 @@ export const MIGRATION_LIMITS = {
   applications: 100_000,
   notes: 200_000,
   messages: 200_000,
-  /** Files referenced across the whole package. */
-  files: 120_000,
+  /**
+   * Files referenced across the whole package. A package is read in memory (ZIP32, one worker): an account larger
+   * than one package is migrated as several packages (for example one per year); candidates merge by email.
+   */
+  files: 10_000,
   filesPerApplication: 50,
   answersPerApplication: 100,
   stageHistoryPerApplication: 200,
-  /** Uncompressed size of everything in the ZIP; checked by the archive reader. */
-  totalBytes: 20 * 1024 ** 3,
+  /** Uncompressed size of everything in the ZIP; checked by the archive reader. Sized for a 4 GB server. */
+  totalBytes: 1024 ** 3,
   /** Uncompressed size of `migration.json`. */
   manifestBytes: 256 * 1024 ** 2,
 } as const;
