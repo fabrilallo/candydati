@@ -7,10 +7,12 @@
   "scripts": {
     "env-docs": "node env-docs/cli.mjs",
     "test": "vitest run",
-    "typecheck": "echo 'nothing to typecheck'",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint ."
   },
   "devDependencies": {
+    "@types/node": "26.4.1",
+    "typescript": "5.9.3",
     "vitest": "5.0.0"
   }
 }
