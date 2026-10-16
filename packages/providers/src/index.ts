@@ -4,6 +4,7 @@ export { loadS3Config, type S3Config } from './storage/config.js';
 export { createSharpImageTranscoder, type SharpTranscoderOptions } from './image/sharp-transcoder.js';
 export { createS3FileStorage, type S3FileStorage } from './storage/s3.js';
 export { sniffCv, type SniffedCv } from './upload/sniff.js';
+export { sniffAttachment, type SniffedAttachment } from './upload/sniff-attachment.js';
 export { safeFileName, FILE_NAME_MAX } from './upload/file-name.js';
 export { extractCvText, normalizeCvText, CV_TEXT_MAX_CHARS } from './cv/extract-text.js';
 export { buildCvPrompt, CV_DATA_START, CV_DATA_END } from './cv/prompt.js';
