@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import type { JsonReader } from '../../../http/index.js';
 import { createGreenhouseClient, nextLink } from './client.js';
-import { addressesIn, fileKindOf, mapApplication, mapCandidate, mapEmail, mapJob, mapNote, mapStages, mapUser } from './map.js';
+import { addressesIn, fileKindOf, isLinkedInUrl, mapApplication, mapCandidate, mapEmail, mapJob, mapNote, mapStages, mapUser } from './map.js';
 
 const URLS = { token: 'https://auth.greenhouse.io/token', api: 'https://harvest.greenhouse.io/v3' };
 const credentials = { clientId: 'id', clientSecret: 'secret' };
@@ -133,5 +133,15 @@ describe('mapping edge cases', () => {
     const kind = (type: string) => fileKindOf({ id: 1, application_id: 1, type, filename: 'f', url: 'u' });
     expect([kind('resume'), kind('cover_letter'), kind('other'), kind('take_home_test'), kind('form_attachment')]).toEqual(['cv', 'cover_letter', 'other', 'other', 'other']);
     for (const dropped of ['offer_packet', 'offer_letter', 'signed_offer_letter', 'midfunnel_agreement', 'automated_agreement', 'new_type']) expect(kind(dropped)).toBeNull();
+  });
+});
+
+describe('isLinkedInUrl', () => {
+  it('accepts linkedin.com and its subdomains, never a URL that only mentions it', () => {
+    expect(isLinkedInUrl('https://linkedin.com/in/ada')).toBe(true);
+    expect(isLinkedInUrl('https://it.linkedin.com/in/ada')).toBe(true);
+    expect(isLinkedInUrl('https://evil.example/?u=linkedin.com/in/ada')).toBe(false);
+    expect(isLinkedInUrl('https://linkedin.com.evil.example/in/ada')).toBe(false);
+    expect(isLinkedInUrl('not a url')).toBe(false);
   });
 });

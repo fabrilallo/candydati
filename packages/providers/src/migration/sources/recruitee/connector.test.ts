@@ -30,7 +30,9 @@ beforeAll(async () => {
   server = createServer((req, res) => {
     requests.push(req);
     const path = (req.url ?? '').split('?')[0] ?? '';
-    (routes.get(req.url ?? '') ?? routes.get(path) ?? code(404))(req, res);
+    const handler = routes.get(req.url ?? '') ?? routes.get(path);
+    if (typeof handler === 'function') handler(req, res);
+    else code(404)(req, res);
   });
   await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
   port = (server.address() as AddressInfo).port;

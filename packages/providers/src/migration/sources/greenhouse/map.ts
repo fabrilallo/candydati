@@ -47,13 +47,23 @@ export function mapJob(job: GhJob, stages: readonly GhStage[]): BuilderJob | nul
 const withScheme = (value: string): string => (/^https?:\/\//i.test(value) ? value : `https://${value}`);
 
 /** No consent: Harvest documents no consent date, so the product asks the person to reconfirm. */
+/** A LinkedIn profile URL: the host itself must be linkedin.com or one of its subdomains, not a URL that merely mentions it. */
+export function isLinkedInUrl(value: string): boolean {
+  try {
+    const host = new URL(value.trim()).hostname.toLowerCase();
+    return host === 'linkedin.com' || host.endsWith('.linkedin.com');
+  } catch {
+    return false;
+  }
+}
+
 export function mapCandidate(candidate: GhCandidate): BuilderCandidate | null {
   const firstName = candidate.first_name?.trim();
   const lastName = candidate.last_name?.trim();
   if (!firstName && !lastName) return null;
   const email = first(candidate.email_addresses, (e) => EMAIL.safeParse(e.value.trim()).success)?.value.trim();
   const phone = first(candidate.phone_numbers, (p) => PHONE.test(p.value.trim()))?.value.trim();
-  const linkedin = first(candidate.social_media_addresses, (s) => /linkedin\.com\//i.test(s.value))?.value.trim();
+  const linkedin = first(candidate.social_media_addresses, (s) => isLinkedInUrl(s.value))?.value.trim();
   const tags = [...new Set((candidate.tags ?? []).map((tag) => cut(tag, TAG_MAX)).filter(Boolean))].slice(0, TAGS_PER_CANDIDATE_MAX);
   return {
     ref: String(candidate.id),

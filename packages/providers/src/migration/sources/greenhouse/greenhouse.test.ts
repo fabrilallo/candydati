@@ -155,7 +155,7 @@ describe('the Greenhouse connector, described', () => {
     expect(greenhouseConnector.hosts(credentials)).toEqual([{ exact: 'auth.greenhouse.io' }, { exact: 'harvest.greenhouse.io' }]);
     expect(greenhouseConnector.fields.map((f) => [f.name, f.type, f.secret])).toEqual([['clientId', 'text', false], ['clientSecret', 'password', true]]);
     for (const field of greenhouseConnector.fields) {
-      expect(field.howToUrl).toMatch(/^https:\/\/harvestdocs\.greenhouse\.io/);
+      expect(new URL(field.howToUrl ?? '').hostname).toBe('harvestdocs.greenhouse.io');
       expect(field.label.it.length).toBeGreaterThan(0);
     }
     expect(greenhouseConnector.fields[0]?.help?.en).toMatch(/private data/i);
