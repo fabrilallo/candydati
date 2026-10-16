@@ -8,9 +8,9 @@ export interface Applicant {
   readonly email: string;
 }
 
-/** Applies from the public ad page with a generated PDF and both consents; resolves once the confirmation shows. */
-export const applyToJob = async (page: Page, orgSlug: string, jobSlug: string, who: Applicant): Promise<void> => {
-  await open(page, `/careers/${orgSlug}/${jobSlug}`);
+/** Applies from the public ad page (`query`: e.g. `?utm_source=linkedin`) with a generated PDF and both consents; resolves once the confirmation shows. */
+export const applyToJob = async (page: Page, orgSlug: string, jobSlug: string, who: Applicant, query = ''): Promise<void> => {
+  await open(page, `/careers/${orgSlug}/${jobSlug}${query}`);
   await page.getByTestId('apply-cta').click();
   await page.locator('#apply-first-name').fill(who.firstName);
   await page.locator('#apply-last-name').fill(who.lastName);
