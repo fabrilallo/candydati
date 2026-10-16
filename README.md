@@ -64,6 +64,28 @@ Status: pre-1.0 (see the [changelog](CHANGELOG.md)). Full product definition: [d
 - Import from CVs and spreadsheets with preview and undo; complete export
 - Migration from another ATS through an open package format, with preview, an explicit responsibility step and undo; an agent skill builds the package ([guide](website/guide/migration.md))
 
+## Migrate from another ATS
+
+Bring jobs, stages, candidates, applications with their outcomes and dates, notes, past emails, CVs and attachments
+from your previous ATS. Everything goes through one open [package format](docs/schema/migration-package.v1.json): you
+see a preview, confirm that your organization is responsible for the transfer, and can undo it. Scores and ratings
+are never imported.
+
+| Source | How it connects | Status |
+|---|---|---|
+| Teamtailor | API key | <img alt="beta" src="https://img.shields.io/badge/beta-F59E0B"> |
+| Greenhouse | Harvest v3 API credentials | <img alt="beta" src="https://img.shields.io/badge/beta-F59E0B"> |
+| Workable | API token | <img alt="beta" src="https://img.shields.io/badge/beta-F59E0B"> |
+| Recruitee | personal API token | <img alt="beta" src="https://img.shields.io/badge/beta-F59E0B"> |
+| Zucchetti InRecruiting | export file (spreadsheet + ZIP of CVs) | <img alt="beta" src="https://img.shields.io/badge/beta-F59E0B"> |
+| Any other ATS or a spreadsheet | package built by an AI agent with the [migration skill](skills/candydati-migration/README.md) | available |
+
+**Beta** means built on the vendor's public documentation and not yet verified on a real account: check the preview
+before confirming, and tell us how it went. What each connector brings and what it cannot:
+[migration sources](docs/migration/sources.md). Step by step: the
+[migration guide](https://fabrilallo.github.io/candydati/guide/migration). Product names are trademarks of their
+owners; Candydati is not affiliated with them.
+
 ## Screenshots
 
 | | |
@@ -206,7 +228,7 @@ No dates. Deferred from the current scope ([PRODUCT.md §3.3](docs/PRODUCT.md)):
 - Scorecards and interview kits
 - Restricted stages: feedback and notes visible only to owners, admins and the hiring manager
 - Interview scheduling through an integration with a scheduling service
-- Built-in connectors for individual ATS products (see [migration sources](docs/migration/sources.md))
+- Migration connectors out of beta once a real migration confirms each one; more sources on request
 
 ## Contributing
 
