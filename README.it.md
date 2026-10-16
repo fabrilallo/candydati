@@ -64,6 +64,7 @@ Stato: pre-1.0 (vedi il [changelog](CHANGELOG.md)). Definizione completa del pro
 **Privacy e dati**
 - Conservazione, cancellazione automatica, diritti dell'interessato, registro delle azioni in sola aggiunta
 - Import da CV e fogli di calcolo con anteprima e annullamento; export completo
+- Migrazione da un altro ATS con un formato di pacchetto aperto, con anteprima, un passaggio di responsabilità esplicito e annullamento; una skill per agenti prepara il pacchetto ([guida](website/it/guide/migration.md))
 
 ## Schermate
 
@@ -207,7 +208,7 @@ Senza date. Rinviati rispetto al perimetro attuale ([PRODUCT.md §3.3](docs/PROD
 - Scorecard e kit per i colloqui
 - Fasi riservate: feedback e note visibili solo a owner, admin e hiring manager
 - Pianificazione dei colloqui tramite integrazione con un servizio di calendario
-- Importatori dedicati per singoli ATS
+- Connettori integrati per singoli ATS (vedi le [fonti di migrazione](docs/migration/sources.md))
 
 ## Contribuire
 

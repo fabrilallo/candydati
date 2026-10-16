@@ -62,6 +62,7 @@ Status: pre-1.0 (see the [changelog](CHANGELOG.md)). Full product definition: [d
 **Privacy and data**
 - Retention, automatic erasure, data subject rights, append-only audit log
 - Import from CVs and spreadsheets with preview and undo; complete export
+- Migration from another ATS through an open package format, with preview, an explicit responsibility step and undo; an agent skill builds the package ([guide](website/guide/migration.md))
 
 ## Screenshots
 
@@ -205,7 +206,7 @@ No dates. Deferred from the current scope ([PRODUCT.md §3.3](docs/PRODUCT.md)):
 - Scorecards and interview kits
 - Restricted stages: feedback and notes visible only to owners, admins and the hiring manager
 - Interview scheduling through an integration with a scheduling service
-- Dedicated importers for individual ATS products
+- Built-in connectors for individual ATS products (see [migration sources](docs/migration/sources.md))
 
 ## Contributing
 
