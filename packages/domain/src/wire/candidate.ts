@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { cvExtractionSchema, EXTRACTION_STATUSES, OUTCOMES } from '../candidate/application.js';
+import { ATTACHMENT_KINDS } from '../candidate/attachment.js';
 import { selectionStageSchema } from '../job/content.js';
 import { JOB_STATUSES } from '../job/job.js';
 import { RESPONSE_STATES } from '../response/response-state.js';
@@ -83,6 +84,16 @@ const extractionSchema = z.object({
 });
 export type ExtractionDto = z.infer<typeof extractionSchema>;
 
+export const applicationAttachmentSchema = z.object({
+  id: z.string(),
+  kind: z.enum(ATTACHMENT_KINDS),
+  fileName: z.string(),
+  mediaType: z.string(),
+  sizeBytes: count,
+  createdAt: isoDate,
+});
+export type ApplicationAttachmentDto = z.infer<typeof applicationAttachmentSchema>;
+
 export const candidateApplicationSchema = z.object({
   id: z.string(),
   job: z.object({ id: z.string(), title: z.string(), slug: z.string() }),
@@ -109,6 +120,10 @@ export const candidateApplicationSchema = z.object({
   extraction: extractionSchema,
   /** Messages in the conversation of this application (sent, received and failed). */
   messageCount: count,
+  /** Files other than the CV (only migrations bring them today); each downloads from its own route, audited like the CV. */
+  attachments: z.array(applicationAttachmentSchema).optional(),
+  /** Form answers kept from the previous ATS. */
+  answers: z.array(z.object({ question: z.string(), answer: z.string() })).optional(),
 });
 export type CandidateApplicationDto = z.infer<typeof candidateApplicationSchema>;
 
