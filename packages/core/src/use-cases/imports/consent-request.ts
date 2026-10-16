@@ -64,6 +64,17 @@ const answerInput = tokenInput.extend({
   decline: z.boolean().optional(),
 });
 
+/**
+ * The applications one answer is about. A migration asks each person once (ADR 0009), about their latest application to
+ * renew: the answer covers every application of theirs that the same migration brought and that waits for it.
+ */
+async function coveredBy(deps: ConsentDeps, application: Application): Promise<readonly string[]> {
+  if (!application.migrationBatchId) return [application.id];
+  const all = await deps.applications.listByCandidate(application.organizationId, application.candidateId);
+  const siblings = all.filter((a) => a.id !== application.id && a.migrationBatchId === application.migrationBatchId && a.consentStatus === 'to_renew').map((a) => a.id);
+  return [application.id, ...siblings];
+}
+
 /** Inside the command's transaction: the token is spent only together with the consent, the candidate and the audit event. */
 async function reconfirm(deps: ConsentDeps, { token, application }: Resolved, scopes: readonly ConsentScope[], version: number | undefined): Promise<void> {
   if (!scopes.includes('selection')) throw new ValidationError([{ path: 'scopes', message: 'selection_consent_required' }]);
@@ -74,7 +85,9 @@ async function reconfirm(deps: ConsentDeps, { token, application }: Resolved, sc
   // Single use: only one concurrent answer wins.
   if (!(await deps.consentTokens.markUsed(token.tokenHash, now))) throw new ConflictError('already_answered');
   const consent = { privacyNoticeId: notice.id, privacyNoticeVersion: notice.version, scopes: [...new Set(scopes)], givenAt: now };
-  await deps.applications.update(token.organizationId, application.id, { consent, consentStatus: 'given', retentionExpiresAt: retentionExpiry(consent, notice), updatedAt: now });
+  for (const id of await coveredBy(deps, application)) {
+    await deps.applications.update(token.organizationId, id, { consent, consentStatus: 'given', retentionExpiresAt: retentionExpiry(consent, notice), updatedAt: now });
+  }
   const candidate = await deps.candidates.findById(token.organizationId, application.candidateId);
   if (candidate) {
     const all = await deps.applications.listByCandidate(token.organizationId, candidate.id);
@@ -93,7 +106,8 @@ async function reconfirm(deps: ConsentDeps, { token, application }: Resolved, sc
 /**
  * Public. `{ scopes }` gives consent against the ACTIVE notice: the application becomes `given`, retention is recomputed
  * as for an application (longest of the chosen scopes from now), the candidate joins the talent pool if chosen and the
- * restrictions on visibility lift. `{ decline: true }` erases the application at once (reason `consent_declined`).
+ * restrictions on visibility lift. `{ decline: true }` erases the application at once (reason `consent_declined`). For a
+ * migrated application, the answer covers the person's other applications of the same migration still to renew.
  */
 export const answerConsentRequest = definePublicCommand<ConsentDeps, typeof answerInput, ConsentAnswerResult>({
   name: 'answerConsentRequest',
@@ -106,7 +120,7 @@ export const answerConsentRequest = definePublicCommand<ConsentDeps, typeof answ
       await eraseCandidateData(deps, {
         organizationId: resolved.token.organizationId,
         candidateId: resolved.application.candidateId,
-        applicationIds: [resolved.application.id],
+        applicationIds: await coveredBy(deps, resolved.application),
         reason: 'consent_declined',
         actor: SYSTEM_ACTOR,
       });
