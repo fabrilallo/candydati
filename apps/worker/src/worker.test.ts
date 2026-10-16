@@ -1,10 +1,10 @@
 import pino from 'pino';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
-import { defineQueue, QUEUE_DEFINITIONS } from './queues/definitions.js';
+import { defineQueue, QUEUE_DEFINITIONS, type JobContext } from './queues/definitions.js';
 import { startWorker, type WorkerBoss, type WorkerJob } from './worker.js';
 
-type WorkHandler = Parameters<WorkerBoss['work']>[1];
+type WorkHandler = Parameters<WorkerBoss['work']>[2];
 
 const silentLogger = pino({ level: 'silent' });
 
@@ -27,7 +27,7 @@ const createFakeBoss = () => {
 
 const job = (id: string, data: unknown): WorkerJob => ({ id, name: 'test.queue', data });
 
-const countingQueue = (handle = vi.fn(async () => undefined)) =>
+const countingQueue = (handle = vi.fn(async (_job: JobContext<{ value: number }>) => undefined)) =>
   defineQueue({
     name: 'test.queue',
     payload: z.object({ value: z.number().int() }),
@@ -63,7 +63,7 @@ describe('startWorker', () => {
 
   it('runs the handler with the parsed payload for every job in the batch', async () => {
     const { boss, handlers } = createFakeBoss();
-    const handle = vi.fn(async () => undefined);
+    const handle = vi.fn(async (_job: JobContext<{ value: number }>) => undefined);
     await startWorker({ boss, logger: silentLogger, queues: [countingQueue(handle)] });
 
     await handlers.get('test.queue')?.([job('a', { value: 1 }), job('b', { value: 2 })]);

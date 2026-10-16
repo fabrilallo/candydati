@@ -14,7 +14,7 @@ describe('email.send queue', () => {
   it('delivers a queued message and marks it sent', async () => {
     const deps = seedMessagingWorld();
     const message = await deps.messages.create(buildMessage({ organizationId: 'org_a', status: 'queued', direction: 'outbound', sentBy: 'system' }));
-    await createEmailSendQueue(deps).handle({ jobId: 'j1', payload: { organizationId: 'org_a', messageId: message.id }, logger, lastAttempt: false });
+    await createEmailSendQueue(deps).handle({ jobId: 'j1', payload: { organizationId: 'org_a', messageId: message.id }, logger, lastAttempt: false, attempt: 1 });
     expect((await deps.messages.findById('org_a', message.id))?.status).toBe('sent');
   });
 
@@ -23,9 +23,9 @@ describe('email.send queue', () => {
     const message = await deps.messages.create(buildMessage({ organizationId: 'org_a', status: 'queued', direction: 'outbound', sentBy: 'system' }));
     const queue = createEmailSendQueue(deps);
     const payload = { organizationId: 'org_a', messageId: message.id };
-    await expect(queue.handle({ jobId: 'j', payload, logger, lastAttempt: false })).rejects.toThrow('timeout');
+    await expect(queue.handle({ jobId: 'j', payload, logger, lastAttempt: false, attempt: 1 })).rejects.toThrow('timeout');
     expect((await deps.messages.findById('org_a', message.id))?.status).toBe('queued');
-    await queue.handle({ jobId: 'j', payload, logger, lastAttempt: true });
+    await queue.handle({ jobId: 'j', payload, logger, lastAttempt: true, attempt: 1 });
     expect((await deps.messages.findById('org_a', message.id))?.status).toBe('failed');
   });
 });

@@ -8,7 +8,7 @@ import { createWebhookDeliverQueue } from './webhook-deliver.js';
 import { createWebhookPublishQueue, WEBHOOK_PUBLISH_CRON } from './webhook-publish.js';
 
 const logger = pino({ level: 'silent' });
-const job = (payload: unknown, lastAttempt = true, attempt = 1) => ({ jobId: 'j1', payload, logger, lastAttempt, attempt });
+const job = <Payload>(payload: Payload, lastAttempt = true, attempt = 1) => ({ jobId: 'j1', payload, logger, lastAttempt, attempt });
 
 describe('automation.run', () => {
   it('runs the rules of the stage and rejects a payload without ids', async () => {
