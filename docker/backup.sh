@@ -27,7 +27,9 @@ log() { printf '%s backup: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$*"; }
 die() { log "ERROR: $*" >&2; exit 1; }
 
 [[ "$PREFIX" =~ ^[A-Za-z0-9._/-]*$ ]] || die "BACKUP_S3_PREFIX may only contain letters, digits and . _ / -"
-[[ "$RETENTION_DAYS" =~ ^[0-9]+$ ]] && [ "$RETENTION_DAYS" -ge 1 ] || die "BACKUP_RETENTION_DAYS must be a whole number of days (at least 1)"
+if ! [[ "$RETENTION_DAYS" =~ ^[0-9]+$ ]] || [ "$RETENTION_DAYS" -lt 1 ]; then
+  die "BACKUP_RETENTION_DAYS must be a whole number of days (at least 1)"
+fi
 
 # ---------- S3 (curl with AWS Signature V4: no extra tool in the image) ----------
 s3_url() {
