@@ -82,7 +82,7 @@ export class TestUser {
   async verifyEmail(): Promise<this> {
     const mailbox = mailboxOf(this.app);
     if (!mailbox) throw new Error('this app has no recording mailbox (createTestApp registers one)');
-    const verified = await this.get(pathOf(mailbox.linkFor(this.email, 'verify_email')));
+    const verified = await this.get(pathOf(await mailbox.waitForLink(this.email, 'verify_email')));
     if (verified.status !== 302 || !this.cookie) throw new Error(`email verification failed: ${verified.status}`);
     return this;
   }
