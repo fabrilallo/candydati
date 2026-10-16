@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { JsonReaderError, type DownloadResult, type DownloadStore, type JsonReader } from '../../../http/index.js';
+import { downloadSourceFile } from '../file-download.js';
 import { tokenSchema } from './schemas.js';
 
 /** Where Harvest v3 lives. Overridable only so tests can point at a local server. */
@@ -30,7 +31,7 @@ export interface GreenhouseClientOptions {
 export interface GreenhouseClient {
   /** Every item of a list endpoint, page by page, following the `Link: rel="next"` URL exactly. */
   pages<S extends z.ZodType>(path: string, params: Readonly<Record<string, string>>, item: S): AsyncGenerator<readonly z.output<S>[]>;
-  /** Streams one file; the bearer is sent only to the API host. */
+  /** Streams one file; the bearer is sent only to the API host, a file anywhere else is fetched as a public file. */
   download(url: string, store: DownloadStore): Promise<DownloadResult>;
 }
 
@@ -43,14 +44,6 @@ export function nextLink(header: string | undefined): string | undefined {
   }
   return undefined;
 }
-
-const originOf = (url: string): string => {
-  try {
-    return new URL(url).origin;
-  } catch {
-    throw new JsonReaderError('host_not_allowed');
-  }
-};
 
 const basic = ({ clientId, clientSecret }: GreenhouseCredentials): string => `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`;
 
@@ -101,8 +94,8 @@ export function createGreenhouseClient(reader: JsonReader, credentials: Greenhou
       }
     },
     async download(url, store) {
-      const sameHost = originOf(url) === apiOrigin;
-      return reader.download(url, store, sameHost ? headers(await bearer()) : undefined);
+      const onApi = URL.canParse(url) && new URL(url).origin === apiOrigin;
+      return downloadSourceFile(reader, url, store, urls.api, onApi ? headers(await bearer()) : undefined);
     },
   };
 }

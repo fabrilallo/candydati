@@ -59,9 +59,10 @@ fields used. Assumed, to be checked on a real account:
 
 - The scope names (`harvest:<resource>:list`) and that a Site Admin integration user can read all of the above.
 - `/v3/sources` exists (its page exists but it is not in the docs index); if the token cannot read it, origins are left out.
-- Attachment URLs: they may be on a host other than `harvest.greenhouse.io`. The reader only reaches Greenhouse's two
-  hosts, so a file on another host is skipped (the application still comes across). The bearer is sent only to
-  `harvest.greenhouse.io`.
+- Attachment URLs: they may be on a host other than `harvest.greenhouse.io` (signed storage URLs). The bearer is sent
+  only to `harvest.greenhouse.io`; a file on any other host is fetched without credentials, from public addresses only
+  (https, every resolved address public, redirects re-checked). A file that is refused or expired is skipped (the
+  application still comes across).
 - A hired application has no hiring date in the docs: its last update (`updated_at`) is used as the closing date.
 - An application with no current stage (or one outside the job's first 50 stages) is placed in the job's first stage.
 - A second resume of an application is imported as an ordinary file (a package holds one CV per application).

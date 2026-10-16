@@ -31,6 +31,7 @@ describe('the client', () => {
       }),
       getJson: vi.fn(async (_url: string, _schema: unknown, extras?: { headers?: Record<string, string> }) => ({ data: [extras?.headers?.authorization], headers: {} })),
       download: vi.fn(async () => ({ bytes: 0, mediaType: null })),
+      downloadPublicFile: vi.fn(async () => ({ bytes: 0, mediaType: null })),
     };
     return { reader: reader as unknown as JsonReader, raw: reader, posts };
   };
@@ -49,14 +50,16 @@ describe('the client', () => {
     expect(raw.getJson.mock.calls[0]?.[0]).toBe('https://harvest.greenhouse.io/v3/jobs?per_page=500');
   });
 
-  it('sends the bearer to downloads on the API host only, and refuses a URL it cannot parse', async () => {
+  it('sends the bearer to downloads on the API host only; any other file is a public file, without credentials', async () => {
     const { reader, raw } = fakeReader({ now: 0 });
     const client = createGreenhouseClient(reader, credentials, { urls: URLS });
     const store = async () => 0;
     await client.download('https://harvest.greenhouse.io/v3/files/1', store);
     await client.download('https://files.example.com/x', store);
-    expect(raw.download.mock.calls.map((c) => (c as unknown[])[2])).toEqual([{ headers: { authorization: 'Bearer t1' } }, undefined]);
-    await expect(client.download('not a url', store)).rejects.toMatchObject({ code: 'host_not_allowed' });
+    await client.download('not a url', store);
+    expect(raw.download.mock.calls.map((c) => (c as unknown[])[2])).toEqual([{ headers: { authorization: 'Bearer t1' } }]);
+    expect(raw.downloadPublicFile.mock.calls.map((c) => c as unknown[])).toEqual([['https://files.example.com/x', store], ['not a url', store]]);
+    expect(raw.postForm).toHaveBeenCalledTimes(1);
   });
 });
 

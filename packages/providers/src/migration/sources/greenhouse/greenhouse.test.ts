@@ -20,6 +20,7 @@ interface Seen {
   readonly path: string;
   readonly query: string;
   readonly authorization: string | undefined;
+  readonly host: string | undefined;
   readonly body: string;
 }
 
@@ -42,7 +43,7 @@ beforeAll(async () => {
     req.on('data', (c: Buffer) => chunks.push(c));
     req.on('end', () => {
       const url = new URL(req.url ?? '/', origin);
-      seen.push({ method: req.method ?? '', path: url.pathname, query: url.search, authorization: req.headers.authorization, body: Buffer.concat(chunks).toString() });
+      seen.push({ method: req.method ?? '', path: url.pathname, query: url.search, authorization: req.headers.authorization, host: req.headers.host, body: Buffer.concat(chunks).toString() });
       if (url.pathname === '/token') {
         issued += 1;
         return send(res, tokenReply ?? { body: { ...schemaToken, access_token: `token-${issued}` } });
@@ -109,13 +110,16 @@ const defaults = (): Record<string, Route> => ({
       { ...docsAttachment, id: 4, type: 'offer_letter', url: `${origin}/files/offer.pdf` },
       { ...docsAttachment, id: 5, type: 'other', url: `${origin}/files/missing.pdf` },
       { ...docsAttachment, id: 6, application_id: 5, url: `${origin}/files/never.pdf` },
-      { ...docsAttachment, id: 7, type: 'other', url: 'https://elsewhere.example.com/f.pdf' },
+      { ...docsAttachment, id: 7, type: 'other', url: `${storage()}/files/external.pdf?X-Amz-Signature=s`, filename: 'external.pdf' },
     ],
   }),
   '/files/cv.pdf': () => pdf('cv'),
   '/files/cv2.pdf': () => pdf('cv2'),
   '/files/cl.pdf': () => pdf('cl'),
+  '/files/external.pdf': () => pdf('external'),
 });
+/** A storage host resolved to the same local server: not an API host, so the bearer must not go there. */
+const storage = (): string => origin.replace('gh.example.com', 'storage.example.net');
 
 beforeEach(() => {
   seen = [];
@@ -219,13 +223,21 @@ describe('a full run against a local Harvest v3', () => {
   it('downloads files right after their record, one CV at most, skips failures, drops offers', async () => {
     const { collected, stored } = await run();
     const files = collected.applications[0]?.files;
-    expect(files?.map((f) => [f.kind, f.fileName])).toEqual([['cv', 'Oldest Attachments'], ['other', 'second.pdf'], ['cover_letter', 'letter.pdf']]);
-    expect(stored.keys()).toHaveLength(3);
+    expect(files?.map((f) => [f.kind, f.fileName])).toEqual([['cv', 'Oldest Attachments'], ['other', 'second.pdf'], ['cover_letter', 'letter.pdf'], ['other', 'external.pdf']]);
+    expect(stored.keys()).toHaveLength(4);
     const requested = seen.map((s) => s.path);
     expect(requested).toEqual(expect.arrayContaining(['/files/cv.pdf', '/files/cv2.pdf', '/files/cl.pdf', '/files/missing.pdf']));
     expect(requested).not.toContain('/files/offer.pdf');
     expect(requested).not.toContain('/files/never.pdf');
     expect(seen.find((s) => s.path === '/files/cv.pdf')?.authorization).toBe('Bearer token-1');
+  });
+
+  it('downloads a file on another host without the bearer', async () => {
+    await run();
+    const external = seen.filter((s) => s.path === '/files/external.pdf');
+    expect(external).toHaveLength(1);
+    expect(external[0]?.host).toBe(new URL(storage()).host);
+    expect(external[0]?.authorization).toBeUndefined();
   });
 
   it('never carries forbidden data and never calls scorecard, EEOC, demographic or offer endpoints', async () => {
