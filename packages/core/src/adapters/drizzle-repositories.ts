@@ -24,6 +24,7 @@ import { createDrizzleJobApprovals, createDrizzleJobRequests, createDrizzleOrgan
 import { createDrizzleJobTemplates } from './drizzle-job-templates.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
 import { createDrizzleMigrationBatches, createDrizzleMigrationIssues } from './drizzle-migrations.js';
+import { createDrizzleMigratedRows } from './drizzle-migrated-rows.js';
 import { createDrizzleJobTeams } from './drizzle-job-teams.js';
 import { createDrizzleMemberDirectory } from './drizzle-members.js';
 import { createDrizzleMessages } from './drizzle-messages.js';
@@ -112,6 +113,7 @@ const operationRepositories = (db: DbExecutor) =>
     commit: createDrizzleImportCommit(db),
     migrations: createDrizzleMigrationBatches(db),
     migrationIssues: createDrizzleMigrationIssues(db),
+    migratedRows: createDrizzleMigratedRows(db),
     stuck: createDrizzleStuckWork(db),
   }) as const;
 

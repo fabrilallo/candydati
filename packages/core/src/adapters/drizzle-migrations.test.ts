@@ -46,6 +46,7 @@ const batch = (organizationId: string, overrides: Partial<MigrationBatch> = {}):
     updatedAt: NOW,
     committedAt: null,
     undoneAt: null,
+    purgedAt: null,
     ...overrides,
   };
 };
@@ -84,6 +85,37 @@ describe('createDrizzleMigrationBatches', () => {
     await handle.pool.query(`update migration_batch set credentials_ciphertext = 'v1.secret' where id = $1`, [created.id]);
     const read = [await repo.findById(org, created.id), ...(await repo.list(org)), await repo.transition(org, created.id, 'uploaded', { status: 'analyzing' })];
     for (const row of read) expect(row).not.toHaveProperty('credentialsCiphertext');
+  });
+});
+
+describe('createDrizzleMigrationBatches: ended batches', () => {
+  const credentialsOf = async (id: string) => (await handle.pool.query<{ c: string | null }>('select credentials_ciphertext as c from migration_batch where id = $1', [id])).rows[0]?.c;
+
+  it.each(['done', 'failed', 'undone'] as const)('wipes the connector credentials when the batch ends %s', async (status) => {
+    const org = await insertOrg();
+    const repo = createDrizzleMigrationBatches(handle.db);
+    const created = await repo.create(batch(org, { status: 'importing' }));
+    await handle.pool.query(`update migration_batch set credentials_ciphertext = 'v1.secret' where id = $1`, [created.id]);
+    await repo.transition(org, created.id, 'importing', { status: 'analyzing' });
+    expect(await credentialsOf(created.id)).toBe('v1.secret');
+    await repo.transition(org, created.id, 'analyzing', { status });
+    expect(await credentialsOf(created.id)).toBeNull();
+  });
+
+  it('locks a batch of its organization only, and lists ended batches not purged yet, oldest change first', async () => {
+    const org = await insertOrg();
+    const repo = createDrizzleMigrationBatches(handle.db);
+    const old = new Date('2020-01-01T00:00:00Z');
+    const done = await repo.create(batch(org, { status: 'done', updatedAt: new Date('2020-01-02T00:00:00Z') }));
+    const undone = await repo.create(batch(org, { status: 'undone', updatedAt: old }));
+    await repo.create(batch(org, { status: 'failed', updatedAt: old, purgedAt: old }));
+    await repo.create(batch(org, { status: 'ready', updatedAt: old }));
+    await repo.create(batch(org, { status: 'done', updatedAt: NOW }));
+    const due = (await repo.listToPurge(new Date('2021-01-01T00:00:00Z'), 5000)).filter((b) => b.organizationId === org);
+    expect(due.map((b) => b.id)).toEqual([undone.id, done.id]);
+    expect((await repo.listToPurge(new Date('2021-01-01T00:00:00Z'), 1)).length).toBe(1);
+    expect(await handle.db.transaction((tx) => createDrizzleMigrationBatches(tx).lock(org, done.id))).toEqual(done);
+    expect(await repo.lock(await insertOrg(), done.id)).toBeNull();
   });
 });
 

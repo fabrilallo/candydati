@@ -1,11 +1,19 @@
-import { MIGRATION_ISSUE_LEVELS, type MigrationBatch, type MigrationIssue } from '@candydati/domain';
+import { isMigrationEnded, MIGRATION_ISSUE_LEVELS, type MigrationBatch, type MigrationIssue } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import type { MigrationBatchRepository, MigrationIssueRepository, MigrationPackageOpenResult, MigrationPackageReader } from '../migration-ports.js';
 import { cell } from './in-memory-transaction.js';
 
+/** Which batch wrote a row the domain types do not carry the batch of (job, candidate, note, message, stage event). */
+export interface MigratedRowTag {
+  readonly kind: 'job' | 'candidate' | 'note' | 'message' | 'stage_event';
+  readonly id: string;
+  readonly batchId: string;
+}
+
 export interface MigrationStoreState {
   readonly batches: readonly MigrationBatch[];
   readonly issues: readonly MigrationIssue[];
+  readonly tags: readonly MigratedRowTag[];
 }
 
 export interface MigrationStore {
@@ -14,7 +22,7 @@ export interface MigrationStore {
 }
 
 export const createMigrationStore = (initial: Partial<MigrationStoreState> = {}): MigrationStore => {
-  const state = cell<MigrationStoreState>({ batches: [], issues: [], ...initial });
+  const state = cell<MigrationStoreState>({ batches: [], issues: [], tags: [], ...initial });
   return {
     read: () => state.get(),
     write: (next) => {
@@ -39,6 +47,16 @@ export function createInMemoryMigrationBatches(store: MigrationStore): Migration
     },
     async findById(organizationId, id) {
       return find(organizationId, id);
+    },
+    async lock(organizationId, id) {
+      return find(organizationId, id);
+    },
+    async listToPurge(before, limit) {
+      return store
+        .read()
+        .batches.filter((b) => isMigrationEnded(b.status) && b.updatedAt < before && b.purgedAt === null)
+        .toSorted((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime() || a.id.localeCompare(b.id))
+        .slice(0, limit);
     },
     async list(organizationId) {
       return store

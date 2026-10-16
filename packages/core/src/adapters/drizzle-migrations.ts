@@ -1,5 +1,5 @@
-import { and, asc, desc, eq, schema, sql } from '@candydati/db';
-import type { MigrationIssue, MigrationIssueCode } from '@candydati/domain';
+import { and, asc, desc, eq, inArray, isNull, lt, schema, sql } from '@candydati/db';
+import { isMigrationEnded, MIGRATION_ENDED_STATUSES, type MigrationIssue, type MigrationIssueCode, type MigrationStatus } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import type { MigrationBatchRepository, MigrationIssueRepository } from '../migration-ports.js';
 import type { DbExecutor } from './db-executor.js';
@@ -32,8 +32,12 @@ const batchColumns = () => {
     updatedAt: columns.updatedAt,
     committedAt: columns.committedAt,
     undoneAt: columns.undoneAt,
+    purgedAt: columns.purgedAt,
   };
 };
+
+/** Credentials never outlive the batch's work: any change to an ended status wipes them in the same statement. */
+const wipeWhenEnded = (status: MigrationStatus | undefined) => (status !== undefined && isMigrationEnded(status) ? { credentialsCiphertext: null } : {});
 
 /** Postgres implementation. Every statement filters by `organization_id`. */
 export function createDrizzleMigrationBatches(db: DbExecutor): MigrationBatchRepository {
@@ -48,7 +52,7 @@ export function createDrizzleMigrationBatches(db: DbExecutor): MigrationBatchRep
     async transition(organizationId, id, from, patch) {
       const [row] = await db
         .update(migrationBatch)
-        .set({ ...patch, excludedJobs: patch.excludedJobs === undefined ? undefined : [...patch.excludedJobs] })
+        .set({ ...patch, ...wipeWhenEnded(patch.status), excludedJobs: patch.excludedJobs === undefined ? undefined : [...patch.excludedJobs] })
         .where(and(one(organizationId, id), eq(migrationBatch.status, from)))
         .returning(batchColumns());
       if (!row) throw new ConflictError('migration_changed');
@@ -58,12 +62,24 @@ export function createDrizzleMigrationBatches(db: DbExecutor): MigrationBatchRep
       const [row] = await db.select(batchColumns()).from(migrationBatch).where(one(organizationId, id)).limit(1);
       return row ?? null;
     },
+    async lock(organizationId, id) {
+      const [row] = await db.select(batchColumns()).from(migrationBatch).where(one(organizationId, id)).limit(1).for('update');
+      return row ?? null;
+    },
     async list(organizationId) {
       return db
         .select(batchColumns())
         .from(migrationBatch)
         .where(eq(migrationBatch.organizationId, organizationId))
         .orderBy(desc(migrationBatch.createdAt), desc(migrationBatch.id));
+    },
+    async listToPurge(before, limit) {
+      return db
+        .select(batchColumns())
+        .from(migrationBatch)
+        .where(and(inArray(migrationBatch.status, [...MIGRATION_ENDED_STATUSES]), lt(migrationBatch.updatedAt, before), isNull(migrationBatch.purgedAt)))
+        .orderBy(asc(migrationBatch.updatedAt), asc(migrationBatch.id))
+        .limit(limit);
     },
   };
 }

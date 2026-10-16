@@ -1,35 +1,12 @@
 import { randomUUID } from 'node:crypto';
-import { createDb, schema, type DbHandle } from '@candydati/db';
+import { createDb, eq, schema, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { buildApplication, buildCandidate, buildJob, buildNote } from '../testing/index.js';
+import { buildJob } from '../testing/index.js';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
-import { createDrizzleApplications } from './drizzle-applications.js';
-import { createDrizzleCandidateNotes } from './drizzle-candidate-notes.js';
-import { createDrizzleCandidates } from './drizzle-candidates.js';
-import { createDrizzleErasureStore } from './drizzle-erasure.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
+import { createDrizzleMigratedRows } from './drizzle-migrated-rows.js';
 
 let handle: DbHandle;
-
-interface World {
-  readonly org: string;
-  readonly jobId: string;
-  readonly candidateId: string;
-  readonly batchId: string;
-}
-
-/** Rows a migration writes (Phase 3 writes them; here only their storage is exercised). */
-async function insertWorld(): Promise<World> {
-  const org = randomUUID();
-  await handle.db.insert(schema.organization).values({ id: org, name: `Org ${org}`, slug: org, createdAt: new Date() });
-  const job = buildJob({ id: randomUUID(), slug: randomUUID(), organizationId: org });
-  await createDrizzleJobs(handle.db).create(job);
-  const candidate = buildCandidate({ id: randomUUID(), organizationId: org, email: `${randomUUID()}@x.it` });
-  await createDrizzleCandidates(handle.db).create(candidate);
-  const batchId = randomUUID();
-  await handle.db.insert(schema.migrationBatch).values({ id: batchId, organizationId: org, status: 'importing', sourceSystem: 'teamtailor', producer: 'test', connectorMaturity: 'beta', createdBy: 'u', packageKey: 'k' });
-  return { org, jobId: job.id, candidateId: candidate.id, batchId };
-}
 
 beforeAll(() => {
   handle = createDb(coreTestDatabaseUrl(), 2);
@@ -38,31 +15,43 @@ afterAll(async () => {
   await handle.close();
 });
 
-describe('migrated rows in Postgres', () => {
-  it('stores and reads back a migrated application without a CV, and erases it without a file key', async () => {
-    const w = await insertWorld();
-    const repo = createDrizzleApplications(handle.db);
-    const withCv = buildApplication({ id: randomUUID(), organizationId: w.org, jobId: w.jobId, candidateId: w.candidateId, outcome: 'hired' });
-    const without = buildApplication({ id: randomUUID(), organizationId: w.org, jobId: w.jobId, candidateId: w.candidateId, outcome: 'not_selected', cv: null, migrationBatchId: w.batchId });
-    await repo.create(withCv);
-    await repo.create(without);
-    expect(await repo.findById(w.org, without.id)).toEqual(without);
-    expect((await repo.findById(w.org, withCv.id))?.migrationBatchId).toBeUndefined();
-    const keys = await createDrizzleErasureStore(handle.db).deleteApplications(w.org, [withCv.id, without.id]);
-    expect(keys).toEqual([withCv.cv?.key]);
+async function world() {
+  const org = randomUUID();
+  await handle.db.insert(schema.organization).values({ id: org, name: org, slug: org, createdAt: new Date() });
+  const batchId = randomUUID();
+  await handle.db.insert(schema.migrationBatch).values({ id: batchId, organizationId: org, status: 'done', sourceSystem: 's', producer: 'p', connectorMaturity: 'package', createdBy: 'u', packageKey: 'k' });
+  const rows = createDrizzleMigratedRows(handle.db);
+  const job = async (status: 'draft' | 'closed' | 'published') => {
+    const value = buildJob({ id: randomUUID(), slug: randomUUID(), organizationId: org, status });
+    await rows.insertJob(batchId, value);
+    return value.id;
+  };
+  return { org, batchId, rows, job };
+}
+
+describe('migrated rows: deleting the jobs of an undone migration', () => {
+  it('deletes a migrated job nothing refers to, never a published one nor one of another batch or organization', async () => {
+    const { org, batchId, rows, job } = await world();
+    const [draft, published, other] = [await job('draft'), await job('published'), await job('closed')];
+    expect(await rows.jobIdsOf(org, batchId)).toEqual([draft, published, other].toSorted());
+    expect(await rows.deleteJobIfUnused(org, randomUUID(), other)).toBe(false);
+    expect(await rows.deleteJobIfUnused(randomUUID(), batchId, other)).toBe(false);
+    expect(await rows.deleteJobIfUnused(org, batchId, published)).toBe(false);
+    expect(await rows.deleteJobIfUnused(org, batchId, draft)).toBe(true);
+    expect(await createDrizzleJobs(handle.db).findById(org, draft)).toBeNull();
+    const [stored] = await handle.db.select({ origin: schema.job.origin }).from(schema.job).where(eq(schema.job.id, other));
+    expect(stored?.origin).toBe('migration');
   });
 
-  it('refuses an application without a CV outside a migration', async () => {
-    const w = await insertWorld();
-    const bad = buildApplication({ id: randomUUID(), organizationId: w.org, jobId: w.jobId, candidateId: w.candidateId, cv: null });
-    await expect(createDrizzleApplications(handle.db).create(bad)).rejects.toThrow();
-  });
-
-  it('stores and lists a note by an external author', async () => {
-    const w = await insertWorld();
-    const repo = createDrizzleCandidateNotes(handle.db);
-    const note = buildNote({ id: randomUUID(), organizationId: w.org, candidateId: w.candidateId, authorId: null, authorName: 'Giulia Rossi' });
-    expect(await repo.create(note)).toEqual(note);
-    expect(await repo.listByCandidate(w.org, w.candidateId)).toEqual([note]);
+  it('keeps a job still referenced elsewhere, inside a transaction that goes on', async () => {
+    const { org, batchId, job } = await world();
+    const closed = await job('closed');
+    await handle.db.insert(schema.jobTeamMember).values({ organizationId: org, jobId: closed, userId: 'u1', role: 'recruiter', addedBy: 'u1' });
+    const outcome = await handle.db.transaction(async (tx) => {
+      const deleted = await createDrizzleMigratedRows(tx).deleteJobIfUnused(org, batchId, closed);
+      return { deleted, stillUsable: await createDrizzleJobs(tx).findById(org, closed) };
+    });
+    expect(outcome.deleted).toBe(false);
+    expect(outcome.stillUsable?.id).toBe(closed);
   });
 });

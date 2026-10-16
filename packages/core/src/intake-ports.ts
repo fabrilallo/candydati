@@ -43,6 +43,7 @@ export const TASK_NAMES = [
   'import.analyze',
   'import.commit',
   'migration.analyze',
+  'migration.commit',
 ] as const;
 export type TaskName = (typeof TASK_NAMES)[number];
 
@@ -110,6 +111,8 @@ export interface TaskPayloads {
   readonly 'import.commit': ImportTaskPayload;
   /** Open, check and preview a migration package (ADR 0009). Ids only, like the import. */
   readonly 'migration.analyze': ImportTaskPayload;
+  /** Write a confirmed migration in chunks (ADR 0009). Ids only. */
+  readonly 'migration.commit': ImportTaskPayload;
 }
 
 /** A task as enqueued: the name decides the payload. */

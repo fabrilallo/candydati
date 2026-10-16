@@ -16,8 +16,15 @@ export interface MigrationBatchRepository {
    */
   transition(organizationId: string, id: string, from: MigrationStatus, patch: MigrationBatchPatch): Promise<MigrationBatch>;
   findById(organizationId: string, id: string): Promise<MigrationBatch | null>;
+  /** Locks the batch row until the transaction ends (`FOR UPDATE`): two runs of the commit write one chunk at a time. */
+  lock(organizationId: string, id: string): Promise<MigrationBatch | null>;
   /** Newest first. */
   list(organizationId: string): Promise<readonly MigrationBatch[]>;
+  /**
+   * Across organizations, for the daily purge: batches `done`, `failed` or `undone`, last changed before `before`, whose
+   * package and issues are not purged yet (`purgedAt` null). Oldest first, at most `limit`.
+   */
+  listToPurge(before: Date, limit: number): Promise<readonly MigrationBatch[]>;
 }
 
 export interface MigrationIssueQuery {

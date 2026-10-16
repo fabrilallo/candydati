@@ -83,3 +83,5 @@ Schema changes are Drizzle migrations in `packages/db/drizzle`. Generate with `p
 - **0030** builds the `migration_batch_id` indexes concurrently (partial: only migrated rows) and swaps
   `message_org_candidate_outbound_idx` for one that leaves historical messages out of the caps: built under a temporary
   name, the old one dropped, the new one renamed. Every step is idempotent.
+- **0031** adds `migration_batch.purged_at` (nullable, no default, no rewrite): set once the package file and the issues
+  of an ended migration are deleted.
