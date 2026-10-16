@@ -1,0 +1,18 @@
+# Automatic HTTPS (Let's Encrypt) in front of the web container: the `caddy` profile of docker-compose.prod.yml.
+# CANDYDATI_DOMAIN must resolve to this server before the first start. The log masks the link tokens (SECURITY.md).
+{$CANDYDATI_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy web:3000
+	request_body {
+		max_size 210MB
+	}
+	log {
+		output stdout
+		format filter {
+			request>uri regexp "(/(?:api/auth/reset-password|accept-invitation|feedback|consent|api/v1/public/(?:feedback|consent))/)[^/?]+|([?&](?:token|secret|key|code|state|otp|cookies|id)=)[^&]*" "${1}${2}***"
+			request>headers>Referer delete
+			request>headers>Cookie delete
+			request>headers>Authorization delete
+		}
+	}
+}

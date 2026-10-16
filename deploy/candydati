@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+# Everyday commands for a server installed with deploy/install.sh. Installed as /usr/local/bin/candydati.
+set -euo pipefail
+
+CANDYDATI_REPO="${CANDYDATI_REPO:-fabrilallo/candydati}"
+CANDYDATI_DIR="${CANDYDATI_DIR:-/opt/candydati}"
+ENV_FILE="$CANDYDATI_DIR/.env"
+
+die() {
+  printf 'candydati: %s\n' "$*" >&2
+  exit 1
+}
+
+usage() {
+  cat <<'EOF'
+Usage: candydati <command>
+
+  status            containers, health and the app's readiness
+  logs [service]    follow the logs (all, or one of: api worker web postgres minio caddy backup)
+  start             start everything (after a reboot it starts by itself)
+  stop              stop everything (data stays)
+  restart           restart everything
+  config            edit the settings (.env), then apply them
+  backup            take a backup now (daily backups run by themselves)
+  update [version]  back up, then move to the latest release (or to the given one)
+  version           installed release
+  help              this list
+EOF
+}
+
+compose() { docker compose --project-directory "$CANDYDATI_DIR" -f "$CANDYDATI_DIR/docker-compose.prod.yml" "$@"; }
+
+require_install() {
+  [[ -f $ENV_FILE ]] || die "no installation in $CANDYDATI_DIR (set CANDYDATI_DIR if it is elsewhere)"
+}
+
+require_root() {
+  [[ $EUID -eq 0 ]] || die "run it as root: sudo candydati $*"
+}
+
+installed_version() { sed -n "s/^CANDYDATI_VERSION='\{0,1\}\([^']*\)'\{0,1\}$/\1/p" "$ENV_FILE"; }
+
+status() {
+  compose ps
+  if curl -fsS -o /dev/null "http://127.0.0.1:3000/api/ready"; then
+    printf '\nApp: ready (database, storage and queue reachable)\n'
+  else
+    printf '\nApp: NOT ready. Look at: candydati logs api\n'
+  fi
+}
+
+config() {
+  local before after
+  before=$(sha256sum "$ENV_FILE")
+  "${EDITOR:-nano}" "$ENV_FILE"
+  chmod 600 "$ENV_FILE"
+  after=$(sha256sum "$ENV_FILE")
+  if [[ $before == "$after" ]]; then
+    echo "No change."
+    return 0
+  fi
+  compose up -d --remove-orphans
+  echo "Settings applied."
+}
+
+# The installer of the target release does the update, so the steps always match that release.
+update() {
+  local version=${1:-} url
+  if [[ -n $version ]]; then
+    url="https://github.com/$CANDYDATI_REPO/releases/download/v${version#v}/install.sh"
+  else
+    url="https://github.com/$CANDYDATI_REPO/releases/latest/download/install.sh"
+  fi
+  curl -fsSL "$url" | CANDYDATI_DIR="$CANDYDATI_DIR" CANDYDATI_REPO="$CANDYDATI_REPO" bash -s -- --upgrade "$version"
+}
+
+main() {
+  local command=${1:-help}
+  [[ $# -gt 0 ]] && shift
+  case "$command" in
+    help | -h | --help) usage ;;
+    version)
+      require_install
+      installed_version
+      ;;
+    status | logs | start | stop | restart | config | backup | update)
+      require_install
+      require_root "$command"
+      case "$command" in
+        status) status ;;
+        logs) compose logs -f --tail=200 "$@" ;;
+        start) compose up -d --remove-orphans ;;
+        stop) compose stop ;;
+        restart) compose restart ;;
+        config) config ;;
+        backup) compose run --rm backup backup.sh once ;;
+        update) update "${1:-}" ;;
+      esac
+      ;;
+    *)
+      usage >&2
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

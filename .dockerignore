@@ -14,3 +14,4 @@ docs
 **/*.test.ts
 **/.DS_Store
 .tmp-e2e
+**/.vitepress/cache

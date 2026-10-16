@@ -1,6 +1,9 @@
 # Self-hosting: the whole stack (postgres, minio, api, worker, web) in one command.
+# One-command install on a fresh server (writes .env, adds Caddy for HTTPS, uses the published images): deploy/install.sh.
+# By hand, from the sources:
 #   cp .env.example .env   # then set the required values (see README, Self-hosting section)
 #   docker compose -f docker-compose.prod.yml up -d --build
+# Published images instead of a local build: set CANDYDATI_VERSION to a release (e.g. 0.2.0), then pull and up -d.
 # With development mail (Mailpit): add --profile mail and EMAIL_PROVIDER=smtp. With scheduled backups: --profile backup.
 # Only "web" is published on the host (WEB_BIND:WEB_PORT); api, worker, postgres and minio stay on the internal network.
 # The stack refuses to start with the example secrets, an http PLATFORM_URL or EMAIL_PROVIDER=log (config-check).
@@ -33,7 +36,8 @@ x-app-env: &app-env
   RESEND_API_KEY: ${RESEND_API_KEY:-}
   EMAIL_DOMAIN: ${EMAIL_DOMAIN:-localhost}
   EMAIL_FROM_LOCAL: ${EMAIL_FROM_LOCAL:-noreply}
-  EMAIL_INBOUND_DOMAIN: ${EMAIL_INBOUND_DOMAIN:-inbound.localhost}
+  # Empty: inbound.<EMAIL_DOMAIN>. Replies to reply+<token>@ that domain need an MX record and an inbound webhook.
+  EMAIL_INBOUND_DOMAIN: ${EMAIL_INBOUND_DOMAIN:-}
   WEBHOOKS_ALLOW_PRIVATE: "false"
   AGENT_MODEL: ${AGENT_MODEL:-}
   FAST_MODEL: ${FAST_MODEL:-}
@@ -117,7 +121,7 @@ services:
 
   api:
     build: { context: ., target: api }
-    image: candydati-api:${CANDYDATI_VERSION:-local}
+    image: ${CANDYDATI_IMAGE_PREFIX:-ghcr.io/fabrilallo/candydati}-api:${CANDYDATI_VERSION:-local}
     restart: unless-stopped
     depends_on:
       postgres: { condition: service_healthy }
@@ -159,7 +163,7 @@ services:
 
   worker:
     build: { context: ., target: worker }
-    image: candydati-worker:${CANDYDATI_VERSION:-local}
+    image: ${CANDYDATI_IMAGE_PREFIX:-ghcr.io/fabrilallo/candydati}-worker:${CANDYDATI_VERSION:-local}
     restart: unless-stopped
     depends_on:
       api: { condition: service_healthy }
@@ -182,7 +186,7 @@ services:
       target: web
       args:
         NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE: ${PLATFORM_DEFAULT_LOCALE:-it}
-    image: candydati-web:${CANDYDATI_VERSION:-local}
+    image: ${CANDYDATI_IMAGE_PREFIX:-ghcr.io/fabrilallo/candydati}-web:${CANDYDATI_VERSION:-local}
     restart: unless-stopped
     depends_on:
       api: { condition: service_healthy }
@@ -197,6 +201,8 @@ services:
       NUXT_API_MAX_BODY_BYTES: ${NUXT_API_MAX_BODY_BYTES:-213909504}
       NUXT_API_TIMEOUT_MS: ${NUXT_API_TIMEOUT_MS:-300000}
       NUXT_TRUST_CLOUDFLARE: ${NUXT_TRUST_CLOUDFLARE:-false}
+      # The bundled Caddy (profile caddy): its x-forwarded-for names the visitor. Set by deploy/install.sh.
+      NUXT_TRUSTED_PROXY: ${NUXT_TRUSTED_PROXY:-}
       NUXT_PUBLIC_TURNSTILE_SITE_KEY: ${NUXT_PUBLIC_TURNSTILE_SITE_KEY:-}
       NUXT_SENTRY_DSN: ${NUXT_SENTRY_DSN:-}
     ports:
@@ -206,13 +212,36 @@ services:
       internal:
         ipv4_address: ${CANDYDATI_WEB_IP:-172.31.77.10}
 
+  # Automatic HTTPS for the one-command install (deploy/install.sh): COMPOSE_PROFILES=caddy and CANDYDATI_DOMAIN in .env.
+  # Leave it off behind another proxy (Dokploy's Traefik, nginx, a Caddy on the host): then use WEB_BIND/WEB_PORT.
+  caddy:
+    profiles: [caddy]
+    image: caddy:2.10.2@sha256:c3d7ee5d2b11f9dc54f947f68a734c84e9c9666c92c88a7f30b9cba5da182adb
+    restart: unless-stopped
+    depends_on:
+      web: { condition: service_healthy }
+    environment:
+      CANDYDATI_DOMAIN: ${CANDYDATI_DOMAIN:-}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+      - caddyconfig:/config
+    networks:
+      internal:
+        # Fixed, like the web's: the web believes x-forwarded-for from this address only (NUXT_TRUSTED_PROXY).
+        ipv4_address: ${CANDYDATI_CADDY_IP:-172.31.77.11}
+
   # Scheduled pg_dump (custom format) with retention, optionally uploaded to S3 (docs/OPERATIONS.md, Backups):
   #   docker compose -f docker-compose.prod.yml --profile backup up -d
   # One backup now: docker compose -f docker-compose.prod.yml --profile backup run --rm backup backup.sh once
   backup:
     profiles: [backup]
     build: { context: ./docker, dockerfile: backup.Dockerfile }
-    image: candydati-backup:${CANDYDATI_VERSION:-local}
+    image: ${CANDYDATI_IMAGE_PREFIX:-ghcr.io/fabrilallo/candydati}-backup:${CANDYDATI_VERSION:-local}
     restart: unless-stopped
     command: ["backup.sh", "loop"]
     depends_on:
@@ -258,3 +287,5 @@ volumes:
   pgdata:
   miniodata:
   backups:
+  caddydata:
+  caddyconfig:

@@ -94,6 +94,10 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # The installer and the server CLI run as root on people's servers (shellcheck is on the GitHub runners).
+      - name: Shellcheck
+        run: shellcheck deploy/install.sh deploy/candydati docker/*.sh
+
       # The Drizzle snapshots must match the schema: `check` validates the migration history and `generate` must
       # produce nothing (no new file, no change).
       - name: Migration drift

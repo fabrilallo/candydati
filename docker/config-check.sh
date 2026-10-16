@@ -14,6 +14,7 @@ check_secret() {
   name=$1
   min=$2
   eval "value=\${$name:-}"
+  # shellcheck disable=SC2154 # assigned by the eval above
   lowered=$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')
   case "$lowered" in
     *change-me* | *changeme* | *change_me* | *candydati-minio-secret* | *minioadmin* | *example*)

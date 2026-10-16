@@ -91,15 +91,21 @@ In locale le email finiscono in Mailpit (http://localhost:8025). Controlli: `pnp
 
 ## Self-hosting
 
-Uno stack completo (Postgres 17, MinIO, api, worker, web) si avvia con un solo comando:
+Servono un server Linux (2 vCPU, 4 GB di RAM), un dominio che punta al server e un account email da cui spedire (Resend
+o un qualsiasi SMTP, anche la casella aziendale). Nessun altro account. Sul server:
 
 ```bash
-cp .env.example .env     # imposta PLATFORM_URL e i segreti
-docker compose -f docker-compose.prod.yml up -d --build
+curl -fsSL https://github.com/fabrilallo/candydati/releases/latest/download/install.sh | sudo bash
 ```
 
-Con `SIGNUP_MODE=invite_only` (il default in produzione) il primo owner si registra su `/signup?setup` con il
-`BOOTSTRAP_TOKEN` monouso del `.env`. Guide:
+L'installer fa qualche domanda, installa Docker se manca, genera tutti i segreti e avvia lo stack completo (Postgres 17,
+MinIO, api, worker, web) con HTTPS automatico (Caddy) e backup giornalieri. Alla fine stampa il link per creare il primo
+owner. Nel quotidiano: `candydati status`, `candydati update`, `candydati backup`, `candydati help`.
+Passo per passo: il [sito di documentazione](https://fabrilallo.github.io/candydati/it/).
+
+Dai sorgenti invece (`cp .env.example .env`, poi `docker compose -f docker-compose.prod.yml up -d --build`), con
+`SIGNUP_MODE=invite_only` il primo owner si registra su `/signup?setup` con il `BOOTSTRAP_TOKEN` monouso del `.env`.
+Guide:
 
 - [Operazioni](docs/OPERATIONS.md): backup, aggiornamenti, monitoraggio
 - [Deploy con Docker Compose](docs/deploy/docker-compose.md), con rete, volumi e più istanze sulla stessa macchina

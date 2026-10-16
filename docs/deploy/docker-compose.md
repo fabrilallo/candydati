@@ -3,6 +3,10 @@
 One server, one command, automatic HTTPS. For the concepts (sizing, backups, monitoring, upgrades) see
 [../OPERATIONS.md](../OPERATIONS.md).
 
+> **The quick way.** `deploy/install.sh` does everything below for you with the published images and a Caddy container
+> (`caddy` profile): `curl -fsSL https://github.com/fabrilallo/candydati/releases/latest/download/install.sh | sudo bash`.
+> This guide is the manual path: build from the sources, Caddy on the host, full control over every setting.
+
 ## 1. Server
 
 A Linux VPS with 2 vCPU, 4 GB RAM (add 2 GB swap if you build on it) and 40 GB disk, a DNS `A` record for the host name

@@ -116,6 +116,10 @@ Never route `/metrics` or the api port (4000) through the proxy.
 
 ## Upgrades and rollback
 
+Installed with `deploy/install.sh`: `candydati update` (or `candydati update X.Y.Z`) takes a backup, downloads the
+release's compose file and images, restarts and waits for `/api/ready`. It runs the installer of the target release
+with `--upgrade`, so the steps always match that release. By hand:
+
 1. Read the [changelog](../CHANGELOG.md). Take a backup first: `backup.sh once`.
 2. `git pull` (or change `CANDYDATI_VERSION`), then `docker compose -f docker-compose.prod.yml up -d --build`.
 3. The api applies migrations at start (`RUN_MIGRATIONS=true`) under a Postgres advisory lock: several api replicas
