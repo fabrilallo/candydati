@@ -2,7 +2,7 @@ import type { DefaultTheme, LocaleSpecificConfig } from 'vitepress';
 import { repoFile, sidebar } from './shared.mjs';
 
 export const it: LocaleSpecificConfig<DefaultTheme.Config> = {
-  description: "L'ATS agentico a sorgente disponibile, dalla parte del candidato.",
+  description: "Un ATS agentico, aperto e installabile sul tuo server, pensato per chi si candida, non solo per chi seleziona.",
   themeConfig: {
     nav: [
       { text: 'Guida', link: '/it/guide/introduction', activeMatch: '^/it/guide/(?!quick-start)' },

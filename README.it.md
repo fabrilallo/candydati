@@ -3,7 +3,7 @@
   <img alt="Candydati" src="docs/assets/logo-dark.svg#gh-dark-mode-only" height="44">
 </p>
 
-<p align="center"><strong>L'ATS agentico a sorgente disponibile, dalla parte del candidato.</strong></p>
+<p align="center"><strong>Un ATS agentico, aperto e installabile sul tuo server, pensato per chi si candida, non solo per chi seleziona.</strong></p>
 
 <p align="center">
   <a href="LICENSE"><img alt="Licenza: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1F47D6"></a>

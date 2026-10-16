@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: Candydati
-  text: L'ATS agentico a sorgente disponibile, dalla parte del candidato.
+  text: Un ATS agentico, aperto e installabile sul tuo server, pensato per chi si candida, non solo per chi seleziona.
   tagline: Si installa sul tuo server con un solo comando. RAL in chiaro, processo dichiarato e una risposta a ogni candidato sono parte del prodotto, non lasciati alla buona volontà.
   actions:
     - theme: brand

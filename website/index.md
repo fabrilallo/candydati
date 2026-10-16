@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: Candydati
-  text: The source-available, agentic ATS on the candidate's side.
+  text: An open, self-hostable agentic ATS built for candidates, not just recruiters.
   tagline: Run it on your own server with one command. Salary ranges, declared processes and an answer for every applicant are built in, not left to goodwill.
   actions:
     - theme: brand

@@ -3,7 +3,7 @@
   <img alt="Candydati" src="docs/assets/logo-dark.svg#gh-dark-mode-only" height="44">
 </p>
 
-<p align="center"><strong>The source-available, agentic ATS on the candidate's side.</strong></p>
+<p align="center"><strong>An open, self-hostable agentic ATS built for candidates, not just recruiters.</strong></p>
 
 <p align="center">
   <a href="LICENSE"><img alt="License: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1F47D6"></a>
@@ -237,5 +237,5 @@ The license text is binding; this summary is not.
 
 ---
 
-**Italiano.** ATS agentico a sorgente disponibile, dalla parte del candidato: RAL in chiaro obbligatoria, processo dichiarato,
-nessuna candidatura senza esito. Questo README in italiano: [README.it.md](README.it.md).
+**Italiano.** ATS agentico, aperto e installabile sul tuo server, pensato per chi si candida: RAL in chiaro
+obbligatoria, processo dichiarato, nessuna candidatura senza esito. Questo README in italiano: [README.it.md](README.it.md).
