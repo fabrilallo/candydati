@@ -21,6 +21,8 @@ regexes = [
   # The placeholders of .env.example and the docs; production refuses them (config-check, boot checks).
   '''change-me[-_a-z0-9]*''',
   '''password-lunga-1''',
+  # The API key placeholder of the docs (`candydati_...`, literal dots): a real key has 8 + 32 base62 characters.
+  '''candydati_\.\.\.''',
   # Public images are pinned by content digest, which looks like a high-entropy token.
   '''@sha256:[0-9a-f]{64}''',
 ]
