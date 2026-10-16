@@ -55,6 +55,12 @@ export type DownloadStore = (source: AsyncIterable<Uint8Array>, mediaType: strin
 
 export interface JsonReader {
   getJson<S extends z.ZodType>(url: string, schema: S, extras?: RequestExtras): Promise<JsonPage<z.output<S>>>;
+  /**
+   * The ONE write the reader makes: an OAuth token exchange. A form POST (`application/x-www-form-urlencoded`) to a host
+   * of the allowlist, with the same pinning, caps, redaction and error mapping as `getJson`; never redirected. The
+   * response is validated by `schema`; the form and the response are never logged or put in an error.
+   */
+  postForm<S extends z.ZodType>(url: string, form: Readonly<Record<string, string>>, schema: S, extras?: RequestExtras): Promise<JsonPage<z.output<S>>>;
   download(url: string, store: DownloadStore, extras?: RequestExtras): Promise<DownloadResult>;
 }
 
@@ -167,6 +173,8 @@ export function createJsonReader(options: JsonReaderOptions): JsonReader {
   return {
     getJson: (url, schema, extras) =>
       run({ url, headers: requestHeaders('application/json', extras), timeoutMs, consume: (exchange) => parsePage(exchange, schema, maxResponseBytes), retryable: () => true }),
+    postForm: (url, form, schema, extras) =>
+      run({ url, method: 'POST', body: new URLSearchParams(form).toString(), headers: requestHeaders('application/json', extras), timeoutMs, consume: (exchange) => parsePage(exchange, schema, maxResponseBytes), retryable: () => true }),
     download: (url, store, extras) => {
       let delivered = false;
       const consume = (exchange: Exchange) => storeDownload(exchange, store, maxDownloadBytes, () => { delivered = true; });

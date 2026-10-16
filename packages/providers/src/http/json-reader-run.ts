@@ -33,6 +33,9 @@ export interface RunSettings {
 
 export interface RunRequest<T> {
   readonly url: string;
+  /** Absent: a GET. `POST` carries `body` (the token exchange only); a POST is never redirected. */
+  readonly method?: 'POST';
+  readonly body?: string;
   readonly headers: Readonly<Record<string, string>>;
   readonly timeoutMs: number;
   /** Turns a 2xx exchange into the result. */
@@ -53,16 +56,17 @@ const refusalFor = (status: number): JsonReaderError =>
       : new JsonReaderError('source_invalid_response', status);
 
 /** Resolves once, pins, and follows redirects only within the same origin (at most three hops). */
-async function send(s: RunSettings, target: ReaderTarget, headers: Readonly<Record<string, string>>, timeoutMs: number): Promise<Exchange> {
+async function send(s: RunSettings, target: ReaderTarget, request: RunRequest<unknown>): Promise<Exchange> {
+  const { headers, timeoutMs } = request;
   const addresses = await pinnedAddresses(target.host, s.resolve, s.unsafe);
   const fn = target.secure ? s.transport.https : s.transport.http;
   let current = target;
   for (let hop = 0; ; hop += 1) {
-    const exchange = await openExchange(fn, current, addresses, headers, timeoutMs);
+    const exchange = await openExchange(fn, current, addresses, headers, timeoutMs, request.method === 'POST' ? { method: 'POST', body: request.body ?? '' } : undefined);
     if (!REDIRECTS.has(exchange.status)) return exchange;
     exchange.close();
     const location = exchange.headers.location;
-    if (hop >= MAX_REDIRECTS || typeof location !== 'string') throw new JsonReaderError('redirect_refused', exchange.status);
+    if (request.method === 'POST' || hop >= MAX_REDIRECTS || typeof location !== 'string') throw new JsonReaderError('redirect_refused', exchange.status);
     const next = new URL(location, current.url);
     if (!sameOrigin(current, next)) throw new JsonReaderError('redirect_refused', exchange.status);
     current = { ...current, url: next };
@@ -92,7 +96,7 @@ export function createRunner(s: RunSettings) {
   /** One attempt: a result, or the failure to retry with how long to wait first. Final refusals are thrown. */
   const attemptOnce = async <T>(target: ReaderTarget, request: RunRequest<T>, attempt: number): Promise<Outcome<T>> => {
     try {
-      const exchange = await send(s, target, request.headers, request.timeoutMs);
+      const exchange = await send(s, target, request);
       const window = exhaustedWindowMs(exchange.headers, s.now());
       if (window !== undefined) blockedUntil = s.now() + window;
       if (exchange.status >= 200 && exchange.status < 300) return { result: { value: await request.consume(exchange) } };
