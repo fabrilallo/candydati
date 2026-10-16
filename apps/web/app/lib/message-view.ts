@@ -14,6 +14,8 @@ export interface MessageView {
   readonly unverified: boolean
   /** Why a delivery failed, as a translation key (the api sends a short code, never the provider's text). */
   readonly errorKey: string | null
+  /** An email of the past brought by a migration: labelled as such, no delivery state of ours. */
+  readonly historical: boolean
 }
 
 const DELIVERY_ERRORS = ['delivery_failed', 'delivery_rejected', 'recipient_missing', 'queue_unavailable'] as const
@@ -26,8 +28,28 @@ const isSystem = (message: MessageDto): boolean => message.sentBy === null || me
 
 const TONES: Readonly<Record<MessageStatus, MessageTone>> = { queued: 'secondary', sending: 'secondary', sent: 'success', failed: 'destructive', received: 'secondary' }
 
+const HISTORICAL_LABEL = 'messages.historical.label'
+
+/** A past email from the previous ATS: written by a member when one is named, else by "the previous system". */
+const historicalView = (message: MessageDto, candidateName: string): MessageView => {
+  const inbound = message.direction === 'inbound'
+  const author = inbound ? candidateName : (message.sentBy?.name ?? null)
+  return {
+    side: message.direction,
+    author,
+    authorKey: author === null ? 'messages.historical.author' : null,
+    statusKey: HISTORICAL_LABEL,
+    tone: 'secondary',
+    at: message.sentAt ?? message.createdAt,
+    unverified: false,
+    errorKey: null,
+    historical: true,
+  }
+}
+
 /** Pure: how one message is drawn in the conversation. */
 export const messageView = (message: MessageDto, candidateName: string): MessageView => {
+  if (message.historical) return historicalView(message, candidateName)
   const inbound = message.direction === 'inbound'
   return {
     side: message.direction,
@@ -38,6 +60,7 @@ export const messageView = (message: MessageDto, candidateName: string): Message
     at: message.sentAt ?? message.createdAt,
     unverified: inbound && message.unverifiedSender,
     errorKey: message.status === 'failed' ? deliveryErrorKey(message.error) : null,
+    historical: false,
   }
 }
 

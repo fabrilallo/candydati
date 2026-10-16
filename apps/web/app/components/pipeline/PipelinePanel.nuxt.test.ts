@@ -9,7 +9,7 @@ import PipelinePanel from './PipelinePanel.vue'
 const state = vi.hoisted(() => ({ calls: [] as { id: string; action: string; body: Record<string, string> }[], failMove: false }))
 const tagged = card('a2', 'stage-0', { noteCount: 3, candidate: { ...card('a2').candidate, firstName: 'Niccolò', lastName: 'Bianchi', tags: ['golang', 'kafka'], location: 'Torino' } })
 const decided = card('d1', 'stage-1', { outcome: 'not_selected', closedAt: '2026-10-14T10:00:00.000Z', candidate: { ...card('d1').candidate, firstName: 'Paolo', lastName: 'Verdi' } })
-registerEndpoint('/api/v1/jobs/j1/pipeline', () => ok(pipeline([card('a1'), tagged, card('a3', 'stage-1'), decided])))
+registerEndpoint('/api/v1/jobs/j1/pipeline', () => ok(pipeline([card('a1'), tagged, card('a3', 'stage-1', { hasCv: false }), decided])))
 for (const id of ['a1', 'a2', 'a3']) {
   registerEndpoint(`/api/v1/applications/${id}/move`, {
     method: 'POST',
@@ -67,6 +67,12 @@ describe('PipelinePanel', () => {
     expect(niccolo.findAll('li').map((node) => node.text())).toContain('golang')
     expect(niccolo.find('[data-testid="card-notes"]').text()).toContain('3 note')
     expect(wrapper.find('[data-testid="pipeline-summary"]').text()).toBe('Aperte: 3 · Con esito: 1')
+  })
+
+  it('marks a card without a CV, and only that one', async () => {
+    const wrapper = await mountPanel()
+    expect(wrapper.find('[data-card-id="a3"] [data-testid="card-no-cv"]').text()).toBe('Senza CV')
+    expect(wrapper.find('[data-card-id="a1"] [data-testid="card-no-cv"]').exists()).toBe(false)
   })
 
   it('filters cards as you type and says when a column has no match', async () => {

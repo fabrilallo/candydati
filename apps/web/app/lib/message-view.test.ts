@@ -14,7 +14,22 @@ describe('messageView', () => {
       at: '2026-10-13T10:00:05.000Z',
       unverified: false,
       errorKey: null,
+      historical: false,
     })
+  })
+
+  it('shows a historical email of a migration as a past message: the previous system as author, no delivery state', () => {
+    expect(messageView(message('m1', { historical: true, sentBy: null, sentAt: null }), 'G')).toMatchObject({
+      side: 'outbound',
+      author: null,
+      authorKey: 'messages.historical.author',
+      statusKey: 'messages.historical.label',
+      tone: 'secondary',
+      historical: true,
+      errorKey: null,
+    })
+    expect(messageView(message('m1', { historical: true }), 'G')).toMatchObject({ author: 'Ada Lovelace', authorKey: null, statusKey: 'messages.historical.label' })
+    expect(messageView(inbound('m2', { historical: true }), 'Giulia Rossi')).toMatchObject({ author: 'Giulia Rossi', statusKey: 'messages.historical.label', historical: true })
   })
 
   it('names the system for automatic messages and explains a failure by its code', () => {

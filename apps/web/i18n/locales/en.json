@@ -1412,7 +1412,9 @@
       "decide": "Outcome…",
       "years": "1 year of experience | {count} years of experience",
       "inStageSince": "Last stage change",
-      "notes": "1 note | {count} notes"
+      "notes": "1 note | {count} notes",
+      "noCv": "No CV",
+      "noCvHint": "Application from another ATS, without a résumé."
     },
     "keyboard": {
       "hint": "Enter opens the profile. Space picks the application up: left and right arrows choose the stage, Space drops it, Escape cancels.",
@@ -1525,7 +1527,7 @@
       "download": "Download",
       "previewTitle": "Preview of {name}",
       "noPreview": "Previews are available for PDFs only. Download the file to open it.",
-      "none": "No CV: this person was imported from a table."
+      "none": "No CV: this application comes from another ATS, where it had no résumé."
     },
     "notes": {
       "label": "New note",
@@ -1539,7 +1541,9 @@
       "saving": "Saving…",
       "saved": "Note added",
       "empty": "No notes yet.",
-      "on": "On: {job}"
+      "on": "On: {job}",
+      "imported": "Imported",
+      "importedHint": "Written in the previous system by someone who is not a member of the organization here."
     },
     "sheet": {
       "title": "Candidate profile",
@@ -1787,6 +1791,11 @@
       "delivery_rejected": "Not delivered: the person's mail server refused the message.",
       "recipient_missing": "Not delivered: there is no valid email address.",
       "queue_unavailable": "Not delivered: the sending service was not available."
+    },
+    "historical": {
+      "label": "Past email",
+      "author": "Previous system",
+      "hint": "Email from the previous system, imported by the migration: it was not sent from here."
     }
   },
   "emailSettings": {

@@ -1412,7 +1412,9 @@
       "decide": "Esito…",
       "years": "1 anno di esperienza | {count} anni di esperienza",
       "inStageSince": "Ultimo cambio di fase",
-      "notes": "1 nota | {count} note"
+      "notes": "1 nota | {count} note",
+      "noCv": "Senza CV",
+      "noCvHint": "Candidatura arrivata da un altro ATS senza curriculum."
     },
     "keyboard": {
       "hint": "Invio apre la scheda. Spazio prende la candidatura: frecce sinistra e destra per scegliere la fase, Spazio per lasciarla, Esc per annullare.",
@@ -1525,7 +1527,7 @@
       "download": "Scarica",
       "previewTitle": "Anteprima di {name}",
       "noPreview": "L'anteprima è disponibile solo per i PDF. Scarica il file per aprirlo.",
-      "none": "Nessun CV: questa persona è stata importata da una tabella."
+      "none": "Nessun CV: questa candidatura viene da un altro ATS, dove non aveva un curriculum."
     },
     "notes": {
       "label": "Nuova nota",
@@ -1539,7 +1541,9 @@
       "saving": "Salvataggio…",
       "saved": "Nota aggiunta",
       "empty": "Ancora nessuna nota.",
-      "on": "Su: {job}"
+      "on": "Su: {job}",
+      "imported": "Importata",
+      "importedHint": "Scritta nel sistema precedente da una persona che qui non è un membro dell'organizzazione."
     },
     "sheet": {
       "title": "Scheda candidato",
@@ -1787,6 +1791,11 @@
       "delivery_rejected": "Non consegnato: il server di posta della persona ha rifiutato il messaggio.",
       "recipient_missing": "Non consegnato: manca un indirizzo email valido.",
       "queue_unavailable": "Non consegnato: il servizio di invio non era disponibile."
+    },
+    "historical": {
+      "label": "Storico",
+      "author": "Sistema precedente",
+      "hint": "Email del sistema precedente, importata con la migrazione: non è partita da qui."
     }
   },
   "emailSettings": {

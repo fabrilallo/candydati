@@ -110,6 +110,7 @@ const moreTags = computed(() => Math.max(0, props.card.candidate.tags.length - T
         <ConsentRenewPill :status="card.consentStatus" :expires-at="card.retentionExpiresAt" :now="now" />
       </div>
       <span v-if="card.stageRemoved" class="rounded-full bg-muted px-2 py-0.5 font-medium" data-testid="card-stage-removed">{{ t('pipeline.stageRemoved') }}</span>
+      <span v-if="!card.hasCv" class="rounded-full bg-muted px-2 py-0.5 font-medium" :title="t('pipeline.card.noCvHint')" data-testid="card-no-cv">{{ t('pipeline.card.noCv') }}</span>
       <span v-if="card.noteCount > 0" class="inline-flex items-center gap-1" data-testid="card-notes">
         <MessageSquareTextIcon class="size-3.5" aria-hidden="true" />
         <span class="sr-only">{{ t('pipeline.card.notes', { count: card.noteCount }, card.noteCount) }}</span>
