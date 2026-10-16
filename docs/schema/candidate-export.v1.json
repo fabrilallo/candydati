@@ -189,30 +189,37 @@
             "additionalProperties": false
           },
           "cv": {
-            "type": "object",
-            "properties": {
-              "path": {
-                "type": "string"
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "path": {
+                    "type": "string"
+                  },
+                  "fileName": {
+                    "type": "string"
+                  },
+                  "mediaType": {
+                    "type": "string"
+                  },
+                  "sizeBytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "path",
+                  "fileName",
+                  "mediaType",
+                  "sizeBytes"
+                ],
+                "additionalProperties": false
               },
-              "fileName": {
-                "type": "string"
-              },
-              "mediaType": {
-                "type": "string"
-              },
-              "sizeBytes": {
-                "type": "integer",
-                "minimum": 0,
-                "maximum": 9007199254740991
+              {
+                "type": "null"
               }
-            },
-            "required": [
-              "path",
-              "fileName",
-              "mediaType",
-              "sizeBytes"
-            ],
-            "additionalProperties": false
+            ]
           },
           "extraction": {
             "anyOf": [
@@ -569,7 +576,10 @@
             ]
           },
           "authorId": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "body": {
             "type": "string"
