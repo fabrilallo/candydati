@@ -30,7 +30,7 @@ describe('createQueues', () => {
     const names = queues.map((queue) => queue.name);
     expect(new Set(names).size).toBe(names.length);
     for (const definition of QUEUE_DEFINITIONS) expect(names).toContain(definition.name);
-    for (const name of ['files.delete', 'email.send', 'migration.analyze']) expect(names).toContain(name);
+    for (const name of ['files.delete', 'email.send', 'migration.analyze', 'migration.commit']) expect(names).toContain(name);
     for (const queue of queues) expect(typeof queue.handle).toBe('function');
   });
 
