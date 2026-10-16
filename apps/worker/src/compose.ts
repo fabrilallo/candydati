@@ -118,6 +118,7 @@ function createMaintenanceQueues({ env, uow, files, queue }: Composition, { impo
       migrations: migrations.purge,
       deliveryLog: { outbox: uow.repositories.outbox, deliveries: uow.repositories.deliveries },
       deliveryLogRetentionDays: env.DELIVERY_LOG_RETENTION_DAYS,
+      jobViews: uow.repositories.jobViews,
       digest,
       now: () => new Date(),
     }),

@@ -1,3 +1,5 @@
+import { viewRetentionCutoff } from '@candydati/domain';
+import type { JobViewRepository } from '../../job-view-ports.js';
 import type { ImportDeps } from '../../import-ports.js';
 import type { RetentionDeps } from '../../privacy-ports.js';
 import type { MigrationPurgeDeps } from '../../migration-commit-ports.js';
@@ -18,6 +20,8 @@ export interface RetentionJobDeps {
   /** Outbox and webhook delivery rows are pruned after `deliveryLogRetentionDays`. Absent: no pruning. */
   readonly deliveryLog?: DeliveryLogDeps | undefined;
   readonly deliveryLogRetentionDays?: number | undefined;
+  /** Daily visit counters older than `VIEW_RETENTION_MONTHS` are deleted. Absent: none deleted. */
+  readonly jobViews?: Pick<JobViewRepository, 'purgeBefore'> | undefined;
   readonly digest: DigestJobConfig;
 }
 
@@ -36,12 +40,14 @@ export interface RetentionJobResult extends DigestSendResult {
   readonly orphanedFiles: readonly { readonly organizationId: string; readonly keys: readonly string[] }[];
   readonly prunedEvents: number;
   readonly prunedDeliveries: number;
+  readonly prunedViews: number;
 }
 
 /**
  * The daily job (`retention.run`): warns owners and admins about applications expiring soon (one digest per person,
  * claimed with its send), erases the ones past their expiry, deletes expired organization exports, purges imports never
- * committed, purges ended migrations and prunes the delivery log. Returns counts and ids only.
+ * committed, purges ended migrations, prunes the delivery log and deletes visit counters older than 25 months. Returns
+ * counts and ids only.
  */
 export async function runRetentionJob(deps: RetentionJobDeps, now: Date): Promise<RetentionJobResult> {
   const result = await runRetention(deps.retention, { now });
@@ -49,6 +55,7 @@ export async function runRetentionJob(deps: RetentionJobDeps, now: Date): Promis
   const migrations = deps.migrations ? await purgeEndedMigrations(deps.migrations, { now }) : { purged: 0, failed: [] };
   const mail = await sendDigests({ transaction: deps.digest.transaction, notifications: deps.retention.notifications, mail: deps.digest.mail, now: () => now }, result.digests);
   const pruned = deps.deliveryLog ? await pruneDeliveryLog(deps.deliveryLog, { now, retentionDays: deps.deliveryLogRetentionDays }) : { events: 0, deliveries: 0 };
+  const prunedViews = deps.jobViews ? await deps.jobViews.purgeBefore(viewRetentionCutoff(now)) : 0;
   return {
     warned: result.runs.reduce((sum, run) => sum + run.warned, 0),
     erased: result.runs.reduce((sum, run) => sum + run.erased, 0),
@@ -62,6 +69,7 @@ export async function runRetentionJob(deps: RetentionJobDeps, now: Date): Promis
     orphanedFiles: result.orphanedFiles,
     prunedEvents: pruned.events,
     prunedDeliveries: pruned.deliveries,
+    prunedViews,
     ...mail,
   };
 }
