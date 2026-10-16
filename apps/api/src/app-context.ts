@@ -21,6 +21,7 @@ import {
   type JobDeps,
   type MessagingDeps,
   type PrivacyDeps,
+  type RecordJobViewDeps,
   type SubmitApplicationDeps,
   type TaskQueue,
   type BindableTaskQueue,
@@ -70,6 +71,8 @@ export interface RateLimitSettings {
   /** Public applications allowed per client in `applyWindowMinutes`. */
   readonly applyMax?: number | undefined;
   readonly applyWindowMinutes?: number | undefined;
+  /** Visit beacons per minute per client on the public job pages. */
+  readonly viewMax?: number | undefined;
   /** Import uploads per minute per client. */
   readonly importMax?: number | undefined;
   /** Requests per minute per client on the public reconfirmation routes. */
@@ -132,6 +135,8 @@ export interface AppContext {
   readonly distributionDeps: DistributionDeps;
   /** What the public reads need: published jobs, organizations, the privacy notice and the public base URL. */
   readonly publicSiteDeps: PublicSiteDeps;
+  /** The visit beacon of the public job page. */
+  readonly jobViewDeps: RecordJobViewDeps;
   readonly rightsDeps: Phase5Deps['rightsDeps'];
   readonly exportDeps: Phase5Deps['exportDeps'];
   readonly overviewDeps: Phase5Deps['overviewDeps'];
@@ -221,6 +226,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     jobDeps,
     reportDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, jobs: jobDeps.jobs, reports: uow.repositories.reports, now: reportClock ?? (() => new Date()) },
     distributionDeps: createDistributionDeps({ uow, publicBaseUrl: env.platform.url, channels: distributionChannels }),
+    jobViewDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, jobViews: uow.repositories.jobViews, now: () => new Date() },
     publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
   };
 }

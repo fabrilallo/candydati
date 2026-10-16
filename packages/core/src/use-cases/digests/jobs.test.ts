@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildApplication, buildOutboxEvent, createFakeEmailSender, createInMemoryOutbox, createInMemoryWebhookDeliveries, seedAutomationWorld, seedImportWorld, seedMigrationWorld, seedPrivacyData, ORG_A } from '../../testing/index.js';
+import { createInMemoryJobViews } from '../../testing/in-memory-job-views.js';
+import { createCandidateStore } from '../../testing/in-memory-candidates.js';
 import { createInMemoryTransaction } from '../../testing/in-memory-transaction.js';
 import { formatDigestFrom } from './digest-email.js';
 import { runDeadlineScan } from './run-deadline-scan.js';
@@ -55,5 +57,19 @@ describe('runRetentionJob', () => {
     await migrations.migrations.create(ended);
     const result = await runRetentionJob({ retention, imports: seedImportWorld(), importStaleDays: 7, migrations, digest: digest() }, NOW);
     expect(result).toMatchObject({ migrationsPurged: 1, migrationPurgeFailures: [] });
+  });
+
+  it('deletes the visit counters older than 25 months, and only those', async () => {
+    const NOW = new Date('2027-06-01T03:00:00Z');
+    const store = createCandidateStore();
+    const jobViews = createInMemoryJobViews(store);
+    const key = { organizationId: ORG_A, jobId: 'job_1', source: 'direct', campaign: '' };
+    await jobViews.increment({ ...key, day: '2025-04-30' });
+    await jobViews.increment({ ...key, day: '2025-05-01' });
+    await jobViews.increment({ ...key, day: '2027-05-31' });
+    const retention = await seedPrivacyData({ applications: [] });
+    const result = await runRetentionJob({ retention, imports: seedImportWorld(), importStaleDays: 7, jobViews, digest: digest() }, NOW);
+    expect(result.prunedViews).toBe(1);
+    expect(store.read().jobViews.map((v) => v.day)).toEqual(['2025-05-01', '2027-05-31']);
   });
 });

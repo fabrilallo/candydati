@@ -61,10 +61,20 @@ export const publicRoutes: readonly RouteSpec[] = [
       firstName: z.string(), lastName: z.string(), email: z.email(), phone: z.string().optional(), linkedinUrl: httpUrlSchema.optional(), message: z.string().optional(),
       consentScopes: z.array(z.enum(CONSENT_SCOPES)).min(1).describe('Sent as repeated fields. Must include `selection`.'), privacyNoticeVersion: z.number().int().positive(),
       origin: z.string().max(500).optional().describe('Where the person came from (`utm_source`, `ref`); sanitized to a short label.'),
+      campaign: z.string().max(500).optional().describe('`utm_campaign` of the ad URL; sanitized to a short label.'),
       website: z.string().max(0).optional().describe('Honeypot: leave empty.'),
       cv: z.string().describe('The CV file (binary).'),
     }),
     response: { schema: receivedSchema },
+  },
+  {
+    method: 'post', path: '/api/v1/public/organizations/:orgSlug/jobs/:jobSlug/view', tag: 'Public', summary: 'Count a visit of a published ad', scope: null, status: 204, noContent: true,
+    description: 'The beacon the careers page fires once a browser has shown an ad. Counts one visit in a daily aggregate by `source` (`utm_source`, `ref` or the referrer host) and `campaign` (`utm_campaign`): no cookie, no IP address and no user agent is stored, so visits cannot be told apart. Always `204`, whether the organization or the ad exists or not, so it reveals nothing; crawlers are not counted. Rate limited per IP (`429`). Not open to other origins.',
+    query: z.object({
+      source: z.string().max(500).optional().describe('Where the visit came from; sanitized to a short label, `direct` when absent.'),
+      campaign: z.string().max(500).optional().describe('`utm_campaign` of the link; sanitized, none when absent.'),
+    }),
+    response: { schema: z.null() },
   },
   {
     method: 'get', path: '/api/v1/public/feedback/:token/cv', tag: 'Public', summary: 'CV of the candidate, for an interviewer', scope: null, fileMediaType: 'application/octet-stream',

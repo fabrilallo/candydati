@@ -24,7 +24,7 @@ const stageRow = (stage: FunnelStageDto): Cell[] => [stage.position, stage.type,
  * written as count, total and rate so the denominator is never lost.
  */
 export function reportsToCsv(report: ReportsDto): string {
-  const { timeToHire, timeToFill, funnel, sources, responses, outcomeCoverage } = report;
+  const { timeToHire, timeToFill, funnel, sources, campaigns, responses, outcomeCoverage } = report;
   const blocks = [
     section('period', ['from', 'to', 'job_id'], [[report.period.from, report.period.to, report.jobId]]),
     section('time_to_hire_days', ['job_id', 'job', 'count', 'median', 'p75'], [
@@ -37,7 +37,8 @@ export function reportsToCsv(report: ReportsDto): string {
       ['all', 'all', funnel.outcomes.hired, funnel.outcomes.not_selected, funnel.outcomes.withdrawn],
       ...funnel.outcomesByJob.map((j) => [j.jobId, j.title, j.hired, j.not_selected, j.withdrawn]),
     ]),
-    section('sources', ['origin', 'applications', 'hires'], sources.map((s) => [s.origin, s.applications, s.hires])),
+    section('sources', ['origin', 'visits', 'applications', 'hires', 'conversion_rate'], sources.map((s) => [s.origin, s.visits, s.applications, s.hires, s.conversion])),
+    section('campaigns', ['origin', 'campaign', 'visits', 'applications', 'hires', 'conversion_rate'], campaigns.map((c) => [c.origin, c.campaign, c.visits, c.applications, c.hires, c.conversion])),
     section('responses', ['scope', 'name', 'kept', 'missed', 'total', 'kept_rate'], [
       ['all', 'all', responses.kept, responses.missed, responses.closed.total, responses.closed.rate],
       ...responses.byJob.map((j) => ['job', j.title, j.kept, j.missed, j.keptRate.total, j.keptRate.rate]),

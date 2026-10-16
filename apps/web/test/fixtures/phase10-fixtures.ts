@@ -41,10 +41,14 @@ export const reportsFixture = (overrides: Partial<ReportsDto> = {}): ReportsFixt
     outcomesByJob: [{ jobId: 'j1', title: 'Data Engineer', hired: 3, not_selected: 15, withdrawn: 2 }],
   },
   sources: [
-    { origin: 'import', applications: 5, hires: 0 },
-    { origin: 'linkedin', applications: 20, hires: 2 },
-    { origin: 'newsletter', applications: 3, hires: 1 },
-    { origin: 'direct', applications: 12, hires: 1 },
+    { origin: 'import', applications: 5, hires: 0, visits: 0, conversion: null },
+    { origin: 'linkedin', applications: 20, hires: 2, visits: 160, conversion: 0.125 },
+    { origin: 'newsletter', applications: 3, hires: 1, visits: 4, conversion: 0.75 },
+    { origin: 'direct', applications: 12, hires: 1, visits: 90, conversion: 0.1333 },
+  ],
+  campaigns: [
+    { origin: 'linkedin', campaign: 'autumn', applications: 14, hires: 2, visits: 100, conversion: 0.14 },
+    { origin: 'linkedin', campaign: 'spring', applications: 6, hires: 0, visits: 60, conversion: 0.1 },
   ],
   responses: {
     closed: rate(47, 50),
@@ -75,6 +79,7 @@ export const emptyReportsFixture = (): ReportsFixture =>
     timeToFill: { overall: { count: 0, median: null, p75: null }, items: [] },
     funnel: { stages: [], outcomes: NO_OUTCOMES, outcomesByJob: [] },
     sources: [],
+    campaigns: [],
     responses: { closed: rate(0, 0), kept: 0, missed: 0, responseHours: { count: 0, median: null, p75: null }, open: 0, overdue: 0, byJob: [], byStageType: [] },
     outcomeCoverage: rate(0, 0),
   })

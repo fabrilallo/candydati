@@ -11,6 +11,8 @@ You do not have to remember these: a production instance applies them on its own
 - **Accounts**: every account confirms its email before the first sign-in; sign-up is invite-only; failed sign-ins slow
   down further attempts instead of locking the account, and the owner is told after 10 failures. Two-factor
   authentication (TOTP with backup codes) is available to everyone, and owners and admins can require it.
+- **Visit counts** of the public ads are aggregate numbers per day, source and campaign: no cookies, no web storage, no
+  IP address or user agent stored, and nothing that tells two visitors apart. See [Tracked links](./tracked-links).
 - **Isolation**: every query is scoped to one organization; every action is checked against the person's permissions
   and written to an append-only audit log.
 - **API keys** always expire and never hold more permissions than their creator.

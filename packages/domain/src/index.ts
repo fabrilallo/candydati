@@ -44,6 +44,7 @@ export * from './job-health/index.js';
 export * from './job/stage-labels.js';
 export * from './report/stats.js';
 export * from './report/origin.js';
+export * from './report/visits.js';
 export * from './report/response-promise.js';
 export * from './report/reports.js';
 export * from './wire/index.js';

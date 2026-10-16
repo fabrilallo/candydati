@@ -43,6 +43,14 @@ export interface FunnelStageDto {
   readonly conversionToNext: Rate | null;
 }
 
+export interface SourceRow {
+  readonly origin: string;
+  readonly applications: number;
+  readonly hires: number;
+  readonly visits: number;
+  readonly conversion: number | null;
+}
+
 /**
  * Numbers of the period. Rates carry their denominator; the interface shows "—" under `minSample`. Time figures are
  * rounded to 2 decimals. Applications erased under GDPR are gone from every aggregate.
@@ -67,8 +75,13 @@ export interface ReportsDto {
     readonly outcomes: OutcomeCounts;
     readonly outcomesByJob: readonly (JobRef & OutcomeCounts)[];
   };
-  /** Applications received in the period by origin, and hires decided in the period by origin. */
-  readonly sources: readonly { readonly origin: string; readonly applications: number; readonly hires: number }[];
+  /**
+   * Applications received in the period by origin, hires decided in the period, and visits of the public job page
+   * (aggregate counts, `job_view_daily`). `conversion` is applications over visits, null without visits.
+   */
+  readonly sources: readonly SourceRow[];
+  /** The same figures per origin and `utm_campaign`, for the applications and visits that carried a campaign. */
+  readonly campaigns: readonly (SourceRow & { readonly campaign: string })[];
   readonly responses: {
     /** Promises closed in the period (answered, or missed at their deadline). */
     readonly closed: Rate;

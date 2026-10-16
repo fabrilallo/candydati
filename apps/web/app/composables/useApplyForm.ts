@@ -1,7 +1,7 @@
 import type { PublicPrivacyNoticeDto } from '@candydati/domain'
 import type { Ref } from 'vue'
 import { ApiFailure } from '@/lib/api-call'
-import { applicationOrigin } from '@/lib/application-origin'
+import { applicationCampaign, applicationOrigin } from '@/lib/application-origin'
 import { emptyApplyValues, needsNoticeReload, submitApplication, toApplicationForm, type ApplyErrors, type ApplyValues } from '@/lib/application-form'
 import { checkCvFile } from '@/lib/cv-file'
 import { fetchPublicJob } from '@/lib/job-api'
@@ -9,6 +9,8 @@ import { fetchPublicJob } from '@/lib/job-api'
 const CV_ERRORS = { empty: 'apply.cv.errors.empty', too_large: 'apply.cv.errors.tooLarge', unsupported: 'apply.cv.errors.unsupported' } as const
 
 const currentOrigin = () => applicationOrigin({ search: window.location.search, referrer: document.referrer, host: window.location.host })
+
+const currentCampaign = () => applicationCampaign(window.location.search)
 
 const fetchNotice = async (request: ReturnType<typeof useJobsApi>, target: { readonly org: string; readonly job: string }): Promise<PublicPrivacyNoticeDto | null> => {
   try {
@@ -64,7 +66,7 @@ export const useApplyForm = (target: { readonly org: string; readonly job: strin
     }
     pending.value = true
     try {
-      await submitApplication(request, target.org, target.job, result.form, file.value, currentOrigin(), turnstileToken)
+      await submitApplication(request, target.org, target.job, result.form, file.value, currentOrigin(), turnstileToken, currentCampaign())
       done.value = true
       return null
     } catch (error) {

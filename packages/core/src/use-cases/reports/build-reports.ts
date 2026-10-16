@@ -13,6 +13,7 @@ import {
 } from '@candydati/domain';
 import type { ReportAggregates } from '../../report-ports.js';
 import { buildFunnel, stageTypesOf } from './funnel.js';
+import { buildSources } from './sources.js';
 
 export interface ReportInput {
   readonly aggregates: ReportAggregates;
@@ -104,7 +105,7 @@ export function buildReports(input: ReportInput): ReportsDto {
     },
     timeToFill: buildTimeToFill(input, jobs),
     funnel: { stages: buildFunnel(input.jobs, aggregates.stageEntries, aggregates.stageAdvances, jobId !== null), outcomes, outcomesByJob },
-    sources: aggregates.origins.toSorted((a, b) => b.applications - a.applications || a.origin.localeCompare(b.origin)),
+    ...buildSources(aggregates),
     responses: buildResponses(input, jobs),
     outcomeCoverage: buildCoverage(input, jobs),
   };

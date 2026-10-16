@@ -98,6 +98,18 @@ describe('tracking: intake', () => {
     expect(personal.store.read().applications[0]?.origin).toBe('direct');
   });
 
+  it('stores the sanitized campaign, and none when absent or personal data', async () => {
+    const withCampaign = seedMessagingWorld({ applications: [], candidates: [] });
+    await submit(withCampaign, { origin: 'linkedin', campaign: 'Autumn 2026 <b>' });
+    expect(withCampaign.store.read().applications[0]?.originCampaign).toBe('autumn-2026-b');
+    const without = seedMessagingWorld({ applications: [], candidates: [] });
+    await submit(without, { origin: 'linkedin' });
+    expect(without.store.read().applications[0]?.originCampaign).toBeNull();
+    const personal = seedMessagingWorld({ applications: [], candidates: [] });
+    await submit(personal, { campaign: 'mario.rossi@example.org' });
+    expect(personal.store.read().applications[0]?.originCampaign).toBeNull();
+  });
+
   it('leaves no event or promise behind for a duplicate application', async () => {
     const deps = seedMessagingWorld({ applications: [], candidates: [] });
     await submit(deps);

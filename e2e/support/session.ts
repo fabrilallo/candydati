@@ -61,8 +61,8 @@ export const newWorkspace = async (page: Page, label = 'owner'): Promise<Workspa
 };
 
 /** Same, in a context of its own (a second person in a second browser). */
-export const newContext = async (browser: Browser): Promise<{ context: BrowserContext; page: Page }> => {
-  const context = await browser.newContext({ locale: 'it-IT' });
+export const newContext = async (browser: Browser, options: { readonly userAgent?: string } = {}): Promise<{ context: BrowserContext; page: Page }> => {
+  const context = await browser.newContext({ locale: 'it-IT', ...(options.userAgent ? { userAgent: options.userAgent } : {}) });
   await isolateClient(context);
   return { context, page: await context.newPage() };
 };

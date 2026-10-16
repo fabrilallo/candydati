@@ -12,6 +12,7 @@ import { getReports } from '../use-cases/reports/get-reports.js';
 import { createDrizzleApplications } from './drizzle-applications.js';
 import { createDrizzleAuditLog } from './drizzle-audit-log.js';
 import { createDrizzleCandidates } from './drizzle-candidates.js';
+import { createDrizzleJobViews } from './drizzle-job-views.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
 import { createDrizzleResponsePromises, createDrizzleStageEvents } from './drizzle-report-history.js';
 import { createDrizzleReports } from './drizzle-reports.js';
@@ -33,6 +34,7 @@ const repositories = (): DatasetRepositories => ({
   applications: createDrizzleApplications(handle.db),
   stageEvents: createDrizzleStageEvents(handle.db),
   promises: createDrizzleResponsePromises(handle.db),
+  jobViews: createDrizzleJobViews(handle.db),
 });
 
 const deps = (): ReportDeps => ({
@@ -84,6 +86,14 @@ describe('getReports on Postgres', () => {
     expect(report.timeToHire.overall).toEqual({ count: 0, median: null, p75: null });
     expect(report.responses.responseHours).toEqual({ count: 0, median: null, p75: null });
     expect(report.sources).toEqual([]);
+  });
+
+  it('counts the visits of the days of one job only, and none of another organization', async () => {
+    const { owner, ids } = await seeded();
+    await seeded();
+    const report = await getReports(deps(), owner, { ...query, jobId: ids.frontend });
+    expect(report.sources.map((s) => [s.origin, s.visits])).toEqual([['linkedin', 7], ['import', 0], ['referral', 2]]);
+    expect(report.campaigns).toEqual([]);
   });
 
   it('includes both ends of the period', async () => {

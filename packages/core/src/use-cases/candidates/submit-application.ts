@@ -6,6 +6,7 @@ import {
   computeResponseDueAt,
   retentionExpiry,
   RECEIVED_STAGE_ID,
+  sanitizeCampaign,
   sanitizeOrigin,
   type Application,
   type ApplicationForm,
@@ -36,6 +37,8 @@ export const applicationSubmissionSchema = z.object({
   cv: z.object({ bytes: z.instanceof(Uint8Array), declaredName: z.string().max(300) }),
   /** `utm_source`, `ref` or the referrer host of the ad URL (the route picks it with `pickOrigin`). Sanitized here: never a URL. */
   origin: z.string().max(500).optional(),
+  /** `utm_campaign` of the ad URL. Sanitized here, like the origin. */
+  campaign: z.string().max(500).optional(),
   client: z.object({ ip: z.string().optional(), userAgent: z.string().optional() }).optional(),
 });
 export type ApplicationSubmission = z.input<typeof applicationSubmissionSchema>;
@@ -73,6 +76,7 @@ interface Intake {
   readonly cvKey: string;
   readonly cvSize: number;
   readonly origin: string;
+  readonly campaign: string;
   readonly now: Date;
   readonly candidateId: string;
   /** The promise to answer, from the job's declared response time. */
@@ -139,6 +143,7 @@ function buildApplication(intake: Intake, candidateId: string, consent: ConsentR
     retentionExpiresAt,
     source: 'careers_page',
     origin: intake.origin,
+    originCampaign: intake.campaign === '' ? null : intake.campaign,
     createdAt: now,
     updatedAt: now,
     stageChangedAt: now,
@@ -273,6 +278,7 @@ export const submitApplication = definePublicCommand<SubmitApplicationDeps, type
       cvKey: `organizations/${organization.id}/applications/${applicationId}/cv`,
       cvSize: input.cv.bytes.byteLength,
       origin: sanitizeOrigin(input.origin),
+      campaign: sanitizeCampaign(input.campaign),
       now,
       candidateId: deps.newId(),
       responseDueAt: computeResponseDueAt(now, job),

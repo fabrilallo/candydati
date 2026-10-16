@@ -149,3 +149,39 @@ describe('CareersList', () => {
     expect(wrapper.find('[data-testid="careers-job"]').exists()).toBe(false)
   })
 })
+
+const stubNavigator = (sendBeacon: () => boolean, doNotTrack: string): void => {
+  Object.defineProperty(navigator, 'sendBeacon', { value: sendBeacon, configurable: true })
+  Object.defineProperty(navigator, 'doNotTrack', { value: doNotTrack, configurable: true })
+}
+const restoreNavigator = (): void => {
+  Reflect.deleteProperty(navigator, 'sendBeacon')
+  Reflect.deleteProperty(navigator, 'doNotTrack')
+}
+
+describe('PublicJobBody visit beacon', () => {
+  beforeAll(async () => {
+    await useNuxtApp().$i18n.loadLocaleMessages('en')
+  })
+
+  it('counts the visit once the page is shown, with only the source and campaign of the URL', async () => {
+    const sendBeacon = vi.fn(() => true)
+    stubNavigator(sendBeacon, '0')
+    window.history.replaceState({}, '', '/careers/acme/backend-1?utm_source=LinkedIn&utm_campaign=autumn')
+    const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
+    expect(sendBeacon).toHaveBeenCalledTimes(1)
+    expect(sendBeacon).toHaveBeenCalledWith('/api/v1/public/organizations/acme/jobs/backend-1/view?source=linkedin&campaign=autumn')
+    wrapper.unmount()
+    window.history.replaceState({}, '', '/')
+    restoreNavigator()
+  })
+
+  it('does not count a visitor who sends Do Not Track', async () => {
+    const sendBeacon = vi.fn(() => true)
+    stubNavigator(sendBeacon, '1')
+    const wrapper = await mountSuspended(PublicJobBody, { props: { page: page() } })
+    expect(sendBeacon).not.toHaveBeenCalled()
+    wrapper.unmount()
+    restoreNavigator()
+  })
+})

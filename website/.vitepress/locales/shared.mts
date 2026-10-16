@@ -17,6 +17,7 @@ export interface PageTitles {
   readonly ai: string;
   readonly operations: string;
   readonly configuration: string;
+  readonly trackedLinks: string;
   readonly otherDeployments: string;
   readonly api: string;
   readonly security: string;
@@ -42,6 +43,7 @@ export function sidebar(prefix: string, groups: SidebarLabels, pages: PageTitles
         { text: pages.ai, link: link('ai') },
         { text: pages.operations, link: link('operations') },
         { text: pages.configuration, link: link('configuration') },
+        { text: pages.trackedLinks, link: link('tracked-links') },
         { text: pages.otherDeployments, link: link('other-deployments') },
       ],
     },

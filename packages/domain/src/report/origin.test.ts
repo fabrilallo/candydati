@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ORIGIN_MAX, pickOrigin, sanitizeOrigin } from './origin.js';
+import { CAMPAIGN_MAX, pickOrigin, sanitizeCampaign, sanitizeOrigin, ORIGIN_MAX } from './origin.js';
 
 describe('sanitizeOrigin', () => {
   it('keeps a short label, lowercased', () => {
@@ -28,5 +28,28 @@ describe('pickOrigin', () => {
     expect(pickOrigin({ ref: 'friend', referrer: 'https://google.com/' })).toBe('friend');
     expect(pickOrigin({ referrer: 'https://www.google.com/search?q=1' })).toBe('google.com');
     expect(pickOrigin({ utmSource: '', referrer: undefined })).toBe('direct');
+  });
+});
+
+describe('sanitizeCampaign', () => {
+  it('uses the origin rules: lowercase, safe characters, at most 60', () => {
+    expect(sanitizeCampaign('Autumn 2026!')).toBe('autumn-2026');
+    expect(sanitizeCampaign('x'.repeat(200))).toHaveLength(CAMPAIGN_MAX);
+  });
+  it('reduces a URL to its host', () => {
+    expect(sanitizeCampaign('https://www.example.org/a?b=1')).toBe('example.org');
+  });
+  it('is the empty string, not direct, for no campaign or personal data', () => {
+    for (const value of [undefined, null, 7, '', '  ', '---', 'mario.rossi@example.org']) expect(sanitizeCampaign(value)).toBe('');
+  });
+});
+
+describe('label cleaning on hostile input', () => {
+  it('stays fast and correct on long runs of dashes and dots', () => {
+    const hostile = `${'-'.repeat(50_000)}x${'.-'.repeat(50_000)}`;
+    const started = performance.now();
+    expect(sanitizeOrigin(hostile)).toBe('direct');
+    expect(sanitizeCampaign(`--.${'a'.repeat(10)}.--`)).toBe('a'.repeat(10));
+    expect(performance.now() - started).toBeLessThan(200);
   });
 });

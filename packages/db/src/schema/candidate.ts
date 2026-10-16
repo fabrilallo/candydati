@@ -109,6 +109,8 @@ export const application = pgTable(
     source: text('source').$type<'careers_page' | 'manual' | 'import'>().notNull(),
     /** Sanitized label of where the application came from; `direct` when unknown. */
     origin: text('origin').notNull().default('direct'),
+    /** Sanitized `utm_campaign` of the ad URL; null when there was none. */
+    originCampaign: text('origin_campaign'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
     stageChangedAt: timestamp('stage_changed_at', { withTimezone: true }).defaultNow().notNull(),

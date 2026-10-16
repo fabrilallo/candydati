@@ -34,6 +34,7 @@ import { createDrizzleOutbox } from './drizzle-outbox.js';
 import { createDrizzleDataExports, createDrizzleRetentionRuns } from './drizzle-privacy.js';
 import { createDrizzlePrivacyNotices } from './drizzle-privacy-notices.js';
 import { createDrizzleResponsePromises, createDrizzleStageEvents } from './drizzle-report-history.js';
+import { createDrizzleJobViews } from './drizzle-job-views.js';
 import { createDrizzleReports } from './drizzle-reports.js';
 import { createDrizzleTasks } from './drizzle-tasks.js';
 import { createDrizzleUserDirectory } from './drizzle-user-directory.js';
@@ -71,6 +72,7 @@ const jobRepositories = (db: DbExecutor) => {
     memberRoles: createDrizzleMemberRoles(db),
     twoFactor: createDrizzleTwoFactor(db),
     reports: createDrizzleReports(db),
+    jobViews: createDrizzleJobViews(db),
     careersPages: createDrizzleCareersPages(db),
     careersMedia: createDrizzleCareersMedia(db),
   } as const;

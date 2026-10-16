@@ -47,7 +47,7 @@ const SKELETON = ['lg:col-span-7', 'lg:col-span-5', 'lg:col-span-5', 'lg:col-spa
         </div>
         <div v-else class="grid gap-4 lg:grid-cols-12">
           <ReportFunnelCard :funnel="report.funnel" class="lg:col-span-7" />
-          <ReportSourcesCard :sources="report.sources" class="lg:col-span-5" />
+          <ReportSourcesCard :sources="report.sources" :campaigns="report.campaigns" class="lg:col-span-5" />
           <ReportResponsesCard :responses="report.responses" class="lg:col-span-5" />
           <ReportTimesCard :report="report" class="lg:col-span-7" />
         </div>

@@ -2,10 +2,13 @@ import {
   DAY_MS,
   durationStat,
   HOUR_MS,
+  viewDay,
+  type Application,
   type ResponsePromise,
   type StageEvent,
 } from '@candydati/domain';
 import type { ReportAggregateQuery, ReportAggregates, ReportRepository, ResponsePromiseRepository, StageEventRepository } from '../report-ports.js';
+import type { JobViewRow } from '../job-view-ports.js';
 import type { CandidateStore } from './in-memory-candidates.js';
 
 const sameKey = (a: { organizationId: string; id: string }, b: { organizationId: string; id: string }) =>
@@ -120,6 +123,25 @@ export function createInMemoryReports(store: CandidateStore): ReportRepository {
         }))
         .filter((row) => row.applications + row.hires > 0);
 
+      const withCampaign = applications.filter((a) => (a.originCampaign ?? '') !== '');
+      const campaigns = [...countBy(withCampaign, (a) => `${a.origin}\u0000${a.originCampaign}`)]
+        .map(([, rows]) => ({
+          origin: (rows[0] as Application).origin,
+          campaign: (rows[0] as Application).originCampaign as string,
+          applications: rows.filter((a) => within(a.createdAt, query)).length,
+          hires: rows.filter((a) => a.outcome === 'hired' && a.closedAt !== null && within(a.closedAt, query)).length,
+        }))
+        .filter((row) => row.applications + row.hires > 0);
+
+      const firstDay = viewDay(query.from);
+      const lastDay = viewDay(query.to);
+      const dayViews = state.jobViews.filter((row) => inScope(row) && row.day >= firstDay && row.day <= lastDay);
+      const visits = [...countBy(dayViews, (row) => `${row.source}\u0000${row.campaign}`)].map(([, rows]) => ({
+        origin: (rows[0] as JobViewRow).source,
+        campaign: (rows[0] as JobViewRow).campaign,
+        visits: rows.reduce((sum, row) => sum + row.views, 0),
+      }));
+
       const closureOf = (p: ResponsePromise): Date | null => (p.status === 'open' ? null : (p.respondedAt ?? p.dueAt));
       const closed = promises.filter((p) => {
         const at = closureOf(p);
@@ -149,7 +171,7 @@ export function createInMemoryReports(store: CandidateStore): ReportRepository {
         decided: rows.filter((a) => a.outcome !== null).length,
       }));
 
-      return { hireDays, firstHires, stageEntries, stageAdvances, outcomes, origins, promisesClosed, responseHours, promisesWaiting, coverage };
+      return { hireDays, firstHires, stageEntries, stageAdvances, outcomes, origins, campaigns, visits, promisesClosed, responseHours, promisesWaiting, coverage };
     },
   };
 }

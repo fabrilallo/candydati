@@ -20,6 +20,10 @@ export const applyRouteConfig = (ctx: AppContext) => ({
 /** Provider webhooks: signed, server-to-server, and their own budget apart from the public pages. */
 export const inboundRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.inboundMax ?? DEFAULT_INBOUND_MAX);
 
+/** A visitor opens a handful of ads a minute; one client cannot inflate the counters beyond this. */
+export const DEFAULT_VIEW_MAX = 30;
+export const viewRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.viewMax ?? DEFAULT_VIEW_MAX);
+
 export const DEFAULT_IMPORT_MAX = 10;
 export const DEFAULT_CONSENT_MAX = 30;
 

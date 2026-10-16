@@ -225,6 +225,13 @@
       "when": 1792163411054,
       "tag": "0031_migration_purged_at",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792166099852,
+      "tag": "0032_tracked_links",
+      "breakpoints": true
     }
   ]
 }

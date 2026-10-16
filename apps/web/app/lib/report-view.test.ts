@@ -1,7 +1,7 @@
 import { rate } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { emptyReportsFixture, reportsFixture } from '~~/test/fixtures/phase10-fixtures'
-import { formatDaysValue, formatRate, funnelRows, headlines, isReportEmpty, percentOf, responseTime, sourceRows, stageTypeRows, timeRows } from './report-view'
+import { formatDaysValue, formatRate, campaignRows, funnelRows, hasNoVisits, headlines, isReportEmpty, percentOf, responseTime, sourceRows, stageTypeRows, timeRows } from './report-view'
 
 describe('percentOf', () => {
   it('rounds to a whole percentage', () => {
@@ -77,6 +77,36 @@ describe('sourceRows', () => {
     expect(rows.map((row) => row.origin)).toEqual(['linkedin', 'direct', 'import', 'newsletter'])
     expect(rows[0]).toMatchObject({ applications: 20, hires: 2, width: 100, hireRate: { count: 2, total: 20 } })
     expect(percentOf(rows[3]!.hireRate)).toBeNull()
+  })
+})
+
+describe('sourceRows with visits', () => {
+  it('carries visits and the conversion with its denominator, which hides under the minimum sample', () => {
+    const rows = sourceRows(reportsFixture().sources)
+    expect(rows[0]).toMatchObject({ visits: 160, conversionRate: { count: 20, total: 160, rate: 0.125 } })
+    expect(percentOf(rows[0]!.conversionRate)).toBe(13)
+    expect(percentOf(rows.find((row) => row.origin === 'newsletter')!.conversionRate)).toBeNull()
+    expect(percentOf(rows.find((row) => row.origin === 'import')!.conversionRate)).toBeNull()
+  })
+
+  it('breaks a tie on applications with the visits', () => {
+    const base = { hires: 0, conversion: null }
+    const rows = sourceRows([{ ...base, origin: 'a', applications: 2, visits: 1 }, { ...base, origin: 'b', applications: 2, visits: 9 }])
+    expect(rows.map((row) => row.origin)).toEqual(['b', 'a'])
+  })
+})
+
+describe('campaignRows and hasNoVisits', () => {
+  it('keeps the order of the api and adds the conversion', () => {
+    const rows = campaignRows(reportsFixture().campaigns)
+    expect(rows.map((row) => row.campaign)).toEqual(['autumn', 'spring'])
+    expect(rows[0]).toMatchObject({ conversionRate: { count: 14, total: 100, rate: 0.14 } })
+  })
+
+  it('knows when no source has a visit', () => {
+    expect(hasNoVisits(reportsFixture().sources)).toBe(false)
+    expect(hasNoVisits([{ origin: 'direct', applications: 3, hires: 0, visits: 0, conversion: null }])).toBe(true)
+    expect(hasNoVisits([])).toBe(true)
   })
 })
 

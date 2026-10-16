@@ -2,6 +2,7 @@ import {
   createDrizzleApplications,
   createDrizzleCandidates,
   createDrizzleJobs,
+  createDrizzleJobViews,
   createDrizzleResponsePromises,
   createDrizzleStageEvents,
 } from '@candydati/core';
@@ -33,6 +34,7 @@ beforeAll(async () => {
       applications: createDrizzleApplications(db),
       stageEvents: createDrizzleStageEvents(db),
       promises: createDrizzleResponsePromises(db),
+      jobViews: createDrizzleJobViews(db),
     },
     organizationId,
     'http',
@@ -97,7 +99,7 @@ describe('GET /api/v1/reports/export.csv', () => {
     for (const name of ['period', 'time_to_hire_days', 'time_to_fill_days', 'funnel', 'outcomes', 'sources', 'responses', 'response_time_hours', 'outcome_coverage']) {
       expect(response.body).toContain(`# ${name}`);
     }
-    expect(response.body).toContain('linkedin,4,3');
+    expect(response.body).toContain('linkedin,45,4,3,0.0889');
     expect(response.body).not.toMatch(/@example\.org/);
   });
 

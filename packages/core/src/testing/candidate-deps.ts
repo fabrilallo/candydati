@@ -14,6 +14,8 @@ import {
   createInMemoryUserDirectory,
   type CandidateStore,
 } from './in-memory-candidates.js';
+import { createInMemoryJobViews } from './in-memory-job-views.js';
+import type { RecordJobViewDeps } from '../job-view-ports.js';
 import { createInMemoryReports, createInMemoryResponsePromises, createInMemoryStageEvents } from './in-memory-reports.js';
 import {
   createInMemoryFileStorage,
@@ -36,7 +38,8 @@ export type TestCandidateDeps = CandidateDeps &
   SubmitApplicationDeps &
   CvExtractionDeps &
   Pick<JobDeps, 'jobs' | 'organizations' | 'privacyNotices'> &
-  Pick<ReportDeps, 'reports'> & {
+  Pick<ReportDeps, 'reports'> &
+  Pick<RecordJobViewDeps, 'jobViews'> & {
     readonly auditLog: InMemoryAuditLog;
     readonly files: InMemoryFileStorage;
     readonly queue: InMemoryTaskQueue;
@@ -64,6 +67,7 @@ export function createTestCandidateDeps(overrides: Partial<TestCandidateDeps> = 
     stageEvents: createInMemoryStageEvents(store),
     promises: createInMemoryResponsePromises(store),
     reports: createInMemoryReports(store),
+    jobViews: createInMemoryJobViews(store),
     jobs,
     organizations: createInMemoryOrganizationDirectory(),
     privacyNotices: createInMemoryPrivacyNoticeRepository(),

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applicationOrigin } from './application-origin'
+import { applicationCampaign, applicationOrigin } from './application-origin'
 
 const at = (search: string, referrer = '', host = 'jobs.example.com') => applicationOrigin({ search, referrer, host })
 
@@ -37,5 +37,18 @@ describe('applicationOrigin', () => {
   it('is direct with no query and no referrer, or an unreadable referrer', () => {
     expect(at('')).toBe('direct')
     expect(at('', 'not a url')).toBe('direct')
+  })
+})
+
+describe('applicationCampaign', () => {
+  it('reads utm_campaign, sanitized like the source', () => {
+    expect(applicationCampaign('?utm_campaign=Autumn%202026!')).toBe('autumn-2026')
+    expect(applicationCampaign('?utm_campaign=' + 'x'.repeat(90))).toHaveLength(60)
+  })
+
+  it('is empty without a campaign, and for an email address', () => {
+    expect(applicationCampaign('')).toBe('')
+    expect(applicationCampaign('?utm_source=linkedin')).toBe('')
+    expect(applicationCampaign('?utm_campaign=mario.rossi%40example.com')).toBe('')
   })
 })

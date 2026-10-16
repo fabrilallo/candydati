@@ -14,6 +14,7 @@ const lang = props.page.job.content.language
 const x = await useAdTranslate(lang)
 const back = computed(() => careersPath(props.page.organization.slug))
 const apply = ref<{ reveal: () => Promise<void> } | null>(null)
+useJobViewBeacon({ org: props.page.organization.slug, job: props.page.job.slug })
 </script>
 
 <template>

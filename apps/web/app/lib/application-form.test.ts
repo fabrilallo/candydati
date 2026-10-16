@@ -120,6 +120,15 @@ describe('submitApplication', () => {
     expect(JSON.parse(String(body.get('data')))).toEqual({ ...form, origin: 'linkedin' })
   })
 
+  it('adds the campaign only when the link had one', async () => {
+    const request = vi.fn<JobApiRequest>(async () => ({ status: 201, body: { success: true, data: { received: true }, error: null } }))
+    await submitApplication(request, 'acme', 'b', form, file, 'linkedin', undefined, 'autumn')
+    await submitApplication(request, 'acme', 'b', form, file, 'linkedin', undefined, '')
+    const data = (index: number) => JSON.parse(String((request.mock.calls[index]?.[1]?.body as FormData).get('data')))
+    expect(data(0)).toEqual({ ...form, origin: 'linkedin', campaign: 'autumn' })
+    expect(data(1)).toEqual({ ...form, origin: 'linkedin' })
+  })
+
   it('adds the Turnstile answer only when there is one', async () => {
     const request = vi.fn<JobApiRequest>(async () => ({ status: 201, body: { success: true, data: { received: true }, error: null } }))
     await submitApplication(request, 'acme', 'b', form, file, undefined, 'tok')

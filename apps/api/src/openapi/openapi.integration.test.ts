@@ -118,7 +118,7 @@ describe('OpenAPI document', () => {
 
   it('documents the public read-only API under the Public tag, with the summary and the full feed', () => {
     const doc = document();
-    const publicPaths = Object.keys(doc.paths).filter((path) => path.startsWith('/api/v1/public/organizations') && !path.endsWith('/applications'));
+    const publicPaths = Object.keys(doc.paths).filter((path) => path.startsWith('/api/v1/public/organizations') && !path.endsWith('/applications') && !path.endsWith('/view'));
     expect(publicPaths.toSorted()).toEqual([
       '/api/v1/public/organizations/{orgSlug}',
       '/api/v1/public/organizations/{orgSlug}/careers-media/{mediaId}/{fileName}',
@@ -133,6 +133,13 @@ describe('OpenAPI document', () => {
     expect(doc.components.schemas.PublicFeed.properties.jobs.items.properties).toHaveProperty('updatedAt');
     expect(doc.components.schemas.PublicCareers.properties.jobs.items.properties).toHaveProperty('updatedAt');
     expect(doc.info.description).toContain('CORS');
+  });
+
+  it('documents the visit beacon as a public POST with no body and no key', () => {
+    const view = document().paths['/api/v1/public/organizations/{orgSlug}/jobs/{jobSlug}/view'].post;
+    expect(view.security).toEqual([]);
+    expect(view.responses['204']).toEqual({ description: 'Success' });
+    expect(view.parameters.map((parameter: Json) => parameter.name)).toEqual(expect.arrayContaining(['orgSlug', 'jobSlug', 'source', 'campaign']));
   });
 
   it('is served publicly and cacheable at /api/v1/openapi.json', async () => {

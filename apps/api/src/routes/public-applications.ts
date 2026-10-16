@@ -20,8 +20,8 @@ export async function registerPublicApplicationRoute(app: FastifyInstance, ctx: 
       { bodyLimit: APPLICATION_BODY_LIMIT, config: applyRouteConfig(ctx) },
       async (request, reply) => {
         const { form: rawForm, cv } = await readApplicationParts(request);
-        // `origin` rides in the JSON of the form but is not a form field: it is sanitized to a short label and never refuses anything.
-        const { origin, turnstileToken, ...form } = rawForm;
+        // `origin` and `campaign` ride in the JSON of the form but are not form fields: it is sanitized to a short label and never refuses anything.
+        const { origin, campaign, turnstileToken, ...form } = rawForm;
         const secret = ctx.env.TURNSTILE_SECRET_KEY;
         if (secret && !(await verifyTurnstile({ secret, token: typeof turnstileToken === 'string' ? turnstileToken : '', ip: request.ip }))) {
           throw new ValidationError([{ path: 'turnstile', message: 'captcha_failed' }]);
@@ -32,6 +32,7 @@ export async function registerPublicApplicationRoute(app: FastifyInstance, ctx: 
           form,
           cv,
           origin: sanitizeOrigin(origin),
+          campaign: typeof campaign === 'string' ? campaign : undefined,
         });
         return reply.status(201).send(ok(receipt));
       },

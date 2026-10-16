@@ -18,16 +18,36 @@ function hostOrSelf(value: string): string {
  * Anything empty, not a string or containing an email address becomes `direct`.
  */
 export function sanitizeOrigin(raw: unknown): string {
-  if (typeof raw !== 'string') return ORIGIN_DIRECT;
-  const trimmed = raw.trim();
-  const host = hostOrSelf(trimmed.toLowerCase());
-  if (host === '' || host.includes('@')) return ORIGIN_DIRECT;
-  const cleaned = host
-    .replace(/[^a-z0-9._-]+/g, '-')
-    .replace(/^[-.]+|[-.]+$/g, '')
-    .slice(0, ORIGIN_MAX)
-    .replace(/[-.]+$/g, '');
-  return cleaned === '' ? ORIGIN_DIRECT : cleaned;
+  return cleanLabel(raw) ?? ORIGIN_DIRECT;
+}
+
+/** Same rules as the origin, for `utm_campaign`. No campaign (empty, not a string, personal data) is the empty string. */
+export const CAMPAIGN_MAX = ORIGIN_MAX;
+export const CAMPAIGN_NONE = '';
+export function sanitizeCampaign(raw: unknown): string {
+  return cleanLabel(raw) ?? CAMPAIGN_NONE;
+}
+
+/** Longest raw value looked at: labels are short, and a bound keeps every step linear on hostile input. */
+const RAW_MAX = 2_000;
+
+const isEdge = (char: string): boolean => char === '-' || char === '.';
+
+/** Drops `-` and `.` at both ends, in one pass (an anchored regex here backtracks quadratically). */
+function trimEdges(value: string): string {
+  let start = 0;
+  let end = value.length;
+  while (start < end && isEdge(value.charAt(start))) start += 1;
+  while (end > start && isEdge(value.charAt(end - 1))) end -= 1;
+  return value.slice(start, end);
+}
+
+function cleanLabel(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const host = hostOrSelf(raw.slice(0, RAW_MAX).trim().toLowerCase());
+  if (host === '' || host.includes('@')) return null;
+  const cleaned = trimEdges(trimEdges(host.replace(/[^a-z0-9._-]+/g, '-')).slice(0, ORIGIN_MAX));
+  return cleaned === '' ? null : cleaned;
 }
 
 /** Order of preference on the ad URL and the request: `utm_source`, then `ref`, then the referrer host, else `direct`. */

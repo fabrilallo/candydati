@@ -57,14 +57,30 @@ export const funnelRows = (stages: readonly FunnelStageDto[]): readonly FunnelRo
 export interface SourceRow extends Source {
   readonly width: number
   readonly hireRate: Rate
+  /** Applications over visits: shown as "—" under the minimum sample, like every rate. */
+  readonly conversionRate: Rate
 }
+
+type Campaign = ReportsDto['campaigns'][number]
+
+export interface CampaignRow extends Campaign {
+  readonly conversionRate: Rate
+}
+
+const conversionOf = (row: Source): Rate => ({ count: row.applications, total: row.visits, rate: row.conversion })
 
 export const sourceRows = (sources: readonly Source[]): readonly SourceRow[] => {
   const max = Math.max(0, ...sources.map((source) => source.applications))
   return sources
-    .toSorted((a, b) => b.applications - a.applications || a.origin.localeCompare(b.origin))
-    .map((source) => ({ ...source, width: pct(source.applications, max), hireRate: rateOf(source.hires, source.applications) }))
+    .toSorted((a, b) => b.applications - a.applications || b.visits - a.visits || a.origin.localeCompare(b.origin))
+    .map((source) => ({ ...source, width: pct(source.applications, max), hireRate: rateOf(source.hires, source.applications), conversionRate: conversionOf(source) }))
 }
+
+/** Campaigns in the order the api gives them (most applications, then visits). */
+export const campaignRows = (campaigns: readonly Campaign[]): readonly CampaignRow[] => campaigns.map((row) => ({ ...row, conversionRate: conversionOf(row) }))
+
+/** True when no source counted a single visit: the visits column would be all zeros, so the card explains how to get them. */
+export const hasNoVisits = (sources: readonly Source[]): boolean => sources.every((source) => source.visits === 0)
 
 export interface StageTypeRow {
   readonly type: FunnelStageType

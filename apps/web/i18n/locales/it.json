@@ -3145,7 +3145,11 @@
         "manual": "Inserita a mano"
       },
       "emptyTitle": "Nessuna candidatura nel periodo",
-      "emptyBody": "Aggiungi utm_source o ref al link dell'annuncio che condividi (per esempio ?utm_source=linkedin) per sapere da dove arrivano."
+      "emptyBody": "Condividi il link tracciato di ogni annuncio (scheda Distribuzione dell'annuncio, o aggiungi a mano ?utm_source=linkedin) per sapere da dove arrivano.",
+      "visits": "nessuna visita | 1 visita | {count} visite",
+      "conversion": "conversione {rate}",
+      "campaigns": "Campagne",
+      "noVisits": "Nessuna visita contata nel periodo. Una visita si conta quando qualcuno apre l'annuncio dalla pagina carriere o da un link tracciato: creane uno nella scheda Distribuzione dell'annuncio."
     },
     "responses": {
       "title": "Tempi di risposta",
@@ -3656,6 +3660,36 @@
       "testimonials": {
         "title": "Chi lavora qui"
       }
+    }
+  },
+  "trackedLinks": {
+    "title": "Link tracciati",
+    "description": "Un link per canale mostra, nei Report, da dove arrivano visite e candidature. Del visitatore non si conserva nulla: solo conteggi per giorno, provenienza e campagna.",
+    "channel": "Canale",
+    "choose": "Scegli un canale",
+    "other": "Altro canale…",
+    "customChannel": "Nome del canale",
+    "customHint": "Lettere, numeri, punti e trattini, per esempio career-day-milano.",
+    "campaign": "Campagna (facoltativa)",
+    "campaignHint": "Per esempio autunno-2026. Usa lo stesso nome su ogni canale della campagna.",
+    "savedAs": "Comparirà come {value}",
+    "invalidChannel": "Non è un nome di canale utilizzabile.",
+    "invalidCampaign": "Non è un nome di campagna utilizzabile, verrà omesso.",
+    "link": "Link da condividere",
+    "copy": "Copia il link tracciato",
+    "pick": "Scegli un canale per ottenere il link.",
+    "notPublished": "Pubblica l'annuncio per ottenere link da condividere.",
+    "privacy": "Solo conteggi: niente cookie, niente indirizzi IP, nessuno viene seguito da una pagina all'altra.",
+    "presets": {
+      "newsletter": "Newsletter",
+      "referral": "Segnalazione",
+      "career-fair": "Fiera del lavoro",
+      "university": "Università"
+    },
+    "visits": {
+      "title": "Da dove arrivano visite e candidature",
+      "description": "Gli ultimi 90 giorni, solo per questo annuncio.",
+      "error": "Non è stato possibile caricare i dati."
     }
   }
 }

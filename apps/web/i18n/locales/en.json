@@ -3145,7 +3145,11 @@
         "manual": "Added by hand"
       },
       "emptyTitle": "No applications in this period",
-      "emptyBody": "Add utm_source or ref to the job link you share (for example ?utm_source=linkedin) to know where people come from."
+      "emptyBody": "Share the tracked link of each ad (Distribution tab of the ad, or add ?utm_source=linkedin by hand) to know where people come from.",
+      "visits": "no visits | 1 visit | {count} visits",
+      "conversion": "conversion {rate}",
+      "campaigns": "Campaigns",
+      "noVisits": "No visits counted in this period. A visit is counted when someone opens the ad from the careers page or from a tracked link: build one in the Distribution tab of the ad."
     },
     "responses": {
       "title": "Response times",
@@ -3656,6 +3660,36 @@
       "testimonials": {
         "title": "People who work here"
       }
+    }
+  },
+  "trackedLinks": {
+    "title": "Tracked links",
+    "description": "One link per channel shows where visits and applications come from, in Reports. Nothing about the visitor is stored: only counts per day, source and campaign.",
+    "channel": "Channel",
+    "choose": "Choose a channel",
+    "other": "Another channel…",
+    "customChannel": "Channel name",
+    "customHint": "Letters, numbers, dots and dashes, for example career-day-milan.",
+    "campaign": "Campaign (optional)",
+    "campaignHint": "For example autumn-2026. Use the same name on every channel of the campaign.",
+    "savedAs": "It will appear as {value}",
+    "invalidChannel": "This is not a usable channel name.",
+    "invalidCampaign": "This is not a usable campaign name, it will be left out.",
+    "link": "Link to share",
+    "copy": "Copy tracked link",
+    "pick": "Choose a channel to get the link.",
+    "notPublished": "Publish the ad to get links you can share.",
+    "privacy": "Counts only: no cookies, no IP addresses, nobody is followed from page to page.",
+    "presets": {
+      "newsletter": "Newsletter",
+      "referral": "Referral",
+      "career-fair": "Career fair",
+      "university": "University"
+    },
+    "visits": {
+      "title": "Where visits and applications come from",
+      "description": "The last 90 days, for this ad only.",
+      "error": "The figures could not be loaded."
     }
   }
 }

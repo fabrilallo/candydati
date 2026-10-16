@@ -11,6 +11,7 @@ import type {
   RetentionPage,
 } from '../candidate-ports.js';
 import type { JobRepository, OpenApplicationCounts } from '../job-ports.js';
+import type { JobViewRow } from '../job-view-ports.js';
 import type { ApplicationIntake, IntakeRepositories } from '../intake-ports.js';
 import type { AuditLogRepository } from '../ports.js';
 import type { OutboxRepository } from '../webhook-ports.js';
@@ -25,6 +26,7 @@ export interface CandidateStoreState {
   readonly extractions: readonly CvExtractionRecord[];
   readonly stageEvents: readonly StageEvent[];
   readonly promises: readonly ResponsePromise[];
+  readonly jobViews: readonly JobViewRow[];
 }
 
 export interface CandidateStore {
@@ -33,7 +35,7 @@ export interface CandidateStore {
 }
 
 export const createCandidateStore = (initial: Partial<CandidateStoreState> = {}): CandidateStore => {
-  const state = cell<CandidateStoreState>({ candidates: [], applications: [], notes: [], extractions: [], stageEvents: [], promises: [], ...initial });
+  const state = cell<CandidateStoreState>({ candidates: [], applications: [], notes: [], extractions: [], stageEvents: [], promises: [], jobViews: [], ...initial });
   return {
     read: () => state.get(),
     write: (next) => {

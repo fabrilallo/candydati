@@ -1,6 +1,6 @@
 import type { ActorType, Outcome, PromiseStatus } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
-import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, date, index, integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { application } from './candidate.js';
 import { job } from './job.js';
@@ -70,3 +70,27 @@ export const responsePromise = pgTable(
 
 export type ApplicationStageEventRow = typeof applicationStageEvent.$inferSelect;
 export type ResponsePromiseRow = typeof responsePromise.$inferSelect;
+
+/**
+ * Visits of the public page of a published job, counted per day, source and campaign. Aggregate counters only: no
+ * cookie, no IP, no user agent, nothing that identifies or even tells apart two visitors. `campaign` is `''` when the
+ * link had none (part of the primary key, so the counter can be upserted). Rows older than 25 months are deleted by the
+ * daily retention job.
+ */
+export const jobViewDaily = pgTable(
+  'job_view_daily',
+  {
+    organizationId: organizationRef(),
+    jobId: text('job_id')
+      .notNull()
+      .references(() => job.id, { onDelete: 'restrict' }),
+    day: date('day', { mode: 'string' }).notNull(),
+    source: text('source').notNull(),
+    campaign: text('campaign').notNull().default(''),
+    views: integer('views').notNull().default(0),
+  },
+  (table) => [
+    primaryKey({ name: 'job_view_daily_pk', columns: [table.organizationId, table.jobId, table.day, table.source, table.campaign] }),
+    index('job_view_daily_day_idx').on(table.day),
+  ],
+);

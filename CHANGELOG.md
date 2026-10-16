@@ -10,6 +10,10 @@ Phases 0 to 10 of the roadmap are implemented. Nothing has been released yet.
 
 ### Added
 
+- **Tracked links and visit analytics:** a link builder in the Distribution tab of each ad (channel presets, campaign),
+  the campaign (`utm_campaign`) stored with each application, daily visit counters of the public ad page
+  (`job_view_daily`, no cookies, no stored IP or user agent, crawlers and Do Not Track left out, deleted after 25 months),
+  and Reports sources with visits, conversion and campaigns, also per ad and in the CSV export.
 - **Foundations (phase 0):** pnpm and Turborepo monorepo, Postgres 17 with Drizzle, Better Auth with organizations, roles
   and invitations, permission check and append-only audit log in every use case, Italian and English UI.
 - **Job ad and publication standard (phase 1):** structured editor, mandatory salary range and declared selection process
