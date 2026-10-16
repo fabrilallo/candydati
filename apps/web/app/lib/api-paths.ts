@@ -44,4 +44,12 @@ export const importMappingPath = (batchId: string): string => `${importPath(batc
 export const importItemsPath = (batchId: string): string => `${importPath(batchId)}/items`
 export const importCommitPath = (batchId: string): string => `${importPath(batchId)}/commit`
 export const importUndoPath = (batchId: string): string => `${importPath(batchId)}/undo`
+
+// Migration from another ATS
+export const MIGRATIONS_PATH = '/api/v1/migrations'
+export const migrationPath = (id: string): string => `${MIGRATIONS_PATH}/${enc(id)}`
+export const migrationIssuesPath = (id: string): string => `${migrationPath(id)}/issues`
+export const migrationChoicesPath = (id: string): string => `${migrationPath(id)}/choices`
+export const migrationCommitPath = (id: string): string => `${migrationPath(id)}/commit`
+export const migrationUndoPath = (id: string): string => `${migrationPath(id)}/undo`
 export const publicConsentPath = (token: string): string => `/api/v1/public/consent/${enc(token)}`

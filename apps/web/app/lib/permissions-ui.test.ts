@@ -77,7 +77,7 @@ describe('defaultInviteRole', () => {
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
     expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates', 'members', 'security', 'emailTemplates', 'distribution'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates', 'members', 'security', 'privacy', 'email', 'emailTemplates', 'webhooks', 'distribution', 'careersPage', 'api', 'data', 'audit'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates', 'members', 'security', 'privacy', 'email', 'emailTemplates', 'webhooks', 'distribution', 'careersPage', 'api', 'data', 'migrations', 'audit'])
   })
 
   it('shows webhooks only with webhook:manage and the work queues to everyone who reads candidates', () => {
@@ -102,6 +102,13 @@ describe('visibleNav', () => {
     expect(visibleNav('interviewer').map((item) => item.id)).not.toContain('emailTemplates')
   })
 
+  it('shows the migration only to owners and admins', () => {
+    expect(visibleNav('owner').map((item) => item.id)).toContain('migrations')
+    expect(visibleNav('admin').map((item) => item.id)).toContain('migrations')
+    expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('migrations')
+    expect(visibleNav(null).map((item) => item.id)).not.toContain('migrations')
+  })
+
   it('shows the careers page builder only to owners and admins', () => {
     expect(visibleNav('admin').map((item) => item.id)).toContain('careersPage')
     expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('careersPage')
@@ -118,7 +125,7 @@ describe('navSections', () => {
   it('groups the visible items and drops nothing the role may see', () => {
     expect(navSections('owner').map((section) => [section.id, section.items.map((item) => item.id)])).toEqual([
       ['work', ['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates']],
-      ['organization', ['members', 'security', 'privacy', 'email', 'emailTemplates', 'webhooks', 'distribution', 'careersPage', 'api', 'data', 'audit']],
+      ['organization', ['members', 'security', 'privacy', 'email', 'emailTemplates', 'webhooks', 'distribution', 'careersPage', 'api', 'data', 'migrations', 'audit']],
     ])
     expect(navSections(null).map((section) => section.id)).toEqual(['work', 'organization'])
   })

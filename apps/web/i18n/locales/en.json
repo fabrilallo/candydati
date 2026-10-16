@@ -51,7 +51,8 @@
     "imports": "Import",
     "jobRequests": "Requests",
     "reports": "Reports",
-    "security": "Security"
+    "security": "Security",
+    "migrations": "Migration"
   },
   "jobRequests": {
     "title": "Hiring requests",
@@ -2906,6 +2907,295 @@
       "backToList": "Back to imports",
       "undone": "Import undone on {date}",
       "undoneBody": "What the import had created has been erased."
+    }
+  },
+  "migrations": {
+    "title": "Migration",
+    "description": "Bring your recruiting history over from another ATS: jobs, candidates, outcomes, notes and emails. You check a preview before anything is written, and you can undo the whole migration.",
+    "new": "New migration",
+    "newTitle": "New migration",
+    "list": {
+      "label": "Migrations",
+      "empty": "No migrations yet",
+      "emptyBody": "Move your history from another ATS into this one. You see a preview before anything is written.",
+      "source": "from {source}",
+      "unknownSource": "package not read yet",
+      "jobs": "1 job | {count} jobs",
+      "candidates": "1 person | {count} people",
+      "applications": "1 application | {count} applications",
+      "open": "Open",
+      "resume": "Resume",
+      "undo": "Undo migration",
+      "error": "We could not load the migrations."
+    },
+    "status": {
+      "uploaded": "Uploaded",
+      "fetching": "Fetching",
+      "analyzing": "Analysing",
+      "ready": "To review",
+      "importing": "Migrating",
+      "done": "Migrated",
+      "failed": "Failed",
+      "undone": "Undone"
+    },
+    "steps": {
+      "label": "Migration steps",
+      "source": "Source",
+      "upload": "Package",
+      "analysis": "Analysis",
+      "preview": "Preview",
+      "stages": "Jobs and stages",
+      "confirm": "Responsibility",
+      "result": "Result"
+    },
+    "source": {
+      "title": "Where does your data come from?",
+      "intro": "Every migration starts from a migration package: one ZIP with a file that describes jobs, candidates and history, plus the CVs. Choose how to bring it in.",
+      "chosen": "Chosen",
+      "package": {
+        "title": "Upload a migration package",
+        "body": "A ZIP in the open package format. Use it for a package prepared by an AI agent, by a script, or exported from another installation.",
+        "action": "Choose this source"
+      },
+      "where": {
+        "title": "Where do packages come from?",
+        "skill": "An agent skill teaches Claude, Codex and similar assistants to read your old ATS (through its API, an export or an MCP connector) and write the package for you. You then upload it here.",
+        "connectors": "Built-in connectors for the main ATS products are coming soon: you will enter a read-only key and the package is built for you, always with a preview before anything is written."
+      }
+    },
+    "upload": {
+      "title": "Upload the package",
+      "intro": "A ZIP with the file migration.json and a folder of files. Nothing reaches your candidates until you have seen the preview and confirmed.",
+      "drop": "Drop the ZIP here",
+      "choose": "Choose a file",
+      "limit": "One ZIP, up to {size}.",
+      "picked": "Chosen file",
+      "remove": "Remove {name}",
+      "send": "Upload and analyse",
+      "uploading": "Uploading, {percent}%",
+      "cancel": "Stop",
+      "cancelled": "Upload stopped",
+      "back": "Back",
+      "errors": {
+        "notZip": "This is not a ZIP file.",
+        "empty": "The file is empty.",
+        "tooLarge": "Too large: the limit is {size}.",
+        "tooLargeServer": "The package is larger than the size limit."
+      }
+    },
+    "analysis": {
+      "title": "Analysis in progress",
+      "body": "We open the package, check every reference and prepare the preview. You can close this page: the analysis goes on and you will find the migration in the list.",
+      "failed": "The package could not be read",
+      "failedBody": "Nothing was written to your data. Fix the package and upload it again.",
+      "reason": "Reason: {reason}",
+      "back": "Back to migrations"
+    },
+    "failure": {
+      "invalid_archive": "the file is not a valid ZIP",
+      "unsafe_path": "the ZIP contains an unsafe path",
+      "symlink": "the ZIP contains a link, which is not allowed",
+      "too_many_entries": "the ZIP has too many entries",
+      "too_large": "the package is larger than the limit",
+      "ratio_exceeded": "the package expands far more than it should",
+      "duplicate_entry": "the ZIP has the same entry twice",
+      "unexpected_entry": "the ZIP holds something other than migration.json and the files folder",
+      "missing_manifest": "migration.json is missing",
+      "invalid_manifest": "migration.json does not follow the package format",
+      "missing_files": "files named in migration.json are missing from the ZIP",
+      "privacy_notice_missing": "your organization has no published privacy notice",
+      "organization_missing": "the organization could not be found",
+      "job_content_invalid": "the content of a job in the package is not valid",
+      "analysis_failed": "the analysis failed unexpectedly",
+      "commit_failed": "the migration failed unexpectedly while writing",
+      "queue_unavailable": "the work could not be queued",
+      "unknown": "an unexpected error"
+    },
+    "preview": {
+      "title": "Check what will come across",
+      "intro": "Nothing is written yet. This is what the package contains and what will happen with it.",
+      "figures": {
+        "jobs": "Jobs",
+        "candidates": "People",
+        "applications": "Applications",
+        "notes": "Notes",
+        "messages": "Emails",
+        "files": "Files"
+      },
+      "leftOut": "1 job left out | {count} jobs left out",
+      "jobsTitle": "Jobs",
+      "jobs": {
+        "applications": "1 application | {count} applications",
+        "stages": "1 stage | {count} stages",
+        "open": "{count} in progress",
+        "hired": "{count} hired",
+        "notSelected": "{count} not selected",
+        "withdrawn": "{count} withdrawn",
+        "status": {
+          "draft": "Draft",
+          "open": "Open",
+          "closed": "Closed"
+        },
+        "leftOutPill": "Left out"
+      },
+      "consent": {
+        "title": "Consent of the people",
+        "intro": "Consent dates and retention periods are taken from the source as they are.",
+        "given": "Consent given",
+        "givenHint": "The package has a consent date: it carries over and retention follows the source.",
+        "toRenew": "Consent to renew",
+        "toRenewHint": "No consent date: each person with an email is asked to confirm, and is erased if they do not.",
+        "expired": "Left out",
+        "expiredHint": "Retention already over: these people are not brought back, with everything attached to them.",
+        "merged": "Already among your candidates",
+        "mergedHint": "Matched by email: their profile is never overwritten, history is added to it."
+      },
+      "issues": {
+        "title": "Findings",
+        "none": "The analysis found nothing to report.",
+        "level": {
+          "error": "Errors",
+          "warning": "To check",
+          "info": "For your information"
+        },
+        "levelHint": {
+          "error": "These block the migration until they are solved.",
+          "warning": "Something is left out or worth a look.",
+          "info": "What will happen, no action needed."
+        },
+        "items": "1 finding | {count} findings",
+        "show": "Show the list",
+        "more": "Show more",
+        "loading": "Loading",
+        "failed": "We could not load the findings.",
+        "retry": "Try again",
+        "refs": "References: {refs}"
+      },
+      "next": "Continue",
+      "back": "Back to the list",
+      "blocked": "Errors must be solved before the migration can be confirmed."
+    },
+    "issue": {
+      "privacy_notice_missing": "Your organization has no published privacy notice. Publish one in the privacy settings, then upload the package again.",
+      "consent_expired": "1 person left out: retention already over | {count} people left out: retention already over",
+      "consent_to_renew": "1 person without a consent date: they will be asked to confirm | {count} people without a consent date: they will be asked to confirm",
+      "merge_existing": "1 person already among your candidates: history is added, the profile is not changed | {count} people already among your candidates: history is added, profiles are not changed",
+      "no_email": "1 person has no email: they cannot be matched or asked to confirm | {count} people have no email: they cannot be matched or asked to confirm",
+      "duplicate_email": "1 email is used by more than one entry: they become one person | {count} emails are used by more than one entry: they become one person each",
+      "already_applied": "1 open application repeats another open one of the same person for the same job: it is left out | {count} open applications repeat another open one of the same person for the same job: they are left out",
+      "stage_unmapped": "1 stage still has no type: choose one in the next step | {count} stages still have no type: choose one in the next step",
+      "too_many_stages": "1 job has more stages than a pipeline can hold | {count} jobs have more stages than a pipeline can hold",
+      "file_missing": "1 file named in the package is not in the ZIP | {count} files named in the package are not in the ZIP",
+      "file_too_large": "1 file is too large and is left out | {count} files are too large and are left out",
+      "file_not_cv": "1 file marked as a CV is not a PDF or a Word document: it is left out | {count} files marked as CVs are not PDF or Word documents: they are left out",
+      "file_unreferenced": "1 file in the ZIP is not used by any application | {count} files in the ZIP are not used by any application"
+    },
+    "stages": {
+      "title": "Jobs and stages",
+      "intro": "Choose where each stage of the old process lands in your pipelines, and leave out the jobs you do not want. Stages of the same job that end up with the same type and name become one stage.",
+      "other": "To choose",
+      "remaining": "1 stage still to choose | {count} stages still to choose",
+      "allDone": "Every stage has a place.",
+      "byName": {
+        "title": "The same name in every job",
+        "intro": "One choice applies to every stage with that name, in every job.",
+        "jobs": "in 1 job | in {count} jobs",
+        "select": "Where stages named {name} land",
+        "mixed": "Different per job"
+      },
+      "perJob": {
+        "title": "Job by job",
+        "include": "Bring this job across",
+        "select": "Where {stage} lands in {job}",
+        "showMore": "Show more jobs",
+        "stage": "Stage"
+      },
+      "received": "Received is the first column: applications arrive there.",
+      "saving": "Saving",
+      "failed": "We could not save your choice.",
+      "back": "Back",
+      "next": "Continue"
+    },
+    "confirm": {
+      "title": "Before you migrate",
+      "intro": "You are about to write the history of the package into your account. Read and confirm the three statements below.",
+      "summary": "To be written: {jobs}, {applications}, {people}.",
+      "jobs": "1 job | {count} jobs",
+      "applications": "1 application | {count} applications",
+      "people": "1 person | {count} people",
+      "box": {
+        "title": "You remain responsible",
+        "body": "{platform} moves what the package contains. It does not verify the legal basis of the source data. You remain responsible for the migration."
+      },
+      "declarationsTitle": "Your statements",
+      "declarations": {
+        "controller": "My organization is the data controller of these data and has a legal basis to move them into {platform}.",
+        "previewChecked": "I checked the preview. I know that consent dates and retention periods are taken from the source as they are.",
+        "processorsOwned": "If an AI agent or a third-party tool prepared this package, my organization chose it and it is covered by our agreements: it is a processor of ours, not of {platform}."
+      },
+      "recorded": "Your statements are recorded in the audit log with your name and the time.",
+      "unmapped": "1 stage still has no type. Go back and choose one. | {count} stages still have no type. Go back and choose one.",
+      "goBack": "Back to stages",
+      "action": "Confirm and migrate",
+      "acting": "Starting",
+      "back": "Back",
+      "needAll": "Tick all three statements to continue."
+    },
+    "result": {
+      "importing": "Migration in progress",
+      "importingBody": "We are writing jobs, people, applications and history. It can take a while: you can close this page and find the migration in the list.",
+      "done": "Migration complete",
+      "doneBody": "The history is in your account. People whose consent has to be renewed have been asked to confirm.",
+      "failed": "The migration stopped",
+      "failedBody": "Part of the history may have been written. You can undo the migration to start again from a clean state.",
+      "counts": {
+        "jobs": "1 job | {count} jobs",
+        "candidatesCreated": "1 new person | {count} new people",
+        "candidatesMerged": "1 person merged with an existing candidate | {count} people merged with existing candidates",
+        "applications": "1 application | {count} applications",
+        "cvs": "1 CV | {count} CVs",
+        "stageEvents": "1 stage change in the history | {count} stage changes in the history",
+        "notes": "1 note | {count} notes",
+        "messages": "1 email in the history | {count} emails in the history",
+        "reconfirmationsQueued": "1 consent request sent | {count} consent requests sent",
+        "skippedAlreadyApplied": "1 repeated open application left out | {count} repeated open applications left out"
+      },
+      "openJobs": "Open the jobs",
+      "openCandidates": "Open the candidates",
+      "backToList": "Back to migrations",
+      "undo": "Undo migration",
+      "undone": "Migration undone on {date}",
+      "undoneBody": "What the migration had written was erased.",
+      "undoneCounts": "1 person erased | {count} people erased",
+      "undoneKept": "1 person stays because they confirmed or applied again | {count} people stay because they confirmed or applied again",
+      "undoneJobs": "1 job removed | {count} jobs removed",
+      "undoneJobsKept": "1 job stays because it is still in use | {count} jobs stay because they are still in use",
+      "undoneFailed": "1 person could not be erased: undo again to finish. | {count} people could not be erased: undo again to finish."
+    },
+    "undo": {
+      "title": "Undo the migration of {date}?",
+      "irreversible": "This cannot be reversed.",
+      "intro": "This erases for good:",
+      "people": "the people the migration created, with CVs, notes, emails and applications (1 person) | the people the migration created, with CVs, notes, emails and applications ({count} people)",
+      "merged": "for people who already existed, only what the migration added: applications, notes, emails and history (1 person) | for people who already existed, only what the migration added: applications, notes, emails and history ({count} people)",
+      "jobs": "the jobs the migration created, when nothing else refers to them (1 job) | the jobs the migration created, when nothing else refers to them ({count} jobs)",
+      "keptTitle": "What stays",
+      "kept": "People who confirmed their consent, or applied again after the migration, stay: from then on the data is theirs.",
+      "keptJobs": "Jobs that are published, or that have other applications, stay.",
+      "record": "The record of the migration stays in the list, with its counts.",
+      "confirm": "Undo migration",
+      "cancel": "Keep the migration",
+      "done": "Migration undone"
+    },
+    "beta": {
+      "title": "Beta connector",
+      "body": "This connector is built on the public documentation of {source}, not yet verified on a real account. Check the preview carefully before you confirm."
+    },
+    "errors": {
+      "stagesUnmapped": "1 stage still has no type. Choose one for every stage. | {count} stages still have no type. Choose one for every stage.",
+      "tooManyStages": "A job has more stages than a pipeline can hold. Give some of them the same type and name so they merge.",
+      "privacyNoticeMissing": "Your organization has no published privacy notice. Publish one in the privacy settings first.",
+      "load": "We could not load the migration."
     }
   },
   "consentRenew": {
