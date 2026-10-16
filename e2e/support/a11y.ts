@@ -14,8 +14,9 @@ export const setTheme = async (page: Page, theme: Theme): Promise<void> => {
     root.classList.toggle('dark', value === 'dark');
     root.classList.toggle('light', value === 'light');
   }, theme);
-  // Some controls fade colours (150 ms): measure once the fade is over.
-  await page.waitForTimeout(300);
+  // Some controls fade colours (150 ms): measure once every transition is over. A fixed wait was too short on a busy
+  // CI runner (axe read the light text colour on the dark background, half-way through the fade).
+  await page.waitForFunction(() => document.getAnimations().every((animation) => animation.playState !== 'running'));
 };
 
 export interface AuditOptions {

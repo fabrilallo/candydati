@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { expect, type Dialog, type Locator, type Page } from '@playwright/test';
 import { open } from './nav';
 
 export interface JobSpec {
@@ -52,8 +52,21 @@ export const fillJob = async (page: Page, spec: JobSpec, skip: readonly string[]
 };
 
 export const saveDraft = async (page: Page): Promise<string> => {
-  await page.getByTestId('save').click();
-  await page.waitForURL(/\/app\/jobs\/(?!new)[^/]+/);
+  // A dialog here (the unsaved-changes confirm) would be dismissed silently and leave the editor on /new: name it.
+  const dialogs: string[] = [];
+  const onDialog = (dialog: Dialog): void => {
+    dialogs.push(`${dialog.type()}: ${dialog.message()}`);
+    void dialog.dismiss();
+  };
+  page.on('dialog', onDialog);
+  try {
+    await page.getByTestId('save').click();
+    await page.waitForURL(/\/app\/jobs\/(?!new)[^/]+/).catch((error: unknown) => {
+      throw new Error(`saved job did not open its page; dialogs: ${dialogs.join(' | ') || 'none'}`, { cause: error });
+    });
+  } finally {
+    page.off('dialog', onDialog);
+  }
   await expect(page.getByTestId('save')).toBeEnabled();
   return /\/app\/jobs\/([^/?#]+)/.exec(page.url())?.[1] ?? '';
 };
