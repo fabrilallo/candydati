@@ -146,7 +146,7 @@ describe('asking for feedback when an application enters a stage', () => {
   });
 
   it('does not run when feedback is not wired', async () => {
-    const deps = { ...(await configured(world())), feedback: undefined };
+    const { feedback: _wired, ...deps } = await configured(world());
     await moveApplication(deps, recruiter, { applicationId: 'app_1', stageId: 'stage-1' });
     expect(deps.feedbackStore.read().requests).toHaveLength(0);
   });

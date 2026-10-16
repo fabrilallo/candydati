@@ -25,7 +25,7 @@ import {
   type InMemoryFileStorage,
   type InMemoryTaskQueue,
 } from './in-memory-files.js';
-import { createInMemoryJobRepository, createInMemoryOrganizationDirectory } from './in-memory-jobs.js';
+import { createInMemoryJobRepository, createInMemoryOrganizationDirectory, type InMemoryJobRepository } from './in-memory-jobs.js';
 import { createInMemoryPrivacyNoticeRepository } from './in-memory-privacy.js';
 import { createInMemoryOutbox, type InMemoryOutbox } from './in-memory-automation.js';
 import { createInMemoryMessageRepository, createMessagingStore, type MessagingStore } from './in-memory-messaging.js';
@@ -47,6 +47,7 @@ export type TestCandidateDeps = CandidateDeps &
     readonly store: CandidateStore;
     readonly messagingStore: MessagingStore;
     readonly jobTeams: InMemoryJobTeams;
+    readonly jobs: InMemoryJobRepository;
   };
 
 export function createTestCandidateDeps(overrides: Partial<TestCandidateDeps> = {}): TestCandidateDeps {

@@ -177,7 +177,7 @@ describe('a migration committed and undone on Postgres', () => {
     expect(batch?.counts.commit).toMatchObject({ attachments: 4, filesSkipped: 2, filesSkippedType: 1, filesSkippedMissing: 1, answers: 1 });
 
     // Ada asks to be erased from what the migration brought; then the operator undoes the whole batch.
-    await eraseCandidateData(w.deps, { organizationId: w.org, candidateId: ada.id, applicationIds: [migrated.id], reason: 'request', actor: { type: 'user', id: 'user_owner' } });
+    await eraseCandidateData(w.deps, { organizationId: w.org, candidateId: ada.id, applicationIds: [migrated.id], reason: 'request', actor: { type: 'user', id: 'user_owner', onBehalfOfUserId: null } });
     expect(await w.deps.applications.listAttachments(w.org, [migrated.id])).toEqual([]);
     expect(w.deps.files.keys().filter((key) => key.includes(`/applications/${migrated.id}/`))).toEqual([]);
     await undoMigration(w.deps, w.owner, { migrationId: batchId });

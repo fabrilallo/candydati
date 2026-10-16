@@ -20,10 +20,12 @@ async function asked() {
 describe('reconfirmation of migrated data', () => {
   it('a yes renews every application of the person the same migration brought, not the others', async () => {
     const { deps, carla, secret } = await asked();
-    const other = buildApplication({ id: 'app_other', organizationId: ORG_A, candidateId: carla[0]?.candidateId, consentStatus: 'to_renew' });
+    const carlaId = carla[0]?.candidateId;
+    if (carlaId === undefined) throw new Error('expected migrated applications of Carla');
+    const other = buildApplication({ id: 'app_other', organizationId: ORG_A, candidateId: carlaId, consentStatus: 'to_renew' });
     deps.store.write({ applications: [...deps.store.read().applications, other] });
     await answerConsentRequest(deps, { token: secret, scopes: ['selection'] });
-    const after = deps.store.read().applications.filter((a) => a.candidateId === carla[0]?.candidateId);
+    const after = deps.store.read().applications.filter((a) => a.candidateId === carlaId);
     expect(after.map((a) => [a.id === 'app_other' ? 'other' : 'migrated', a.consentStatus]).toSorted()).toEqual([
       ['migrated', 'given'],
       ['migrated', 'given'],

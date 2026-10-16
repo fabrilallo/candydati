@@ -4,7 +4,7 @@ import type { Application, Candidate, CandidateNote, CvExtractionRecord, Privacy
 const DATE = new Date('2026-01-01T00:00:00.000Z');
 
 /** A tiny but sniffable PDF: starts with the `%PDF-` magic bytes. */
-export const fakePdfBytes = (size = 64): Uint8Array => {
+export const fakePdfBytes = (size = 64): Uint8Array<ArrayBuffer> => {
   const bytes = new Uint8Array(Math.max(size, 8));
   [...'%PDF-1.7'].forEach((char, index) => {
     bytes[index] = char.charCodeAt(0);
@@ -12,7 +12,7 @@ export const fakePdfBytes = (size = 64): Uint8Array => {
   return bytes;
 };
 
-export const fakeDocxBytes = (): Uint8Array => new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0, 0, 0, 0]);
+export const fakeDocxBytes = (): Uint8Array<ArrayBuffer> => new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0, 0, 0, 0]);
 
 const NOTICE_TEXT = 'Informativa sul trattamento dei dati dei candidati. '.repeat(6).trim();
 

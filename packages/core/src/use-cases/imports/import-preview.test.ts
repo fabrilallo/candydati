@@ -1,7 +1,7 @@
 import { importFilePrefix } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
-import { buildCandidate, fakePdfBytes, ORG_A } from '../../testing/index.js';
+import { buildCandidate, createInMemoryTaskQueue, fakePdfBytes, ORG_A } from '../../testing/index.js';
 import { recordImportAnalysis, startImportAnalysis, failImportBatch } from './analyze.js';
 import { createImportBatch } from './create-import-batch.js';
 import { getImportBatch, setImportItems, updateImportMapping } from './queries.js';
@@ -38,7 +38,7 @@ describe('createImportBatch', () => {
   });
 
   it('marks the batch failed when the analysis cannot be queued, and removes the files when the write fails', async () => {
-    const down = importWorld({ importOverrides: { queue: { async enqueue() { throw new Error('down'); } } } });
+    const down = importWorld({ importOverrides: { queue: createInMemoryTaskQueue(new Error('down')) } });
     const batch = await createImportBatch(down, recruiter, { jobId: 'job_1', stageId: 'received', files: [{ fileName: 'a.csv', bytes: fakePdfBytes() }] });
     expect(batch).toMatchObject({ status: 'failed', error: 'queue_unavailable' });
     const broken = importWorld();

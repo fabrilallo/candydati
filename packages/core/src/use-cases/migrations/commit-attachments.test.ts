@@ -84,7 +84,7 @@ describe('commitMigration: attachments and form answers', () => {
 describe('attachments go with their application', () => {
   it('erasure deletes the attachment rows and files, the answers with the row', async () => {
     const { deps, ada } = await committed();
-    await eraseCandidateData(deps, { organizationId: ORG_A, candidateId: 'cand_1', reason: 'request', actor: { type: 'user', id: 'user_owner' } });
+    await eraseCandidateData(deps, { organizationId: ORG_A, candidateId: 'cand_1', reason: 'request', actor: { type: 'user', id: 'user_owner', onBehalfOfUserId: null } });
     expect(deps.store.read().applications.some((a) => a.id === ada.id)).toBe(false);
     expect(attachmentsOf(deps, ada.id)).toEqual([]);
     expect(filesUnder(deps, ada.id)).toEqual([]);

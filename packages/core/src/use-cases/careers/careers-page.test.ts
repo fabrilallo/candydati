@@ -1,4 +1,5 @@
-import { careersPageDocumentSchema, careersPageFixture, defaultCareersPage, type CareersMediaRecord } from '@candydati/domain';
+import { careersPageDocumentSchema, careersPageFixture, defaultCareersPage } from '@candydati/domain';
+import type { CareersMediaRecord } from '../../careers-ports.js';
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError, NotFoundError, StaleRevisionError, ValidationError } from '../../errors.js';
 import { agentActor, apiKeyActor, userActor } from '../../testing/actors.js';

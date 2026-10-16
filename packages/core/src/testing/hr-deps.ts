@@ -1,8 +1,7 @@
 import { createHash } from 'node:crypto';
-import type { FeedbackDeps } from '../feedback-ports.js';
+import type { FeedbackDeps, FeedbackStageEntryParts } from '../feedback-ports.js';
 import type { JobRequestDeps, StaleJobDeps, StaleScanDeps } from '../job-request-ports.js';
 import { createInMemoryJobRequests, createInMemoryStaleJobs, type InMemoryJobRequests } from './in-memory-job-requests.js';
-import type { InMemoryJobRepository } from './in-memory-jobs.js';
 import { seedPrivacyWorld, type PrivacySeedOptions, type TestPrivacyDeps } from './privacy-deps.js';
 
 export const testHash = (secret: string): string => createHash('sha256').update(secret).digest('hex');
@@ -13,6 +12,8 @@ export type TestHrDeps = TestPrivacyDeps &
   StaleJobDeps &
   StaleScanDeps & {
     readonly jobRequests: InMemoryJobRequests;
+    /** Always wired in the HR world (the optional `feedback` of the candidate deps is set). */
+    readonly feedback: FeedbackStageEntryParts;
   };
 
 export interface HrSeedOptions extends PrivacySeedOptions {
@@ -30,7 +31,7 @@ export function seedHrWorld(options: HrSeedOptions = {}): TestHrDeps {
     ...world,
     hash: testHash,
     jobRequests: createInMemoryJobRequests(),
-    staleJobs: createInMemoryStaleJobs(world.jobs as InMemoryJobRepository, world.store),
+    staleJobs: createInMemoryStaleJobs(world.jobs, world.store),
   };
   return {
     ...base,

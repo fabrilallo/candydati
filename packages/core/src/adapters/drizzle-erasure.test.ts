@@ -81,6 +81,7 @@ async function addApplication(org: string, jobId: string, candidateId: string, p
       id: randomUUID(), organizationId: org, applicationId: id, candidateId, direction, subject: `Hello ${person.firstName}`, bodyText: `Dear ${person.firstName}`,
       status: direction === 'inbound' ? 'received' : 'sent', providerMessageId: null, sentBy: direction === 'inbound' ? null : 'user_x', createdAt: NOW, sentAt: NOW,
       error: null, rawText: direction === 'inbound' ? `raw from ${person.email}` : null, unverifiedSender: false, inboundMessageId: direction === 'inbound' ? `<${id}@mail>` : null,
+      historical: false,
     });
   }
   const taskId = randomUUID();
@@ -324,7 +325,7 @@ describe('Postgres adapters of the privacy ports', () => {
     const base = depsFor(world);
     const notifications = createDrizzleNotifications(handle.db);
     const result = await runRetention(
-      { ...base, notifications, members: createDrizzleMemberDirectory(handle.db), retentionRuns: createDrizzleRetentionRuns(handle.db), dataExports: createDrizzleDataExports(handle.db) },
+      { ...base, notifications, jobTeams: createDrizzleJobTeams(handle.db), members: createDrizzleMemberDirectory(handle.db), retentionRuns: createDrizzleRetentionRuns(handle.db), dataExports: createDrizzleDataExports(handle.db) },
       { now: NOW },
     );
     const mine = result.runs.find((run) => run.organizationId === world.org);

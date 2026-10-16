@@ -46,7 +46,7 @@ describe('submitApplication: success', () => {
       consent: { privacyNoticeId: 'notice_1', privacyNoticeVersion: 1, scopes: ['selection'], givenAt: deps.now() },
       cv: { fileName: 'Ada CV.pdf', mediaType: 'application/pdf', sizeBytes: 64 },
     });
-    expect(await deps.files.get(application?.cv.key ?? '')).toEqual(fakePdfBytes());
+    expect(await deps.files.get(application?.cv?.key ?? '')).toEqual(fakePdfBytes());
     expect(extractions[0]).toMatchObject({ applicationId: application?.id, status: 'pending' });
     expect(deps.queue.jobs()).toEqual([
       { name: 'cv.extract', payload: { organizationId: ORG_A, applicationId: application?.id } },
@@ -69,7 +69,7 @@ describe('submitApplication: success', () => {
     await submitApplication(deps, submission({ cv: { bytes: fakeDocxBytes(), declaredName: 'cv.docx' }, form: validApplicationForm({ consentScopes: ['selection', 'talent_pool', 'selection'] }) }));
     const { applications, candidates } = deps.store.read();
     const expected = new Date(deps.now().getTime() + 730 * 86_400_000);
-    expect(applications[0]?.cv.mediaType).toContain('wordprocessingml');
+    expect(applications[0]?.cv?.mediaType).toContain('wordprocessingml');
     expect(applications[0]?.consent.scopes).toEqual(['selection', 'talent_pool']);
     expect(applications[0]?.retentionExpiresAt).toEqual(expected);
     expect(candidates[0]).toMatchObject({ talentPool: true, retentionExpiresAt: expected });
@@ -202,7 +202,7 @@ describe('submitApplication: refusals', () => {
   });
 
   it('rejects empty, oversized and non PDF/DOCX files with a cv issue, storing nothing', async () => {
-    const cases: [Uint8Array, string][] = [
+    const cases: [Uint8Array<ArrayBuffer>, string][] = [
       [new Uint8Array(), 'cv_empty'],
       [fakePdfBytes(CV_MAX_BYTES + 1), 'cv_too_large'],
       [new TextEncoder().encode('MZ executable'), 'unsupported_file'],

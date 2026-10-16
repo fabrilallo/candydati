@@ -15,7 +15,7 @@ const renameOrg = defineUseCase({
   audit: {
     action: 'organization.updated',
     target: (input) => ({ type: 'organization', id: input.organizationId }),
-    metadata: (input, result) => ({ name: input.name, previous: result.previous }),
+    metadata: (input, result: { readonly previous: string }) => ({ name: input.name, previous: result.previous }),
   },
   handler: async ({ input }) => ({ previous: 'Old', name: input.name }),
 });

@@ -62,11 +62,12 @@ describe('undoMigration', () => {
     expect(await answerConsentRequest(deps, { token: secret, scopes: ['selection'] })).toEqual({ status: 'reconfirmed' });
     expect(migratedOf(deps, batchId).filter((a) => a.candidateId === carlaApps[0]?.candidateId).map((a) => a.consentStatus)).toEqual(['given', 'given']);
     const dario = deps.store.read().candidates.find((c) => c.firstName === 'Dario');
-    deps.store.write({ applications: [...deps.store.read().applications, buildApplication({ id: 'app_again', organizationId: ORG_A, candidateId: dario?.id, createdAt: new Date('2026-06-02T00:00:00Z') })] });
+    if (dario === undefined) throw new Error('expected the candidate Dario');
+    deps.store.write({ applications: [...deps.store.read().applications, buildApplication({ id: 'app_again', organizationId: ORG_A, candidateId: dario.id, createdAt: new Date('2026-06-02T00:00:00Z') })] });
     const result = await undoMigration(deps, migrationOwner, { migrationId: batchId });
     expect(result.counts).toMatchObject({ keptReconfirmed: 1, keptAppliedAgain: 1, applicationsErased: 1, candidatesErased: 0, jobsDeleted: 0, jobsKept: 2 });
     const left = migratedOf(deps, batchId);
-    expect(left.map((a) => a.candidateId).toSorted()).toEqual([carlaApps[0]?.candidateId, carlaApps[0]?.candidateId, dario?.id].toSorted());
+    expect(left.map((a) => a.candidateId).toSorted()).toEqual([carlaApps[0]?.candidateId, carlaApps[0]?.candidateId, dario.id].toSorted());
     expect(deps.store.read().notes.map((n) => n.body).toSorted()).toEqual(['Non disponibile', 'Portfolio interessante']);
     expect(deps.store.read().applications.some((a) => a.id === 'app_1')).toBe(true);
   });
@@ -74,7 +75,8 @@ describe('undoMigration', () => {
   it('keeps a migrated job that holds an application from outside the batch', async () => {
     const { deps, batchId } = await committedWithBaseline();
     const designer = deps.jobs.snapshot().find((j) => j.content.title === 'Designer');
-    deps.store.write({ applications: [...deps.store.read().applications, buildApplication({ id: 'app_outside', organizationId: ORG_A, jobId: designer?.id, createdAt: new Date('2026-01-01T00:00:00Z') })] });
+    if (designer === undefined) throw new Error('expected the migrated job Designer');
+    deps.store.write({ applications: [...deps.store.read().applications, buildApplication({ id: 'app_outside', organizationId: ORG_A, jobId: designer.id, createdAt: new Date('2026-01-01T00:00:00Z') })] });
     const result = await undoMigration(deps, migrationOwner, { migrationId: batchId });
     expect(result.counts).toMatchObject({ jobsDeleted: 1, jobsKept: 1, keptAppliedAgain: 0 });
     expect(deps.jobs.snapshot().map((j) => j.content.title)).toContain('Designer');

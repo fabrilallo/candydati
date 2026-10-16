@@ -29,7 +29,7 @@ describe('reconcileQueuedWork (#3)', () => {
         { organizationId: 'o', id: 'g3', status: 'importing' },
       ],
     });
-    const result = await reconcileQueuedWork({ stuck: repo, queue: recording }, { now: NOW });
+    const result = await reconcileQueuedWork({ stuck: repo, queue: recording, files: createInMemoryFileStorage() }, { now: NOW });
     expect(result).toEqual({ messages: 1, exports: 1, imports: 2, migrations: 3, extractions: 1, fetchesFailed: 0, failed: 0 });
     expect(calls).toEqual([
       ['email.send', { organizationId: 'o', messageId: 'm1' }, { singletonKey: 'm1', replaceFailed: true }],
