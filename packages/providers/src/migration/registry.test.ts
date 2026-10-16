@@ -3,9 +3,10 @@ import { createFakeConnector } from '../testing/fake-connector.js';
 import { BUILT_IN_MIGRATION_CONNECTORS, createConnectorRegistry } from './registry.js';
 
 describe('createConnectorRegistry', () => {
-  it('ships no vendor connector yet: an empty catalog', () => {
-    expect(BUILT_IN_MIGRATION_CONNECTORS).toEqual([]);
-    expect(createConnectorRegistry().list()).toEqual([]);
+  it('ships the built-in vendor connectors, each as beta', () => {
+    expect(BUILT_IN_MIGRATION_CONNECTORS.map((connector) => connector.id)).toEqual(['teamtailor']);
+    expect(createConnectorRegistry().list().map((source) => source.id)).toEqual(['teamtailor']);
+    expect(BUILT_IN_MIGRATION_CONNECTORS.every((connector) => connector.maturity === 'beta')).toBe(true);
   });
 
   it('finds connectors by id and lists them', () => {
