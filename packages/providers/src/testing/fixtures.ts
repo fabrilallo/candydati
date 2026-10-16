@@ -1,6 +1,6 @@
 import ExcelJS from 'exceljs';
 import { zipSync } from 'fflate';
-import { crc32 } from 'node:zlib';
+import { crc32, deflateRawSync } from 'node:zlib';
 
 const encoder = new TextEncoder();
 
@@ -95,9 +95,39 @@ export async function makeXlsx(rows: readonly (readonly string[])[], sheetName =
  * `claimed` bytes: the shape of a zip bomb that lies about its size.
  */
 export function makeLyingBomb(entryName: string, size: number, claimed: number): Uint8Array {
-  const zip = Uint8Array.from(zipSync({ [entryName]: new Uint8Array(size) }, { level: 9 }));
-  const view = new DataView(zip.buffer);
-  view.setUint32(22, claimed, true);
-  view.setUint32(zip.length - 22 - 46 - entryName.length + 24, claimed, true);
+  // Native deflate: fflate's JavaScript deflate of 64 MiB takes seconds under V8 coverage and timed tests out in CI.
+  const content = new Uint8Array(size);
+  const data = deflateRawSync(content, { level: 9 });
+  const name = encoder.encode(entryName);
+  const local = zipHeader(30, 0x04034b50, name, { crc: crc32(content), compressed: data.length, claimed });
+  const central = zipHeader(46, 0x02014b50, name, { crc: crc32(content), compressed: data.length, claimed });
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true);
+  end.setUint16(8, 1, true);
+  end.setUint16(10, 1, true);
+  end.setUint32(12, central.length, true);
+  end.setUint32(16, local.length + data.length, true);
+  const zip = new Uint8Array(local.length + data.length + central.length + 22);
+  zip.set(local, 0);
+  zip.set(data, local.length);
+  zip.set(central, local.length + data.length);
+  zip.set(new Uint8Array(end.buffer), local.length + data.length + central.length);
   return zip;
+}
+
+/** A local (30 bytes) or central (46 bytes) header of one deflated entry at offset 0; both claim `claimed` bytes. */
+function zipHeader(length: 30 | 46, signature: number, name: Uint8Array, sizes: { crc: number; compressed: number; claimed: number }): Uint8Array {
+  const header = new Uint8Array(length + name.length);
+  const view = new DataView(header.buffer);
+  const at = length === 30 ? 4 : 6; // the central header has one more field (version made by) before "version needed"
+  view.setUint32(0, signature, true);
+  if (length === 46) view.setUint16(4, 20, true);
+  view.setUint16(at, 20, true);
+  view.setUint16(at + 4, 8, true); // deflate
+  view.setUint32(at + 10, sizes.crc, true);
+  view.setUint32(at + 14, sizes.compressed, true);
+  view.setUint32(at + 18, sizes.claimed, true);
+  view.setUint16(at + 22, name.length, true);
+  header.set(name, length);
+  return header;
 }
