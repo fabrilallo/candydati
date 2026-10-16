@@ -66,6 +66,28 @@ Stato: pre-1.0 (vedi il [changelog](CHANGELOG.md)). Definizione completa del pro
 - Import da CV e fogli di calcolo con anteprima e annullamento; export completo
 - Migrazione da un altro ATS con un formato di pacchetto aperto, con anteprima, un passaggio di responsabilità esplicito e annullamento; una skill per agenti prepara il pacchetto ([guida](website/it/guide/migration.md))
 
+## Migrare da un altro ATS
+
+Porta dal tuo ATS precedente annunci, fasi, candidati, candidature con esiti e date, note, email passate, CV e
+allegati. Tutto passa da un [formato di pacchetto](docs/schema/migration-package.v1.json) aperto: vedi un'anteprima,
+confermi che la tua organizzazione è responsabile del trasferimento e puoi annullarlo. Punteggi e valutazioni non
+vengono mai importati.
+
+| Fonte | Come si collega | Stato |
+|---|---|---|
+| Teamtailor | chiave API | <img alt="beta" src="https://img.shields.io/badge/beta-F59E0B"> |
+| Greenhouse | credenziali API Harvest v3 | <img alt="beta" src="https://img.shields.io/badge/beta-F59E0B"> |
+| Workable | token API | <img alt="beta" src="https://img.shields.io/badge/beta-F59E0B"> |
+| Recruitee | token API personale | <img alt="beta" src="https://img.shields.io/badge/beta-F59E0B"> |
+| Zucchetti InRecruiting | file di export (foglio di calcolo + ZIP dei CV) | <img alt="beta" src="https://img.shields.io/badge/beta-F59E0B"> |
+| Qualsiasi altro ATS o un foglio di calcolo | pacchetto preparato da un agente AI con la [skill di migrazione](skills/candydati-migration/README.md) | disponibile |
+
+**Beta** significa costruito sulla documentazione pubblica del fornitore e non ancora verificato su un account reale:
+controlla l'anteprima prima di confermare e raccontaci com'è andata. Cosa porta ogni connettore e cosa no:
+[fonti di migrazione](docs/migration/sources.md) (in inglese). Passo per passo: la
+[guida alla migrazione](https://fabrilallo.github.io/candydati/it/guide/migration). I nomi dei prodotti sono marchi dei
+rispettivi titolari; Candydati non è affiliato con loro.
+
 ## Schermate
 
 | | |
@@ -208,7 +230,7 @@ Senza date. Rinviati rispetto al perimetro attuale ([PRODUCT.md §3.3](docs/PROD
 - Scorecard e kit per i colloqui
 - Fasi riservate: feedback e note visibili solo a owner, admin e hiring manager
 - Pianificazione dei colloqui tramite integrazione con un servizio di calendario
-- Connettori integrati per singoli ATS (vedi le [fonti di migrazione](docs/migration/sources.md))
+- Connettori di migrazione fuori dalla beta quando una migrazione reale conferma ciascuno; altre fonti su richiesta
 
 ## Contribuire
 
