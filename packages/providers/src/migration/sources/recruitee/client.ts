@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 import type { JsonReader, DownloadStore } from '../../../http/index.js';
 import { JsonReaderError } from '../../../http/index.js';
+import { downloadSourceFile } from '../file-download.js';
 import {
   candidateDetailSchema,
   hitSchema,
@@ -47,6 +48,7 @@ export interface RecruiteeClient {
   offerDetail(offerId: string): Promise<RecruiteeOffer | null>;
   candidateDetail(candidateId: string): Promise<RecruiteeCandidateDetail | null>;
   notes(candidateId: string): Promise<readonly RecruiteeNote[] | null>;
+  /** The token goes only to the API host; a file anywhere else is fetched as a public file, without it. */
   download(url: string, store: DownloadStore): Promise<unknown>;
 }
 
@@ -119,6 +121,6 @@ export function createRecruiteeClient(options: RecruiteeClientOptions): Recruite
     offerDetail: (id) => optional('offer_detail', async () => (await get(`/offers/${encodeURIComponent(id)}`, offerDetailSchema)).data.offer ?? null),
     candidateDetail: (id) => optional('candidate_detail', async () => (await get(`/candidates/${encodeURIComponent(id)}`, candidateDetailSchema)).data.candidate ?? null),
     notes: (id) => optional('notes', async () => parseAll((await get(`/candidates/${encodeURIComponent(id)}/notes`, notesSchema)).data, safe(noteSchema)).ok),
-    download: (url, store) => options.reader.download(url, store, extras),
+    download: (url, store) => downloadSourceFile(options.reader, url, store, options.baseUrl, extras),
   };
 }

@@ -188,12 +188,16 @@ describe('Recruitee connector', () => {
     expect(summary?.skipped['file_not_found']).toBe(1);
   });
 
-  it('refuses a file URL outside the allowed host without sending the token there', async () => {
+  it('downloads a file on another host without sending the token there', async () => {
+    const storage = origin().replace('api.recruitee.com', 'recruitee-files.s3.amazonaws.com');
     route(`${C}/search/new/candidates`, json(searchPage([searchHit()])));
-    route(`${C}/candidates/101`, json(candidateDetail('https://files.elsewhere.example/cv.pdf')));
-    let summary: RecruiteeStats | undefined;
-    await run({ onSummary: (s) => (summary = s) });
-    expect(summary?.skipped['file_host_not_allowed']).toBe(1);
+    route(`${C}/candidates/101`, json(candidateDetail(`${storage}/files/cv.pdf?X-Amz-Signature=s`)));
+    const { collected } = await run();
+    expect(collected.applications[0]?.files).toEqual([expect.objectContaining({ kind: 'cv' })]);
+    const download = requests.filter((r) => r.url?.startsWith('/files/'));
+    expect(download).toHaveLength(1);
+    expect(download[0]?.headers.host).toBe(new URL(storage).host);
+    expect(download[0]?.headers.authorization).toBeUndefined();
   });
 
   it('keeps consent only with a given date and uses gdpr_expires_at as its expiry', async () => {

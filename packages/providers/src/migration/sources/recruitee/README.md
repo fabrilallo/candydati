@@ -63,7 +63,8 @@ the timeline and emails, so they are not attempted.
 - Optional endpoints (offers, offer detail, candidate detail, notes): 401/403 switches the endpoint off for the run, 404
   skips that call (five in a row switch it off), an unexpected shape skips the call. Skips are counted
   (`onSummary` / `onSkip`), never logged with data. Jobs are then rebuilt from placements and the candidates still come.
-- Files: downloaded right after their candidate is read. If Recruitee serves files from another host than
-  `api.recruitee.com` (not documented), the reader refuses them: they are skipped and counted as `file_host_not_allowed`.
-  Check the counters: a migration with no CVs probably means this.
+- Files: downloaded right after their candidate is read. The token is sent only to `api.recruitee.com`; a file on any
+  other host (Recruitee's file host is not documented, signed storage URLs are likely) is fetched without credentials,
+  from public addresses only (https, every resolved address public, redirects re-checked). A file that fails is skipped
+  and counted as `file_<code>` (for example `file_not_found`, `file_host_not_allowed` for a private address).
 - A record the package refuses (an unsafe name, for example) is skipped and counted; the rest goes on.
