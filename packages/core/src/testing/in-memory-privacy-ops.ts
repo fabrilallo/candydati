@@ -55,14 +55,16 @@ export function createInMemoryErasure(world: ErasureWorld): ErasureTransaction {
           requests: world.feedbackStore.read().requests.filter((r) => !(own(r) && ids.has(r.applicationId))),
         });
         world.importStore?.write({ tokens: world.importStore.read().tokens.filter((t) => !(own(t) && ids.has(t.applicationId))) });
+        const attachments = store.read().attachments.filter((f) => own(f) && ids.has(f.applicationId));
         store.write({
+          attachments: store.read().attachments.filter((f) => !(own(f) && ids.has(f.applicationId))),
           extractions: store.read().extractions.filter((e) => !(own(e) && ids.has(e.applicationId))),
           notes: store.read().notes.filter((n) => !(own(n) && n.applicationId !== null && ids.has(n.applicationId))),
           applications: store.read().applications.filter((a) => !(own(a) && ids.has(a.id))),
           stageEvents: store.read().stageEvents.filter((e) => !(own(e) && ids.has(e.applicationId))),
           promises: store.read().promises.filter((p) => !(own(p) && ids.has(p.applicationId))),
         });
-        return doomed.flatMap((a) => (a.cv ? [a.cv.key] : []));
+        return [...doomed.flatMap((a) => (a.cv ? [a.cv.key] : [])), ...attachments.map((f) => f.key)];
       },
       async deleteDataExports(organizationId: string): Promise<readonly string[]> {
         const removed = world.dataExports?.purge(organizationId) ?? [];

@@ -2,7 +2,7 @@ import type { Actor } from '../actor.js';
 import { NotFoundError, ForbiddenError } from '../errors.js';
 import { agentActor, apiKeyActor, userActor } from './actors.js';
 import { buildAutomationRule, buildNotification, buildTask } from './automation-fixtures.js';
-import { buildApplication, buildCandidate, buildExtraction, buildNote, fakePdfBytes } from './candidate-fixtures.js';
+import { buildApplication, buildAttachment, buildCandidate, buildExtraction, buildNote, fakePdfBytes } from './candidate-fixtures.js';
 import { ORG_A } from './candidate-seed.js';
 import { testHash, type TestHrDeps } from './hr-deps.js';
 import { seedImportWorld, type TestImportDeps } from './import-deps.js';
@@ -105,6 +105,13 @@ export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
 
 async function seedJobB(deps: JobScopeWorld): Promise<void> {
   for (const { cv } of APPLICATIONS) if (cv) await deps.files.put(cv.key, fakePdfBytes(), 'application/pdf');
+  const attachments = [
+    buildAttachment({ id: 'att_a', applicationId: 'app_a', fileName: 'anna-letter.pdf', ...org }),
+    buildAttachment({ id: 'att_b', applicationId: 'app_b', fileName: 'B-ONLY-letter.pdf', ...org }),
+    buildAttachment({ id: 'att_s2', applicationId: 'app_s2', fileName: 'SHARED-B-letter.pdf', ...org }),
+  ];
+  deps.store.write({ attachments });
+  for (const attachment of attachments) await deps.files.put(attachment.key, fakePdfBytes(), attachment.mediaType);
   for (const userId of ['int_a', 'hm_a', 'rec_a']) {
     await deps.jobTeams.upsert({ organizationId: ORG_A, jobId: JOB_A, userId, role: userId === 'hm_a' ? 'hiring_manager' : userId === 'int_a' ? 'interviewer' : 'recruiter', addedBy: 'system', createdAt: new Date() });
     await deps.notifications.createIfAbsent(buildNotification({ id: `notif_b_${userId}`, userId, applicationId: 'app_b', jobId: JOB_B, ...org }), `b-${userId}`);

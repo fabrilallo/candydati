@@ -1,3 +1,4 @@
+import { attachmentKey, type ApplicationAttachment } from '@candydati/domain';
 import type { Application, Candidate, CandidateNote, CvExtractionRecord, PrivacyNotice, PrivacyNoticeInput } from '@candydati/domain';
 
 const DATE = new Date('2026-01-01T00:00:00.000Z');
@@ -106,3 +107,23 @@ export const buildExtraction = (overrides: Partial<CvExtractionRecord> = {}): Cv
   updatedAt: DATE,
   ...overrides,
 });
+
+/** A cover letter of `app_1`, stored under the application's prefix (the bytes are the test's to put). */
+export const buildAttachment = (overrides: Partial<ApplicationAttachment> = {}): ApplicationAttachment => {
+  const id = overrides.id ?? 'att_1';
+  const organizationId = overrides.organizationId ?? 'org_test';
+  const applicationId = overrides.applicationId ?? 'app_1';
+  return {
+    id,
+    organizationId,
+    applicationId,
+    migrationBatchId: 'mig_1',
+    kind: 'cover_letter',
+    fileName: 'lettera.pdf',
+    mediaType: 'application/pdf',
+    sizeBytes: 64,
+    key: attachmentKey(organizationId, applicationId, id),
+    createdAt: DATE,
+    ...overrides,
+  };
+};

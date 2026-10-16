@@ -86,7 +86,8 @@ const README = `Export of the organization's data.
 organization.json  the organization
 jobs/              one file per job ad, in the job-content schema (docs/schema/job-content.v1.json)
 candidates/        one file per candidate, in the candidate-export schema (docs/schema/candidate-export.v1.json)
-files/             the original CV files, referenced by applications[].cv.path in the candidate files
+files/             the original CV files and the attachments, referenced by applications[].cv.path and
+                   applications[].attachments[].path in the candidate files
 careers/           the careers page (page.json: draft and published document), its media library (media.json) and files
 `;
 

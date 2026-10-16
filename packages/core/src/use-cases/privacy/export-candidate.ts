@@ -6,7 +6,7 @@ import { defineRightsUseCase } from './rights.js';
 export type CandidateExportResult = CandidateExportBundle;
 
 /**
- * Right of access and portability (art. 15, 20): `candidate.json` in the public schema plus the original CV files. The
+ * Right of access and portability (art. 15, 20): `candidate.json` in the public schema plus the original CV and attachment files. The
  * api puts them in a ZIP with a `ZipWriter`. Audited with counts only.
  */
 export const exportCandidate = defineRightsUseCase({

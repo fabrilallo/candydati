@@ -3,6 +3,7 @@ import type { FileStorage, TaskQueue } from './intake-ports.js';
 import type { OutboxRepository } from './webhook-ports.js';
 import type {
   Application,
+  ApplicationAttachment,
   Candidate,
   CandidateNote,
   CvExtractionRecord,
@@ -89,6 +90,13 @@ export interface ApplicationRepository {
   listByImportBatch(organizationId: string, batchId: string): Promise<readonly Application[]>;
   /** Applications stored at or after `since`, in the organization or, when `jobId` is given, for that job only. */
   countCreatedSince(organizationId: string, since: Date, jobId?: string): Promise<number>;
+  /**
+   * The attachments (files other than the CV) of these applications, oldest first. They are written only by a migration
+   * (`MigratedRowsRepository.insertAttachments`) and deleted only by the erasure, with their application.
+   */
+  listAttachments(organizationId: string, applicationIds: readonly string[]): Promise<readonly ApplicationAttachment[]>;
+  /** One attachment of one application; null when either does not exist (or is of another organization). */
+  findAttachment(organizationId: string, applicationId: string, attachmentId: string): Promise<ApplicationAttachment | null>;
 }
 
 /** Keyset batch of the retention scan. */

@@ -18,6 +18,7 @@ function rows(deps: TestMigrationCommitDeps) {
     jobs: deps.jobs.snapshot(),
     candidates: store.read().candidates,
     applications: store.read().applications,
+    attachments: store.read().attachments,
     notes: store.read().notes,
     stageEvents: store.read().stageEvents,
     extractions: store.read().extractions,

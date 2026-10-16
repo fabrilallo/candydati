@@ -39,6 +39,9 @@ export function createInMemoryMigratedRows({ store, messagingStore, jobs, migrat
       messagingStore.write({ messages: [...messagingStore.read().messages, ...messages] });
       tag('message', batchId, messages.map((m) => m.id));
     },
+    async insertAttachments(_batchId, attachments) {
+      store.write({ attachments: [...store.read().attachments, ...attachments] });
+    },
     async candidateIdsOf(organizationId, batchId) {
       const own = <T extends { readonly organizationId: string }>(row: T): boolean => row.organizationId === organizationId;
       const notes = tagged('note', batchId);

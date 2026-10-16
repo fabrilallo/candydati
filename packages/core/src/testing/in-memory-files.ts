@@ -1,5 +1,5 @@
 import type { CvMediaType } from '@candydati/domain';
-import type { CvModelExtractor, CvSniffer, CvTextExtractor, FileStorage, QueuedTask, TaskQueue } from '../intake-ports.js';
+import type { AttachmentSniffer, CvModelExtractor, CvSniffer, CvTextExtractor, FileStorage, QueuedTask, TaskQueue } from '../intake-ports.js';
 
 export interface InMemoryFileStorage extends FileStorage {
   keys(): readonly string[];
@@ -81,6 +81,22 @@ export const fakeCvSniffer: CvSniffer = (bytes, declaredName) => {
   if (startsWith(bytes, [0x50, 0x4b, 0x03, 0x04])) {
     return { mediaType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', fileName: `${stem}.docx` };
   }
+  return null;
+};
+
+const PNG = [0x89, 0x50, 0x4e, 0x47];
+
+/**
+ * Fake of the real attachment sniffer: what `fakeCvSniffer` accepts, `\x89PNG` is a PNG, printable text with no `<` is
+ * plain text; anything else (an `MZ` executable, markup, binary bytes) is refused.
+ */
+export const fakeAttachmentSniffer: AttachmentSniffer = (bytes, declaredName) => {
+  const cv = fakeCvSniffer(bytes, declaredName);
+  if (cv) return cv;
+  const stem = (declaredName.split(/[\\/]/).pop()?.trim() || 'attachment').replace(/\.[^.]*$/, '') || 'attachment';
+  if (startsWith(bytes, PNG)) return { mediaType: 'image/png', fileName: `${stem}.png` };
+  const text = new TextDecoder().decode(bytes);
+  if (bytes.length > 0 && !startsWith(bytes, [0x4d, 0x5a]) && /^[\t\n\r\x20-\x7e]*$/.test(text) && !text.includes('<')) return { mediaType: 'text/plain', fileName: `${stem}.txt` };
   return null;
 };
 

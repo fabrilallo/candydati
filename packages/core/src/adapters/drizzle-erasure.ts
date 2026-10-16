@@ -10,7 +10,7 @@ import { createDrizzleOutbox } from './drizzle-outbox.js';
  * fails loudly instead of leaving data behind), every statement filters by `organization_id`.
  */
 export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
-  const { application, applicationStageEvent, candidate, candidateNote, consentToken, conversation, cvExtraction, dataExport, feedbackRequest, interviewFeedback, message, notification, outboxEvent, responsePromise, task, webhookDelivery } = schema;
+  const { application, applicationAttachment, applicationStageEvent, candidate, candidateNote, consentToken, conversation, cvExtraction, dataExport, feedbackRequest, interviewFeedback, message, notification, outboxEvent, responsePromise, task, webhookDelivery } = schema;
 
   /** Outbox events (and their deliveries) whose data mentions one of these ids under `key`. */
   const deleteEvents = async (organizationId: string, key: 'applicationId' | 'candidateId', ids: readonly string[]): Promise<void> => {
@@ -71,8 +71,12 @@ export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
       await db.delete(feedbackRequest).where(and(eq(feedbackRequest.organizationId, organizationId), inArray(feedbackRequest.applicationId, ids)));
       await db.delete(responsePromise).where(and(eq(responsePromise.organizationId, organizationId), inArray(responsePromise.applicationId, ids)));
       await db.delete(applicationStageEvent).where(and(eq(applicationStageEvent.organizationId, organizationId), inArray(applicationStageEvent.applicationId, ids)));
+      const attachments = await db
+        .delete(applicationAttachment)
+        .where(and(eq(applicationAttachment.organizationId, organizationId), inArray(applicationAttachment.applicationId, ids)))
+        .returning({ key: applicationAttachment.storageKey });
       await db.delete(application).where(and(eq(application.organizationId, organizationId), inArray(application.id, ids)));
-      return rows.flatMap((row) => (row.cvKey === null ? [] : [row.cvKey]));
+      return [...rows.flatMap((row) => (row.cvKey === null ? [] : [row.cvKey])), ...attachments.map((row) => row.key)];
     },
     async deleteDataExports(organizationId) {
       const rows = await db.delete(dataExport).where(eq(dataExport.organizationId, organizationId)).returning({ id: dataExport.id });

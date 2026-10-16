@@ -67,7 +67,7 @@ describe('commitMigration: what it writes', () => {
     expect(applications.find((a) => a.outcome === null)?.message).toBe('Vorrei lavorare con voi.');
   });
 
-  it('copies readable CVs to the application key, queues their extraction, and skips other files', async () => {
+  it('copies readable CVs to the application key, queues their extraction, and keeps the other files as attachments', async () => {
     const { deps, applications, batch } = await committed();
     const ada = applications.find((a) => a.candidateId === 'cand_1');
     expect(ada?.cv).toEqual({ key: `organizations/${ORG_A}/applications/${ada?.id}/cv`, fileName: 'ada-cv.pdf', mediaType: 'application/pdf', sizeBytes: 64 });
@@ -75,7 +75,14 @@ describe('commitMigration: what it writes', () => {
     expect(applications.filter((a) => a.cv !== null)).toHaveLength(1);
     expect(deps.store.read().extractions.find((e) => e.applicationId === ada?.id)).toMatchObject({ status: 'pending' });
     expect(deps.queue.jobs()).toContainEqual({ name: 'cv.extract', payload: { organizationId: ORG_A, applicationId: ada?.id } });
-    expect((await deps.migrations.findById(ORG_A, batch.id))?.counts.commit).toMatchObject({ cvs: 1, filesSkipped: 2 });
+    expect((await deps.migrations.findById(ORG_A, batch.id))?.counts.commit).toMatchObject({ cvs: 1, attachments: 2, filesSkipped: 0 });
+    const carla = applications.find((a) => a.message === 'Vorrei lavorare con voi.');
+    const attachments = deps.store.read().attachments.filter((f) => f.applicationId === carla?.id);
+    // A CV that is not a PDF or DOCX is not lost: it is kept as an attachment, and so is the portfolio.
+    expect(attachments.map((f) => [f.kind, f.fileName, f.mediaType])).toEqual([
+      ['other', 'cv.txt', 'text/plain'],
+      ['other', 'portfolio.pdf', 'application/pdf'],
+    ]);
   });
 
   it('records the stage history as backfilled system events, moves inside a merged stage left out', async () => {

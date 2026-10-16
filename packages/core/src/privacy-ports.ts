@@ -33,7 +33,8 @@ export interface ErasureStore {
   lockCandidateApplications(organizationId: string, candidateId: string): Promise<readonly ErasableApplication[]>;
   /**
    * Deletes, for the given applications: notifications, tasks, outbox events and webhook deliveries that point to them,
-   * messages, conversations, CV extractions, stage events and response promises, notes about them, interview feedback and its requests and finally the applications. Returns their CV file keys.
+   * messages, conversations, CV extractions, stage events and response promises, notes about them, interview feedback and its requests, attachments and finally the applications (their answers go with the row).
+   * Returns the keys of their CV and attachment files.
    */
   deleteApplications(organizationId: string, applicationIds: readonly string[]): Promise<readonly string[]>;
   /**

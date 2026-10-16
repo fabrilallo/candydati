@@ -38,6 +38,7 @@ function snapshot(deps: TestMigrationCommitDeps) {
     jobs: deps.jobs.snapshot().length,
     candidates: store.read().candidates.length,
     applications: store.read().applications.map((a) => a.id).toSorted(),
+    attachments: store.read().attachments.map((f) => f.id).toSorted(),
     events: store.read().stageEvents.map((e) => e.id).toSorted(),
     notes: store.read().notes.map((n) => n.id).toSorted(),
     messages: messagingStore.read().messages.length,

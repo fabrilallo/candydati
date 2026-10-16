@@ -1,4 +1,4 @@
-import type { CvMediaType } from '@candydati/domain';
+import type { AttachmentMediaType, CvMediaType } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { ReceiptDeps } from './messaging-ports.js';
@@ -157,6 +157,18 @@ export interface SniffedCv {
 
 /** Decides from the magic bytes, never from the declared name alone. Null: not a PDF or DOCX. */
 export type CvSniffer = (bytes: Uint8Array, declaredName: string) => SniffedCv | null;
+
+export interface SniffedAttachment {
+  readonly mediaType: AttachmentMediaType;
+  /** A safe file name, extension matching the media type. */
+  readonly fileName: string;
+}
+
+/**
+ * Decides an attachment's type from its content (PDF, DOCX, DOC, ODT, RTF, plain text, PNG, JPEG). Null: anything
+ * else (executables, archives, HTML, SVG...), which is never stored.
+ */
+export type AttachmentSniffer = (bytes: Uint8Array, declaredName: string) => SniffedAttachment | null;
 
 export interface CvTextExtractor {
   /** Plain text of the document. May throw on a corrupt document: core marks the extraction `failed`. */

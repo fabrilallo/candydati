@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { createDb, eq, schema, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { buildJob } from '../testing/index.js';
+import { attachmentKey } from '@candydati/domain';
+import { buildApplication, buildCandidate, buildJob } from '../testing/index.js';
+import { createDrizzleApplications, toAttachment } from './drizzle-applications.js';
+import { createDrizzleCandidates } from './drizzle-candidates.js';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
 import { createDrizzleMigratedRows } from './drizzle-migrated-rows.js';
@@ -53,5 +56,31 @@ describe('migrated rows: deleting the jobs of an undone migration', () => {
     });
     expect(outcome.deleted).toBe(false);
     expect(outcome.stillUsable?.id).toBe(closed);
+  });
+});
+
+describe('migrated rows: attachments', () => {
+  it('stores attachments with their batch and reads them back only in their organization and application', async () => {
+    const { org, batchId, rows, job } = await world();
+    const jobId = await job('closed');
+    const candidate = await createDrizzleCandidates(handle.db).create(buildCandidate({ id: randomUUID(), organizationId: org, email: `${randomUUID()}@x.it` }));
+    const applications = createDrizzleApplications(handle.db);
+    const application = await applications.create(buildApplication({ id: randomUUID(), organizationId: org, jobId, candidateId: candidate.id, migrationBatchId: batchId, cv: null, answers: [{ question: 'Q', answer: 'A' }] }));
+    expect(application.answers).toEqual([{ question: 'Q', answer: 'A' }]);
+    const at = new Date('2025-02-01T09:00:00Z');
+    const attachment = (id: string, kind: 'cover_letter' | 'other') => ({
+      id, organizationId: org, applicationId: application.id, migrationBatchId: batchId, kind, fileName: `${id}.pdf`, mediaType: 'application/pdf' as const, sizeBytes: 3, key: attachmentKey(org, application.id, id), createdAt: at,
+    });
+    const [first, second] = [attachment(randomUUID(), 'cover_letter'), attachment(randomUUID(), 'other')];
+    await rows.insertAttachments(batchId, [first, second]);
+    await rows.insertAttachments(batchId, []);
+    expect((await applications.listAttachments(org, [application.id])).map((f) => f.id).toSorted()).toEqual([first.id, second.id].toSorted());
+    expect(await applications.listAttachments(org, [])).toEqual([]);
+    expect(await applications.listAttachments(randomUUID(), [application.id])).toEqual([]);
+    expect(await applications.findAttachment(org, application.id, first.id)).toEqual(first);
+    expect(await applications.findAttachment(randomUUID(), application.id, first.id)).toBeNull();
+    expect(await applications.findAttachment(org, randomUUID(), first.id)).toBeNull();
+    const row = { ...first, storageKey: first.key, mediaType: 'text/html' as never };
+    expect(() => toAttachment(row)).toThrow('Unexpected attachment media type');
   });
 });

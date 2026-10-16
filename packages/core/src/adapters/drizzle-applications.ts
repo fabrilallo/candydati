@@ -1,5 +1,5 @@
-import { and, asc, count, desc, eq, gte, isNotNull, isNull, lte, schema, sql } from '@candydati/db';
-import { CV_MEDIA_TYPES, type Application, type CvMediaType, type StoredFile } from '@candydati/domain';
+import { and, asc, count, desc, eq, gte, inArray, isNotNull, isNull, lte, schema, sql } from '@candydati/db';
+import { CV_MEDIA_TYPES, isAttachmentMediaType, type Application, type ApplicationAttachment, type AttachmentMediaType, type CvMediaType, type StoredFile } from '@candydati/domain';
 import type { ApplicationRepository, RetentionPage } from '../candidate-ports.js';
 import { ConflictError, NotFoundError } from '../errors.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';
@@ -29,6 +29,7 @@ const toApplication = (row: Row): Application => ({
   message: row.message,
   cv: toStoredFile(row),
   ...(row.submittedContact ? { submittedContact: row.submittedContact } : {}),
+  ...(row.answers ? { answers: row.answers } : {}),
   consent: { ...row.consent, givenAt: new Date(row.consent.givenAt) },
   consentStatus: row.consentStatus,
   importBatchId: row.importBatchId,
@@ -59,6 +60,7 @@ const toValues = (a: Application) => ({
   cvMediaType: a.cv?.mediaType ?? null,
   cvSizeBytes: a.cv?.sizeBytes ?? null,
   submittedContact: a.submittedContact ?? null,
+  answers: a.answers ?? null,
   consent: a.consent,
   consentStatus: a.consentStatus,
   importBatchId: a.importBatchId,
@@ -74,6 +76,26 @@ const toValues = (a: Application) => ({
   responseDueAt: a.responseDueAt,
   respondedAt: a.respondedAt,
   reconfirmationSentAt: a.reconfirmationSentAt ?? null,
+});
+
+type AttachmentRow = typeof schema.applicationAttachment.$inferSelect;
+
+const toAttachmentMediaType = (value: string): AttachmentMediaType => {
+  if (!isAttachmentMediaType(value)) throw new Error(`Unexpected attachment media type in database: ${value}`);
+  return value;
+};
+
+export const toAttachment = (row: AttachmentRow): ApplicationAttachment => ({
+  id: row.id,
+  organizationId: row.organizationId,
+  applicationId: row.applicationId,
+  migrationBatchId: row.migrationBatchId,
+  kind: row.kind,
+  fileName: row.fileName,
+  mediaType: toAttachmentMediaType(row.mediaType),
+  sizeBytes: row.sizeBytes,
+  key: row.storageKey,
+  createdAt: row.createdAt,
 });
 
 /** Postgres implementation. Every statement filters by `organization_id`. */
@@ -163,6 +185,25 @@ export function createDrizzleApplications(db: DbExecutor): ApplicationRepository
           ),
         );
       return row?.total ?? 0;
+    },
+    async listAttachments(organizationId, applicationIds) {
+      if (applicationIds.length === 0) return [];
+      const { applicationAttachment: attachment } = schema;
+      const rows = await db
+        .select()
+        .from(attachment)
+        .where(and(eq(attachment.organizationId, organizationId), inArray(attachment.applicationId, [...applicationIds])))
+        .orderBy(asc(attachment.createdAt), asc(attachment.id));
+      return rows.map(toAttachment);
+    },
+    async findAttachment(organizationId, applicationId, attachmentId) {
+      const { applicationAttachment: attachment } = schema;
+      const [row] = await db
+        .select()
+        .from(attachment)
+        .where(and(eq(attachment.organizationId, organizationId), eq(attachment.applicationId, applicationId), eq(attachment.id, attachmentId)))
+        .limit(1);
+      return row ? toAttachment(row) : null;
     },
   };
 }
