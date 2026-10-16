@@ -214,7 +214,7 @@ describe('migrations: connectors of a default build', () => {
   it('offers the built-in vendor connectors (beta), never the test one', async () => {
     const w = await createWorld(t);
     const listed = (await w.owner.get<{ id: string; maturity: string }[]>('/api/v1/migrations/connectors')).body.data ?? [];
-    expect(listed.map((connector) => [connector.id, connector.maturity])).toEqual([['teamtailor', 'beta'], ['greenhouse', 'beta'], ['workable', 'beta'], ['recruitee', 'beta']]);
+    expect(listed.map((connector) => [connector.id, connector.maturity])).toEqual([['teamtailor', 'beta'], ['greenhouse', 'beta'], ['workable', 'beta'], ['recruitee', 'beta'], ['inrecruiting', 'beta']]);
   });
 });
 
@@ -223,6 +223,6 @@ describe('migrations: documentation', () => {
     const doc = (await t.app.inject({ method: 'GET', url: '/api/v1/openapi.json' })).json() as { paths: Record<string, Record<string, { tags: string[] }>> };
     expect(doc.paths['/api/v1/migrations']?.post?.tags).toEqual(['Migration']);
     expect(doc.paths['/api/v1/migrations/{id}/commit']?.post?.tags).toEqual(['Migration']);
-    expect(Object.keys(doc.paths).filter((path) => path.includes('/migrations'))).toHaveLength(8);
+    expect(Object.keys(doc.paths).filter((path) => path.includes('/migrations'))).toHaveLength(9);
   });
 });

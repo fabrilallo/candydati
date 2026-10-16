@@ -16,6 +16,7 @@ const fetchView = (fetch: MigrationFetchCounts): NonNullable<MigrationBatchView[
   done: fetch.done,
   total: fetch.total,
   ...(fetch.parts === undefined ? {} : { parts: fetch.parts }),
+  ...(fetch.notices === undefined ? {} : { notices: [...fetch.notices] }),
 });
 
 export function toMigrationView(batch: MigrationBatch): MigrationBatchView {

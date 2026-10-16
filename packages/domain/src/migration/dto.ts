@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { CONNECTOR_MATURITIES, MIGRATION_ISSUE_CODES, MIGRATION_ISSUE_LEVELS, MIGRATION_STAGE_TARGETS, MIGRATION_STATUSES } from './batch.js';
 import { MIGRATION_JOB_STATUSES } from './constants.js';
+import { migrationFetchNoticeSchema } from './connector.js';
 import { migrationStageChoiceSchema, migrationStageNameChoiceSchema } from './choices.js';
 
 /** The migration as the api sends it and the web reads it (`GET /api/v1/migrations`): dates as ISO text, no storage keys. */
@@ -63,7 +64,7 @@ const counts = z.object({
   issueWarnings: int,
   issueInfos: int,
   perJob: z.array(migrationJobCountSchema),
-  fetch: z.object({ done: int, total: int.nullable(), parts: int.optional() }).describe('Progress of a connector fetch, then the number of parts it produced.'),
+  fetch: z.object({ done: int, total: int.nullable(), parts: int.optional(), notices: z.array(migrationFetchNoticeSchema).optional() }).describe('Progress of a connector fetch, then the number of parts it produced.'),
   commit: commitCounts.optional(),
   undo: undoCounts.optional(),
 }).partial();

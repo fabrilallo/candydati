@@ -120,7 +120,8 @@ Remember that the candidate data passes through the agent's model provider: it m
 
 ## Connectors
 
-Built-in connectors, where you enter a read-only key and the package is built for you, are **coming soon**.
+Built-in connectors, where you enter a read-only key and the package is built for you, are **coming soon**. The one available today, Zucchetti InRecruiting, has no public API: it reads an export file you upload
+(see [InRecruiting](#inrecruiting)).
 
 | Source | Status |
 | --- | --- |
@@ -128,11 +129,53 @@ Built-in connectors, where you enter a read-only key and the package is built fo
 | Workable | coming soon |
 | Greenhouse | coming soon |
 | Recruitee | coming soon |
+| Zucchetti InRecruiting | beta (export file) |
 
 When they arrive they will be marked **beta**: built on the source's public documentation and not yet verified on a real
 account, so check the preview carefully. A connector becomes stable only after a real migration, recorded in
 [the sources list](https://github.com/fabrilallo/candydati/blob/main/docs/migration/sources.md). The API key is kept
 encrypted only while the data is fetched, then wiped. Until then, use the skill or a package you build yourself.
+
+### InRecruiting
+
+Zucchetti InRecruiting has **no public API**, so this connector does not ask for a key: it reads the **export** you get
+from the vendor. It is **beta**: the column names below are assumed (no real export format is public) and it has not been
+verified on a real account, so check the preview carefully.
+
+1. **Ask for a full export.** Contact InRecruiting / Zucchetti support and ask for an export of your applications as a
+   spreadsheet (CSV or Excel), one row per application, and, if you want the CVs, a ZIP with the CV files. This may be a
+   paid service on your plan: that is between you and the vendor.
+2. **Check the columns.** Candydati recognises these headers (Italian or English, any case, accents ignored):
+
+   | Information | Recognised headers |
+   | --- | --- |
+   | Name (required) | Nome e cognome, Nominativo, Full name, or Nome and Cognome / First name and Last name |
+   | Job (required) | Annuncio, Posizione, Ruolo, Job, Job title, Vacancy |
+   | Job code | Codice annuncio, Codice posizione, Job code |
+   | Email, phone | Email, Telefono, Cellulare, Phone |
+   | Stage | Stato, Fase, Stage, Status |
+   | Applied on | Data candidatura, Application date, Applied at |
+   | Outcome | Esito, Esito finale, Outcome |
+   | Notes, tags, source | Note, Tag, Fonte, Source |
+   | CV file | CV, File, Allegato, Curriculum |
+
+   A column with another name is **left out and listed** in the preview. If your export uses other names, **rename the
+   columns in the spreadsheet before uploading**: it takes a minute and nothing else changes.
+3. **Upload.** Choose *Zucchetti InRecruiting* in the first step, then the spreadsheet and, optionally, the ZIP of CVs.
+   The files are used only to read your data and are deleted at the end of the reading, whatever happens: success, failure, or a worker that stopped.
+
+How it reads the file: one row is one application; jobs are the distinct job titles (plus the code when there is one);
+the stages of a job are the distinct stage values in order of first appearance; a status or outcome such as *Assunto*,
+*Scartato*, *Non idoneo*, *Ritirato* (hired, rejected, withdrawn) closes the application on the date of the row. People
+are merged by email, or by name when there is no email. A CV is matched through the CV column, otherwise by the email or
+the full name in the file name; a CV that cannot be matched with certainty is not imported, and the preview says how many.
+A job with applications still open comes across as a draft: the migration never publishes anything.
+
+**Scores and ratings are never imported.** A column called Valutazione, Punteggio, Rating, Voto, Stelle and the like is
+ignored on purpose and listed in the preview. The sheet can have up to 5000 rows: split a bigger one.
+
+If the reading fails with "the spreadsheet has no column for the name or the job", rename the columns as above and
+upload again.
 
 ## GDPR and your role
 

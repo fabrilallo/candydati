@@ -33,7 +33,8 @@ export async function registerFetchedParts(
   progress: MigrationFetchCounts,
 ): Promise<readonly MigrationBatch[]> {
   const now = deps.now();
-  const fetch: MigrationFetchCounts = { done: progress.done, total: progress.total, parts: result.parts.length };
+  const notices = result.notices ?? [];
+  const fetch: MigrationFetchCounts = { done: progress.done, total: progress.total, parts: result.parts.length, ...(notices.length === 0 ? {} : { notices }) };
   const parts = await inTransaction(deps, async (tx) => {
     const lead = await tx.migrations.transition(batch.organizationId, batch.id, 'fetching', { status: 'uploaded', counts: { fetch }, groupId: batch.id, part: 1, error: null, updatedAt: now });
     const later: MigrationBatch[] = [];

@@ -25,6 +25,17 @@ export const FAKE_SOURCE: MigrationSource = {
   credentials: z.strictObject({ apiKey: z.string().min(8), subdomain: z.string().regex(/^[a-z0-9-]{1,63}$/) }),
 };
 
+/** A file-based connector as the catalog lists it: no credentials, an uploaded spreadsheet instead. */
+export const FAKE_FILES_SOURCE: MigrationSource = {
+  id: 'fake-sheet',
+  label: 'Fake sheet ATS',
+  maturity: 'beta',
+  input: 'files',
+  docsUrl: 'https://docs.example.com/sheet',
+  fields: [],
+  credentials: z.strictObject({}),
+};
+
 export const FAKE_CREDENTIALS = { apiKey: 'sk_live_very_secret_value', subdomain: 'acme' } as const;
 
 export const fakeSourceCatalog = (sources: readonly MigrationSource[] = [FAKE_SOURCE]): MigrationSourceCatalog => ({

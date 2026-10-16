@@ -1,7 +1,9 @@
 import { z } from 'zod';
-import type { EnqueueOptions, TaskName, TaskPayloads, TaskQueue } from '../../intake-ports.js';
+import { MIGRATION_UPLOAD_NAMES, migrationUploadKey } from '@candydati/domain';
+import type { EnqueueOptions, FileStorage, TaskName, TaskPayloads, TaskQueue } from '../../intake-ports.js';
 import type { StuckWorkRepository } from '../../reconcile-ports.js';
 import { defineSystemJob } from '../../use-case.js';
+import { deleteMigrationFile } from '../migrations/shared.js';
 
 /** Waiting longer than this without its task having run: the task is queued again. */
 export const STUCK_AFTER_MINUTES = 15;
@@ -13,6 +15,8 @@ const REQUEUE = (key: string): EnqueueOptions => ({ singletonKey: key, replaceFa
 export interface ReconcileDeps {
   readonly stuck: StuckWorkRepository;
   readonly queue: TaskQueue;
+  /** Deletes the files a failed file-based fetch left behind. */
+  readonly files: Pick<FileStorage, 'delete'>;
 }
 
 export interface ReconcileResult {
@@ -68,7 +72,12 @@ export const reconcileQueuedWork = defineSystemJob<ReconcileDeps, typeof inputSc
       const name = row.status === 'importing' ? 'migration.commit' : 'migration.analyze';
       if (await send(name, { organizationId: row.organizationId, batchId: row.id }, REQUEUE(row.id))) migrations += 1;
     }
-    const fetchesFailed = await deps.stuck.failStalledFetches(before, input.limit);
+    const stalled = await deps.stuck.failStalledFetches(before, input.limit);
+    // What an operator uploaded to a file-based connector is personal data: gone now, not at the next purge.
+    for (const row of stalled) {
+      for (const name of MIGRATION_UPLOAD_NAMES) await deleteMigrationFile(deps, row.organizationId, row.id, migrationUploadKey(row.organizationId, row.id, name));
+    }
+    const fetchesFailed = stalled.length;
     return { messages, exports, imports, migrations, extractions, fetchesFailed, failed };
   },
 });

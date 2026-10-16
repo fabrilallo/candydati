@@ -1,4 +1,4 @@
-import { DAY_MS, MIGRATION_PURGE_DAYS, migrationFetchFileKey, migrationFilePrefix, migrationPackageKey, type MigrationBatch, type MigrationStatus } from '@candydati/domain';
+import { DAY_MS, MIGRATION_PURGE_DAYS, migrationFetchFileKey, migrationFilePrefix, migrationPackageKey, migrationUploadKey, type MigrationBatch, type MigrationStatus } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError } from '../../errors.js';
 import { ORG_A, seedMigrationWorld } from '../../testing/index.js';
@@ -77,6 +77,14 @@ describe('purgeEndedMigrations', () => {
     const deps = seedMigrationWorld({ batches: [crashed] });
     const prefix = migrationFilePrefix(ORG_A, crashed.id);
     for (const slot of [0, 1]) await deps.files.put(migrationFetchFileKey(prefix, slot), new Uint8Array([1]), 'application/pdf');
+    expect(await purgeEndedMigrations(deps, { now: NOW })).toEqual({ purged: 1, failed: [] });
+    expect(deps.files.keys()).toEqual([]);
+  });
+
+  it('deletes the uploaded files of a file-based connector that died before it could', async () => {
+    const dead = { ...batch('upload_left', 'failed', OLD), connectorMaturity: 'beta' as const, counts: { fetch: { done: 0, total: null, upload: { cvs: true } } } };
+    const deps = seedMigrationWorld({ batches: [dead] });
+    for (const name of ['sheet', 'cvs'] as const) await deps.files.put(migrationUploadKey(ORG_A, dead.id, name), new Uint8Array([1]), 'text/csv');
     expect(await purgeEndedMigrations(deps, { now: NOW })).toEqual({ purged: 1, failed: [] });
     expect(deps.files.keys()).toEqual([]);
   });

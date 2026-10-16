@@ -15,6 +15,7 @@ import { ok } from '@candydati/domain';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { MIGRATION_BODY_LIMIT, MIGRATION_MULTIPART_LIMITS, readMigrationPackage } from '../http/migration-multipart.js';
+import { registerConnectorFilesRoute } from './migration-files.js';
 import { toIssueView, toMigrationView } from './migration-view.js';
 import { importUploadRouteConfig } from './limits.js';
 import { asNumber, bodyOf, paramOf, queryOf } from './request.js';
@@ -43,6 +44,8 @@ export async function registerMigrationRoutes(app: FastifyInstance, ctx: AppCont
       return reply.status(201).send(ok({ id: batch.id, status: batch.status }));
     });
   });
+
+  await registerConnectorFilesRoute(app, ctx);
 
   app.get('/api/v1/migrations/connectors', async (request) => ok(await listMigrationConnectors(deps, await actorOf(request), {})));
 

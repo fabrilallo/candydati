@@ -11,5 +11,7 @@ export {
   undoMigrationDtoSchema as undoMigrationSchema,
 } from '@candydati/domain';
 
+export const migrationConnectorFilesBody = z.object({ sheet: z.string().meta({ format: 'binary' }), cvs: z.string().meta({ format: 'binary' }).optional() });
+
 export const migrationUploadBody = z.object({ file: z.string().meta({ format: 'binary' }) });
 

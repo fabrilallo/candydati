@@ -121,7 +121,8 @@ Ricorda che i dati dei candidati passano dal fornitore del modello dell'agente: 
 ## Connettori
 
 I connettori integrati, in cui inserisci una chiave di sola lettura e il pacchetto viene costruito per te, sono **in
-arrivo**.
+arrivo**. Quello disponibile oggi, Zucchetti InRecruiting, non ha un'API pubblica: legge un file di export che carichi
+(vedi [InRecruiting](#inrecruiting)).
 
 | Origine | Stato |
 | --- | --- |
@@ -129,6 +130,7 @@ arrivo**.
 | Workable | in arrivo |
 | Greenhouse | in arrivo |
 | Recruitee | in arrivo |
+| Zucchetti InRecruiting | beta (file di export) |
 
 Quando arriveranno saranno segnati come **beta**: costruiti sulla documentazione pubblica dell'origine e non ancora
 verificati su un account reale, quindi controlla con attenzione l'anteprima. Un connettore diventa stabile solo dopo una
@@ -136,6 +138,48 @@ migrazione reale, registrata nell'
 [elenco delle fonti](https://github.com/fabrilallo/candydati/blob/main/docs/migration/sources.md) (in inglese). La
 chiave API resta cifrata solo mentre i dati vengono letti, poi viene cancellata. Nel frattempo usa la skill o un
 pacchetto che costruisci tu.
+
+### InRecruiting
+
+Zucchetti InRecruiting **non ha un'API pubblica**, quindi questo connettore non chiede una chiave: legge l'**export** che
+ottieni dal fornitore. È **beta**: i nomi delle colonne qui sotto sono ipotizzati (nessun formato di export reale è
+pubblico) e il connettore non è stato verificato su un account reale, quindi controlla con attenzione l'anteprima.
+
+1. **Chiedi un export completo.** Scrivi al supporto InRecruiting / Zucchetti e chiedi un export delle candidature in un
+   foglio di calcolo (CSV o Excel), una riga per candidatura, e, se vuoi i CV, uno ZIP con i file dei CV. Può essere un
+   servizio a pagamento nel tuo piano: è un accordo tra te e il fornitore.
+2. **Controlla le colonne.** Candydati riconosce queste intestazioni (italiano o inglese, maiuscole e accenti non contano):
+
+   | Informazione | Intestazioni riconosciute |
+   | --- | --- |
+   | Nome (obbligatorio) | Nome e cognome, Nominativo, Full name, oppure Nome e Cognome / First name e Last name |
+   | Annuncio (obbligatorio) | Annuncio, Posizione, Ruolo, Job, Job title, Vacancy |
+   | Codice annuncio | Codice annuncio, Codice posizione, Job code |
+   | Email, telefono | Email, Telefono, Cellulare, Phone |
+   | Fase | Stato, Fase, Stage, Status |
+   | Data candidatura | Data candidatura, Application date, Applied at |
+   | Esito | Esito, Esito finale, Outcome |
+   | Note, tag, fonte | Note, Tag, Fonte, Source |
+   | File del CV | CV, File, Allegato, Curriculum |
+
+   Una colonna con un altro nome viene **lasciata fuori ed elencata** nell'anteprima. Se il tuo export usa altri nomi,
+   **rinomina le colonne nel foglio prima di caricarlo**: ci vuole un minuto e non cambia altro.
+3. **Carica.** Nel primo passo scegli *Zucchetti InRecruiting*, poi il foglio e, se vuoi, lo ZIP dei CV. I file servono
+   solo a leggere i dati e vengono cancellati alla fine della lettura, qualunque cosa accada: riuscita, errore o worker fermato.
+
+Come legge il file: una riga è una candidatura; gli annunci sono i titoli distinti (più il codice, se c'è); le fasi di un
+annuncio sono i valori distinti della colonna fase, nell'ordine in cui compaiono; uno stato o un esito come *Assunto*,
+*Scartato*, *Non idoneo*, *Ritirato* chiude la candidatura alla data della riga. Le persone si uniscono per email, o per
+nome se manca l'email. Un CV si abbina con la colonna CV, altrimenti con l'email o il nome e cognome nel nome del file;
+un CV che non si può abbinare con certezza non viene importato e l'anteprima dice quanti sono. Un annuncio con
+candidature ancora aperte arriva come bozza: la migrazione non pubblica mai nulla.
+
+**Punteggi e valutazioni non vengono mai importati.** Una colonna chiamata Valutazione, Punteggio, Rating, Voto, Stelle e
+simili viene ignorata di proposito ed elencata nell'anteprima. Il foglio può avere fino a 5000 righe: dividine uno più
+grande.
+
+Se la lettura fallisce con "il foglio non ha una colonna per il nome o per l'annuncio", rinomina le colonne come sopra e
+carica di nuovo.
 
 ## GDPR e il tuo ruolo
 

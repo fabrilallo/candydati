@@ -42,11 +42,22 @@ const failureOf = (status: number, body: unknown): FailureInfo => {
   return { status, code: typeof error?.code === 'string' ? error.code : null, message: typeof error?.message === 'string' ? error.message : null, issues: [] }
 }
 
+/** What the api names when it refuses a file: the words the user reads. */
+const UPLOAD_REFUSAL_KEYS: Readonly<Record<string, string>> = {
+  not_a_zip: 'migrations.upload.errors.notZip',
+  not_a_spreadsheet: 'migrations.files.errors.notSheet',
+  sheet_too_large: 'migrations.files.errors.tooLargeServer',
+  file_missing: 'migrations.files.errors.sheetMissing',
+  file_empty: 'migrations.upload.errors.empty',
+  connector_unknown: 'migrations.connector.errors.unknown',
+}
+
 /** The key the user sees for a refused upload: too large and not-a-ZIP have their own words. */
 const uploadFailureKey = (failure: FailureInfo, body: unknown): string => {
   if (failure.status === 413 || failure.code === 'too_large') return 'migrations.upload.errors.tooLargeServer'
   const issues = (body as { error?: { issues?: { message?: unknown }[] } } | null)?.error?.issues ?? []
-  if (issues.some((issue) => issue.message === 'not_a_zip')) return 'migrations.upload.errors.notZip'
+  const refusal = issues.map((issue) => issue.message).find((message) => typeof message === 'string' && message in UPLOAD_REFUSAL_KEYS)
+  if (typeof refusal === 'string') return UPLOAD_REFUSAL_KEYS[refusal] ?? defaultFailureKey(failure)
   return defaultFailureKey(failure)
 }
 

@@ -1,6 +1,6 @@
 import { MIGRATION_ISSUE_LEVELS, MIGRATION_ISSUES_PAGE_MAX } from '@candydati/domain';
 import { z } from 'zod';
-import { migrationChoicesBody, migrationCommitBody, migrationConnectorBody, migrationUploadBody } from './schemas-migration.js';
+import { migrationChoicesBody, migrationCommitBody, migrationConnectorBody, migrationConnectorFilesBody, migrationUploadBody } from './schemas-migration.js';
 import type { RouteSpec } from './spec.js';
 
 export const migrationRoutes: readonly RouteSpec[] = [
@@ -18,6 +18,11 @@ export const migrationRoutes: readonly RouteSpec[] = [
     method: 'post', path: '/api/v1/migrations/connector', tag: 'Migration', summary: 'Start a migration from a connector', scope: 'migration:manage', sessionOnly: true, status: 201,
     description: 'The credentials are write-only: checked against the connector, kept encrypted only while the source is read, then wiped; never returned, logged or audited. The read runs in the background (`fetching`): poll the migration until `ready` or `failed`. A source larger than one package is split into parts (`groupId`, `part`), each previewed and confirmed on its own.',
     body: migrationConnectorBody, response: { schema: z.object({ id: z.string(), status: z.string() }) },
+  },
+  {
+    method: 'post', path: '/api/v1/migrations/connector/:connectorId/files', tag: 'Migration', summary: 'Start a migration from an export file', scope: 'migration:manage', sessionOnly: true, status: 201, multipart: true,
+    description: 'For a connector with `input: "files"` (no credentials). A `sheet` part (CSV or XLSX, up to 25 MiB) and an optional `cvs` part (a ZIP of CVs). Both are kept only while the source is read, then deleted, whatever the outcome. The read runs in the background (`fetching`): poll the migration until `ready` or `failed`.',
+    body: migrationConnectorFilesBody, response: { schema: z.object({ id: z.string(), status: z.string() }) },
   },
   { method: 'get', path: '/api/v1/migrations', tag: 'Migration', summary: 'List migrations', scope: 'migration:manage', sessionOnly: true, response: { schema: 'MigrationBatch', list: true } },
   {

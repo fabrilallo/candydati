@@ -1,4 +1,4 @@
-import { migrationConnectorInputSchema, migrationPackageKey, type MigrationBatch, type MigrationConnectorDto } from '@candydati/domain';
+import { migrationConnectorInputSchema, migrationPackageKey, type MigrationBatch, type MigrationConnectorDto, type MigrationFetchCounts } from '@candydati/domain';
 import { z } from 'zod';
 import type { Actor } from '../../actor.js';
 import { ValidationError } from '../../errors.js';
@@ -16,7 +16,7 @@ function checkCredentials(source: MigrationSource, credentials: unknown): unknow
   throw new ValidationError(paths.map((path) => ({ path, message: 'invalid_credential' })));
 }
 
-const newConnectorBatch = (deps: MigrationConnectorDeps, actor: Actor, id: string, source: MigrationSource): MigrationBatch => ({
+export const newConnectorBatch = (deps: MigrationConnectorDeps, actor: Actor, id: string, source: MigrationSource, fetch: MigrationFetchCounts = { done: 0, total: null }): MigrationBatch => ({
   id,
   organizationId: actor.organizationId,
   status: 'fetching',
@@ -24,7 +24,7 @@ const newConnectorBatch = (deps: MigrationConnectorDeps, actor: Actor, id: strin
   producer: `connector:${source.id}`,
   connectorMaturity: source.maturity,
   createdBy: actor.onBehalfOfUserId ?? actor.id ?? 'system',
-  counts: { fetch: { done: 0, total: null } },
+  counts: { fetch },
   stageMapping: [],
   excludedJobs: [],
   declarations: null,
@@ -60,6 +60,8 @@ export const createMigrationFromConnector = defineUseCase<MigrationConnectorDeps
     const source = deps.sources.find(input.connectorId);
     // A refusal on the input, with an issue the web can recognise: the instance does not offer this connector.
     if (!source) throw new ValidationError([{ path: 'connectorId', message: 'connector_unknown' }]);
+    // A file-based connector has no credentials: it starts from an upload (`createMigrationFromFiles`).
+    if (source.input !== 'api') throw new ValidationError([{ path: 'connectorId', message: 'connector_needs_files' }]);
     const credentials = checkCredentials(source, input.credentials);
     const id = deps.newId();
     const credentialsCiphertext = deps.secrets.seal(JSON.stringify(credentials), id);

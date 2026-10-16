@@ -1,4 +1,4 @@
-import type { MigrationConnectorField, MigrationConnectorInput, MigrationConnectorMaturity, MigrationFetchError } from '@candydati/domain';
+import type { MigrationConnectorField, MigrationConnectorInput, MigrationConnectorMaturity, MigrationFetchError, MigrationFetchNotice } from '@candydati/domain';
 import type { z } from 'zod';
 import type { MigrationDeps } from './migration-ports.js';
 
@@ -46,12 +46,25 @@ export interface MigrationPartCounts {
   readonly bytes: number;
 }
 
+/**
+ * What a `files` connector reads instead of credentials: the spreadsheet and the optional ZIP of CVs the operator
+ * uploaded for this batch. Read-only; the fetch deletes them when it ends, whatever happens.
+ */
+export interface MigrationInputFiles {
+  /** The uploaded spreadsheet (CSV or XLSX). */
+  sheet(): Promise<Uint8Array>;
+  /** The uploaded ZIP of CVs, or null when the operator sent none. */
+  cvs(): Promise<Uint8Array | null>;
+}
+
 export interface MigrationFetchRequest {
   readonly organizationId: string;
   readonly batchId: string;
   readonly connectorId: string;
-  /** Already checked against the connector's schema. */
+  /** Already checked against the connector's schema. An empty object for a `files` connector. */
   readonly credentials: unknown;
+  /** Set only for a `files` connector (`input: 'files'`). */
+  readonly inputFiles?: MigrationInputFiles | undefined;
   /** `organizations/{org}/migrations/{batchId}/`: temporary files of the fetch go under it. */
   readonly filePrefix: string;
   /** Storage key of the package of part `index` (0-based). Called once per part, in order. */
@@ -65,6 +78,8 @@ export interface MigrationFetchRequest {
 export interface MigrationFetchResult {
   /** One per package written, in order; at least one. */
   readonly parts: readonly { readonly key: string; readonly counts: MigrationPartCounts }[];
+  /** What the connector reported about its reading: counts and headers, for the preview. */
+  readonly notices?: readonly MigrationFetchNotice[] | undefined;
 }
 
 /** Runs a connector into one or more packages. It cleans up its own temporary files and written parts when it fails. */

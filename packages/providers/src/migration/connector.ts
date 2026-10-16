@@ -1,4 +1,5 @@
-import type { MigrationConnectorField, MigrationConnectorInput, MigrationConnectorMaturity } from '@candydati/domain';
+import type { MigrationInputFiles } from '@candydati/core';
+import type { MigrationConnectorField, MigrationConnectorInput, MigrationConnectorMaturity, MigrationFetchNotice } from '@candydati/domain';
 import type { z } from 'zod';
 import type { HostRule, JsonReader, RateOptions } from '../http/index.js';
 import type { PackageBuilder } from './package-builder.js';
@@ -13,6 +14,13 @@ export interface ConnectorTools {
   readonly reader: JsonReader;
   /** Items read so far, and the total when the source says it. Also keeps the batch alive: call it at least once a minute. */
   progress(done: number, total?: number | null): Promise<void>;
+  /** Tells the preview something about the reading: counts and column headers, never a cell value. */
+  notice(notice: MigrationFetchNotice): void;
+  /**
+   * Read-only access to what the operator uploaded; set only for a connector with `input: 'files'` (which has no
+   * credentials and no hosts: its reader reaches nothing).
+   */
+  readonly files?: MigrationInputFiles | undefined;
 }
 
 /**
