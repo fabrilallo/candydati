@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
 import { trimTrailing } from './trim-trailing.js';
 
 describe('trimTrailing', () => {
@@ -13,9 +14,12 @@ describe('trimTrailing', () => {
 
   it('stays linear on a long run of the trimmed character followed by something else', () => {
     const hostile = `${'/'.repeat(50_000)}a`;
-    const started = performance.now();
     expect(trimTrailing(hostile, '/')).toBe(hostile);
     expect(trimTrailing(`a${')'.repeat(50_000)}`, '.,;)')).toBe('a');
-    expect(performance.now() - started).toBeLessThan(200);
+    const run = (size: number) => {
+      trimTrailing(`${'/'.repeat(size)}a`, '/');
+      trimTrailing(`a${')'.repeat(size)}`, '.,;)');
+    };
+    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
   });
 });

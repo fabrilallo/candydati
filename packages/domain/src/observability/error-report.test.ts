@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
 import { buildErrorEnvelope, buildErrorEvent, parseDsn, readFrameLine, scrubMessage, stackFrames } from './error-report.js';
 
 describe('parseDsn', () => {
@@ -35,11 +36,13 @@ describe('scrubMessage', () => {
   });
 
   it('finishes fast on hostile input (CodeQL js/polynomial-redos)', () => {
-    const started = performance.now();
-    scrubMessage('!'.repeat(50_000));
-    scrubMessage('! '.repeat(25_000));
-    scrubMessage(`${'a'.repeat(500)}@${'b'.repeat(11)} `.repeat(100));
-    expect(performance.now() - started).toBeLessThan(200);
+    const run = (size: number) => {
+      scrubMessage('!'.repeat(size));
+      scrubMessage('! '.repeat(size / 2));
+      scrubMessage(`${'a'.repeat(500)}@${'b'.repeat(11)} `.repeat(size / 500));
+    };
+    run(50_000);
+    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
   });
 });
 
@@ -84,11 +87,14 @@ describe('stackFrames', () => {
   });
 
   it('finishes fast on hostile input (CodeQL js/polynomial-redos)', () => {
-    const started = performance.now();
     expect(stackFrames(`at ${'a (a'.repeat(12_500)}`)).toEqual([]);
-    stackFrames(`  at ${'a (a:1'.repeat(10_000)}`);
-    stackFrames(`at ${'a (a'.repeat(12_500)}\n`.repeat(4));
-    expect(performance.now() - started).toBeLessThan(200);
+    const run = (size: number) => {
+      stackFrames(`at ${'a (a'.repeat(size / 4)}`);
+      stackFrames(`  at ${'a (a:1'.repeat(size / 5)}`);
+      stackFrames(`at ${'a (a'.repeat(size / 4)}\n`.repeat(4));
+    };
+    run(50_000);
+    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
   });
 });
 

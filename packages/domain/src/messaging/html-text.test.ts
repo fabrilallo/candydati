@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
 import { textToHtml } from './html.js';
 import { decodeEntities, htmlToText } from './html-text.js';
 
@@ -46,13 +47,15 @@ describe('htmlToText', () => {
   });
 
   it('finishes fast on hostile input', () => {
-    const started = performance.now();
-    htmlToText('<'.repeat(50_000));
-    htmlToText('<a'.repeat(25_000));
-    htmlToText(`<script>${'</'.repeat(25_000)}`);
-    htmlToText(`<a title="${'x'.repeat(50_000)}`);
-    htmlToText('&#'.repeat(25_000));
-    expect(performance.now() - started).toBeLessThan(200);
+    const run = (size: number) => {
+      htmlToText('<'.repeat(size));
+      htmlToText('<a'.repeat(size / 2));
+      htmlToText(`<script>${'</'.repeat(size / 2)}`);
+      htmlToText(`<a title="${'x'.repeat(size)}`);
+      htmlToText('&#'.repeat(size / 2));
+    };
+    run(50_000);
+    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
   });
 });
 

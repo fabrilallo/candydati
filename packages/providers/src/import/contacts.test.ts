@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
 import { extractContacts } from './contacts.js';
 
 describe('extractContacts', () => {
@@ -52,12 +53,14 @@ Esperienza 2019-2023`;
   });
 
   it('finishes fast on hostile text (CodeQL js/polynomial-redos)', () => {
-    const started = performance.now();
-    extractContacts('%'.repeat(50_000));
-    extractContacts(`${'%'.repeat(50_000)}@`);
-    extractContacts(`linkedin.com/in/a${'.'.repeat(50_000)}b ${')'.repeat(50_000)}`);
-    extractContacts(`${'a'.repeat(500)}@b.it `.repeat(100));
-    expect(performance.now() - started).toBeLessThan(200);
+    const run = (size: number) => {
+      extractContacts('%'.repeat(size));
+      extractContacts(`${'%'.repeat(size)}@`);
+      extractContacts(`linkedin.com/in/a${'.'.repeat(size)}b ${')'.repeat(size)}`);
+      extractContacts(`${'a'.repeat(500)}@b.it `.repeat(size / 500));
+    };
+    run(50_000);
+    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
   });
 
   it('drops the punctuation that follows a linkedin url', () => {
