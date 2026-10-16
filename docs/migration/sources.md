@@ -10,7 +10,7 @@ validation, preview and undo (ADR 0009).
 | Source | Kind | Status | What it brings | Verified on a real account |
 | --- | --- | --- | --- | --- |
 | Teamtailor | built-in connector | beta (built on public docs, not verified on a real account) | users, jobs and stages, candidates, applications with outcome and dates, notes, form answers, CVs and uploads; no scores, no consent date, one stage-history entry, no emails ([details](../../packages/providers/src/migration/sources/teamtailor/README.md)) | no |
-| Workable | built-in connector | planned | not yet defined | no |
+| Workable | built-in connector | beta (built on public docs, not verified on a real account) | jobs and their stages, candidates, applications with outcome and dates, stage history, notes, historical messages, CVs; [details](../../packages/providers/src/migration/sources/workable/README.md) | no |
 | Greenhouse | built-in connector | beta (built on public docs, not verified on a real account) | users, jobs and stages, candidates, applications with outcome, origin and stage history, notes, past emails, CVs and files; see its [README](../../packages/providers/src/migration/sources/greenhouse/README.md) | no |
 | Recruitee | built-in connector | planned | not yet defined | no |
 | Any other ATS or a spreadsheet | package built by the [agent skill](../../skills/candydati-migration/README.md) or by hand | available | whatever the package contains | not applicable |
