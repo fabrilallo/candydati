@@ -64,7 +64,7 @@ services:
   # Refuses to start the stack with the example secrets of .env.example, short secrets, an http PLATFORM_URL or
   # EMAIL_PROVIDER=log (docker/config-check.sh). The api and the worker apply the same rules again at boot.
   config-check:
-    image: busybox:1.37@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e
+    image: busybox:1.38@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e
     restart: "no"
     command: ["sh", "/config-check.sh"]
     volumes:
