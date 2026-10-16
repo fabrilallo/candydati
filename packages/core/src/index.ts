@@ -157,6 +157,7 @@ export * from './migration-ports.js';
 export * from './use-cases/migrations/create-migration.js';
 export * from './migration-fetch-ports.js';
 export * from './use-cases/migrations/create-from-connector.js';
+export * from './use-cases/migrations/create-from-files.js';
 export * from './use-cases/migrations/fetch-migration.js';
 export * from './use-cases/migrations/analyze-migration.js';
 export * from './use-cases/migrations/queries.js';

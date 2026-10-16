@@ -227,5 +227,12 @@ export const MIGRATION_PURGE_DAYS = 7;
 export const MIGRATION_ISSUES_PAGE_MAX = 200;
 
 export const migrationFilePrefix = (organizationId: string, batchId: string): string => `organizations/${organizationId}/migrations/${batchId}/`;
+/** The files an operator uploads to a `files` connector, kept only while the fetch runs (like the credentials). */
+export const MIGRATION_UPLOAD_NAMES = ['sheet', 'cvs'] as const;
+export type MigrationUploadName = (typeof MIGRATION_UPLOAD_NAMES)[number];
+export const migrationUploadKey = (organizationId: string, batchId: string, name: MigrationUploadName): string => `${migrationFilePrefix(organizationId, batchId)}upload/${name}`;
+/** The spreadsheet is parsed in memory: same cap as an import sheet. */
+export const MIGRATION_SHEET_MAX_BYTES = 25 * 1024 * 1024;
+
 /** Where the uploaded (or fetched) package ZIP is stored. */
 export const migrationPackageKey = (organizationId: string, batchId: string): string => `${migrationFilePrefix(organizationId, batchId)}package.zip`;

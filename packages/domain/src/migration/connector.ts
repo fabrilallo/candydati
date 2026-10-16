@@ -72,6 +72,8 @@ export interface MigrationFetchCounts {
    * have its files deleted by the purge. Never sent to the web.
    */
   readonly reservedFiles?: number | undefined;
+  /** Internal: a `files` connector's upload (the spreadsheet is always there; the ZIP of CVs is optional). */
+  readonly upload?: { readonly cvs: boolean } | undefined;
 }
 
 /** Where the files a fetch downloads wait until they are written into the package of their part. */

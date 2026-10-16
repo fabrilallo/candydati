@@ -1,4 +1,4 @@
-import { DAY_MS, MIGRATION_PURGE_DAYS, migrationFetchFileKey, migrationFilePrefix, type MigrationBatch } from '@candydati/domain';
+import { DAY_MS, MIGRATION_PURGE_DAYS, migrationFetchFileKey, migrationFilePrefix, MIGRATION_UPLOAD_NAMES, migrationUploadKey, type MigrationBatch } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError } from '../../errors.js';
 import type { MigrationPurgeDeps } from '../../migration-commit-ports.js';
@@ -23,6 +23,8 @@ async function deleteFetchLeftovers(deps: MigrationPurgeDeps, batch: MigrationBa
   for (let slot = 0; slot < (batch.counts.fetch?.reservedFiles ?? 0); slot += 1) {
     await deleteMigrationFile(deps, batch.organizationId, batch.id, migrationFetchFileKey(prefix, slot));
   }
+  // A file-based connector's upload, when the fetch died before it could delete it.
+  for (const name of MIGRATION_UPLOAD_NAMES) await deleteMigrationFile(deps, batch.organizationId, batch.id, migrationUploadKey(batch.organizationId, batch.id, name));
 }
 
 const input = z.object({
