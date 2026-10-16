@@ -13,11 +13,11 @@ const pick = async (wrapper: Awaited<ReturnType<typeof mountSuspended>>, file: F
 }
 
 describe('migration source step', () => {
-  it('offers the package and says where packages come from, with connectors coming soon', async () => {
+  it('offers the package and says where packages come from', async () => {
     const wrapper = await mountSuspended(MigrationSourceStep)
     mounted.push(wrapper)
     expect(wrapper.find('[data-testid="migration-where"]').text()).toContain('skill')
-    expect(wrapper.find('[data-testid="migration-where"]').text()).toContain('arriveranno presto')
+    expect(wrapper.find('[data-testid="migration-where"]').text()).toContain('connettori integrati')
     await wrapper.find('[data-testid="source-package"]').trigger('click')
     expect(wrapper.emitted('choose')).toEqual([['package']])
   })

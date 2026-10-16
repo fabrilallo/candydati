@@ -1,4 +1,4 @@
-import { MIGRATION_ISSUE_LEVELS, MIGRATION_STAGE_TARGETS, normaliseStageName, type MigrationBatchDto, type MigrationJobCountDto, type MigrationStageTarget } from '@candydati/domain'
+import { MIGRATION_FETCH_ERRORS, MIGRATION_ISSUE_LEVELS, MIGRATION_STAGE_TARGETS, normaliseStageName, type MigrationBatchDto, type MigrationJobCountDto, type MigrationStageTarget } from '@candydati/domain'
 import { ApiFailure } from './api-call'
 
 type Status = MigrationBatchDto['status']
@@ -137,7 +137,7 @@ export const commitErrorKey = (error: unknown): { readonly key: string; readonly
 const FAILURE_CODES: ReadonlySet<string> = new Set([
   'invalid_archive', 'unsafe_path', 'symlink', 'too_many_entries', 'too_large', 'ratio_exceeded', 'duplicate_entry', 'unexpected_entry',
   'missing_manifest', 'invalid_manifest', 'missing_files', 'privacy_notice_missing', 'organization_missing', 'job_content_invalid',
-  'analysis_failed', 'commit_failed', 'queue_unavailable',
+  'analysis_failed', 'commit_failed', 'queue_unavailable', ...MIGRATION_FETCH_ERRORS,
 ])
 
 /** Translation key of the reason a migration failed: its own words when the code is known, a generic one otherwise. */

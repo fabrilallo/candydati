@@ -49,6 +49,9 @@ export const importUndoPath = (batchId: string): string => `${importPath(batchId
 
 // Migration from another ATS
 export const MIGRATIONS_PATH = '/api/v1/migrations'
+/** Built-in source connectors, and the start of a migration from one of them (credentials in the body, never in the URL). */
+export const MIGRATION_CONNECTORS_PATH = `${MIGRATIONS_PATH}/connectors`
+export const MIGRATION_CONNECTOR_PATH = `${MIGRATIONS_PATH}/connector`
 export const migrationPath = (id: string): string => `${MIGRATIONS_PATH}/${enc(id)}`
 export const migrationIssuesPath = (id: string): string => `${migrationPath(id)}/issues`
 export const migrationChoicesPath = (id: string): string => `${migrationPath(id)}/choices`

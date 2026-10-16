@@ -1,3 +1,4 @@
+import { MIGRATION_FETCH_ERRORS } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { ApiFailure } from './api-call'
 import { commitErrorKey, failureKey, isWorking, issueTotals, jobViews, migrationTone, previewFigures, stageNameGroups, stageTargetKey, stepOf, unmappedCount } from './migration-view'
@@ -70,6 +71,7 @@ describe('migration view', () => {
     expect(failureKey('missing_manifest')).toBe('migrations.failure.missing_manifest')
     expect(failureKey('something_new')).toBe('migrations.failure.unknown')
     expect(failureKey(null)).toBe('migrations.failure.unknown')
+    for (const code of MIGRATION_FETCH_ERRORS) expect(failureKey(code)).toBe(`migrations.failure.${code}`)
   })
 
   it('reads a refused commit', () => {

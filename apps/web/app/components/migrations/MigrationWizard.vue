@@ -20,7 +20,8 @@ const undo = async (): Promise<void> => {
     <div><Button variant="outline" @click="() => w.refresh()">{{ t('common.retry') }}</Button></div>
   </div>
   <div v-else-if="!w.batch.value" class="grid gap-3" aria-busy="true"><Skeleton class="h-24 w-full" /><Skeleton class="h-48 w-full" /></div>
-  <template v-else>
+  <div v-else class="grid gap-6">
+    <MigrationParts :batch="w.batch.value" />
     <MigrationAnalysisStep v-if="w.step.value === 'analysis'" :batch="w.batch.value" />
     <MigrationPreviewStep v-else-if="w.step.value === 'preview'" :batch="w.batch.value" @next="w.goTo('stages')" />
     <MigrationStagesStep
@@ -47,5 +48,5 @@ const undo = async (): Promise<void> => {
       <MigrationResultStep :batch="w.batch.value" :undo-pending="w.busy.value === 'undo'" @undo="undoOpen = true" />
       <UndoMigrationDialog v-model:open="undoOpen" :batch="w.batch.value" :pending="w.busy.value === 'undo'" @confirm="undo" />
     </template>
-  </template>
+  </div>
 </template>

@@ -2956,7 +2956,7 @@
     "steps": {
       "label": "Migration steps",
       "source": "Source",
-      "upload": "Package",
+      "upload": "Package or credentials",
       "analysis": "Analysis",
       "preview": "Preview",
       "stages": "Jobs and stages",
@@ -2975,7 +2975,16 @@
       "where": {
         "title": "Where do packages come from?",
         "skill": "An agent skill teaches Claude, Codex and similar assistants to read your old ATS (through its API, an export or an MCP connector) and write the package for you. You then upload it here.",
-        "connectors": "Built-in connectors for the main ATS products are coming soon: you will enter a read-only key and the package is built for you, always with a preview before anything is written."
+        "connectors": "Built-in connectors read the API of your previous ATS with a key you enter here and build the package for you. Every connector is in beta: you always check a preview before anything is written."
+      },
+      "connectors": {
+        "label": "Connectors",
+        "beta": "Beta",
+        "sentence": "Built on the public documentation of {vendor}, not yet verified on a real account: check the preview before confirming.",
+        "docs": "Documentation of {vendor}",
+        "action": "Connect",
+        "loading": "Loading the connectors",
+        "error": "The connectors could not be loaded. You can still upload a package."
       }
     },
     "upload": {
@@ -3004,7 +3013,13 @@
       "failed": "The package could not be read",
       "failedBody": "Nothing was written to your data. Fix the package and upload it again.",
       "reason": "Reason: {reason}",
-      "back": "Back to migrations"
+      "back": "Back to migrations",
+      "fetchingTitle": "Reading from {source}",
+      "fetchingBody": "The connector reads jobs, candidates and history, then builds the package and the preview. You can close this page: the reading goes on and you will find the migration in the list.",
+      "fetchingProgress": "{done} of {total} read",
+      "fetchingCount": "{done} read so far",
+      "fetchFailed": "The source could not be read",
+      "fetchFailedBody": "Nothing was written to your data, and the credentials were erased. Start a new migration to try again."
     },
     "failure": {
       "invalid_archive": "the file is not a valid ZIP",
@@ -3024,6 +3039,14 @@
       "analysis_failed": "the analysis failed unexpectedly",
       "commit_failed": "the migration failed unexpectedly while writing",
       "queue_unavailable": "the work could not be queued",
+      "credentials_refused": "the source refused the credentials: check the key and its permissions, then start again",
+      "source_unavailable": "the source could not be reached or kept answering with errors",
+      "source_rate_limited": "the source kept limiting the requests: try again later",
+      "source_invalid_response": "the source answered something the connector does not understand",
+      "part_too_large": "one job alone is larger than a package can hold (10 000 files or 1 GiB)",
+      "connector_unavailable": "the connector is not available on this installation any more",
+      "fetch_interrupted": "the reading stopped before the end and the credentials were erased: start again",
+      "fetch_failed": "the reading of the source failed unexpectedly",
       "unknown": "an unexpected error"
     },
     "preview": {
@@ -3211,6 +3234,29 @@
       "tooManyStages": "A job has more stages than a pipeline can hold. Give some of them the same type and name so they merge.",
       "privacyNoticeMissing": "Your organization has no published privacy notice. Publish one in the privacy settings first.",
       "load": "We could not load the migration."
+    },
+    "connector": {
+      "title": "Connect {vendor}",
+      "intro": "Enter the credentials of {vendor}. They are used only to read your data: kept encrypted while the reading runs, then erased, and never shown again. Use a read-only key when {vendor} offers one.",
+      "howTo": "How to get it",
+      "howToLabel": "How to get {field} (opens in a new tab)",
+      "submit": "Connect and read",
+      "submitting": "Connecting",
+      "back": "Back",
+      "cleared": "For your safety the fields were cleared: enter the credentials again.",
+      "errors": {
+        "required": "Fill in this field.",
+        "invalid": "Some values were not accepted. Check them and enter them again.",
+        "invalidFields": "Not accepted: {fields}. Enter the credentials again.",
+        "unknown": "This connector is not available any more."
+      }
+    },
+    "parts": {
+      "label": "Parts of this migration",
+      "current": "Part {part} of {parts}",
+      "intro": "This source was larger than one package: it was split into {parts} parts. Each part is previewed and confirmed on its own; people in several parts are merged by email.",
+      "part": "Part {part}",
+      "open": "Open part {part}"
     }
   },
   "consentRenew": {

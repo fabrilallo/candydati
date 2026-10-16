@@ -2956,7 +2956,7 @@
     "steps": {
       "label": "Passaggi della migrazione",
       "source": "Origine",
-      "upload": "Pacchetto",
+      "upload": "Pacchetto o credenziali",
       "analysis": "Analisi",
       "preview": "Anteprima",
       "stages": "Annunci e fasi",
@@ -2975,7 +2975,16 @@
       "where": {
         "title": "Da dove arrivano i pacchetti?",
         "skill": "Una skill per agenti insegna a Claude, Codex e assistenti simili a leggere il tuo vecchio ATS (tramite API, un export o un connettore MCP) e a scrivere il pacchetto al posto tuo. Poi lo carichi qui.",
-        "connectors": "I connettori integrati per i principali ATS arriveranno presto: inserirai una chiave di sola lettura e il pacchetto viene costruito per te, sempre con un'anteprima prima che venga scritto qualcosa."
+        "connectors": "I connettori integrati leggono le API del tuo ATS precedente con una chiave che inserisci qui e preparano il pacchetto per te. Ogni connettore è in beta: controlli sempre un'anteprima prima che venga scritto qualcosa."
+      },
+      "connectors": {
+        "label": "Connettori",
+        "beta": "Beta",
+        "sentence": "Costruito sulla documentazione pubblica di {vendor}, non ancora verificato su un account reale: controlla l'anteprima prima di confermare.",
+        "docs": "Documentazione di {vendor}",
+        "action": "Collega",
+        "loading": "Caricamento dei connettori",
+        "error": "Non è stato possibile caricare i connettori. Puoi comunque caricare un pacchetto."
       }
     },
     "upload": {
@@ -3004,7 +3013,13 @@
       "failed": "Non è stato possibile leggere il pacchetto",
       "failedBody": "Non è stato scritto nulla nei tuoi dati. Correggi il pacchetto e caricalo di nuovo.",
       "reason": "Motivo: {reason}",
-      "back": "Torna alle migrazioni"
+      "back": "Torna alle migrazioni",
+      "fetchingTitle": "Lettura da {source}",
+      "fetchingBody": "Il connettore legge posizioni, candidati e storico, poi prepara il pacchetto e l'anteprima. Puoi chiudere questa pagina: la lettura continua e troverai la migrazione nell'elenco.",
+      "fetchingProgress": "{done} di {total} letti",
+      "fetchingCount": "{done} letti finora",
+      "fetchFailed": "Non è stato possibile leggere la fonte",
+      "fetchFailedBody": "Nessun dato è stato scritto e le credenziali sono state cancellate. Avvia una nuova migrazione per riprovare."
     },
     "failure": {
       "invalid_archive": "il file non è uno ZIP valido",
@@ -3024,6 +3039,14 @@
       "analysis_failed": "l'analisi è fallita in modo imprevisto",
       "commit_failed": "la migrazione è fallita in modo imprevisto durante la scrittura",
       "queue_unavailable": "non è stato possibile mettere in coda il lavoro",
+      "credentials_refused": "la fonte ha rifiutato le credenziali: controlla la chiave e i suoi permessi, poi riprova",
+      "source_unavailable": "la fonte non era raggiungibile o ha continuato a rispondere con errori",
+      "source_rate_limited": "la fonte ha continuato a limitare le richieste: riprova più tardi",
+      "source_invalid_response": "la fonte ha risposto in un modo che il connettore non comprende",
+      "part_too_large": "una sola posizione è più grande di quanto un pacchetto possa contenere (10 000 file o 1 GiB)",
+      "connector_unavailable": "il connettore non è più disponibile su questa installazione",
+      "fetch_interrupted": "la lettura si è fermata prima della fine e le credenziali sono state cancellate: riprova",
+      "fetch_failed": "la lettura della fonte non è riuscita per un errore imprevisto",
       "unknown": "un errore imprevisto"
     },
     "preview": {
@@ -3211,6 +3234,29 @@
       "tooManyStages": "Un annuncio ha più fasi di quante ne contenga una pipeline. Dai a alcune lo stesso tipo e nome così si uniscono.",
       "privacyNoticeMissing": "La tua organizzazione non ha un'informativa privacy pubblicata. Pubblicane una prima nelle impostazioni privacy.",
       "load": "Non siamo riusciti a caricare la migrazione."
+    },
+    "connector": {
+      "title": "Collega {vendor}",
+      "intro": "Inserisci le credenziali di {vendor}. Servono solo a leggere i tuoi dati: restano cifrate mentre la lettura è in corso, poi vengono cancellate e non sono mai mostrate di nuovo. Usa una chiave di sola lettura quando {vendor} la offre.",
+      "howTo": "Come ottenerla",
+      "howToLabel": "Come ottenere {field} (si apre in una nuova scheda)",
+      "submit": "Collega e leggi",
+      "submitting": "Collegamento in corso",
+      "back": "Indietro",
+      "cleared": "Per sicurezza i campi sono stati svuotati: inserisci di nuovo le credenziali.",
+      "errors": {
+        "required": "Compila questo campo.",
+        "invalid": "Alcuni valori non sono stati accettati. Controllali e inseriscili di nuovo.",
+        "invalidFields": "Non accettati: {fields}. Inserisci di nuovo le credenziali.",
+        "unknown": "Questo connettore non è più disponibile."
+      }
+    },
+    "parts": {
+      "label": "Parti di questa migrazione",
+      "current": "Parte {part} di {parts}",
+      "intro": "Questa fonte era più grande di un pacchetto: è stata divisa in {parts} parti. Ogni parte ha la sua anteprima e la sua conferma; le persone presenti in più parti vengono unite per email.",
+      "part": "Parte {part}",
+      "open": "Apri la parte {part}"
     }
   },
   "consentRenew": {
