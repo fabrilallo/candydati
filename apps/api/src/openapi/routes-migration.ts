@@ -1,6 +1,6 @@
 import { MIGRATION_ISSUE_LEVELS, MIGRATION_ISSUES_PAGE_MAX } from '@candydati/domain';
 import { z } from 'zod';
-import { migrationChoicesBody, migrationCommitBody, migrationUploadBody } from './schemas-migration.js';
+import { migrationChoicesBody, migrationCommitBody, migrationConnectorBody, migrationUploadBody } from './schemas-migration.js';
 import type { RouteSpec } from './spec.js';
 
 export const migrationRoutes: readonly RouteSpec[] = [
@@ -8,6 +8,16 @@ export const migrationRoutes: readonly RouteSpec[] = [
     method: 'post', path: '/api/v1/migrations', tag: 'Migration', summary: 'Upload a migration package', scope: 'migration:manage', sessionOnly: true, status: 201, multipart: true,
     description: 'One `file` part: a ZIP with `migration.json` and its `files/` (schema `migration-package.v1`), up to 1 GiB. The package is checked in the background: poll the migration until `ready` or `failed`.',
     body: migrationUploadBody, response: { schema: z.object({ id: z.string(), status: z.string() }) },
+  },
+  {
+    method: 'get', path: '/api/v1/migrations/connectors', tag: 'Migration', summary: 'List the source connectors', scope: 'migration:manage', sessionOnly: true,
+    description: 'The built-in connectors this instance offers, each `beta` until a real migration confirms it, with the fields of its credentials form. Never a credential schema or a value.',
+    response: { schema: 'MigrationConnector', list: true },
+  },
+  {
+    method: 'post', path: '/api/v1/migrations/connector', tag: 'Migration', summary: 'Start a migration from a connector', scope: 'migration:manage', sessionOnly: true, status: 201,
+    description: 'The credentials are write-only: checked against the connector, kept encrypted only while the source is read, then wiped; never returned, logged or audited. The read runs in the background (`fetching`): poll the migration until `ready` or `failed`. A source larger than one package is split into parts (`groupId`, `part`), each previewed and confirmed on its own.',
+    body: migrationConnectorBody, response: { schema: z.object({ id: z.string(), status: z.string() }) },
   },
   { method: 'get', path: '/api/v1/migrations', tag: 'Migration', summary: 'List migrations', scope: 'migration:manage', sessionOnly: true, response: { schema: 'MigrationBatch', list: true } },
   {

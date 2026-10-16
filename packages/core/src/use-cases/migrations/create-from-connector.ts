@@ -1,7 +1,7 @@
 import { migrationConnectorInputSchema, migrationPackageKey, type MigrationBatch, type MigrationConnectorDto } from '@candydati/domain';
 import { z } from 'zod';
 import type { Actor } from '../../actor.js';
-import { NotFoundError, ValidationError } from '../../errors.js';
+import { ValidationError } from '../../errors.js';
 import type { MigrationConnectorDeps, MigrationSource } from '../../migration-fetch-ports.js';
 import { defineUseCase } from '../../use-case.js';
 
@@ -58,7 +58,8 @@ export const createMigrationFromConnector = defineUseCase<MigrationConnectorDeps
   transaction: { skip: 'the batch must be committed before its fetch is queued, like the package upload' },
   handler: async ({ deps, actor, input }) => {
     const source = deps.sources.find(input.connectorId);
-    if (!source) throw new NotFoundError('connector_unknown');
+    // A refusal on the input, with an issue the web can recognise: the instance does not offer this connector.
+    if (!source) throw new ValidationError([{ path: 'connectorId', message: 'connector_unknown' }]);
     const credentials = checkCredentials(source, input.credentials);
     const id = deps.newId();
     const credentialsCiphertext = deps.secrets.seal(JSON.stringify(credentials), id);

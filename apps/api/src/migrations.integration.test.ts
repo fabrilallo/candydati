@@ -190,6 +190,8 @@ describe('migrations: access', () => {
       ['PUT', `/api/v1/migrations/${id}/choices`],
       ['POST', `/api/v1/migrations/${id}/commit`],
       ['POST', `/api/v1/migrations/${id}/undo`],
+      ['GET', '/api/v1/migrations/connectors'],
+      ['POST', '/api/v1/migrations/connector'],
     ] as const;
     for (const [method, url] of routes) expect((await t.app.inject({ method, url, headers })).statusCode, `${method} ${url}`).toBe(403);
     expect((await uploadMigration(t, w.owner, packageZip(), { ...headers, cookie: '' })).statusCode).toBe(403);
@@ -208,11 +210,18 @@ describe('migrations: access', () => {
   });
 });
 
+describe('migrations: connectors of a default build', () => {
+  it('offers none yet: no vendor connector ships before it is written, the test one never does', async () => {
+    const w = await createWorld(t);
+    expect((await w.owner.get<unknown[]>('/api/v1/migrations/connectors')).body.data).toEqual([]);
+  });
+});
+
 describe('migrations: documentation', () => {
   it('documents the routes under the Migration tag, session only', async () => {
     const doc = (await t.app.inject({ method: 'GET', url: '/api/v1/openapi.json' })).json() as { paths: Record<string, Record<string, { tags: string[] }>> };
     expect(doc.paths['/api/v1/migrations']?.post?.tags).toEqual(['Migration']);
     expect(doc.paths['/api/v1/migrations/{id}/commit']?.post?.tags).toEqual(['Migration']);
-    expect(Object.keys(doc.paths).filter((path) => path.includes('/migrations'))).toHaveLength(6);
+    expect(Object.keys(doc.paths).filter((path) => path.includes('/migrations'))).toHaveLength(8);
   });
 });

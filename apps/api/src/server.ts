@@ -2,7 +2,7 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { safeErrorSerializer } from '@candydati/core';
 import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, TaskQueue } from '@candydati/core';
-import { createEmailProvider, createErrorReporter, type ErrorReporter } from '@candydati/providers';
+import { createEmailProvider, createErrorReporter, type ErrorReporter, type MigrationConnectorRegistry } from '@candydati/providers';
 import type { Db } from '@candydati/db';
 import type { AdQualityAnalyzer } from '@candydati/domain';
 import { createConfiguredAnalyzer } from './ai/ad-quality.js';
@@ -83,6 +83,8 @@ export interface ServerDeps {
   readonly messaging?: { readonly sender: MessageSender; readonly identity: EmailIdentity } | undefined;
   /** Channels to distribute ads to besides the built-in feed. Empty by default (self-hosted); hosted deployments pass theirs. */
   readonly distributionChannels?: readonly DistributionChannel[] | undefined;
+  /** Migration source connectors: the built-in ones by default (none yet); tests register a fake one. */
+  readonly migrationConnectors?: MigrationConnectorRegistry | undefined;
   /** Test seam: the "now" of the reports. */
   readonly reportClock?: (() => Date) | undefined;
   /** Test seam: the careers media transcoder (sharp by default). */
@@ -174,6 +176,7 @@ function createContext(app: FastifyInstance, deps: ServerDeps, metrics: ApiMetri
     queue: deps.queue,
     ...messaging,
     distributionChannels: deps.distributionChannels,
+    migrationConnectors: deps.migrationConnectors,
     reportClock: deps.reportClock,
     images: deps.images,
     onReceiptError: (error) => {

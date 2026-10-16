@@ -1,6 +1,6 @@
 import { migrationPackageKey } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
-import { ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
+import { ForbiddenError, ValidationError } from '../../errors.js';
 import { agentActor, apiKeyActor, ORG_A } from '../../testing/index.js';
 import { migrationAdmin, migrationOwner, migrationRecruiter } from '../../testing/migration-fixtures.js';
 import { FAKE_CREDENTIALS, FAKE_SOURCE, fakeCredentialsBox, seedMigrationFetchWorld } from '../../testing/migration-fetch.js';
@@ -46,7 +46,8 @@ describe('createMigrationFromConnector', () => {
 
   it('refuses an unknown connector and credentials the connector schema refuses, naming fields and never values', async () => {
     const deps = seedMigrationFetchWorld();
-    expect(await rejection(createMigrationFromConnector(deps, migrationOwner, { ...input, connectorId: 'nope' }))).toBeInstanceOf(NotFoundError);
+    const unknown = (await rejection(createMigrationFromConnector(deps, migrationOwner, { ...input, connectorId: 'nope' }))) as ValidationError;
+    expect(unknown.issues).toEqual([{ path: 'connectorId', message: 'connector_unknown' }]);
     const refused = (await rejection(createMigrationFromConnector(deps, migrationOwner, { ...input, credentials: { apiKey: 'short', subdomain: 'Bad Sub!' } }))) as ValidationError;
     expect(refused).toBeInstanceOf(ValidationError);
     expect(refused.issues).toEqual([

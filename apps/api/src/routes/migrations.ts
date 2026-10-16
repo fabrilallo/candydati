@@ -1,7 +1,9 @@
 import multipart from '@fastify/multipart';
 import {
   authorize,
+  createMigrationFromConnector,
   createMigrationFromPackage,
+  listMigrationConnectors,
   getMigration,
   listMigrationIssues,
   listMigrations,
@@ -23,7 +25,8 @@ const withoutUndefined = (input: Readonly<Record<string, unknown>>): Record<stri
 /**
  * Migration from another ATS through a package (ADR 0009). Session only: `migration:manage` (owner and admin) is never
  * grantable to a key or the agent, and a bearer is refused before anything runs. The routes are thin: the use cases
- * hold the rules. The connector source (`POST /api/v1/migrations/connector`) comes with the connectors.
+ * hold the rules. A connector start (`POST /api/v1/migrations/connector`) carries the source's credentials: the body is
+ * never logged (request logs hold method and url only), the credentials are sealed by the use case and never returned.
  */
 export async function registerMigrationRoutes(app: FastifyInstance, ctx: AppContext): Promise<void> {
   const deps = ctx.migrationDeps;
@@ -39,6 +42,13 @@ export async function registerMigrationRoutes(app: FastifyInstance, ctx: AppCont
       const batch = await createMigrationFromPackage(deps, actor, { batchId: stored.batchId, file: { key: stored.key, sizeBytes: stored.sizeBytes } });
       return reply.status(201).send(ok({ id: batch.id, status: batch.status }));
     });
+  });
+
+  app.get('/api/v1/migrations/connectors', async (request) => ok(await listMigrationConnectors(deps, await actorOf(request), {})));
+
+  app.post('/api/v1/migrations/connector', { config: importUploadRouteConfig(ctx) }, async (request, reply) => {
+    const batch = await createMigrationFromConnector(deps, await actorOf(request), bodyOf(request));
+    return reply.status(201).send(ok({ id: batch.id, status: batch.status }));
   });
 
   app.get('/api/v1/migrations', async (request) => ok((await listMigrations(deps, await actorOf(request), {})).map(toMigrationView)));
