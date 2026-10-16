@@ -49,9 +49,13 @@ const withScheme = (value: string): string => (/^https?:\/\//i.test(value) ? val
 /** No consent: Harvest documents no consent date, so the product asks the person to reconfirm. */
 /** A LinkedIn profile URL: the host itself must be linkedin.com or one of its subdomains, not a URL that merely mentions it. */
 export function isLinkedInUrl(value: string): boolean {
+  const raw = value.trim();
+  // Greenhouse stores social links as typed, often without a scheme (`linkedin.com/in/ada`).
+  const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`;
   try {
-    const host = new URL(value.trim()).hostname.toLowerCase();
-    return host === 'linkedin.com' || host.endsWith('.linkedin.com');
+    const url = new URL(withScheme);
+    const host = url.hostname.toLowerCase();
+    return (url.protocol === 'https:' || url.protocol === 'http:') && (host === 'linkedin.com' || host.endsWith('.linkedin.com'));
   } catch {
     return false;
   }

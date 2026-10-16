@@ -142,6 +142,8 @@ describe('isLinkedInUrl', () => {
     expect(isLinkedInUrl('https://it.linkedin.com/in/ada')).toBe(true);
     expect(isLinkedInUrl('https://evil.example/?u=linkedin.com/in/ada')).toBe(false);
     expect(isLinkedInUrl('https://linkedin.com.evil.example/in/ada')).toBe(false);
+    expect(isLinkedInUrl('linkedin.com/in/ada')).toBe(true);
+    expect(isLinkedInUrl('javascript://linkedin.com/%0aalert(1)')).toBe(false);
     expect(isLinkedInUrl('not a url')).toBe(false);
   });
 });
