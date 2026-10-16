@@ -12,7 +12,11 @@ const VALIDATE = join(SKILL, 'scripts', 'validate.mjs');
 const work = mkdtempSync(join(tmpdir(), 'candydati-skill-'));
 afterAll(() => rmSync(work, { recursive: true, force: true }));
 
-type Manifest = Record<string, any>;
+type Manifest = Record<string, unknown>;
+type Row = Record<string, unknown>;
+
+/** The `index`-th record of a collection of the manifest, to edit it in a test. */
+const row = (manifest: Manifest, collection: string, index = 0): Row => (manifest[collection] as Row[])[index] as Row;
 
 const validManifest = (): Manifest => ({
   format: 'candydati-migration',
@@ -137,7 +141,7 @@ describe('validate.mjs', () => {
 
   it('refuses a score hidden in an application, with its path', () => {
     const manifest = validManifest();
-    manifest['applications'][0].score = 4;
+    row(manifest, 'applications', 0)['score'] = 4;
     const result = run(makeFolder(manifest));
     expect(result.code).toBe(1);
     expect(result.err).toContain('applications[0].score: is not allowed');
@@ -145,7 +149,7 @@ describe('validate.mjs', () => {
 
   it.each(['birthDate', 'gender', 'photoUrl', 'rating'])('refuses the forbidden candidate field %s', (field) => {
     const manifest = validManifest();
-    manifest['candidates'][0][field] = 'x';
+    row(manifest, 'candidates', 0)[field] = 'x';
     const result = run(makeFolder(manifest));
     expect(result.code).toBe(1);
     expect(result.err).toContain(`candidates[0].${field}: is not allowed`);
@@ -153,9 +157,9 @@ describe('validate.mjs', () => {
 
   it('refuses a wrong type, a missing field and a date without time zone', () => {
     const manifest = validManifest();
-    manifest['jobs'][0].status = 'archived';
-    delete manifest['candidates'][0].lastName;
-    manifest['candidates'][0].createdAt = '2025-01-15';
+    row(manifest, 'jobs', 0)['status'] = 'archived';
+    delete row(manifest, 'candidates', 0)['lastName'];
+    row(manifest, 'candidates', 0)['createdAt'] = '2025-01-15';
     const result = run(makeFolder(manifest));
     expect(result.code).toBe(1);
     expect(result.err).toContain('jobs[0].status: must be one of: draft, open, closed');
@@ -165,9 +169,9 @@ describe('validate.mjs', () => {
 
   it('refuses a broken reference', () => {
     const manifest = validManifest();
-    manifest['applications'][0].candidateRef = 'nobody';
-    manifest['applications'][0].stageRef = 'nowhere';
-    manifest['notes'][0].authorRef = 'ghost';
+    row(manifest, 'applications', 0)['candidateRef'] = 'nobody';
+    row(manifest, 'applications', 0)['stageRef'] = 'nowhere';
+    row(manifest, 'notes', 0)['authorRef'] = 'ghost';
     const result = run(makeFolder(manifest));
     expect(result.code).toBe(1);
     expect(result.err).toContain('applications[0].candidateRef: no candidate has ref "nobody"');
@@ -177,8 +181,8 @@ describe('validate.mjs', () => {
 
   it('refuses duplicate refs and an outcome without a closing date', () => {
     const manifest = validManifest();
-    manifest['candidates'].push({ ...manifest['candidates'][0] });
-    delete manifest['applications'][0].closedAt;
+    (manifest['candidates'] as Row[]).push({ ...row(manifest, 'candidates') });
+    delete row(manifest, 'applications', 0)['closedAt'];
     const result = run(makeFolder(manifest));
     expect(result.err).toContain('candidates[1].ref: duplicate ref "c1"');
     expect(result.err).toContain('applications[0].closedAt: closedAt is required when there is an outcome');
@@ -186,7 +190,7 @@ describe('validate.mjs', () => {
 
   it.each(['../secret.pdf', 'files/../secret.pdf', 'docs/cv.pdf', '/etc/passwd', 'files\\cv.pdf'])('refuses the file path %s', (path) => {
     const manifest = validManifest();
-    manifest['applications'][0].files[0].path = path;
+    (row(manifest, 'applications')['files'] as Row[])[0]!['path'] = path;
     const result = run(makeFolder(manifest));
     expect(result.code).toBe(1);
     expect(result.err).toContain('applications[0].files[0].path:');
