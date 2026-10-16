@@ -4,6 +4,7 @@ import { careersRoutes } from './routes-careers.js';
 import { configRoutes } from './routes-config.js';
 import { hrRoutes } from './routes-hr.js';
 import { importRoutes } from './routes-import.js';
+import { migrationRoutes } from './routes-migration.js';
 import { jobRoutes } from './routes-jobs.js';
 import { privacyRoutes } from './routes-privacy.js';
 import { publicRoutes } from './routes-public.js';
@@ -27,6 +28,7 @@ export const ROUTE_REGISTRY: readonly RouteSpec[] = [
   ...privacyRoutes,
   ...configRoutes,
   ...importRoutes,
+  ...migrationRoutes,
   ...careersRoutes,
   ...hrRoutes,
   ...teamRoutes,

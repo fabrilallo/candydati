@@ -49,6 +49,7 @@ import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
 import { createApiKeyDeps } from './wiring/api-key-deps.js';
 import { createDistributionDeps } from './wiring/distribution-deps.js';
+import { createMigrationDeps, type MigrationRouteDeps } from './wiring/migration-deps.js';
 import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
 import { createCareersDeps, type CareersWiring } from './wiring/careers-deps.js';
 import { createHrDeps, type HrWiring } from './wiring/hr-deps.js';
@@ -142,6 +143,7 @@ export interface AppContext {
   readonly overviewDeps: Phase5Deps['overviewDeps'];
   readonly importDeps: ImportWiring['importDeps'];
   readonly consentDeps: ImportWiring['consentDeps'];
+  readonly migrationDeps: MigrationRouteDeps;
   readonly careersDeps: CareersWiring['careersDeps'];
   readonly publicCareersDeps: CareersWiring['publicCareersDeps'];
   readonly feedbackDeps: HrWiring['feedbackDeps'];
@@ -207,6 +209,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...phase2,
     ...phase5,
     ...createImportDeps({ uow, files, queue }),
+    ...createMigrationDeps({ uow, files, queue }),
     ...createCareersDeps({ uow, files, queue, defaultLocale: env.platform.defaultLocale, images }),
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     submitDeps: withDailyCaps(env, phase2),
