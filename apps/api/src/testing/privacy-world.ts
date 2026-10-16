@@ -78,6 +78,7 @@ export function retentionDeps(t: TestApp): RetentionDeps {
     files: t.files,
     queue: t.queue,
     jobs: r.jobs,
+    jobTeams: r.jobTeams,
     notifications: r.notifications,
     members: r.members,
     retentionRuns: r.retentionRuns,

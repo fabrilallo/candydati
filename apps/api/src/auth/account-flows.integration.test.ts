@@ -17,6 +17,14 @@ afterAll(async () => {
 
 const post = (app: TestApp, url: string, payload: object, cookie?: string) =>
   app.app.inject({ method: 'POST', url, headers: { origin: WEB_ORIGIN, 'content-type': 'application/json', ...(cookie ? { cookie } : {}) }, payload });
+/** An existing user and organization to act as the inviter of an invitation. */
+const anInviter = async (app: TestApp): Promise<{ readonly userId: string; readonly organizationId: string }> => {
+  const [user] = await app.handle.db.select({ id: schema.user.id }).from(schema.user).limit(1);
+  const [organization] = await app.handle.db.select({ id: schema.organization.id }).from(schema.organization).limit(1);
+  if (user === undefined || organization === undefined) throw new Error('expected a user and an organization in the test database');
+  return { userId: user.id, organizationId: organization.id };
+};
+
 const mailsTo = (app: TestApp, email: string, kind?: string) => app.mailbox.sent.filter((m) => m.to === email && (kind === undefined || m.email.kind === kind));
 
 describe('sign-up with email verification (M5)', () => {
@@ -109,27 +117,25 @@ describe('SIGNUP_MODE=invite_only (M5)', () => {
   });
 
   it('lets an invited address create its account', async () => {
-    const [{ id: userId }] = await inviteOnly.handle.db.select({ id: schema.user.id }).from(schema.user).limit(1);
-    const [{ id: organizationId }] = await inviteOnly.handle.db.select({ id: schema.organization.id }).from(schema.organization).limit(1);
+    const { userId, organizationId } = await anInviter(inviteOnly);
     const email = uniqueEmail('welcome');
     await inviteOnly.handle.db.insert(schema.invitation).values({
       id: `inv-${Math.random().toString(36).slice(2)}`,
-      organizationId: organizationId!,
+      organizationId,
       email,
       role: 'recruiter',
       status: 'pending',
       expiresAt: new Date(Date.now() + 60_000),
-      inviterId: userId!,
+      inviterId: userId,
     });
     expect((await post(inviteOnly, '/api/auth/sign-up/email', { email: email.toUpperCase(), password: PASSWORD, name: 'Welcome' })).statusCode).toBe(200);
   });
 
   it('confirms the address only while the invitation that admitted it is still pending', async () => {
-    const [{ id: userId }] = await inviteOnly.handle.db.select({ id: schema.user.id }).from(schema.user).limit(1);
-    const [{ id: organizationId }] = await inviteOnly.handle.db.select({ id: schema.organization.id }).from(schema.organization).limit(1);
+    const { userId, organizationId } = await anInviter(inviteOnly);
     const email = uniqueEmail('withdrawn');
     const invitationId = `inv-${Math.random().toString(36).slice(2)}`;
-    await inviteOnly.handle.db.insert(schema.invitation).values({ id: invitationId, organizationId: organizationId!, email, role: 'recruiter', status: 'pending', expiresAt: new Date(Date.now() + 60_000), inviterId: userId! });
+    await inviteOnly.handle.db.insert(schema.invitation).values({ id: invitationId, organizationId, email, role: 'recruiter', status: 'pending', expiresAt: new Date(Date.now() + 60_000), inviterId: userId });
     expect((await post(inviteOnly, '/api/auth/sign-up/email', { email, password: PASSWORD, name: 'Withdrawn' })).statusCode).toBe(200);
     const link = pathOf(inviteOnly.mailbox.linkFor(email, 'verify_email'));
 

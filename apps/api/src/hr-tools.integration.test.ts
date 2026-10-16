@@ -1,5 +1,6 @@
+import type { Employment } from '@candydati/domain';
 import { randomUUID } from 'node:crypto';
-import { createDrizzleJobs, createDrizzleMemberDirectory, createDrizzleNotifications, createDrizzleStaleJobs, scanStaleJobs } from '@candydati/core';
+import { createDrizzleJobs, createDrizzleJobTeams, createDrizzleMemberDirectory, createDrizzleNotifications, createDrizzleStaleJobs, scanStaleJobs } from '@candydati/core';
 import { completeJobContent } from '@candydati/core/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createKey, withKey } from './testing/api-keys.js';
@@ -62,7 +63,7 @@ describe('compliance blocks publication', () => {
 describe('employment terms', () => {
   it('round-trip through the job and appear in the public feed', async () => {
     const w = await createWorld(t);
-    const employment = {
+    const employment: Employment = {
       ccnl: 'commercio_terziario',
       level: '4° livello',
       monthlyPayments: 14,
@@ -315,7 +316,7 @@ describe('stale ads', () => {
     expect(await staleIds((await createWorld(t, 'Other')).owner)).toEqual([]);
 
     const db = t.handle.db;
-    const deps = { staleJobs: createDrizzleStaleJobs(db), jobs: createDrizzleJobs(db), notifications: createDrizzleNotifications(db), members: createDrizzleMemberDirectory(db), newId: randomUUID };
+    const deps = { staleJobs: createDrizzleStaleJobs(db), jobs: createDrizzleJobs(db), jobTeams: createDrizzleJobTeams(db), notifications: createDrizzleNotifications(db), members: createDrizzleMemberDirectory(db), newId: randomUUID };
     await scanStaleJobs(deps, { now: new Date() });
     await scanStaleJobs(deps, { now: new Date() });
     const { rows } = await t.handle.pool.query(`select kind, user_id from notification where job_id = $1`, [job.id]);

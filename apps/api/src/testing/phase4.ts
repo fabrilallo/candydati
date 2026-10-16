@@ -37,6 +37,7 @@ export function scanDeps(t: TestApp): ScanDeps {
     tasks: r.tasks,
     notifications: r.notifications,
     members: r.members,
+    jobTeams: r.jobTeams,
     newId: randomUUID,
   };
 }
