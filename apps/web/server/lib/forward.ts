@@ -14,7 +14,7 @@ export const forwardToApi = (matches: (pathWithQuery: string) => boolean) =>
     if (!matches(pathWithQuery)) return
 
     const body = event.method === 'GET' || event.method === 'HEAD' ? undefined : (getRequestWebStream(event) ?? undefined)
-    const { apiInternalUrl, trustCloudflare, apiMaxBodyBytes, apiTimeoutMs, public: site } = useRuntimeConfig(event)
+    const { apiInternalUrl, trustCloudflare, trustedProxy, apiMaxBodyBytes, apiTimeoutMs, public: site } = useRuntimeConfig(event)
     const origin = publicOriginOf(String(site?.siteUrl ?? ''), { host: url.host, protocol: url.protocol === 'https:' ? 'https' : 'http' })
     // Browser went away before the api answered: stop the upstream call too.
     const clientGone = new AbortController()
@@ -35,6 +35,7 @@ export const forwardToApi = (matches: (pathWithQuery: string) => boolean) =>
         protocol: origin.protocol,
         socketAddress: event.node.req.socket.remoteAddress,
         trustCloudflare,
+        trustedProxy,
       },
       (input, init) => fetch(input, init),
     )

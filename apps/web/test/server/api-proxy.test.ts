@@ -81,6 +81,12 @@ describe('upstream request headers', () => {
     expect(upstreamRequestHeaders(request({ socketAddress: '172.16.0.9', headers: new Headers({ 'cf-connecting-ip': 'not-an-ip, 1.1.1.1' }), trustCloudflare: true })).get('x-forwarded-for')).toBe('172.16.0.9')
   })
 
+  it('reads the last x-forwarded-for entry only when the socket is the trusted reverse proxy', () => {
+    const headers = new Headers({ 'x-forwarded-for': '6.6.6.6, 203.0.113.7' })
+    expect(upstreamRequestHeaders(request({ socketAddress: '172.31.77.11', headers, trustedProxy: '172.31.77.11' })).get('x-forwarded-for')).toBe('203.0.113.7')
+    expect(upstreamRequestHeaders(request({ socketAddress: '172.31.77.12', headers, trustedProxy: '172.31.77.11' })).get('x-forwarded-for')).toBe('172.31.77.12')
+  })
+
   it('normalizes an IPv4-mapped socket address and sends nothing when the address is unknown', () => {
     expect(upstreamRequestHeaders(request({ socketAddress: '::ffff:198.51.100.2', headers: new Headers() })).get('x-forwarded-for')).toBe('198.51.100.2')
     expect(upstreamRequestHeaders(request({ socketAddress: undefined, headers: new Headers({ 'x-forwarded-for': '1.1.1.1' }) })).has('x-forwarded-for')).toBe(false)

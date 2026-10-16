@@ -9,6 +9,11 @@ export interface ClientIpSource {
   readonly socketAddress?: string | undefined
   /** `NUXT_TRUST_CLOUDFLARE=true`: the web runs behind Cloudflare and only Cloudflare can reach it, so its `cf-connecting-ip` is the client. */
   readonly trustCloudflare?: boolean | undefined
+  /**
+   * `NUXT_TRUSTED_PROXY`: address of the one reverse proxy in front of the web (the bundled Caddy). Only a request
+   * whose socket is that address has its client read from `x-forwarded-for`, last entry (the one the proxy appended).
+   */
+  readonly trustedProxy?: string | undefined
 }
 
 const IPV4 = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/
@@ -28,9 +33,20 @@ export const normalizeIp = (address: string | undefined): string | null => {
   return IPV4.test(value) || isIpv6(value) ? value : null
 }
 
-/** The socket address, or, only when the deploy says the web sits behind Cloudflare, the `cf-connecting-ip` it set. A client-sent header is never used. */
+const fromTrustedProxy = (source: ClientIpSource): string | null => {
+  const proxy = normalizeIp(source.trustedProxy)
+  if (!proxy || normalizeIp(source.socketAddress) !== proxy) return null
+  return normalizeIp(source.headers.get('x-forwarded-for')?.split(',').at(-1))
+}
+
+/**
+ * The socket address, or the address set by a front the deploy declares: Cloudflare (`cf-connecting-ip`) or the
+ * trusted reverse proxy (`x-forwarded-for`, only when the socket is that proxy). A client-sent header is never used.
+ */
 export const clientIpOf = (source: ClientIpSource): string | null =>
-  (source.trustCloudflare ? normalizeIp(source.headers.get('cf-connecting-ip') ?? undefined) : null) ?? normalizeIp(source.socketAddress)
+  (source.trustCloudflare ? normalizeIp(source.headers.get('cf-connecting-ip') ?? undefined) : null) ??
+  fromTrustedProxy(source) ??
+  normalizeIp(source.socketAddress)
 
 /** The single clean `x-forwarded-for` for an upstream call, empty when the client is unknown. */
 export const forwardedForHeader = (source: ClientIpSource): Record<string, string> => {

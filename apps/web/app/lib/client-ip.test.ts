@@ -25,6 +25,24 @@ describe('clientIpOf', () => {
   })
 })
 
+describe('clientIpOf behind a trusted reverse proxy', () => {
+  const proxy = '172.31.77.11'
+  it('uses the last x-forwarded-for entry, the one the trusted proxy appended', () => {
+    expect(clientIpOf({ headers: headers({ 'x-forwarded-for': '9.9.9.9' }), socketAddress: proxy, trustedProxy: proxy })).toBe('9.9.9.9')
+    expect(clientIpOf({ headers: headers({ 'x-forwarded-for': '6.6.6.6, 9.9.9.9' }), socketAddress: proxy, trustedProxy: proxy })).toBe('9.9.9.9')
+    expect(clientIpOf({ headers: headers({ 'x-forwarded-for': '9.9.9.9' }), socketAddress: `::ffff:${proxy}`, trustedProxy: proxy })).toBe('9.9.9.9')
+  })
+  it('ignores x-forwarded-for from any other peer, or when no proxy is configured', () => {
+    expect(clientIpOf({ headers: headers({ 'x-forwarded-for': '9.9.9.9' }), socketAddress: '10.0.0.5', trustedProxy: proxy })).toBe('10.0.0.5')
+    expect(clientIpOf({ headers: headers({ 'x-forwarded-for': '9.9.9.9' }), socketAddress: proxy })).toBe(proxy)
+    expect(clientIpOf({ headers: headers({ 'x-forwarded-for': '9.9.9.9' }), socketAddress: proxy, trustedProxy: '' })).toBe(proxy)
+  })
+  it('falls back to the socket when the proxy sent no usable address', () => {
+    expect(clientIpOf({ headers: headers(), socketAddress: proxy, trustedProxy: proxy })).toBe(proxy)
+    expect(clientIpOf({ headers: headers({ 'x-forwarded-for': '9.9.9.9, nope' }), socketAddress: proxy, trustedProxy: proxy })).toBe(proxy)
+  })
+})
+
 describe('forwardedForHeader', () => {
   it('is one clean header, or nothing when the client is unknown', () => {
     expect(forwardedForHeader({ headers: headers(), socketAddress: '::ffff:1.2.3.4' })).toEqual({ 'x-forwarded-for': '1.2.3.4' })

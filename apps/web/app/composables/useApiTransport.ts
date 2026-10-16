@@ -13,16 +13,17 @@ export interface ApiTransport {
  */
 export const useApiTransport = (): ApiTransport => {
   if (!import.meta.server) return { baseURL: undefined, headers: {} }
-  const { apiInternalUrl, trustCloudflare, public: site } = useRuntimeConfig()
+  const { apiInternalUrl, trustCloudflare, trustedProxy, public: site } = useRuntimeConfig()
   const url = useRequestURL()
   const origin = publicOriginOf(site.siteUrl, { host: url.host, protocol: url.protocol === 'https:' ? 'https' : 'http' })
   return {
     baseURL: apiInternalUrl,
     headers: ssrApiHeaders({
       cookie: useRequestHeaders(['cookie']).cookie,
-      headers: new Headers(useRequestHeaders(['cf-connecting-ip'])),
+      headers: new Headers(useRequestHeaders(['cf-connecting-ip', 'x-forwarded-for'])),
       socketAddress: useRequestEvent()?.node.req.socket.remoteAddress,
       trustCloudflare,
+      trustedProxy,
       host: origin.host,
       protocol: origin.protocol,
     }),

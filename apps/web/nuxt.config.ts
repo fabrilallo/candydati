@@ -52,6 +52,8 @@ export default defineNuxtConfig({
     apiTimeoutMs: 300_000,
     /** `NUXT_TRUST_CLOUDFLARE=true`: only when the site is reachable through Cloudflare alone; then `cf-connecting-ip` is the client IP. */
     trustCloudflare: false,
+    /** `NUXT_TRUSTED_PROXY`: address of the one reverse proxy in front (the bundled Caddy); its `x-forwarded-for` names the client. Empty = none. */
+    trustedProxy: '',
     /** `NUXT_SENTRY_DSN`: DSN of a Sentry-compatible collector for the server's errors (5xx; no request data). Empty = nothing is sent. */
     sentryDsn: '',
     public: {

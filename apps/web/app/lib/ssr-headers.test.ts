@@ -23,6 +23,11 @@ describe('ssrApiHeaders', () => {
     expect(ssrApiHeaders({ ...base, headers, socketAddress: '10.0.0.1' })['x-forwarded-for']).toBe('10.0.0.1')
     expect(ssrApiHeaders({ ...base, headers, socketAddress: '10.0.0.1', trustCloudflare: true })['x-forwarded-for']).toBe('9.9.9.9')
   })
+  it('honours x-forwarded-for only from the trusted reverse proxy', () => {
+    const headers = new Headers({ 'x-forwarded-for': '9.9.9.9' })
+    expect(ssrApiHeaders({ ...base, headers, socketAddress: '10.0.0.1', trustedProxy: '10.0.0.1' })['x-forwarded-for']).toBe('9.9.9.9')
+    expect(ssrApiHeaders({ ...base, headers, socketAddress: '10.0.0.2', trustedProxy: '10.0.0.1' })['x-forwarded-for']).toBe('10.0.0.2')
+  })
 })
 
 describe('ssrAuthHeaders', () => {

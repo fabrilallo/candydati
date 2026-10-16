@@ -53,6 +53,7 @@ Variables without a default are required or optional as described; see `.env.exa
 | `NUXT_PUBLIC_TURNSTILE_SITE_KEY` | web |  | Cloudflare Turnstile site key: the application form shows the check and the page policy allows challenges.cloudflare.com. Empty: off. |
 | `NUXT_SENTRY_DSN` | web |  | Web: DSN of a Sentry-compatible collector for server errors (5xx), scrubbed of personal data. Empty: nothing is sent. |
 | `NUXT_TRUST_CLOUDFLARE` | web |  | true only when the site is reachable through Cloudflare alone: cf-connecting-ip is then the client IP. |
+| `NUXT_TRUSTED_PROXY` | web |  | Web: address of the single reverse proxy in front of the web (the bundled Caddy, CANDYDATI_CADDY_IP); only from that socket is the client read from x-forwarded-for. Empty: the socket address is the client. |
 | `OPENAI_API_KEY` | api, worker |  | API key for openai/* models. |
 | `OPENROUTER_API_KEY` | api, worker |  | API key for openrouter/* models. |
 | `ORGANIZATION_CREATION` | api |  | Who may create organizations: open (anyone), one_per_user (one organization ever created per account; the limit is per account, so invite-only sign-up is what bounds people) or instance_admins (only the first owner and INSTANCE_ADMIN_EMAILS). Default: one_per_user when SIGNUP_MODE=invite_only, open otherwise. |

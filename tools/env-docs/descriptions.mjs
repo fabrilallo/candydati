@@ -75,6 +75,7 @@ export const DESCRIPTIONS = {
   NUXT_API_TIMEOUT_MS: 'Web proxy: milliseconds to wait for the api to start answering (default 300000).',
   NUXT_TRUST_CLOUDFLARE: 'true only when the site is reachable through Cloudflare alone: cf-connecting-ip is then the client IP.',
   NUXT_PUBLIC_SITE_URL: 'Public URL of the site (canonical links, sitemap).',
+  NUXT_TRUSTED_PROXY: 'Web: address of the single reverse proxy in front of the web (the bundled Caddy, CANDYDATI_CADDY_IP); only from that socket is the client read from x-forwarded-for. Empty: the socket address is the client.',
   NUXT_PUBLIC_PLATFORM_NAME: 'Product name in the web app.',
   NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE: 'Default language of the web app: it or en. Read at build time too.',
   NUXT_PUBLIC_TIME_ZONE: 'IANA time zone dates are shown in.',

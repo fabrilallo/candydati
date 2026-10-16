@@ -59,6 +59,8 @@ export interface ProxyRequest {
   readonly socketAddress?: string | undefined
   /** `NUXT_TRUST_CLOUDFLARE=true`: the web runs behind Cloudflare and only Cloudflare can reach it, so its `cf-connecting-ip` is the client. */
   readonly trustCloudflare?: boolean | undefined
+  /** `NUXT_TRUSTED_PROXY`: the reverse proxy whose `x-forwarded-for` names the client (see `clientIpOf`). */
+  readonly trustedProxy?: string | undefined
 }
 
 export type FetchLike = (input: string, init: RequestInit) => Promise<Response>
@@ -83,7 +85,7 @@ export const isMcpPath = (pathWithQuery: string): boolean => /^\/mcp\/?(?:\?|$)/
 
 export const apiTarget = (apiOrigin: string, pathWithQuery: string): string => `${apiOrigin.replace(/\/+$/, '')}${pathWithQuery}`
 
-export const upstreamRequestHeaders = (request: Pick<ProxyRequest, 'headers' | 'host' | 'protocol' | 'socketAddress' | 'trustCloudflare'>): Headers => {
+export const upstreamRequestHeaders = (request: Pick<ProxyRequest, 'headers' | 'host' | 'protocol' | 'socketAddress' | 'trustCloudflare' | 'trustedProxy'>): Headers => {
   const out = new Headers()
   request.headers.forEach((value, name) => {
     if (!DROPPED_REQUEST_HEADERS.has(name) && !CLIENT_ADDRESS_HEADERS.includes(name)) out.set(name, value)
