@@ -24,11 +24,21 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # A major Postgres version cannot read the previous one's data directory: upgrading needs pg_upgrade or a
+      # dump and restore, planned and documented (docs/OPERATIONS.md), never an automatic pull request.
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: chore
   - package-ecosystem: docker
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # A major Postgres version cannot read the previous one's data directory: upgrading needs pg_upgrade or a
+      # dump and restore, planned and documented (docs/OPERATIONS.md), never an automatic pull request.
+      - dependency-name: postgres
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: chore
