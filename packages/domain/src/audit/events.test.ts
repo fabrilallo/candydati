@@ -23,6 +23,12 @@ describe('newAuditEventSchema', () => {
     expect(event.actor).toEqual({ type: 'agent', id: 'process-assistant', onBehalfOfUserId: 'user_1' });
   });
 
+  it('records every step of a migration from another ATS', () => {
+    for (const action of ['migration.created', 'migration.fetched', 'migration.committed', 'migration.undone']) {
+      expect(newAuditEventSchema.safeParse({ ...base, action, target: { type: 'migration_batch', id: 'mig_1' } }).success).toBe(true);
+    }
+  });
+
   it('rejects unknown actions and missing organizations', () => {
     expect(newAuditEventSchema.safeParse({ ...base, action: 'candidate.ranked' }).success).toBe(false);
     expect(newAuditEventSchema.safeParse({ ...base, organizationId: '' }).success).toBe(false);

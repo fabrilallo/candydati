@@ -584,6 +584,12 @@
       "careers_media": {
         "uploaded": "Uploaded an image or video for the careers page",
         "deleted": "Deleted an image or video of the careers page"
+      },
+      "migration": {
+        "created": "Uploaded a migration package",
+        "fetched": "Fetched data from another ATS",
+        "committed": "Migrated data from another ATS",
+        "undone": "Undid a migration"
       }
     }
   },
@@ -2415,6 +2421,9 @@
       },
       "careers_page": {
         "manage": "Manage the careers page"
+      },
+      "migration": {
+        "manage": "Migrate from another ATS"
       }
     },
     "withheld": "Some things a key can never do: decisions about candidates, messages to candidates and administration stay with a person.",

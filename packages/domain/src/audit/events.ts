@@ -71,6 +71,10 @@ export const AUDIT_ACTIONS = [
   'careers_page.published',
   'careers_media.uploaded',
   'careers_media.deleted',
+  'migration.created',
+  'migration.fetched',
+  'migration.committed',
+  'migration.undone',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

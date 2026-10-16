@@ -28,6 +28,7 @@ describe('machine access', () => {
       'api_key:manage',
       'job_team:manage',
       'careers_page:manage',
+      'migration:manage',
     ] as const) {
       expect(MACHINE_FORBIDDEN_PERMISSIONS).toContain(permission);
     }
@@ -75,6 +76,16 @@ describe('import:manage', () => {
     expect(isForbiddenFor('api_key', 'import:manage')).toBe(true);
     expect(isForbiddenFor('agent', 'import:manage')).toBe(true);
     expect(isForbiddenFor('user', 'import:manage')).toBe(false);
+  });
+});
+
+describe('migration:manage', () => {
+  it('is for owner and admin only, never for a key or the agent', () => {
+    expect(ROLES.filter((role) => roleHasPermission(role, 'migration:manage'))).toEqual(['owner', 'admin']);
+    expect(isForbiddenFor('api_key', 'migration:manage')).toBe(true);
+    expect(isForbiddenFor('agent', 'migration:manage')).toBe(true);
+    expect(isForbiddenFor('user', 'migration:manage')).toBe(false);
+    expect(grantablePermissions('owner', 'api_key')).not.toContain('migration:manage');
   });
 });
 
