@@ -6,7 +6,7 @@ export interface ImportEntry {
   readonly bytes: Uint8Array;
 }
 
-interface CentralEntry {
+export interface CentralEntry {
   readonly name: string;
   readonly compressedSize: number;
   readonly size: number;
@@ -30,8 +30,8 @@ function findEocd(view: DataView): number {
   return -1;
 }
 
-/** Reads the central directory without inflating anything. */
-function readCentralDirectory(bytes: Uint8Array, limits: ImportLimits): readonly CentralEntry[] {
+/** Reads the central directory without inflating anything. Names are raw, as written in the archive. */
+export function readCentralDirectory(bytes: Uint8Array, limits: ImportLimits): readonly CentralEntry[] {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const eocd = bytes.byteLength >= EOCD_MIN ? findEocd(view) : -1;
   if (eocd < 0) throw new ImportError('invalid_archive', 'Not a valid ZIP archive.');

@@ -13,3 +13,4 @@ a superseded ADR is marked, not deleted.
 | [0006](0006-models-via-mastra.md) | Models only through Mastra, configured by env strings |
 | [0007](0007-stateless-assistant.md) | Stateless assistant |
 | [0008](0008-imports-consent-renewal.md) | Consent to renew for imported candidates |
+| [0009](0009-ats-migration-package.md) | ATS migration through one public, strict package; the operator answers for it |

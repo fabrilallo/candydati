@@ -40,6 +40,7 @@ In app, la pagina `/app/settings/privacy` mostra il registro compilato con i dat
 | Decisioni automatizzate (art. 22) | Nessuna. L'agente non ordina, non assegna punteggi e non scarta candidati; ogni messaggio ai candidati richiede conferma di una persona | Vincoli dell'agente |
 | Export completo | Archivio ZIP per candidato e export dell'intera organizzazione, anche a fine contratto | Scheda candidato, esportazioni |
 | Dati importati | Consenso segnato "da rinnovare", con email di riconferma | Import |
+| Dati migrati da un altro ATS | Stesso titolare: date di consenso e conservazione riprese dalla fonte; chi non ha una data di consenso riceve la riconferma dei dati importati; chi ha la conservazione già scaduta resta escluso. Nessun punteggio, valutazione o dato particolare viene trasferito. Prima di confermare, un owner o admin dichiara che l'organizzazione è titolare, che ha una base giuridica per il trasferimento e che l'eventuale agente AI o strumento terzo usato per preparare il pacchetto è un suo sub-responsabile; le dichiarazioni restano nel registro delle azioni | Migrazione |
 | Documenti | Questi modelli e il registro compilato in app | `docs/legal/` |
 
 ## Cosa resta a carico del titolare
@@ -49,3 +50,8 @@ In app, la pagina `/app/settings/privacy` mostra il registro compilato con i dat
 - Scegliere le durate di conservazione e motivarle.
 - Istruire le persone autorizzate a usare la piattaforma.
 - Gestire le richieste degli interessati entro i termini di legge (un mese, art. 12 GDPR).
+- In una migrazione da un altro ATS: avere una base giuridica per trasferire i dati, verificare che date di consenso e
+  termini di conservazione della fonte siano corretti (vengono ripresi così come sono) e, se un agente AI o uno strumento
+  terzo prepara il pacchetto, sceglierlo e coprirlo con i propri accordi: il fornitore del modello è un sub-responsabile
+  del titolare, non del gestore della piattaforma. La piattaforma trasferisce ciò che il pacchetto contiene e non verifica
+  la base giuridica dei dati di origine.

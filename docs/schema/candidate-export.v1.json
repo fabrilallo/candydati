@@ -391,6 +391,7 @@
                   "type": "string",
                   "enum": [
                     "queued",
+                    "sending",
                     "sent",
                     "failed",
                     "received"
