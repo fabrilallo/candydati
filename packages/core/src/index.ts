@@ -55,6 +55,7 @@ export * from './use-cases/candidates/move-application.js';
 export * from './use-cases/candidates/decide-application.js';
 export * from './use-cases/candidates/search-candidates.js';
 export * from './use-cases/candidates/get-candidate.js';
+export * from './use-cases/candidates/application-timeline.js';
 export * from './use-cases/candidates/update-candidate-tags.js';
 export * from './use-cases/candidates/add-candidate-note.js';
 export * from './use-cases/candidates/open-cv.js';

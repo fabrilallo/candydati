@@ -1,4 +1,4 @@
-import type { Application, Candidate, CandidateNote, CvExtractionRecord, CvMediaType, Job, PipelineStage, ResponseState } from '@candydati/domain';
+import type { ApplicationTimelineDto, Application, Candidate, CandidateNote, CvExtractionRecord, CvMediaType, Job, PipelineStage, ResponseState } from '@candydati/domain';
 
 /** What the use cases return: domain objects. The mappers in `mappers/candidate-dto.ts` turn them into DTOs. */
 export interface ApplicationCardView {
@@ -49,4 +49,14 @@ export interface CvFile {
   readonly bytes: Uint8Array;
   readonly fileName: string;
   readonly mediaType: CvMediaType;
+}
+
+type WithDate<T> = T extends unknown ? Omit<T, 'at'> & { readonly at: Date } : never;
+
+/** One entry of the timeline of an application; the mapper turns `at` into an ISO string. */
+export type TimelineItemView = WithDate<ApplicationTimelineDto['items'][number]>;
+
+export interface ApplicationTimelineView {
+  /** Oldest first. */
+  readonly items: readonly TimelineItemView[];
 }

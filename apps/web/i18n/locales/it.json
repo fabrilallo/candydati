@@ -1465,7 +1465,8 @@
       "messages": "Messaggi",
       "tasks": "Attività",
       "privacy": "Privacy e dati",
-      "feedback": "Feedback"
+      "feedback": "Feedback",
+      "timeline": "Cronologia"
     },
     "header": {
       "stage": "Fase:",
@@ -3980,6 +3981,44 @@
       "title": "Da dove arrivano visite e candidature",
       "description": "Gli ultimi 90 giorni, solo per questo annuncio.",
       "error": "Non è stato possibile caricare i dati."
+    }
+  },
+  "timeline": {
+    "title": "Cronologia",
+    "intro": "Cosa è successo a questa candidatura, dalla più vecchia. L'ultima riga è a che punto è ora.",
+    "fromPreviousSystem": "dal sistema precedente",
+    "campaign": "campagna {campaign}",
+    "from": "da {stage}",
+    "messageFailed": "non consegnato",
+    "source": {
+      "careers_page": "pagina carriere",
+      "manual": "inserita a mano",
+      "import": "importazione"
+    },
+    "actor": {
+      "agent": "assistente",
+      "api_key": "chiave API",
+      "system": "automatico",
+      "candidate": "candidato",
+      "external": "esterno",
+      "person": "persona"
+    },
+    "item": {
+      "received": "Candidatura ricevuta ({source})",
+      "moved": "Spostata in {stage}",
+      "decided": {
+        "hired": "Esito: assunto",
+        "not_selected": "Esito: non selezionato",
+        "withdrawn": "Esito: ritirata"
+      },
+      "note": "Nota aggiunta",
+      "message": {
+        "outbound": "Messaggio inviato",
+        "inbound": "Messaggio ricevuto"
+      },
+      "feedback": "Feedback del colloquio inviato ({stage})",
+      "reconfirmationSent": "Riconferma richiesta",
+      "reconfirmationAnswered": "Riconferma data"
     }
   }
 }

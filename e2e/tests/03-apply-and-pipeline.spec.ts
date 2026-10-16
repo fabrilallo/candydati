@@ -53,4 +53,14 @@ test('a candidate applies and the recruiter moves, writes to and decides on the 
   await page.getByRole('dialog').getByRole('button', { name: "Registra l'esito" }).click();
   await expect(page.getByTestId('candidate-status')).toContainText('Non selezionata');
   await expect(page.getByTestId('decide-menu')).toHaveCount(0);
+
+  // Timeline: the same story, oldest first, with the outcome last (the receipt is the first message, ours the last).
+  await page.getByTestId('tab-timeline').click();
+  const items = page.getByTestId('timeline-item');
+  await expect(items.first()).toHaveAttribute('data-kind', 'received');
+  await expect(items.last()).toHaveAttribute('data-kind', 'decided');
+  const kinds = await items.evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-kind')));
+  expect(kinds).toEqual(expect.arrayContaining(['received', 'stage_moved', 'message', 'decided']));
+  expect(kinds.indexOf('stage_moved')).toBeLessThan(kinds.lastIndexOf('message'));
+  await expect(page.getByTestId('timeline-list').locator('time').first()).toHaveAttribute('datetime', /^\d{4}-\d{2}-\d{2}T/);
 });

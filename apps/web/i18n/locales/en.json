@@ -1465,7 +1465,8 @@
       "messages": "Messages",
       "tasks": "Tasks",
       "privacy": "Privacy and data",
-      "feedback": "Feedback"
+      "feedback": "Feedback",
+      "timeline": "Timeline"
     },
     "header": {
       "stage": "Stage:",
@@ -3980,6 +3981,44 @@
       "title": "Where visits and applications come from",
       "description": "The last 90 days, for this ad only.",
       "error": "The figures could not be loaded."
+    }
+  },
+  "timeline": {
+    "title": "Timeline",
+    "intro": "What happened to this application, oldest first. The last line is where it stands now.",
+    "fromPreviousSystem": "from the previous system",
+    "campaign": "campaign {campaign}",
+    "from": "from {stage}",
+    "messageFailed": "not delivered",
+    "source": {
+      "careers_page": "careers page",
+      "manual": "added by hand",
+      "import": "import"
+    },
+    "actor": {
+      "agent": "assistant",
+      "api_key": "API key",
+      "system": "automatic",
+      "candidate": "candidate",
+      "external": "external",
+      "person": "person"
+    },
+    "item": {
+      "received": "Application received ({source})",
+      "moved": "Moved to {stage}",
+      "decided": {
+        "hired": "Outcome: hired",
+        "not_selected": "Outcome: not selected",
+        "withdrawn": "Outcome: withdrawn"
+      },
+      "note": "Note added",
+      "message": {
+        "outbound": "Message sent",
+        "inbound": "Message received"
+      },
+      "feedback": "Interview feedback submitted ({stage})",
+      "reconfirmationSent": "Reconfirmation requested",
+      "reconfirmationAnswered": "Reconfirmation given"
     }
   }
 }
