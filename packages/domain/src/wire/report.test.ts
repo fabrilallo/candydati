@@ -11,6 +11,7 @@ const valid = {
   timeToFill: { overall: stat, items: [] },
   funnel: { stages: [], outcomes, outcomesByJob: [] },
   sources: [],
+  campaigns: [],
   responses: { closed: rate, kept: 0, missed: 0, responseHours: stat, open: 0, overdue: 0, byJob: [], byStageType: [] },
   outcomeCoverage: rate,
 };
@@ -29,6 +30,14 @@ describe('reports wire', () => {
     expect(parsed.invalid).toEqual(['sources']);
     expect(parsed.funnel).not.toBeNull();
     expect(parsed.minSample).toBe(REPORT_MIN_SAMPLE);
+  });
+
+  it('requires visits and a campaign label on the rows', () => {
+    const row = { origin: 'linkedin', applications: 2, hires: 1, visits: 10, conversion: 0.2 };
+    const parsed = reportsSchema.parse({ ...valid, sources: [row], campaigns: [{ ...row, campaign: 'autumn' }] });
+    expect(parsed.invalid).toEqual([]);
+    expect(reportsSchema.parse({ ...valid, campaigns: [row] }).campaigns).toBeNull();
+    expect(reportsSchema.parse({ ...valid, sources: [{ origin: 'x', applications: 1, hires: 0 }] }).sources).toBeNull();
   });
 
   it('refuses an answer that is not an object', () => {

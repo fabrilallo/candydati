@@ -127,6 +127,8 @@ export interface Application {
   readonly source: 'careers_page' | 'manual' | 'import';
   /** Short sanitized label of where it came from (`sanitizeOrigin`): `linkedin`, `google.com`, `direct`, `import`, `manual`. */
   readonly origin: string;
+  /** `utm_campaign` of the ad URL, sanitized (`sanitizeCampaign`). Absent or null: none. */
+  readonly originCampaign?: string | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
   readonly stageChangedAt: Date;

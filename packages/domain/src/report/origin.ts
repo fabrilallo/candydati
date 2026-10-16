@@ -18,16 +18,26 @@ function hostOrSelf(value: string): string {
  * Anything empty, not a string or containing an email address becomes `direct`.
  */
 export function sanitizeOrigin(raw: unknown): string {
-  if (typeof raw !== 'string') return ORIGIN_DIRECT;
-  const trimmed = raw.trim();
-  const host = hostOrSelf(trimmed.toLowerCase());
-  if (host === '' || host.includes('@')) return ORIGIN_DIRECT;
+  return cleanLabel(raw) ?? ORIGIN_DIRECT;
+}
+
+/** Same rules as the origin, for `utm_campaign`. No campaign (empty, not a string, personal data) is the empty string. */
+export const CAMPAIGN_MAX = ORIGIN_MAX;
+export const CAMPAIGN_NONE = '';
+export function sanitizeCampaign(raw: unknown): string {
+  return cleanLabel(raw) ?? CAMPAIGN_NONE;
+}
+
+function cleanLabel(raw: unknown): string | null {
+  if (typeof raw !== 'string') return null;
+  const host = hostOrSelf(raw.trim().toLowerCase());
+  if (host === '' || host.includes('@')) return null;
   const cleaned = host
     .replace(/[^a-z0-9._-]+/g, '-')
     .replace(/^[-.]+|[-.]+$/g, '')
     .slice(0, ORIGIN_MAX)
     .replace(/[-.]+$/g, '');
-  return cleaned === '' ? ORIGIN_DIRECT : cleaned;
+  return cleaned === '' ? null : cleaned;
 }
 
 /** Order of preference on the ad URL and the request: `utm_source`, then `ref`, then the referrer host, else `direct`. */

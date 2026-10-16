@@ -18,6 +18,8 @@ const funnelType = z.enum(FUNNEL_TYPES) as z.ZodType<FunnelStageType>;
 const outcomeCounts = Object.fromEntries(OUTCOMES.map((outcome) => [outcome, count])) as Record<(typeof OUTCOMES)[number], typeof count>;
 const jobRef = { jobId: z.string(), title: z.string() };
 
+const sourceRow = z.object({ origin: z.string(), applications: count, hires: count, visits: count, conversion: z.number().nonnegative().nullable() });
+
 const sectionSchemas = {
   timeToHire: z.object({ overall: durationStat, byJob: z.array(z.object({ ...jobRef, ...durationStat.shape })) }),
   timeToFill: z.object({
@@ -38,7 +40,8 @@ const sectionSchemas = {
     outcomes: z.object(outcomeCounts),
     outcomesByJob: z.array(z.object({ ...jobRef, ...outcomeCounts })),
   }),
-  sources: z.array(z.object({ origin: z.string(), applications: count, hires: count })),
+  sources: z.array(sourceRow),
+  campaigns: z.array(z.object({ ...sourceRow.shape, campaign: z.string() })),
   responses: z.object({
     closed: rate,
     kept: count,
