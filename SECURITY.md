@@ -99,6 +99,31 @@ What the code enforces, so an operator does not have to remember it:
   email verification and account deletion (`?token=`), OAuth `code`/`state`, invitation ids and the public feedback and
   consent links are written as `***`. Headers (cookies, bearer keys) are never logged.
 
+## Outbound requests of migration connectors
+
+A migration connector (Teamtailor, Greenhouse, Workable, Recruitee) never opens a socket of its own: every request goes
+through one reader (`packages/providers/src/http/json-reader.ts`), GET only except the OAuth token exchange. The reader
+has two modes, and a credential can only ever travel with the first:
+
+- **Authenticated (the vendor's API).** `getJson`, `postForm` and `download` reach only the hosts the connector declares
+  (`hosts()`: the vendor's API hosts, nothing else), over https on the default port, with no user info in the URL.
+  The host is resolved once, every address must be public (no loopback, private, link-local, CGNAT, metadata or
+  reserved range, IPv4 or IPv6) and the connection is pinned to those addresses, so DNS rebinding cannot move it.
+  Redirects stay on the same origin (three at most; the token exchange is never redirected). These calls carry the
+  connector's credentials.
+- **Public file (no credentials).** Vendors hand out CVs and attachments as signed URLs on storage or CDN hosts outside
+  their API domains. `downloadPublicFile` fetches such a file from any public host under a narrow rule: https on the
+  default port, no user info, every resolved address public and the connection pinned to them (SNI kept), at most
+  three redirects, each to an https URL that passes the same checks and is resolved and pinned again. It accepts no
+  caller headers at all (passing any is a programming error), so no `Authorization`, cookie or API key can reach a host
+  outside the allowlist; the URL's own signature is its only credential. The response is never parsed: the body streams
+  to storage under the same size cap and timeout as an authenticated download, and a foreign host's rate-limit headers
+  never slow the vendor's API.
+
+Each connector chooses per file: a URL on its own API origin goes through the authenticated `download`, any other URL
+through `downloadPublicFile`. In both modes, events and errors carry the URL with every query value replaced (signed
+URLs carry their signature in the query) and never a header or a body.
+
 ## Reverse proxy access logs
 
 The api masks its own logs, but a reverse proxy in front of the web container logs every URL first, and the emailed
