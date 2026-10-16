@@ -33,7 +33,7 @@ type World = Awaited<ReturnType<typeof world>>;
 async function addApplication(w: World, values: Partial<typeof application.$inferInsert> = {}): Promise<string> {
   const id = randomUUID();
   await handle.db.insert(application).values({
-    id, organizationId: w.org, jobId: w.jobId, candidateId: randomUUID(), stageId: 'received', cvKey: 'k', cvFileName: 'cv.pdf', cvMediaType: 'application/pdf', cvSizeBytes: 1, consent, retentionExpiresAt: new Date(), source: 'careers_page', ...values,
+    id, organizationId: w.org, jobId: w.jobId, stageId: 'received', cvKey: 'k', cvFileName: 'cv.pdf', cvMediaType: 'application/pdf', cvSizeBytes: 1, consent, retentionExpiresAt: new Date(), source: 'careers_page', ...values,
     candidateId: w.candidateId,
   });
   return id;
