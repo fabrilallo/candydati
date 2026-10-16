@@ -47,22 +47,3 @@ export function textToHtml(text: string, options: TextToHtmlOptions = {}): strin
     .filter((paragraph) => paragraph !== '');
   return paragraphs.map((paragraph) => `<p>${linkifyOutside(paragraph, literals).replaceAll('\n', '<br>')}</p>`).join('\n');
 }
-
-const ENTITIES: Readonly<Record<string, string>> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' };
-
-/** Text of an HTML email, for when the sender gave no plain part. Stored as text, never rendered back as HTML. */
-export function htmlToText(html: string): string {
-  return html
-    .replace(/<(script|style)\b[\s\S]*?<\/\1\s*>/gi, '')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/(p|div|li|tr|h[1-6]|blockquote)\s*>/gi, '\n\n')
-    .replace(/<[^>]*>/g, '')
-    .replace(/&(amp|lt|gt|quot|apos|nbsp);/g, (_match, name: string) => ENTITIES[name] ?? '')
-    .replace(/&#(\d{1,6});/g, (_match, code: string) => {
-      const point = Number(code);
-      return point > 0 ? String.fromCodePoint(point) : '';
-    })
-    .replace(/[ \t]+\n/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
-}

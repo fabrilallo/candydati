@@ -25,6 +25,7 @@ export * from './candidate/attachment.js';
 export { isSafePersonName, personNameSchema, safePersonNameOrEmpty } from './candidate/person-name.js';
 export * from './messaging/variables.js';
 export * from './messaging/html.js';
+export * from './messaging/html-text.js';
 export * from './messaging/template.js';
 export * from './messaging/defaults.js';
 export * from './messaging/message.js';
