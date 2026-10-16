@@ -32,6 +32,24 @@ describe('candidateExportSchema', () => {
     expect(parsed.notes[0]?.authorId).toBeNull();
   });
 
+  it('accepts attachments and form answers, and still accepts a v1 file written before they existed', () => {
+    const application = {
+      id: 'a', jobId: 'j', jobTitle: 'T', source: 'import', stageId: 'received', stageChangedAt: iso, outcome: null, message: '',
+      createdAt: iso, closedAt: null, retentionExpiresAt: iso,
+      consent: { status: 'given', privacyNoticeVersion: 1, scopes: ['selection'], givenAt: iso },
+      cv: null, extraction: null, messages: [],
+    };
+    const attachment = { id: 'f', kind: 'cover_letter', path: 'files/a/attachments/f/letter.pdf', fileName: 'letter.pdf', mediaType: 'application/pdf', sizeBytes: 10, createdAt: iso };
+    const parsed = candidateExportSchema.parse({ ...valid, applications: [{ ...application, attachments: [attachment], answers: [{ question: 'Q', answer: 'A' }] }] });
+    expect(parsed.applications[0]?.attachments).toEqual([attachment]);
+    expect(parsed.applications[0]?.answers).toEqual([{ question: 'Q', answer: 'A' }]);
+    expect(candidateExportSchema.parse({ ...valid, applications: [application] }).applications[0]?.attachments).toBeUndefined();
+    expect(candidateExportSchema.safeParse({ ...valid, applications: [{ ...application, attachments: [{ ...attachment, kind: 'cv' }] }] }).success).toBe(false);
+    const required = (candidateExportJsonSchema() as { properties: { applications: { items: { required: string[] } } } }).properties.applications.items.required;
+    expect(required).not.toContain('attachments');
+    expect(required).not.toContain('answers');
+  });
+
   it('has a versioned JSON schema that is deterministic', () => {
     const schema = candidateExportJsonSchema();
     expect(schema.$id).toBe(CANDIDATE_EXPORT_SCHEMA_ID);

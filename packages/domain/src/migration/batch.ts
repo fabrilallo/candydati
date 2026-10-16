@@ -78,8 +78,21 @@ export interface MigrationCommitCounts {
   /** A second open application of the same person to the same job: left out, like `already_applied` in the preview. */
   readonly skippedAlreadyApplied: number;
   readonly cvs: number;
-  /** Files of migrated applications that were not stored: not a readable CV, a cover letter or another attachment. */
+  /** Files of migrated applications that were not stored, whatever the reason: the sum of the three below. */
   readonly filesSkipped: number;
+  /**
+   * Files stored as attachments (cover letters, other documents, a CV that is not a PDF or DOCX). Absent on batches
+   * committed before attachments were kept: read as 0, like the counts below.
+   */
+  readonly attachments?: number;
+  /** Skipped because the content is not an allowed type (an executable, an archive, HTML, SVG...). */
+  readonly filesSkippedType?: number;
+  /** Skipped because the file, or the application's attachments together, are over the size cap. */
+  readonly filesSkippedSize?: number;
+  /** Skipped because the package referenced a file it does not contain. */
+  readonly filesSkippedMissing?: number;
+  /** Applications whose form answers were kept. */
+  readonly answers?: number;
   readonly stageEvents: number;
   readonly notes: number;
   readonly messages: number;
