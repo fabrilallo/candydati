@@ -5,7 +5,7 @@ export const RETENTION_WARNING_DAYS = 30;
 /** An organization export stays downloadable for this many days, then the retention job deletes it. */
 export const DATA_EXPORT_TTL_DAYS = 7;
 
-export const ERASURE_REASONS = ['request', 'retention', 'consent_withdrawn', 'consent_not_renewed', 'import_undone', 'consent_declined'] as const;
+export const ERASURE_REASONS = ['request', 'retention', 'consent_withdrawn', 'consent_not_renewed', 'import_undone', 'consent_declined', 'migration_undone'] as const;
 export type ErasureReason = (typeof ERASURE_REASONS)[number];
 
 /** One daily run of the retention job for one organization. Counts only. */

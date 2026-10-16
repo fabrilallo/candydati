@@ -19,6 +19,9 @@ import { createCvExtractQueue } from './queues/cv-extract.js';
 import { createImportWorkerDeps } from './import/deps.js';
 import { createImportAnalyzeQueue } from './queues/import-analyze.js';
 import { createImportCommitQueue } from './queues/import-commit.js';
+import { createMigrationWorkerDeps } from './migration/deps.js';
+import { createMigrationAnalyzeQueue } from './queues/migration-analyze.js';
+import { createMigrationCommitQueue } from './queues/migration-commit.js';
 import { createEmailSendQueue } from './queues/email-send.js';
 import { createReconcileQueue } from './queues/reconcile.js';
 import { QUEUE_DEFINITIONS } from './queues/definitions.js';
@@ -75,10 +78,11 @@ function createSharedDeps({ env, logger, uow, files, queue }: Composition) {
       locale: env.platform.defaultLocale,
     },
   };
-  return { sender, phase4, imports, hr, digest, privacy: createPrivacyWorkerDeps({ uow, files, queue }) };
+  const migrations = createMigrationWorkerDeps({ uow, files, queue, platform: env.platform, email: env.email });
+  return { sender, phase4, imports, hr, digest, migrations, privacy: createPrivacyWorkerDeps({ uow, files, queue }) };
 }
 
-function createTaskQueues({ env, logger, uow, files }: Composition, { sender, phase4, imports, hr, digest }: Shared) {
+function createTaskQueues({ env, logger, uow, files }: Composition, { sender, phase4, imports, hr, digest, migrations }: Shared) {
   const cvDeps = createCvExtractionDeps({
     uow,
     files,
@@ -96,10 +100,12 @@ function createTaskQueues({ env, logger, uow, files }: Composition, { sender, ph
     createDeadlinesScanQueue({ scan: phase4.scan, feedback: hr.feedback, stale: hr.stale, digest, now: () => new Date() }),
     createImportAnalyzeQueue({ deps: imports.analysis, extractor: imports.extractor }),
     createImportCommitQueue(imports.commit),
+    createMigrationAnalyzeQueue(migrations.analysis),
+    createMigrationCommitQueue(migrations.commit),
   ];
 }
 
-function createMaintenanceQueues({ env, uow, files, queue }: Composition, { imports, privacy, digest }: Shared) {
+function createMaintenanceQueues({ env, uow, files, queue }: Composition, { imports, privacy, digest, migrations }: Shared) {
   return [
     createFilesDeleteQueue(files),
     // Uses the queue outside any transaction: it repairs what a transaction could not queue.
@@ -109,6 +115,7 @@ function createMaintenanceQueues({ env, uow, files, queue }: Composition, { impo
       retention: privacy.retention,
       imports: imports.commit,
       importStaleDays: env.IMPORT_STALE_DAYS,
+      migrations: migrations.purge,
       deliveryLog: { outbox: uow.repositories.outbox, deliveries: uow.repositories.deliveries },
       deliveryLogRetentionDays: env.DELIVERY_LOG_RETENTION_DAYS,
       digest,

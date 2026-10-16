@@ -71,4 +71,27 @@ describe('reconciler on Postgres (#3)', () => {
     expect(found).toEqual([{ organizationId: world.org, id: pendingApplication }]);
     expect((await stuck.pendingExtractions(new Date(NOW.getTime() - 60_000), 5000)).filter((row) => row.organizationId === world.org)).toEqual([]);
   });
+
+  it('finds migration batches waiting for their analysis or commit since before the cutoff, by last change', async () => {
+    const world = await buildImportWorld(handle, NOW);
+    const insert = async (status: string, updatedAt: Date): Promise<string> => {
+      const id = randomUUID();
+      await handle.db.insert(schema.migrationBatch).values({ id, organizationId: world.org, status: status as never, sourceSystem: '', producer: '', connectorMaturity: 'package', createdBy: 'u', packageKey: 'k', createdAt: NOW, updatedAt });
+      return id;
+    };
+    const uploaded = await insert('uploaded', NOW);
+    const analyzing = await insert('analyzing', NOW);
+    const importing = await insert('importing', NOW);
+    await insert('importing', LATER);
+    await insert('ready', NOW);
+    await insert('done', NOW);
+    const found = (await createDrizzleStuckWork(handle.db).unfinishedMigrations(new Date(NOW.getTime() + 60_000), 5000)).filter((row) => row.organizationId === world.org);
+    expect(found.toSorted((a, b) => a.id.localeCompare(b.id))).toEqual(
+      [
+        { organizationId: world.org, id: uploaded, status: 'uploaded' },
+        { organizationId: world.org, id: analyzing, status: 'analyzing' },
+        { organizationId: world.org, id: importing, status: 'importing' },
+      ].toSorted((a, b) => a.id.localeCompare(b.id)),
+    );
+  });
 });

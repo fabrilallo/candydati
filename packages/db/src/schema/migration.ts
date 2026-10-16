@@ -49,6 +49,8 @@ export const migrationBatch = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
     committedAt: timestamp('committed_at', { withTimezone: true }),
     undoneAt: timestamp('undone_at', { withTimezone: true }),
+    /** When the package file and the issues were deleted (some days after the batch ended): the purge is then done. */
+    purgedAt: timestamp('purged_at', { withTimezone: true }),
   },
   (table) => [
     index('migration_batch_org_created_idx').on(table.organizationId, sql`${table.createdAt} desc`),

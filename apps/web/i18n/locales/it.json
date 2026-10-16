@@ -584,6 +584,12 @@
       "careers_media": {
         "uploaded": "Ha caricato un'immagine o un video per la pagina carriere",
         "deleted": "Ha eliminato un'immagine o un video della pagina carriere"
+      },
+      "migration": {
+        "created": "Ha caricato un pacchetto di migrazione",
+        "fetched": "Ha recuperato i dati da un altro ATS",
+        "committed": "Ha migrato i dati da un altro ATS",
+        "undone": "Ha annullato una migrazione"
       }
     }
   },
@@ -2415,6 +2421,9 @@
       },
       "careers_page": {
         "manage": "Gestire la pagina carriere"
+      },
+      "migration": {
+        "manage": "Migrare da un altro ATS"
       }
     },
     "withheld": "Alcune cose una chiave non le può fare mai: decisioni sui candidati, messaggi ai candidati e amministrazione restano a una persona.",

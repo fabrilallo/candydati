@@ -1,9 +1,6 @@
 import {
-  CONSENT_LINK,
   IMPORT_NOTE_MAX,
   placeholderEmail,
-  reconfirmEmail,
-  SYSTEM_SENDER,
   type Application,
   type Candidate,
   type CvMediaType,
@@ -14,7 +11,7 @@ import {
 } from '@candydati/domain';
 import { ConflictError, CoreError } from '../../errors.js';
 import type { ImportCommitDeps, ImportCommitRepositories } from '../../import-ports.js';
-import { ensureConversation, oneLine } from '../messaging/shared.js';
+import { storeReconfirmationRequest } from './reconfirmation-request.js';
 
 /** An item whose CV was read, checked and copied to its final key, ready to be written. */
 export interface Prepared {
@@ -105,43 +102,16 @@ function newApplication(ctx: CommitContext, prepared: Prepared, candidateId: str
   };
 }
 
-/**
- * The single-use consent token and the reconfirmation request, queued as a system message. The token's hash is of a
- * secret nobody keeps: the delivery rotates it at send time and only the email ever holds a working secret. The body
- * keeps the `CONSENT_LINK` placeholder, so no link is ever stored.
- */
-async function queueReconfirmation(ctx: CommitContext, repos: ImportCommitRepositories, application: Application, person: { readonly id: string; readonly firstName: string }): Promise<string> {
-  const { deps, organization, job } = ctx;
-  await repos.consentTokens.create({ tokenHash: deps.hash(deps.newSecret()), organizationId: organization.id, applicationId: application.id, expiresAt: ctx.expiresAt, usedAt: null, createdAt: ctx.importedAt });
-  const email = reconfirmEmail({
-    language: job.content.language,
-    firstName: person.firstName,
-    organizationName: organization.name,
-    jobTitle: job.content.title,
-    url: CONSENT_LINK,
-  });
-  await ensureConversation({ conversations: repos.conversations, newToken: deps.mail.newToken }, organization.id, application.id);
-  const message = await repos.messages.create({
-    id: deps.newId(),
-    organizationId: organization.id,
+/** The reconfirmation request of the person, in the chunk's transaction. */
+const queueReconfirmation = (ctx: CommitContext, repos: ImportCommitRepositories, application: Application, person: { readonly id: string; readonly firstName: string }): Promise<string> =>
+  storeReconfirmationRequest(ctx.deps, repos, {
+    organization: ctx.organization,
+    job: { title: ctx.job.content.title, language: ctx.job.content.language },
     applicationId: application.id,
-    candidateId: person.id,
-    direction: 'outbound',
-    subject: oneLine(email.subject),
-    bodyText: email.body,
-    status: 'queued',
-    providerMessageId: null,
-    sentBy: SYSTEM_SENDER,
-    createdAt: ctx.importedAt,
-    sentAt: null,
-    error: null,
-    rawText: null,
-    unverifiedSender: false,
-    inboundMessageId: null,
-    historical: false,
+    person,
+    expiresAt: ctx.expiresAt,
+    at: ctx.importedAt,
   });
-  return message.id;
-}
 
 /** One item, inside the chunk's transaction (and its own savepoint). */
 export async function writeItem(ctx: CommitContext, repos: ImportCommitRepositories, prepared: Prepared): Promise<Written> {

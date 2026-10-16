@@ -9,3 +9,11 @@ export const isUniqueViolation = (error: unknown): boolean => {
   const cause = (error as { cause?: { code?: string } } | null)?.cause;
   return (error as { code?: string } | null)?.code === UNIQUE_VIOLATION || cause?.code === UNIQUE_VIOLATION;
 };
+
+const FOREIGN_KEY_VIOLATION = '23503';
+
+/** A row is still referenced by another one (`RESTRICT`): the delete was refused. */
+export const isForeignKeyViolation = (error: unknown): boolean => {
+  const cause = (error as { cause?: { code?: string } } | null)?.cause;
+  return (error as { code?: string } | null)?.code === FOREIGN_KEY_VIOLATION || cause?.code === FOREIGN_KEY_VIOLATION;
+};

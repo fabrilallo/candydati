@@ -14,6 +14,8 @@ const byDateDesc = (field: 'updatedAt' | 'publishedAt') => (a: Job, b: Job) =>
 
 export interface InMemoryJobRepository extends JobRepository {
   snapshot(): readonly Job[];
+  /** Test stores only: what a migration undo does to a job nothing refers to. */
+  remove(organizationId: string, id: string): void;
 }
 
 export function createInMemoryJobRepository(initial: readonly Job[] = []): InMemoryJobRepository {
@@ -24,6 +26,9 @@ export function createInMemoryJobRepository(initial: readonly Job[] = []): InMem
     return job;
   };
   return {
+    remove(organizationId, id) {
+      rows.set(rows.get().filter((j) => !(j.organizationId === organizationId && j.id === id)));
+    },
     async create(job) {
       if (inOrg(job.organizationId).some((j) => j.slug === job.slug)) throw new ConflictError('Slug already used.');
       rows.set([...rows.get(), job]);

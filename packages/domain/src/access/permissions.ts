@@ -40,6 +40,11 @@ export const STATEMENTS = {
   report: ['read'],
   /** The public careers page: its sections, theme and media, the draft and its publication. */
   careers_page: ['manage'],
+  /**
+   * Migration from another ATS (ADR 0009): upload or fetch a package, preview, confirm, undo. The operator answers for the
+   * transfer, so owner and admin only; never grantable to a key or to the agent.
+   */
+  migration: ['manage'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -81,6 +86,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     feedback: ['manage', 'read'],
     report: ['read'],
     careers_page: ['manage'],
+    migration: ['manage'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],

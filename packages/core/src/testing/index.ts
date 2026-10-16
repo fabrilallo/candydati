@@ -35,3 +35,6 @@ export * from './report-random.js';
 export * from './in-memory-security-settings.js';
 export * from './in-memory-two-factor.js';
 export * from './in-memory-careers.js';
+export * from './in-memory-migrations.js';
+export * from './migration-deps.js';
+export * from './in-memory-migrated-rows.js';

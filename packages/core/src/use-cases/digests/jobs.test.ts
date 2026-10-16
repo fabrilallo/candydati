@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildApplication, buildOutboxEvent, createFakeEmailSender, createInMemoryOutbox, createInMemoryWebhookDeliveries, seedAutomationWorld, seedImportWorld, seedPrivacyData, ORG_A } from '../../testing/index.js';
+import { buildApplication, buildOutboxEvent, createFakeEmailSender, createInMemoryOutbox, createInMemoryWebhookDeliveries, seedAutomationWorld, seedImportWorld, seedMigrationWorld, seedPrivacyData, ORG_A } from '../../testing/index.js';
 import { createInMemoryTransaction } from '../../testing/in-memory-transaction.js';
 import { formatDigestFrom } from './digest-email.js';
 import { runDeadlineScan } from './run-deadline-scan.js';
@@ -39,11 +39,21 @@ describe('runRetentionJob', () => {
       { retention, imports: seedImportWorld(), importStaleDays: 7, deliveryLog: { outbox, deliveries: createInMemoryWebhookDeliveries() }, digest: digest(sender) },
       NOW,
     );
-    expect(result).toMatchObject({ erased: 1, failed: 0, prunedEvents: 1, prunedDeliveries: 0, erasureFailures: [] });
+    expect(result).toMatchObject({ erased: 1, failed: 0, prunedEvents: 1, prunedDeliveries: 0, erasureFailures: [], migrationsPurged: 0, migrationPurgeFailures: [] });
     expect(result.warned).toBeGreaterThan(0);
     expect(result.sent).toBe(result.digests);
     expect(outbox.snapshot().map((e) => e.id)).toEqual(['new']);
     const quiet = await runRetentionJob({ retention, imports: seedImportWorld(), importStaleDays: 7, digest: digest(sender) }, NOW);
     expect(quiet).toMatchObject({ sent: 0, prunedEvents: 0 });
+  });
+
+  it('purges the migrations that ended more than a week ago', async () => {
+    const NOW = new Date('2027-06-01T03:00:00Z');
+    const retention = await seedPrivacyData({ applications: [] });
+    const migrations = seedMigrationWorld();
+    const ended = { id: 'm1', organizationId: ORG_A, status: 'done' as const, sourceSystem: 's', producer: 'p', connectorMaturity: 'package' as const, createdBy: 'u', counts: {}, stageMapping: [], excludedJobs: [], declarations: null, packageKey: `organizations/${ORG_A}/migrations/m1/package.zip`, error: null, createdAt: NOW, updatedAt: new Date(NOW.getTime() - 8 * DAY), committedAt: null, undoneAt: null, purgedAt: null };
+    await migrations.migrations.create(ended);
+    const result = await runRetentionJob({ retention, imports: seedImportWorld(), importStaleDays: 7, migrations, digest: digest() }, NOW);
+    expect(result).toMatchObject({ migrationsPurged: 1, migrationPurgeFailures: [] });
   });
 });
