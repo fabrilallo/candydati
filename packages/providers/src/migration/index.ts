@@ -9,3 +9,4 @@ export {
   type MigrationPackageFile,
   type OpenedMigrationPackage,
 } from './package-archive.js';
+export { createMigrationPackageReader } from './package-reader.js';

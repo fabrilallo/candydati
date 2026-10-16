@@ -19,6 +19,8 @@ import { createCvExtractQueue } from './queues/cv-extract.js';
 import { createImportWorkerDeps } from './import/deps.js';
 import { createImportAnalyzeQueue } from './queues/import-analyze.js';
 import { createImportCommitQueue } from './queues/import-commit.js';
+import { createMigrationWorkerDeps } from './migration/deps.js';
+import { createMigrationAnalyzeQueue } from './queues/migration-analyze.js';
 import { createEmailSendQueue } from './queues/email-send.js';
 import { createReconcileQueue } from './queues/reconcile.js';
 import { QUEUE_DEFINITIONS } from './queues/definitions.js';
@@ -78,7 +80,7 @@ function createSharedDeps({ env, logger, uow, files, queue }: Composition) {
   return { sender, phase4, imports, hr, digest, privacy: createPrivacyWorkerDeps({ uow, files, queue }) };
 }
 
-function createTaskQueues({ env, logger, uow, files }: Composition, { sender, phase4, imports, hr, digest }: Shared) {
+function createTaskQueues({ env, logger, uow, files, queue }: Composition, { sender, phase4, imports, hr, digest }: Shared) {
   const cvDeps = createCvExtractionDeps({
     uow,
     files,
@@ -96,6 +98,7 @@ function createTaskQueues({ env, logger, uow, files }: Composition, { sender, ph
     createDeadlinesScanQueue({ scan: phase4.scan, feedback: hr.feedback, stale: hr.stale, digest, now: () => new Date() }),
     createImportAnalyzeQueue({ deps: imports.analysis, extractor: imports.extractor }),
     createImportCommitQueue(imports.commit),
+    createMigrationAnalyzeQueue(createMigrationWorkerDeps({ uow, files, queue })),
   ];
 }
 
