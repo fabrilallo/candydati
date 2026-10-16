@@ -64,7 +64,7 @@ services:
   # Refuses to start the stack with the example secrets of .env.example, short secrets, an http PLATFORM_URL or
   # EMAIL_PROVIDER=log (docker/config-check.sh). The api and the worker apply the same rules again at boot.
   config-check:
-    image: busybox:1.37@sha256:bdf57e528e45e4433820e045b29b4597825a1c9e38353532d90a01445013f82e
+    image: busybox:1.38@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e
     restart: "no"
     command: ["sh", "/config-check.sh"]
     volumes:
@@ -99,7 +99,7 @@ services:
 
   minio:
     # The MinIO community images are no longer published on Docker Hub: Chainguard build, pinned by digest (tag: latest).
-    image: cgr.dev/chainguard/minio:latest@sha256:dc455cdd4db6e390b1b26514f15ff37681a777bf8dab41aac445a0259f751e56
+    image: cgr.dev/chainguard/minio:latest@sha256:2136d593beacf4461187035eca949fe49abd589d5079735025c711ca58fee0c8
     restart: unless-stopped
     command: server /data --console-address ":9001"
     depends_on:
@@ -218,7 +218,7 @@ services:
   # Leave it off behind another proxy (Dokploy's Traefik, nginx, a Caddy on the host): then use WEB_BIND/WEB_PORT.
   caddy:
     profiles: [caddy]
-    image: caddy:2.10.2@sha256:c3d7ee5d2b11f9dc54f947f68a734c84e9c9666c92c88a7f30b9cba5da182adb
+    image: caddy:2.11.6@sha256:3422ce6de165df66534f9b9ba50efaf457114ec961763cc52f5dbdaac2972d73
     restart: unless-stopped
     depends_on:
       web: { condition: service_healthy }
