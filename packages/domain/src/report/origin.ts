@@ -28,15 +28,25 @@ export function sanitizeCampaign(raw: unknown): string {
   return cleanLabel(raw) ?? CAMPAIGN_NONE;
 }
 
+/** Longest raw value looked at: labels are short, and a bound keeps every step linear on hostile input. */
+const RAW_MAX = 2_000;
+
+const isEdge = (char: string): boolean => char === '-' || char === '.';
+
+/** Drops `-` and `.` at both ends, in one pass (an anchored regex here backtracks quadratically). */
+function trimEdges(value: string): string {
+  let start = 0;
+  let end = value.length;
+  while (start < end && isEdge(value.charAt(start))) start += 1;
+  while (end > start && isEdge(value.charAt(end - 1))) end -= 1;
+  return value.slice(start, end);
+}
+
 function cleanLabel(raw: unknown): string | null {
   if (typeof raw !== 'string') return null;
-  const host = hostOrSelf(raw.trim().toLowerCase());
+  const host = hostOrSelf(raw.slice(0, RAW_MAX).trim().toLowerCase());
   if (host === '' || host.includes('@')) return null;
-  const cleaned = host
-    .replace(/[^a-z0-9._-]+/g, '-')
-    .replace(/^[-.]+|[-.]+$/g, '')
-    .slice(0, ORIGIN_MAX)
-    .replace(/[-.]+$/g, '');
+  const cleaned = trimEdges(trimEdges(host.replace(/[^a-z0-9._-]+/g, '-')).slice(0, ORIGIN_MAX));
   return cleaned === '' ? null : cleaned;
 }
 

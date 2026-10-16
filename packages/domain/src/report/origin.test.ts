@@ -43,3 +43,13 @@ describe('sanitizeCampaign', () => {
     for (const value of [undefined, null, 7, '', '  ', '---', 'mario.rossi@example.org']) expect(sanitizeCampaign(value)).toBe('');
   });
 });
+
+describe('label cleaning on hostile input', () => {
+  it('stays fast and correct on long runs of dashes and dots', () => {
+    const hostile = `${'-'.repeat(50_000)}x${'.-'.repeat(50_000)}`;
+    const started = performance.now();
+    expect(sanitizeOrigin(hostile)).toBe('direct');
+    expect(sanitizeCampaign(`--.${'a'.repeat(10)}.--`)).toBe('a'.repeat(10));
+    expect(performance.now() - started).toBeLessThan(200);
+  });
+});
