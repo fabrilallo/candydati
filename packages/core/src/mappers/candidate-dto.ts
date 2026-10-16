@@ -1,4 +1,5 @@
 import type {
+  ApplicationTimelineDto,
   Candidate,
   ConsentScope,
   ConsentStatus,
@@ -14,7 +15,7 @@ import type {
 } from '@candydati/domain';
 import type { CandidateSummary } from '../candidate-ports.js';
 import type { CandidatePage } from '../use-cases/candidates/search-candidates.js';
-import type { ApplicationCardView, CandidateDetailView, NoteView, PipelineView } from '../use-cases/candidates/views.js';
+import type { ApplicationCardView, ApplicationTimelineView, CandidateDetailView, NoteView, PipelineView } from '../use-cases/candidates/views.js';
 
 const iso = (date: Date): string => date.toISOString();
 const isoOrNull = (date: Date | null): string | null => (date ? date.toISOString() : null);
@@ -275,4 +276,8 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
     messageCount,
   })),
   notes: view.notes.map(toNoteDto),
+});
+
+export const toApplicationTimelineDto = (view: ApplicationTimelineView): ApplicationTimelineDto => ({
+  items: view.items.map((item) => ({ ...item, at: item.at.toISOString() })),
 });

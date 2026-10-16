@@ -16,3 +16,4 @@ export * from './stale-jobs.js';
 export * from './job.js';
 export * from './report.js';
 export * from './slug.js';
+export * from './timeline.js';

@@ -52,6 +52,7 @@ const ROWS: readonly Row[] = [
   read('renderMessageDraft', { ...MESSAGE, applicationId: 'app_b' }),
   read('previewMessage', { ...MESSAGE, applicationId: 'app_b' }),
   read('listApplicationFeedback', { applicationId: 'app_b' }),
+  read('getApplicationTimeline', { applicationId: 'app_b' }),
   read('getJobInterviewers', { jobId: JOB_B }),
   read('listTasks', { mine: true }),
   read('listTasks', { mine: false }, { label: 'every assignee' }),
