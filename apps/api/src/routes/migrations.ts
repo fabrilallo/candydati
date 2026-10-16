@@ -1,7 +1,9 @@
 import multipart from '@fastify/multipart';
 import {
   authorize,
+  ValidationError,
   createMigrationFromConnector,
+  createMigrationFromFiles,
   createMigrationFromPackage,
   listMigrationConnectors,
   getMigration,
@@ -12,6 +14,7 @@ import {
   updateMigrationChoices,
 } from '@candydati/core';
 import { ok } from '@candydati/domain';
+import { MIGRATION_FILES_MULTIPART_LIMITS, readConnectorFiles } from '../http/migration-files-multipart.js';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { MIGRATION_BODY_LIMIT, MIGRATION_MULTIPART_LIMITS, readMigrationPackage } from '../http/migration-multipart.js';
@@ -40,6 +43,23 @@ export async function registerMigrationRoutes(app: FastifyInstance, ctx: AppCont
       const actor = await actorOf(request);
       const stored = await readMigrationPackage(request, { organizationId: actor.organizationId, newId: deps.newId, files: deps.files });
       const batch = await createMigrationFromPackage(deps, actor, { batchId: stored.batchId, file: { key: stored.key, sizeBytes: stored.sizeBytes } });
+      return reply.status(201).send(ok({ id: batch.id, status: batch.status }));
+    });
+  });
+
+  await app.register(async (scope) => {
+    await scope.register(multipart, { limits: MIGRATION_FILES_MULTIPART_LIMITS });
+    const mayMigrate = async (request: FastifyRequest): Promise<void> => authorize(await actorOf(request), 'migration:manage');
+    // A file-based connector (`input: 'files'`) has no credentials: the operator uploads its export instead.
+    scope.post('/api/v1/migrations/connector/:connectorId/files', { bodyLimit: MIGRATION_BODY_LIMIT, config: importUploadRouteConfig(ctx), onRequest: mayMigrate }, async (request, reply) => {
+      const actor = await actorOf(request);
+      const connectorId = paramOf(request, 'connectorId');
+      // Before a byte is stored: a connector this instance does not offer, or one that wants credentials, gets no upload.
+      const source = deps.sources.find(connectorId);
+      if (source?.input !== 'files') throw new ValidationError([{ path: 'connectorId', message: source === undefined ? 'connector_unknown' : 'connector_needs_credentials' }]);
+      const batchId = deps.newId();
+      const stored = await readConnectorFiles(request, { organizationId: actor.organizationId, batchId, files: deps.files });
+      const batch = await createMigrationFromFiles(deps, actor, { connectorId, batchId, ...stored });
       return reply.status(201).send(ok({ id: batch.id, status: batch.status }));
     });
   });
