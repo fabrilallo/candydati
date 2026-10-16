@@ -91,3 +91,7 @@ Schema changes are Drizzle migrations in `packages/db/drizzle`. Generate with `p
   rewrite) with `application_answers_check` (an array of at most 1 MiB) added `NOT VALID`, with a 5 s `lock_timeout`.
   The new table is empty: its indexes and foreign keys are built inline.
 - **0034** validates `application_answers_check` (rule 5).
+- **0035** adds `migration_batch.group_id` and `migration_batch.part` (nullable, no default, no rewrite): the parts of a
+  connector fetch too large for one package, one batch each. Their check (`migration_batch_part_check`: both null or both
+  set, part ≥ 1) is added `NOT VALID` with a 5 s `lock_timeout`.
+- **0036** validates it (rule 5).
