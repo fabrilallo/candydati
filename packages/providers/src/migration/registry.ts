@@ -2,6 +2,7 @@ import type { MigrationSource, MigrationSourceCatalog } from '@candydati/core';
 import { migrationConnectorDtoSchema } from '@candydati/domain';
 import type { MigrationConnector } from './connector.js';
 import { teamtailorConnector } from './sources/teamtailor/index.js';
+import { greenhouseConnector } from './sources/greenhouse/index.js';
 
 /** The connectors this instance offers, by id. Also the core's catalog (what to list, the credential schemas). */
 export interface MigrationConnectorRegistry extends MigrationSourceCatalog {
@@ -9,10 +10,10 @@ export interface MigrationConnectorRegistry extends MigrationSourceCatalog {
 }
 
 /**
- * Built-in vendor connectors (Phase 6, each task adds its own here). Test-only connectors are never listed here (see
- * `@candydati/providers/testing`).
+ * Built-in vendor connectors (Phase 6), all beta until a real migration confirms them (docs/migration/sources.md).
+ * Test-only connectors are never listed here (see `@candydati/providers/testing`).
  */
-export const BUILT_IN_MIGRATION_CONNECTORS: readonly MigrationConnector[] = [teamtailorConnector as MigrationConnector];
+export const BUILT_IN_MIGRATION_CONNECTORS: readonly MigrationConnector[] = [teamtailorConnector as MigrationConnector, greenhouseConnector as MigrationConnector];
 
 /** Checks every connector's public description and that ids are unique, at startup. */
 export function createConnectorRegistry(connectors: readonly MigrationConnector[] = BUILT_IN_MIGRATION_CONNECTORS): MigrationConnectorRegistry {

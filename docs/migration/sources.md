@@ -11,12 +11,13 @@ validation, preview and undo (ADR 0009).
 | --- | --- | --- | --- | --- |
 | Teamtailor | built-in connector | beta (built on public docs, not verified on a real account) | users, jobs and stages, candidates, applications with outcome and dates, notes, form answers, CVs and uploads; no scores, no consent date, one stage-history entry, no emails ([details](../../packages/providers/src/migration/sources/teamtailor/README.md)) | no |
 | Workable | built-in connector | planned | not yet defined | no |
-| Greenhouse | built-in connector | planned | not yet defined | no |
+| Greenhouse | built-in connector | beta (built on public docs, not verified on a real account) | users, jobs and stages, candidates, applications with outcome, origin and stage history, notes, past emails, CVs and files; see its [README](../../packages/providers/src/migration/sources/greenhouse/README.md) | no |
 | Recruitee | built-in connector | planned | not yet defined | no |
 | Any other ATS or a spreadsheet | package built by the [agent skill](../../skills/candydati-migration/README.md) or by hand | available | whatever the package contains | not applicable |
 
-Only Teamtailor exists so far. "Planned" means it is on the list and not started. When a connector is released, its
-row says what it brings and what it cannot, and it is marked **beta**.
+Connectors marked **beta** are built on public documentation and not yet verified on a real account. "Planned" means a
+connector is on the list and not started. When a connector is released, its row says what it brings and what it
+cannot, and it is marked **beta**.
 
 ## Maturity levels
 
