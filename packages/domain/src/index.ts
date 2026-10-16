@@ -2,6 +2,7 @@ export * from './platform/config.js';
 export * from './platform/secrets.js';
 export * from './platform/production.js';
 export * from './url/http-url.js';
+export * from './text/trim-trailing.js';
 export * from './access/permissions.js';
 export * from './access/job-team.js';
 export * from './auth/password.js';

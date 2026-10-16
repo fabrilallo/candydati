@@ -1,3 +1,5 @@
+import { trimTrailing } from '../text/trim-trailing.js';
+
 /**
  * Minimal XML writing helpers. Everything that comes from data goes through `escapeXml` or `cdata`: there is no other way
  * to put text into a document built here. No DOM and no Node libs (this package runs in the browser and in Node).
@@ -28,4 +30,4 @@ export const cdataElement = (name: string, value: string, indent = ''): string =
 export const XML_DECLARATION = '<?xml version="1.0" encoding="UTF-8"?>';
 
 /** Canonical base URL without the trailing slash. */
-export const trimBaseUrl = (baseUrl: string): string => baseUrl.replace(/\/+$/, '');
+export const trimBaseUrl = (baseUrl: string): string => trimTrailing(baseUrl, '/');
