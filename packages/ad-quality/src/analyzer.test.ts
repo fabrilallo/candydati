@@ -34,9 +34,10 @@ describe('model analyzer', () => {
   });
 
   it('sends the built prompt and a schema to the generator', async () => {
-    const generate = vi.fn(() => Promise.resolve(modelAnswer()));
+    const generate = vi.fn<StructuredGenerator>(() => Promise.resolve(modelAnswer()));
     await createModelAnalyzer(generate).analyze(richAd());
-    const request = generate.mock.calls[0]?.[0] as unknown as { system: string; prompt: string; schema: { safeParse: (v: unknown) => { success: boolean } } };
+    const request = generate.mock.calls[0]?.[0];
+    if (request === undefined) throw new Error('the generator was not called');
     expect(request.prompt).toContain('BEGIN JOB AD');
     expect(request.system).toContain('selection_process');
     expect(request.schema.safeParse(modelAnswer()).success).toBe(true);

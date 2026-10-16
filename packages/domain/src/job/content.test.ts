@@ -34,11 +34,7 @@ describe('checkPublishable', () => {
     expect(isPublishable(draft({}))).toBe(true);
   });
 
-  it.each([
-    ['role', 'role'],
-    ['seniority', 'seniority'],
-    ['contractType', 'contractType'],
-  ] as const)('reports a missing %s as required', (field) => {
+  it.each(['role', 'seniority', 'contractType'] as const)('reports a missing %s as required', (field) => {
     expect(rulesOf({ [field]: undefined })).toEqual([`${field}:required`]);
   });
 
