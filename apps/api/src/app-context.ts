@@ -10,6 +10,7 @@ import {
   type TaskDeps,
   type WebhookDeps,
   type CandidateDeps,
+  type TimelineDeps,
   type DistributionChannel,
   type DistributionDeps,
   type PublicSiteDeps,
@@ -125,6 +126,8 @@ export interface AppContext {
   /** Read-only aggregates of the history kept by core. */
   readonly reportDeps: ReportDeps;
   readonly candidateDeps: CandidateDeps;
+  /** The timeline of an application: the candidate repositories plus the submitted feedback. */
+  readonly timelineDeps: TimelineDeps;
   readonly privacyDeps: PrivacyDeps;
   readonly submitDeps: SubmitApplicationDeps;
   readonly messagingDeps: MessagingDeps;
@@ -213,6 +216,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...createCareersDeps({ uow, files, queue, defaultLocale: env.platform.defaultLocale, images }),
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     submitDeps: withDailyCaps(env, phase2),
+    timelineDeps: { ...phase2.candidateDeps, interviewFeedback: hr.feedbackRecords.interviewFeedback },
     feedbackDeps: hr.feedbackDeps,
     publicFeedbackDeps: hr.publicFeedbackDeps,
     jobRequestDeps: hr.jobRequestDeps,

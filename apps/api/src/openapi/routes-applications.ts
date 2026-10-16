@@ -24,6 +24,11 @@ export const applicationRoutes: readonly RouteSpec[] = [
     description: 'All or none: one decided or foreign id refuses the whole batch with `409`/`404`. One audit event per application.',
     body: z.object({ applicationIds, outcome }), response: { schema: decidedSchema },
   },
+  {
+    method: 'get', path: '/api/v1/applications/:id/timeline', tag: 'Candidates', summary: 'Timeline of an application', scope: 'candidate:read',
+    description: 'What happened to one application, oldest first: received (with source and campaign), stage moves, notes, messages, feedback submitted, reconfirmation and the outcome. Messages appear with `message:read` and feedback with `feedback:read`; feedback shows only that it was submitted, never answers or a recommendation. Entries rebuilt by a migration carry `fromPreviousSystem: true`. Same access by ad as the profile: an application outside your jobs is `404`. Query `viaJobId` is the job of the pipeline you came from (needed for imported people still to reconfirm).',
+    query: z.object({ viaJobId: z.string().min(1).optional() }), response: { schema: 'ApplicationTimeline' },
+  },
   { method: 'get', path: '/api/v1/applications/:id/messages', tag: 'Messages', summary: 'Conversation with a candidate', scope: 'message:read', response: { schema: 'Message', list: true } },
   {
     method: 'post', path: '/api/v1/messages', tag: 'Messages', summary: 'Send an email to one or more candidates', scope: 'message:send', sessionOnly: true,

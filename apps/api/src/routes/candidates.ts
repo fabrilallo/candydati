@@ -1,7 +1,9 @@
 import {
   addCandidateNote,
+  getApplicationTimeline,
   getCandidate,
   searchCandidates,
+  toApplicationTimelineDto,
   toCandidateDetailDto,
   toCandidateSummaryDtos,
   toNoteDto,
@@ -39,6 +41,11 @@ export function registerCandidateRoutes(app: FastifyInstance, ctx: AppContext): 
     const actor = await ctx.resolveActor(request);
     const viaJobId = queryOf(request).viaJobId;
     return ok(toCandidateDetailDto(await getCandidate(deps, actor, withoutUndefined({ candidateId: candidateId(request), viaJobId }))));
+  });
+
+  app.get('/api/v1/applications/:id/timeline', async (request) => {
+    const input = withoutUndefined({ applicationId: paramOf(request, 'id'), viaJobId: queryOf(request).viaJobId });
+    return ok(toApplicationTimelineDto(await getApplicationTimeline(ctx.timelineDeps, await ctx.resolveActor(request), input)));
   });
 
   app.patch('/api/v1/candidates/:id', async (request) => {
