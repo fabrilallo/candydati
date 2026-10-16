@@ -91,7 +91,8 @@ In locale le email finiscono in Mailpit (http://localhost:8025). Controlli: `pnp
 
 ## Self-hosting
 
-Servono un server Linux (2 vCPU, 4 GB di RAM), un dominio che punta al server e un account email da cui spedire (Resend
+Servono un server Linux con 2 vCPU e 4 GB di RAM (per esempio Hetzner Cloud CX23 o l'Arm CAX11, oppure OVHcloud VPS-1:
+circa 5–7 € al mese a ottobre 2026), un dominio che punta al server e un account email da cui spedire (Resend
 o un qualsiasi SMTP, anche la casella aziendale). Nessun altro account. Sul server:
 
 ```bash

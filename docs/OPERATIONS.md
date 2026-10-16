@@ -28,9 +28,14 @@ Only `web` is reachable from outside. Everything is stateless except Postgres an
 
 ## Sizing
 
-A small team (a few recruiters, hundreds of applications a month) runs on **2 vCPU, 4 GB RAM, 40 GB disk**: api about
-400 MB, worker 200 to 300 MB, web 150 MB, Postgres 300 MB plus cache, MinIO 150 MB. Disk grows with CVs (a few hundred
-KB each) and the audit log. Building the images needs about 4 GB of free memory: build elsewhere and pull, or add swap
+A small team (a few recruiters, hundreds of applications a month) runs on **2 vCPU, 4 GB RAM, 40 GB disk**. Measured on
+the production stack in October 2026: about 850 MB at rest (api 360 MB, worker 230 MB, MinIO 90 MB, Postgres 70 MB,
+Caddy 55 MB, web 45 MB) and about 1.3 GB during a burst of 3 000 requests (the web rises to 400 MB, then returns to
+115 MB). 2 GB RAM is the floor for a small team that does not import large archives; 4 GB is the recommendation,
+because imports and migrations hold an archive in memory (a migration package up to 1 GiB). Server-side rendering
+takes one core under load, hence 2 vCPU. Examples at about €5–7 a month (October 2026, prices change): Hetzner Cloud
+CX23 or CAX11 (Arm: the images are multi-architecture), OVHcloud VPS-1. Disk grows with CVs (a few hundred KB each)
+and the audit log. Building the images needs about 4 GB of free memory: build elsewhere and pull, or add swap
 on a small server. Move to managed Postgres and S3 when you need provider backups and failover, not for speed.
 
 ## Required environment
