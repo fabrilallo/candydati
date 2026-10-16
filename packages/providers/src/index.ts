@@ -15,6 +15,7 @@ export * from './http/index.js';
 export { createZipWriter, assertZipPath, zipWriterFactory } from './zip/zip-writer.js';
 export { createZipStream, zipStreamFactory } from './zip/zip-stream.js';
 export * from './import/index.js';
+export * from './migration/index.js';
 export { gatherSources, NOTION_FILES_HEADER, type SourceFile, type FoundCv, type Gathered, type CvHandler } from './import/gather.js';
 export { parseCvs, DEFAULT_ANALYSIS_CONCURRENCY, DEFAULT_ANALYSIS_BUDGET_MS, type ParseCvOptions } from './import/parse-cvs.js';
 export { runImportAnalysis, type ImportAnalysisDeps, type ImportAnalysisOutcome, type RunImportAnalysisOptions } from './import/run-analysis.js';
