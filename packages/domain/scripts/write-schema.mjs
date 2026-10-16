@@ -13,9 +13,14 @@ const files = {
   'migration-package.v1.json': migrationPackageJsonSchema(),
 };
 
+/** The migration skill validates packages offline with its own copy of the schema: keep it identical. */
+const skillCopy = resolve(here, '../../../skills/candydati-migration/scripts/migration-package.v1.json');
+
 mkdirSync(outDir, { recursive: true });
 for (const [name, schema] of Object.entries(files)) {
   const file = resolve(outDir, name);
   writeFileSync(file, `${JSON.stringify(schema, null, 2)}\n`);
   process.stdout.write(`Schema written to ${file}\n`);
 }
+writeFileSync(skillCopy, `${JSON.stringify(files['migration-package.v1.json'], null, 2)}\n`);
+process.stdout.write(`Schema written to ${skillCopy}\n`);

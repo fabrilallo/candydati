@@ -41,6 +41,6 @@ Repository tests for the validator: `pnpm --filter @candydati/tools test`.
 
 ## Keep the schema copy in sync
 
-When `docs/schema/migration-package.v1.json` changes (`pnpm --filter @candydati/domain schema`), copy it over
-`scripts/migration-package.v1.json`. If the schema starts using a JSON Schema keyword the small validator in
+`pnpm --filter @candydati/domain schema` writes `docs/schema/migration-package.v1.json` and this copy together, and
+a test fails if the two ever differ. If the schema starts using a JSON Schema keyword the small validator in
 `scripts/lib/json-schema.mjs` does not know, it stops with an error instead of skipping the check.
