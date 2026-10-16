@@ -3,6 +3,7 @@ packages:
   - packages/*
   - e2e
   - tools
+  - website
 auditConfig:
   ignoreGhsas:
     - GHSA-v5rq-49vh-5v5c

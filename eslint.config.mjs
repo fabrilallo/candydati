@@ -50,7 +50,7 @@ const TEST_CODE = ['**/*.test.ts', '**/testing/**'];
 
 export default tseslint.config(
   {
-    ignores: ['**/dist/**', '**/coverage/**', '**/.turbo/**', '**/node_modules/**', '**/drizzle/**', 'apps/web/**'],
+    ignores: ['**/dist/**', '**/coverage/**', '**/.turbo/**', '**/node_modules/**', '**/drizzle/**', '**/.vitepress/cache/**', 'apps/web/**'],
   },
   js.configs.recommended,
   tseslint.configs.recommended,

@@ -1,0 +1,80 @@
+/* Candydati tokens (docs/DESIGN-SYSTEM.md): Geist, one cobalt accent, neutral ink. Only VitePress variables are set. */
+:root {
+  --vp-font-family-base: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --vp-font-family-mono: 'Geist Mono Variable', ui-monospace, monospace;
+
+  --vp-c-bg: #ffffff;
+  --vp-c-bg-alt: #f6f7f9;
+  --vp-c-bg-soft: #edeff3;
+  --vp-c-text-1: #111318;
+  --vp-c-text-2: #596070;
+  --vp-c-divider: #e3e6eb;
+  --vp-c-gutter: #e3e6eb;
+
+  --vp-c-brand-1: #1f47d6;
+  --vp-c-brand-2: #1a3cb8;
+  --vp-c-brand-3: #1f47d6;
+  --vp-c-brand-soft: rgba(31, 71, 214, 0.1);
+
+  --vp-button-brand-bg: #1f47d6;
+  --vp-button-brand-hover-bg: #1a3cb8;
+  --vp-button-brand-active-bg: #1a3cb8;
+  --vp-button-brand-text: #f6f7f9;
+  --vp-button-brand-hover-text: #f6f7f9;
+  --vp-button-brand-active-text: #f6f7f9;
+
+  --vp-home-hero-name-color: #111318;
+  --vp-code-font-size: 0.875em;
+  /* Cobalt marks actions and links only: inline code is ink. */
+  --vp-code-color: var(--vp-c-text-1);
+}
+
+.dark {
+  --vp-c-bg: #0e1013;
+  --vp-c-bg-alt: #121519;
+  --vp-c-bg-soft: #1b1f25;
+  --vp-c-text-1: #eceef2;
+  --vp-c-text-2: #9aa1ad;
+  --vp-c-divider: #252a31;
+  --vp-c-gutter: #252a31;
+
+  --vp-c-brand-1: #7d9bff;
+  --vp-c-brand-2: #96afff;
+  --vp-c-brand-3: #7d9bff;
+  --vp-c-brand-soft: rgba(125, 155, 255, 0.14);
+
+  --vp-button-brand-bg: #7d9bff;
+  --vp-button-brand-hover-bg: #96afff;
+  --vp-button-brand-active-bg: #96afff;
+  --vp-button-brand-text: #0b1020;
+  --vp-button-brand-hover-text: #0b1020;
+  --vp-button-brand-active-text: #0b1020;
+
+  --vp-home-hero-name-color: #eceef2;
+}
+
+/* Editorial headings: tight tracking, no decoration. */
+.vp-doc h1,
+.vp-doc h2,
+.VPHero .name,
+.VPHero .text {
+  letter-spacing: -0.02em;
+}
+
+.VPHero .text {
+  font-weight: 600;
+}
+
+/* Controls 8px, cards 14px (DESIGN-SYSTEM.md 2.4). */
+.VPButton {
+  border-radius: 8px !important;
+}
+
+.VPFeature,
+.vp-doc div[class*='language-'] {
+  border-radius: 14px;
+}
+
+.VPNavBar .logo {
+  height: 28px;
+}

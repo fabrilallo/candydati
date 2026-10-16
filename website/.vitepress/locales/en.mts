@@ -1,0 +1,38 @@
+import type { DefaultTheme, LocaleSpecificConfig } from 'vitepress';
+import { repoFile, sidebar } from './shared.mjs';
+
+export const en: LocaleSpecificConfig<DefaultTheme.Config> = {
+  description: "The source-available, agentic ATS on the candidate's side.",
+  themeConfig: {
+    nav: [
+      { text: 'Guide', link: '/guide/introduction', activeMatch: '^/guide/(?!quick-start)' },
+      { text: 'Quick start', link: '/guide/quick-start' },
+      { text: 'Changelog', link: repoFile('CHANGELOG.md') },
+    ],
+    sidebar: {
+      '/guide/': sidebar(
+        '/',
+        { start: 'Getting started', run: 'Run your instance', integrate: 'Integrate', project: 'Project' },
+        {
+          introduction: 'Introduction',
+          quickStart: 'Quick start',
+          email: 'Email',
+          ai: 'AI assistant (optional)',
+          operations: 'Day-to-day operations',
+          configuration: 'Configuration',
+          otherDeployments: 'Other ways to deploy',
+          api: 'API, webhooks and MCP',
+          security: 'Security and privacy',
+          faq: 'FAQ',
+          contributing: 'Contributing',
+        },
+      ),
+    },
+    editLink: { pattern: repoFile('website/:path'), text: 'Edit this page on GitHub' },
+    footer: {
+      message: 'Source available under the Business Source License 1.1.',
+      copyright: '© 2026 Fabrizio Lallo',
+    },
+    outline: { label: 'On this page' },
+  },
+};

@@ -10,6 +10,7 @@ coverage/
 !.env.example
 .DS_Store
 .tmp-e2e/
+.vitepress/cache/
 
 # Third-party design screenshots (not ours, never commit)
 docs/design/references/
