@@ -68,4 +68,14 @@ describe('Teamtailor client', () => {
     api.routes.set('/v1/jobs', (req, res) => void res.writeHead(200).end(JSON.stringify({ data: [], links: { next: `${api.origin}${req.url}` } })));
     expect((await failure(collect(client().list('/jobs', 'jobs')))).code).toBe('source_invalid_response');
   });
+
+  it('downloads a file on another host without the key, and never sends the key to a file URL', async () => {
+    api.routes.set('/files/cv.pdf', (_req, res) => void res.writeHead(200, { 'content-type': 'application/pdf' }).end('%PDF'));
+    const keep = async (source: AsyncIterable<Uint8Array>) => (await collect(source)).reduce((sum, chunk) => sum + chunk.length, 0);
+    const storage = api.origin.replace('api.teamtailor.com', 'files.example-cdn.net');
+    expect(await client().download(`${storage}/files/cv.pdf?X-Amz-Signature=s`, keep)).toEqual({ bytes: 4, mediaType: 'application/pdf' });
+    expect(await client().download(`${api.origin}/files/cv.pdf`, keep)).toEqual({ bytes: 4, mediaType: 'application/pdf' });
+    expect(api.seen.map((req) => req.headers.host)).toEqual([new URL(storage).host, new URL(api.origin).host]);
+    for (const req of api.seen) expect(req.headers).not.toHaveProperty('authorization');
+  });
 });

@@ -1,4 +1,5 @@
 import { JsonReaderError, type DownloadStore, type JsonPage, type JsonReader } from '../../../http/index.js';
+import { downloadSourceFile } from '../file-download.js';
 import { teamtailorPages, type TeamtailorPageName, type TeamtailorResource } from './schemas.js';
 
 /** https://docs.teamtailor.com/ : "Base" of every example, JSON:API. */
@@ -15,7 +16,10 @@ export type QueryParams = Readonly<Record<string, string>>;
 export interface TeamtailorClient {
   /** Every record of a list endpoint, following `links.next`; `onPage` is told how many each page carried. */
   list<K extends TeamtailorPageName>(path: string, page: K, params?: QueryParams, onPage?: (count: number) => Promise<void>): AsyncGenerator<TeamtailorResource<K>>;
-  /** A signed file URL: no API credentials are sent to it. */
+  /**
+   * A signed file URL: no API credentials are ever sent to it. On the API host it goes through the allowlisted download;
+   * anywhere else (the signed storage URLs of the docs) it is fetched as a public file, from public addresses only.
+   */
   download(url: string, store: DownloadStore): Promise<unknown>;
 }
 
@@ -51,6 +55,6 @@ export function createTeamtailorClient(reader: JsonReader, apiKey: string, baseU
         url = next;
       }
     },
-    download: (url, store) => reader.download(url, store),
+    download: (url, store) => downloadSourceFile(reader, url, store, baseUrl),
   };
 }
