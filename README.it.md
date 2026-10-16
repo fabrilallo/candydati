@@ -31,6 +31,8 @@ strutturale, non opzionale: un'installazione non può disattivare questi princip
 - **Processo di selezione dichiarato.** Le fasi, chi le conduce e quanto dura ciascuna sono visibili prima di candidarsi.
 - **Nessuna candidatura senza esito.** Ogni candidato riceve una risposta; un annuncio con candidature aperte non si può chiudere.
 - **Nessuna decisione automatica.** L'assistente lavora sul processo. Non ordina, non assegna punteggi e non scarta persone.
+  L'unico punteggio del prodotto valuta l'annuncio, non chi si candida; la lettura del CV estrae fatti (ruoli, competenze,
+  lingue) mostrati accanto all'originale, senza giudicarli.
 - **Pronto per gli agenti.** Tutto ciò che è nell'interfaccia è disponibile tramite API REST (OpenAPI) e server MCP, con gli stessi permessi.
 - **GDPR by design.** Consenso versionato, conservazione e cancellazione automatica, diritti dell'interessato, export completo in formati aperti.
 

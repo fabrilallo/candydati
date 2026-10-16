@@ -28,7 +28,9 @@ switch these principles off.
 - **Salary range in clear.** A job ad without a range cannot be published.
 - **Declared selection process.** The stages, who runs them and how long each one takes are visible before applying.
 - **No application without an outcome.** Every candidate gets an answer; a job with open applications cannot be closed.
-- **No automated decisions.** The assistant works on the process. It never ranks, scores or rejects people.
+- **No automated decisions.** The assistant works on the process. It never ranks, scores or rejects people. The only
+  score in the product rates the job ad, not who applies; the CV reader extracts facts (roles, skills, languages) shown
+  next to the original, without judging them.
 - **Agentic-ready.** Everything in the UI is available through a REST API (OpenAPI) and an MCP server, with the same permissions.
 - **GDPR by design.** Versioned consent, retention and automatic erasure, data subject rights, full export in open formats.
 
