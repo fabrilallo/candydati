@@ -25,7 +25,7 @@
     "test:coverage": "vitest run --coverage --passWithNoTests",
     "lint": "eslint .",
     "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate",
+    "migrate": "tsc -p tsconfig.json && node --env-file-if-exists=../../.env dist/migrate-cli.js",
     "studio": "drizzle-kit studio"
   },
   "dependencies": {

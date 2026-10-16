@@ -13,8 +13,8 @@ Schema changes are Drizzle migrations in `packages/db/drizzle`. Generate with `p
   `CONCURRENTLY` is applied statement by statement, so every statement in it must be idempotent (`IF NOT EXISTS`). If one
   fails midway, fix the cause and restart: it resumes safely. A failed `CREATE INDEX CONCURRENTLY` leaves an INVALID
   index behind; `DROP INDEX CONCURRENTLY` it before retrying (`select indexrelid::regclass from pg_index where not indisvalid`).
-- `drizzle-kit migrate` (`pnpm db:migrate`) uses its own runner, without the lock or the per-migration transaction.
-  Use it on a developer machine only.
+- `pnpm db:migrate` runs the same `runMigrations` against `DATABASE_URL` (from the root `.env`, else the local
+  docker-compose database). Do not use `drizzle-kit migrate`: its runner has no lock and cannot apply `CONCURRENTLY`.
 
 ## Rules for new migrations
 
