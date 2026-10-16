@@ -351,7 +351,8 @@ describe('rate limits and failures', () => {
   it('waits for a spent window when the headers say so', async () => {
     routes['/v3/users'] = () => ({ body: [], headers: { 'x-ratelimit-limit': '75', 'x-ratelimit-remaining': '0', 'x-ratelimit-reset': '12' } });
     const { waits } = await run();
-    expect(waits).toContain(12_000);
+    // The reader measures the window with the real clock: a millisecond may pass between the answer and the next request.
+    expect(waits.some((ms) => ms > 11_900 && ms <= 12_000)).toBe(true);
   });
 
   it('fails with a readable code when the source is down, answers nonsense, or a page has the wrong shape', async () => {
