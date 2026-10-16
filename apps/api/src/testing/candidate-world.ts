@@ -1,5 +1,5 @@
 import { completeJobContent, fakePdfBytes, validApplicationForm } from '@candydati/core/testing';
-import type { FastifyInstance } from 'fastify';
+import type { LightMyRequestResponse } from 'fastify';
 import { TestUser } from './client.js';
 import { multipartBody, type FieldPart, type FilePart } from './multipart.js';
 import { publishNotice } from './privacy.js';
@@ -20,7 +20,7 @@ export interface World {
   /** Puts `user` on the team of `jobId` (default: the world's job), as the owner would from the Team tab. */
   joinTeam(user: TestUser, role: 'hiring_manager' | 'interviewer' | 'recruiter', jobId?: string): Promise<void>;
   /** Public application as a candidate: multipart with `data` and `cv`. */
-  submit(form?: Record<string, unknown>, options?: ApplyOptions): ReturnType<FastifyInstance['inject']>;
+  submit(form?: Record<string, unknown>, options?: ApplyOptions): Promise<LightMyRequestResponse>;
 }
 
 export interface ApplyOptions {

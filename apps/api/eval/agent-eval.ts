@@ -3,11 +3,9 @@
  * `pnpm --filter @candydati/api eval:agent`. Skips (exit 0) without AGENT_MODEL or its provider key; exits 1 when a case fails.
  */
 import { writeFile } from 'node:fs/promises';
-import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStorage, createInMemoryTaskQueue, fakeAdQualityAnalyzer } from '@candydati/core/testing';
-import { createDb, runMigrations } from '@candydati/db';
+import { runMigrations } from '@candydati/db';
 import { agentStatus } from '../src/agent/config.js';
-import { buildServer } from '../src/server.js';
-import { testEnv, WEB_ORIGIN, type TestApp } from '../src/testing/test-app.js';
+import { createTestApp, WEB_ORIGIN, type TestApp } from '../src/testing/test-app.js';
 import { apiTestDatabaseUrl, prepareTestDatabase } from '../src/testing/test-database.js';
 import { buildCases, type EvalCase } from './cases.js';
 import { createJudge, rankingHeuristic, type Judge, type Verdict } from './judge.js';
@@ -25,26 +23,10 @@ async function migratedTestDatabase(url: string): Promise<void> {
   }
 }
 
+/** The same app as the integration tests, with the real models of the eval. */
 async function startApp(agentModel: string, fastModel: string | undefined): Promise<TestApp> {
-  const url = apiTestDatabaseUrl();
-  await migratedTestDatabase(url);
-  const handle = createDb(url, 6);
-  const files = createInMemoryFileStorage();
-  const queue = createInMemoryTaskQueue();
-  const sender = createFakeEmailSender();
-  const env = testEnv({ AGENT_MODEL: agentModel, ...(fastModel ? { FAST_MODEL: fastModel } : {}) });
-  const app = await buildServer({
-    env,
-    db: handle.db,
-    emailSender: { sendInvitation: async () => undefined },
-    rateLimit: { max: 100_000, authMax: 100_000, publicMax: 100_000, qualityMax: 100_000, applyMax: 100_000 },
-    adQuality: fakeAdQualityAnalyzer(),
-    files,
-    queue,
-    messaging: { sender, identity: createFakeEmailIdentity() },
-  });
-  await app.ready();
-  return { app, handle, sentInvitations: [], files, queue, emailSender: sender, close: async () => { await app.close(); await handle.close(); } };
+  await migratedTestDatabase(apiTestDatabaseUrl());
+  return createTestApp({ env: { AGENT_MODEL: agentModel, ...(fastModel ? { FAST_MODEL: fastModel } : {}) } });
 }
 
 interface StreamOutcome {
