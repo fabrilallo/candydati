@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { applicationFormSchema } from '../candidate/application.js';
 import { candidateCorrectionSchema } from '../candidate/correction.js';
-import { httpUrlOrNull, httpUrlSchema, httpsUrlSchema } from './http-url.js';
+import { httpUrlOrNull, httpUrlSchema, httpsUrlSchema, urlHostIs } from './http-url.js';
 
 describe('httpUrlSchema', () => {
   it('accepts http and https', () => {
@@ -41,4 +41,18 @@ describe('user supplied URLs in forms', () => {
     expect(candidateCorrectionSchema.safeParse({ linkedinUrl: 'javascript:alert(1)' }).success).toBe(false);
     expect(candidateCorrectionSchema.safeParse({ linkedinUrl: null }).success).toBe(true);
   });
+});
+
+describe('urlHostIs', () => {
+  it('accepts the domain and its subdomains, by parsed hostname', () => {
+    expect(urlHostIs('https://linkedin.com/in/a', 'linkedin.com')).toBe(true);
+    expect(urlHostIs('https://IT.LinkedIn.com/in/a', 'linkedin.com')).toBe(true);
+  });
+
+  it.each(['https://evil.example/linkedin.com', 'https://linkedin.com.evil.example/', 'https://notlinkedin.com/', 'https://linkedin.com@evil.example/', 'https://evil.example/?linkedin.com', 'not a url', ''])(
+    'refuses %s',
+    (url) => {
+      expect(urlHostIs(url, 'linkedin.com')).toBe(false);
+    },
+  );
 });
