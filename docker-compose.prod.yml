@@ -80,7 +80,7 @@ services:
     network_mode: none
 
   postgres:
-    image: postgres:17@sha256:4d89c904835259bc58876520e56267ca07a4ebd6a027f7814bbbf91b50d685be
+    image: postgres:18@sha256:74935e72241653ca55e0414067e6d8763aceb8a810eb51b452253ec3dcfc4336
     restart: unless-stopped
     depends_on:
       config-check: { condition: service_completed_successfully }
