@@ -1,4 +1,5 @@
 import type {
+  ApplicationAnswer,
   ConsentRecord,
   ConsentStatus,
   CvExtraction,
@@ -97,6 +98,8 @@ export const application = pgTable(
     cvFileName: text('cv_file_name'),
     cvMediaType: text('cv_media_type'),
     cvSizeBytes: integer('cv_size_bytes'),
+    /** Form answers kept from the source ATS of a migration: an array of {question, answer}, capped (`application_answers_check`). */
+    answers: jsonb('answers').$type<readonly ApplicationAnswer[]>(),
     /** Contact data typed on the public form, kept apart from the candidate profile for a recruiter to review. */
     submittedContact: jsonb('submitted_contact').$type<SubmittedContact>(),
     consent: jsonb('consent').$type<ConsentRecord>().notNull(),
@@ -140,6 +143,11 @@ export const application = pgTable(
       .on(table.organizationId, table.responseDueAt)
       .where(sql`${table.outcome} is null and ${table.responseDueAt} is not null`),
     index('application_migration_batch_idx').on(table.migrationBatchId).where(sql`${table.migrationBatchId} is not null`),
+    // ANSWERS_MAX_BYTES of @candydati/domain; a test keeps the two equal.
+    check(
+      'application_answers_check',
+      sql`${table.answers} is null or (jsonb_typeof(${table.answers}) = 'array' and octet_length(${table.answers}::text) <= 1048576)`,
+    ),
     check(
       'application_cv_check',
       sql`(${table.cvKey} is not null and ${table.cvFileName} is not null and ${table.cvMediaType} is not null and ${table.cvSizeBytes} is not null) or (${table.migrationBatchId} is not null and ${table.cvKey} is null and ${table.cvFileName} is null and ${table.cvMediaType} is null and ${table.cvSizeBytes} is null)`,

@@ -2,6 +2,7 @@ export * from './auth.js';
 export * from './audit-log.js';
 export * from './job.js';
 export * from './candidate.js';
+export * from './application-attachment.js';
 export * from './messaging.js';
 export * from './automation.js';
 export * from './privacy.js';

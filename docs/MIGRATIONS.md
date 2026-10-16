@@ -85,3 +85,9 @@ Schema changes are Drizzle migrations in `packages/db/drizzle`. Generate with `p
   name, the old one dropped, the new one renamed. Every step is idempotent.
 - **0031** adds `migration_batch.purged_at` (nullable, no default, no rewrite): set once the package file and the issues
   of an ended migration are deleted.
+- **0033** creates `application_attachment` (files of an application other than its CV, brought by migrations: kind,
+  sniffed media type, size and a storage key that a check pins under the application's prefix; `application_id`
+  RESTRICT, so the erasure must delete them first) and adds `application.answers` (nullable jsonb, no default, no
+  rewrite) with `application_answers_check` (an array of at most 1 MiB) added `NOT VALID`, with a 5 s `lock_timeout`.
+  The new table is empty: its indexes and foreign keys are built inline.
+- **0034** validates `application_answers_check` (rule 5).
