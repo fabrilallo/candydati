@@ -82,7 +82,10 @@ useEventListener(globalThis.document, 'keydown', (event: KeyboardEvent) => {
         <div class="flex flex-wrap items-start gap-3">
           <PersonAvatar :name="note.author.name" />
           <div class="grid min-w-0 flex-1 gap-0.5">
-            <p class="text-sm font-medium">{{ note.author.name }}</p>
+            <p class="flex flex-wrap items-center gap-2 text-sm font-medium">
+              {{ note.author.name }}
+              <span v-if="note.author.external" class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground" :title="t('candidate.notes.importedHint')" data-testid="note-imported">{{ t('candidate.notes.imported') }}</span>
+            </p>
             <p v-if="jobOf(note.applicationId)" class="truncate text-xs text-muted-foreground">{{ t('candidate.notes.on', { job: jobOf(note.applicationId) }) }}</p>
           </div>
           <time :datetime="note.createdAt" class="figure text-xs text-muted-foreground">{{ formatDateTime(note.createdAt, locale) }}</time>

@@ -55,6 +55,7 @@ describe('candidate DTO mappers', () => {
       importBatchId: null,
       retentionExpiresAt: '2027-01-01T00:00:00.000Z',
       stageRemoved: false,
+      hasCv: true,
       candidate: { id: 'cand_1', firstName: 'Ada', lastName: 'Lovelace', tags: ['go'], headline: 'Senior engineer', location: 'Milano', yearsOfExperience: 8 },
     });
     expect(toApplicationCardDto({ ...view, extraction: null, application: buildApplication() })).toMatchObject({
@@ -114,7 +115,7 @@ describe('candidate DTO mappers', () => {
     expect(toNoteDto({ note: buildNote({ applicationId: 'app_1' }), authorName: 'Rita' })).toEqual({
       id: 'note_1',
       applicationId: 'app_1',
-      author: { id: 'user_test', name: 'Rita' },
+      author: { id: 'user_test', name: 'Rita', external: false },
       body: 'Strong profile.',
       createdAt: '2026-01-01T00:00:00.000Z',
     });
@@ -152,5 +153,20 @@ describe('candidate DTO mappers', () => {
     });
     expect(JSON.stringify(dto)).not.toMatch(/notice_1|organizations\/|org_test/);
     expect(dto.notes).toHaveLength(1);
+  });
+
+  it('maps a migrated application without a CV: null CV on the detail, hasCv false on the card', () => {
+    const migrated = buildApplication({ cv: null, migrationBatchId: 'mig_1' });
+    const stages = pipelineStagesOf(job.content.process);
+    const dto = toCandidateDetailDto({ candidate, applications: [{ application: migrated, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const }], notes: [] });
+    expect(dto.applications[0]?.cv).toBeNull();
+    const card = (app: typeof migrated) => toApplicationCardDto({ application: app, candidate, extraction: null, noteCount: 0, stageRemoved: false, responseState: 'on_track' as const });
+    expect(card(migrated).hasCv).toBe(false);
+    expect(card(application).hasCv).toBe(true);
+  });
+
+  it('maps a note by an external author: no id, the stored name, marked external', () => {
+    const note = buildNote({ authorId: null, authorName: 'Giulia Rossi' });
+    expect(toNoteDto({ note, authorName: 'Giulia Rossi' }).author).toEqual({ id: null, name: 'Giulia Rossi', external: true });
   });
 });

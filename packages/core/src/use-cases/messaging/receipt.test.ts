@@ -77,6 +77,19 @@ describe('application receipt', () => {
     expect(deps.store.read().applications).toHaveLength(3);
   });
 
+  it('does not count historical emails brought by a migration against the caps', async () => {
+    const deps = empty();
+    const receipts = receiptsFor(deps, { dailyMaxPerOrganization: 2 });
+    await submitApplication({ ...deps, receipts }, submission());
+    const [first] = deps.messagingStore.read().messages;
+    if (!first) throw new Error('receipt not queued');
+    const past = Array.from({ length: RECEIPTS_PER_RECIPIENT_PER_DAY }, (_, i) => ({ ...first, id: `hist_${i}`, status: 'sent' as const, historical: true }));
+    deps.messagingStore.write({ messages: [first, ...past] });
+    deps.store.write({ applications: [] });
+    await submitApplication({ ...deps, receipts }, submission());
+    expect(deps.messagingStore.read().messages.filter((m) => !m.historical)).toHaveLength(2);
+  });
+
   it('uses English defaults for an English ad and the organization template when it has one', async () => {
     const english = empty();
     const job = buildJob({ id: 'job_1', slug: 'backend', organizationId: ORG_A, status: 'published', publishedAt: new Date(), content: completeJobContent({ title: 'Engineer', language: 'en' }) });

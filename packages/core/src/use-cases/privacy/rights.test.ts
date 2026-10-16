@@ -121,6 +121,25 @@ describe('exportCandidate', () => {
     expect(missingFiles).toEqual(['files/app_2/zelda-2.pdf']);
   });
 
+  it('exports a migrated application without a CV with cv null and no file', async () => {
+    const deps = await seedPrivacyData();
+    const applications = deps.store.read().applications.map((a) => (a.id === 'app_2' ? { ...a, cv: null, migrationBatchId: 'mig_1' } : a));
+    deps.store.write({ applications });
+    const { json, files, missingFiles } = await exportCandidate(deps, recruiter, { candidateId: 'cand_1' });
+    expect(candidateExportSchema.safeParse(json).success).toBe(true);
+    expect(json.applications.find((a) => a.id === 'app_2')?.cv).toBeNull();
+    expect(files.map((f) => f.path)).toEqual(['files/app_1/zelda.pdf']);
+    expect(missingFiles).toEqual([]);
+  });
+
+  it('exports a note by an external author with authorId null', async () => {
+    const deps = await seedPrivacyData();
+    deps.store.write({ notes: deps.store.read().notes.map((n) => (n.id === 'note_2' ? { ...n, authorId: null, authorName: 'Giulia Rossi' } : n)) });
+    const { json } = await exportCandidate(deps, recruiter, { candidateId: 'cand_1' });
+    expect(candidateExportSchema.safeParse(json).success).toBe(true);
+    expect(json.notes.find((n) => n.id === 'note_2')?.authorId).toBeNull();
+  });
+
   it('is audited with counts only', async () => {
     const deps = await seedPrivacyData();
     await exportCandidate(deps, recruiter, { candidateId: 'cand_1' });

@@ -59,6 +59,8 @@ export interface ApplicationCardDto {
   readonly retentionExpiresAt: string;
   /** True when the stage no longer exists in the job's process: show "stage removed". */
   readonly stageRemoved: boolean;
+  /** False only for an application brought by a migration without a CV: the card says so. */
+  readonly hasCv: boolean;
   readonly candidate: {
     readonly id: string;
     readonly firstName: string;
@@ -94,7 +96,8 @@ export interface CandidateSummaryDto {
 export interface NoteDto {
   readonly id: string;
   readonly applicationId: string | null;
-  readonly author: { readonly id: string; readonly name: string };
+  /** `external`: a migrated note by someone who is not a member here (`id` null, `name` as stored). */
+  readonly author: { readonly id: string | null; readonly name: string; readonly external: boolean };
   readonly body: string;
   readonly createdAt: string;
 }
@@ -138,7 +141,8 @@ export interface CandidateDetailDto {
     };
     readonly importBatchId: string | null;
     readonly retentionExpiresAt: string;
-    readonly cv: { readonly fileName: string; readonly mediaType: string; readonly sizeBytes: number };
+    /** null for an application brought by a migration without a CV. */
+    readonly cv: { readonly fileName: string; readonly mediaType: string; readonly sizeBytes: number } | null;
     readonly submittedContact?: SubmittedContact | null;
     readonly extraction: { readonly status: ExtractionStatus; readonly data: CvExtraction | null; readonly source: 'model' | 'text' | null };
     /** Messages in the conversation of this application (sent, received and failed). */
@@ -183,6 +187,7 @@ export const toApplicationCardDto = (view: ApplicationCardView): ApplicationCard
     importBatchId: application.importBatchId,
     retentionExpiresAt: iso(application.retentionExpiresAt),
     stageRemoved: view.stageRemoved,
+    hasCv: application.cv !== null,
     candidate: {
       id: candidate.id,
       firstName: candidate.firstName,
@@ -222,7 +227,7 @@ export const toCandidateSummaryDtos = (page: CandidatePage): readonly CandidateS
 export const toNoteDto = ({ note, authorName }: NoteView): NoteDto => ({
   id: note.id,
   applicationId: note.applicationId,
-  author: { id: note.authorId, name: authorName },
+  author: { id: note.authorId, name: authorName, external: note.authorId === null },
   body: note.body,
   createdAt: iso(note.createdAt),
 });
@@ -264,7 +269,7 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
         : { status: 'to_renew', privacyNoticeVersion: null, scopes: [], givenAt: null },
     importBatchId: application.importBatchId,
     retentionExpiresAt: iso(application.retentionExpiresAt),
-    cv: { fileName: application.cv.fileName, mediaType: application.cv.mediaType, sizeBytes: application.cv.sizeBytes },
+    cv: application.cv ? { fileName: application.cv.fileName, mediaType: application.cv.mediaType, sizeBytes: application.cv.sizeBytes } : null,
     submittedContact: application.submittedContact ?? null,
     extraction: { status: extraction?.status ?? 'pending', data: extraction?.data ?? null, source: extraction?.source ?? null },
     messageCount,

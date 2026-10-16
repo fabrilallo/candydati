@@ -104,7 +104,7 @@ export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
 }
 
 async function seedJobB(deps: JobScopeWorld): Promise<void> {
-  for (const application of APPLICATIONS) await deps.files.put(application.cv.key, fakePdfBytes(), 'application/pdf');
+  for (const { cv } of APPLICATIONS) if (cv) await deps.files.put(cv.key, fakePdfBytes(), 'application/pdf');
   for (const userId of ['int_a', 'hm_a', 'rec_a']) {
     await deps.jobTeams.upsert({ organizationId: ORG_A, jobId: JOB_A, userId, role: userId === 'hm_a' ? 'hiring_manager' : userId === 'int_a' ? 'interviewer' : 'recruiter', addedBy: 'system', createdAt: new Date() });
     await deps.notifications.createIfAbsent(buildNotification({ id: `notif_b_${userId}`, userId, applicationId: 'app_b', jobId: JOB_B, ...org }), `b-${userId}`);

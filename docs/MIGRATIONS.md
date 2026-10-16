@@ -73,3 +73,13 @@ Schema changes are Drizzle migrations in `packages/db/drizzle`. Generate with `p
   existing tables. An organization without a row gets the default page.
 - **0027** adds `careers_page.revision` (integer, constant default 0, no rewrite): the optimistic lock of the careers
   page editor.
+- **0028** creates `migration_batch` and `migration_issue` (ADR 0009), adds nullable `migration_batch_id` columns (job,
+  candidate, application, candidate note, message, stage event), `job.origin` and `message.historical` (constant
+  defaults, no rewrite), `candidate_note.author_name`, and drops `NOT NULL` from the four `application.cv_*` columns and
+  `candidate_note.author_id`. The new foreign keys and checks on existing tables (`application_cv_check`: the CV is
+  whole, or absent on a migrated application only; `candidate_note_author_check`; `message_historical_check`: a
+  historical message is never queued; `job_origin_check`) are added `NOT VALID`, with a 5 s `lock_timeout`.
+- **0029** validates them (rule 5).
+- **0030** builds the `migration_batch_id` indexes concurrently (partial: only migrated rows) and swaps
+  `message_org_candidate_outbound_idx` for one that leaves historical messages out of the caps: built under a temporary
+  name, the old one dropped, the new one renamed. Every step is idempotent.

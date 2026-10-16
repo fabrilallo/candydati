@@ -29,6 +29,7 @@ const outbound = computed(() => view.value.side === 'outbound')
         <TriangleAlertIcon class="mt-px size-3.5 shrink-0" aria-hidden="true" />
         <span><span class="font-medium">{{ t('messages.unverified.title') }}</span> {{ t('messages.unverified.body') }}</span>
       </p>
+      <p v-if="view.historical && outbound" class="text-xs text-muted-foreground" role="note" data-testid="message-historical">{{ t('messages.historical.hint') }}</p>
       <p class="text-sm font-medium break-words" data-testid="message-subject">{{ message.subject }}</p>
       <p class="text-sm whitespace-pre-line break-words text-pretty" data-testid="message-body">{{ message.bodyText }}</p>
       <p v-if="view.errorKey" class="text-xs text-destructive" data-testid="message-error">{{ t(view.errorKey) }}</p>

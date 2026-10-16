@@ -41,6 +41,8 @@ export interface Message {
   readonly unverifiedSender: boolean;
   /** Inbound only: the `Message-ID` header, unique per organization (dedupe). */
   readonly inboundMessageId: string | null;
+  /** An email of the past brought by a migration: shown in the conversation, never sent, never counted by the caps. */
+  readonly historical: boolean;
 }
 
 export const DOMAIN_STATUSES = ['verified', 'pending', 'failed', 'unsupported'] as const;

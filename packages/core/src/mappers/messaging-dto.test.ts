@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { toEmailSettingsDto, toEmailTemplateDto } from './messaging-dto.js';
+import { buildMessage } from '../testing/messaging-fixtures.js';
+import { toEmailSettingsDto, toEmailTemplateDto, toMessageDto } from './messaging-dto.js';
 
 describe('messaging DTO mappers', () => {
   it('maps a template, with null updatedAt for an untouched default', () => {
@@ -11,5 +12,10 @@ describe('messaging DTO mappers', () => {
   it('maps settings as they are', () => {
     const view = { senderName: 'A', fromAddress: null, domain: null, effectiveFrom: '"A" <a@b.c>' };
     expect(toEmailSettingsDto(view)).toEqual(view);
+  });
+
+  it('marks a historical message brought by a migration, and a live one not', () => {
+    expect(toMessageDto({ message: buildMessage({ historical: true, status: 'sent' }), senderName: null }).historical).toBe(true);
+    expect(toMessageDto({ message: buildMessage(), senderName: 'Rita' }).historical).toBe(false);
   });
 });

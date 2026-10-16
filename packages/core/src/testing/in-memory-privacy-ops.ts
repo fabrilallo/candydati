@@ -62,7 +62,7 @@ export function createInMemoryErasure(world: ErasureWorld): ErasureTransaction {
           stageEvents: store.read().stageEvents.filter((e) => !(own(e) && ids.has(e.applicationId))),
           promises: store.read().promises.filter((p) => !(own(p) && ids.has(p.applicationId))),
         });
-        return doomed.map((a) => a.cv.key);
+        return doomed.flatMap((a) => (a.cv ? [a.cv.key] : []));
       },
       async deleteDataExports(organizationId: string): Promise<readonly string[]> {
         const removed = world.dataExports?.purge(organizationId) ?? [];

@@ -107,6 +107,18 @@ describe('Messaggi tab', () => {
     expect(queued?.find('[data-testid="message-status"]').text()).toBe('In coda')
   })
 
+  it('shows a historical email of a migration as a past message, never as sent from here', async () => {
+    state.messages = [message('m0', { historical: true, sentBy: null, createdAt: '2025-01-10T10:00:00.000Z', sentAt: null }), inbound('m2', { historical: true })]
+    const wrapper = await mountDetail()
+    await openMessages(wrapper)
+    const [past, reply] = wrapper.findAll('[data-testid="message"]')
+    expect(past?.find('[data-testid="message-author"]').text()).toBe('Sistema precedente')
+    expect(past?.find('[data-testid="message-status"]').text()).toBe('Storico')
+    expect(past?.find('[data-testid="message-historical"]').text()).toContain('non è partita da qui')
+    expect(reply?.find('[data-testid="message-author"]').text()).toBe('Giulia Rossi')
+    expect(reply?.find('[data-testid="message-status"]').text()).toBe('Storico')
+  })
+
   it('fills the composer from a template and previews it for this candidate, debounced', async () => {
     const wrapper = await mountDetail()
     await openMessages(wrapper)

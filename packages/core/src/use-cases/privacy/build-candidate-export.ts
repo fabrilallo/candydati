@@ -29,7 +29,9 @@ export interface ExportSources extends FeedbackRecords {
   readonly files: FileStorage;
 }
 
-async function readFile(files: FileStorage, key: string): Promise<Uint8Array | null> {
+/** null when there is nothing to read (a migrated application without a CV) or the file cannot be read. */
+async function readFile(files: FileStorage, key: string | undefined): Promise<Uint8Array | null> {
+  if (key === undefined) return null;
   try {
     return await files.get(key);
   } catch {
@@ -54,12 +56,14 @@ export async function buildCandidateExport(sources: ExportSources, candidate: Ca
     const [job, messages, bytes, feedback, feedbackRequests] = await sequential(
       () => sources.jobs.findById(organizationId, application.jobId),
       () => sources.messages.listByApplication(organizationId, application.id),
-      () => readFile(sources.files, application.cv.key),
+      () => readFile(sources.files, application.cv?.key),
       () => sources.interviewFeedback.listByApplication(organizationId, application.id),
       () => sources.feedbackRequests.listByApplication(organizationId, application.id),
     );
-    if (bytes) files.push({ path, bytes });
-    else missingFiles.push(path);
+    if (path !== null) {
+      if (bytes) files.push({ path, bytes });
+      else missingFiles.push(path);
+    }
     const extraction = extractions.find((e) => e.applicationId === application.id) ?? null;
     exportedApplications.push(exportApplication({ application, path, job, extraction, messages, feedback, feedbackRequests }));
   }

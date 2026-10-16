@@ -67,7 +67,8 @@ const exportedApplicationSchema = z.object({
     scopes: z.array(z.enum(CONSENT_SCOPES)),
     givenAt: date,
   }),
-  cv: exportedFileSchema,
+  /** null for an application brought by a migration from another ATS without a CV. */
+  cv: exportedFileSchema.nullable(),
   extraction: z
     .object({
       status: z.enum(EXTRACTION_STATUSES),
@@ -106,7 +107,8 @@ export const candidateExportSchema = z.object({
     z.object({
       id: z.string(),
       applicationId: z.string().nullable(),
-      authorId: z.string(),
+      /** null for a note brought by a migration whose author is not a member of the organization. */
+      authorId: z.string().nullable(),
       body: z.string(),
       createdAt: date,
     }),

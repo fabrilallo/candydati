@@ -15,6 +15,8 @@ export const messageSchema = z.object({
   sentAt: isoDate.nullable(),
   unverifiedSender: z.boolean(),
   error: z.string().nullable(),
+  /** An email of the past brought by a migration: shown as such, never sent from here. */
+  historical: z.boolean(),
 });
 export type MessageDto = z.infer<typeof messageSchema>;
 

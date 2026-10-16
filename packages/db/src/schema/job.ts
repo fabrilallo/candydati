@@ -1,7 +1,8 @@
-import type { AdQualityReport, JobContent, JobStatus } from '@candydati/domain';
+import type { AdQualityReport, JobContent, JobOrigin, JobStatus } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
-import { index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { check, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
+import { migrationBatchRef } from './migration.js';
 
 /**
  * The job ad (PRODUCT.md §4). `content` is validated with `jobContentSchema` when read: jsonb is a boundary.
@@ -34,10 +35,15 @@ export const job = pgTable(
     approvalSalaryMin: integer('approval_salary_min'),
     approvalSalaryMax: integer('approval_salary_max'),
     approvalCurrency: text('approval_currency'),
+    /** `migration`: created by a migration in its final state (closed jobs never went through the publish rules). */
+    origin: text('origin').$type<JobOrigin>().notNull().default('app'),
+    migrationBatchId: migrationBatchRef(),
   },
   (table) => [
     uniqueIndex('job_org_slug_uidx').on(table.organizationId, table.slug),
     index('job_org_status_updated_at_idx').on(table.organizationId, table.status, sql`${table.updatedAt} desc`),
+    index('job_migration_batch_idx').on(table.migrationBatchId).where(sql`${table.migrationBatchId} is not null`),
+    check('job_origin_check', sql`${table.origin} in ('app', 'migration')`),
   ],
 );
 

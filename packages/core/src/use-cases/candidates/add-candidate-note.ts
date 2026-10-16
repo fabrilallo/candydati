@@ -32,6 +32,7 @@ export const addCandidateNote = defineCandidateUseCase({
       candidateId: candidate.id,
       applicationId: input.applicationId ?? null,
       authorId,
+      authorName: null,
       body: input.body,
       createdAt: deps.now(),
     };

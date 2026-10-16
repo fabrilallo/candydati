@@ -49,7 +49,7 @@ export async function seedPrivacyData(options: PrivacySeedOptions = {}): Promise
     ...options,
   });
   for (const app of apps) {
-    await deps.files.put(app.cv.key, fakePdfBytes(), 'application/pdf');
+    if (app.cv) await deps.files.put(app.cv.key, fakePdfBytes(), 'application/pdf');
     await deps.notifications.createIfAbsent(
       buildNotification({ id: `notif_${app.id}`, applicationId: app.id, taskId: `task_${app.id}`, ...org }),
       `k-${app.id}`,

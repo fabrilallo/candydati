@@ -1,4 +1,4 @@
-import { pipelineStagesOf, responseState, type Application, type Candidate } from '@candydati/domain';
+import { pipelineStagesOf, responseState, type Application, type Candidate, type CandidateNote } from '@candydati/domain';
 import type { CandidateDeps } from '../../candidate-ports.js';
 import { NotFoundError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';
@@ -32,10 +32,15 @@ export async function loadCardView(deps: CandidateDeps, application: Application
   return { application, candidate, extraction, noteCount: counts[application.id] ?? 0, stageRemoved, responseState: responseState(application, job, deps.now()) };
 }
 
+/** A member's current name; for a migrated note by someone who is not a member here, the name stored with it. */
+const authorNameOf = (note: CandidateNote, names: Readonly<Record<string, string>>): string =>
+  note.authorId === null ? (note.authorName ?? UNKNOWN_AUTHOR) : (names[note.authorId] ?? UNKNOWN_AUTHOR);
+
 async function loadNotes(deps: CandidateDeps, candidate: Candidate): Promise<readonly NoteView[]> {
   const notes = await deps.notes.listByCandidate(candidate.organizationId, candidate.id);
-  const names = await deps.users.namesOf(candidate.organizationId, [...new Set(notes.map((n) => n.authorId))]);
-  return notes.map((note) => ({ note, authorName: names[note.authorId] ?? UNKNOWN_AUTHOR }));
+  const memberIds = [...new Set(notes.flatMap((n) => (n.authorId === null ? [] : [n.authorId])))];
+  const names = await deps.users.namesOf(candidate.organizationId, memberIds);
+  return notes.map((note) => ({ note, authorName: authorNameOf(note, names) }));
 }
 
 /**

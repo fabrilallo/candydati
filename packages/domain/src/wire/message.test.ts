@@ -3,9 +3,15 @@ import { emailSettingsSchema, messageSchema, sendResultSchema } from './message.
 
 describe('message wire schemas', () => {
   it('reads a message sent by the system and the sending state', () => {
-    const base = { id: 'm', direction: 'outbound', subject: 's', bodyText: 'b', status: 'sending', sentBy: { id: 'system', name: 'system' }, createdAt: '2026-10-10T09:00:00.000Z', sentAt: null, unverifiedSender: false, error: null };
+    const base = { id: 'm', direction: 'outbound', subject: 's', bodyText: 'b', status: 'sending', sentBy: { id: 'system', name: 'system' }, createdAt: '2026-10-10T09:00:00.000Z', sentAt: null, unverifiedSender: false, error: null, historical: false };
     expect(messageSchema.parse(base).status).toBe('sending');
     expect(() => messageSchema.parse({ ...base, status: 'x' })).toThrow();
+  });
+
+  it('requires the historical flag', () => {
+    const base = { id: 'm', direction: 'outbound', subject: 's', bodyText: 'b', status: 'sent', sentBy: null, createdAt: '2026-10-10T09:00:00.000Z', sentAt: null, unverifiedSender: false, error: null };
+    expect(messageSchema.parse({ ...base, historical: true }).historical).toBe(true);
+    expect(() => messageSchema.parse(base)).toThrow();
   });
 
   it('reads email settings and the send result', () => {

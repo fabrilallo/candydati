@@ -81,7 +81,7 @@ export const getFeedbackRequest = definePublicFeedbackQuery({
       stage: { label: stage.label, note: stage.declared?.note ?? null },
       questions: localizeQuestions(feedbackQuestionsFor(stage.declared?.type ?? null), job.content.language),
       recommendations: FEEDBACK_RECOMMENDATIONS,
-      hasCv: application.cv.key !== '',
+      hasCv: application.cv !== null && application.cv.key !== '',
       expiresAt: request.expiresAt,
       submission: feedback ? { answers: feedback.answers, recommendation: feedback.recommendation, submittedAt: feedback.submittedAt } : null,
     };
@@ -104,9 +104,11 @@ export const openFeedbackCv = definePublicFeedbackCommand({
   audit: { skip: 'appended by the handler in the command transaction: the event needs ids the result does not carry' },
   handler: async ({ deps, input, actor }): Promise<FeedbackCvFile> => {
     const { request, application } = await resolve(deps, input.token);
+    const { cv } = application;
+    if (!cv) throw new NotFoundError('The CV is not available.');
     let bytes: Uint8Array;
     try {
-      bytes = await deps.files.get(application.cv.key);
+      bytes = await deps.files.get(cv.key);
     } catch {
       throw new NotFoundError('The CV is not available.');
     }
@@ -117,7 +119,7 @@ export const openFeedbackCv = definePublicFeedbackCommand({
       target: { type: 'feedback_request', id: request.id },
       metadata: { applicationId: application.id },
     });
-    return { bytes, fileName: application.cv.fileName, mediaType: application.cv.mediaType, inlineable: application.cv.mediaType === 'application/pdf' };
+    return { bytes, fileName: cv.fileName, mediaType: cv.mediaType, inlineable: cv.mediaType === 'application/pdf' };
   },
 });
 

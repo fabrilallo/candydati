@@ -26,6 +26,8 @@ export interface MessageDto {
   readonly unverifiedSender: boolean;
   /** A short code (`delivery_failed`, `delivery_rejected`, `recipient_missing`, `queue_unavailable`). */
   readonly error: string | null;
+  /** An email of the past brought by a migration: shown as such, never sent from here. */
+  readonly historical: boolean;
 }
 
 export interface EmailSettingsDto {
@@ -61,6 +63,7 @@ export const toMessageDto = ({ message, senderName }: MessageView): MessageDto =
   sentAt: message.sentAt ? message.sentAt.toISOString() : null,
   unverifiedSender: message.unverifiedSender,
   error: message.error,
+  historical: message.historical,
 });
 
 export const toEmailSettingsDto = (view: EmailSettingsView): EmailSettingsDto => ({

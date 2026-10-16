@@ -69,7 +69,8 @@ export const runCvExtraction = defineUseCase<CvExtractionDeps, typeof inputSchem
   audit: { skip: 'derived data on an application already audited as received; no personal data in the event' },
   handler: async ({ deps, input }): Promise<RunCvExtractionResult> => {
     const application = await deps.applications.findById(input.organizationId, input.applicationId);
-    if (!application) return 'skipped';
+    // A migrated application may come without a CV: there is nothing to read.
+    if (!application?.cv) return 'skipped';
     const current = await deps.extractions.findByApplication(input.organizationId, application.id);
     if (current && (current.status === 'done' || current.status === 'text_only')) return current.status;
     const text = await readText(deps, application.cv.key, application.cv.mediaType);

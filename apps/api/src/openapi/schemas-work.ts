@@ -45,6 +45,7 @@ export const applicationCardSchema: z.ZodType<ApplicationCardDto> = z.object({
   importBatchId,
   retentionExpiresAt: isoDate,
   stageRemoved: z.boolean(),
+  hasCv: z.boolean().describe('False only for an application migrated from another ATS without a CV.'),
   candidate: person.extend({
     tags: z.array(z.string()),
     headline: z.string().nullable(),
@@ -76,7 +77,9 @@ export const candidateSummarySchema: z.ZodType<CandidateSummaryDto> = z.object({
 export const noteSchema: z.ZodType<NoteDto> = z.object({
   id: z.string(),
   applicationId: z.string().nullable(),
-  author: z.object({ id: z.string(), name: z.string() }),
+  author: z
+    .object({ id: z.string().nullable(), name: z.string(), external: z.boolean() })
+    .describe('`external`: a migrated note by someone who is not a member (`id` null, `name` as stored).'),
   body: z.string(),
   createdAt: isoDate,
 });
@@ -111,7 +114,10 @@ export const candidateDetailSchema: z.ZodType<CandidateDetailDto> = z.object({
       consent: z.object({ status: consentStatus, privacyNoticeVersion: z.number().int().nullable(), scopes: z.array(z.enum(CONSENT_SCOPES)), givenAt: isoDate.nullable() }),
       importBatchId,
       retentionExpiresAt: isoDate,
-      cv: z.object({ fileName: z.string(), mediaType: z.string(), sizeBytes: z.number().int() }),
+      cv: z
+        .object({ fileName: z.string(), mediaType: z.string(), sizeBytes: z.number().int() })
+        .nullable()
+        .describe('null for an application migrated from another ATS without a CV.'),
       extraction: z.object({
         status: z.enum(EXTRACTION_STATUSES),
         data: cvExtractionSchema.nullable(),

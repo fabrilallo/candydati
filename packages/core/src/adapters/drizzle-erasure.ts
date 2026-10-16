@@ -72,7 +72,7 @@ export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
       await db.delete(responsePromise).where(and(eq(responsePromise.organizationId, organizationId), inArray(responsePromise.applicationId, ids)));
       await db.delete(applicationStageEvent).where(and(eq(applicationStageEvent.organizationId, organizationId), inArray(applicationStageEvent.applicationId, ids)));
       await db.delete(application).where(and(eq(application.organizationId, organizationId), inArray(application.id, ids)));
-      return rows.map((row) => row.cvKey);
+      return rows.flatMap((row) => (row.cvKey === null ? [] : [row.cvKey]));
     },
     async deleteDataExports(organizationId) {
       const rows = await db.delete(dataExport).where(eq(dataExport.organizationId, organizationId)).returning({ id: dataExport.id });

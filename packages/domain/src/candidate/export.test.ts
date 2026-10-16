@@ -19,6 +19,19 @@ describe('candidateExportSchema', () => {
     expect(candidateExportSchema.safeParse({ ...valid, exportedAt: 'yesterday' }).success).toBe(false);
   });
 
+  it('accepts a migrated application without a CV and a note by an external author (authorId null)', () => {
+    const application = {
+      id: 'a', jobId: 'j', jobTitle: 'T', source: 'import', stageId: 'received', stageChangedAt: iso, outcome: 'not_selected', message: '',
+      createdAt: iso, closedAt: iso, retentionExpiresAt: iso,
+      consent: { status: 'given', privacyNoticeVersion: 1, scopes: ['selection'], givenAt: iso },
+      cv: null, extraction: null, messages: [],
+    };
+    const note = { id: 'n', applicationId: 'a', authorId: null, body: 'b', createdAt: iso };
+    const parsed = candidateExportSchema.parse({ ...valid, applications: [application], notes: [note] });
+    expect(parsed.applications[0]?.cv).toBeNull();
+    expect(parsed.notes[0]?.authorId).toBeNull();
+  });
+
   it('has a versioned JSON schema that is deterministic', () => {
     const schema = candidateExportJsonSchema();
     expect(schema.$id).toBe(CANDIDATE_EXPORT_SCHEMA_ID);

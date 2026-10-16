@@ -24,7 +24,7 @@ registerEndpoint('/api/v1/candidates/c1/notes', {
   handler: async (event) => {
     const body = await readBody<{ body: string }>(event)
     state.calls.push({ what: 'note', body })
-    return ok(note('n9', { body: body.body, author: { id: 'u1', name: 'Ada' } }))
+    return ok(note('n9', { body: body.body, author: { id: 'u1', name: 'Ada', external: false } }))
   },
 })
 registerEndpoint('/api/v1/applications/a1/move', {
@@ -130,6 +130,27 @@ describe('CandidateDetailView', () => {
     await tab(wrapper, 'cv')
     expect(wrapper.find('[data-testid="cv-preview"]').exists()).toBe(false)
     expect(wrapper.find('[data-testid="cv-panel"]').text()).toContain("L'anteprima è disponibile solo per i PDF")
+  })
+
+  it('says clearly that a migrated application has no CV, with nothing to download', async () => {
+    const [first] = detail().applications
+    state.value = detail({ applications: [{ ...first!, cv: null }] })
+    const wrapper = await mountDetail()
+    await tab(wrapper, 'cv')
+    expect(wrapper.find('[data-testid="cv-none"]').text()).toContain('altro ATS')
+    expect(wrapper.find('[data-testid="cv-download"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="cv-preview"]').exists()).toBe(false)
+  })
+
+  it('shows the name of an external author of a migrated note, marked as imported', async () => {
+    state.value = detail({ notes: [note('n1', { author: { id: null, name: 'Giulia Verdi', external: true } }), note('n2')] })
+    const wrapper = await mountDetail()
+    await tab(wrapper, 'notes')
+    const [external, member] = wrapper.findAll('[data-testid="note"]')
+    expect(external?.text()).toContain('Giulia Verdi')
+    expect(external?.find('[data-testid="note-imported"]').text()).toBe('Importata')
+    expect(external?.find('[data-testid="note-imported"]').attributes('title')).toContain('sistema precedente')
+    expect(member?.find('[data-testid="note-imported"]').exists()).toBe(false)
   })
 
   it('adds a note with Ctrl+Enter and shows it first', async () => {

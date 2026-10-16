@@ -83,6 +83,7 @@ describe('deliverMessage', () => {
       [queued({ status: 'sent' })],
       [queued({ status: 'failed' })],
       [queued({ direction: 'inbound', status: 'received' })],
+      [queued({ historical: true })],
       [],
     ]) {
       const deps = seedMessagingWorld({ messaging: { messages } });

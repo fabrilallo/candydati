@@ -121,6 +121,11 @@ describe('getCandidate', () => {
     expect((await getCandidate(d, recruiter, { candidateId: 'cand_1' })).notes[0]?.authorName).toBe('Former member');
   });
 
+  it('shows the stored name of an external author of a migrated note', async () => {
+    const d = seedCandidateWorld({ notes: [buildNote({ organizationId: ORG_A, authorId: null, authorName: 'Giulia Rossi' })] });
+    expect((await getCandidate(d, recruiter, { candidateId: 'cand_1' })).notes[0]?.authorName).toBe('Giulia Rossi');
+  });
+
   it('answers 404 for another organization and writes no audit event', async () => {
     const d = world();
     await expect(getCandidate(d, outsider, { candidateId: 'cand_1' })).rejects.toBeInstanceOf(NotFoundError);
@@ -210,5 +215,11 @@ describe('openCv', () => {
     await expect(openCv(d, outsider, { applicationId: 'app_1' })).rejects.toBeInstanceOf(NotFoundError);
     await expect(openCv(world(), recruiter, { applicationId: 'app_1' })).rejects.toThrow();
     for (const role of ROLES) await expect(openCv(d, userActor({ role, organizationId: ORG_A }), { applicationId: 'app_1' })).resolves.toBeDefined();
+  });
+
+  it('answers 404 for a migrated application without a CV and audits nothing', async () => {
+    const d = seedCandidateWorld({ applications: [buildApplication({ organizationId: ORG_A, cv: null, migrationBatchId: 'mig_1' })] });
+    await expect(openCv(d, recruiter, { applicationId: 'app_1' })).rejects.toBeInstanceOf(NotFoundError);
+    expect(d.auditLog.events()).toEqual([]);
   });
 });

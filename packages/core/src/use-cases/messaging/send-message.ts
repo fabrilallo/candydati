@@ -130,6 +130,7 @@ export const sendMessage = defineMessagingUseCase({
           rawText: null,
           unverifiedSender: false,
           inboundMessageId: null,
+          historical: false,
         };
       },
     );

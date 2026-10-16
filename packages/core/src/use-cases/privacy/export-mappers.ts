@@ -6,15 +6,18 @@ type Records<K extends keyof FeedbackRecords> = Awaited<ReturnType<FeedbackRecor
 export const iso = (date: Date): string => date.toISOString();
 const isoOrNull = (date: Date | null): string | null => (date ? date.toISOString() : null);
 
-/** `files/<applicationId>/<file name>`: unique per application, the same in the single and the organization export. */
-export const cvPathOf = (application: Application): string => `files/${application.id}/${application.cv.fileName}`;
+/**
+ * `files/<applicationId>/<file name>`: unique per application, the same in the single and the organization export.
+ * null for a migrated application that came without a CV.
+ */
+export const cvPathOf = (application: Application): string | null => (application.cv ? `files/${application.id}/${application.cv.fileName}` : null);
 
 export const oldestFirst = (a: { createdAt: Date; id: string }, b: { createdAt: Date; id: string }): number =>
   a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id);
 
 export interface ApplicationParts {
   readonly application: Application;
-  readonly path: string;
+  readonly path: string | null;
   readonly job: Job | null;
   readonly extraction: CvExtractionRecord | null;
   readonly messages: readonly Message[];
@@ -42,7 +45,7 @@ export function exportApplication({ application, path, job, extraction, messages
       scopes: [...application.consent.scopes],
       givenAt: iso(application.consent.givenAt),
     },
-    cv: { path, fileName: application.cv.fileName, mediaType: application.cv.mediaType, sizeBytes: application.cv.sizeBytes },
+    cv: application.cv && path ? { path, fileName: application.cv.fileName, mediaType: application.cv.mediaType, sizeBytes: application.cv.sizeBytes } : null,
     extraction: extraction ? { status: extraction.status, source: extraction.source, text: extraction.text, data: extraction.data } : null,
     messages: messages.map((m) => ({
       id: m.id,

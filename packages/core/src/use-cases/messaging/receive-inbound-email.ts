@@ -84,6 +84,7 @@ function toMessage(deps: InboundDeps, input: z.output<typeof inboundEmailSchema>
     rawText,
     unverifiedSender: addressOf(input.from) !== candidate.email.toLowerCase(),
     inboundMessageId: input.messageId,
+    historical: false,
   };
 }
 
