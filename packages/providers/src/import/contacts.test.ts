@@ -44,4 +44,23 @@ Esperienza 2019-2023`;
     expect(extractContacts('Curriculum Vitae\nSenior Software Engineer\nlorem ipsum').fullName).toBeNull();
     expect(extractContacts('Solo').fullName).toBeNull();
   });
+
+  it('finds emails glued to other text and keeps them out of the phone numbers', () => {
+    expect(extractContacts('Email:Mario.Rossi+cv@mail.example.it;tel').email).toBe('mario.rossi+cv@mail.example.it');
+    expect(extractContacts('a@b.it 3331234567@mail.example.com').phones).toEqual([]);
+    expect(extractContacts(`${'x'.repeat(600)}@mail.example.it`).email).toBeNull(); // a run too long to be an address
+  });
+
+  it('finishes fast on hostile text (CodeQL js/polynomial-redos)', () => {
+    const started = performance.now();
+    extractContacts('%'.repeat(50_000));
+    extractContacts(`${'%'.repeat(50_000)}@`);
+    extractContacts(`linkedin.com/in/a${'.'.repeat(50_000)}b ${')'.repeat(50_000)}`);
+    extractContacts(`${'a'.repeat(500)}@b.it `.repeat(100));
+    expect(performance.now() - started).toBeLessThan(200);
+  });
+
+  it('drops the punctuation that follows a linkedin url', () => {
+    expect(extractContacts('linkedin.com/in/anna.bianchi.').linkedin).toBe('https://www.linkedin.com/in/anna.bianchi');
+  });
 });
