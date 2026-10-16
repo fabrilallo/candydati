@@ -43,7 +43,8 @@ export default defineNuxtConfig({
       ],
     },
   },
-  nitro: { preset: 'node-server' },
+  // The server tests (`test/server`) are type-checked with the server code: Nuxt's own tsconfig leaves them out.
+  nitro: { preset: 'node-server', typescript: { tsConfig: { include: ['../test/server/**/*.ts'] } } },
   runtimeConfig: {
     apiInternalUrl: API_ORIGIN,
     /** `NUXT_API_MAX_BODY_BYTES`: largest request body the proxy streams to the api (default 204 MiB, the api's biggest route limit). */
