@@ -1,4 +1,4 @@
-import { pickOrigin } from '@candydati/domain'
+import { pickOrigin, sanitizeCampaign } from '@candydati/domain'
 
 /**
  * Where an application came from, as a short label for the "sources" report: never a full URL, never personal data.
@@ -29,3 +29,6 @@ export const applicationOrigin = ({ search, referrer, host }: OriginInput): stri
   const params = new URLSearchParams(search)
   return pickOrigin({ utmSource: params.get('utm_source') ?? undefined, ref: params.get('ref') ?? undefined, referrer: externalReferrer(referrer, host) })
 }
+
+/** `utm_campaign` of the ad URL, sanitized like the source (`''`: none). Sent with the application and with the visit. */
+export const applicationCampaign = (search: string): string => sanitizeCampaign(new URLSearchParams(search).get('utm_campaign'))

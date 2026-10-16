@@ -95,12 +95,12 @@ export const applicationsUrl = (org: string, job: string): string =>
   `/api/v1/public/organizations/${encodeURIComponent(org)}/jobs/${encodeURIComponent(job)}/applications`
 
 /**
- * Multipart: `data` is the JSON of the form (plus `origin`, the short source label of `application-origin.ts`, and the Turnstile answer when the check is on), `cv`
+ * Multipart: `data` is the JSON of the form (plus `origin`, the short source label of `application-origin.ts`, `campaign` when the link had one, and the Turnstile answer when the check is on), `cv`
  * the file. No account, no session.
  */
-export const submitApplication = async (request: JobApiRequest, org: string, job: string, form: ApplicationForm, cv: File, origin?: string, turnstileToken?: string): Promise<void> => {
+export const submitApplication = async (request: JobApiRequest, org: string, job: string, form: ApplicationForm, cv: File, origin?: string, turnstileToken?: string, campaign?: string): Promise<void> => {
   const body = new FormData()
-  body.append('data', JSON.stringify({ ...form, ...(origin === undefined ? {} : { origin }), ...(turnstileToken ? { turnstileToken } : {}) }))
+  body.append('data', JSON.stringify({ ...form, ...(origin === undefined ? {} : { origin }), ...(campaign ? { campaign } : {}), ...(turnstileToken ? { turnstileToken } : {}) }))
   body.append('cv', cv, cv.name)
   await callApi(request, applicationsUrl(org, job), receivedSchema, { method: 'POST', body }, applicationErrorKey)
 }

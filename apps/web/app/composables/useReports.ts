@@ -10,9 +10,9 @@ const JOB_FILTER_LIMIT = 100
  * The figures of the reports page for a period and an optional job. Refetches when either changes; the previous
  * figures stay on screen (dimmed) meanwhile.
  */
-export const useReports = (period: Ref<Period>, jobId: Ref<string | null>) => {
+export const useReports = (period: Ref<Period>, jobId: Ref<string | null>, key = 'reports') => {
   const request = useJobsApi()
-  const { data, status, refresh } = useFreshAsyncData('reports', () => loaded(() => getReports(request, period.value, jobId.value)), { watch: [period, jobId] })
+  const { data, status, refresh } = useFreshAsyncData(key, () => loaded(() => getReports(request, period.value, jobId.value)), { watch: [period, jobId] })
   return {
     report: computed(() => data.value?.data ?? null),
     errorKey: computed(() => data.value?.errorKey ?? null),

@@ -93,6 +93,35 @@ describe('ReportsPanel', () => {
     expect(times[2]?.text()).toContain('—')
   })
 
+  it('shows visits and conversion per source, with the basis, and a dash when the sample is too small', async () => {
+    const wrapper = await mountPanel()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="source-rows"]').exists()).toBe(true))
+    const visits = wrapper.findAll('[data-testid="source-visits"]').map((row) => row.text())
+    expect(visits[0]).toBe('160 visite, conversione 13%')
+    expect(visits[1]).toBe('90 visite, conversione 13%')
+    expect(visits[2]).toBe('nessuna visita, conversione —')
+    expect(visits[3]).toBe('4 visite, conversione —')
+    expect(wrapper.find('[data-testid="sources-no-visits"]').exists()).toBe(false)
+  })
+
+  it('lists the campaigns under the sources', async () => {
+    const wrapper = await mountPanel()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="campaigns"]').exists()).toBe(true))
+    const rows = wrapper.findAll('[data-testid="campaign-row"]').map((row) => row.text())
+    expect(rows).toHaveLength(2)
+    expect(rows[0]).toContain('linkedin / autumn')
+    expect(rows[0]).toContain('100 visite, conversione 14%, 2 assunzioni')
+    expect(rows[1]).toContain('linkedin / spring')
+  })
+
+  it('explains how to get visits when the period has applications but no visits, and has no campaign list', async () => {
+    state.report = reportsFixture({ sources: [{ origin: 'direct', applications: 6, hires: 0, visits: 0, conversion: null }], campaigns: [] })
+    const wrapper = await mountPanel()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="sources-no-visits"]').exists()).toBe(true))
+    expect(text(wrapper, 'sources-no-visits')).toContain('scheda Distribuzione')
+    expect(wrapper.find('[data-testid="campaigns"]').exists()).toBe(false)
+  })
+
   it('keeps the rest of the page when the funnel is invalid, with a short error in that card only', async () => {
     const report = reportsFixture()
     state.report = { ...report, funnel: { ...report.funnel, stages: [{ ...report.funnel.stages[0]!, conversionToNext: { count: 4, total: 3, rate: 1.3333 } }] } }

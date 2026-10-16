@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { BriefcaseBusinessIcon } from '@lucide/vue'
+import { jobUrl } from '@candydati/domain'
 import { formatDate } from '@/lib/format'
 import { getJob, loaded } from '@/lib/job-api'
 import { can } from '@/lib/permissions-ui'
@@ -10,12 +11,20 @@ const route = useRoute()
 const { viewer } = useViewer()
 const api = useJobsApi()
 const id = String(route.params.id)
+const config = useRuntimeConfig()
 const allowed = computed(() => can(viewer.value?.role ?? null, 'job:publish'))
+const canReadReports = computed(() => can(viewer.value?.role ?? null, 'report:read'))
 
 // Same key and loader as the other job tabs, so switching tab reuses what is already there.
 const { data } = await useFreshAsyncData(`job-${id}`, () => loaded(() => getJob(api, id)))
 const job = computed(() => data.value?.data ?? null)
 const errorKey = computed(() => data.value?.errorKey ?? null)
+/** The public address of the ad, only while it is published: a draft or closed ad has no page to link to. */
+const publicUrl = computed(() => {
+  const slug = job.value?.slug
+  const org = viewer.value?.organization?.slug
+  return job.value?.status === 'published' && slug && org ? jobUrl(config.public.siteUrl, org, slug) : null
+})
 const title = computed(() => job.value?.content.title || t('job.editor.untitled'))
 useSeoMeta({ title: () => `${t('distribution.job.title')}: ${title.value}` })
 </script>
@@ -33,7 +42,11 @@ useSeoMeta({ title: () => `${t('distribution.job.title')}: ${title.value}` })
       <FormAlert v-if="!allowed" message-key="errors.forbidden" />
       <NotAccessible v-else-if="!job && errorKey === 'errors.notFound'" back-to="/app/jobs" back-key="notAccessible.backJobs" />
       <FormAlert v-else-if="!job" :message-key="errorKey ?? 'job.errors.loadFailed'" />
-      <JobDistributionPanel v-else :job="job" />
+      <template v-else>
+        <JobDistributionPanel :job="job" />
+        <TrackedLinkBuilder :job-url="publicUrl" />
+        <JobSourcesPanel v-if="canReadReports" :job-id="job.id" />
+      </template>
     </div>
   </AppPage>
 </template>
