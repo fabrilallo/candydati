@@ -9,4 +9,7 @@ describe('htmlToText', () => {
   it('ignores out-of-range numeric entities', () => {
     expect(htmlToText('&#99999999;')).toBe('&#99999999;');
   });
+  it('skips the head and leaves nothing of a tag split around another one', () => {
+    expect(htmlToText('<html><head><title>T</title></head><body><p>x</p><scr<script>ipt>alert(1)</script></body></html>')).toBe('x\nipt>alert(1)');
+  });
 });

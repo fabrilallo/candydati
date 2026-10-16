@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
 import { fileStem, levenshtein, levenshteinRatio, nameFromFileName, nameKey, nameSimilarity, normalizeEmail, normalizeText, phoneDigits, splitFullName } from './names.js';
 
 describe('normalizeText and nameKey', () => {
@@ -46,6 +47,23 @@ describe('splitFullName', () => {
   ])('%s', (full, firstName, lastName) => {
     expect(splitFullName(full)).toEqual({ firstName, lastName });
   });
+  it.each([
+    ['Rossi;Mario', 'Mario', 'Rossi'],
+    [' Rossi ,   Maria Grazia ', 'Maria Grazia', 'Rossi'],
+    ['Rossi, Mario, Jr', 'Rossi', 'Mario Jr'],
+    [', Mario', 'Mario', ''],
+    ['Rossi,', 'Rossi', ''],
+  ])('reads "last, first" only with one separator: %s', (full, firstName, lastName) => {
+    expect(splitFullName(full)).toEqual({ firstName, lastName });
+  });
+  it('finishes fast on a separator followed by a long run of spaces (CodeQL js/polynomial-redos)', () => {
+    const run = (size: number) => {
+      splitFullName(`+,${' '.repeat(size)};x`);
+      splitFullName(`a,${' '.repeat(size)}b`);
+    };
+    run(50_000);
+    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
+  });
   it('keeps an all-caps full name as written', () => {
     expect(splitFullName('MARIO ROSSI')).toEqual({ firstName: 'MARIO', lastName: 'ROSSI' });
   });
@@ -66,6 +84,27 @@ describe('file names, emails and phones', () => {
     expect(normalizeEmail('<a@b.it>')).toBe('a@b.it');
     expect(normalizeEmail('not an email')).toBeNull();
     expect(normalizeEmail(undefined)).toBeNull();
+  });
+  it.each(['a@b', 'a@.it', 'a@b.', '@b.it', 'a@@b.it', 'a@b@c.it', 'a b@c.it', 'a@b.\tit'])('refuses %s as an email', (value) => {
+    expect(normalizeEmail(value)).toBeNull();
+  });
+  it('refuses an address longer than 254 characters', () => {
+    expect(normalizeEmail(`${'a'.repeat(249)}@b.it`)).toBe(`${'a'.repeat(249)}@b.it`);
+    expect(normalizeEmail(`${'a'.repeat(250)}@b.it`)).toBeNull();
+  });
+  it('accepts any dot inside the domain, as before', () => {
+    expect(normalizeEmail('a@b.c')).toBe('a@b.c');
+    expect(normalizeEmail('a.b@c.d.e')).toBe('a.b@c.d.e');
+    expect(normalizeEmail('x@a.b.')).toBe('x@a.b.');
+  });
+  it('finishes fast on a long domain of dots with no valid end (CodeQL js/polynomial-redos)', () => {
+    expect(normalizeEmail(`!@!.${'!.'.repeat(25_000)}@`)).toBeNull();
+    expect(normalizeEmail(`!@!${'.'.repeat(50_000)} `)).toBeNull();
+    const run = (size: number) => {
+      normalizeEmail(`!@!.${'!.'.repeat(size / 2)}@`);
+      normalizeEmail(`!@!${'.'.repeat(size)} `);
+    };
+    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
   });
   it('compares phones by digits', () => {
     expect(phoneDigits('+39 333 123 4567')).toBe(phoneDigits('333-1234567'));

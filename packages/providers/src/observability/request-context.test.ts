@@ -45,4 +45,11 @@ describe('isMetricsAuthorized', () => {
     expect(isMetricsAuthorized(undefined, token)).toBe(false);
     expect(isMetricsAuthorized(`Bearer ${token}`, null)).toBe(false);
   });
+  it('compares tokens of any length without throwing, and never accepts an empty token', () => {
+    expect(isMetricsAuthorized('Bearer x', token)).toBe(false);
+    expect(isMetricsAuthorized(`Bearer ${token.repeat(10)}`, token)).toBe(false);
+    expect(isMetricsAuthorized(`Bearer ${'é'.repeat(token.length)}`, token)).toBe(false);
+    expect(isMetricsAuthorized('Bearer ', '')).toBe(false);
+    expect(isMetricsAuthorized(`  Bearer ${token}  `, token)).toBe(true);
+  });
 });

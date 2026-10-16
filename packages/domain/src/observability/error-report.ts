@@ -28,19 +28,30 @@ export function parseDsn(dsn: string): ParsedDsn | null {
 }
 
 const MESSAGE_MAX = 300;
+/** Only the start of a message is read: the report keeps 300 characters of it. */
+const MESSAGE_INPUT_MAX = 4_096;
+/** A longer word is not prose: it is masked whole, so the patterns below only ever run on short words. */
+const WORD_MAX = 512;
 const EMAIL = /[^\s@<>()"',;:]+@[^\s@<>()"',;:]+\.[A-Za-z]{2,}/g;
 const LONG_TOKEN = /[A-Za-z0-9_\-+/=]{24,}/g;
 const URL_QUERY = /(https?:\/\/[^\s?#]+)[?#][^\s]*/g;
 
+/** None of the patterns crosses whitespace, so masking word by word masks exactly what masking the whole text would. */
+const scrubWord = (word: string): string =>
+  word.length > WORD_MAX ? '[redacted]' : word.replace(EMAIL, '[email]').replace(URL_QUERY, '$1').replace(LONG_TOKEN, '[redacted]');
+
 /** An error message as it may leave the server: emails, tokens and URL queries masked, length capped. */
-export const scrubMessage = (message: string): string =>
-  message
-    .replace(EMAIL, '[email]')
-    .replace(URL_QUERY, '$1')
-    .replace(LONG_TOKEN, '[redacted]')
-    .replace(/\s+/g, ' ')
-    .trim()
+export function scrubMessage(message: string): string {
+  const truncated = message.length > MESSAGE_INPUT_MAX;
+  const words = message.slice(0, MESSAGE_INPUT_MAX).split(/\s+/);
+  // The last word of a truncated message may be half an email that no longer looks like one.
+  const whole = truncated ? words.slice(0, -1) : words;
+  return whole
+    .filter((word) => word !== '')
+    .map(scrubWord)
+    .join(' ')
     .slice(0, MESSAGE_MAX);
+}
 
 export interface StackFrame {
   readonly function?: string;
@@ -50,8 +61,52 @@ export interface StackFrame {
   readonly in_app: boolean;
 }
 
-const FRAME = /^\s*at (?:(.+?) \()?(.+?):(\d+):(\d+)\)?$/;
 const MAX_FRAMES = 50;
+/** A longer line is not a V8 frame. */
+const FRAME_LINE_MAX = 4_096;
+const DIGITS = /^\d+$/;
+/** Characters `.` does not match in a regex: the legacy pattern refused lines that held them. */
+const LINE_TERMINATOR = /[\r\u2028\u2029]/;
+
+export interface FrameLine {
+  readonly function: string | undefined;
+  readonly file: string;
+  readonly lineno: number;
+  readonly colno: number;
+}
+
+/** `<file>:<line>:<col>` read from the end, so a path with colons keeps them. */
+function frameLocation(body: string): { readonly fileEnd: number; readonly lineno: number; readonly colno: number } | null {
+  const colonCol = body.lastIndexOf(':');
+  if (colonCol < 0) return null;
+  const colonLine = body.lastIndexOf(':', colonCol - 1);
+  if (colonLine < 1 || colonLine >= colonCol) return null;
+  const lineno = body.slice(colonLine + 1, colonCol);
+  const colno = body.slice(colonCol + 1);
+  return DIGITS.test(lineno) && DIGITS.test(colno) ? { fileEnd: colonLine, lineno: Number(lineno), colno: Number(colno) } : null;
+}
+
+/**
+ * One V8 frame line, `at [<function> (]<file>:<line>:<col>[)]`, or null. A hand parser, linear on any line: it reads
+ * exactly what `/^\s*at (?:(.+?) \()?(.+?):(\d+):(\d+)\)?$/` read, without its quadratic backtracking.
+ */
+export function readFrameLine(line: string): FrameLine | null {
+  if (line.length > FRAME_LINE_MAX || LINE_TERMINATOR.test(line)) return null;
+  const trimmed = line.trimStart();
+  if (!trimmed.startsWith('at ')) return null;
+  const rest = trimmed.slice(3);
+  const body = rest.endsWith(')') ? rest.slice(0, -1) : rest;
+  const where = frameLocation(body);
+  if (!where) return null;
+  const open = body.indexOf(' (', 1);
+  const named = open > 0 && open + 2 < where.fileEnd;
+  return {
+    function: named ? body.slice(0, open) : undefined,
+    file: body.slice(named ? open + 2 : 0, where.fileEnd),
+    lineno: where.lineno,
+    colno: where.colno,
+  };
+}
 
 /** Keeps the part of the path inside the app or the dependency, so neither a home folder nor a container layout leaks. */
 const relativePath = (file: string): string => {
@@ -70,13 +125,14 @@ const relativePath = (file: string): string => {
 export function stackFrames(stack: string): readonly StackFrame[] {
   const frames: StackFrame[] = [];
   for (const line of stack.split('\n')) {
-    const match = FRAME.exec(line);
-    if (!match) continue;
-    const [, fn, file = '', lineno = '0', colno = '0'] = match;
+    if (frames.length === MAX_FRAMES) break;
+    const frame = readFrameLine(line);
+    if (!frame) continue;
+    const { function: fn, file, lineno, colno } = frame;
     const filename = relativePath(file);
-    frames.push({ ...(fn ? { function: fn.slice(0, 120) } : {}), filename, lineno: Number(lineno), colno: Number(colno), in_app: !filename.startsWith('node_modules/') && !file.startsWith('node:') });
+    frames.push({ ...(fn ? { function: fn.slice(0, 120) } : {}), filename, lineno, colno, in_app: !filename.startsWith('node_modules/') && !file.startsWith('node:') });
   }
-  return frames.slice(0, MAX_FRAMES).reverse();
+  return frames.reverse();
 }
 
 /** What a caller may tell about the failure: a short list of tags (service, request id, queue), nothing free-form. */

@@ -12,9 +12,11 @@ export interface CaseResult {
   readonly passed: boolean;
 }
 
-const cell = (text: string, max = 160): string => {
-  const flat = text.replace(/\s+/g, ' ').replace(/\|/g, '\\|').trim();
-  return flat.length > max ? `${flat.slice(0, max)}…` : flat;
+/** One markdown table cell: whitespace flattened, cut to `max`, then backslashes and pipes escaped (backslashes first). */
+export const markdownCell = (text: string, max = 160): string => {
+  const flat = text.replace(/\s+/g, ' ').trim();
+  const cut = flat.length > max ? `${flat.slice(0, max)}…` : flat;
+  return cut.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
 };
 
 const toolNames = (calls: readonly string[]): string => (calls.length === 0 ? '—' : calls.map((c) => c.slice(0, c.indexOf('('))).join(', '));
@@ -23,7 +25,7 @@ export function renderReport({ agentModel, judgeModel, results, date }: { agentM
   const passed = results.filter((r) => r.passed).length;
   const rows = results.map(
     (r) =>
-      `| ${r.evalCase.id} | ${r.passed ? 'pass' : '**fail**'} | ${toolNames(r.toolCalls)} | ${r.effects.length === 0 ? 'none' : cell(r.effects.join('; '))} | ${cell(r.passed ? (r.verdict?.reason ?? '') : r.failures.join('; '))} | ${cell(r.answer)} |`,
+      `| ${r.evalCase.id} | ${r.passed ? 'pass' : '**fail**'} | ${toolNames(r.toolCalls)} | ${r.effects.length === 0 ? 'none' : markdownCell(r.effects.join('; '))} | ${markdownCell(r.passed ? (r.verdict?.reason ?? '') : r.failures.join('; '))} | ${markdownCell(r.answer)} |`,
   );
   return [
     '# Assistant adversarial eval',

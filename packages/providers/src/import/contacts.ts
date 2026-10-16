@@ -1,3 +1,5 @@
+import { trimTrailing } from '@candydati/domain';
+
 export type NameConfidence = 'high' | 'medium' | 'low';
 
 export interface ExtractedContacts {
@@ -9,6 +11,10 @@ export interface ExtractedContacts {
 }
 
 const EMAIL = /[\p{L}\p{N}._%+-]+@[\p{L}\p{N}-]+(?:\.[\p{L}\p{N}-]+)*\.[A-Za-z]{2,}/gu;
+/** Every character an address can hold: an address always sits inside one run of them. */
+const EMAIL_RUN = /[\p{L}\p{N}._%+@-]+/gu;
+/** A longer run is not an address (RFC 5321 caps one at 254): the address pattern only ever sees short strings. */
+const EMAIL_RUN_MAX = 320;
 const EMAIL_REJECT = /^(no-?reply|donotreply|example|test)@|@(example\.(com|org)|domain\.com|email\.com)$|\.(png|jpe?g|gif|svg|webp)$/i;
 const INTERNATIONAL = /(?<![\d+])(?:\+|00)\d{1,3}[\s.()-]{0,2}\d(?:[\s.()-]{0,2}\d){6,12}(?!\d)/g;
 const IT_MOBILE = /(?<![\d+])3\d{2}[\s.-]?\d{3}[\s.-]?\d{3,4}(?!\d)/g;
@@ -22,8 +28,17 @@ const TOKEN = /^[\p{Lu}][\p{L}'’.-]*$/u;
 const NAME_SCAN_LINES = 8;
 const PHONE_DIGITS = { min: 8, max: 15 } as const;
 
+/** Addresses in reading order, searched run by run: linear on any text, where one pass of `EMAIL` is quadratic. */
+function emails(text: string): readonly string[] {
+  return [...text.matchAll(EMAIL_RUN)].flatMap(([run]) => (run.length <= EMAIL_RUN_MAX && run.includes('@') ? (run.match(EMAIL) ?? []) : []));
+}
+
+/** The text with every address blanked out, found the same way. */
+const withoutEmails = (text: string): string =>
+  text.replace(EMAIL_RUN, (run) => (run.length <= EMAIL_RUN_MAX && run.includes('@') ? run.replace(EMAIL, ' ') : run));
+
 function firstEmail(text: string): string | null {
-  const found = text.match(EMAIL)?.find((email) => !EMAIL_REJECT.test(email));
+  const found = emails(text).find((email) => !EMAIL_REJECT.test(email));
   return found ? found.toLowerCase() : null;
 }
 
@@ -34,7 +49,7 @@ function normalisePhone(raw: string, italian: boolean): string | null {
 }
 
 function phoneNumbers(text: string): readonly string[] {
-  const scoped = text.replace(EMAIL, ' ');
+  const scoped = withoutEmails(text);
   const results: string[] = [];
   const consumed = scoped.replace(INTERNATIONAL, (raw) => {
     const phone = normalisePhone(raw, false);
@@ -52,7 +67,7 @@ function phoneNumbers(text: string): readonly string[] {
 
 function linkedinUrl(text: string): string | null {
   const match = [...text.matchAll(LINKEDIN)][0];
-  const slug = match?.[1]?.replace(/[.,;)]+$/, '');
+  const slug = match?.[1] === undefined ? undefined : trimTrailing(match[1], '.,;)');
   return slug ? `https://www.linkedin.com/in/${slug}` : null;
 }
 

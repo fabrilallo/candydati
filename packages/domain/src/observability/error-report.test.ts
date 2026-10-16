@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { buildErrorEnvelope, buildErrorEvent, parseDsn, scrubMessage, stackFrames } from './error-report.js';
+import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { buildErrorEnvelope, buildErrorEvent, parseDsn, readFrameLine, scrubMessage, stackFrames } from './error-report.js';
 
 describe('parseDsn', () => {
   it('reads key, project and origin, with an optional path prefix', () => {
@@ -21,6 +22,28 @@ describe('scrubMessage', () => {
     expect(scrubbed).toContain('[email]');
     expect(scrubMessage('word '.repeat(200)).length).toBe(300);
   });
+
+  it('keeps the masking of the regex version word by word', () => {
+    expect(scrubMessage('  to (ada@example.com),\tcc <bob.b@mail.example.it>  ')).toBe('to ([email]), cc <[email]>');
+    expect(scrubMessage('see https://x.test/a/b#frag?x=1 and http://y.test?q')).toBe('see https://x.test/a/b and http://y.test');
+    expect(scrubMessage('pkg@1.2.3 failed')).toBe('pkg@1.2.3 failed');
+  });
+
+  it('masks a word too long to be prose and never leaks half an email cut at the input limit', () => {
+    expect(scrubMessage(`a ${'x!'.repeat(400)} b`)).toBe('a [redacted] b');
+    const message = `${'word '.repeat(819)}abc ada.lovelace@example.com`;
+    expect(scrubMessage(message)).not.toContain('ada.lovelace');
+  });
+
+  it('finishes fast on hostile input (CodeQL js/polynomial-redos)', () => {
+    const run = (size: number) => {
+      scrubMessage('!'.repeat(size));
+      scrubMessage('! '.repeat(size / 2));
+      scrubMessage(`${'a'.repeat(500)}@${'b'.repeat(11)} `.repeat(size / 500));
+    };
+    run(50_000);
+    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
+  });
 });
 
 describe('stackFrames', () => {
@@ -32,6 +55,46 @@ describe('stackFrames', () => {
     expect(JSON.stringify(frames)).not.toContain('/Users/ada');
     expect(frames[2]).toMatchObject({ function: 'run', lineno: 10, colno: 5, in_app: true });
     expect(frames[1]?.in_app).toBe(false);
+  });
+
+  /** The regex the parser replaced: the parser must read every line the same way. */
+  const LEGACY_FRAME = /^\s*at (?:(.+?) \()?(.+?):(\d+):(\d+)\)?$/;
+  it.each([
+    '    at run (/app/src/a.ts:10:5)',
+    '    at /app/node_modules/pg/lib/client.js:3:9',
+    '    at async Promise.all (index 0)',
+    '    at Object.<anonymous> (C:\\app\\src\\a.js:1:2)',
+    '    at new Foo (bar (baz):1:2)',
+    '    at fn (file:3:4',
+    '    at  (x:1:2)',
+    '    at a (:1:2)',
+    'at x:1:2:3',
+    'at x:1:2))',
+    'at x:1:a',
+    'at :1:2',
+    'at x:1:2\r',
+    'at a\rb (x:1:2)',
+    '    at f (x:1:2) extra',
+    'Error: boom',
+    '',
+  ])('reads %j like the legacy regex', (line) => {
+    const legacy = LEGACY_FRAME.exec(line);
+    expect(readFrameLine(line)).toEqual(legacy ? { function: legacy[1], file: legacy[2], lineno: Number(legacy[3]), colno: Number(legacy[4]) } : null);
+  });
+
+  it('reads at most 50 frames', () => {
+    expect(stackFrames('    at f (/app/src/a.ts:1:1)\n'.repeat(80))).toHaveLength(50);
+  });
+
+  it('finishes fast on hostile input (CodeQL js/polynomial-redos)', () => {
+    expect(stackFrames(`at ${'a (a'.repeat(12_500)}`)).toEqual([]);
+    const run = (size: number) => {
+      stackFrames(`at ${'a (a'.repeat(size / 4)}`);
+      stackFrames(`  at ${'a (a:1'.repeat(size / 5)}`);
+      stackFrames(`at ${'a (a'.repeat(size / 4)}\n`.repeat(4));
+    };
+    run(50_000);
+    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
   });
 });
 

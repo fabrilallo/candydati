@@ -50,14 +50,26 @@ export interface SplitName {
   readonly lastName: string;
 }
 
+/** Longer than any real name: the rest of a cell is not read. */
+const FULL_NAME_MAX = 300;
+
+/** "Rossi, Mario" or "Rossi; Mario": exactly one separator with text on both sides. Null otherwise. */
+function lastCommaFirst(trimmed: string): SplitName | null {
+  const parts = trimmed.split(/[,;]/);
+  if (parts.length !== 2) return null;
+  const [last = '', first = ''] = parts;
+  return last === '' || first === '' ? null : { firstName: first.trim(), lastName: last.trim() };
+}
+
 /**
  * Splits a full name written as "Mario Rossi", "ROSSI Mario" or "Maria Grazia De Luca". A single word is a first name
  * with an empty last name: the caller flags it.
  */
 export function splitFullName(full: string): SplitName {
-  const comma = /^([^,;]+)[,;]\s*([^,;]+)$/.exec(full.trim());
-  if (comma) return { firstName: (comma[2] ?? '').trim(), lastName: (comma[1] ?? '').trim() };
-  const tokens = full.replace(/[,;]+/g, ' ').split(/\s+/).filter((token) => token !== '');
+  const bounded = full.slice(0, FULL_NAME_MAX);
+  const comma = lastCommaFirst(bounded.trim());
+  if (comma) return comma;
+  const tokens = bounded.replace(/[,;]+/g, ' ').split(/\s+/).filter((token) => token !== '');
   if (tokens.length === 0) return { firstName: '', lastName: '' };
   if (tokens.length === 1) return { firstName: tokens[0] ?? '', lastName: '' };
   const [head, ...tail] = tokens;
@@ -84,12 +96,24 @@ export function nameFromFileName(fileName: string): string {
 /** The base name of a path, lowercase and without extension: how a spreadsheet cell and a file are compared. */
 export const fileStem = (value: string): string => normalizeText((value.split(/[\\/]/).pop() ?? value).replace(/\.[a-z0-9]{2,5}$/i, ''));
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** RFC 5321: no deliverable address is longer. */
+const EMAIL_MAX = 254;
+
+/**
+ * `local@domain` with no whitespace, exactly one `@`, a non-empty local part and a dot inside the domain (not its first
+ * or last character). Checked by hand: the regex form backtracks quadratically on a long domain of dots.
+ */
+function looksLikeEmail(value: string): boolean {
+  if (value.length > EMAIL_MAX || /\s/.test(value)) return false;
+  const at = value.indexOf('@');
+  if (at <= 0 || value.indexOf('@', at + 1) !== -1) return false;
+  return value.slice(at + 2, -1).includes('.');
+}
 
 /** Lowercase, trimmed, without `mailto:`; null when it is not an email. */
 export function normalizeEmail(value: string | null | undefined): string | null {
   const cleaned = (value ?? '').trim().replace(/^mailto:/i, '').replace(/[<>]/g, '').toLowerCase();
-  return EMAIL_PATTERN.test(cleaned) ? cleaned : null;
+  return looksLikeEmail(cleaned) ? cleaned : null;
 }
 
 /** Digits only, without a 00 prefix or the Italian +39 country code: how two phone numbers are compared. */

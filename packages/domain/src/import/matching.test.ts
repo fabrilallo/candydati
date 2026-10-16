@@ -138,6 +138,14 @@ describe('matchImport duplicates and single sources', () => {
     expect(item?.candidate).toMatchObject({ linkedinUrl: 'https://www.linkedin.com/in/ab', tags: ['java', 'go'] });
     const [other] = run([], [row(2, { Nome: 'A', Cognome: 'B', Email: 'a@b.it', LinkedIn: 'https://evil.example/x' })]);
     expect(other?.candidate.linkedinUrl).toBeNull();
+    for (const hostile of ['https://evil.example/linkedin.com/in/x', 'https://linkedin.com.evil.example/in/x', 'https://notlinkedin.com/in/x', 'https://evil.example/?u=linkedin.com', 'https://linkedin.com@evil.example/in/x', 'evil.example#linkedin.com']) {
+      const [item] = run([], [row(2, { Nome: 'A', Cognome: 'B', Email: 'a@b.it', LinkedIn: hostile })]);
+      expect(item?.candidate.linkedinUrl, hostile).toBeNull();
+    }
+    for (const fine of ['https://it.linkedin.com/in/ab', 'HTTPS://LinkedIn.com/in/ab', 'linkedin.com/in/ab']) {
+      const [item] = run([], [row(2, { Nome: 'A', Cognome: 'B', Email: 'a@b.it', LinkedIn: fine })]);
+      expect(item?.candidate.linkedinUrl, fine).not.toBeNull();
+    }
   });
 
   it('works with a full name column and with no mapping at all', () => {

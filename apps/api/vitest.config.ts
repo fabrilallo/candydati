@@ -2,7 +2,7 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'eval/**/*.test.ts'],
     env: { NODE_ENV: 'test' },
     globalSetup: ['./src/testing/global-setup.ts'],
     setupFiles: ['./src/testing/overlap-guard.setup.ts'],

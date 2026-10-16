@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { escapeHtml, htmlToText, textToHtml } from './html.js';
+import { escapeHtml, textToHtml } from './html.js';
 
 describe('textToHtml', () => {
   it('escapes markup', () => {
@@ -40,12 +40,5 @@ describe('textToHtml', () => {
   it('returns an empty string for blank text', () => {
     expect(textToHtml('  \n\n ')).toBe('');
     expect(escapeHtml('plain')).toBe('plain');
-  });
-});
-
-describe('htmlToText', () => {
-  it('drops scripts, styles and tags, and decodes entities', () => {
-    const html = '<style>p{}</style><p>Ciao&nbsp;Ada &amp; co</p><script>evil()</script><div>Line<br>two</div>&#65;&#0;&unknown;';
-    expect(htmlToText(html)).toBe('Ciao Ada & co\n\nLine\ntwo\n\nA&unknown;');
   });
 });
