@@ -7,7 +7,9 @@ giornalieri e il comando `candydati` per gestire l'installazione.
 
 - **Un server Linux**: consigliati Ubuntu 22.04 o successivo, oppure Debian 12 o successivo. `amd64` o `arm64`. Almeno
   **2 vCPU, 4 GB di RAM e 40 GB di disco**: bastano per un piccolo team (pochi recruiter, centinaia di candidature al
-  mese).
+  mese). Per esempio Hetzner Cloud CX23 o CAX11 (Arm), oppure OVHcloud VPS-1, circa 5–7 € al mese a ottobre 2026
+  (verifica il prezzo attuale; non abbiamo affiliazioni). Lo stack usa circa 850 MB a riposo e 1,3 GB sotto carico:
+  2 GB bastano a un piccolo team senza import grandi, 4 GB sono consigliati.
 - **Le porte 80 e 443 aperte** verso internet. Tieni chiuso tutto il resto tranne SSH.
 - **Un nome di dominio che punta al server, prima di installare.** Crea un record DNS `A` (e `AAAA` se il server ha
   IPv6) per il nome che vuoi, per esempio `ats.example.com`, con l'indirizzo pubblico del server. Il certificato HTTPS

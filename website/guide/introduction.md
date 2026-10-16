@@ -58,7 +58,7 @@ The license text is the reference: this summary does not replace it.
 
 | Item | Typical cost |
 |---|---|
-| A Linux server (2 vCPU, 4 GB RAM, 40 GB disk) | a few euros a month at most cloud providers |
+| A Linux server (2 vCPU, 4 GB RAM, 40 GB disk) | about €5–7 a month (e.g. Hetzner CX23 or CAX11, OVHcloud VPS-1, October 2026) |
 | A domain | you probably have one already: a subdomain such as `ats.example.com` is enough |
 | Sending email | free tiers of transactional providers, or the company mailbox you already pay for |
 | AI (optional) | pay per use at the model provider you choose; off by default |

@@ -7,6 +7,9 @@ backups and the `candydati` command to manage the instance.
 
 - **A Linux server**: Ubuntu 22.04 or later, or Debian 12 or later, recommended. `amd64` or `arm64`. At least
   **2 vCPU, 4 GB RAM and 40 GB disk**: enough for a small team (a few recruiters, hundreds of applications a month).
+  For example Hetzner Cloud CX23 or CAX11 (Arm), or OVHcloud VPS-1, about €5–7 a month in October 2026 (check the
+  current price; we have no affiliation). The stack uses about 850 MB at rest and 1.3 GB under load: 2 GB works for a
+  small team without large imports, 4 GB is recommended.
 - **Ports 80 and 443 open** to the internet. Keep everything else closed except SSH.
 - **A domain name pointing to the server, before you install.** Create a DNS `A` record (and `AAAA` if the server has
   IPv6) for the host name you want, for example `ats.example.com`, with the server's public address. The HTTPS

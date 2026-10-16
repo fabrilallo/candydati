@@ -66,7 +66,7 @@ Fa fede il testo della licenza: questo riassunto non lo sostituisce.
 
 | Voce | Costo tipico |
 |---|---|
-| Un server Linux (2 vCPU, 4 GB di RAM, 40 GB di disco) | pochi euro al mese presso la maggior parte dei provider cloud |
+| Un server Linux (2 vCPU, 4 GB di RAM, 40 GB di disco) | circa 5–7 € al mese (es. Hetzner CX23 o CAX11, OVHcloud VPS-1, ottobre 2026) |
 | Un dominio | probabilmente ce l'hai già: basta un sottodominio come `ats.example.com` |
 | Invio delle email | i piani gratuiti dei servizi transazionali, oppure la casella aziendale che già paghi |
 | AI (facoltativa) | a consumo presso il fornitore di modelli che scegli; spenta di default |

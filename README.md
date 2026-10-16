@@ -89,7 +89,8 @@ Locally, emails go to Mailpit (http://localhost:8025). Checks: `pnpm lint`, `pnp
 
 ## Self-hosting
 
-You need a Linux server (2 vCPU, 4 GB RAM), a domain pointing to it and an email account to send from (Resend or any
+You need a Linux server with 2 vCPU and 4 GB RAM (for example Hetzner Cloud CX23 or the Arm CAX11, or OVHcloud
+VPS-1: about €5–7 a month in October 2026), a domain pointing to it and an email account to send from (Resend or any
 SMTP, including your company mailbox). No other accounts. On the server:
 
 ```bash
