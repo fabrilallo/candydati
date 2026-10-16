@@ -13,11 +13,17 @@ validation, preview and undo (ADR 0009).
 | Workable | built-in connector | beta (built on public docs, not verified on a real account) | jobs and their stages, candidates, applications with outcome and dates, stage history, notes, historical messages, CVs; [details](../../packages/providers/src/migration/sources/workable/README.md) | no |
 | Greenhouse | built-in connector | beta (built on public docs, not verified on a real account) | users, jobs and stages, candidates, applications with outcome, origin and stage history, notes, past emails, CVs and files; see its [README](../../packages/providers/src/migration/sources/greenhouse/README.md) | no |
 | Recruitee | built-in connector | beta (built on public docs, not verified on a real account; several endpoints assumed) | jobs (open, closed, archived), candidates with tags, source and GDPR expiry, applications with stage and outcome (hired, not selected), CVs, cover letters, notes. Not: ratings, evaluations, photos, emails, timeline | no |
+| Zucchetti InRecruiting | built-in connector, file-based (no public API) | beta (file export; columns assumed, not verified on a real export) | jobs by title and code, people, applications with stages, outcomes and dates, notes, tags, source, CVs from a ZIP; never scores or ratings | no |
 | Any other ATS or a spreadsheet | package built by the [agent skill](../../skills/candydati-migration/README.md) or by hand | available | whatever the package contains | not applicable |
 
 Connectors marked **beta** are built on public documentation and not yet verified on a real account. "Planned" means a
 connector is on the list and not started. When a connector is released, its row says what it brings and what it
 cannot, and it is marked **beta**.
+
+Zucchetti InRecruiting has no public API (access to the data is through the vendor's support, possibly paid), so its
+connector reads an export the operator uploads: a spreadsheet (CSV or XLSX) and, optionally, a ZIP of CVs. The column
+names it recognises are **assumed**, because no real export format is public, and the test fixtures are synthetic. See
+[the connector's README](../../packages/providers/src/migration/sources/inrecruiting/README.md).
 
 ## Maturity levels
 
