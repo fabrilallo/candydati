@@ -48,6 +48,7 @@ import { registerPipelineRoutes } from './routes/pipeline.js';
 import { registerPrivacyNoticeRoutes } from './routes/privacy-notice.js';
 import { registerPublicApplicationRoute } from './routes/public-applications.js';
 import { registerPublicJobRoutes } from './routes/public-jobs.js';
+import { registerPublicViewRoute } from './routes/public-views.js';
 import { registerApplicationRightsRoutes } from './routes/application-rights.js';
 import { registerCandidateRightsRoutes } from './routes/candidate-rights.js';
 import { registerExportRoutes } from './routes/exports.js';
@@ -207,6 +208,7 @@ function registerRecruitingRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerJobTemplateRoutes(app, ctx);
   registerDistributionRoutes(app, ctx);
   registerPublicJobRoutes(app, ctx);
+  registerPublicViewRoute(app, ctx);
   registerPrivacyNoticeRoutes(app, ctx);
   registerPipelineRoutes(app, ctx);
   registerAttentionRoutes(app, ctx);

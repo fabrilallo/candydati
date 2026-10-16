@@ -24,6 +24,8 @@ export interface RouteSpec {
   readonly status?: number;
   /** The success body is this media type (a file), not the JSON envelope. */
   readonly fileMediaType?: string;
+  /** The success reply has no body (`204`). */
+  readonly noContent?: boolean;
   readonly response: {
     readonly schema: ComponentName | z.ZodType;
     readonly list?: boolean;

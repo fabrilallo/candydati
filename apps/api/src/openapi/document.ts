@@ -93,9 +93,13 @@ function operation(route: RouteSpec): Json {
     responses: {
       [String(route.status ?? 200)]: {
         description: 'Success',
-        content: route.fileMediaType
-          ? { [route.fileMediaType]: { schema: { type: 'string' } } }
-          : { 'application/json': { schema: envelope(route.response) } },
+        ...(route.noContent
+          ? {}
+          : {
+              content: route.fileMediaType
+                ? { [route.fileMediaType]: { schema: { type: 'string' } } }
+                : { 'application/json': { schema: envelope(route.response) } },
+            }),
       },
       ...errorResponses(isPublic),
     },
