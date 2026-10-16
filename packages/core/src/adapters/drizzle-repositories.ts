@@ -23,6 +23,7 @@ import { createDrizzleConsentTokens, createDrizzleImportAnalyses, createDrizzleI
 import { createDrizzleJobApprovals, createDrizzleJobRequests, createDrizzleOrganizationSettings, createDrizzleStaleJobs } from './drizzle-job-requests.js';
 import { createDrizzleJobTemplates } from './drizzle-job-templates.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
+import { createDrizzleMigrationBatches, createDrizzleMigrationIssues } from './drizzle-migrations.js';
 import { createDrizzleJobTeams } from './drizzle-job-teams.js';
 import { createDrizzleMemberDirectory } from './drizzle-members.js';
 import { createDrizzleMessages } from './drizzle-messages.js';
@@ -98,7 +99,7 @@ const candidateRepositories = (db: DbExecutor) =>
     tasks: createDrizzleTasks(db),
   }) as const;
 
-/** Privacy operations and imports. */
+/** Privacy operations, imports and migrations. */
 const operationRepositories = (db: DbExecutor) =>
   ({
     erasure: createDrizzleErasure(db),
@@ -109,6 +110,8 @@ const operationRepositories = (db: DbExecutor) =>
     importAnalyses: createDrizzleImportAnalyses(db),
     consentTokens: createDrizzleConsentTokens(db),
     commit: createDrizzleImportCommit(db),
+    migrations: createDrizzleMigrationBatches(db),
+    migrationIssues: createDrizzleMigrationIssues(db),
     stuck: createDrizzleStuckWork(db),
   }) as const;
 

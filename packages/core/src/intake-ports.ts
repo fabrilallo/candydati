@@ -42,6 +42,7 @@ export const TASK_NAMES = [
   'distribution.sync',
   'import.analyze',
   'import.commit',
+  'migration.analyze',
 ] as const;
 export type TaskName = (typeof TASK_NAMES)[number];
 
@@ -107,6 +108,8 @@ export interface TaskPayloads {
   readonly 'distribution.sync': DistributionSyncPayload;
   readonly 'import.analyze': ImportTaskPayload;
   readonly 'import.commit': ImportTaskPayload;
+  /** Open, check and preview a migration package (ADR 0009). Ids only, like the import. */
+  readonly 'migration.analyze': ImportTaskPayload;
 }
 
 /** A task as enqueued: the name decides the payload. */
