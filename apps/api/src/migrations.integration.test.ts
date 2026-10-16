@@ -214,7 +214,7 @@ describe('migrations: connectors of a default build', () => {
   it('offers the built-in vendor connectors (beta), never the test one', async () => {
     const w = await createWorld(t);
     const listed = (await w.owner.get<{ id: string; maturity: string }[]>('/api/v1/migrations/connectors')).body.data ?? [];
-    expect(listed.map((connector) => [connector.id, connector.maturity])).toEqual([['teamtailor', 'beta']]);
+    expect(listed.map((connector) => [connector.id, connector.maturity])).toEqual([['teamtailor', 'beta'], ['greenhouse', 'beta'], ['workable', 'beta'], ['recruitee', 'beta']]);
   });
 });
 
