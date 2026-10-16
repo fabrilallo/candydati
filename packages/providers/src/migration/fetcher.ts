@@ -1,6 +1,7 @@
-import { MigrationFetchFailure, type FileStorage, type MigrationFetcher, type MigrationFetchRequest } from '@candydati/core';
-import { MIGRATION_FETCH_ERRORS, MIGRATION_LIMITS, type MigrationFetchError } from '@candydati/domain';
+import { MigrationFetchFailure, type FileStorage, type MigrationInputFiles, type MigrationFetcher, type MigrationFetchRequest } from '@candydati/core';
+import { MIGRATION_FETCH_ERRORS, MIGRATION_LIMITS, type MigrationConnectorInput, type MigrationFetchError, type MigrationFetchNotice } from '@candydati/domain';
 import { createJsonReader, JsonReaderError, type HostRule, type JsonReader, type RateOptions } from '../http/index.js';
+import type { ConnectorTools } from './connector.js';
 import { createPackageBuilder, PackageBuilderError } from './package-builder.js';
 import { splitPackage, type PartLimits } from './package-split.js';
 import { writePackagePart } from './package-writer.js';
@@ -46,6 +47,14 @@ const infoOf = (error: unknown): FetchErrorInfo => {
 
 const defaultReaderFor = (hosts: readonly HostRule[], rate: RateOptions | undefined): JsonReader => createJsonReader({ allowedHosts: hosts, ...(rate === undefined ? {} : { rate }) });
 
+/** What a connector gets: only a `files` connector sees the uploaded files. */
+const toolsFor = (input: MigrationConnectorInput, reader: JsonReader, progress: ConnectorTools['progress'], files: MigrationInputFiles | undefined, notice: ConnectorTools['notice']): ConnectorTools => ({
+  reader,
+  progress,
+  notice,
+  ...(input === 'files' ? { files } : {}),
+});
+
 /**
  * The core's `MigrationFetcher` (Task 6.3): runs a registered connector with a reader limited to its hosts and a
  * `PackageBuilder`, splits what it collected into packages within MIGRATION_LIMITS, and writes each one at the key the
@@ -59,6 +68,8 @@ export function createMigrationFetcher(options: MigrationFetcherOptions): Migrat
       const connector = options.registry.get(request.connectorId);
       if (!connector) throw new MigrationFetchFailure('connector_unavailable');
       const credentials = connector.credentials.parse(request.credentials);
+      // A file-based connector reads the upload and nothing else; an API connector never gets files.
+      if (connector.input === 'files' && request.inputFiles === undefined) throw new MigrationFetchFailure('fetch_interrupted');
       const builder = createPackageBuilder({
         files: options.files,
         filePrefix: request.filePrefix,
@@ -69,20 +80,25 @@ export function createMigrationFetcher(options: MigrationFetcherOptions): Migrat
       const written: string[] = [];
       let done = 0;
       let total: number | null = null;
+      let notices: readonly MigrationFetchNotice[] = [];
       const progress = async (d: number, t?: number | null): Promise<void> => {
         done = d;
         total = t ?? null;
         await request.progress(d, total);
       };
       try {
-        await connector.fetch(credentials, builder, { reader: readerFor(connector.hosts(credentials), connector.rate), progress });
+        const reader = readerFor(connector.hosts(credentials), connector.rate);
+        const tools = toolsFor(connector.input, reader, progress, request.inputFiles, (notice) => {
+          notices = [...notices, notice];
+        });
+        await connector.fetch(credentials, builder, tools);
         const parts = splitPackage(builder.collected(), options.limits ?? MIGRATION_LIMITS);
         for (const [index, part] of parts.entries()) {
           const key = request.partKey(index);
           written.push(key);
           await writePackagePart(options.files, key, part, () => request.progress(done, total));
         }
-        return { parts: parts.map((part, index) => ({ key: written[index] ?? '', counts: part.counts })) };
+        return { parts: parts.map((part, index) => ({ key: written[index] ?? '', counts: part.counts })), ...(notices.length === 0 ? {} : { notices }) };
       } catch (error) {
         options.onError?.(infoOf(error));
         for (const key of written) await options.files.delete(key).catch(() => undefined);

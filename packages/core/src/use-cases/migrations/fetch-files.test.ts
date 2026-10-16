@@ -75,4 +75,12 @@ describe('fetchMigration for a file-based connector', () => {
     expect(await deps.migrations.findById(ORG_A, 'b1')).toMatchObject({ error: 'fetch_interrupted' });
     expect(partCounts().jobs).toBe(1);
   });
+
+  it('keeps what the connector reported on the batch, for the preview', async () => {
+    const deps = await start(true);
+    const notices = [{ code: 'columns_unrecognized' as const, count: 1, headers: ['Taglia scarpe'] }];
+    const reporting = { ...deps, fetcher: { async fetch(request: Parameters<typeof deps.fetcher.fetch>[0]) { return { ...(await deps.fetcher.fetch(request)), notices }; } } };
+    await fetchMigration(reporting, payload);
+    expect((await deps.migrations.findById(ORG_A, 'b1'))?.counts.fetch?.notices).toEqual(notices);
+  });
 });

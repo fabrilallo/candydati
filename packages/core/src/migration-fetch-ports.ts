@@ -1,4 +1,4 @@
-import type { MigrationConnectorField, MigrationConnectorInput, MigrationConnectorMaturity, MigrationFetchError } from '@candydati/domain';
+import type { MigrationConnectorField, MigrationConnectorInput, MigrationConnectorMaturity, MigrationFetchError, MigrationFetchNotice } from '@candydati/domain';
 import type { z } from 'zod';
 import type { MigrationDeps } from './migration-ports.js';
 
@@ -78,6 +78,8 @@ export interface MigrationFetchRequest {
 export interface MigrationFetchResult {
   /** One per package written, in order; at least one. */
   readonly parts: readonly { readonly key: string; readonly counts: MigrationPartCounts }[];
+  /** What the connector reported about its reading: counts and headers, for the preview. */
+  readonly notices?: readonly MigrationFetchNotice[] | undefined;
 }
 
 /** Runs a connector into one or more packages. It cleans up its own temporary files and written parts when it fails. */

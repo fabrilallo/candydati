@@ -61,6 +61,20 @@ export const migrationConnectorInputSchema = z.strictObject({
 });
 export type MigrationConnectorInputDto = z.infer<typeof migrationConnectorInputSchema>;
 
+/**
+ * What a connector says about its own reading, for the preview: counts and column headers, never a cell. For example a
+ * file-based connector lists the columns it did not recognise and the score columns it ignored on purpose.
+ */
+export const MIGRATION_FETCH_NOTICE_CODES = ['columns_unrecognized', 'columns_ignored', 'rows_skipped', 'rows_duplicate', 'values_dropped', 'cvs_unmatched'] as const;
+export const migrationFetchNoticeSchema = z.object({
+  code: z.enum(MIGRATION_FETCH_NOTICE_CODES),
+  /** Columns, rows or files concerned. */
+  count: z.number().int().nonnegative(),
+  /** Column headers (not values), when the notice is about columns. */
+  headers: z.array(z.string().max(100)).max(30).optional(),
+});
+export type MigrationFetchNotice = z.infer<typeof migrationFetchNoticeSchema>;
+
 /** How far a connector fetch is (also on every part it produced). `total` is null while the source has not said. */
 export interface MigrationFetchCounts {
   readonly done: number;
@@ -74,6 +88,8 @@ export interface MigrationFetchCounts {
   readonly reservedFiles?: number | undefined;
   /** Internal: a `files` connector's upload (the spreadsheet is always there; the ZIP of CVs is optional). */
   readonly upload?: { readonly cvs: boolean } | undefined;
+  /** What the connector reported about its reading (shown in the preview). */
+  readonly notices?: readonly MigrationFetchNotice[] | undefined;
 }
 
 /** Where the files a fetch downloads wait until they are written into the package of their part. */
@@ -98,6 +114,10 @@ export const MIGRATION_FETCH_ERRORS = [
   'connector_unavailable',
   /** The worker stopped while fetching: the credentials are gone, start again. */
   'fetch_interrupted',
+  /** A file-based connector could not read the uploaded file (not a spreadsheet, empty, unreadable). */
+  'input_unreadable',
+  /** A file-based connector did not find the columns it needs: the message lists the headers it expected. */
+  'input_columns_missing',
   /** Anything else. */
   'fetch_failed',
 ] as const;
