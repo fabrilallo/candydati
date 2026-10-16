@@ -16,6 +16,6 @@ export const createReconcileQueue = (deps: ReconcileDeps, now: () => Date): Queu
     schedule: { cron: RECONCILE_CRON, data: {} },
     handle: async ({ jobId, logger }) => {
       const result = await reconcileQueuedWork(deps, { now: now() });
-      if (result.messages + result.exports + result.imports + result.migrations + result.extractions + result.failed > 0) logger.info({ jobId, ...result }, 'stuck work queued again');
+      if (result.messages + result.exports + result.imports + result.migrations + result.extractions + result.fetchesFailed + result.failed > 0) logger.info({ jobId, ...result }, 'stuck work queued again');
     },
   });

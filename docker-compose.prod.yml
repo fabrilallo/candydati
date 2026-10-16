@@ -169,6 +169,8 @@ services:
       api: { condition: service_healthy }
     environment:
       <<: *app-env
+      # Derives the key that keeps a migration connector's credentials encrypted while its fetch runs.
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?imposta BETTER_AUTH_SECRET (almeno 32 caratteri)}
       # Health server of the worker (/health, /ready, /metrics): internal network only, never published.
       WORKER_PORT: ${WORKER_PORT:-4001}
       WORKER_HOST: ${WORKER_HOST:-0.0.0.0}

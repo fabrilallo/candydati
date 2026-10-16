@@ -22,6 +22,7 @@ import { createImportCommitQueue } from './queues/import-commit.js';
 import { createMigrationWorkerDeps } from './migration/deps.js';
 import { createMigrationAnalyzeQueue } from './queues/migration-analyze.js';
 import { createMigrationCommitQueue } from './queues/migration-commit.js';
+import { createMigrationFetchQueue } from './queues/migration-fetch.js';
 import { createEmailSendQueue } from './queues/email-send.js';
 import { createReconcileQueue } from './queues/reconcile.js';
 import { QUEUE_DEFINITIONS } from './queues/definitions.js';
@@ -78,7 +79,15 @@ function createSharedDeps({ env, logger, uow, files, queue }: Composition) {
       locale: env.platform.defaultLocale,
     },
   };
-  const migrations = createMigrationWorkerDeps({ uow, files, queue, platform: env.platform, email: env.email });
+  const migrations = createMigrationWorkerDeps({
+    uow,
+    files,
+    queue,
+    platform: env.platform,
+    email: env.email,
+    authSecret: env.BETTER_AUTH_SECRET,
+    onFetchError: (info) => logger.warn({ ...info }, 'migration fetch failed'),
+  });
   return { sender, phase4, imports, hr, digest, migrations, privacy: createPrivacyWorkerDeps({ uow, files, queue }) };
 }
 
@@ -102,6 +111,7 @@ function createTaskQueues({ env, logger, uow, files }: Composition, { sender, ph
     createImportCommitQueue(imports.commit),
     createMigrationAnalyzeQueue(migrations.analysis),
     createMigrationCommitQueue(migrations.commit),
+    createMigrationFetchQueue(migrations.fetch),
   ];
 }
 

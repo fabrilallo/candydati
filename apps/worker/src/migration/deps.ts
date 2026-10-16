@@ -1,7 +1,19 @@
 import { randomUUID } from 'node:crypto';
-import type { DrizzleUnitOfWork, FileStorage, MigrationAnalysisDeps, MigrationCommitDeps, MigrationPurgeDeps, TaskQueue } from '@candydati/core';
+import type { DrizzleUnitOfWork, FileStorage, MigrationAnalysisDeps, MigrationCommitDeps, MigrationFetchDeps, MigrationPurgeDeps, TaskQueue } from '@candydati/core';
 import type { PlatformConfig } from '@candydati/domain';
-import { createMigrationPackageReader, newConversationToken, sniffAttachment, sniffCv, toMessagingConfig, type EmailConfig } from '@candydati/providers';
+import {
+  createConnectorRegistry,
+  createMigrationFetcher,
+  createMigrationPackageReader,
+  createSecretBox,
+  newConversationToken,
+  sniffAttachment,
+  sniffCv,
+  toMessagingConfig,
+  type EmailConfig,
+  type FetchErrorInfo,
+  type MigrationConnectorRegistry,
+} from '@candydati/providers';
 import { hashConsentSecret, newConsentSecret } from '../import/deps.js';
 
 export interface MigrationWorkerWiring {
@@ -10,19 +22,26 @@ export interface MigrationWorkerWiring {
   readonly queue: TaskQueue;
   readonly platform: PlatformConfig;
   readonly email: EmailConfig;
+  /** `BETTER_AUTH_SECRET`: the connector credentials are sealed with a key derived from it. */
+  readonly authSecret: string;
+  /** The built-in connectors by default. */
+  readonly connectors?: MigrationConnectorRegistry | undefined;
+  /** Names and codes of a failed fetch, never values. */
+  readonly onFetchError?: ((info: FetchErrorInfo) => void) | undefined;
 }
 
 export interface MigrationWorkerDeps {
   readonly analysis: MigrationAnalysisDeps;
   readonly commit: MigrationCommitDeps;
   readonly purge: MigrationPurgeDeps;
+  readonly fetch: MigrationFetchDeps;
 }
 
 /**
  * Drizzle repositories, S3 and the package reader for the migration tasks. The commit asks people with no consent date
  * to reconfirm through the same path as the import (consent secret, hash, queued system message).
  */
-export function createMigrationWorkerDeps({ uow, files, queue, platform, email }: MigrationWorkerWiring): MigrationWorkerDeps {
+export function createMigrationWorkerDeps({ uow, files, queue, platform, email, authSecret, connectors, onFetchError }: MigrationWorkerWiring): MigrationWorkerDeps {
   const r = uow.repositories;
   const packages = createMigrationPackageReader(files);
   const analysis: MigrationAnalysisDeps = {
@@ -53,5 +72,12 @@ export function createMigrationWorkerDeps({ uow, files, queue, platform, email }
     newSecret: newConsentSecret,
     hash: hashConsentSecret,
   };
-  return { analysis, commit, purge: analysis };
+  const registry = connectors ?? createConnectorRegistry();
+  const fetch: MigrationFetchDeps = {
+    ...analysis,
+    sources: registry,
+    secrets: createSecretBox(authSecret),
+    fetcher: createMigrationFetcher({ registry, files, onError: onFetchError }),
+  };
+  return { analysis, commit, purge: analysis, fetch };
 }

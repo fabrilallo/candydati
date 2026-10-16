@@ -27,7 +27,7 @@ async function writeJob(builder: PackageBuilder, j: number, perJob: number): Pro
   builder.addJob({ ref: `job-${j}`, title: `Ruolo ${j}`, status: 'closed', createdAt: at(j), closedAt: at(j + 60), stages: [{ ref: 'applied', name: 'Candidatura' }, { ref: 'hr', name: 'Colloquio HR', type: 'hr_interview' }] });
   for (let i = 0; i < perJob; i += 1) {
     const person = `person-${j}-${i}`;
-    builder.addCandidate({ ref: person, firstName: 'Persona', lastName: `Prova ${j} ${i}`, email: `${person}@example.com`, createdAt: at(j + 1), consent: { givenAt: at(j + 1) } });
+    builder.addCandidate({ ref: person, firstName: 'Persona', lastName: `Prova ${j} ${i}`, email: `${person}@example.com`, createdAt: at(j + 1), consent: { givenAt: at(j + 1), expiresAt: '2036-01-01T00:00:00.000Z' } });
     const ref = `application-${j}-${i}`;
     builder.addApplication({ ref, candidateRef: person, jobRef: `job-${j}`, stageRef: 'hr', createdAt: at(j + 1), outcome: 'not_selected', closedAt: at(j + 30), stageHistory: [{ stageRef: 'hr', enteredAt: at(j + 5) }] });
     builder.addNote({ candidateRef: person, applicationRef: ref, authorName: 'Selezione', body: 'Colloquio svolto', createdAt: at(j + 6) });

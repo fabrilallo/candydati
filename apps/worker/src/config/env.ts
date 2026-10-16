@@ -14,6 +14,8 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/, error: 'must be a postgres:// URL' }),
+  /** The api's secret: the worker derives from it the key that opens a migration connector's credentials during the fetch. */
+  BETTER_AUTH_SECRET: z.string().min(32, 'must be at least 32 characters'),
   /** Mastra `provider/model` for the CV structuring. Empty: only the plain text is extracted. */
   /** `WEBHOOKS_ALLOW_PRIVATE=true`: the SSRF guard lets webhooks reach localhost and private addresses (development only). */
   WEBHOOKS_ALLOW_PRIVATE: strictFlag,
