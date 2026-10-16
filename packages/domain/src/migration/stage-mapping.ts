@@ -3,8 +3,8 @@ import { STAGE_TYPES, type StageType } from '../job/taxonomy.js';
 import type { MigrationStageMapping } from './batch.js';
 import type { MigrationJob } from './package.js';
 
-/** Lowercase, no accents, words separated by single spaces. */
-const normalise = (text: string): string =>
+/** Lowercase, no accents, words separated by single spaces: how stage names are compared. */
+export const normaliseStageName = (text: string): string =>
   text
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
@@ -14,7 +14,7 @@ const normalise = (text: string): string =>
 
 /** The labels the product itself uses for each type, in every language. */
 const LABELS: ReadonlyMap<string, StageType> = new Map(
-  Object.values(STAGE_TYPE_LABELS).flatMap((labels) => STAGE_TYPES.map((type) => [normalise(labels[type]), type] as const)),
+  Object.values(STAGE_TYPE_LABELS).flatMap((labels) => STAGE_TYPES.map((type) => [normaliseStageName(labels[type]), type] as const)),
 );
 
 /**
@@ -36,7 +36,7 @@ const SYNONYMS: readonly (readonly [StageType, readonly string[]])[] = [
 
 /** The stage type a source stage name stands for, or null when nothing fits. Never guesses from a partial word. */
 export function stageTypeFromName(name: string): StageType | null {
-  const text = normalise(name);
+  const text = normaliseStageName(name);
   const exact = LABELS.get(text);
   if (exact !== undefined) return exact;
   const padded = ` ${text} `;
@@ -52,6 +52,7 @@ export function proposeStageMapping(jobs: readonly Pick<MigrationJob, 'ref' | 's
     job.stages.map((stage) => ({
       jobRef: job.ref,
       stageRef: stage.ref,
+      sourceName: stage.name,
       type: stage.type ?? stageTypeFromName(stage.name) ?? 'other',
       title: stage.name,
     })),

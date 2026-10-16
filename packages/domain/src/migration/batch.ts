@@ -1,5 +1,3 @@
-import { z } from 'zod';
-import { STAGE_TITLE_MAX } from '../job/content.js';
 import { STAGE_TYPES, type StageType } from '../job/taxonomy.js';
 import type { MIGRATION_JOB_STATUSES } from './constants.js';
 
@@ -61,29 +59,70 @@ export interface MigrationAnalysisCounts {
   readonly perJob: readonly MigrationJobCount[];
 }
 
-/** Totals of a batch: empty until the analysis fills them in; the commit adds its own. */
-export type MigrationCounts = Partial<MigrationAnalysisCounts>;
+/** Where the commit stands: the step it is in and the index of the next item of that step. Saved with each chunk. */
+export const MIGRATION_COMMIT_STEPS = ['jobs', 'people', 'applications', 'reconfirm', 'notes', 'messages'] as const;
+export type MigrationCommitStep = (typeof MIGRATION_COMMIT_STEPS)[number];
+
+export interface MigrationCommitCursor {
+  readonly step: MigrationCommitStep;
+  readonly index: number;
+}
+
+/** What the commit wrote, added chunk by chunk in the same transaction as the rows. */
+export interface MigrationCommitCounts {
+  readonly cursor: MigrationCommitCursor;
+  readonly jobs: number;
+  readonly candidatesCreated: number;
+  readonly candidatesMerged: number;
+  readonly applications: number;
+  /** A second open application of the same person to the same job: left out, like `already_applied` in the preview. */
+  readonly skippedAlreadyApplied: number;
+  readonly cvs: number;
+  /** Files of migrated applications that were not stored: not a readable CV, a cover letter or another attachment. */
+  readonly filesSkipped: number;
+  readonly stageEvents: number;
+  readonly notes: number;
+  readonly messages: number;
+  readonly reconfirmationsQueued: number;
+}
+
+/** What the undo did. People kept are those who reconfirmed, or applied again, after the migration. */
+export interface MigrationUndoCounts {
+  readonly applicationsErased: number;
+  readonly candidatesErased: number;
+  readonly keptReconfirmed: number;
+  readonly keptAppliedAgain: number;
+  readonly jobsDeleted: number;
+  /** Migrated jobs left in place: applications outside the batch (or of people kept), published, or referenced elsewhere. */
+  readonly jobsKept: number;
+  readonly historyDeleted: number;
+  /** Candidates whose erasure failed: run the undo again. */
+  readonly failed: number;
+}
+
+/** Totals of a batch: empty until the analysis fills them in; the commit and the undo add their own. */
+export type MigrationCounts = Partial<MigrationAnalysisCounts> & {
+  readonly commit?: MigrationCommitCounts | undefined;
+  readonly undo?: MigrationUndoCounts | undefined;
+};
 
 /** `other`: no stage type fits; the stage keeps its original title and the operator picks a type in the preview. */
 export const MIGRATION_STAGE_OTHER = 'other';
-export const MIGRATION_STAGE_TARGETS = [...STAGE_TYPES, MIGRATION_STAGE_OTHER] as const;
-export type MigrationStageTarget = StageType | typeof MIGRATION_STAGE_OTHER;
+/** `received`: the stage is where applications arrive (Applied, New, Sourced): they land in the job's first column. */
+export const MIGRATION_STAGE_RECEIVED = 'received';
+export const MIGRATION_STAGE_TARGETS = [...STAGE_TYPES, MIGRATION_STAGE_RECEIVED, MIGRATION_STAGE_OTHER] as const;
+export type MigrationStageTarget = StageType | typeof MIGRATION_STAGE_RECEIVED | typeof MIGRATION_STAGE_OTHER;
 
 /** Where one stage of one package job lands in Candydati. */
 export interface MigrationStageMappingEntry {
   readonly jobRef: string;
   readonly stageRef: string;
+  /** The stage name in the package, as it was: what the bulk choice matches (normalised). */
+  readonly sourceName: string;
   readonly type: MigrationStageTarget;
   readonly title: string;
 }
 export type MigrationStageMapping = readonly MigrationStageMappingEntry[];
-
-export const migrationStageMappingEntrySchema = z.strictObject({
-  jobRef: z.string().min(1).max(120),
-  stageRef: z.string().min(1).max(120),
-  type: z.enum(MIGRATION_STAGE_TARGETS),
-  title: z.string().trim().min(1).max(STAGE_TITLE_MAX),
-});
 
 /** The three statements the operator confirms before the commit, with who and when (recorded in the audit log too). */
 export interface MigrationDeclarations {
@@ -91,7 +130,8 @@ export interface MigrationDeclarations {
   readonly at: string;
   readonly controller: true;
   readonly previewChecked: true;
-  readonly subProcessor: true;
+  /** Any AI agent or third-party tool that prepared the package is the organization's own processor, under its agreements. */
+  readonly processorsOwned: true;
 }
 
 /**
@@ -151,7 +191,16 @@ export interface MigrationBatch {
   readonly updatedAt: Date;
   readonly committedAt: Date | null;
   readonly undoneAt: Date | null;
+  /** When the package file and the issues were deleted, some days after the batch ended. */
+  readonly purgedAt: Date | null;
 }
+
+/** Statuses after which nothing runs on the batch any more (except the undo of a `done` or `failed` one). */
+export const MIGRATION_ENDED_STATUSES = ['done', 'failed', 'undone'] as const satisfies readonly MigrationStatus[];
+export const isMigrationEnded = (status: MigrationStatus): boolean => (MIGRATION_ENDED_STATUSES as readonly MigrationStatus[]).includes(status);
+
+/** Days after the end of a batch before its package and its issues are deleted. */
+export const MIGRATION_PURGE_DAYS = 7;
 
 export const MIGRATION_ISSUES_PAGE_MAX = 200;
 

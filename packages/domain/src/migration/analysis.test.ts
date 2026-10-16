@@ -135,9 +135,9 @@ describe('analyzeMigrationPackage: applications, stages and files', () => {
   it('proposes a stage mapping and lists the stages it could not name', () => {
     const analysis = analyzeMigrationPackage(input());
     expect(analysis.stageMapping).toEqual([
-      { jobRef: 'j1', stageRef: 's1', type: 'hr_interview', title: 'Colloquio HR' },
-      { jobRef: 'j1', stageRef: 's2', type: 'other', title: 'Applied' },
-      { jobRef: 'j2', stageRef: 's1', type: 'other', title: 'Portfolio review' },
+      { jobRef: 'j1', stageRef: 's1', sourceName: 'Colloquio HR', type: 'hr_interview', title: 'Colloquio HR' },
+      { jobRef: 'j1', stageRef: 's2', sourceName: 'Applied', type: 'other', title: 'Applied' },
+      { jobRef: 'j2', stageRef: 's1', sourceName: 'Portfolio review', type: 'other', title: 'Portfolio review' },
     ]);
     expect(analysis.issues).toContainEqual({ level: 'info', code: 'stage_unmapped', ref: 'j1/s2', detail: 'Applied' });
   });

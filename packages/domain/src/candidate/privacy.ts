@@ -55,6 +55,12 @@ export interface ConsentRecord {
   readonly privacyNoticeVersion: number;
   readonly scopes: readonly ConsentScope[];
   readonly givenAt: Date;
+  /**
+   * `migration`: carried over from the organization's previous ATS (ADR 0009, same controller): `givenAt` is the date the
+   * source recorded and `sourceSystem` names it. A reconfirmation replaces the whole record, so it loses this mark.
+   */
+  readonly origin?: 'migration' | undefined;
+  readonly sourceSystem?: string | undefined;
 }
 
 /** The longest retention among the consented scopes, counted from the moment consent is given. */

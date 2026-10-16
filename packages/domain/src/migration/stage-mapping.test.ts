@@ -45,9 +45,9 @@ describe('proposeStageMapping', () => {
       },
     ];
     expect(proposeStageMapping(jobs)).toEqual([
-      { jobRef: 'j1', stageRef: 's1', type: 'screening_call', title: 'Chiacchierata' },
-      { jobRef: 'j1', stageRef: 's2', type: 'technical_interview', title: 'Colloquio tecnico' },
-      { jobRef: 'j1', stageRef: 's3', type: 'other', title: 'Applied' },
+      { jobRef: 'j1', stageRef: 's1', sourceName: 'Chiacchierata', type: 'screening_call', title: 'Chiacchierata' },
+      { jobRef: 'j1', stageRef: 's2', sourceName: 'Colloquio tecnico', type: 'technical_interview', title: 'Colloquio tecnico' },
+      { jobRef: 'j1', stageRef: 's3', sourceName: 'Applied', type: 'other', title: 'Applied' },
     ]);
   });
 });
