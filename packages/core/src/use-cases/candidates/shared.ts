@@ -59,6 +59,7 @@ export async function loadCandidateDetail(
   const applications = (await deps.applications.listByCandidate(organizationId, candidate.id)).filter(visible);
   const extractions = await deps.extractions.findByApplications(organizationId, applications.map((a) => a.id));
   const messageCounts = await deps.messages.countByApplication(organizationId, applications.map((a) => a.id));
+  const attachments = await deps.applications.listAttachments(organizationId, applications.map((a) => a.id));
   const jobIds = [...new Set(applications.map((a) => a.jobId))];
   const jobs = await mapSequential(jobIds, (id) => requireJob(deps, organizationId, id));
   return {
@@ -73,6 +74,7 @@ export async function loadCandidateDetail(
         extraction: extractions.find((e) => e.applicationId === application.id) ?? null,
         messageCount: messageCounts[application.id] ?? 0,
         responseState: responseState(application, job, deps.now()),
+        attachments: attachments.filter((attachment) => attachment.applicationId === application.id),
       };
     }),
     notes: await loadNotes(deps, candidate),

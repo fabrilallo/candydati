@@ -42,6 +42,11 @@ export const applicationRoutes: readonly RouteSpec[] = [
     query: z.object({ disposition: z.enum(['inline', 'attachment']).optional() }), response: { schema: z.string() },
   },
   {
+    method: 'get', path: '/api/v1/applications/:id/attachments/:attachmentId', tag: 'Candidates', summary: 'Download an attachment of an application', scope: 'candidate:read', fileMediaType: 'application/octet-stream',
+    description: 'A file other than the CV (a cover letter, a portfolio), listed in `applications[].attachments` of the candidate profile; today only migrations from another ATS bring them. Same rules as the CV: personal data, every read is recorded in the audit log, `disposition=inline` shows only a PDF (inside a CSP sandbox), never cached. `404` for an attachment of another application or out of reach.',
+    query: z.object({ disposition: z.enum(['inline', 'attachment']).optional() }), response: { schema: z.string() },
+  },
+  {
     method: 'post', path: '/api/v1/applications/:id/withdraw-consent', tag: 'Privacy', summary: 'Record a withdrawal of consent', scope: 'candidate:update',
     description: 'For one scope (`selection` or `talent_pool`). Withdrawing `selection` erases the application (`{ erased: true }`); otherwise the updated candidate profile is returned.',
     body: z.object({ scope: z.enum(CONSENT_SCOPES) }), response: { schema: z.union([erasedSchema, candidateDetailSchema]) },

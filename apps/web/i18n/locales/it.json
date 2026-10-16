@@ -518,6 +518,7 @@
         "viewed": "Ha aperto la scheda di un candidato",
         "updated": "Ha modificato un candidato",
         "cv_downloaded": "Ha aperto o scaricato un CV",
+        "attachment_downloaded": "Ha aperto o scaricato un allegato di una candidatura",
         "erased": "Ha cancellato i dati di un candidato",
         "exported": "Ha esportato i dati di un candidato",
         "corrected": "Ha corretto i dati di un candidato",
@@ -1461,6 +1462,7 @@
       "label": "Sezioni della scheda",
       "profile": "Profilo",
       "cv": "CV",
+      "cvDocuments": "CV e documenti",
       "notes": "Note",
       "messages": "Messaggi",
       "tasks": "Attività",
@@ -1536,6 +1538,18 @@
       "previewTitle": "Anteprima di {name}",
       "noPreview": "L'anteprima è disponibile solo per i PDF. Scarica il file per aprirlo.",
       "none": "Nessun CV: questa candidatura viene da un altro ATS, dove non aveva un curriculum."
+    },
+    "attachments": {
+      "title": "Allegati",
+      "kind": {
+        "cover_letter": "Lettera di presentazione",
+        "other": "Altro documento"
+      },
+      "downloadNamed": "Scarica {name}"
+    },
+    "answers": {
+      "title": "Risposte al modulo di candidatura",
+      "source": "Come erano nell'ATS precedente, da cui la candidatura è stata migrata."
     },
     "notes": {
       "label": "Nuova nota",

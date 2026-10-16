@@ -3,6 +3,7 @@ import { CONSENT_SCOPES, CONSENT_STATUSES } from './privacy.js';
 import { EXTRACTION_STATUSES, OUTCOMES, cvExtractionSchema } from './application.js';
 import { FEEDBACK_RECOMMENDATIONS } from '../feedback/feedback.js';
 import { MESSAGE_DIRECTIONS, MESSAGE_STATUSES } from '../messaging/message.js';
+import { ATTACHMENT_KINDS } from './attachment.js';
 
 /** Identifier of the public, versioned schema of the candidate export (PRODUCT.md §6). Bump the version on breaking changes. */
 export const CANDIDATE_EXPORT_SCHEMA_ID = 'candidate-export.v1';
@@ -17,6 +18,15 @@ const exportedFileSchema = z.object({
   mediaType: z.string(),
   sizeBytes: z.number().int().nonnegative(),
 });
+
+/** A file of the application other than its CV (only migrations bring them today), stored in the ZIP like the CV. */
+const exportedAttachmentSchema = exportedFileSchema.extend({
+  id: z.string(),
+  kind: z.enum(ATTACHMENT_KINDS),
+  createdAt: date,
+});
+
+const exportedAnswerSchema = z.object({ question: z.string(), answer: z.string() });
 
 const exportedMessageSchema = z.object({
   id: z.string(),
@@ -80,6 +90,12 @@ const exportedApplicationSchema = z.object({
   messages: z.array(exportedMessageSchema),
   feedback: z.array(exportedFeedbackSchema).default([]),
   feedbackRequests: z.array(exportedFeedbackRequestSchema).default([]),
+  /**
+   * Added within v1 (optional, so files produced before stay valid): the attachments, each with its `path` in the ZIP,
+   * and the form answers kept from another ATS. The product always writes both, empty when there is nothing.
+   */
+  attachments: z.array(exportedAttachmentSchema).optional(),
+  answers: z.array(exportedAnswerSchema).optional(),
 });
 
 /**

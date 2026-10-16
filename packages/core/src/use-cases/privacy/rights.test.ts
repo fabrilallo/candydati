@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
-import { ERASED, KEPT, ORG_A, ORG_B, buildApplication, buildPrivacyNotice, createInMemoryPrivacyNoticeRepository, seedPrivacyData, userActor } from '../../testing/index.js';
+import { ERASED, KEPT, ORG_A, ORG_B, buildApplication, buildAttachment, fakePdfBytes, buildPrivacyNotice, createInMemoryPrivacyNoticeRepository, seedPrivacyData, userActor } from '../../testing/index.js';
 import { correctCandidate } from './correct-candidate.js';
 import { exportCandidate } from './export-candidate.js';
 import { zipCandidateExport } from './build-candidate-export.js';
@@ -130,6 +130,28 @@ describe('exportCandidate', () => {
     expect(json.applications.find((a) => a.id === 'app_2')?.cv).toBeNull();
     expect(files.map((f) => f.path)).toEqual(['files/app_1/zelda.pdf']);
     expect(missingFiles).toEqual([]);
+  });
+
+  it('exports the attachments as files next to the CV and the form answers, listing an unreadable attachment as missing', async () => {
+    const deps = await seedPrivacyData();
+    const letter = buildAttachment({ organizationId: ORG_A, applicationId: 'app_2' });
+    const gone = buildAttachment({ id: 'att_2', organizationId: ORG_A, applicationId: 'app_2', kind: 'other', fileName: 'scan.png', mediaType: 'image/png' });
+    await deps.files.put(letter.key, fakePdfBytes(), letter.mediaType);
+    deps.store.write({
+      attachments: [letter, gone],
+      applications: deps.store.read().applications.map((a) => (a.id === 'app_2' ? { ...a, answers: [{ question: 'Preavviso?', answer: 'Un mese' }] } : a)),
+    });
+    const { json, files, missingFiles } = await exportCandidate(deps, recruiter, { candidateId: 'cand_1' });
+    expect(candidateExportSchema.safeParse(json).success).toBe(true);
+    const exported = json.applications.find((a) => a.id === 'app_2');
+    expect(exported?.attachments).toEqual([
+      { id: 'att_1', kind: 'cover_letter', path: 'files/app_2/attachments/att_1/lettera.pdf', fileName: 'lettera.pdf', mediaType: 'application/pdf', sizeBytes: 64, createdAt: '2026-01-01T00:00:00.000Z' },
+      { id: 'att_2', kind: 'other', path: 'files/app_2/attachments/att_2/scan.png', fileName: 'scan.png', mediaType: 'image/png', sizeBytes: 64, createdAt: '2026-01-01T00:00:00.000Z' },
+    ]);
+    expect(exported?.answers).toEqual([{ question: 'Preavviso?', answer: 'Un mese' }]);
+    expect(json.applications.find((a) => a.id === 'app_1')).toMatchObject({ attachments: [], answers: [] });
+    expect(files.map((f) => f.path)).toContain('files/app_2/attachments/att_1/lettera.pdf');
+    expect(missingFiles).toEqual(['files/app_2/attachments/att_2/scan.png']);
   });
 
   it('exports a note by an external author with authorId null', async () => {

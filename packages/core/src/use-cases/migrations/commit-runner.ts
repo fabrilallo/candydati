@@ -4,22 +4,25 @@ import {
   type MigrationCommitCounts,
   type MigrationCommitCursor,
   type MigrationCommitStep,
+  type ApplicationAttachment,
   type StoredFile,
 } from '@candydati/domain';
 import type { MigrationCommitDeps } from '../../migration-commit-ports.js';
 import { inTransaction } from '../../transaction.js';
 import type { MigrationCommitContext } from './commit-context.js';
+import { NO_SKIPPED, type SkippedFiles } from './commit-files.js';
 
 /** What one chunk adds to the batch's commit counts. */
 export type CommitDelta = Partial<Omit<MigrationCommitCounts, 'cursor'>>;
 
-/** CVs copied to their final keys before a chunk of applications, by application ref, and the files left behind. */
+/** CVs and attachments copied to their final keys before a chunk of applications, by application ref, and the files left behind. */
 export interface PreparedFiles {
   readonly cvs: ReadonlyMap<string, StoredFile>;
-  readonly skipped: number;
+  readonly attachments: ReadonlyMap<string, readonly ApplicationAttachment[]>;
+  readonly skipped: SkippedFiles;
 }
 
-export const NO_FILES: PreparedFiles = { cvs: new Map(), skipped: 0 };
+export const NO_FILES: PreparedFiles = { cvs: new Map(), attachments: new Map(), skipped: NO_SKIPPED };
 
 /** One step of the commit: how many items it has, how many go in one transaction, and how a chunk is written. */
 export interface CommitStepWriter {
@@ -45,6 +48,11 @@ export const emptyCommitCounts = (): MigrationCommitCounts => ({
   skippedAlreadyApplied: 0,
   cvs: 0,
   filesSkipped: 0,
+  attachments: 0,
+  filesSkippedType: 0,
+  filesSkippedSize: 0,
+  filesSkippedMissing: 0,
+  answers: 0,
   stageEvents: 0,
   notes: 0,
   messages: 0,

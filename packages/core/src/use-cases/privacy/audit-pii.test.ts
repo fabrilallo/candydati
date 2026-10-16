@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { ERASED, KEPT, ORG_A, seedPrivacyData, userActor, type TestPrivacyDeps } from '../../testing/index.js';
+import { buildAttachment, ERASED, fakePdfBytes, KEPT, ORG_A, seedPrivacyData, userActor, type TestPrivacyDeps } from '../../testing/index.js';
 import { addCandidateNote } from '../candidates/add-candidate-note.js';
 import { decideApplication } from '../candidates/decide-application.js';
 import { getCandidate } from '../candidates/get-candidate.js';
 import { moveApplication } from '../candidates/move-application.js';
+import { openAttachment } from '../candidates/open-attachment.js';
 import { openCv } from '../candidates/open-cv.js';
 import { updateCandidateTags } from '../candidates/update-candidate-tags.js';
 import { sendMessage } from '../messaging/send-message.js';
@@ -28,6 +29,15 @@ type Step = readonly [string, (deps: TestPrivacyDeps) => Promise<unknown>];
 const STEPS: readonly Step[] = [
   ['getCandidate', (d) => getCandidate(d, actor, { candidateId: 'cand_1' })],
   ['openCv', (d) => openCv(d, actor, { applicationId: 'app_1' })],
+  [
+    'openAttachment',
+    async (d) => {
+      const attachment = buildAttachment({ organizationId: ORG_A, fileName: `${ERASED.lastName}-letter.pdf` });
+      d.store.write({ attachments: [attachment] });
+      await d.files.put(attachment.key, fakePdfBytes(), attachment.mediaType);
+      await openAttachment(d, actor, { applicationId: 'app_1', attachmentId: attachment.id });
+    },
+  ],
   ['updateCandidateTags', (d) => updateCandidateTags(d, actor, { candidateId: 'cand_1', tags: ['rust'] })],
   ['addCandidateNote', (d) => addCandidateNote(d, actor, { candidateId: 'cand_1', body: `Note about ${ERASED.firstName}` })],
   ['moveApplication', (d) => moveApplication(d, actor, { applicationId: 'app_1', stageId: 'stage-0' })],

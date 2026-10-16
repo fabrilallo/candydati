@@ -28,6 +28,7 @@ export const AUDIT_ACTIONS = [
   'candidate.viewed',
   'candidate.updated',
   'candidate.cv_downloaded',
+  'candidate.attachment_downloaded',
   'candidate.erased',
   'candidate.exported',
   'candidate.corrected',

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { DrizzleUnitOfWork, FileStorage, MigrationAnalysisDeps, MigrationCommitDeps, MigrationPurgeDeps, TaskQueue } from '@candydati/core';
 import type { PlatformConfig } from '@candydati/domain';
-import { createMigrationPackageReader, newConversationToken, sniffCv, toMessagingConfig, type EmailConfig } from '@candydati/providers';
+import { createMigrationPackageReader, newConversationToken, sniffAttachment, sniffCv, toMessagingConfig, type EmailConfig } from '@candydati/providers';
 import { hashConsentSecret, newConsentSecret } from '../import/deps.js';
 
 export interface MigrationWorkerWiring {
@@ -47,6 +47,7 @@ export function createMigrationWorkerDeps({ uow, files, queue, platform, email }
     organizations: r.organizations,
     members: r.members,
     migratedRows: r.migratedRows,
+    attachmentSniffer: sniffAttachment,
     consentTokens: r.consentTokens,
     mail: { conversations: r.conversations, messages: r.messages, config: toMessagingConfig(platform, email), newToken: newConversationToken },
     newSecret: newConsentSecret,

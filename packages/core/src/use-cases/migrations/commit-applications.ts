@@ -1,57 +1,42 @@
 import {
-  CV_MAX_BYTES,
   MESSAGE_MAX,
+  cappedAnswers,
   migratedStageMoves,
   sanitizeOrigin,
   type Application,
+  type ApplicationAttachment,
   type PlannedMigrationApplication,
   type StageEvent,
   type StoredFile,
 } from '@candydati/domain';
 import type { MigrationCommitDeps } from '../../migration-commit-ports.js';
 import type { MigrationCommitContext } from './commit-context.js';
+import { addSkipped, copyApplicationFiles, NO_SKIPPED } from './commit-files.js';
 import { resolveJobs, resolvePeople, type ResolvedJob } from './commit-resolve.js';
 import type { CommitDelta, CommitStepWriter, PreparedFiles } from './commit-runner.js';
 
-/** Applications per transaction: each may carry a CV of up to 10 MiB, read one at a time. */
+/** Applications per transaction: each may carry a CV and attachments of up to 10 MiB each, read one at a time. */
 export const APPLICATION_CHUNK = 25;
 
-const cvKey = (organizationId: string, applicationId: string): string => `organizations/${organizationId}/applications/${applicationId}/cv`;
-
-/**
- * The CV of one application, copied to the key every application's CV has (like the import's `prepare()`): the first
- * file declared `cv` that is really a PDF or a Word document and not larger than a CV may be. The other files have no
- * place to live (no attachment store yet): they are counted as skipped, never stored where an erasure could miss them.
- */
-async function copyCv(ctx: MigrationCommitContext, entry: PlannedMigrationApplication): Promise<StoredFile | null> {
-  const { deps, batch } = ctx;
-  for (const file of entry.application.files.filter((f) => f.kind === 'cv')) {
-    const stored = ctx.files.get(file.path);
-    if (!stored || stored.size > CV_MAX_BYTES) continue;
-    const bytes = await stored.read();
-    const sniffed = deps.cvSniffer(bytes, file.fileName);
-    if (!sniffed) continue;
-    const key = cvKey(batch.organizationId, ctx.rowId('application', entry.application.ref));
-    await deps.files.put(key, bytes, sniffed.mediaType);
-    return { key, fileName: sniffed.fileName, mediaType: sniffed.mediaType, sizeBytes: bytes.byteLength };
-  }
-  return null;
-}
-
+/** Copies the files of the chunk's applications (`copyApplicationFiles`) before its transaction. */
 async function prepare(ctx: MigrationCommitContext, from: number, to: number): Promise<PreparedFiles> {
   const cvs = new Map<string, StoredFile>();
-  let skipped = 0;
+  const attachments = new Map<string, readonly ApplicationAttachment[]>();
+  let skipped = NO_SKIPPED;
   for (const entry of ctx.plan.applications.slice(from, to)) {
     if (entry.duplicate) continue;
-    const cv = await copyCv(ctx, entry);
-    if (cv) cvs.set(entry.application.ref, cv);
-    skipped += entry.application.files.length - (cv ? 1 : 0);
+    const files = await copyApplicationFiles(ctx, entry);
+    if (files.cv) cvs.set(entry.application.ref, files.cv);
+    if (files.attachments.length > 0) attachments.set(entry.application.ref, files.attachments);
+    skipped = addSkipped(skipped, files.skipped);
   }
-  return { cvs, skipped };
+  return { cvs, attachments, skipped };
 }
 
+/** After a failed transaction: nothing points to these files, so none may stay. */
 async function discard(ctx: MigrationCommitContext, prepared: PreparedFiles): Promise<void> {
-  for (const cv of prepared.cvs.values()) await ctx.deps.files.delete(cv.key).catch(() => undefined);
+  const keys = [...[...prepared.cvs.values()].map((cv) => cv.key), ...[...prepared.attachments.values()].flat().map((attachment) => attachment.key)];
+  for (const key of keys) await ctx.deps.files.delete(key).catch(() => undefined);
 }
 
 function applicationOf(ctx: MigrationCommitContext, entry: PlannedMigrationApplication, candidateId: string, job: ResolvedJob, cv: StoredFile | null): Application {
@@ -67,6 +52,7 @@ function applicationOf(ctx: MigrationCommitContext, entry: PlannedMigrationAppli
     outcome: application.outcome ?? null,
     message: application.coverLetter?.slice(0, MESSAGE_MAX) ?? '',
     cv,
+    answers: cappedAnswers(application.answers),
     consent: entry.consent,
     consentStatus: entry.consentStatus,
     importBatchId: null,
@@ -100,11 +86,16 @@ function historyOf(ctx: MigrationCommitContext, entry: PlannedMigrationApplicati
   }));
 }
 
-/** One application with its history and, when it has a CV, its pending extraction (`cv.extract` runs once the chunk commits). */
-async function writeOne(ctx: MigrationCommitContext, tx: MigrationCommitDeps, entry: PlannedMigrationApplication, candidateId: string, job: ResolvedJob, cv: StoredFile | null): Promise<number> {
+/**
+ * One application with its history, its attachments and, when it has a CV, its pending extraction (`cv.extract` runs
+ * once the chunk commits).
+ */
+async function writeOne(ctx: MigrationCommitContext, tx: MigrationCommitDeps, entry: PlannedMigrationApplication, candidateId: string, job: ResolvedJob, prepared: PreparedFiles): Promise<number> {
+  const cv = prepared.cvs.get(entry.application.ref) ?? null;
   const application = await tx.applications.create(applicationOf(ctx, entry, candidateId, job, cv));
   const events = historyOf(ctx, entry, application, job);
   await tx.migratedRows.insertStageEvents(ctx.batch.id, events);
+  await tx.migratedRows.insertAttachments(ctx.batch.id, prepared.attachments.get(entry.application.ref) ?? []);
   if (cv) {
     const payload = { organizationId: application.organizationId, applicationId: application.id };
     await tx.extractions.upsert({ ...payload, status: 'pending', text: null, data: null, source: null, updatedAt: ctx.at });
@@ -123,9 +114,21 @@ async function write(ctx: MigrationCommitContext, tx: MigrationCommitDeps, from:
     const job = jobs.get(entry.application.jobRef);
     const candidateId = people.get(entry.personKey);
     if (!job || !candidateId) throw new Error('migration_reference_missing');
-    stageEvents += await writeOne(ctx, tx, entry, candidateId, job, prepared.cvs.get(entry.application.ref) ?? null);
+    stageEvents += await writeOne(ctx, tx, entry, candidateId, job, prepared);
   }
-  return { applications: written.length, skippedAlreadyApplied: entries.length - written.length, cvs: prepared.cvs.size, filesSkipped: prepared.skipped, stageEvents };
+  const { skipped } = prepared;
+  return {
+    applications: written.length,
+    skippedAlreadyApplied: entries.length - written.length,
+    cvs: prepared.cvs.size,
+    attachments: [...prepared.attachments.values()].reduce((sum, list) => sum + list.length, 0),
+    filesSkipped: skipped.type + skipped.size + skipped.missing,
+    filesSkippedType: skipped.type,
+    filesSkippedSize: skipped.size,
+    filesSkippedMissing: skipped.missing,
+    answers: written.filter((entry) => cappedAnswers(entry.application.answers) !== null).length,
+    stageEvents,
+  };
 }
 
 export const applicationsStep: CommitStepWriter = { size: APPLICATION_CHUNK, length: (ctx) => ctx.plan.applications.length, prepare, discard, write };

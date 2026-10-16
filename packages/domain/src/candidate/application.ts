@@ -4,6 +4,7 @@ import type { SelectionStage } from '../job/content.js';
 import type { Locale } from '../platform/config.js';
 import { NAME_MAX, personNameSchema } from './person-name.js';
 import { CONSENT_SCOPES, type ConsentRecord, type ConsentStatus } from './privacy.js';
+import type { ApplicationAnswer } from './attachment.js';
 
 export const CV_MAX_BYTES = 10 * 1024 * 1024;
 /** Checked against the file's magic bytes, never only the declared type or the extension. */
@@ -114,6 +115,8 @@ export interface Application {
   readonly message: string;
   /** null only for an application brought by a migration from another ATS that had no CV (`migrationBatchId` set). */
   readonly cv: StoredFile | null;
+  /** Form answers kept from the source ATS of a migration (absent or null: none). Capped by `cappedAnswers`. */
+  readonly answers?: readonly ApplicationAnswer[] | null;
   /** Contact data as submitted on the public form; absent for imported and manual applications. */
   readonly submittedContact?: SubmittedContact | null;
   readonly consent: ConsentRecord;

@@ -1,5 +1,7 @@
 import type {
+  ApplicationAttachment,
   ApplicationTimelineDto,
+  AttachmentKind,
   Candidate,
   ConsentScope,
   ConsentStatus,
@@ -148,6 +150,10 @@ export interface CandidateDetailDto {
     readonly extraction: { readonly status: ExtractionStatus; readonly data: CvExtraction | null; readonly source: 'model' | 'text' | null };
     /** Messages in the conversation of this application (sent, received and failed). */
     readonly messageCount: number;
+    /** Files other than the CV (only migrations bring them): downloaded one by one, like the CV. */
+    readonly attachments: readonly AttachmentDto[];
+    /** Form answers kept from the previous ATS. */
+    readonly answers: readonly { readonly question: string; readonly answer: string }[];
   }[];
   readonly notes: readonly NoteDto[];
 }
@@ -248,9 +254,28 @@ const toCandidateDto = (candidate: Candidate, consentStatus: ConsentStatus): Can
   createdAt: iso(candidate.createdAt),
 });
 
+/** No storage key: the file is reached only through its download route. */
+export interface AttachmentDto {
+  readonly id: string;
+  readonly kind: AttachmentKind;
+  readonly fileName: string;
+  readonly mediaType: string;
+  readonly sizeBytes: number;
+  readonly createdAt: string;
+}
+
+const toAttachmentDto = (attachment: ApplicationAttachment): AttachmentDto => ({
+  id: attachment.id,
+  kind: attachment.kind,
+  fileName: attachment.fileName,
+  mediaType: attachment.mediaType,
+  sizeBytes: attachment.sizeBytes,
+  createdAt: iso(attachment.createdAt),
+});
+
 export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetailDto => ({
   candidate: toCandidateDto(view.candidate, view.applications.some((a) => a.application.consentStatus === 'given') ? 'given' : 'to_renew'),
-  applications: view.applications.map(({ application, job, stages, extraction, messageCount, responseState }) => ({
+  applications: view.applications.map(({ application, job, stages, extraction, messageCount, responseState, attachments }) => ({
     id: application.id,
     job: { id: job.id, title: job.content.title, slug: job.slug },
     stageId: application.stageId,
@@ -274,6 +299,8 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
     submittedContact: application.submittedContact ?? null,
     extraction: { status: extraction?.status ?? 'pending', data: extraction?.data ?? null, source: extraction?.source ?? null },
     messageCount,
+    attachments: attachments.map(toAttachmentDto),
+    answers: (application.answers ?? []).map(({ question, answer }) => ({ question, answer })),
   })),
   notes: view.notes.map(toNoteDto),
 });

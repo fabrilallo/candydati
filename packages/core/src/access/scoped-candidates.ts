@@ -50,6 +50,9 @@ export function scopeApplications(raw: ApplicationRepository, ctx: JobScopeConte
     listRetentionExpiringAcrossOrganizations: (before, page) => raw.listRetentionExpiringAcrossOrganizations(before, page),
     listByImportBatch: async (organizationId, batchId) => many(await raw.listByImportBatch(organizationId, batchId)),
     countCreatedSince: (organizationId, since, jobId) => raw.countCreatedSince(organizationId, since, jobId),
+    listAttachments: async (organizationId, applicationIds) => raw.listAttachments(organizationId, await ctx.applicationsIn(applicationIds)),
+    findAttachment: async (organizationId, applicationId, attachmentId) =>
+      (await ctx.applicationsIn([applicationId])).length > 0 ? raw.findAttachment(organizationId, applicationId, attachmentId) : null,
   };
 }
 

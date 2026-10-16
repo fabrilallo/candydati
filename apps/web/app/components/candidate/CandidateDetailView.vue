@@ -36,6 +36,8 @@ const nowMs = useState('candidate-now', () => Date.now())
 const now = computed(() => new Date(nowMs.value))
 const renewBy = computed(() => (detail.value ? renewalDeadline(detail.value.applications) : null))
 
+/** Attachments or form answers brought by a migration live next to the CV, and the tab says so. */
+const hasDocuments = computed(() => (current.value?.attachments?.length ?? 0) > 0 || (current.value?.answers?.length ?? 0) > 0)
 type Tab = 'profile' | 'cv' | 'notes' | 'messages' | 'tasks' | 'feedback' | 'timeline' | 'privacy'
 const tab = ref<Tab>('profile')
 const canRead = computed(() => can(role.value, 'message:read'))
@@ -43,7 +45,7 @@ const canSend = computed(() => can(role.value, 'message:send'))
 const canPrivacy = computed(() => (['candidate:export', 'candidate:update', 'candidate:erase'] as const).some((permission) => can(role.value, permission)))
 const tabs = computed<readonly TabItem<Tab>[]>(() => [
   { value: 'profile', label: t('candidate.tabs.profile'), icon: UserRoundIcon, testId: 'tab-profile' },
-  { value: 'cv', label: t('candidate.tabs.cv'), icon: FileTextIcon, testId: 'tab-cv' },
+  { value: 'cv', label: hasDocuments.value ? t('candidate.tabs.cvDocuments') : t('candidate.tabs.cv'), icon: FileTextIcon, testId: 'tab-cv' },
   { value: 'notes', label: t('candidate.tabs.notes'), icon: MessageSquareTextIcon, count: detail.value?.notes.length ?? null, testId: 'tab-notes' },
   ...(canRead.value ? [{ value: 'messages' as const, label: t('candidate.tabs.messages'), icon: MailIcon, count: messageTotal(detail.value?.applications ?? []), testId: 'tab-messages' }] : []),
   ...(can(role.value, 'task:read') && current.value ? [{ value: 'tasks' as const, label: t('candidate.tabs.tasks'), icon: ListTodoIcon, testId: 'tab-tasks' }] : []),
@@ -136,7 +138,10 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
       <UnderlineTabs v-model="tab" :items="tabs" :label="t('candidate.tabs.label')" />
 
       <CandidateProfile v-if="tab === 'profile'" :detail="detail" :current="current" :now="now" :can-update="can(role, 'candidate:update')" @updated="c.replace" />
-      <CvPanel v-else-if="tab === 'cv' && current" :application="current" />
+      <div v-else-if="tab === 'cv' && current" class="grid gap-8">
+        <CvPanel :application="current" />
+        <ApplicationDocuments :application="current" />
+      </div>
       <NotesFeed
         v-else-if="tab === 'notes'"
         :notes="detail.notes"

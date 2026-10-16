@@ -10,7 +10,7 @@ import { createInMemoryJobRepository, createInMemoryOrganizationDirectory } from
 import { createInMemoryJobTeams } from './in-memory-job-teams.js';
 import { createInMemoryPrivacyNoticeRepository } from './in-memory-privacy.js';
 import { buildJob } from './job-fixtures.js';
-import type { Application, Candidate, CandidateNote, CvExtractionRecord, Job } from '@candydati/domain';
+import type { Application, ApplicationAttachment, Candidate, CandidateNote, CvExtractionRecord, Job } from '@candydati/domain';
 
 export const ORG_A = 'org_a';
 export const ORG_B = 'org_b';
@@ -20,6 +20,7 @@ export interface SeedOptions {
   readonly applications?: readonly Application[];
   readonly notes?: readonly CandidateNote[];
   readonly extractions?: readonly CvExtractionRecord[];
+  readonly attachments?: readonly ApplicationAttachment[];
   readonly jobs?: readonly Job[];
   readonly overrides?: Partial<TestCandidateDeps>;
 }
@@ -34,6 +35,7 @@ export function seedCandidateWorld(options: SeedOptions = {}): TestCandidateDeps
     applications: options.applications ?? [buildApplication({ organizationId: ORG_A })],
     notes: options.notes ?? [],
     extractions: options.extractions ?? [buildExtraction({ organizationId: ORG_A })],
+    attachments: options.attachments ?? [],
   });
   const jobs = options.jobs ?? [
     buildJob({ id: 'job_1', slug: 'backend', organizationId: ORG_A, status: 'published', publishedAt: new Date('2026-02-01T00:00:00Z') }),

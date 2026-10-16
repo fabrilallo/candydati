@@ -110,6 +110,47 @@ export const COMMIT_FILES = (): Record<string, Uint8Array> => ({
   'files/a3/portfolio.pdf': fakePdfBytes(),
 });
 
+/** Ada's form answers in ATTACHMENTS_PACKAGE. */
+export const ADA_ANSWERS = [
+  { question: 'Periodo di preavviso?', answer: 'Un mese' },
+  { question: 'Disponibile a trasferte?', answer: 'Sì, occasionali' },
+] as const;
+
+/**
+ * COMMIT_PACKAGE with Ada's application carrying, besides her CV, a cover letter, a scanned image, a forbidden
+ * executable, a file the package does not contain, and her form answers.
+ */
+export const ATTACHMENTS_PACKAGE: MigrationPackageInput = {
+  ...COMMIT_PACKAGE,
+  applications: COMMIT_PACKAGE.applications.map((application) =>
+    application.ref === 'a1'
+      ? {
+          ...application,
+          answers: [...ADA_ANSWERS],
+          files: [
+            ...(application.files ?? []),
+            { path: 'files/a1/letter.pdf', kind: 'cover_letter', fileName: 'Lettera di presentazione.pdf' },
+            { path: 'files/a1/scan.png', kind: 'other', fileName: 'certificato.png' },
+            { path: 'files/a1/tool.exe', kind: 'other', fileName: 'portfolio.pdf' },
+            { path: 'files/a1/gone.pdf', kind: 'other', fileName: 'gone.pdf' },
+          ],
+        }
+      : application,
+  ),
+};
+
+/** A PNG signature and a few bytes: enough for the sniffers. */
+export const pngBytes = (): Uint8Array => Uint8Array.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13]);
+/** A Windows executable header. */
+export const exeBytes = (): Uint8Array => Uint8Array.from([0x4d, 0x5a, 0x90, 0, 3, 0, 0, 0]);
+
+export const ATTACHMENTS_FILES = (): Record<string, Uint8Array> => ({
+  ...COMMIT_FILES(),
+  'files/a1/letter.pdf': fakePdfBytes(),
+  'files/a1/scan.png': pngBytes(),
+  'files/a1/tool.exe': exeBytes(),
+});
+
 /** The operator's choices for COMMIT_PACKAGE: `Applied` lands in received, s2 and s3 of j1 merge, j3 stays out. */
 export const COMMIT_CHOICES = {
   stageNames: [{ name: 'Applied', type: 'received' as const }],

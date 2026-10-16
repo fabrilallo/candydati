@@ -13,7 +13,7 @@ import type { MigrationCommitDeps } from '../../migration-commit-ports.js';
 import type { MigrationPackageEntry } from '../../migration-ports.js';
 
 /** Kinds of rows a migration writes: each gets a stable id from its batch, its kind and its package key. */
-export type MigratedRowKind = 'job' | 'candidate' | 'application' | 'stage_event' | 'note' | 'message';
+export type MigratedRowKind = 'job' | 'candidate' | 'application' | 'attachment' | 'stage_event' | 'note' | 'message';
 
 /** Who signs a migrated note: a member found by email, else the name the package gives. */
 export interface NoteAuthor {

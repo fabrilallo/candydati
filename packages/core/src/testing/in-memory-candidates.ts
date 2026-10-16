@@ -1,4 +1,4 @@
-import type { Application, Candidate, CandidateNote, CvExtractionRecord, ResponsePromise, StageEvent } from '@candydati/domain';
+import type { Application, ApplicationAttachment, Candidate, CandidateNote, CvExtractionRecord, ResponsePromise, StageEvent } from '@candydati/domain';
 import { ConflictError, NotFoundError } from '../errors.js';
 import type {
   ApplicationRepository,
@@ -22,6 +22,8 @@ import { cell } from './in-memory-transaction.js';
 export interface CandidateStoreState {
   readonly candidates: readonly Candidate[];
   readonly applications: readonly Application[];
+  /** Attachments of applications (only migrations write them). */
+  readonly attachments: readonly ApplicationAttachment[];
   readonly notes: readonly CandidateNote[];
   readonly extractions: readonly CvExtractionRecord[];
   readonly stageEvents: readonly StageEvent[];
@@ -35,7 +37,7 @@ export interface CandidateStore {
 }
 
 export const createCandidateStore = (initial: Partial<CandidateStoreState> = {}): CandidateStore => {
-  const state = cell<CandidateStoreState>({ candidates: [], applications: [], notes: [], extractions: [], stageEvents: [], promises: [], jobViews: [], ...initial });
+  const state = cell<CandidateStoreState>({ candidates: [], applications: [], attachments: [], notes: [], extractions: [], stageEvents: [], promises: [], jobViews: [], ...initial });
   return {
     read: () => state.get(),
     write: (next) => {
@@ -139,6 +141,16 @@ export function createInMemoryApplicationRepository(store: CandidateStore): Appl
     },
     async countCreatedSince(organizationId, since, jobId) {
       return inOrg(organizationId).filter((a) => a.source === 'careers_page' && a.createdAt >= since && (jobId === undefined || a.jobId === jobId)).length;
+    },
+    async listAttachments(organizationId, applicationIds) {
+      const ids = new Set(applicationIds);
+      return store
+        .read()
+        .attachments.filter((f) => f.organizationId === organizationId && ids.has(f.applicationId))
+        .toSorted((a, b) => a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id));
+    },
+    async findAttachment(organizationId, applicationId, attachmentId) {
+      return store.read().attachments.find((f) => f.organizationId === organizationId && f.applicationId === applicationId && f.id === attachmentId) ?? null;
     },
   };
 }

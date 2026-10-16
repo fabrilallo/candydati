@@ -1,4 +1,4 @@
-import type { DataExport } from '@candydati/domain';
+import { attachmentKey, type DataExport } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError, ValidationError } from '../../errors.js';
 import { buildApplication, buildCandidate, ERASED, ORG_A, ORG_B, seedPrivacyData, seedPrivacyWorld, userActor, createInMemoryTaskQueue } from '../../testing/index.js';
@@ -52,6 +52,17 @@ describe('runRetention', () => {
     const events = deps.auditLog.events().filter((e) => e.action === 'candidate.erased');
     expect(events).toHaveLength(1);
     expect(events[0]).toMatchObject({ actor: { type: 'system', id: null }, metadata: { reason: 'retention', applicationCount: 2 } });
+  });
+
+  it('erases the attachments of expired applications with them: rows and files', async () => {
+    const deps = await world({ app_1: at(-1) });
+    const key = attachmentKey(ORG_A, 'app_1', 'att_1');
+    await deps.files.put(key, new Uint8Array([1]), 'application/pdf');
+    const attachment = { id: 'att_1', organizationId: ORG_A, applicationId: 'app_1', migrationBatchId: null, kind: 'cover_letter' as const, fileName: 'l.pdf', mediaType: 'application/pdf' as const, sizeBytes: 1, key, createdAt: NOW };
+    deps.store.write({ attachments: [attachment] });
+    await runRetention(deps, { now: NOW });
+    expect(deps.store.read().attachments).toEqual([]);
+    expect(deps.files.keys()).not.toContain(key);
   });
 
   it('counts an erasure whose files could not be deleted or queued as erased, and reports the orphaned keys', async () => {

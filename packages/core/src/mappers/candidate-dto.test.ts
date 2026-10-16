@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildApplication,
+  buildAttachment,
   buildCandidate,
   buildExtraction,
   buildJob,
@@ -80,16 +81,28 @@ describe('candidate DTO mappers', () => {
     const detail = toCandidateDetailDto({
       candidate,
       applications: [
-        { application: buildApplication({ stageId: 'gone' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const },
-        { application: buildApplication({ stageId: 'stage-0' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const },
-        { application: buildApplication({ stageId: 'received' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const },
+        { application: buildApplication({ stageId: 'gone' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] },
+        { application: buildApplication({ stageId: 'stage-0' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] },
+        { application: buildApplication({ stageId: 'received' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] },
       ],
       notes: [],
     });
     expect(detail.applications.map((a) => a.stageRemoved)).toEqual([true, false, false]);
     expect(detail.applications.map((a) => a.messageCount)).toEqual([0, 0, 0]);
-    const counted = toCandidateDetailDto({ candidate, applications: [{ application, job, stages, extraction: null, messageCount: 4, responseState: 'on_track' as const }], notes: [] });
+    const counted = toCandidateDetailDto({ candidate, applications: [{ application, job, stages, extraction: null, messageCount: 4, responseState: 'on_track' as const, attachments: [] }], notes: [] });
     expect(counted.applications[0]?.messageCount).toBe(4);
+  });
+
+  it('lists attachments without their storage key, and the form answers, empty when there are none', () => {
+    const stages = pipelineStagesOf(job.content.process);
+    const attachment = buildAttachment();
+    const answered = buildApplication({ answers: [{ question: 'Q', answer: 'A' }] });
+    const detail = toCandidateDetailDto({ candidate, applications: [{ application: answered, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [attachment] }], notes: [] });
+    expect(detail.applications[0]?.attachments).toEqual([{ id: 'att_1', kind: 'cover_letter', fileName: 'lettera.pdf', mediaType: 'application/pdf', sizeBytes: 64, createdAt: '2026-01-01T00:00:00.000Z' }]);
+    expect(JSON.stringify(detail)).not.toContain(attachment.key);
+    expect(detail.applications[0]?.answers).toEqual([{ question: 'Q', answer: 'A' }]);
+    const bare = toCandidateDetailDto({ candidate, applications: [{ application, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] }], notes: [] });
+    expect(bare.applications[0]).toMatchObject({ attachments: [], answers: [] });
   });
 
   it('maps summaries', () => {
@@ -125,7 +138,7 @@ describe('candidate DTO mappers', () => {
     const stages = pipelineStagesOf(job.content.process);
     const dto = toCandidateDetailDto({
       candidate,
-      applications: [{ application, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const }],
+      applications: [{ application, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] }],
       notes: [{ note: buildNote(), authorName: 'Rita' }],
     });
     expect(dto.candidate).toEqual({
@@ -158,7 +171,7 @@ describe('candidate DTO mappers', () => {
   it('maps a migrated application without a CV: null CV on the detail, hasCv false on the card', () => {
     const migrated = buildApplication({ cv: null, migrationBatchId: 'mig_1' });
     const stages = pipelineStagesOf(job.content.process);
-    const dto = toCandidateDetailDto({ candidate, applications: [{ application: migrated, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const }], notes: [] });
+    const dto = toCandidateDetailDto({ candidate, applications: [{ application: migrated, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] }], notes: [] });
     expect(dto.applications[0]?.cv).toBeNull();
     const card = (app: typeof migrated) => toApplicationCardDto({ application: app, candidate, extraction: null, noteCount: 0, stageRemoved: false, responseState: 'on_track' as const });
     expect(card(migrated).hasCv).toBe(false);

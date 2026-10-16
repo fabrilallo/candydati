@@ -1,8 +1,8 @@
-import type { Candidate, CandidateNote, Job, Message, StageEvent } from '@candydati/domain';
+import type { ApplicationAttachment, Candidate, CandidateNote, Job, Message, StageEvent } from '@candydati/domain';
 import type { MemberDirectory } from './automation-ports.js';
 import type { ApplicationRepository, CandidateRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
 import type { ConsentTokenRepository, ImportMailDeps } from './import-ports.js';
-import type { CvSniffer } from './intake-ports.js';
+import type { AttachmentSniffer, CvSniffer } from './intake-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { MigrationDeps, MigrationPackageReader } from './migration-ports.js';
 import type { ErasureDeps } from './privacy-ports.js';
@@ -21,6 +21,8 @@ export interface MigratedRowsRepository {
   insertNotes(batchId: string, notes: readonly CandidateNote[]): Promise<void>;
   /** Historical messages: never sent, never counted by the caps. */
   insertMessages(batchId: string, messages: readonly Message[]): Promise<void>;
+  /** The attachments of migrated applications (their files are already stored at their keys). */
+  insertAttachments(batchId: string, attachments: readonly ApplicationAttachment[]): Promise<void>;
   /** Every candidate the batch touched: created by it, or with an application, a note or a message of it. */
   candidateIdsOf(organizationId: string, batchId: string): Promise<readonly string[]>;
   /** Jobs the batch created. */
@@ -50,6 +52,8 @@ export interface MigrationCommitDeps extends MigrationDeps {
   /** The reconfirmation request is a queued system message, like the import's. */
   readonly mail: ImportMailDeps;
   readonly cvSniffer: CvSniffer;
+  /** Every other file of an application is stored only when its content is an allowed attachment type. */
+  readonly attachmentSniffer: AttachmentSniffer;
   /** A new secret from a CSPRNG, for the consent token. */
   readonly newSecret: () => string;
   /** sha256 as hex: consent tokens, and the stable ids of migrated rows (the same package ref always gets the same id). */

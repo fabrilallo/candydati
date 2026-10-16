@@ -26,6 +26,8 @@ const SAFE_BY_CONSTRUCTION = [
   /^`mailto:/,
   /^`tel:/,
   /^cvUrl\(/,
+  // Same-origin download path of an attachment, ids encoded (`lib/candidate-api.ts`).
+  /^attachmentUrl\(/,
   /^candidateExportUrl\(/,
   /^dataExportUrl\(/,
   /^publicPath$/,

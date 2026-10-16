@@ -59,6 +59,7 @@ export * from './use-cases/candidates/application-timeline.js';
 export * from './use-cases/candidates/update-candidate-tags.js';
 export * from './use-cases/candidates/add-candidate-note.js';
 export * from './use-cases/candidates/open-cv.js';
+export * from './use-cases/candidates/open-attachment.js';
 export * from './use-cases/candidates/run-cv-extraction.js';
 export * from './adapters/drizzle-privacy-notices.js';
 export * from './adapters/drizzle-candidates.js';

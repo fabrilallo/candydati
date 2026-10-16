@@ -62,5 +62,9 @@ export const updateCandidateTags = async (request: JobApiRequest, candidateId: s
 export const addNote = async (request: JobApiRequest, candidateId: string, body: string, applicationId: string | null): Promise<NoteDto> =>
   (await callApi(request, `/api/v1/candidates/${id(candidateId)}/notes`, noteSchema, { method: 'POST', body: { body, ...(applicationId ? { applicationId } : {}) } })).data
 
+/** Same-origin address of an attachment of an application: always a download, audited like the CV. */
+export const attachmentUrl = (applicationId: string, attachmentId: string): string =>
+  `/api/v1/applications/${id(applicationId)}/attachments/${id(attachmentId)}?disposition=attachment`
+
 /** Same-origin address of the CV: `inline` for the preview, `attachment` for the download. Both are audited. */
 export const cvUrl = (applicationId: string, disposition: 'inline' | 'attachment'): string => `/api/v1/applications/${id(applicationId)}/cv?disposition=${disposition}`

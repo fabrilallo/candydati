@@ -10,7 +10,7 @@ async function insertInChunks<T>(rows: readonly T[], insert: (chunk: T[]) => Pro
 
 /** Postgres implementation. Every statement filters by `organization_id`; the batch id comes from the call, never from a row. */
 export function createDrizzleMigratedRows(db: DbExecutor): MigratedRowsRepository {
-  const { job, candidate, application, candidateNote, message, applicationStageEvent } = schema;
+  const { job, candidate, application, candidateNote, message, applicationStageEvent, applicationAttachment } = schema;
   return {
     async insertJob(batchId, value) {
       await db.insert(job).values({ ...value, title: value.content.title, origin: 'migration', migrationBatchId: batchId });
@@ -26,6 +26,13 @@ export function createDrizzleMigratedRows(db: DbExecutor): MigratedRowsRepositor
     },
     async insertMessages(batchId, messages) {
       await insertInChunks(messages, (chunk) => db.insert(message).values(chunk.map((value) => ({ ...value, migrationBatchId: batchId }))));
+    },
+    async insertAttachments(batchId, attachments) {
+      await insertInChunks(attachments, (chunk) =>
+        db.insert(applicationAttachment).values(
+          chunk.map(({ key, ...value }) => ({ ...value, storageKey: key, migrationBatchId: batchId })),
+        ),
+      );
     },
     async candidateIdsOf(organizationId, batchId) {
       const rows = await db.execute<{ id: string }>(sql`

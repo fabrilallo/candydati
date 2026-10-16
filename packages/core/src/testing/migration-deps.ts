@@ -3,6 +3,7 @@ import type { MigrationCommitDeps, MigrationUndoDeps } from '../migration-commit
 import type { MigrationAnalysisDeps } from '../migration-ports.js';
 import { seedImportWorld, type ImportSeedOptions, type TestImportDeps } from './import-deps.js';
 import type { InMemoryJobRepository } from './in-memory-jobs.js';
+import { fakeAttachmentSniffer } from './in-memory-files.js';
 import { createInMemoryMigratedRows } from './in-memory-migrated-rows.js';
 import { seedCandidateWorld, type SeedOptions } from './candidate-seed.js';
 import type { TestCandidateDeps } from './candidate-deps.js';
@@ -69,6 +70,7 @@ export function seedMigrationCommitWorld(options: MigrationCommitSeedOptions = {
     migrationIssues: createInMemoryMigrationIssues(migrationStore),
     migratedRows: createInMemoryMigratedRows({ store: world.store, messagingStore: world.messagingStore, jobs, migrationStore }),
     packages: createFakeMigrationPackageReader(),
+    attachmentSniffer: fakeAttachmentSniffer,
     ...options.migrationOverrides,
   };
 }

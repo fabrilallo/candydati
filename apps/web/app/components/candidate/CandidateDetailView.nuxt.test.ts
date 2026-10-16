@@ -132,6 +132,39 @@ describe('CandidateDetailView', () => {
     expect(wrapper.find('[data-testid="cv-panel"]').text()).toContain("L'anteprima è disponibile solo per i PDF")
   })
 
+  it('lists the attachments of a migrated application with an audited download each, and its form answers, labeled', async () => {
+    const [first] = detail().applications
+    const attachments = [
+      { id: 'f1', kind: 'cover_letter' as const, fileName: 'Lettera.pdf', mediaType: 'application/pdf', sizeBytes: 2048, createdAt: '2025-01-01T00:00:00.000Z' },
+      { id: 'f2', kind: 'other' as const, fileName: 'scan.png', mediaType: 'image/png', sizeBytes: 300, createdAt: '2025-01-01T00:00:00.000Z' },
+    ]
+    state.value = detail({ applications: [{ ...first!, cv: null, attachments, answers: [{ question: 'Periodo di preavviso?', answer: 'Un mese' }] }] })
+    const wrapper = await mountDetail()
+    expect(wrapper.find('[data-testid="tab-cv"]').text()).toContain('CV e documenti')
+    await tab(wrapper, 'cv')
+    const items = wrapper.findAll('[data-testid="attachment"]')
+    expect(items.map((item) => item.find('[data-testid="attachment-name"]').text())).toEqual(['Lettera.pdf', 'scan.png'])
+    expect(items[0]?.text()).toContain('Lettera di presentazione')
+    expect(items[1]?.text()).toContain('Altro documento')
+    const download = items[0]!.find('[data-testid="attachment-download"]')
+    expect(download.attributes('href')).toBe('/api/v1/applications/a1/attachments/f1?disposition=attachment')
+    expect(download.attributes('aria-label')).toBe('Scarica Lettera.pdf')
+    const section = wrapper.find('[data-testid="attachments"]')
+    expect(wrapper.find(`#${section.attributes('aria-labelledby')}`).text()).toBe('Allegati')
+    const answers = wrapper.find('[data-testid="form-answers"]')
+    expect(answers.text()).toContain('Risposte al modulo di candidatura')
+    expect(answers.text()).toContain('ATS precedente')
+    expect(answers.find('dt').text()).toBe('Periodo di preavviso?')
+    expect(answers.find('dd').text()).toBe('Un mese')
+  })
+
+  it('shows no documents section and keeps the CV tab label when there are none', async () => {
+    const wrapper = await mountDetail()
+    expect(wrapper.find('[data-testid="tab-cv"]').text()).not.toContain('documenti')
+    await tab(wrapper, 'cv')
+    expect(wrapper.find('[data-testid="application-documents"]').exists()).toBe(false)
+  })
+
   it('says clearly that a migrated application has no CV, with nothing to download', async () => {
     const [first] = detail().applications
     state.value = detail({ applications: [{ ...first!, cv: null }] })

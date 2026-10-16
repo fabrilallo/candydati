@@ -1,4 +1,4 @@
-import type { ApplicationTimelineDto, Application, Candidate, CandidateNote, CvExtractionRecord, CvMediaType, Job, PipelineStage, ResponseState } from '@candydati/domain';
+import type { ApplicationTimelineDto, Application, ApplicationAttachment, AttachmentMediaType, Candidate, CandidateNote, CvExtractionRecord, CvMediaType, Job, PipelineStage, ResponseState } from '@candydati/domain';
 
 /** What the use cases return: domain objects. The mappers in `mappers/candidate-dto.ts` turn them into DTOs. */
 export interface ApplicationCardView {
@@ -32,6 +32,8 @@ export interface CandidateApplicationView {
   readonly extraction: CvExtractionRecord | null;
   readonly messageCount: number;
   readonly responseState: ResponseState;
+  /** Files of the application other than its CV, oldest first. */
+  readonly attachments: readonly ApplicationAttachment[];
 }
 
 export interface NoteView {
@@ -59,4 +61,10 @@ export type TimelineItemView = WithDate<ApplicationTimelineDto['items'][number]>
 export interface ApplicationTimelineView {
   /** Oldest first. */
   readonly items: readonly TimelineItemView[];
+}
+
+export interface AttachmentFile {
+  readonly bytes: Uint8Array;
+  readonly fileName: string;
+  readonly mediaType: AttachmentMediaType;
 }

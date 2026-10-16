@@ -7,6 +7,12 @@
     per una candidatura arrivata da un altro ATS senza curriculum (ADR 0009; nello ZIP non c'è il file) e `notes[].authorId`
     per una nota migrata scritta da una persona che non è membro dell'organizzazione. Chi legge l'export deve accettare il
     `null` in entrambi i campi.
+  - Due campi facoltativi per candidatura, aggiunti senza cambiare versione (un file v1 già prodotto resta valido):
+    `applications[].attachments` (gli allegati diversi dal CV, oggi portati solo da una migrazione da un altro ATS: `id`,
+    `kind` `cover_letter` o `other`, `path` nello ZIP, `fileName`, `mediaType`, `sizeBytes`, `createdAt`; il file è nello
+    ZIP sotto `files/<id candidatura>/attachments/<id allegato>/`) e `applications[].answers` (le risposte al modulo
+    dell'ATS di origine, coppie `question` / `answer` in testo semplice). Il prodotto li scrive sempre, vuoti se non c'è
+    nulla; chi legge l'export deve accettarne l'assenza nei file prodotti prima.
 - `migration-package.v1.json`: schema JSON del file `migration.json` del pacchetto di migrazione da un altro ATS (ADR 0009, PRODUCT.md §6). Il pacchetto è uno ZIP con `migration.json` alla radice e i file sotto `files/`; lo producono i connettori integrati, la skill per agenti o una persona a mano, e passa sempre dalla stessa validazione. Contiene `source` (sistema di origine, data dell'export, chi ha prodotto il pacchetto), `users` (solo per firmare le note, non crea account), `jobs` con le loro fasi (`stages[]`, `type` facoltativo tra i tipi di fase della tassonomia) e un `content` parziale dell'annuncio, `candidates` con l'eventuale `consent` (`givenAt`, `expiresAt`, `scopes`), `applications` con fase attuale, esito, date, risposte, file e storico delle fasi, `notes` e `messages` (email passate, mai inviate). Ogni elemento ha un `ref` stabile scelto da chi produce il pacchetto; le date sono ISO 8601 con fuso orario. Si rigenera con lo stesso comando.
   - Tutti gli oggetti sono chiusi (`additionalProperties: false`): un campo sconosciuto fa rifiutare il pacchetto, non viene ignorato. Così un punteggio non può entrare sotto un altro nome.
   - Mancano di proposito, e non vanno aggiunti: punteggi, voti, valutazioni delle schede di colloquio, valutazioni automatiche o "match", dati demografici o di categorie particolari (art. 9 GDPR), foto, data di nascita, genere. Il prodotto non decide e non dà voti alle persone (PRODUCT.md §2.4, ADR 0005) e raccoglie solo i dati che servono alla selezione (§6); i connettori scartano questi valori. Le note libere dei colloqui arrivano come note.

@@ -1,4 +1,5 @@
 import {
+  ATTACHMENT_KINDS,
   ATTENTION_STATES,
   CONSENT_SCOPES,
   CONSENT_STATUSES,
@@ -124,6 +125,19 @@ export const candidateDetailSchema: z.ZodType<CandidateDetailDto> = z.object({
         source: z.enum(['model', 'text']).nullable(),
       }),
       messageCount: z.number().int(),
+      attachments: z
+        .array(
+          z.object({
+            id: z.string(),
+            kind: z.enum(ATTACHMENT_KINDS).describe('`cover_letter` or `other` (any other document, a second CV, a certificate).'),
+            fileName: z.string(),
+            mediaType: z.string(),
+            sizeBytes: z.number().int(),
+            createdAt: isoDate,
+          }),
+        )
+        .describe('Files other than the CV, oldest first; download each from `/api/v1/applications/{id}/attachments/{attachmentId}`. Only migrations from another ATS bring them today.'),
+      answers: z.array(z.object({ question: z.string(), answer: z.string() })).describe('Form answers kept from the previous ATS; empty when there are none.'),
     }),
   ),
   notes: z.array(noteSchema),

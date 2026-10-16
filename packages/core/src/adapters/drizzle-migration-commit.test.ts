@@ -10,11 +10,13 @@ import {
   createFakeMigrationPackageReader,
   createInMemoryFileStorage,
   createInMemoryTaskQueue,
+  fakeAttachmentSniffer,
   fakeCvSniffer,
   testMessagingConfig,
   userActor,
 } from '../testing/index.js';
-import { COMMIT_CHOICES, COMMIT_FILES, COMMIT_PACKAGE, DECLARATIONS } from '../testing/migration-commit-fixtures.js';
+import { ADA_ANSWERS, ATTACHMENTS_FILES, ATTACHMENTS_PACKAGE, COMMIT_CHOICES, COMMIT_FILES, COMMIT_PACKAGE, DECLARATIONS } from '../testing/migration-commit-fixtures.js';
+import { eraseCandidateData } from '../use-cases/privacy/erase-candidate-data.js';
 import { openedPackage, zipBytes } from '../testing/migration-fixtures.js';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { answerConsentRequest } from '../use-cases/imports/consent-request.js';
@@ -28,7 +30,7 @@ import { createDrizzleUnitOfWork } from './drizzle-repositories.js';
 
 let handle: DbHandle;
 const NOW = new Date('2026-06-01T10:00:00.000Z');
-const TABLES = ['job', 'candidate', 'application', 'candidate_note', 'message', 'conversation', 'application_stage_event', 'cv_extraction', 'consent_token', 'response_promise'] as const;
+const TABLES = ['job', 'candidate', 'application', 'application_attachment', 'candidate_note', 'message', 'conversation', 'application_stage_event', 'cv_extraction', 'consent_token', 'response_promise'] as const;
 
 beforeAll(() => {
   handle = createDb(coreTestDatabaseUrl(), 4);
@@ -67,6 +69,7 @@ async function world() {
     mail: { conversations: r.conversations, messages: r.messages, config: testMessagingConfig, newToken: () => randomUUID().replaceAll('-', '') },
     packages: createFakeMigrationPackageReader(),
     cvSniffer: fakeCvSniffer,
+    attachmentSniffer: fakeAttachmentSniffer,
     files: createInMemoryFileStorage(),
     queue: createInMemoryTaskQueue(),
     newId: () => randomUUID(),
@@ -90,9 +93,9 @@ async function rowsOf(org: string): Promise<Record<string, readonly string[]>> {
   return Object.fromEntries(entries);
 }
 
-async function commit({ org, deps, owner }: World): Promise<string> {
+async function commit({ org, deps, owner }: World, opened = openedPackage(COMMIT_PACKAGE, COMMIT_FILES())): Promise<string> {
   const created = await createMigrationFromPackage(deps, owner, { file: { fileName: 'export.zip', bytes: zipBytes() } });
-  deps.packages.register(migrationPackageKey(org, created.id), openedPackage(COMMIT_PACKAGE, COMMIT_FILES()));
+  deps.packages.register(migrationPackageKey(org, created.id), opened);
   expect(await analyzeMigration(deps, { organizationId: org, batchId: created.id })).toBe('ready');
   await updateMigrationChoices(deps, owner, { migrationId: created.id, ...COMMIT_CHOICES });
   await requestMigrationCommit(deps, owner, { migrationId: created.id, declarations: DECLARATIONS });
@@ -147,5 +150,38 @@ describe('a migration committed and undone on Postgres', () => {
     const others = Object.fromEntries(Object.entries(await rowsOf(w.org)).map(([table, rows]) => [table, rows.filter((row) => !keptIds.some((id) => row.includes(id)))]));
     expect(others).toEqual(before);
     expect(await w.deps.applications.listByCandidate(w.org, carla.id)).toHaveLength(2);
+  });
+
+  it('keeps a cover letter, an image and the form answers, refuses an executable, and erasure then undo leave nothing behind', async () => {
+    const w = await world();
+    const before = await rowsOf(w.org);
+    const batchId = await commit(w, openedPackage(ATTACHMENTS_PACKAGE, ATTACHMENTS_FILES()));
+    const { rows: attachments } = await handle.pool.query<{ application_id: string; kind: string; media_type: string; storage_key: string; migration_batch_id: string }>(
+      'select application_id, kind, media_type, storage_key, migration_batch_id from application_attachment where organization_id = $1 order by kind, media_type',
+      [w.org],
+    );
+    expect(attachments.map((row) => [row.kind, row.media_type, row.migration_batch_id])).toEqual([
+      ['cover_letter', 'application/pdf', batchId],
+      ['other', 'application/pdf', batchId],
+      ['other', 'image/png', batchId],
+      ['other', 'text/plain', batchId],
+    ]);
+    for (const row of attachments) expect(w.deps.files.keys()).toContain(row.storage_key);
+    const stored = await Promise.all(w.deps.files.keys().map((key) => w.deps.files.get(key)));
+    expect(stored.some((bytes) => bytes[0] === 0x4d && bytes[1] === 0x5a)).toBe(false);
+    const ada = (await w.deps.candidates.findByEmail(w.org, 'ada@example.com'))!;
+    const migrated = (await w.deps.applications.listByCandidate(w.org, ada.id)).find((a) => a.migrationBatchId === batchId)!;
+    expect(migrated.answers).toEqual(ADA_ANSWERS);
+    expect(await w.deps.applications.listAttachments(w.org, [migrated.id])).toHaveLength(2);
+    const [batch] = await handle.pool.query<{ counts: { commit: Record<string, number> } }>('select counts from migration_batch where id = $1', [batchId]).then((q) => q.rows);
+    expect(batch?.counts.commit).toMatchObject({ attachments: 4, filesSkipped: 2, filesSkippedType: 1, filesSkippedMissing: 1, answers: 1 });
+
+    // Ada asks to be erased from what the migration brought; then the operator undoes the whole batch.
+    await eraseCandidateData(w.deps, { organizationId: w.org, candidateId: ada.id, applicationIds: [migrated.id], reason: 'request', actor: { type: 'user', id: 'user_owner' } });
+    expect(await w.deps.applications.listAttachments(w.org, [migrated.id])).toEqual([]);
+    expect(w.deps.files.keys().filter((key) => key.includes(`/applications/${migrated.id}/`))).toEqual([]);
+    await undoMigration(w.deps, w.owner, { migrationId: batchId });
+    expect(await rowsOf(w.org)).toEqual(before);
+    expect(w.deps.files.keys().filter((key) => key.includes('/applications/'))).toEqual([]);
   });
 });

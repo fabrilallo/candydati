@@ -47,6 +47,8 @@ const ROWS: readonly Row[] = [
   read('searchCandidates', { tag: 'b-only' }, { label: 'by tag' }),
   read('getPipeline', { jobId: JOB_B }),
   read('openCv', { applicationId: 'app_b' }),
+  read('openAttachment', { applicationId: 'app_b', attachmentId: 'att_b' }),
+  read('openAttachment', { applicationId: 'app_a', attachmentId: 'att_b' }, { label: 'attachment of job B through an application of job A' }),
   read('listAttention', {}),
   read('listMessages', { applicationId: 'app_b' }),
   read('renderMessageDraft', { ...MESSAGE, applicationId: 'app_b' }),

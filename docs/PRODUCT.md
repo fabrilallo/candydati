@@ -203,12 +203,12 @@ Roles. The client company is the data controller. In the hosted offering the ser
 | Documents | Data processing agreement template, sub-processor list, record of processing activities (`docs/legal/`) |
 | Public form | A submission never rewrites an existing person's profile: the typed contact data stays on the application and a recruiter reviews it ("new details from the application"). An existing open application is answered like a success (nothing reveals who applied), receipts have a per-recipient and a per-organization daily cap, and an optional Cloudflare Turnstile check can be switched on |
 | Imported data | Consent marked "to be renewed", with a reconfirmation email; imported candidates stay visible only in the pipeline of their import until they reconfirm, and their data is erased if they do not |
-| Migrated data | From the organization's previous ATS (same controller): consent dates and retention carry over; people with no consent date get the reconfirmation of imported data; people whose retention already expired are left out. The operator confirms in the app that they are the controller, that they may transfer the data, and that any AI agent used to prepare it is their own sub-processor |
+| Migrated data | From the organization's previous ATS (same controller): consent dates and retention carry over; people with no consent date get the reconfirmation of imported data; people whose retention already expired are left out. Attachments are kept only when their content is a document or a still image (PDF, Word, ODT, RTF, text, PNG, JPEG; never executables, archives, HTML or SVG) within the CV size limit, and with the form answers they follow the application: same access, audit, export, retention and erasure as the CV. The operator confirms in the app that they are the controller, that they may transfer the data, and that any AI agent used to prepare it is their own sub-processor |
 
 ### 6.1 What erasure cannot reach
 
-Erasure removes the candidate and everything hanging from the applications in the database and in file storage (CVs, and
-the organization exports generated so far, which are deleted whenever any candidate is erased: generate a new one). It
+Erasure removes the candidate and everything hanging from the applications in the database and in file storage (CVs,
+the attachments and form answers a migration brought, and the organization exports generated so far, which are deleted whenever any candidate is erased: generate a new one). It
 cannot reach copies that left the system:
 
 - **Webhooks already delivered.** The receiving system keeps what it received (events carry ids and counts only, but
