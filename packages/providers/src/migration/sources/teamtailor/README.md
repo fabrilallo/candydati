@@ -14,7 +14,8 @@ the Admin scope ("Required scope: Admin" in the reference). The key is used only
 
 Base `https://api.teamtailor.com/v1`, JSON:API, headers `Authorization: Token token=<key>` and `X-Api-Version: 20161108`
 (the docs: "The current version is 20161108", header required). Pages of 30 (`page[size]`, max 30), following `links.next`.
-The key is never sent to a file URL.
+The key is never sent to a file URL. Files on a host other than `api.teamtailor.com` (the signed storage URLs) are
+fetched without credentials, from public addresses only (https, every resolved address public, redirects re-checked).
 
 | Endpoint | Used for |
 | --- | --- |
@@ -55,8 +56,8 @@ static values, so the connector paces itself at 3 requests a second), the attrib
   only `links`. If the API does not, the run stops with `source_invalid_response` instead of importing nothing.
 - That `filter[status]=all` returns jobs of every status for an Admin key, and that no `filter[feed]` is needed.
 - The notes list shape: the docs show `{ "notes": [ { "data": ... } ] }`; both that and `{ "data": [...] }` are accepted.
-- That signed file URLs are on `teamtailor-production.s3.amazonaws.com` (the docs' example). Another host is refused
-  by the reader: the file is skipped and counted, never fetched.
+- That signed file URLs need no credentials (the docs' example is on `teamtailor-production.s3.amazonaws.com`). Any
+  public https host is accepted for them, without the key; a link that is refused or expired is skipped and counted.
 - That `created-at` of jobs is present (the docs say it needs Admin permission); a stand-in date is used if missing.
 - A candidate without a name gets the email's local part and `-`; a candidate without any name gets `-`.
 - Real rate limits and page timing; large accounts have not been tried.

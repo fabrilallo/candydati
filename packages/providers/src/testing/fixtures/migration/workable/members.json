@@ -1,0 +1,15 @@
+{
+  "_source": "https://workable.readme.io/reference/members (response example)",
+  "members": [
+    {
+      "id": "3dae6411",
+      "name": "John Doe",
+      "headline": null,
+      "email": "john.doe@workable.com",
+      "role": "admin",
+      "hris_role": "hris_admin",
+      "active": false,
+      "collaboration_rules": []
+    }
+  ]
+}

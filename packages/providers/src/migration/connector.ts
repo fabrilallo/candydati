@@ -7,7 +7,8 @@ import type { PackageBuilder } from './package-builder.js';
 export interface ConnectorTools {
   /**
    * GET-only JSON and file reader, limited to `hosts(credentials)`, DNS-pinned, rate-limit aware. A connector never
-   * opens a socket of its own and never writes to the source.
+   * opens a socket of its own and never writes to the source. Files on another host (signed storage URLs) go through
+   * `downloadPublicFile`, which sends no credentials and reaches public addresses only (see `downloadSourceFile`).
    */
   readonly reader: JsonReader;
   /** Items read so far, and the total when the source says it. Also keeps the batch alive: call it at least once a minute. */

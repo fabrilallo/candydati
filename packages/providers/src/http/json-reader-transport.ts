@@ -34,12 +34,18 @@ export async function pinnedAddresses(host: string, resolve: Resolve, allowPriva
   return addresses;
 }
 
-const requestOptions = (target: ReaderTarget, addresses: readonly string[], headers: Readonly<Record<string, string>>): RequestOptions & { servername?: string } => ({
-  method: 'GET',
+/** A request body: only the token exchange sends one. */
+export interface RequestBody {
+  readonly method: 'POST';
+  readonly body: string;
+}
+
+const requestOptions = (target: ReaderTarget, addresses: readonly string[], headers: Readonly<Record<string, string>>, send: RequestBody | undefined): RequestOptions & { servername?: string } => ({
+  method: send?.method ?? 'GET',
   hostname: target.host,
   port: target.port,
   path: `${target.url.pathname}${target.url.search}`,
-  headers,
+  headers: send === undefined ? headers : { ...headers, 'content-type': 'application/x-www-form-urlencoded', 'content-length': String(Buffer.byteLength(send.body)) },
   lookup: createPinnedLookup(addresses),
   agent: false,
   ...(target.secure && isIP(target.host) === 0 ? { servername: target.host } : {}),
@@ -49,13 +55,13 @@ const requestOptions = (target: ReaderTarget, addresses: readonly string[], head
  * Sends one GET to the pinned addresses (the hostname stays in `Host` and SNI) and resolves when the headers arrive.
  * The timer covers the whole exchange, body included: when it fires the request is destroyed and reading fails.
  */
-export function openExchange(fn: RequestFn, target: ReaderTarget, addresses: readonly string[], headers: Readonly<Record<string, string>>, timeoutMs: number): Promise<Exchange> {
+export function openExchange(fn: RequestFn, target: ReaderTarget, addresses: readonly string[], headers: Readonly<Record<string, string>>, timeoutMs: number, send?: RequestBody): Promise<Exchange> {
   return new Promise((resolve, reject) => {
     let timedOut = false;
     let settled = false;
     let req: ClientRequest;
     try {
-      req = fn(requestOptions(target, addresses, headers));
+      req = fn(requestOptions(target, addresses, headers, send));
     } catch {
       reject(new TransientFailure('network'));
       return;
@@ -80,7 +86,7 @@ export function openExchange(fn: RequestFn, target: ReaderTarget, addresses: rea
       res.on('error', () => undefined);
       resolve({ status: res.statusCode ?? 0, headers: res.headers, body: res, close, timedOut: () => timedOut });
     });
-    req.end();
+    req.end(send?.body);
   });
 }
 

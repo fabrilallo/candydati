@@ -262,3 +262,68 @@ describe('download', () => {
     await expect(reader().download(`${base()}/f`, async () => { throw new Error('storage down'); })).rejects.toThrow('storage down');
   });
 });
+
+describe('postForm (token exchange)', () => {
+  const token = z.object({ access_token: z.string(), token_type: z.string() });
+  const form = { grant_type: 'client_credentials', note: 'a b&c' };
+  const bodyOf = (req: IncomingMessage): Promise<string> => collect(req).then((b) => b.toString());
+
+  it('posts an urlencoded form with the given headers, validates the answer and returns its headers', async () => {
+    let received = '';
+    handlers = [(req, res) => { void bodyOf(req).then((b) => { received = b; json({ access_token: 't', token_type: 'Bearer' }, 200, { 'x-ratelimit-remaining': '5' })(req, res); }); }];
+    const result = await reader().postForm(`${base()}/token`, form, token, { headers: { authorization: 'Basic abc' } });
+    expect(result.data).toEqual({ access_token: 't', token_type: 'Bearer' });
+    expect(result.headers).toMatchObject({ 'x-ratelimit-remaining': '5' });
+    expect(received).toBe('grant_type=client_credentials&note=a+b%26c');
+    expect(seen[0]).toMatchObject({ method: 'POST', url: '/token' });
+    expect(seen[0]?.headers).toMatchObject({ authorization: 'Basic abc', 'content-type': 'application/x-www-form-urlencoded', 'content-length': String(received.length), host: `${HOST}:${port}` });
+  });
+
+  it('refuses a shape it does not expect, without echoing the body', async () => {
+    handlers = [json({ access_token: 'SECRETTOKEN', token_type: 5 })];
+    const error = await failure(reader().postForm(`${base()}/token`, form, token));
+    expect(error.code).toBe('source_invalid_response');
+    expect(error.message).not.toContain('SECRETTOKEN');
+  });
+
+  it.each([[401, 'credentials_refused'], [403, 'credentials_refused'], [400, 'source_invalid_response'], [404, 'not_found']])('maps %i to %s without retrying', async (code, expected) => {
+    handlers = [status(code)];
+    expect((await failure(reader().postForm(`${base()}/token`, form, token))).code).toBe(expected);
+    expect(seen).toHaveLength(1);
+  });
+
+  it('retries 5xx and honours Retry-After on 429, like a read', async () => {
+    handlers = [status(503), status(429, { 'retry-after': '2' }), json({ access_token: 't', token_type: 'Bearer' })];
+    await reader().postForm(`${base()}/token`, form, token);
+    expect(waits).toEqual([100, 2000]);
+    expect(seen.map((r) => r.method)).toEqual(['POST', 'POST', 'POST']);
+  });
+
+  it('never follows a redirect, not even on the same origin', async () => {
+    handlers = [status(307, { location: '/elsewhere' })];
+    expect((await failure(reader().postForm(`${base()}/token`, form, token))).code).toBe('redirect_refused');
+    expect(seen).toHaveLength(1);
+  });
+
+  it('applies the host allowlist, https and the private-address guard', async () => {
+    expect((await failure(reader().postForm(`http://evil.example.com:${port}/token`, form, token))).code).toBe('host_not_allowed');
+    const strict = createJsonReader({ allowedHosts: [{ exact: HOST }], resolve: async () => ['10.0.0.5'], sleep: async () => undefined });
+    expect((await failure(strict.postForm(`http://${HOST}/token`, form, token))).code).toBe('host_not_allowed');
+    expect((await failure(strict.postForm(`https://${HOST}/token`, form, token))).code).toBe('host_not_allowed');
+    expect(seen).toHaveLength(0);
+  });
+
+  it('caps the answer size and times out', async () => {
+    handlers = [(_req, res) => res.writeHead(200).end(Buffer.alloc(64 * 1024, 0x20))];
+    expect((await failure(reader({ maxResponseBytes: 1024 }).postForm(`${base()}/token`, form, token))).code).toBe('source_invalid_response');
+    handlers = [() => undefined];
+    expect((await failure(reader({ timeoutMs: 50, maxRetries: 0 }).postForm(`${base()}/token`, form, token))).code).toBe('source_unavailable');
+  });
+
+  it('never reports the form or the credentials: events and errors are redacted', async () => {
+    handlers = [status(503), status(401)];
+    const error = await failure(reader().postForm(`${base()}/token?client_secret=SUPERSECRET`, { client_secret: 'SUPERSECRET' }, token, { headers: { authorization: 'Basic SUPERSECRET' } }));
+    expect(error.message).not.toContain('SUPERSECRET');
+    expect(JSON.stringify(events)).not.toContain('SUPERSECRET');
+  });
+});

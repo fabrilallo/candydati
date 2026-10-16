@@ -43,11 +43,11 @@ export interface ReaderTarget {
 }
 
 /**
- * Parses and checks a URL against the allowlist: https on the default port, no user info, no trailing dot, a host one
- * of the rules allows. `unsafeLoopback` (tests only) also accepts http and any port.
+ * Parses and checks a URL's shape: https on the default port, no user info, no trailing dot. `unsafeLoopback` (tests
+ * only) also accepts http and any port. IPv6 literals lose their brackets, so the address checks see the address.
  * @throws JsonReaderError `host_not_allowed`
  */
-export function checkTarget(raw: string, rules: readonly HostRule[], unsafeLoopback: boolean): ReaderTarget {
+export function checkPublicTarget(raw: string, unsafeLoopback: boolean): ReaderTarget {
   let url: URL;
   try {
     url = new URL(raw);
@@ -60,10 +60,21 @@ export function checkTarget(raw: string, rules: readonly HostRule[], unsafeLoopb
     url.username !== '' ||
     url.password !== '' ||
     (url.port !== '' && !unsafeLoopback) ||
-    url.hostname.endsWith('.') ||
-    !rules.some((rule) => hostMatches(url.hostname, rule));
+    url.hostname === '' ||
+    url.hostname.endsWith('.');
   if (refused) throw new JsonReaderError('host_not_allowed');
-  return { url, host: url.hostname, port: url.port === '' ? (secure ? 443 : 80) : Number(url.port), secure };
+  const host = url.hostname.replace(/^\[|\]$/g, '');
+  return { url, host, port: url.port === '' ? (secure ? 443 : 80) : Number(url.port), secure };
+}
+
+/**
+ * `checkPublicTarget`, plus a host one of the connector's rules allows.
+ * @throws JsonReaderError `host_not_allowed`
+ */
+export function checkTarget(raw: string, rules: readonly HostRule[], unsafeLoopback: boolean): ReaderTarget {
+  const target = checkPublicTarget(raw, unsafeLoopback);
+  if (!rules.some((rule) => hostMatches(target.host, rule))) throw new JsonReaderError('host_not_allowed');
+  return target;
 }
 
 /** A redirect may only stay on the same scheme, host and port. */

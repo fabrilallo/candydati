@@ -19,8 +19,8 @@ export interface TeamtailorConnectorOptions {
   readonly now?: (() => Date) | undefined;
 }
 
-/** The API host, and the file host of the signed URLs shown in the docs' examples (uploads, resumes). */
-const HOSTS = [{ exact: 'api.teamtailor.com' }, { exact: 'teamtailor-production.s3.amazonaws.com' }] as const;
+/** The API host only: signed file URLs (uploads, resumes) are fetched without credentials, from any public host. */
+const HOSTS = [{ exact: 'api.teamtailor.com' }] as const;
 const KEEP_ALIVE_MS = 10_000;
 
 /**

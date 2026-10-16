@@ -15,6 +15,8 @@ afterAll(() => api.close());
 
 const PDF = new TextEncoder().encode('%PDF-1.4 fixture');
 const credentials = { apiKey: 'secret-key-123' };
+/** The docs' signed-URL host, resolved to the same local server: not an API host, so files come without credentials. */
+const storage = () => api.origin.replace('api.teamtailor.com', 'teamtailor-production.s3.amazonaws.com');
 
 const serveFile = (status: number) => (_req: unknown, res: { writeHead(code: number, headers?: Record<string, string>): { end(body?: Uint8Array): void } }) =>
   void res.writeHead(status, { 'content-type': 'application/pdf' }).end(status === 200 ? PDF : undefined);
@@ -32,8 +34,8 @@ beforeEach(() => {
   r.set('/v1/job-applications', fx.applications());
   r.set('/v1/questions', fx.questions());
   r.set('/v1/answers', fx.answers());
-  r.set('/v1/candidates', fx.candidates(api.origin));
-  r.set('/v1/uploads', fx.uploads(api.origin));
+  r.set('/v1/candidates', fx.candidates(storage()));
+  r.set('/v1/uploads', fx.uploads(storage()));
   r.set('/v1/notes', { raw: fx.notesDocShape(fx.notes()) });
   r.set('/files/resume.pdf', serveFile(200));
   r.set('/files/cover_letter.pdf', serveFile(200));
@@ -46,7 +48,7 @@ async function run() {
   const files = createInMemoryFileStorage();
   const builder = createPackageBuilder({ files, filePrefix: 'organizations/o/migrations/m/', source: { system: 'teamtailor', producer: 'connector:teamtailor@1', exportedAt: '2026-10-16T10:00:00.000Z' }, reserveFiles: async () => undefined });
   const progress: Array<[number, number | null | undefined]> = [];
-  const reader = testReader(connector.hosts(credentials) as { exact: string }[]);
+  const reader = testReader([...connector.hosts(credentials)] as { exact: string }[]);
   await connector.fetch(credentials, builder, { reader, progress: async (done, total) => void progress.push([done, total]) });
   const collected = builder.collected();
   const { files: _files, ...items } = collected;
@@ -63,7 +65,7 @@ describe('Teamtailor connector: description', () => {
     expect(teamtailorConnector.credentials.safeParse(credentials).success).toBe(true);
     expect(teamtailorConnector.credentials.safeParse({ ...credentials, extra: 1 }).success).toBe(false);
     expect(teamtailorConnector.credentials.safeParse({ apiKey: 'short' }).success).toBe(false);
-    expect(teamtailorConnector.hosts(credentials)[0]).toEqual({ exact: 'api.teamtailor.com' });
+    expect(teamtailorConnector.hosts(credentials)).toEqual([{ exact: 'api.teamtailor.com' }]);
     expect(teamtailorConnector.rate).toBeDefined();
   });
 });
@@ -116,6 +118,7 @@ describe('Teamtailor connector: a full run on the docs fixtures', () => {
     const downloads = api.seen.filter((req) => req.url?.startsWith('/files/'));
     expect(downloads.length).toBe(4);
     for (const req of downloads) expect(req.headers).not.toHaveProperty('authorization');
+    for (const req of downloads) expect(req.headers.host).toBe(new URL(storage()).host);
     expect(report).toMatchObject({ files: 2, filesSkipped: 3 });
   });
 

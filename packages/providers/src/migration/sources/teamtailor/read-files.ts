@@ -8,7 +8,7 @@ export type FileCounts = Map<string, number>;
 
 /**
  * Downloads one file right after its record was read (signed URLs live 30 s to 1 minute) and attaches it to an
- * application. A file that cannot be had (expired link, host not allowed, too large, refused) is left out and counted:
+ * application. A file that cannot be had (expired link, private address, too large, refused) is left out and counted:
  * one bad file never stops the migration. Credentials are never sent to the signed URL.
  */
 export async function storeFile(run: Run, counts: FileCounts, applicationRef: string, file: BuilderFile, url: string): Promise<void> {
