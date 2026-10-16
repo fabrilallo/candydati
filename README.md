@@ -1,8 +1,6 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-dark.svg">
-    <img alt="Candydati" src="docs/assets/logo.svg" height="44">
-  </picture>
+  <img alt="Candydati" src="docs/assets/logo.svg#gh-light-mode-only" height="44">
+  <img alt="Candydati" src="docs/assets/logo-dark.svg#gh-dark-mode-only" height="44">
 </p>
 
 <p align="center"><strong>The source-available, agentic ATS on the candidate's side.</strong></p>
