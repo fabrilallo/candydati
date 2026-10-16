@@ -1,4 +1,4 @@
-import { DAY_MS, MIGRATION_PURGE_DAYS } from '@candydati/domain';
+import { DAY_MS, MIGRATION_PURGE_DAYS, migrationFetchFileKey, migrationFilePrefix, type MigrationBatch } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError } from '../../errors.js';
 import type { MigrationPurgeDeps } from '../../migration-commit-ports.js';
@@ -12,6 +12,17 @@ export interface PurgeEndedMigrationsResult {
   readonly purged: number;
   /** Batches whose purge failed: the next run retries them. Ids only. */
   readonly failed: readonly { readonly organizationId: string; readonly batchId: string }[];
+}
+
+/**
+ * A connector fetch that died left its downloaded files in temporary slots (`.../fetch/{n}`); the fetch recorded how many
+ * slots it reserved before using them, so they are all found. Missing slots are not an error.
+ */
+async function deleteFetchLeftovers(deps: MigrationPurgeDeps, batch: MigrationBatch): Promise<void> {
+  const prefix = migrationFilePrefix(batch.organizationId, batch.id);
+  for (let slot = 0; slot < (batch.counts.fetch?.reservedFiles ?? 0); slot += 1) {
+    await deleteMigrationFile(deps, batch.organizationId, batch.id, migrationFetchFileKey(prefix, slot));
+  }
 }
 
 const input = z.object({
@@ -37,6 +48,7 @@ export const purgeEndedMigrations = defineSystemJob<MigrationPurgeDeps, typeof i
     for (const batch of ended) {
       try {
         await deleteMigrationFile(deps, batch.organizationId, batch.id, batch.packageKey);
+        await deleteFetchLeftovers(deps, batch);
         await deps.migrationIssues.deleteByBatch(batch.organizationId, batch.id);
         await deps.migrations.transition(batch.organizationId, batch.id, batch.status, { status: batch.status, purgedAt: now });
         purged += 1;

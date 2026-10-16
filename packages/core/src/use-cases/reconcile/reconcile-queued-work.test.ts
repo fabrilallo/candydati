@@ -8,7 +8,8 @@ const NOW = new Date('2026-06-01T10:00:00Z');
 const stuck = (rows: Partial<Record<keyof StuckWorkRepository, readonly unknown[]>>): StuckWorkRepository & { readonly cutoffs: Date[] } => {
   const cutoffs: Date[] = [];
   const list = (key: keyof StuckWorkRepository) => async (before: Date) => (cutoffs.push(before), (rows[key] ?? []) as never);
-  return { queuedMessages: list('queuedMessages'), pendingExports: list('pendingExports'), pendingExtractions: list('pendingExtractions'), unfinishedImports: list('unfinishedImports'), unfinishedMigrations: list('unfinishedMigrations'), cutoffs };
+  const failStalledFetches = async (before: Date) => (cutoffs.push(before), (rows.failStalledFetches ?? []).length);
+  return { queuedMessages: list('queuedMessages'), pendingExports: list('pendingExports'), pendingExtractions: list('pendingExtractions'), unfinishedImports: list('unfinishedImports'), unfinishedMigrations: list('unfinishedMigrations'), failStalledFetches, cutoffs };
 };
 
 describe('reconcileQueuedWork (#3)', () => {
@@ -28,7 +29,7 @@ describe('reconcileQueuedWork (#3)', () => {
       ],
     });
     const result = await reconcileQueuedWork({ stuck: repo, queue: recording }, { now: NOW });
-    expect(result).toEqual({ messages: 1, exports: 1, imports: 2, migrations: 3, extractions: 1, failed: 0 });
+    expect(result).toEqual({ messages: 1, exports: 1, imports: 2, migrations: 3, extractions: 1, fetchesFailed: 0, failed: 0 });
     expect(calls).toEqual([
       ['email.send', { organizationId: 'o', messageId: 'm1' }, { singletonKey: 'm1', replaceFailed: true }],
       ['organization.export', { organizationId: 'o', exportId: 'x1' }, { singletonKey: 'x1', replaceFailed: true }],
@@ -45,6 +46,14 @@ describe('reconcileQueuedWork (#3)', () => {
   it('counts what it could not queue and goes on with the rest', async () => {
     const repo = stuck({ queuedMessages: [{ organizationId: 'o', id: 'm1' }, { organizationId: 'o', id: 'm2' }] });
     const result = await reconcileQueuedWork({ stuck: repo, queue: createInMemoryTaskQueue(new Error('queue down')) }, { now: NOW });
-    expect(result).toEqual({ messages: 0, exports: 0, imports: 0, migrations: 0, extractions: 0, failed: 2 });
+    expect(result).toEqual({ messages: 0, exports: 0, imports: 0, migrations: 0, extractions: 0, fetchesFailed: 0, failed: 2 });
+  });
+
+  it('fails connector fetches that stopped moving instead of running them again: their credentials are gone', async () => {
+    const queue = createInMemoryTaskQueue();
+    const repo = stuck({ failStalledFetches: [{ organizationId: 'o', id: 'f1' }, { organizationId: 'o', id: 'f2' }] });
+    const result = await reconcileQueuedWork({ stuck: repo, queue }, { now: NOW });
+    expect(result.fetchesFailed).toBe(2);
+    expect(queue.jobs()).toEqual([]);
   });
 });
