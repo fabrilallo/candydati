@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { NotFoundError } from '../../errors.js';
 import { defineCandidateUseCase } from './define.js';
 import { requireApplication } from './shared.js';
 import type { CvFile } from './views.js';
@@ -14,7 +15,10 @@ export const openCv = defineCandidateUseCase({
   },
   handler: async ({ deps, actor, input }): Promise<CvFile> => {
     const application = await requireApplication(deps, actor.organizationId, input.applicationId);
-    const bytes = await deps.files.get(application.cv.key);
-    return { bytes, fileName: application.cv.fileName, mediaType: application.cv.mediaType };
+    // A migrated application may come without a CV: nothing to open, nothing to audit.
+    const { cv } = application;
+    if (!cv) throw new NotFoundError('This application has no CV.');
+    const bytes = await deps.files.get(cv.key);
+    return { bytes, fileName: cv.fileName, mediaType: cv.mediaType };
   },
 });

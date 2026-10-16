@@ -11,6 +11,7 @@ export const message = (id: string, overrides: Partial<MessageDto> = {}): Messag
   sentAt: '2026-10-13T10:00:05.000Z',
   unverifiedSender: false,
   error: null,
+  historical: false,
   ...overrides,
 })
 

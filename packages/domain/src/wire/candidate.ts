@@ -28,6 +28,8 @@ export const applicationCardSchema = z.object({
   noteCount: count,
   /** The stage was removed from the job's process: shown as "stage removed". */
   stageRemoved: z.boolean(),
+  /** false only for an application brought by a migration without a CV: the card says so. */
+  hasCv: z.boolean(),
   ...responseFields,
   ...cardConsentFields,
   candidate: z.object({
@@ -67,7 +69,8 @@ export type CandidateSummaryDto = z.infer<typeof candidateSummarySchema>;
 export const noteSchema = z.object({
   id: z.string(),
   applicationId: z.string().nullable(),
-  author: z.object({ id: z.string(), name: z.string() }),
+  /** `external`: a migrated note by someone who is not a member (`id` null, `name` as stored with the note). */
+  author: z.object({ id: z.string().nullable(), name: z.string(), external: z.boolean() }),
   body: z.string(),
   createdAt: isoDate,
 });
@@ -96,7 +99,8 @@ export const candidateApplicationSchema = z.object({
   consent: applicationConsentSchema,
   importBatchId: z.string().nullable(),
   retentionExpiresAt: isoDate,
-  cv: z.object({ fileName: z.string(), mediaType: z.string(), sizeBytes: count }),
+  /** null for an application brought by a migration without a CV. */
+  cv: z.object({ fileName: z.string(), mediaType: z.string(), sizeBytes: count }).nullable(),
   /** What the person typed on the public form (never applied to the profile by itself); null for imports and manual entries. */
   submittedContact: z
     .object({ firstName: z.string(), lastName: z.string(), phone: z.string().nullable(), linkedinUrl: z.string().nullable() })

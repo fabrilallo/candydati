@@ -57,6 +57,7 @@ export async function queueReceipt(
       rawText: null,
       unverifiedSender: false,
       inboundMessageId: null,
+      historical: false,
     });
     return await enqueueDelivery({ queue: deps.queue, messages: receipts.messages }, message);
   } catch (error) {

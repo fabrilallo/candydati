@@ -114,7 +114,8 @@ export const deliverMessage = defineUseCase<DeliverDeps, typeof inputSchema, Del
   handler: async ({ deps, actor, input }): Promise<DeliverResult> => {
     const { organizationId } = input;
     const found = await deps.messages.findById(organizationId, input.messageId);
-    if (!found || found.direction !== 'outbound') return 'skipped';
+    // A historical message (brought by a migration) was sent long ago, elsewhere: never send it from here.
+    if (!found || found.direction !== 'outbound' || found.historical) return 'skipped';
     const message = await claim(deps, actor, found, input.attempt);
     if (!message) return found.status === 'sending' && input.attempt > 1 ? 'failed' : 'skipped';
     const [candidate, organization] = await sequential(() => deps.candidates.findById(organizationId, message.candidateId), () => deps.organizations.findById(organizationId));

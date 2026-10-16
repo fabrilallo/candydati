@@ -112,7 +112,8 @@ export interface Application {
   /** null while open. */
   readonly outcome: Outcome | null;
   readonly message: string;
-  readonly cv: StoredFile;
+  /** null only for an application brought by a migration from another ATS that had no CV (`migrationBatchId` set). */
+  readonly cv: StoredFile | null;
   /** Contact data as submitted on the public form; absent for imported and manual applications. */
   readonly submittedContact?: SubmittedContact | null;
   readonly consent: ConsentRecord;
@@ -120,6 +121,8 @@ export interface Application {
   readonly consentStatus: ConsentStatus;
   /** The import batch that created this application; null for everyone else. */
   readonly importBatchId: string | null;
+  /** The migration that brought this application from another ATS (absent or null: not migrated). */
+  readonly migrationBatchId?: string | null;
   readonly retentionExpiresAt: Date;
   readonly source: 'careers_page' | 'manual' | 'import';
   /** Short sanitized label of where it came from (`sanitizeOrigin`): `linkedin`, `google.com`, `direct`, `import`, `manual`. */
@@ -145,7 +148,10 @@ export interface CandidateNote {
   readonly candidateId: string;
   /** The application the note is about, if any. */
   readonly applicationId: string | null;
-  readonly authorId: string;
+  /** The member who wrote it; null for a note brought by a migration whose author is not a member here. */
+  readonly authorId: string | null;
+  /** The external author of a migrated note (`authorId` null); null for notes written here. */
+  readonly authorName: string | null;
   readonly body: string;
   readonly createdAt: Date;
 }

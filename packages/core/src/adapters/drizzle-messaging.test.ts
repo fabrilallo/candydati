@@ -171,6 +171,19 @@ describe('createDrizzleMessages', () => {
     expect((await repo.findById(w.org, m1.id))?.status).toBe('sent');
   });
 
+  it('leaves historical messages out of the hourly caps', async () => {
+    const repo = createDrizzleMessages(handle.db);
+    const w = await insertWorld();
+    const since = new Date('2026-01-01');
+    const at = new Date('2026-01-02');
+    await repo.create(message(w, { createdAt: at, status: 'sent', sentBy: 'system' }));
+    await repo.create(message(w, { createdAt: at, status: 'sent', sentBy: 'system', historical: true }));
+    await repo.create(message(w, { createdAt: at, status: 'sent', historical: true }));
+    expect(await repo.countOutboundSince(w.org, w.candidateId, since)).toBe(1);
+    expect(await repo.countSystemOutboundSince(w.org, since)).toBe(1);
+    expect((await repo.listByApplication(w.org, w.applicationId)).filter((m) => m.historical)).toHaveLength(2);
+  });
+
   it('dedupes inbound ids per organization with a ConflictError', async () => {
     const repo = createDrizzleMessages(handle.db);
     const w = await insertWorld();

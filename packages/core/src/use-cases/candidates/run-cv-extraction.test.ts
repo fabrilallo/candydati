@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError, ValidationError } from '../../errors.js';
 import {
+  buildApplication,
   buildExtraction,
   fakeModelExtractor,
   fakePdfBytes,
@@ -25,6 +26,12 @@ async function world(overrides = {}, withFile = true) {
 const stored = (deps: Awaited<ReturnType<typeof world>>) => deps.extractions.findByApplication(ORG_A, 'app_1');
 
 describe('runCvExtraction', () => {
+  it('skips a migrated application without a CV', async () => {
+    const deps = seedCandidateWorld({ applications: [buildApplication({ organizationId: ORG_A, cv: null, migrationBatchId: 'mig_1' })], extractions: [pending] });
+    expect(await runCvExtraction(deps, worker, input)).toBe('skipped');
+    expect(await stored(deps)).toMatchObject({ status: 'pending' });
+  });
+
   it('stores text and structured data as done/model', async () => {
     const data = { headline: 'Engineer', skills: ['go'] };
     const deps = await world({ textExtractor: fakeTextExtractor('  Plain\u0000 text  '), modelExtractor: fakeModelExtractor(data) });

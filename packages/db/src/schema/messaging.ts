@@ -1,8 +1,9 @@
 import type { DomainRecord, DomainStatus, EmailTemplateKind, MessageDirection, MessageStatus } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
-import { boolean, index, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { boolean, check, index, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { application, candidate } from './candidate.js';
+import { migrationBatchRef } from './migration.js';
 
 const organizationRef = () =>
   text('organization_id')
@@ -79,13 +80,18 @@ export const message = pgTable(
     rawText: text('raw_text'),
     unverifiedSender: boolean('unverified_sender').notNull().default(false),
     inboundMessageId: text('inbound_message_id'),
+    /** An email of the past, brought by a migration: shown in the conversation, never sent, never counted by the caps. */
+    historical: boolean('historical').notNull().default(false),
+    migrationBatchId: migrationBatchRef(),
   },
   (table) => [
     index('message_org_application_created_idx').on(table.organizationId, table.applicationId, table.createdAt),
-    // Hourly caps count the outbound messages sent to one candidate.
+    // Hourly caps count the outbound messages sent to one candidate (historical ones are not ours to count).
     index('message_org_candidate_outbound_idx')
       .on(table.organizationId, table.candidateId, table.createdAt)
-      .where(sql`${table.direction} = 'outbound'`),
+      .where(sql`${table.direction} = 'outbound' and ${table.historical} = false`),
+    index('message_migration_batch_idx').on(table.migrationBatchId).where(sql`${table.migrationBatchId} is not null`),
+    check('message_historical_check', sql`not ${table.historical} or ${table.status} in ('sent', 'received')`),
     // Postgres treats nulls as distinct: outbound messages (null) never collide, a repeated inbound id does.
     uniqueIndex('message_org_inbound_message_id_uidx').on(table.organizationId, table.inboundMessageId),
   ],

@@ -1,5 +1,5 @@
 import { and, asc, count, desc, eq, gte, isNotNull, isNull, lte, schema, sql } from '@candydati/db';
-import { CV_MEDIA_TYPES, type Application, type CvMediaType } from '@candydati/domain';
+import { CV_MEDIA_TYPES, type Application, type CvMediaType, type StoredFile } from '@candydati/domain';
 import type { ApplicationRepository, RetentionPage } from '../candidate-ports.js';
 import { ConflictError, NotFoundError } from '../errors.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';
@@ -13,6 +13,12 @@ const toMediaType = (value: string): CvMediaType => {
   return found;
 };
 
+/** The four CV columns are all set or, on a migrated application, all null (`application_cv_check`). */
+const toStoredFile = (row: Row): StoredFile | null =>
+  row.cvKey !== null && row.cvFileName !== null && row.cvMediaType !== null && row.cvSizeBytes !== null
+    ? { key: row.cvKey, fileName: row.cvFileName, mediaType: toMediaType(row.cvMediaType), sizeBytes: row.cvSizeBytes }
+    : null;
+
 const toApplication = (row: Row): Application => ({
   id: row.id,
   organizationId: row.organizationId,
@@ -21,11 +27,12 @@ const toApplication = (row: Row): Application => ({
   stageId: row.stageId,
   outcome: row.outcome,
   message: row.message,
-  cv: { key: row.cvKey, fileName: row.cvFileName, mediaType: toMediaType(row.cvMediaType), sizeBytes: row.cvSizeBytes },
+  cv: toStoredFile(row),
   ...(row.submittedContact ? { submittedContact: row.submittedContact } : {}),
   consent: { ...row.consent, givenAt: new Date(row.consent.givenAt) },
   consentStatus: row.consentStatus,
   importBatchId: row.importBatchId,
+  ...(row.migrationBatchId ? { migrationBatchId: row.migrationBatchId } : {}),
   retentionExpiresAt: row.retentionExpiresAt,
   source: row.source,
   origin: row.origin,
@@ -46,14 +53,15 @@ const toValues = (a: Application) => ({
   stageId: a.stageId,
   outcome: a.outcome,
   message: a.message,
-  cvKey: a.cv.key,
-  cvFileName: a.cv.fileName,
-  cvMediaType: a.cv.mediaType,
-  cvSizeBytes: a.cv.sizeBytes,
+  cvKey: a.cv?.key ?? null,
+  cvFileName: a.cv?.fileName ?? null,
+  cvMediaType: a.cv?.mediaType ?? null,
+  cvSizeBytes: a.cv?.sizeBytes ?? null,
   submittedContact: a.submittedContact ?? null,
   consent: a.consent,
   consentStatus: a.consentStatus,
   importBatchId: a.importBatchId,
+  migrationBatchId: a.migrationBatchId ?? null,
   retentionExpiresAt: a.retentionExpiresAt,
   source: a.source,
   origin: a.origin,

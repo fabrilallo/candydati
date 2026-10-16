@@ -19,6 +19,7 @@ export const buildMessage = (overrides: Partial<Message> = {}): Message => ({
   rawText: null,
   unverifiedSender: false,
   inboundMessageId: null,
+  historical: false,
   ...overrides,
 });
 

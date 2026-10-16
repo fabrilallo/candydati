@@ -6,6 +6,7 @@ import {
   SYSTEM_SENDER,
   type Application,
   type Candidate,
+  type CvMediaType,
   type ImportBatch,
   type ImportItem,
   type Job,
@@ -21,7 +22,7 @@ export interface Prepared {
   readonly candidateId: string;
   readonly applicationId: string;
   readonly cv: ParsedImportCv;
-  readonly stored: { readonly key: string; readonly fileName: string; readonly mediaType: Application['cv']['mediaType']; readonly sizeBytes: number };
+  readonly stored: { readonly key: string; readonly fileName: string; readonly mediaType: CvMediaType; readonly sizeBytes: number };
 }
 
 export interface Written {
@@ -137,6 +138,7 @@ async function queueReconfirmation(ctx: CommitContext, repos: ImportCommitReposi
     rawText: null,
     unverifiedSender: false,
     inboundMessageId: null,
+    historical: false,
   });
   return message.id;
 }
@@ -177,7 +179,7 @@ export async function writeItem(ctx: CommitContext, repos: ImportCommitRepositor
     updatedAt: ctx.importedAt,
   });
   if (person.note !== null && person.note.trim() !== '') {
-    await repos.notes.create({ id: deps.newId(), organizationId, candidateId: candidate.id, applicationId: application.id, authorId: batch.createdBy, body: person.note.slice(0, IMPORT_NOTE_MAX), createdAt: ctx.importedAt });
+    await repos.notes.create({ id: deps.newId(), organizationId, candidateId: candidate.id, applicationId: application.id, authorId: batch.createdBy, authorName: null, body: person.note.slice(0, IMPORT_NOTE_MAX), createdAt: ctx.importedAt });
   }
   const messageId = person.email === null ? null : await queueReconfirmation(ctx, repos, application, { id: candidate.id, firstName: person.firstName });
   await repos.importItems.setStatus(organizationId, prepared.item.id, 'imported', null);

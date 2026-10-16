@@ -4,6 +4,7 @@ import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { application } from './candidate.js';
 import { job } from './job.js';
+import { migrationBatchRef } from './migration.js';
 
 const organizationRef = () =>
   text('organization_id')
@@ -31,10 +32,12 @@ export const applicationStageEvent = pgTable(
     occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull(),
     actorType: text('actor_type').$type<ActorType>().notNull(),
     backfilled: boolean('backfilled').notNull().default(false),
+    migrationBatchId: migrationBatchRef(),
   },
   (table) => [
     index('application_stage_event_org_occurred_idx').on(table.organizationId, table.occurredAt),
     index('application_stage_event_application_idx').on(table.applicationId),
+    index('application_stage_event_migration_batch_idx').on(table.migrationBatchId).where(sql`${table.migrationBatchId} is not null`),
   ],
 );
 

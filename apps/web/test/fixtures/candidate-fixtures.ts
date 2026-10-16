@@ -29,6 +29,7 @@ export const card = (id: string, stageId = 'received', overrides: Partial<Applic
   closedAt: null,
   noteCount: 0,
   stageRemoved: false,
+  hasCv: true,
   responseDueAt: null,
   respondedAt: null,
   responseState: 'on_track',
@@ -54,7 +55,7 @@ export const pipeline = (applications: readonly ApplicationCardDto[] = [card('a1
 export const note = (id: string, overrides: Partial<NoteDto> = {}): NoteDto => ({
   id,
   applicationId: 'a1',
-  author: { id: 'u1', name: 'Ada Lovelace' },
+  author: { id: 'u1', name: 'Ada Lovelace', external: false },
   body: 'Ottima chiamata, molto chiara sulle aspettative.',
   createdAt: T0,
   ...overrides,

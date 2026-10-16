@@ -191,7 +191,7 @@ describe('requestFeedback (by hand)', () => {
 
 async function asked(): Promise<{ deps: TestHrDeps; secret: string }> {
   const deps = await configured(world());
-  await deps.files.put(deps.store.read().applications[0]?.cv.key ?? '', fakePdfBytes(), 'application/pdf');
+  await deps.files.put(deps.store.read().applications[0]?.cv?.key ?? '', fakePdfBytes(), 'application/pdf');
   await moveApplication(deps, recruiter, { applicationId: 'app_1', stageId: 'stage-1' });
   return { deps, secret: secretsOf(deps)[0] as string };
 }
@@ -224,8 +224,16 @@ describe('the public form', () => {
     expect(file.bytes.byteLength).toBeGreaterThan(0);
     const event = deps.auditLog.events().find((e) => e.action === 'feedback.cv_opened');
     expect(event).toMatchObject({ actor: { type: 'system', id: 'feedback_page' }, metadata: { applicationId: 'app_1' } });
-    await deps.files.delete(deps.store.read().applications[0]?.cv.key ?? '');
+    await deps.files.delete(deps.store.read().applications[0]?.cv?.key ?? '');
     await expect(openFeedbackCv(deps, { token: secret })).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it('says there is no CV for a migrated application without one, and opens nothing', async () => {
+    const { deps, secret } = await asked();
+    deps.store.write({ applications: deps.store.read().applications.map((a) => (a.id === 'app_1' ? { ...a, cv: null, migrationBatchId: 'mig_1' } : a)) });
+    expect((await getFeedbackRequest(deps, { token: secret })).hasCv).toBe(false);
+    await expect(openFeedbackCv(deps, { token: secret })).rejects.toBeInstanceOf(NotFoundError);
+    expect(deps.auditLog.events().some((e) => e.action === 'feedback.cv_opened')).toBe(false);
   });
 
   it('saves the feedback once, then the link is read-only and shows what was written', async () => {
