@@ -91,10 +91,14 @@ const jsonBytes = (value: unknown): number => utf8Length(JSON.stringify(value));
  */
 export function cappedAnswers(answers: readonly ApplicationAnswer[]): readonly ApplicationAnswer[] | null {
   const kept: ApplicationAnswer[] = [];
+  // JSON of an array is `[` + items joined by `,` + `]`: its size grows item by item, no need to re-serialize it all.
+  let bytes = 2;
   for (const answer of answers.slice(0, ANSWERS_PER_APPLICATION_MAX)) {
-    const next = [...kept, { question: answer.question, answer: answer.answer }];
-    if (jsonBytes(next) > ANSWERS_MAX_BYTES) break;
-    kept.push({ question: answer.question, answer: answer.answer });
+    const item = { question: answer.question, answer: answer.answer };
+    const next = bytes + jsonBytes(item) + (kept.length > 0 ? 1 : 0);
+    if (next > ANSWERS_MAX_BYTES) break;
+    kept.push(item);
+    bytes = next;
   }
   return kept.length === 0 ? null : kept;
 }
