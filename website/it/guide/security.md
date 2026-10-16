@@ -12,6 +12,9 @@ Non devi ricordartele: un'installazione in produzione le applica da sola.
   falliti rallentano i tentativi successivi invece di bloccare l'account, e il proprietario viene avvisato dopo 10
   fallimenti. L'autenticazione a due fattori (TOTP con codici di riserva) è disponibile per tutti, e proprietari e
   amministratori possono renderla obbligatoria.
+- **Conteggio delle visite** degli annunci pubblici: sono numeri aggregati per giorno, provenienza e campagna, senza
+  cookie, archivio locale del browser, indirizzo IP o user agent conservati, e nulla che distingua due visitatori. Vedi
+  [Link tracciati](./tracked-links).
 - **Isolamento**: ogni query è limitata a una sola organizzazione; ogni azione è controllata rispetto ai permessi della
   persona e scritta in un registro delle azioni non modificabile.
 - **Le chiavi API** scadono sempre e non hanno mai più permessi di chi le ha create.

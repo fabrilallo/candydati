@@ -20,6 +20,7 @@ export const it: LocaleSpecificConfig<DefaultTheme.Config> = {
           ai: 'Assistente AI (facoltativo)',
           operations: 'Gestione quotidiana',
           configuration: 'Configurazione',
+          trackedLinks: 'Link tracciati e provenienza',
           otherDeployments: 'Altri modi di installare',
           api: 'API, webhook e MCP',
           security: 'Sicurezza e privacy',

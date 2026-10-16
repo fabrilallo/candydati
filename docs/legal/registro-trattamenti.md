@@ -38,6 +38,8 @@ Candidati e candidate; persone di riferimento eventualmente indicate [se previst
 - Professionali: curriculum, esperienze, competenze, lingue, messaggio di presentazione.
 - Processo di selezione: fase, valutazioni e note dei selezionatori, esiti, comunicazioni, disponibilità per i colloqui.
 - Consenso: versione dell'informativa, data, ambito.
+- Provenienza della candidatura: etichetta breve del canale e della campagna del link (per esempio `linkedin`, `autunno-2026`), mai un indirizzo web completo né un indirizzo email.
+- Statistiche di visita degli annunci: conteggi aggregati per giorno, canale e campagna. Nessun cookie, nessun archivio locale del browser, nessun indirizzo IP o user agent conservato: non sono dati personali, perché non permettono di riconoscere né di distinguere i visitatori. Conservati 25 mesi.
 - Nessuna categoria particolare di dati (art. 9) è richiesta. Il prodotto non ha campi dedicati e l'estrazione dai CV scarta foto, data di nascita e stato civile.
 
 ## Destinatari
