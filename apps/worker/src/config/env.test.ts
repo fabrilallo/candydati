@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { loadEnv } from './env.js';
 
 const VALID_DATABASE_URL = 'postgres://candydati:candydati@localhost:5434/candydati';
-const S3 = { S3_ENDPOINT: 'http://localhost:9000', S3_BUCKET: 'candydati', S3_ACCESS_KEY: 'key', S3_SECRET_KEY: 'secret' };
+/** The api's secret travels with the storage settings in every case below: the worker needs both. */
+const AUTH_SECRET = 'Zq8vN3kR7wLp2XsT9bYc4HdM6fJg1Ae5';
+const S3 = { BETTER_AUTH_SECRET: AUTH_SECRET, S3_ENDPOINT: 'http://localhost:9000', S3_BUCKET: 'candydati', S3_ACCESS_KEY: 'key', S3_SECRET_KEY: 'secret' };
 
 /** Passes every production rule: strong secrets, https PLATFORM_URL, a real email provider. */
 const PRODUCTION = {
@@ -97,7 +99,7 @@ describe('loadEnv storage and model', () => {
   });
 
   it('requires S3 and names the variable, not its value', () => {
-    expect(() => loadEnv({ DATABASE_URL: VALID_DATABASE_URL })).toThrow(/S3_/);
+    expect(() => loadEnv({ BETTER_AUTH_SECRET: AUTH_SECRET, DATABASE_URL: VALID_DATABASE_URL })).toThrow(/S3_/);
     expect(() => loadEnv({ ...S3, S3_SECRET_KEY: '', DATABASE_URL: VALID_DATABASE_URL })).toThrow(/S3_SECRET_KEY/);
   });
 });
@@ -135,5 +137,23 @@ describe('loadEnv webhooks', () => {
     expect(loadEnv(base).CV_MODEL_DAILY_BUDGET).toBe(1000);
     expect(loadEnv({ ...base, CV_MODEL_DAILY_BUDGET: '25' }).CV_MODEL_DAILY_BUDGET).toBe(25);
     expect(() => loadEnv({ ...base, CV_MODEL_DAILY_BUDGET: '0' })).toThrow(/CV_MODEL_DAILY_BUDGET/);
+  });
+});
+
+describe('loadEnv: the secret of migration credentials', () => {
+  it('requires BETTER_AUTH_SECRET, at least 32 characters, naming it and never its value', () => {
+    const { BETTER_AUTH_SECRET: _omit, ...withoutSecret } = S3;
+    expect(() => loadEnv({ ...withoutSecret, DATABASE_URL: VALID_DATABASE_URL })).toThrow(/BETTER_AUTH_SECRET: missing/);
+    const short = 'short-secret-value';
+    const message = (() => {
+      try {
+        loadEnv({ ...S3, BETTER_AUTH_SECRET: short, DATABASE_URL: VALID_DATABASE_URL });
+        return '';
+      } catch (error) {
+        return (error as Error).message;
+      }
+    })();
+    expect(message).toMatch(/BETTER_AUTH_SECRET/);
+    expect(message).not.toContain(short);
   });
 });

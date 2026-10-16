@@ -18,7 +18,7 @@ Variables without a default are required or optional as described; see `.env.exa
 | `APPLICATIONS_DAILY_MAX_PER_ORGANIZATION` | api |  | Applications the public form accepts per organization in 24 hours. |
 | `ASSISTANT_DAILY_BUDGET_PER_ORGANIZATION` | api |  | Assistant chat requests per organization per UTC day. |
 | `ASSISTANT_DAILY_BUDGET_PER_USER` | api |  | Assistant chat requests per person per UTC day. |
-| `BETTER_AUTH_SECRET` | api |  | Session signing secret, at least 32 random characters. Production refuses example (change-me) and low-entropy values. |
+| `BETTER_AUTH_SECRET` | api, worker |  | Session signing secret, at least 32 random characters. Production refuses example (change-me) and low-entropy values. The worker needs it too: it derives the key that keeps a migration connector's credentials encrypted during the fetch. |
 | `BETTER_AUTH_URL` | api |  | The WEB origin: the browser reaches the api through the web proxy. Must be https in production (Secure cookies). |
 | `BOOTSTRAP_TOKEN` | api |  | One-time secret for the first owner sign-up in invite_only mode (field on /signup?setup, sent as the x-bootstrap-token header). Required in production to bootstrap, at least 32 random characters; useless once a confirmed account exists, remove it then. |
 | `CV_MODEL_DAILY_BUDGET` | worker | `1000` | Worker: CV extractions per organization and day that may call the model. |

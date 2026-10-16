@@ -138,6 +138,19 @@ const migrationPackageShape = z.strictObject({
   messages: z.array(messageSchema).max(MIGRATION_LIMITS.messages).default([]),
 });
 
+/**
+ * Each kind of item on its own, for producers that build a package item by item (the connectors' `PackageBuilder`):
+ * the same strict shapes as in the package, so an item accepted here is accepted in the package.
+ */
+export const migrationPackageItemSchemas = {
+  user: userSchema,
+  job: jobSchema,
+  candidate: candidateSchema,
+  application: applicationSchema,
+  note: noteSchema,
+  message: messageSchema,
+} as const;
+
 export type MigrationPackage = z.infer<typeof migrationPackageShape>;
 export type MigrationPackageInput = z.input<typeof migrationPackageShape>;
 export type MigrationJob = MigrationPackage['jobs'][number];

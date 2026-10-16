@@ -1,4 +1,4 @@
-import type { MigrationBatch, MigrationBatchDto, MigrationCommitCounts, MigrationIssue, MigrationIssueDto } from '@candydati/domain';
+import type { MigrationBatch, MigrationBatchDto, MigrationFetchCounts, MigrationCommitCounts, MigrationIssue, MigrationIssueDto } from '@candydati/domain';
 
 export type MigrationBatchView = MigrationBatchDto;
 export type MigrationIssueView = MigrationIssueDto;
@@ -11,8 +11,15 @@ const omitCursor = ({ cursor: _cursor, ...written }: MigrationCommitCounts): Omi
  * The batch as the web shows it. Left out on purpose: where the package is stored, and the commit cursor (an internal
  * detail of the worker). The declarations keep their time, not the user id: the audit log has who.
  */
+/** A connector fetch's progress and parts; the temporary file slots it reserved stay internal. */
+const fetchView = (fetch: MigrationFetchCounts): NonNullable<MigrationBatchView['counts']['fetch']> => ({
+  done: fetch.done,
+  total: fetch.total,
+  ...(fetch.parts === undefined ? {} : { parts: fetch.parts }),
+});
+
 export function toMigrationView(batch: MigrationBatch): MigrationBatchView {
-  const { commit, perJob, ...counts } = batch.counts;
+  const { commit, perJob, fetch, ...counts } = batch.counts;
   const written = commit === undefined ? undefined : omitCursor(commit);
   return {
     id: batch.id,
@@ -20,7 +27,12 @@ export function toMigrationView(batch: MigrationBatch): MigrationBatchView {
     sourceSystem: batch.sourceSystem,
     producer: batch.producer,
     connectorMaturity: batch.connectorMaturity,
-    counts: { ...counts, ...(perJob === undefined ? {} : { perJob: [...perJob] }), ...(written === undefined ? {} : { commit: written }) },
+    counts: {
+      ...counts,
+      ...(perJob === undefined ? {} : { perJob: [...perJob] }),
+      ...(fetch === undefined ? {} : { fetch: fetchView(fetch) }),
+      ...(written === undefined ? {} : { commit: written }),
+    },
     stageMapping: [...batch.stageMapping],
     excludedJobs: [...batch.excludedJobs],
     declarations: batch.declarations === null ? null : { at: batch.declarations.at, controller: true, previewChecked: true, processorsOwned: true },
@@ -30,6 +42,8 @@ export function toMigrationView(batch: MigrationBatch): MigrationBatchView {
     committedAt: iso(batch.committedAt),
     undoneAt: iso(batch.undoneAt),
     purgedAt: iso(batch.purgedAt),
+    groupId: batch.groupId,
+    part: batch.part,
   };
 }
 

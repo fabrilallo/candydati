@@ -10,10 +10,18 @@ export interface MigratedRowTag {
   readonly batchId: string;
 }
 
+/** Sealed connector credentials, kept apart from the batch like the Postgres column the batch reads never select. */
+export interface StoredCredentials {
+  readonly organizationId: string;
+  readonly batchId: string;
+  readonly ciphertext: string;
+}
+
 export interface MigrationStoreState {
   readonly batches: readonly MigrationBatch[];
   readonly issues: readonly MigrationIssue[];
   readonly tags: readonly MigratedRowTag[];
+  readonly credentials: readonly StoredCredentials[];
 }
 
 export interface MigrationStore {
@@ -22,7 +30,7 @@ export interface MigrationStore {
 }
 
 export const createMigrationStore = (initial: Partial<MigrationStoreState> = {}): MigrationStore => {
-  const state = cell<MigrationStoreState>({ batches: [], issues: [], tags: [], ...initial });
+  const state = cell<MigrationStoreState>({ batches: [], issues: [], tags: [], credentials: [], ...initial });
   return {
     read: () => state.get(),
     write: (next) => {
@@ -33,9 +41,14 @@ export const createMigrationStore = (initial: Partial<MigrationStoreState> = {})
 
 export function createInMemoryMigrationBatches(store: MigrationStore): MigrationBatchRepository {
   const find = (organizationId: string, id: string) => store.read().batches.find((b) => b.organizationId === organizationId && b.id === id) ?? null;
+  const ofBatch = (organizationId: string, id: string) => (c: StoredCredentials) => c.organizationId === organizationId && c.batchId === id;
+  const wipe = (organizationId: string, id: string): void => {
+    store.write({ credentials: store.read().credentials.filter((c) => !ofBatch(organizationId, id)(c)) });
+  };
   return {
-    async create(batch) {
-      store.write({ batches: [...store.read().batches, batch] });
+    async create(batch, secrets) {
+      const credentials = secrets === undefined ? [] : [{ organizationId: batch.organizationId, batchId: batch.id, ciphertext: secrets.credentialsCiphertext }];
+      store.write({ batches: [...store.read().batches, batch], credentials: [...store.read().credentials, ...credentials] });
       return batch;
     },
     async transition(organizationId, id, from, patch) {
@@ -43,7 +56,15 @@ export function createInMemoryMigrationBatches(store: MigrationStore): Migration
       if (!current || current.status !== from) throw new ConflictError('migration_changed');
       const next = { ...current, ...patch };
       store.write({ batches: store.read().batches.map((b) => (b === current ? next : b)) });
+      // Like Postgres: any change to an ended status wipes the credentials in the same write.
+      if (patch.status !== undefined && isMigrationEnded(patch.status)) wipe(organizationId, id);
       return next;
+    },
+    async readCredentials(organizationId, id) {
+      return store.read().credentials.find(ofBatch(organizationId, id))?.ciphertext ?? null;
+    },
+    async wipeCredentials(organizationId, id) {
+      wipe(organizationId, id);
     },
     async findById(organizationId, id) {
       return find(organizationId, id);

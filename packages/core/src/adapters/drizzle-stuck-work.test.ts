@@ -94,4 +94,22 @@ describe('reconciler on Postgres (#3)', () => {
       ].toSorted((a, b) => a.id.localeCompare(b.id)),
     );
   });
+  it('fails connector fetches that stopped moving, wiping their credentials, and leaves live ones alone', async () => {
+    const world = await buildImportWorld(handle, NOW);
+    const insert = async (status: string, updatedAt: Date): Promise<string> => {
+      const id = randomUUID();
+      await handle.db.insert(schema.migrationBatch).values({ id, organizationId: world.org, status: status as never, sourceSystem: 'fake-ats', producer: '', connectorMaturity: 'beta', createdBy: 'u', packageKey: 'k', createdAt: NOW, updatedAt, credentialsCiphertext: 'sb1.sealed' });
+      return id;
+    };
+    const stalled = await insert('fetching', NOW);
+    const live = await insert('fetching', LATER);
+    const analyzing = await insert('analyzing', NOW);
+    const failed = await createDrizzleStuckWork(handle.db).failStalledFetches(new Date(NOW.getTime() + 60_000), 5000);
+    expect(failed).toBeGreaterThanOrEqual(1);
+    const rows = await handle.db.select().from(schema.migrationBatch).where(eq(schema.migrationBatch.organizationId, world.org));
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    expect(byId.get(stalled)).toMatchObject({ status: 'failed', error: 'fetch_interrupted', credentialsCiphertext: null });
+    expect(byId.get(live)).toMatchObject({ status: 'fetching', credentialsCiphertext: 'sb1.sealed' });
+    expect(byId.get(analyzing)).toMatchObject({ status: 'analyzing', credentialsCiphertext: 'sb1.sealed' });
+  });
 });

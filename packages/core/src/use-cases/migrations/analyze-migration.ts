@@ -62,7 +62,8 @@ async function record(deps: MigrationAnalysisDeps, batch: MigrationBatch, opened
       status: 'ready',
       sourceSystem: opened.manifest.source.system,
       producer: opened.manifest.source.producer,
-      counts: analysis.counts,
+      // A connector fetch's progress and number of parts stay with the preview.
+      counts: batch.counts.fetch === undefined ? analysis.counts : { ...analysis.counts, fetch: batch.counts.fetch },
       stageMapping: analysis.stageMapping,
       excludedJobs: [],
       error: null,

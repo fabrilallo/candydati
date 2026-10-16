@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, lt, schema } from '@candydati/db';
+import { and, asc, eq, inArray, lt, schema, sql } from '@candydati/db';
 import type { StuckWorkRepository, UnfinishedMigrationStatus } from '../reconcile-ports.js';
 import type { DbExecutor } from './db-executor.js';
 
@@ -48,6 +48,20 @@ export function createDrizzleStuckWork(db: DbExecutor): StuckWorkRepository {
         const status = waiting.find((value) => value === row.status);
         return status === undefined ? [] : [{ organizationId: row.organizationId, id: row.id, status }];
       });
+    },
+    async failStalledFetches(before, limit) {
+      const stalled = db
+        .select({ id: migrationBatch.id })
+        .from(migrationBatch)
+        .where(and(eq(migrationBatch.status, 'fetching'), lt(migrationBatch.updatedAt, before)))
+        .orderBy(asc(migrationBatch.updatedAt), asc(migrationBatch.id))
+        .limit(limit);
+      const failed = await db
+        .update(migrationBatch)
+        .set({ status: 'failed', error: 'fetch_interrupted', credentialsCiphertext: null, updatedAt: sql`now()` })
+        .where(and(eq(migrationBatch.status, 'fetching'), inArray(migrationBatch.id, stalled)))
+        .returning({ id: migrationBatch.id });
+      return failed.length;
     },
   };
 }

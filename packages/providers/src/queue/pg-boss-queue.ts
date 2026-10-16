@@ -8,6 +8,8 @@ export interface RetryPolicy {
   readonly retryBackoff: boolean;
   /** Longest wait between two retries, in seconds. */
   readonly retryDelayMax?: number;
+  /** How long a job may run before pg-boss takes it for dead (default 15 minutes). */
+  readonly expireInSeconds?: number;
 }
 
 export interface SendOptions extends RetryPolicy {
@@ -36,9 +38,21 @@ export const WEBHOOK_RETRY: RetryPolicy = { retryLimit: 14, retryDelay: 30, retr
 /** A stored file that must go (erasure): eight attempts, 60 s then doubling, so storage can be down for hours. */
 export const FILES_DELETE_RETRY: RetryPolicy = { retryLimit: 8, retryDelay: 60, retryBackoff: true };
 
+/**
+ * A migration connector fetch is never retried: its credentials are wiped when it ends, whatever happened. It may read
+ * a large account for hours (Workable allows 10 requests per 10 s), so it expires late; the reconciler fails a fetch
+ * whose worker died well before that.
+ */
+export const MIGRATION_FETCH_RETRY: RetryPolicy = { retryLimit: 0, retryDelay: 0, retryBackoff: false, expireInSeconds: 12 * 60 * 60 };
+
 /** A distribution channel (a job board) can be down as long as a webhook receiver: same policy. */
-const retryFor = (name: string): RetryPolicy =>
-  name === 'webhook.deliver' || name === 'distribution.sync' ? WEBHOOK_RETRY : name === 'files.delete' ? FILES_DELETE_RETRY : TASK_RETRY;
+const POLICIES: Readonly<Record<string, RetryPolicy>> = {
+  'webhook.deliver': WEBHOOK_RETRY,
+  'distribution.sync': WEBHOOK_RETRY,
+  'files.delete': FILES_DELETE_RETRY,
+  'migration.fetch': MIGRATION_FETCH_RETRY,
+};
+const retryFor = (name: string): RetryPolicy => POLICIES[name] ?? TASK_RETRY;
 
 /** A stable UUID (version 5 layout) for `name` + `key`: the same task key always gives the same pg-boss job id. */
 export function singletonJobId(name: string, key: string): string {

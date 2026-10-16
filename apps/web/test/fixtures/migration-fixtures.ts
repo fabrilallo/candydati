@@ -40,6 +40,8 @@ export const migration = (over: Record<string, unknown> = {}) => ({
   committedAt: null,
   undoneAt: null,
   purgedAt: null,
+  groupId: null,
+  part: null,
   ...over,
 })
 
@@ -54,3 +56,24 @@ export const commitCounts = { jobs: 2, candidatesCreated: 4, candidatesMerged: 1
 export const issue = (id: string, level: string, code: string, ref: string | null = null) => ({ id, level, code, ref, detail: null })
 
 export const issuesPage = (items: unknown[], total = items.length, page = 1) => ({ items, total, page, limit: 50 })
+
+/** A built-in connector as `GET /api/v1/migrations/connectors` lists it. */
+export const connector = (over: Record<string, unknown> = {}) => ({
+  id: 'acme',
+  label: 'Acme ATS',
+  maturity: 'beta',
+  input: 'api',
+  docsUrl: 'https://docs.acme.example/api',
+  fields: [
+    { name: 'subdomain', label: { en: 'Account subdomain', it: 'Sottodominio dell’account' }, type: 'text', secret: false, placeholder: 'yourcompany' },
+    {
+      name: 'apiKey',
+      label: { en: 'API key', it: 'Chiave API' },
+      help: { en: 'A read-only key of an admin.', it: 'Una chiave di sola lettura di un amministratore.' },
+      type: 'password',
+      secret: true,
+      howToUrl: 'https://docs.acme.example/keys',
+    },
+  ],
+  ...over,
+})

@@ -8,7 +8,12 @@ export type MigrationBatchPatch = Partial<Omit<MigrationBatch, 'id' | 'organizat
 
 /** Migration batches (ADR 0009). Every call is scoped to one organization. */
 export interface MigrationBatchRepository {
-  create(batch: MigrationBatch): Promise<MigrationBatch>;
+  /** `credentialsCiphertext`: only for a connector batch, sealed by the `CredentialsBox`; never read back with the batch. */
+  create(batch: MigrationBatch, secrets?: { readonly credentialsCiphertext: string }): Promise<MigrationBatch>;
+  /** The sealed connector credentials, or null once wiped. Only the fetch job reads them. */
+  readCredentials(organizationId: string, id: string): Promise<string | null>;
+  /** Erases the connector credentials of the batch, whatever its status. Idempotent. */
+  wipeCredentials(organizationId: string, id: string): Promise<void>;
   /**
    * Writes `patch` only while the batch is still `from` (compare-and-set). Edits in the preview pass `from: 'ready'` and
    * no status: an edit and the start of the commit can never both win.

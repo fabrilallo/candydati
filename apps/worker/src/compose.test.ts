@@ -9,6 +9,7 @@ import { QUEUE_DEFINITIONS } from './queues/definitions.js';
 
 const env = loadEnv({
   DATABASE_URL: 'postgres://candydati:candydati@localhost:5434/candydati',
+  BETTER_AUTH_SECRET: 'Zq8vN3kR7wLp2XsT9bYc4HdM6fJg1Ae5',
   S3_ENDPOINT: 'http://localhost:9000',
   S3_BUCKET: 'candydati',
   S3_ACCESS_KEY: 'key',
@@ -30,7 +31,7 @@ describe('createQueues', () => {
     const names = queues.map((queue) => queue.name);
     expect(new Set(names).size).toBe(names.length);
     for (const definition of QUEUE_DEFINITIONS) expect(names).toContain(definition.name);
-    for (const name of ['files.delete', 'email.send', 'migration.analyze', 'migration.commit']) expect(names).toContain(name);
+    for (const name of ['files.delete', 'email.send', 'migration.analyze', 'migration.commit', 'migration.fetch']) expect(names).toContain(name);
     for (const queue of queues) expect(typeof queue.handle).toBe('function');
   });
 

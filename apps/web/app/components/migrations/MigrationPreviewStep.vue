@@ -15,12 +15,13 @@ const totals = computed(() => issueTotals(props.batch.counts))
 // The commit looks the errors up again when it is asked for (a notice published since still counts): the way on stays open.
 const blocked = computed(() => totals.value.error > 0)
 const levels = computed(() => ISSUE_LEVELS.filter((level) => totals.value[level] > 0))
+const connectors = useMigrationConnectors()
 const stats = computed(() => (['jobs', 'candidates', 'applications', 'notes', 'messages', 'files'] as const).map((key) => ({ key, value: figures.value[key] })))
 </script>
 
 <template>
   <section class="grid gap-8" aria-labelledby="migration-preview-title" data-testid="migration-preview-step">
-    <MigrationBetaNotice v-if="batch.connectorMaturity === 'beta'" :source="batch.sourceSystem" />
+    <MigrationBetaNotice v-if="batch.connectorMaturity === 'beta'" :source="connectors.labelOf(batch.sourceSystem)" />
 
     <div class="grid gap-1">
       <h2 id="migration-preview-title" class="text-lg font-semibold tracking-tight">{{ t('migrations.preview.title') }}</h2>

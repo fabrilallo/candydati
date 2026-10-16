@@ -15,7 +15,7 @@ export const DESCRIPTIONS = {
   DELIVERY_LOG_RETENTION_DAYS: 'Days after which delivered outbox events and webhook delivery records are pruned by the daily job (default 30).',
   WEBHOOKS_ALLOW_PRIVATE: 'Development only: webhooks may target localhost and private addresses. Refused in production.',
   DATABASE_URL: 'Postgres connection string. In production its password must be at least 16 random characters, not the example.',
-  BETTER_AUTH_SECRET: 'Session signing secret, at least 32 random characters. Production refuses example (change-me) and low-entropy values.',
+  BETTER_AUTH_SECRET: 'Session signing secret, at least 32 random characters. Production refuses example (change-me) and low-entropy values. The worker needs it too: it derives the key that keeps a migration connector\'s credentials encrypted during the fetch.',
   BETTER_AUTH_URL: 'The WEB origin: the browser reaches the api through the web proxy. Must be https in production (Secure cookies).',
   WEB_ORIGIN: 'Origin of the web app (CORS and trusted origin).',
   TRUSTED_ORIGINS: 'Extra browser origins allowed by CORS and Better Auth, comma-separated URLs.',

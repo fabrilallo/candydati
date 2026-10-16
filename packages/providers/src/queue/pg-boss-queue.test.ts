@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createPgBossQueue, FILES_DELETE_RETRY, singletonJobId, TASK_RETRY, WEBHOOK_RETRY, type BossSender } from './pg-boss-queue.js';
+import { createPgBossQueue, FILES_DELETE_RETRY, MIGRATION_FETCH_RETRY, singletonJobId, TASK_RETRY, WEBHOOK_RETRY, type BossSender } from './pg-boss-queue.js';
 
 type FakeBoss = BossSender & { send: ReturnType<typeof vi.fn>; createQueue: ReturnType<typeof vi.fn>; getJobById: ReturnType<typeof vi.fn>; deleteJob: ReturnType<typeof vi.fn> };
 
@@ -105,5 +105,12 @@ describe('createPgBossQueue', () => {
       await createPgBossQueue(boss).enqueue('email.send', task, { singletonKey: 'm' });
       expect(boss.getJobById).not.toHaveBeenCalled();
     });
+  });
+
+  it('never retries a migration fetch (its credentials are gone) and lets it run for hours', async () => {
+    const boss = { send: vi.fn(async () => 'id'), createQueue: vi.fn(async () => undefined), getJobById: vi.fn(async () => null), deleteJob: vi.fn(async () => undefined) };
+    await createPgBossQueue(boss).enqueue('migration.fetch', { organizationId: 'o', batchId: 'b' }, { singletonKey: 'b' });
+    expect(boss.send.mock.calls[0]?.[2]).toMatchObject({ retryLimit: 0, expireInSeconds: 12 * 60 * 60, singletonKey: 'b' });
+    expect(MIGRATION_FETCH_RETRY.retryLimit).toBe(0);
   });
 });

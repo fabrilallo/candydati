@@ -13,6 +13,7 @@ export { createCvExtractor, type CvExtractor, type CvExtractorOptions, type CvEx
 export { createMastraGenerator, GENERATOR_TEMPERATURE, GENERATOR_TIMEOUT_MS } from './ai/structured-generator.js';
 export * from './email/index.js';
 export * from './http/index.js';
+export * from './crypto/index.js';
 export { createZipWriter, assertZipPath, zipWriterFactory } from './zip/zip-writer.js';
 export { createZipStream, zipStreamFactory } from './zip/zip-stream.js';
 export * from './import/index.js';
@@ -20,5 +21,5 @@ export * from './migration/index.js';
 export { gatherSources, NOTION_FILES_HEADER, type SourceFile, type FoundCv, type Gathered, type CvHandler } from './import/gather.js';
 export { parseCvs, DEFAULT_ANALYSIS_CONCURRENCY, DEFAULT_ANALYSIS_BUDGET_MS, type ParseCvOptions } from './import/parse-cvs.js';
 export { runImportAnalysis, type ImportAnalysisDeps, type ImportAnalysisOutcome, type RunImportAnalysisOptions } from './import/run-analysis.js';
-export { createPgBossQueue, singletonJobId, TASK_RETRY, WEBHOOK_RETRY, FILES_DELETE_RETRY, type BossSender, type RetryPolicy, type SendOptions } from './queue/pg-boss-queue.js';
+export { createPgBossQueue, singletonJobId, TASK_RETRY, WEBHOOK_RETRY, FILES_DELETE_RETRY, MIGRATION_FETCH_RETRY, type BossSender, type RetryPolicy, type SendOptions } from './queue/pg-boss-queue.js';
 export * from './observability/index.js';

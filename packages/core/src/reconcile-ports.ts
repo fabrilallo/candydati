@@ -22,6 +22,12 @@ export interface StuckWorkRepository {
    * their commit (`importing`). The commit touches its batch with every chunk, so a long commit is never taken for stuck.
    */
   unfinishedMigrations(before: Date, limit: number): Promise<readonly (StuckRow & { readonly status: UnfinishedMigrationStatus })[]>;
+  /**
+   * Connector fetches (`fetching`) last changed before `before`: their worker died (a live fetch writes its progress every
+   * few seconds). They cannot run again, their credentials are not to be trusted to a retry, so they are failed with
+   * `fetch_interrupted` and their credentials wiped, in one statement. Returns how many.
+   */
+  failStalledFetches(before: Date, limit: number): Promise<number>;
 }
 
 export type UnfinishedMigrationStatus = 'uploaded' | 'analyzing' | 'importing';

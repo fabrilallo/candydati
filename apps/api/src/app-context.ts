@@ -55,7 +55,7 @@ import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
 import { createCareersDeps, type CareersWiring } from './wiring/careers-deps.js';
 import { createHrDeps, type HrWiring } from './wiring/hr-deps.js';
 import { createTeamDeps, type TeamWiring } from './wiring/team-deps.js';
-import { toMessagingConfig } from '@candydati/providers';
+import { toMessagingConfig, type MigrationConnectorRegistry } from '@candydati/providers';
 
 export interface RateLimitSettings {
   /** Requests per minute per client on every route. */
@@ -177,6 +177,8 @@ export interface AppContextDeps {
   readonly onAfterCommitError?: ((error: unknown) => void) | undefined;
   /** Distribution channels beyond the built-in feed: none by default, hosted deployments register theirs. */
   readonly distributionChannels?: readonly DistributionChannel[] | undefined;
+  /** Migration source connectors: the built-in ones by default. */
+  readonly migrationConnectors?: MigrationConnectorRegistry | undefined;
   /** "Now" of the reports (open and overdue promises, job age). The real clock unless a test fixes it. */
   readonly reportClock?: (() => Date) | undefined;
   /** Test seam: the careers media transcoder (sharp by default). */
@@ -185,7 +187,7 @@ export interface AppContextDeps {
 
 const isBindable = (queue: TaskQueue | BindableTaskQueue): queue is BindableTaskQueue => 'bindTo' in queue && typeof queue.bindTo === 'function';
 
-export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, reportClock, images }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
@@ -212,7 +214,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...phase2,
     ...phase5,
     ...createImportDeps({ uow, files, queue }),
-    ...createMigrationDeps({ uow, files, queue }),
+    ...createMigrationDeps({ uow, files, queue, authSecret: env.BETTER_AUTH_SECRET, connectors: migrationConnectors }),
     ...createCareersDeps({ uow, files, queue, defaultLocale: env.platform.defaultLocale, images }),
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     submitDeps: withDailyCaps(env, phase2),

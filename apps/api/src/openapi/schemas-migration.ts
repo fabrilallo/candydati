@@ -6,6 +6,8 @@ export {
   migrationCommitInputSchema as migrationCommitBody,
   migrationIssueDtoSchema as migrationIssueSchema,
   migrationIssuesPageDtoSchema as migrationIssuesPageSchema,
+  migrationConnectorDtoSchema as migrationConnectorSchema,
+  migrationConnectorInputSchema as migrationConnectorBody,
   undoMigrationDtoSchema as undoMigrationSchema,
 } from '@candydati/domain';
 

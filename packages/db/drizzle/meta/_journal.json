@@ -246,6 +246,20 @@
       "when": 1792176318132,
       "tag": "0034_application_answers_validate",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792179099732,
+      "tag": "0035_migration_batch_parts",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792179100249,
+      "tag": "0036_migration_batch_parts_validate",
+      "breakpoints": true
     }
   ]
 }

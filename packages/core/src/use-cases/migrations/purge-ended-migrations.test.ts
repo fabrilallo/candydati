@@ -1,4 +1,4 @@
-import { DAY_MS, MIGRATION_PURGE_DAYS, migrationPackageKey, type MigrationBatch, type MigrationStatus } from '@candydati/domain';
+import { DAY_MS, MIGRATION_PURGE_DAYS, migrationFetchFileKey, migrationFilePrefix, migrationPackageKey, type MigrationBatch, type MigrationStatus } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { ConflictError } from '../../errors.js';
 import { ORG_A, seedMigrationWorld } from '../../testing/index.js';
@@ -27,6 +27,8 @@ const batch = (id: string, status: MigrationStatus, updatedAt: Date, purgedAt: D
   committedAt: null,
   undoneAt: null,
   purgedAt,
+  groupId: null,
+  part: null,
 });
 
 const issue = (batchId: string) => ({ id: `i_${batchId}`, organizationId: ORG_A, batchId, level: 'info' as const, code: 'merge_existing' as const, ref: 'c1', detail: null });
@@ -68,5 +70,14 @@ describe('purgeEndedMigrations', () => {
     const deps = world();
     const racing = { ...deps, migrations: { ...deps.migrations, transition: async () => Promise.reject(new ConflictError('migration_changed')) } };
     expect(await purgeEndedMigrations(racing, { now: NOW, limit: 1 })).toEqual({ purged: 0, failed: [] });
+  });
+
+  it('deletes the temporary files a crashed connector fetch reserved, as recorded on the batch', async () => {
+    const crashed = { ...batch('fetch_crashed', 'failed', OLD), connectorMaturity: 'beta' as const, counts: { fetch: { done: 3, total: null, reservedFiles: 3 } } };
+    const deps = seedMigrationWorld({ batches: [crashed] });
+    const prefix = migrationFilePrefix(ORG_A, crashed.id);
+    for (const slot of [0, 1]) await deps.files.put(migrationFetchFileKey(prefix, slot), new Uint8Array([1]), 'application/pdf');
+    expect(await purgeEndedMigrations(deps, { now: NOW })).toEqual({ purged: 1, failed: [] });
+    expect(deps.files.keys()).toEqual([]);
   });
 });

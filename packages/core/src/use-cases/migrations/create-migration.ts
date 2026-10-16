@@ -55,6 +55,8 @@ const newBatch = (deps: MigrationDeps, actor: Actor, id: string, packageKey: str
   committedAt: null,
   undoneAt: null,
   purgedAt: null,
+  groupId: null,
+  part: null,
 });
 
 /** Writes the batch and queues its analysis. A batch that cannot be queued is left `failed`, so the operator sees it. */
