@@ -19,6 +19,8 @@ export interface ReconcileResult {
   readonly messages: number;
   readonly exports: number;
   readonly imports: number;
+  /** Migration batches waiting for their analysis or their commit. */
+  readonly migrations: number;
   /** CV extractions still pending whose task was never queued (the queue was down right after the application committed). */
   readonly extractions: number;
   /** Tasks that could not be queued this time; the next run tries again. */
@@ -30,7 +32,7 @@ const inputSchema = z.object({ now: z.date(), limit: z.number().int().min(1).max
 /**
  * System job (every few minutes). Wherever the queue could not take part in the transaction that stored the work, a
  * crash or an outage between the commit and the send leaves a row waiting forever: a message `queued`, an export
- * `pending`, an import batch `uploaded` or `importing`, a CV extraction `pending` (its task is queued after the application commits). Their tasks are queued again with the row id as singleton key,
+ * `pending`, an import batch `uploaded` or `importing`, a migration batch `uploaded`, `analyzing` or `importing`, a CV extraction `pending` (its task is queued after the application commits). Their tasks are queued again with the row id as singleton key,
  * so a task still known to the queue is not duplicated, and the handlers are idempotent anyway.
  */
 export const reconcileQueuedWork = defineSystemJob<ReconcileDeps, typeof inputSchema, ReconcileResult>({
@@ -59,6 +61,11 @@ export const reconcileQueuedWork = defineSystemJob<ReconcileDeps, typeof inputSc
       const name = row.status === 'uploaded' ? 'import.analyze' : 'import.commit';
       if (await send(name, { organizationId: row.organizationId, batchId: row.id }, REQUEUE(row.id))) imports += 1;
     }
-    return { messages, exports, imports, extractions, failed };
+    let migrations = 0;
+    for (const row of await deps.stuck.unfinishedMigrations(before, input.limit)) {
+      const name = row.status === 'importing' ? 'migration.commit' : 'migration.analyze';
+      if (await send(name, { organizationId: row.organizationId, batchId: row.id }, REQUEUE(row.id))) migrations += 1;
+    }
+    return { messages, exports, imports, migrations, extractions, failed };
   },
 });

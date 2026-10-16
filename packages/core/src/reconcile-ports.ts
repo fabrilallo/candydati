@@ -17,4 +17,11 @@ export interface StuckWorkRepository {
   pendingExtractions(before: Date, limit: number): Promise<readonly StuckRow[]>;
   /** Import batches created before `before` and still waiting for their analysis (`uploaded`) or commit (`importing`). */
   unfinishedImports(before: Date, limit: number): Promise<readonly (StuckRow & { readonly status: 'uploaded' | 'importing' })[]>;
+  /**
+   * Migration batches last changed before `before` and still waiting for their analysis (`uploaded`, `analyzing`) or
+   * their commit (`importing`). The commit touches its batch with every chunk, so a long commit is never taken for stuck.
+   */
+  unfinishedMigrations(before: Date, limit: number): Promise<readonly (StuckRow & { readonly status: UnfinishedMigrationStatus })[]>;
 }
+
+export type UnfinishedMigrationStatus = 'uploaded' | 'analyzing' | 'importing';
