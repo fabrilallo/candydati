@@ -15,3 +15,6 @@ coverage/
 # Third-party design screenshots (not ours, never commit)
 docs/design/references/
 
+
+# Working plans we implement ourselves: never committed
+/.local/
