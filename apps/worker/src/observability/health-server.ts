@@ -14,27 +14,44 @@ export interface HealthServerOptions {
   readonly onError: (error: unknown) => void;
 }
 
-const json = (status: number, body: object): { status: number; type: string; body: string } => ({ status, type: 'application/json; charset=utf-8', body: JSON.stringify(body) });
+const json = (status: number, body: object): Answer => ({ status, type: 'application/json; charset=utf-8', body: JSON.stringify(body) });
 
 type Answer = { status: number; type: string; body: string; headers?: Record<string, string> };
+type Route = (authorization: string | undefined, options: HealthServerOptions) => Promise<Answer>;
 
-async function answer(path: string, authorization: string | undefined, options: HealthServerOptions): Promise<Answer> {
-  if (path === '/health') return json(200, { status: 'ok' });
-  if (path === '/ready') {
-    if (!options.isReady()) return json(503, { status: 'not_ready', checks: { queues: 'fail' } });
-    try {
-      await options.checkDatabase();
-      return json(200, { status: 'ready', checks: { database: 'ok', queues: 'ok' } });
-    } catch (error) {
-      options.onError(error);
-      return json(503, { status: 'not_ready', checks: { database: 'fail' } });
-    }
+const NOT_FOUND = json(404, { error: 'not found' });
+
+async function ready(options: HealthServerOptions): Promise<Answer> {
+  if (!options.isReady()) return json(503, { status: 'not_ready', checks: { queues: 'fail' } });
+  try {
+    await options.checkDatabase();
+    return json(200, { status: 'ready', checks: { database: 'ok', queues: 'ok' } });
+  } catch (error) {
+    options.onError(error);
+    return json(503, { status: 'not_ready', checks: { database: 'fail' } });
   }
-  if (path === '/metrics' && options.metricsToken !== null) {
-    if (!isMetricsAuthorized(authorization, options.metricsToken)) return { ...json(401, { error: 'metrics token required' }), headers: { 'www-authenticate': 'Bearer' } };
-    return { status: 200, type: METRICS_CONTENT_TYPE, body: await options.metrics.render() };
-  }
-  return json(404, { error: 'not found' });
+}
+
+/** Without a configured token the route does not exist; with one, the bearer token is the only way in. */
+async function metrics(authorization: string | undefined, options: HealthServerOptions): Promise<Answer> {
+  if (options.metricsToken === null) return NOT_FOUND;
+  if (!isMetricsAuthorized(authorization, options.metricsToken)) return { ...json(401, { error: 'metrics token required' }), headers: { 'www-authenticate': 'Bearer' } };
+  return { status: 200, type: METRICS_CONTENT_TYPE, body: await options.metrics.render() };
+}
+
+/**
+ * Exact paths, looked up in a Map (no prototype keys, no prefix or case games). The path only picks the route: each
+ * route checks what it needs itself, so no path can reach the metrics without the token.
+ */
+const ROUTES: ReadonlyMap<string, Route> = new Map<string, Route>([
+  ['/health', async () => json(200, { status: 'ok' })],
+  ['/ready', async (_authorization, options) => ready(options)],
+  ['/metrics', metrics],
+]);
+
+function answer(path: string, authorization: string | undefined, options: HealthServerOptions): Promise<Answer> {
+  const route = ROUTES.get(path);
+  return typeof route === 'function' ? route(authorization, options) : Promise.resolve(NOT_FOUND);
 }
 
 /**
