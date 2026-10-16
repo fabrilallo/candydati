@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { JsonReaderError, type DownloadResult, type DownloadStore, type JsonReader } from '../../../http/index.js';
+import { downloadSourceFile } from '../file-download.js';
 
 /**
  * Workable SPI v3 reads, one Zod schema per page (https://workable.readme.io/reference). Every schema lists only the
@@ -89,6 +90,7 @@ export interface WorkableClient {
   candidateIds(shortcode: string): AsyncIterable<string>;
   candidate(id: string): Promise<WorkableCandidate>;
   activities(candidateId: string): AsyncIterable<WorkableActivity>;
+  /** The token goes only to the account's API host; a file anywhere else is fetched as a public file, without it. */
   download(url: string, store: DownloadStore): Promise<DownloadResult>;
 }
 
@@ -151,6 +153,6 @@ export function createWorkableClient(reader: JsonReader, baseUrl: string, token:
         const data = await get(`/candidates/${encodeURIComponent(id)}/activities`, q, activitiesPage);
         return { items: data.activities, next: data.paging?.next };
       }),
-    download: (url, store) => reader.download(url, store, extras),
+    download: (url, store) => downloadSourceFile(reader, url, store, baseUrl, extras),
   };
 }

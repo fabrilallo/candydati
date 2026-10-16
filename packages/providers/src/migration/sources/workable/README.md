@@ -66,9 +66,10 @@ dates, so they go through the reconfirmation flow of ADR 0008.
 
 ## Unverified (built on docs, not tried)
 
-- **CV link**: the host of `resume_url` is not documented. The reader only reaches `*.workable.com`, so if the link points
-  elsewhere (for example a storage host) the CV is skipped. The token is sent with the download; whether the link also
-  expires quickly is unknown, hence the immediate download.
+- **CV link**: the host of `resume_url` is not documented. On the account's own host (`{subdomain}.workable.com`) the
+  token is sent with the download. On any other host (a storage or CDN host, or another `workable.com` name) the link is
+  fetched without credentials, from public addresses only (https, every resolved address public, redirects re-checked).
+  Whether the link expires quickly is unknown, hence the immediate download.
 - **Message direction**: the docs give no direction. A message with a `member` is taken as sent by the team, one without as
   received from the candidate.
 - **Move activities**: the docs describe `action_stage` and `target_stage` for moves, but their example shows a move as an

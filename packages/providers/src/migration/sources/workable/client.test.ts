@@ -86,4 +86,20 @@ describe('createWorkableClient', () => {
     expect(result.bytes).toBe(8);
     expect(harness.requests[0]?.headers.authorization).toBe(`Bearer ${TOKEN}`);
   });
+
+  it('downloads a CV on another host (another Workable subdomain included) without the token', async () => {
+    harness = await startWorkable(() => () => ({ raw: new TextEncoder().encode('%PDF-1.4') }));
+    const client = createWorkableClient(harness.reader, harness.baseUrl, TOKEN);
+    const keep = async (source: AsyncIterable<Uint8Array>) => {
+      let size = 0;
+      for await (const chunk of source) size += chunk.length;
+      return size;
+    };
+    for (const host of ['workable-files.s3.amazonaws.com', 'files.workable.com']) {
+      const url = harness.origin.replace('acme.workable.com', host);
+      expect((await client.download(`${url}/resumes/cv.pdf?Signature=s`, keep)).bytes).toBe(8);
+    }
+    expect(harness.requests.map((request) => request.headers.host)).toEqual([`workable-files.s3.amazonaws.com:${harness.port}`, `files.workable.com:${harness.port}`]);
+    for (const request of harness.requests) expect(request.headers.authorization).toBeUndefined();
+  });
 });
