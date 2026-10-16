@@ -183,7 +183,7 @@ describe('POST /api/v1/agent/chat with a mock model', () => {
     expect((await chat(app, 'Ricordati di me')).statusCode).toBe(200);
     for (const method of ['GET', 'DELETE'] as const) expect((await app.inject({ method, url: '/api/v1/agent/conversation' })).statusCode).toBe(404);
     const schemas = await t.handle.db.execute(sql`select 1 from information_schema.schemata where schema_name = 'mastra'`);
-    expect(schemas.length ?? schemas.rowCount).toBe(0);
+    expect(schemas.rows.length).toBe(0);
     await app.close();
   });
 
