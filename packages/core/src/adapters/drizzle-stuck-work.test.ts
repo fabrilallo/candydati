@@ -105,7 +105,9 @@ describe('reconciler on Postgres (#3)', () => {
     const live = await insert('fetching', LATER);
     const analyzing = await insert('analyzing', NOW);
     const failed = await createDrizzleStuckWork(handle.db).failStalledFetches(new Date(NOW.getTime() + 60_000), 5000);
-    expect(failed).toBeGreaterThanOrEqual(1);
+    expect(failed.map((row) => row.id)).toContain(stalled);
+    expect(failed.find((row) => row.id === stalled)?.organizationId).toBe(world.org);
+    expect(failed.map((row) => row.id)).not.toContain(live);
     const rows = await handle.db.select().from(schema.migrationBatch).where(eq(schema.migrationBatch.organizationId, world.org));
     const byId = new Map(rows.map((row) => [row.id, row]));
     expect(byId.get(stalled)).toMatchObject({ status: 'failed', error: 'fetch_interrupted', credentialsCiphertext: null });

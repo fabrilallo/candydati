@@ -162,7 +162,7 @@ verified on a real account, so check the preview carefully.
    A column with another name is **left out and listed** in the preview. If your export uses other names, **rename the
    columns in the spreadsheet before uploading**: it takes a minute and nothing else changes.
 3. **Upload.** Choose *Zucchetti InRecruiting* in the first step, then the spreadsheet and, optionally, the ZIP of CVs.
-   The files are used only to read your data and are deleted as soon as the reading ends, whatever the result.
+   The files are used only to read your data and are deleted at the end of the reading, whatever happens: success, failure, or a worker that stopped.
 
 How it reads the file: one row is one application; jobs are the distinct job titles (plus the code when there is one);
 the stages of a job are the distinct stage values in order of first appearance; a status or outcome such as *Assunto*,

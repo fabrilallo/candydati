@@ -25,9 +25,10 @@ export interface StuckWorkRepository {
   /**
    * Connector fetches (`fetching`) last changed before `before`: their worker died (a live fetch writes its progress every
    * few seconds). They cannot run again, their credentials are not to be trusted to a retry, so they are failed with
-   * `fetch_interrupted` and their credentials wiped, in one statement. Returns how many.
+   * `fetch_interrupted` and their credentials wiped, in one statement. Returns the batches it failed, so the files an
+   * operator uploaded to a file-based connector can be deleted at once.
    */
-  failStalledFetches(before: Date, limit: number): Promise<number>;
+  failStalledFetches(before: Date, limit: number): Promise<readonly StuckRow[]>;
 }
 
 export type UnfinishedMigrationStatus = 'uploaded' | 'analyzing' | 'importing';

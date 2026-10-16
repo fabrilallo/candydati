@@ -75,6 +75,12 @@ Scores, ratings and evaluations (ADR 0009, decision 3). A column whose header lo
 Rating, Voto, Giudizio, Stelle, Score...) is ignored on purpose and listed in the preview. Columns not recognised at all
 are listed too (headers only, never values).
 
+## Privacy of the upload
+
+The uploaded spreadsheet and ZIP are personal data. They are deleted when the fetch ends, whatever the outcome (success,
+failure, crash), and also when the reconciler fails a fetch whose worker died, right away; the daily purge is only a
+last safety net.
+
 ## Limits
 
 25 MB per spreadsheet, 5000 rows (a bigger file is refused, not cut: split it), the import's limits on the ZIP.

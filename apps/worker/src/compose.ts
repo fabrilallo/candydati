@@ -119,7 +119,7 @@ function createMaintenanceQueues({ env, uow, files, queue }: Composition, { impo
   return [
     createFilesDeleteQueue(files),
     // Uses the queue outside any transaction: it repairs what a transaction could not queue.
-    createReconcileQueue({ stuck: uow.repositories.stuck, queue }, () => new Date()),
+    createReconcileQueue({ stuck: uow.repositories.stuck, queue, files }, () => new Date()),
     createOrganizationExportQueue(privacy.organizationExport),
     createRetentionRunQueue({
       retention: privacy.retention,

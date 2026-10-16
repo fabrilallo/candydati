@@ -21,7 +21,7 @@ export function assertMigrationStatus(batch: MigrationBatch, allowed: readonly M
  * Deletes a stored file of a migration (the package is personal data). Only keys under the organization's migrations
  * prefix; a failed delete is queued for a retry by `files.delete`.
  */
-export async function deleteMigrationFile(deps: Pick<MigrationDeps, 'files' | 'queue'>, organizationId: string, batchId: string, key: string): Promise<void> {
+export async function deleteMigrationFile(deps: { readonly files: Pick<MigrationDeps['files'], 'delete'>; readonly queue: MigrationDeps['queue'] }, organizationId: string, batchId: string, key: string): Promise<void> {
   if (!key.startsWith(migrationFilePrefix(organizationId, batchId))) return;
   try {
     await deps.files.delete(key);

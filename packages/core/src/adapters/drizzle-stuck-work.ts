@@ -60,8 +60,8 @@ export function createDrizzleStuckWork(db: DbExecutor): StuckWorkRepository {
         .update(migrationBatch)
         .set({ status: 'failed', error: 'fetch_interrupted', credentialsCiphertext: null, updatedAt: sql`now()` })
         .where(and(eq(migrationBatch.status, 'fetching'), inArray(migrationBatch.id, stalled)))
-        .returning({ id: migrationBatch.id });
-      return failed.length;
+        .returning({ organizationId: migrationBatch.organizationId, id: migrationBatch.id });
+      return failed;
     },
   };
 }

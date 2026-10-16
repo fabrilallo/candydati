@@ -165,7 +165,7 @@ pubblico) e il connettore non è stato verificato su un account reale, quindi co
    Una colonna con un altro nome viene **lasciata fuori ed elencata** nell'anteprima. Se il tuo export usa altri nomi,
    **rinomina le colonne nel foglio prima di caricarlo**: ci vuole un minuto e non cambia altro.
 3. **Carica.** Nel primo passo scegli *Zucchetti InRecruiting*, poi il foglio e, se vuoi, lo ZIP dei CV. I file servono
-   solo a leggere i dati e vengono cancellati appena la lettura finisce, qualunque sia il risultato.
+   solo a leggere i dati e vengono cancellati alla fine della lettura, qualunque cosa accada: riuscita, errore o worker fermato.
 
 Come legge il file: una riga è una candidatura; gli annunci sono i titoli distinti (più il codice, se c'è); le fasi di un
 annuncio sono i valori distinti della colonna fase, nell'ordine in cui compaiono; uno stato o un esito come *Assunto*,
