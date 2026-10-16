@@ -22,13 +22,14 @@ const { t } = useI18n()
         {{ connector.label }}
         <Badge v-if="connector.maturity === 'beta'" variant="warning" data-testid="connector-beta">{{ t('migrations.source.connectors.beta') }}</Badge>
       </h3>
+      <p v-if="connector.input === 'files'" class="max-w-xl text-sm text-pretty" data-testid="connector-files-sentence">{{ t('migrations.source.connectors.files', { vendor: connector.label }) }}</p>
       <p v-if="connector.maturity === 'beta'" class="max-w-xl text-sm text-pretty text-muted-foreground">{{ t('migrations.source.connectors.sentence', { vendor: connector.label }) }}</p>
       <a v-if="safeExternalUrl(connector.docsUrl)" :href="safeExternalUrl(connector.docsUrl) ?? undefined" target="_blank" rel="noopener noreferrer" class="inline-flex w-fit items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline">
         {{ t('migrations.source.connectors.docs', { vendor: connector.label }) }}<ExternalLinkIcon class="size-3" aria-hidden="true" />
       </a>
     </div>
     <Button type="button" variant="outline" :data-testid="`source-connector-${connector.id}`" @click="emit('connect')">
-      {{ t('migrations.source.connectors.action') }}<ArrowRightIcon aria-hidden="true" />
+      {{ connector.input === 'files' ? t('migrations.source.connectors.actionFiles') : t('migrations.source.connectors.action') }}<ArrowRightIcon aria-hidden="true" />
     </Button>
   </div>
 </template>

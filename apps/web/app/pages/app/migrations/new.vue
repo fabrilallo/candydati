@@ -24,6 +24,7 @@ const opened = async (migrationId: string): Promise<void> => {
       <template v-if="allowed">
         <MigrationSourceStep v-if="source === null" @choose="source = $event" @connect="source = $event" />
         <MigrationUploadStep v-else-if="source === 'package'" @uploaded="opened" @back="source = null" />
+        <MigrationConnectorFiles v-else-if="source.input === 'files'" :key="source.id" :connector="source" @started="opened" @back="source = null" />
         <MigrationConnectorForm v-else :key="source.id" :connector="source" @started="opened" @back="source = null" />
       </template>
       <FormAlert v-else message-key="errors.forbidden" />

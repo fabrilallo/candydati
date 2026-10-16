@@ -23,6 +23,8 @@ const stats = computed(() => (['jobs', 'candidates', 'applications', 'notes', 'm
   <section class="grid gap-8" aria-labelledby="migration-preview-title" data-testid="migration-preview-step">
     <MigrationBetaNotice v-if="batch.connectorMaturity === 'beta'" :source="connectors.labelOf(batch.sourceSystem)" />
 
+    <MigrationFetchNotices :notices="batch.counts.fetch?.notices ?? []" />
+
     <div class="grid gap-1">
       <h2 id="migration-preview-title" class="text-lg font-semibold tracking-tight">{{ t('migrations.preview.title') }}</h2>
       <p class="max-w-2xl text-sm text-pretty text-muted-foreground">{{ t('migrations.preview.intro') }}</p>

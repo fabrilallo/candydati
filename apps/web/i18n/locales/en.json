@@ -2984,7 +2984,9 @@
         "docs": "Documentation of {vendor}",
         "action": "Connect",
         "loading": "Loading the connectors",
-        "error": "The connectors could not be loaded. You can still upload a package."
+        "error": "The connectors could not be loaded. You can still upload a package.",
+        "files": "Upload your {vendor} export",
+        "actionFiles": "Upload the export"
       }
     },
     "upload": {
@@ -3019,7 +3021,7 @@
       "fetchingProgress": "{done} of {total} read",
       "fetchingCount": "{done} read so far",
       "fetchFailed": "The source could not be read",
-      "fetchFailedBody": "Nothing was written to your data, and the credentials were erased. Start a new migration to try again."
+      "fetchFailedBody": "Nothing was written to your data, and what you sent (credentials or files) was erased. Start a new migration to try again."
     },
     "failure": {
       "invalid_archive": "the file is not a valid ZIP",
@@ -3047,7 +3049,9 @@
       "connector_unavailable": "the connector is not available on this installation any more",
       "fetch_interrupted": "the reading stopped before the end and the credentials were erased: start again",
       "fetch_failed": "the reading of the source failed unexpectedly",
-      "unknown": "an unexpected error"
+      "unknown": "an unexpected error",
+      "input_unreadable": "the file could not be read: it is empty, not a CSV or XLSX spreadsheet, has more than 5000 rows (split it), or the ZIP of CVs is not valid",
+      "input_columns_missing": "the spreadsheet has no column for the name (expected a header such as Nome e cognome, Full name, or Nome and Cognome) or for the job (Annuncio, Posizione, Job, Vacancy): rename the columns and upload again"
     },
     "preview": {
       "title": "Check what will come across",
@@ -3257,6 +3261,42 @@
       "intro": "This source was larger than one package: it was split into {parts} parts. Each part is previewed and confirmed on its own; people in several parts are merged by email.",
       "part": "Part {part}",
       "open": "Open part {part}"
+    },
+    "files": {
+      "title": "Upload your {vendor} export",
+      "intro": "{vendor} has no public API: ask {vendor} support for a full export of your data, then upload it here. The files are used only to read your data: they are deleted as soon as the reading ends, and no scores or ratings are imported.",
+      "guide": "How to get and prepare the {vendor} export",
+      "sheet": {
+        "title": "Spreadsheet",
+        "body": "Required. A CSV or XLSX file, one row per application, up to {size}.",
+        "choose": "Choose the spreadsheet"
+      },
+      "cvs": {
+        "title": "CVs (optional)",
+        "body": "A ZIP with the CVs (PDF or Word), up to {size}. They are matched to people by the file column, the email or the name in the file name.",
+        "choose": "Choose the ZIP"
+      },
+      "remove": "Remove {name}",
+      "submit": "Upload and read",
+      "errors": {
+        "notSheet": "This is not a CSV or XLSX file.",
+        "notZip": "This is not a ZIP file.",
+        "empty": "The file is empty.",
+        "tooLarge": "Too large: the limit is {size}.",
+        "tooLargeServer": "The spreadsheet is larger than the size limit.",
+        "sheetMissing": "Choose the spreadsheet first."
+      }
+    },
+    "notices": {
+      "title": "What the reading noted",
+      "columns_unrecognized": "{count} column was not recognised and left out | {count} columns were not recognised and left out",
+      "columns_ignored": "{count} column looks like a score or rating and was ignored on purpose | {count} columns look like scores or ratings and were ignored on purpose",
+      "rows_skipped": "{count} row was skipped: no usable name or no job | {count} rows were skipped: no usable name or no job",
+      "rows_duplicate": "{count} row repeated the same person for the same job and was merged | {count} rows repeated the same person for the same job and were merged",
+      "values_dropped": "{count} value (email, phone or date) was not valid and left empty | {count} values (email, phone or date) were not valid and left empty",
+      "cvs_unmatched": "{count} CV in the ZIP could not be matched to a person and was not imported | {count} CVs in the ZIP could not be matched to a person and were not imported",
+      "headers": "Columns: {headers}",
+      "hint": "To bring a column across, rename it to a name the guide lists and upload again."
     }
   },
   "consentRenew": {

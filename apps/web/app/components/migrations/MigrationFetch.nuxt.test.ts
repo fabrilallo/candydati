@@ -40,7 +40,7 @@ describe('reading from a connector', () => {
   it('says the credentials are gone when the reading failed', async () => {
     const wrapper = await mountSuspended(MigrationAnalysisStep, { props: { batch: migration({ status: 'failed', error: 'credentials_refused', counts: {} }) as never } })
     mounted.push(wrapper)
-    expect(wrapper.find('[data-testid="migration-failed"]').text()).toContain('le credenziali sono state cancellate')
+    expect(wrapper.find('[data-testid="migration-failed"]').text()).toContain('credenziali o file) è stato cancellato')
     expect(wrapper.find('[data-testid="migration-failure-reason"]').text()).toContain('la fonte ha rifiutato le credenziali')
   })
 

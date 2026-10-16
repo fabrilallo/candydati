@@ -52,6 +52,8 @@ export const MIGRATIONS_PATH = '/api/v1/migrations'
 /** Built-in source connectors, and the start of a migration from one of them (credentials in the body, never in the URL). */
 export const MIGRATION_CONNECTORS_PATH = `${MIGRATIONS_PATH}/connectors`
 export const MIGRATION_CONNECTOR_PATH = `${MIGRATIONS_PATH}/connector`
+/** The upload of an export for a file-based connector (a spreadsheet and optionally a ZIP of CVs). */
+export const migrationConnectorFilesPath = (connectorId: string): string => `${MIGRATION_CONNECTOR_PATH}/${enc(connectorId)}/files`
 export const migrationPath = (id: string): string => `${MIGRATIONS_PATH}/${enc(id)}`
 export const migrationIssuesPath = (id: string): string => `${migrationPath(id)}/issues`
 export const migrationChoicesPath = (id: string): string => `${migrationPath(id)}/choices`

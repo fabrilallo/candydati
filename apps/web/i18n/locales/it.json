@@ -2984,7 +2984,9 @@
         "docs": "Documentazione di {vendor}",
         "action": "Collega",
         "loading": "Caricamento dei connettori",
-        "error": "Non è stato possibile caricare i connettori. Puoi comunque caricare un pacchetto."
+        "error": "Non è stato possibile caricare i connettori. Puoi comunque caricare un pacchetto.",
+        "files": "Carica l’export di {vendor}",
+        "actionFiles": "Carica l’export"
       }
     },
     "upload": {
@@ -3019,7 +3021,7 @@
       "fetchingProgress": "{done} di {total} letti",
       "fetchingCount": "{done} letti finora",
       "fetchFailed": "Non è stato possibile leggere la fonte",
-      "fetchFailedBody": "Nessun dato è stato scritto e le credenziali sono state cancellate. Avvia una nuova migrazione per riprovare."
+      "fetchFailedBody": "Nessun dato è stato scritto e quello che hai inviato (credenziali o file) è stato cancellato. Avvia una nuova migrazione per riprovare."
     },
     "failure": {
       "invalid_archive": "il file non è uno ZIP valido",
@@ -3047,7 +3049,9 @@
       "connector_unavailable": "il connettore non è più disponibile su questa installazione",
       "fetch_interrupted": "la lettura si è fermata prima della fine e le credenziali sono state cancellate: riprova",
       "fetch_failed": "la lettura della fonte non è riuscita per un errore imprevisto",
-      "unknown": "un errore imprevisto"
+      "unknown": "un errore imprevisto",
+      "input_unreadable": "il file non si è potuto leggere: è vuoto, non è un foglio CSV o XLSX, ha più di 5000 righe (dividilo) oppure lo ZIP dei CV non è valido",
+      "input_columns_missing": "il foglio non ha una colonna per il nome (serve un’intestazione come Nome e cognome, Full name, oppure Nome e Cognome) o per l’annuncio (Annuncio, Posizione, Job, Vacancy): rinomina le colonne e carica di nuovo"
     },
     "preview": {
       "title": "Controlla cosa arriverà",
@@ -3257,6 +3261,42 @@
       "intro": "Questa fonte era più grande di un pacchetto: è stata divisa in {parts} parti. Ogni parte ha la sua anteprima e la sua conferma; le persone presenti in più parti vengono unite per email.",
       "part": "Parte {part}",
       "open": "Apri la parte {part}"
+    },
+    "files": {
+      "title": "Carica l’export di {vendor}",
+      "intro": "{vendor} non ha un’API pubblica: chiedi al supporto di {vendor} un export completo dei tuoi dati e caricalo qui. I file servono solo a leggere i dati: vengono cancellati appena la lettura finisce e nessun punteggio o valutazione viene importato.",
+      "guide": "Come ottenere e preparare l’export di {vendor}",
+      "sheet": {
+        "title": "Foglio di calcolo",
+        "body": "Obbligatorio. Un file CSV o XLSX, una riga per candidatura, fino a {size}.",
+        "choose": "Scegli il foglio"
+      },
+      "cvs": {
+        "title": "CV (facoltativo)",
+        "body": "Uno ZIP con i CV (PDF o Word), fino a {size}. Si abbinano alle persone con la colonna file, l’email o il nome nel nome del file.",
+        "choose": "Scegli lo ZIP"
+      },
+      "remove": "Rimuovi {name}",
+      "submit": "Carica e leggi",
+      "errors": {
+        "notSheet": "Questo non è un file CSV o XLSX.",
+        "notZip": "Questo non è un file ZIP.",
+        "empty": "Il file è vuoto.",
+        "tooLarge": "Troppo grande: il limite è {size}.",
+        "tooLargeServer": "Il foglio supera il limite di dimensione.",
+        "sheetMissing": "Scegli prima il foglio di calcolo."
+      }
+    },
+    "notices": {
+      "title": "Cosa ha notato la lettura",
+      "columns_unrecognized": "{count} colonna non è stata riconosciuta ed è stata lasciata fuori | {count} colonne non sono state riconosciute e sono state lasciate fuori",
+      "columns_ignored": "{count} colonna sembra un punteggio o una valutazione ed è stata ignorata di proposito | {count} colonne sembrano punteggi o valutazioni e sono state ignorate di proposito",
+      "rows_skipped": "{count} riga è stata saltata: nessun nome utilizzabile o nessun annuncio | {count} righe sono state saltate: nessun nome utilizzabile o nessun annuncio",
+      "rows_duplicate": "{count} riga ripeteva la stessa persona per lo stesso annuncio ed è stata unita | {count} righe ripetevano la stessa persona per lo stesso annuncio e sono state unite",
+      "values_dropped": "{count} valore (email, telefono o data) non era valido ed è stato lasciato vuoto | {count} valori (email, telefono o data) non erano validi e sono stati lasciati vuoti",
+      "cvs_unmatched": "{count} CV nello ZIP non è stato abbinato a una persona e non è stato importato | {count} CV nello ZIP non sono stati abbinati a una persona e non sono stati importati",
+      "headers": "Colonne: {headers}",
+      "hint": "Per portare una colonna, rinominala con un nome elencato nella guida e carica di nuovo."
     }
   },
   "consentRenew": {
