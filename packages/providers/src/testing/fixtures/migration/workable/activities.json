@@ -1,0 +1,64 @@
+{
+  "_source": "https://workable.readme.io/reference/candidate-activities (response example)",
+  "activities": [
+    {
+      "action": "applied",
+      "stage_name": "Applied",
+      "created_at": "2016-09-29T00:00:00.000Z",
+      "updated_at": "2016-09-29T00:00:00.000Z",
+      "body": null
+    },
+    {
+      "action": "comment",
+      "stage_name": null,
+      "created_at": "2016-10-01T00:00:00.000Z",
+      "updated_at": "2016-10-01T00:00:00.000Z",
+      "member": {
+        "id": "13e0eb0e",
+        "name": "Eduardo Vallente"
+      },
+      "body": "Sure, looks very promising. Let’s schedule a phone interview",
+      "visibility_roles": [
+        "simple",
+        "hiring_manager",
+        "admin",
+        "reviewer",
+        "recruiting_admin"
+      ]
+    },
+    {
+      "action": "phone-screen",
+      "stage_name": "Phone Screen",
+      "created_at": "2016-10-02T00:00:00.000Z",
+      "updated_at": "2016-10-02T00:00:00.000Z",
+      "member": {
+        "id": "3f8918be",
+        "name": "Natalie Sung"
+      },
+      "body": null
+    },
+    {
+      "action": "message",
+      "stage_name": null,
+      "created_at": "2016-10-03T00:00:00.000Z",
+      "updated_at": "2016-10-03T00:00:00.000Z",
+      "body": "<p>Hi, Natalie</p>\n<p>Thank you for your email. It would be great to speak to you and I am available any time this week for a call at your convenience.<p>\n<p>Many, thanks,</p>\nSteve Parks\n",
+      "visibility_roles": [
+        "hiring_manager",
+        "admin",
+        "recruiting_admin"
+      ]
+    },
+    {
+      "action": "event",
+      "stage_name": null,
+      "created_at": "2016-10-03T01:00:00.000Z",
+      "updated_at": "2016-10-03T01:00:00.000Z",
+      "member": {
+        "id": "3f8918be",
+        "name": "Natalie Sung"
+      },
+      "body": null
+    }
+  ]
+}
