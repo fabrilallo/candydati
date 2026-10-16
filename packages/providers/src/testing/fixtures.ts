@@ -1,5 +1,4 @@
 import ExcelJS from 'exceljs';
-import { zipSync } from 'fflate';
 import { crc32, deflateRawSync } from 'node:zlib';
 
 const encoder = new TextEncoder();

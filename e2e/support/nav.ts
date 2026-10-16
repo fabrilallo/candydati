@@ -1,9 +1,22 @@
 import type { Page } from '@playwright/test';
 import { BASE_URL } from './env';
 
-interface NuxtRoot extends HTMLElement {
-  __vue_app__?: { config: { globalProperties: { $nuxt?: { isHydrating?: boolean }; $router?: { push: (to: string) => Promise<unknown> } } } };
+interface NuxtApp {
+  isHydrating?: boolean;
+  hooks?: { hookOnce: (name: 'page:finish', callback: () => void) => void };
 }
+
+interface NuxtRouter {
+  currentRoute: { value: { fullPath: string } };
+  push: (to: string) => Promise<unknown>;
+}
+
+interface NuxtRoot extends HTMLElement {
+  __vue_app__?: { config: { globalProperties: { $nuxt?: NuxtApp; $router?: NuxtRouter } } };
+}
+
+/** Longest wait for a client-side page to render after its route changed (async setup, data loading). */
+const PAGE_FINISH_TIMEOUT_MS = 30_000;
 
 /** A dev server compiles on first load, so the first hydration of a cold browser can take tens of seconds. */
 const HYDRATION_TIMEOUT_MS = 75_000;
@@ -26,12 +39,24 @@ const onApp = (page: Page): boolean => page.url().startsWith(BASE_URL);
  */
 export const open = async (page: Page, path: string): Promise<void> => {
   if (onApp(page)) {
-    const pushed = await page.evaluate(async (to) => {
-      const router = (document.querySelector('#__nuxt') as NuxtRoot | null)?.__vue_app__?.config.globalProperties.$router;
-      if (!router) return false;
-      await router.push(to);
-      return true;
-    }, path);
+    // The route changes first; a page with an async setup renders later, and until then the previous page stays on
+    // screen. Filling a form right after the push could type into the old page's fields: wait for `page:finish`.
+    const pushed = await page.evaluate(
+      async ({ to, timeout }) => {
+        const app = (document.querySelector('#__nuxt') as NuxtRoot | null)?.__vue_app__?.config.globalProperties;
+        const router = app?.$router;
+        if (!router) return false;
+        if (router.currentRoute.value.fullPath === to) return true;
+        const finished = new Promise<void>((resolve) => {
+          app.$nuxt?.hooks?.hookOnce('page:finish', resolve);
+          setTimeout(resolve, timeout);
+        });
+        const failure = await router.push(to);
+        if (failure === undefined) await finished;
+        return true;
+      },
+      { to: path, timeout: PAGE_FINISH_TIMEOUT_MS },
+    );
     if (pushed) return;
   }
   await page.goto(path);
