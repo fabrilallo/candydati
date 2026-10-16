@@ -1,6 +1,7 @@
 import type { FunnelStageDto, Outcome, ReportsDto, ResponsePromise, StageEvent } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository } from '../candidate-ports.js';
 import type { JobRepository } from '../job-ports.js';
+import type { JobViewRepository } from '../job-view-ports.js';
 import type { ResponsePromiseRepository, StageEventRepository } from '../report-ports.js';
 import { buildApplication, buildCandidate } from './candidate-fixtures.js';
 import { buildJob, completeJobContent } from './job-fixtures.js';
@@ -12,6 +13,8 @@ export interface DatasetRepositories {
   readonly applications: ApplicationRepository;
   readonly stageEvents: StageEventRepository;
   readonly promises: ResponsePromiseRepository;
+  /** Visit counters; without it the dataset has none. */
+  readonly jobViews?: JobViewRepository;
 }
 
 /** The reports are asked for June 2026; "now" is the first instant of July. */
@@ -33,6 +36,8 @@ interface App {
   readonly job: keyof DatasetIds;
   readonly created: string;
   readonly origin: string;
+  /** `utm_campaign` of the ad URL the application came through. */
+  readonly campaign?: string;
   /** Stage entries `[stage, time]` (`received` included), then optionally the decision. */
   readonly entries: readonly (readonly [string, string])[];
   readonly decision?: readonly [Outcome, string];
@@ -43,12 +48,12 @@ interface App {
  * applications entering stages and being decided on known dates, 13 response promises. See `expectedReports`.
  */
 const APPS: readonly App[] = [
-  { key: 'a1', job: 'backend', created: '06-02T10:00', origin: 'linkedin', entries: [['received', '06-02T10:00'], ['stage-0', '06-04T10:00'], ['stage-1', '06-10T10:00']], decision: ['hired', '06-12T10:00'] },
-  { key: 'a2', job: 'backend', created: '06-03T00:00', origin: 'linkedin', entries: [['received', '06-03T00:00'], ['stage-0', '06-05T00:00']], decision: ['hired', '06-23T00:00'] },
+  { key: 'a1', campaign: 'autumn', job: 'backend', created: '06-02T10:00', origin: 'linkedin', entries: [['received', '06-02T10:00'], ['stage-0', '06-04T10:00'], ['stage-1', '06-10T10:00']], decision: ['hired', '06-12T10:00'] },
+  { key: 'a2', campaign: 'autumn', job: 'backend', created: '06-03T00:00', origin: 'linkedin', entries: [['received', '06-03T00:00'], ['stage-0', '06-05T00:00']], decision: ['hired', '06-23T00:00'] },
   { key: 'a3', job: 'backend', created: '06-05T12:00', origin: 'google.com', entries: [['received', '06-05T12:00'], ['stage-0', '06-06T12:00']], decision: ['not_selected', '06-07T12:00'] },
   { key: 'a4', job: 'backend', created: '06-06T12:00', origin: 'direct', entries: [['received', '06-06T12:00']], decision: ['withdrawn', '06-08T12:00'] },
   { key: 'a5', job: 'backend', created: '05-20T10:00', origin: 'referral', entries: [['received', '05-20T10:00'], ['stage-0', '06-02T10:00'], ['stage-1', '06-03T10:00']], decision: ['hired', '06-04T10:00'] },
-  { key: 'a6', job: 'backend', created: '06-15T10:00', origin: 'linkedin', entries: [['received', '06-15T10:00']] },
+  { key: 'a6', campaign: 'spring', job: 'backend', created: '06-15T10:00', origin: 'linkedin', entries: [['received', '06-15T10:00']] },
   { key: 'b1', job: 'frontend', created: '06-11T10:00', origin: 'linkedin', entries: [['received', '06-11T10:00'], ['stage-0', '06-12T10:00']], decision: ['hired', '06-14T10:00'] },
   // Imported: no `received` event, it enters the first stage directly.
   { key: 'b2', job: 'frontend', created: '06-12T10:00', origin: 'import', entries: [['stage-0', '06-13T10:00']] },
@@ -76,6 +81,24 @@ const PROMISES: readonly Pr[] = [
   ['c4', 'received', '06-10T10:00', '06-15T10:00', '06-18T10:00', 'missed'],
 ];
 
+/**
+ * Visits `[job, day, source, campaign, views]`. The ones on 05-31 and 07-01 are outside June, 06-30 is the last day in it.
+ */
+type Vw = readonly [job: keyof DatasetIds, day: string, source: string, campaign: string, views: number];
+const VIEWS: readonly Vw[] = [
+  ['backend', '2026-06-02', 'linkedin', 'autumn', 20],
+  ['backend', '2026-06-03', 'linkedin', 'autumn', 10],
+  ['backend', '2026-06-15', 'linkedin', 'spring', 8],
+  ['backend', '2026-06-05', 'google.com', '', 5],
+  ['backend', '2026-06-06', 'direct', '', 40],
+  ['backend', '2026-06-30', 'direct', '', 1],
+  ['backend', '2026-05-31', 'linkedin', 'autumn', 99],
+  ['backend', '2026-07-01', 'linkedin', 'autumn', 50],
+  ['frontend', '2026-06-12', 'linkedin', '', 7],
+  ['frontend', '2026-06-12', 'referral', '', 2],
+  ['closed', '2026-06-20', 'direct', '', 10],
+];
+
 const JOBS = {
   backend: { title: 'Backend Developer', status: 'published' as const, publishedAt: at('04-01T00:00'), process: [stage('hr_interview'), stage('technical_interview')], closedAt: null },
   frontend: { title: 'Frontend Developer', status: 'published' as const, publishedAt: at('06-10T00:00'), process: [stage('hr_interview')], closedAt: null },
@@ -100,6 +123,7 @@ export async function seedReportDataset(repos: DatasetRepositories, organization
     await repos.applications.create(
       buildApplication({
         id, organizationId, jobId: ids[app.job], candidateId, stageId: last[0], outcome, origin: app.origin,
+        ...(app.campaign ? { originCampaign: app.campaign } : {}),
         createdAt: at(app.created), updatedAt: at(app.created), stageChangedAt: at(last[1]), closedAt: closedAt === null ? null : at(closedAt),
       }),
     );
@@ -116,6 +140,9 @@ export async function seedReportDataset(repos: DatasetRepositories, organization
       id: `${tag}-p${index}`, organizationId, applicationId: `${tag}-${appKey}`, jobId: ids[app.job], stageId,
       startedAt: at(started), dueAt: at(due), respondedAt: responded === null ? null : at(responded), status, backfilled: false,
     });
+  }
+  for (const [job, day, source, campaign, views] of VIEWS) {
+    await repos.jobViews?.increment({ organizationId, jobId: ids[job], day, source, campaign }, views);
   }
   return ids;
 }
@@ -179,11 +206,15 @@ export function expectedReports(ids: DatasetIds): ReportsDto {
       ],
     },
     sources: [
-      { origin: 'direct', applications: 4, hires: 1 },
-      { origin: 'linkedin', applications: 4, hires: 3 },
-      { origin: 'google.com', applications: 1, hires: 0 },
-      { origin: 'import', applications: 1, hires: 0 },
-      { origin: 'referral', applications: 0, hires: 1 },
+      { origin: 'direct', applications: 4, hires: 1, visits: 51, conversion: 0.0784 },
+      { origin: 'linkedin', applications: 4, hires: 3, visits: 45, conversion: 0.0889 },
+      { origin: 'google.com', applications: 1, hires: 0, visits: 5, conversion: 0.2 },
+      { origin: 'import', applications: 1, hires: 0, visits: 0, conversion: null },
+      { origin: 'referral', applications: 0, hires: 1, visits: 2, conversion: 0 },
+    ],
+    campaigns: [
+      { origin: 'linkedin', campaign: 'autumn', applications: 2, hires: 2, visits: 30, conversion: 0.0667 },
+      { origin: 'linkedin', campaign: 'spring', applications: 1, hires: 0, visits: 8, conversion: 0.125 },
     ],
     responses: {
       closed: r(7, 10, 0.7),

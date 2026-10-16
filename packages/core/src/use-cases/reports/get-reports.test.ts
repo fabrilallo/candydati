@@ -39,11 +39,12 @@ describe('getReports on the seeded dataset (in memory)', () => {
     expect(report.funnel.stages).toEqual(expectedJobFunnels().backend);
     expect(report.funnel.outcomes).toEqual({ hired: 3, not_selected: 1, withdrawn: 1 });
     expect(report.sources).toEqual([
-      { origin: 'linkedin', applications: 3, hires: 2 },
-      { origin: 'direct', applications: 1, hires: 0 },
-      { origin: 'google.com', applications: 1, hires: 0 },
-      { origin: 'referral', applications: 0, hires: 1 },
+      { origin: 'linkedin', applications: 3, hires: 2, visits: 38, conversion: 0.0789 },
+      { origin: 'direct', applications: 1, hires: 0, visits: 41, conversion: 0.0244 },
+      { origin: 'google.com', applications: 1, hires: 0, visits: 5, conversion: 0.2 },
+      { origin: 'referral', applications: 0, hires: 1, visits: 0, conversion: null },
     ]);
+    expect(report.campaigns.map((c) => [c.campaign, c.visits, c.applications])).toEqual([['autumn', 30, 2], ['spring', 8, 1]]);
     expect(report.responses).toMatchObject({ kept: 5, missed: 2, closed: { count: 5, total: 7, rate: 0.7143 }, responseHours: { count: 6, median: 48, p75: 48 }, open: 1, overdue: 1 });
     expect(report.outcomeCoverage).toEqual({ count: 4, total: 5, rate: 0.8 });
   });
@@ -91,7 +92,7 @@ describe('getReports on the seeded dataset (in memory)', () => {
     deps.store.write({ applications: deps.store.read().applications.map((a) => (a.organizationId === ORG_B && a.id === 'b-a6' ? { ...a, origin: 'only-in-b' } : a)) });
     expect(await getReports(deps, owner, query)).toEqual(expectedReports(ids));
     const other = await getReports(deps, userActor({ role: 'owner', organizationId: ORG_B }), query);
-    expect(other).toEqual({ ...expectedReports(otherIds), sources: expect.any(Array) });
+    expect(other).toEqual({ ...expectedReports(otherIds), sources: expect.any(Array), campaigns: expect.any(Array) });
     expect(other.sources.map((s) => s.origin)).toContain('only-in-b');
     expect(JSON.stringify(await getReports(deps, owner, query))).not.toContain('only-in-b');
   });
@@ -148,7 +149,7 @@ describe('exportReportsCsv', () => {
     expect(file.csv).toContain(`${ids.backend},Backend Developer,3,15,17.5`);
     expect(file.csv).toContain('# funnel\nposition,stage_type,entered,advanced,base,conversion_rate\n,received,9,5,9,0.5556');
     expect(file.csv).toContain('# outcome_coverage\nwith_outcome,applications,rate\n6,8,0.75');
-    expect(file.csv).toContain('referral,0,1');
+    expect(file.csv).toContain('referral,2,0,1,0');
     expect(file.csv.endsWith('\n')).toBe(true);
   });
 

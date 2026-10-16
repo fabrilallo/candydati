@@ -3,6 +3,7 @@ import { EMPTY_DURATION, type DurationStat, type Outcome } from '@candydati/doma
 import type { ReportAggregateQuery, ReportAggregates, ReportRepository } from '../report-ports.js';
 import type { DbExecutor } from './db-executor.js';
 import { queryStageAdvances } from './drizzle-report-funnel.js';
+import { queryVisits, querySources } from './drizzle-report-sources.js';
 
 /**
  * Aggregates behind `getReports`, computed by Postgres. Every statement filters by `organization_id`; the period is closed on
@@ -45,7 +46,7 @@ export function createDrizzleReports(db: DbExecutor): ReportRepository {
       const closedInPeriod = and(inPromise, ne(promise.status, 'open'), sql`${closureAt} >= ${ts(from)}`, sql`${closureAt} <= ${ts(to)}`);
       const createdInPeriod = and(inApplication, gte(application.createdAt, from), lte(application.createdAt, to));
 
-      const [hireOverall, hireByJob, firstHires, stageEntries, stageAdvances, outcomes, origins, promisesClosed, responseHours, promisesWaiting, coverage] = await Promise.all([
+      const [hireOverall, hireByJob, firstHires, stageEntries, stageAdvances, outcomes, sources, visits, promisesClosed, responseHours, promisesWaiting, coverage] = await Promise.all([
         db.select(durationColumns(hireValue)).from(application).where(hiredInPeriod),
         db.select({ jobId: application.jobId, ...durationColumns(hireValue) }).from(application).where(hiredInPeriod).groupBy(application.jobId),
         db
@@ -65,15 +66,8 @@ export function createDrizzleReports(db: DbExecutor): ReportRepository {
           .from(stageEvent)
           .where(and(inEvent, isNotNull(stageEvent.outcome), gte(stageEvent.occurredAt, from), lte(stageEvent.occurredAt, to)))
           .groupBy(stageEvent.jobId, stageEvent.outcome),
-        db
-          .select({
-            origin: application.origin,
-            applications: sql<number>`(count(*) filter (where ${application.createdAt} >= ${ts(from)} and ${application.createdAt} <= ${ts(to)}))::int`,
-            hires: sql<number>`(count(*) filter (where ${application.outcome} = 'hired' and ${application.closedAt} >= ${ts(from)} and ${application.closedAt} <= ${ts(to)}))::int`,
-          })
-          .from(application)
-          .where(inApplication)
-          .groupBy(application.origin),
+        querySources(db, query),
+        queryVisits(db, query),
         db
           .select({
             jobId: promise.jobId,
@@ -113,7 +107,8 @@ export function createDrizzleReports(db: DbExecutor): ReportRepository {
         stageEntries,
         stageAdvances,
         outcomes,
-        origins: origins.filter((row) => row.applications + row.hires > 0),
+        ...sources,
+        visits,
         promisesClosed,
         responseHours: toStat(responseHours[0]),
         promisesWaiting,

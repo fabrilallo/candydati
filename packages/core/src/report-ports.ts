@@ -67,6 +67,10 @@ export interface ReportAggregates {
   readonly outcomes: readonly (JobCount & { readonly outcome: Outcome; readonly count: number })[];
   /** Applications created in the period, and hires decided in the period, by origin. Origins with neither are absent. */
   readonly origins: readonly { readonly origin: string; readonly applications: number; readonly hires: number }[];
+  /** The applications and hires above that carried a `utm_campaign`, by origin and campaign. */
+  readonly campaigns: readonly { readonly origin: string; readonly campaign: string; readonly applications: number; readonly hires: number }[];
+  /** Visits of the public job page on the days of the period (`job_view_daily`), by source and campaign (`''`: none). */
+  readonly visits: readonly { readonly origin: string; readonly campaign: string; readonly visits: number }[];
   /** Promises closed in the period: answered in it, or missed at a deadline falling in it. */
   readonly promisesClosed: readonly (JobCount & { readonly stageId: string; readonly kept: number; readonly missed: number })[];
   /** Hours from start to answer, of the closed promises that were answered. */
