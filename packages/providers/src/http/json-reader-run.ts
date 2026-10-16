@@ -1,7 +1,7 @@
 import type { BackoffOptions } from './json-reader-rate.js';
 import { backoffMs, exhaustedWindowMs, retryAfterMs } from './json-reader-rate.js';
 import { JsonReaderError, TransientFailure } from './json-reader-errors.js';
-import { checkTarget, sameOrigin, type HostRule, type ReaderTarget } from './json-reader-hosts.js';
+import { checkPublicTarget, checkTarget, sameOrigin, type HostRule, type ReaderTarget } from './json-reader-hosts.js';
 import { openExchange, pinnedAddresses, type Exchange, type RequestFn, type Resolve } from './json-reader-transport.js';
 import { redactUrl } from './redact.js';
 
@@ -42,6 +42,11 @@ export interface RunRequest<T> {
   readonly consume: (exchange: Exchange) => Promise<T>;
   /** Whether a transient failure inside `consume` may still be retried (a download, only before its first byte). */
   readonly retryable: () => boolean;
+  /**
+   * A credential-free file download: any public host (no allowlist), redirects to any URL that passes the same checks,
+   * each hop resolved and pinned again. The caller guarantees `headers` carry no credentials.
+   */
+  readonly publicFile?: boolean;
 }
 
 const REDIRECTS = new Set([301, 302, 303, 307, 308]);
@@ -55,21 +60,54 @@ const refusalFor = (status: number): JsonReaderError =>
       ? new JsonReaderError('not_found', status)
       : new JsonReaderError('source_invalid_response', status);
 
-/** Resolves once, pins, and follows redirects only within the same origin (at most three hops). */
+/** Where a redirect may go: the same origin, or for a public file any URL that passes the public checks. */
+function nextHop(s: RunSettings, current: ReaderTarget, exchange: Exchange, request: RunRequest<unknown>, hop: number): ReaderTarget {
+  const location = exchange.headers.location;
+  const refused = new JsonReaderError('redirect_refused', exchange.status);
+  if (request.method === 'POST' || hop >= MAX_REDIRECTS || typeof location !== 'string') throw refused;
+  let next: URL;
+  try {
+    next = new URL(location, current.url);
+  } catch {
+    throw refused;
+  }
+  if (!request.publicFile) {
+    if (!sameOrigin(current, next)) throw refused;
+    return { ...current, url: next };
+  }
+  try {
+    return checkPublicTarget(next.href, s.unsafe);
+  } catch {
+    throw refused;
+  }
+}
+
+/** The addresses of a redirect target: a private answer refuses the redirect, a resolution failure stays transient. */
+async function hopAddresses(s: RunSettings, target: ReaderTarget, status: number): Promise<readonly string[]> {
+  try {
+    return await pinnedAddresses(target.host, s.resolve, s.unsafe);
+  } catch (error) {
+    throw error instanceof JsonReaderError ? new JsonReaderError('redirect_refused', status) : error;
+  }
+}
+
+/**
+ * Resolves, pins and follows at most three redirects: within the same origin (same pinned addresses), or for a public
+ * file to any URL that passes the public checks, resolved and pinned again.
+ */
 async function send(s: RunSettings, target: ReaderTarget, request: RunRequest<unknown>): Promise<Exchange> {
   const { headers, timeoutMs } = request;
-  const addresses = await pinnedAddresses(target.host, s.resolve, s.unsafe);
-  const fn = target.secure ? s.transport.https : s.transport.http;
+  const body = request.method === 'POST' ? { method: 'POST' as const, body: request.body ?? '' } : undefined;
+  let addresses = await pinnedAddresses(target.host, s.resolve, s.unsafe);
   let current = target;
   for (let hop = 0; ; hop += 1) {
-    const exchange = await openExchange(fn, current, addresses, headers, timeoutMs, request.method === 'POST' ? { method: 'POST', body: request.body ?? '' } : undefined);
+    const fn = current.secure ? s.transport.https : s.transport.http;
+    const exchange = await openExchange(fn, current, addresses, headers, timeoutMs, body);
     if (!REDIRECTS.has(exchange.status)) return exchange;
     exchange.close();
-    const location = exchange.headers.location;
-    if (request.method === 'POST' || hop >= MAX_REDIRECTS || typeof location !== 'string') throw new JsonReaderError('redirect_refused', exchange.status);
-    const next = new URL(location, current.url);
-    if (!sameOrigin(current, next)) throw new JsonReaderError('redirect_refused', exchange.status);
-    current = { ...current, url: next };
+    const next = nextHop(s, current, exchange, request, hop);
+    if (request.publicFile) addresses = await hopAddresses(s, next, exchange.status);
+    current = next;
   }
 }
 
@@ -97,7 +135,8 @@ export function createRunner(s: RunSettings) {
   const attemptOnce = async <T>(target: ReaderTarget, request: RunRequest<T>, attempt: number): Promise<Outcome<T>> => {
     try {
       const exchange = await send(s, target, request);
-      const window = exhaustedWindowMs(exchange.headers, s.now());
+      // A foreign file host's rate-limit headers say nothing about the vendor's API.
+      const window = request.publicFile ? undefined : exhaustedWindowMs(exchange.headers, s.now());
       if (window !== undefined) blockedUntil = s.now() + window;
       if (exchange.status >= 200 && exchange.status < 300) return { result: { value: await request.consume(exchange) } };
       exchange.close();
@@ -113,7 +152,7 @@ export function createRunner(s: RunSettings) {
   };
 
   return async <T>(request: RunRequest<T>): Promise<T> => {
-    const target = checkTarget(request.url, s.allowedHosts, s.unsafe);
+    const target = request.publicFile ? checkPublicTarget(request.url, s.unsafe) : checkTarget(request.url, s.allowedHosts, s.unsafe);
     const url = redactUrl(request.url);
     for (let attempt = 1; ; attempt += 1) {
       await pause(s.take(), url, attempt);

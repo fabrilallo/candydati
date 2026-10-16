@@ -61,7 +61,16 @@ export interface JsonReader {
    * response is validated by `schema`; the form and the response are never logged or put in an error.
    */
   postForm<S extends z.ZodType>(url: string, form: Readonly<Record<string, string>>, schema: S, extras?: RequestExtras): Promise<JsonPage<z.output<S>>>;
+  /** A file that needs the vendor's credentials: a host of the allowlist, redirects within the same origin only. */
   download(url: string, store: DownloadStore, extras?: RequestExtras): Promise<DownloadResult>;
+  /**
+   * A file that needs NO credentials (a signed storage or CDN URL), from any public host: https on the default port, no
+   * user info, every resolved address public and the connection pinned to them (SNI kept), at most three redirects, each
+   * to a URL that passes the same checks and is resolved and pinned again. It sends no caller headers at all, so a
+   * credential can never reach a host outside the allowlist: passing any third argument is a TypeError. Same size cap,
+   * timeout, retries and redaction as `download`.
+   */
+  downloadPublicFile(url: string, store: DownloadStore): Promise<DownloadResult>;
 }
 
 export const JSON_READER_DEFAULTS = {
@@ -162,7 +171,8 @@ async function storeDownload(exchange: Exchange, store: DownloadStore, maxBytes:
  * redirects only within the same origin, a timeout over the whole exchange, a capped body, JSON checked by the caller's
  * Zod schema. Throttled by a token bucket and by the source's own rate-limit headers; 429, 5xx and broken connections
  * are retried with backoff. Nothing it throws or reports carries a URL query, a header or a body. Files stream to
- * storage under their own cap and are retried only before their first byte.
+ * storage under their own cap and are retried only before their first byte. `downloadPublicFile` is the one way past
+ * the allowlist: a credential-free file from any public host (see its doc).
  */
 export function createJsonReader(options: JsonReaderOptions): JsonReader {
   const run = createRunner(runSettings(options));
@@ -170,15 +180,21 @@ export function createJsonReader(options: JsonReaderOptions): JsonReader {
   const downloadTimeoutMs = options.downloadTimeoutMs ?? JSON_READER_DEFAULTS.downloadTimeoutMs;
   const maxResponseBytes = options.maxResponseBytes ?? JSON_READER_DEFAULTS.maxResponseBytes;
   const maxDownloadBytes = options.maxDownloadBytes ?? JSON_READER_DEFAULTS.maxDownloadBytes;
+  /** A file streams to `store`; a transient failure is retried only before its first byte reached it. */
+  const fileDownload = (url: string, store: DownloadStore, headers: Readonly<Record<string, string>>, publicFile: boolean): Promise<DownloadResult> => {
+    let delivered = false;
+    const consume = (exchange: Exchange) => storeDownload(exchange, store, maxDownloadBytes, () => { delivered = true; });
+    return run({ url, headers, timeoutMs: downloadTimeoutMs, consume, retryable: () => !delivered, publicFile });
+  };
   return {
     getJson: (url, schema, extras) =>
       run({ url, headers: requestHeaders('application/json', extras), timeoutMs, consume: (exchange) => parsePage(exchange, schema, maxResponseBytes), retryable: () => true }),
     postForm: (url, form, schema, extras) =>
       run({ url, method: 'POST', body: new URLSearchParams(form).toString(), headers: requestHeaders('application/json', extras), timeoutMs, consume: (exchange) => parsePage(exchange, schema, maxResponseBytes), retryable: () => true }),
-    download: (url, store, extras) => {
-      let delivered = false;
-      const consume = (exchange: Exchange) => storeDownload(exchange, store, maxDownloadBytes, () => { delivered = true; });
-      return run({ url, headers: requestHeaders('*/*', extras), timeoutMs: downloadTimeoutMs, consume, retryable: () => !delivered });
+    download: (url, store, extras) => fileDownload(url, store, requestHeaders('*/*', extras), false),
+    downloadPublicFile: (url, store, ...rest: readonly unknown[]) => {
+      if (rest.some((extra) => extra !== undefined)) return Promise.reject(new TypeError('downloadPublicFile sends no headers: use download for authenticated files.'));
+      return fileDownload(url, store, requestHeaders('*/*', undefined), true);
     },
   };
 }
