@@ -7,3 +7,4 @@ export type { MigrationReferenceIssue } from './references.js';
 export * from './choices.js';
 export * from './commit-plan.js';
 export * from './migrated-job.js';
+export * from './dto.js';

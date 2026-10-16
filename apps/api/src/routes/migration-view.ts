@@ -1,9 +1,7 @@
-import type { MigrationBatch, MigrationCommitCounts, MigrationIssue } from '@candydati/domain';
-import type { z } from 'zod';
-import type { migrationBatchSchema, migrationIssueSchema } from '../openapi/schemas-migration.js';
+import type { MigrationBatch, MigrationBatchDto, MigrationCommitCounts, MigrationIssue, MigrationIssueDto } from '@candydati/domain';
 
-export type MigrationBatchView = z.infer<typeof migrationBatchSchema>;
-export type MigrationIssueView = z.infer<typeof migrationIssueSchema>;
+export type MigrationBatchView = MigrationBatchDto;
+export type MigrationIssueView = MigrationIssueDto;
 
 const iso = (date: Date | null): string | null => (date === null ? null : date.toISOString());
 
