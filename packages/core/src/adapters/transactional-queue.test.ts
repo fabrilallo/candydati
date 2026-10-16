@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { createDb, sql, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { BindableTaskQueue, SqlExecutor } from '../intake-ports.js';
+import type { BindableTaskQueue, SqlExecutor, TaskQueue } from '../intake-ports.js';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { inSavepoint, inTransaction } from '../transaction.js';
 import { createDrizzleUnitOfWork } from './drizzle-repositories.js';
@@ -92,7 +92,7 @@ describe('a task queue bound to the transaction (#3)', () => {
   it('defers a queue it does not own to after the commit, as before', async () => {
     const sent: string[] = [];
     const uow = createDrizzleUnitOfWork(handle.db);
-    const queue = { enqueue: async (name: string) => void sent.push(name) };
+    const queue: TaskQueue = { enqueue: async (name) => void sent.push(name) };
     await inTransaction({ transaction: uow.transaction, queue }, async (tx) => {
       await tx.queue.enqueue('email.send', { organizationId: 'o', messageId: 'm' });
       expect(sent).toEqual([]);

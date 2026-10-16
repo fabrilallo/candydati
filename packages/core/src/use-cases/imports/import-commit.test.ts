@@ -25,8 +25,8 @@ describe('commitImport', () => {
     expect(apps).toHaveLength(2);
     expect(apps.every((a) => a.consentStatus === 'to_renew' && a.source === 'import' && a.stageId === 'received' && a.outcome === null && a.consent.scopes.length === 0 && a.retentionExpiresAt.getTime() === expected.getTime())).toBe(true);
     expect(candidates.every((c) => !c.talentPool && c.retentionExpiresAt.getTime() === expected.getTime())).toBe(true);
-    for (const a of apps) expect(deps.files.keys()).toContain(a.cv.key);
-    const mario = apps.find((a) => a.cv.fileName === 'Mario_Rossi.pdf')!;
+    for (const a of apps) expect(deps.files.keys()).toContain(a.cv?.key);
+    const mario = apps.find((a) => a.cv?.fileName === 'Mario_Rossi.pdf')!;
     expect(deps.store.read().extractions.find((e) => e.applicationId === mario.id)).toMatchObject({ status: 'text_only', text: 'CV text of Mario Rossi', source: 'text' });
     expect(deps.store.read().notes.filter((n) => n.applicationId === mario.id)).toMatchObject([{ body: 'Ottimo colloquio', authorId: 'user_rec' }]);
     expect(candidates.find((c) => c.email === 'mario@example.com')).toMatchObject({ phone: '333 111', tags: ['java'] });
@@ -197,14 +197,14 @@ describe('undoImport', () => {
     const deps = importWorld();
     const batch = await readyBatch(deps, [MARIO, GIULIA], [MARIO_ROW, GIULIA_ROW]);
     await commit(deps, batch.id);
-    const mario = deps.store.read().applications.find((a) => a.cv.fileName.startsWith('Mario'))!;
+    const mario = deps.store.read().applications.find((a) => a.cv?.fileName.startsWith('Mario'))!;
     const secret = (await deliverQueued(deps)).get(mario.id)!;
     await answerConsentRequest(deps, { token: secret, scopes: ['selection'] });
     const result = await undoImport(deps, recruiter, { batchId: batch.id });
     expect(result).toMatchObject({ erased: 1, skippedReconfirmed: 1, failed: 0, batch: { status: 'undone', counts: { erased: 1, skippedReconfirmed: 1 } } });
     expect(deps.store.read().candidates.map((c) => c.email)).toContain('mario@example.com');
     expect(deps.store.read().candidates.some((c) => c.email === 'giulia@example.com')).toBe(false);
-    expect(deps.store.read().applications.some((a) => a.cv.fileName.startsWith('Giulia'))).toBe(false);
+    expect(deps.store.read().applications.some((a) => a.cv?.fileName.startsWith('Giulia'))).toBe(false);
     expect(deps.auditLog.events().filter((e) => e.action === 'candidate.erased').at(-1)).toMatchObject({ metadata: { reason: 'import_undone', applicationCount: 1 } });
     expect(deps.auditLog.events().at(-1)).toMatchObject({ action: 'import.undone', metadata: { erased: 1, skippedReconfirmed: 1 } });
     expect(await rejection(undoImport(deps, recruiter, { batchId: batch.id }))).toBeInstanceOf(ConflictError);

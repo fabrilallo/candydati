@@ -367,7 +367,7 @@ describe('createDrizzleApplicationIntake with submitApplication', () => {
     expect(await createDrizzleCvExtractions(handle.db).findByApplication(org.id, application?.id ?? '')).toMatchObject({ status: 'pending' });
     const { rows } = await handle.pool.query('select action, actor_id, metadata from audit_log where organization_id = $1', [org.id]);
     expect(rows).toEqual([{ action: 'application.received', actor_id: 'careers_page', metadata: { jobId: job.id, applicationId: application?.id } }]);
-    expect(deps.files.keys()).toEqual([application?.cv.key]);
+    expect(deps.files.keys()).toEqual([application?.cv?.key]);
     expect(deps.queue.jobs().map((j) => j.name)).toEqual(['cv.extract', 'automation.run']);
   });
 

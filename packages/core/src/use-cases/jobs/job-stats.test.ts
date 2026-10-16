@@ -6,7 +6,7 @@ import { buildProcess, buildQuality, buildReadiness, buildSalary, buildStatusCou
 const withoutKey = (content: JobContent, key: keyof JobContent): JobContent =>
   Object.fromEntries(Object.entries(content).filter(([k]) => k !== key)) as JobContent;
 
-const published = (id: string, overrides: Parameters<typeof completeJobContent>[0] = { title: id }) =>
+const published = (id: string, overrides: Partial<Parameters<typeof completeJobContent>[0]> = {}) =>
   buildJob({ id, status: 'published', content: completeJobContent({ title: id, ...overrides }) });
 
 describe('median', () => {

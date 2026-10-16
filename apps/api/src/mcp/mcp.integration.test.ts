@@ -30,7 +30,12 @@ afterAll(async () => {
 
 async function connect(secret: string): Promise<Client> {
   const client = new Client({ name: 'test-agent', version: '1.0.0' });
-  await client.connect(new StreamableHTTPClientTransport(new URL(`${baseUrl}/mcp`), { requestInit: { headers: { authorization: `Bearer ${secret}` } } }));
+  // The SDK's HTTP transport types `sessionId` as `string | undefined`, which `Transport` (`sessionId?: string`) refuses under
+  // exactOptionalPropertyTypes. Seen without that member it is a valid `Transport`; the object is the same at runtime.
+  const transport: Omit<StreamableHTTPClientTransport, 'sessionId'> = new StreamableHTTPClientTransport(new URL(`${baseUrl}/mcp`), {
+    requestInit: { headers: { authorization: `Bearer ${secret}` } },
+  });
+  await client.connect(transport);
   clients.push(client);
   return client;
 }

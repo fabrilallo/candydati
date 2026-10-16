@@ -35,6 +35,7 @@ import { createDrizzleJobs } from './drizzle-jobs.js';
 import { createDrizzleMessages } from './drizzle-messages.js';
 import { createDrizzleOrganizationDirectory } from './drizzle-organizations.js';
 import { createDrizzlePrivacyNotices } from './drizzle-privacy-notices.js';
+import { createDrizzleResponsePromises } from './drizzle-report-history.js';
 import { createDrizzleTransaction } from './drizzle-repositories.js';
 
 let handle: DbHandle;
@@ -232,7 +233,7 @@ describe('messaging flow on Postgres', () => {
     const candidates = createDrizzleCandidates(handle.db);
     const applications = createDrizzleApplications(handle.db);
     const auditLog = createDrizzleAuditLog(handle.db);
-    const deliverDeps = { auditLog, transaction: createDrizzleTransaction(handle.db), organizations: createDrizzleOrganizationDirectory(handle.db), candidates, applications, settings: createDrizzleEmailSettings(handle.db), conversations, messages, sender, config: testMessagingConfig, newToken, now: () => new Date() };
+    const deliverDeps = { auditLog, transaction: createDrizzleTransaction(handle.db), organizations: createDrizzleOrganizationDirectory(handle.db), candidates, applications, settings: createDrizzleEmailSettings(handle.db), promises: createDrizzleResponsePromises(handle.db), conversations, messages, sender, config: testMessagingConfig, newToken, now: () => new Date() };
     expect(await deliverMessage(deliverDeps, systemActor({ organizationId: org }), { organizationId: org, messageId: email?.payload.messageId })).toBe('sent');
     const [sent] = sender.sent();
     const token = /reply\+([a-z2-7]+)@/.exec(sent?.replyTo ?? '')?.[1];

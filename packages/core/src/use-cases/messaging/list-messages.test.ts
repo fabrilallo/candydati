@@ -33,7 +33,7 @@ describe('listMessages', () => {
   });
 
   it('shows member names', async () => {
-    const deps = { ...world(), users: { namesOf: async () => ({ user_r: 'Rita Rossi' }) } };
+    const deps = { ...world(), users: { namesOf: async () => ({ user_r: 'Rita Rossi' }), actorNamesOf: async () => ({ user_r: 'Rita Rossi' }) } };
     const [first] = await listMessages(deps, userActor({ role: 'recruiter', organizationId: ORG_A }), { applicationId: 'app_1' });
     expect(toMessageDto(first!).sentBy).toEqual({ id: 'user_r', name: 'Rita Rossi' });
   });

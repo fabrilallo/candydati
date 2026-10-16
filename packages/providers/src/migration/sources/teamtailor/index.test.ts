@@ -49,7 +49,7 @@ async function run() {
   const builder = createPackageBuilder({ files, filePrefix: 'organizations/o/migrations/m/', source: { system: 'teamtailor', producer: 'connector:teamtailor@1', exportedAt: '2026-10-16T10:00:00.000Z' }, reserveFiles: async () => undefined });
   const progress: Array<[number, number | null | undefined]> = [];
   const reader = testReader([...connector.hosts(credentials)] as { exact: string }[]);
-  await connector.fetch(credentials, builder, { reader, progress: async (done, total) => void progress.push([done, total]) });
+  await connector.fetch(credentials, builder, { reader, progress: async (done, total) => void progress.push([done, total]), notice: () => undefined });
   const collected = builder.collected();
   const { files: _files, ...items } = collected;
   return { collected, progress, report: reports[0]!, manifest: { format: MIGRATION_PACKAGE_FORMAT, version: 1, ...items }, files };

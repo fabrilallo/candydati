@@ -75,7 +75,7 @@ async function run(options: RecruiteeConnectorOptions = {}) {
   const files = createInMemoryFileStorage();
   const builder = createPackageBuilder({ files, filePrefix: 'org/mig/', source: { system: 'recruitee', producer: 'connector:recruitee@1', exportedAt: '2025-06-01T00:00:00.000Z' }, reserveFiles: async () => undefined });
   const progress = vi.fn(async () => undefined);
-  await connector.fetch(recruiteeCredentialsSchema.parse(credentials), builder, { reader: readerFor(connector), progress });
+  await connector.fetch(recruiteeCredentialsSchema.parse(credentials), builder, { reader: readerFor(connector), progress, notice: () => undefined });
   const c = builder.collected();
   const parsed = parseMigrationPackage({ format: MIGRATION_PACKAGE_FORMAT, version: 1, source: c.source, users: c.users, jobs: c.jobs, candidates: c.candidates, applications: c.applications, notes: c.notes, messages: c.messages });
   return { collected: c, parsed, progress };

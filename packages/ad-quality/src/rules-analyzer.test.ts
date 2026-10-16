@@ -1,4 +1,4 @@
-import { QUALITY_CATEGORIES, adQualityReportSchema, jobContentSchema, type JobContent } from '@candydati/domain';
+import { QUALITY_CATEGORIES, adQualityReportSchema, jobContentSchema, type Employment, type JobContent } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
 import { analyzeWithRules, createRulesAnalyzer } from './rules-analyzer.js';
 import { draft, richAd } from './testing/fixtures.js';
@@ -88,7 +88,7 @@ describe('rules analyzer', () => {
   });
 
   it('counts the structured employment terms in the benefits category', () => {
-    const employment = { monthlyPayments: 14, mealVoucher: { amountPerDay: 8, type: 'electronic' }, extraBenefits: ['health_insurance'] };
+    const employment: Employment = { monthlyPayments: 14, mealVoucher: { amountPerDay: 8, type: 'electronic' }, extraBenefits: ['health_insurance'] };
     expect(scoreOf(draft({ benefits: [], employment }), 'benefits')).toBe(1);
     expect(scoreOf(draft({ benefits: ['Palestra', 'Asilo'], employment: { welfareAnnual: 1000 } }), 'benefits')).toBe(1);
     expect(scoreOf(draft({ benefits: [], employment: { extraBenefits: ['gym', 'phone', 'computer'] } }), 'benefits')).toBe(0.5);

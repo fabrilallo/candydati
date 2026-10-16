@@ -9,7 +9,7 @@ import { createOrganizationExportQueue } from './organization-export.js';
 import { createRetentionRunQueue, RETENTION_RUN_CRON } from './retention-run.js';
 
 const logger = pino({ level: 'silent' });
-const job = (payload: unknown, lastAttempt = true) => ({ jobId: 'j1', payload, logger, lastAttempt, attempt: 1 });
+const job = <Payload>(payload: Payload, lastAttempt = true) => ({ jobId: 'j1', payload, logger, lastAttempt, attempt: 1 });
 const DAY = 24 * 3600 * 1000;
 
 describe('files.delete', () => {

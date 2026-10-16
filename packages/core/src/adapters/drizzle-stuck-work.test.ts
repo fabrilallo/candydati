@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { createDb, eq, schema, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { buildApplication, buildCandidate, createInMemoryTaskQueue } from '../testing/index.js';
+import { buildApplication, buildCandidate, createInMemoryFileStorage, createInMemoryTaskQueue } from '../testing/index.js';
 import { buildImportWorld, newPerson, readyBatch, recruiterOf } from '../testing/import-postgres.js';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { commitImport } from '../use-cases/imports/commit-import.js';
@@ -45,7 +45,7 @@ describe('reconciler on Postgres (#3)', () => {
     const queue = createInMemoryTaskQueue();
     const stuck = createDrizzleStuckWork(handle.db);
     expect(await stuck.queuedMessages(NOW, 1000)).not.toContainEqual({ organizationId: world.org, id: stored!.id });
-    await reconcileQueuedWork({ stuck, queue }, { now: LATER, limit: 5000 });
+    await reconcileQueuedWork({ stuck, queue, files: createInMemoryFileStorage() }, { now: LATER, limit: 5000 });
     expect(queue.jobs()).toContainEqual({ name: 'email.send', payload: { organizationId: world.org, messageId: stored!.id } });
   });
 

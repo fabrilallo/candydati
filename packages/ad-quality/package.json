@@ -20,13 +20,14 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit"
   },
   "dependencies": {
     "@candydati/domain": "workspace:*",
     "zod": "4.5.4"
   },
   "devDependencies": {
+    "@types/node": "26.4.1",
     "@vitest/coverage-v8": "5.0.0",
     "typescript": "5.9.3",
     "vitest": "5.0.0"

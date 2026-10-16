@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { describe, expect, it } from 'vitest';
 import { AuditWriteError } from './errors.js';
 import type { TaskQueue } from './intake-ports.js';
-import { afterCommitOrNow, baseDeps, inTransaction, type TransactionPort } from './transaction.js';
+import { afterCommitOrNow, baseDeps, inTransaction, type TransactionalDeps, type TransactionPort } from './transaction.js';
 import { defineUseCase } from './use-case.js';
 import { cell, createInMemoryTransaction } from './testing/in-memory-transaction.js';
 import { createInMemoryAuditLog, createInMemoryTaskQueue, failingAuditLog, userActor } from './testing/index.js';
@@ -68,7 +68,8 @@ describe('inTransaction', () => {
     const errors: unknown[] = [];
     const { port } = recordingPort(new Map(), (error) => errors.push(error));
     const ran: string[] = [];
-    const result = await inTransaction({ transaction: port }, async (tx) => {
+    const deps: TransactionalDeps = { transaction: port };
+    const result = await inTransaction(deps, async (tx) => {
       tx.afterCommit?.(async () => {
         throw new Error('queue down');
       });

@@ -9,7 +9,7 @@ import { registerBacklogMetrics, type SqlReader } from './backlog-metrics.js';
 import { startHealthServer } from './health-server.js';
 import { createWorkerMetrics } from './worker-metrics.js';
 
-type WorkHandler = Parameters<WorkerBoss['work']>[1];
+type WorkHandler = Parameters<WorkerBoss['work']>[2];
 const silent = pino({ level: 'silent' });
 
 const bossWith = () => {

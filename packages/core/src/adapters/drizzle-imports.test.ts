@@ -117,11 +117,12 @@ describe('import on Postgres', () => {
     const person = newPerson();
     const existing = buildCandidate({ id: randomUUID(), organizationId: world.org, email: person.email, firstName: person.first, lastName: person.last });
     await createDrizzleCandidates(handle.db).create(existing);
-    const earlier = buildApplication({ id: randomUUID(), organizationId: world.org, jobId: world.otherJobId, candidateId: existing.id, cv: { key: `organizations/${world.org}/applications/earlier/cv`, fileName: 'old.pdf', mediaType: 'application/pdf', sizeBytes: 64 } });
+    const earlierCvKey = `organizations/${world.org}/applications/earlier/cv`;
+    const earlier = buildApplication({ id: randomUUID(), organizationId: world.org, jobId: world.otherJobId, candidateId: existing.id, cv: { key: earlierCvKey, fileName: 'old.pdf', mediaType: 'application/pdf', sizeBytes: 64 } });
     await createDrizzleApplications(handle.db).create(earlier);
-    await createDrizzleCandidateNotes(handle.db).create({ id: randomUUID(), organizationId: world.org, candidateId: existing.id, applicationId: earlier.id, authorId: 'u', body: 'earlier note', createdAt: NOW });
+    await createDrizzleCandidateNotes(handle.db).create({ id: randomUUID(), organizationId: world.org, candidateId: existing.id, applicationId: earlier.id, authorId: 'u', authorName: null, body: 'earlier note', createdAt: NOW });
     await createDrizzleCvExtractions(handle.db).upsert({ applicationId: earlier.id, organizationId: world.org, status: 'done', text: 't', data: null, source: 'text', updatedAt: NOW });
-    await world.files.put(earlier.cv.key, fakePdfBytes(), 'application/pdf');
+    await world.files.put(earlierCvKey, fakePdfBytes(), 'application/pdf');
 
     const batchId = await readyBatch(world, [person]);
     await runCommit(world, batchId);
@@ -131,7 +132,7 @@ describe('import on Postgres', () => {
     expect(left.map((a) => a.id)).toEqual([earlier.id]);
     expect(await createDrizzleCandidates(handle.db).findById(world.org, existing.id)).toMatchObject({ email: person.email, importBatchId: null });
     expect((await createDrizzleCandidateNotes(handle.db).listByCandidate(world.org, existing.id)).map((n) => n.body)).toEqual(['earlier note']);
-    expect(world.files.keys()).toEqual([earlier.cv.key]);
+    expect(world.files.keys()).toEqual([earlierCvKey]);
     expect((await leftovers([`Note on ${person.first}`])).candidate_note).toBeUndefined();
   });
 

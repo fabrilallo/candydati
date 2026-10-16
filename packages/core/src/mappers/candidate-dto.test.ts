@@ -18,6 +18,7 @@ import {
   toPrivacyNoticeDto,
   toPublicPrivacyNoticeDto,
 } from './candidate-dto.js';
+import type { CandidatePage } from '../use-cases/candidates/search-candidates.js';
 
 const job = buildJob({ id: 'job_1', status: 'published' });
 const candidate = buildCandidate({ tags: ['go'], phone: '+39 02 1234567' });
@@ -107,7 +108,7 @@ describe('candidate DTO mappers', () => {
 
   it('maps summaries', () => {
     const summary = { candidate, applicationCount: 2, lastAppliedAt: new Date('2026-02-01T00:00:00Z') };
-    const one = (item: typeof summary) => toCandidateSummaryDtos({ items: [item], total: 1, page: 1, limit: 25 })[0];
+    const one = (item: CandidatePage['items'][number]) => toCandidateSummaryDtos({ items: [item], total: 1, page: 1, limit: 25 })[0];
     expect(one(summary)).toEqual({
       id: 'cand_1',
       firstName: 'Ada',

@@ -94,7 +94,7 @@ describe('mapping edge cases', () => {
     const stages = Array.from({ length: 60 }, (_, i) => ({ id: i + 1, job_id: 1, name: i === 0 ? ' ' : `S${i}`, sort_order: 0 }));
     const mapped = mapStages(stages);
     expect(mapped).toHaveLength(50);
-    expect(mapped[0]).toEqual({ ref: '1', name: 'Stage' });
+    expect(mapped?.[0]).toEqual({ ref: '1', name: 'Stage' });
   });
 
   const application = { id: 1, candidate_id: 1, job_id: 1, status: 'in_process' as const, created_at: '2024-02-01T00:00:00Z', updated_at: '2024-03-01T00:00:00Z' };

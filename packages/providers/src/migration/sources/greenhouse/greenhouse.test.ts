@@ -139,7 +139,7 @@ const run = async (options: { maxRetries?: number } = {}) => {
   const builder = createPackageBuilder({ files: stored, filePrefix: 'organizations/o/migrations/m/', source: { system: 'greenhouse', producer: 'connector:greenhouse@1', exportedAt: '2026-10-16T10:00:00.000Z' }, reserveFiles: async () => undefined });
   const c = connector();
   const reader = createJsonReader({ allowedHosts: c.hosts(credentials), unsafeAllowLoopbackForTests: true, resolve: async () => ['127.0.0.1'], sleep: async (ms) => { waits.push(ms); }, random: () => 1, backoff: { baseMs: 10, maxMs: 10 }, maxRetries: options.maxRetries ?? 2 });
-  await c.fetch(credentials, builder, { reader, progress: async (done) => { progress.push(done); } });
+  await c.fetch(credentials, builder, { reader, progress: async (done) => { progress.push(done); }, notice: () => undefined });
   return { builder, collected: builder.collected(), waits, progress, stored };
 };
 

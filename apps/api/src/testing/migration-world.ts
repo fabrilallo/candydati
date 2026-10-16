@@ -1,7 +1,7 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { analyzeMigration, commitMigration, createDrizzleUnitOfWork, type MigrationAnalysisDeps, type MigrationCommitDeps } from '@candydati/core';
 import type { MigrationPackageInput } from '@candydati/domain';
-import { createMigrationPackageReader, newConversationToken, sniffCv, toMessagingConfig } from '@candydati/providers';
+import { createMigrationPackageReader, newConversationToken, sniffAttachment, sniffCv, toMessagingConfig } from '@candydati/providers';
 import { makePdf } from '@candydati/providers/testing';
 import { strToU8, zipSync } from 'fflate';
 import type { TestUser } from './client.js';
@@ -36,6 +36,7 @@ export function migrationWorkerDeps(t: TestApp): { analysis: MigrationAnalysisDe
     members: r.members,
     migratedRows: r.migratedRows,
     consentTokens: r.consentTokens,
+    attachmentSniffer: sniffAttachment,
     mail: { conversations: r.conversations, messages: r.messages, config: toMessagingConfig(env.platform, env.email), newToken: newConversationToken },
     newSecret: () => randomBytes(24).toString('base64url'),
     hash: (value) => createHash('sha256').update(value).digest('hex'),

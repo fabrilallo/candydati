@@ -36,9 +36,9 @@ describe('outbox fan-out on Postgres', () => {
     const queue = createInMemoryTaskQueue();
     const deps = { endpoints: r.endpoints, outbox: r.outbox, queue, transaction: uow.transaction, now: () => new Date() };
     await Promise.all([publishWebhookEvents(deps, { limit: 1000 }), publishWebhookEvents(deps, { limit: 1000 })]);
-    const mine = queue.jobs().filter((job) => job.name === 'webhook.deliver' && job.payload.organizationId === world.org);
-    expect(mine.map((job) => job.payload.eventId).toSorted()).toEqual(events.map((e) => e.id).toSorted());
-    expect(mine.every((job) => job.payload.endpointId === endpoint.id)).toBe(true);
+    const mine = queue.jobs().flatMap((job) => (job.name === 'webhook.deliver' && job.payload.organizationId === world.org ? [job.payload] : []));
+    expect(mine.map((payload) => payload.eventId).toSorted()).toEqual(events.map((e) => e.id).toSorted());
+    expect(mine.every((payload) => payload.endpointId === endpoint.id)).toBe(true);
     for (const event of events) expect((await r.outbox.findById(world.org, event.id))?.publishedAt).not.toBeNull();
   });
 });

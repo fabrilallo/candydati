@@ -7,7 +7,6 @@ import { ORG_A } from './candidate-seed.js';
 import { testHash, type TestHrDeps } from './hr-deps.js';
 import { seedImportWorld, type TestImportDeps } from './import-deps.js';
 import { createInMemoryJobRequests, createInMemoryStaleJobs } from './in-memory-job-requests.js';
-import type { InMemoryJobRepository } from './in-memory-jobs.js';
 import { buildJob, completeJobContent } from './job-fixtures.js';
 import { buildMessage } from './messaging-fixtures.js';
 import { createDistributionRegistry } from '../distribution-registry.js';
@@ -92,7 +91,7 @@ export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
     ...world,
     hash: testHash,
     jobRequests: createInMemoryJobRequests(),
-    staleJobs: createInMemoryStaleJobs(world.jobs as InMemoryJobRepository, world.store),
+    staleJobs: createInMemoryStaleJobs(world.jobs, world.store),
     distributions: createInMemoryJobDistributions(),
     distributionSettings: createInMemoryDistributionSettings(),
     registry: createDistributionRegistry([createFakeDistributionChannel()]),

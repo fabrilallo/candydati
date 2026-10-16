@@ -53,7 +53,7 @@ describe('runRetentionJob', () => {
     const NOW = new Date('2027-06-01T03:00:00Z');
     const retention = await seedPrivacyData({ applications: [] });
     const migrations = seedMigrationWorld();
-    const ended = { id: 'm1', organizationId: ORG_A, status: 'done' as const, sourceSystem: 's', producer: 'p', connectorMaturity: 'package' as const, createdBy: 'u', counts: {}, stageMapping: [], excludedJobs: [], declarations: null, packageKey: `organizations/${ORG_A}/migrations/m1/package.zip`, error: null, createdAt: NOW, updatedAt: new Date(NOW.getTime() - 8 * DAY), committedAt: null, undoneAt: null, purgedAt: null };
+    const ended = { id: 'm1', organizationId: ORG_A, status: 'done' as const, sourceSystem: 's', producer: 'p', connectorMaturity: 'package' as const, createdBy: 'u', counts: {}, stageMapping: [], excludedJobs: [], declarations: null, packageKey: `organizations/${ORG_A}/migrations/m1/package.zip`, error: null, createdAt: NOW, updatedAt: new Date(NOW.getTime() - 8 * DAY), committedAt: null, undoneAt: null, purgedAt: null, groupId: null, part: null };
     await migrations.migrations.create(ended);
     const result = await runRetentionJob({ retention, imports: seedImportWorld(), importStaleDays: 7, migrations, digest: digest() }, NOW);
     expect(result).toMatchObject({ migrationsPurged: 1, migrationPurgeFailures: [] });

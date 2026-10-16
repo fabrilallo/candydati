@@ -29,6 +29,7 @@ describe('queue definitions', () => {
       payload: { sentAt: '2026-10-13T10:00:00.000Z' },
       logger,
       lastAttempt: true,
+      attempt: 1,
     });
 
     expect(info).toHaveBeenCalledWith({ jobId: 'job-1', sentAt: '2026-10-13T10:00:00.000Z' }, 'heartbeat received');

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { TaskQueue } from './intake-ports.js';
 import { cell, createInMemoryTransaction } from './testing/in-memory-transaction.js';
 import { createInMemoryTaskQueue } from './testing/index.js';
-import { inSavepoint, inTransaction, queuesInTransaction, type TransactionPort } from './transaction.js';
+import { inSavepoint, inTransaction, queuesInTransaction, type TransactionalDeps, type TransactionPort } from './transaction.js';
 
 describe('inSavepoint (in memory)', () => {
   it('undoes only the writes of a failing savepoint and keeps the rest of the transaction', async () => {
@@ -37,7 +37,8 @@ describe('inSavepoint (in memory)', () => {
   it('drops the tasks and effects of a failing savepoint and runs the others after the commit', async () => {
     const queue = createInMemoryTaskQueue();
     const effects: string[] = [];
-    await inTransaction({ transaction: createInMemoryTransaction(), queue }, async (tx) => {
+    const deps: TransactionalDeps & { readonly queue: TaskQueue } = { transaction: createInMemoryTransaction(), queue };
+    await inTransaction(deps, async (tx) => {
       await inSavepoint(tx, async (sp) => {
         await sp.queue.enqueue('cv.extract', { organizationId: 'o', applicationId: 'kept' });
         sp.afterCommit?.(async () => void effects.push('kept'));

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
 import { ERASED, KEPT, ORG_A, ORG_B, buildApplication, buildAttachment, fakePdfBytes, buildPrivacyNotice, createInMemoryPrivacyNoticeRepository, seedPrivacyData, userActor } from '../../testing/index.js';
+import type { ZipWriterFactory } from '../../privacy-ports.js';
 import { correctCandidate } from './correct-candidate.js';
 import { exportCandidate } from './export-candidate.js';
 import { zipCandidateExport } from './build-candidate-export.js';
@@ -174,8 +175,8 @@ describe('exportCandidate', () => {
   it('zips candidate.json and the files through a ZipWriter', async () => {
     const deps = await seedPrivacyData();
     const bundle = await exportCandidate(deps, recruiter, { candidateId: 'cand_1' });
-    const zip = deps.zip();
-    await zipCandidateExport(zip, bundle);
+    const writerFactory: ZipWriterFactory = deps.zip;
+    await zipCandidateExport(writerFactory(), bundle);
     expect(deps.zip.writers()[0]?.entries().map((e) => e.path)).toEqual(['candidate.json', 'files/app_1/zelda.pdf', 'files/app_2/zelda-2.pdf']);
   });
 

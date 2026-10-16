@@ -22,7 +22,7 @@ describe('reconfirmation', () => {
     const delivered = await deliverQueued(deps);
     const secrets = [...delivered.values()];
     const byApp = (name: string) => {
-      const app = deps.store.read().applications.find((a) => a.cv.fileName.startsWith(name))!;
+      const app = deps.store.read().applications.find((a) => a.cv?.fileName.startsWith(name))!;
       return { app, secret: delivered.get(app.id)! };
     };
     return { deps, batch, secrets, mario: byApp('Mario'), giulia: byApp('Giulia') };
@@ -63,7 +63,7 @@ describe('reconfirmation', () => {
     expect(await answerConsentRequest(deps, { token: mario.secret, decline: true })).toEqual({ status: 'declined' });
     expect(deps.store.read().applications.some((a) => a.id === mario.app.id)).toBe(false);
     expect(deps.store.read().candidates.some((c) => c.email === 'mario@example.com')).toBe(false);
-    expect(deps.files.keys()).not.toContain(mario.app.cv.key);
+    expect(deps.files.keys()).not.toContain(mario.app.cv?.key);
     expect(deps.importStore.read().tokens.some((t) => t.applicationId === mario.app.id)).toBe(false);
     expect(deps.auditLog.events().find((e) => e.action === 'candidate.erased')).toMatchObject({ metadata: { reason: 'consent_declined' } });
     expect(await rejection(getConsentRequest(deps, { token: mario.secret }))).toBeInstanceOf(NotFoundError);
