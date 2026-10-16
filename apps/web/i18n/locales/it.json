@@ -51,7 +51,8 @@
     "imports": "Import",
     "jobRequests": "Richieste",
     "reports": "Report",
-    "security": "Sicurezza"
+    "security": "Sicurezza",
+    "migrations": "Migrazione"
   },
   "jobRequests": {
     "title": "Richieste di assunzione",
@@ -2906,6 +2907,295 @@
       "backToList": "Torna agli import",
       "undone": "Import annullato il {date}",
       "undoneBody": "Quello che l'import aveva creato è stato cancellato."
+    }
+  },
+  "migrations": {
+    "title": "Migrazione",
+    "description": "Porta qui lo storico di selezione da un altro ATS: annunci, candidati, esiti, note ed email. Controlli un'anteprima prima che venga scritto qualcosa e puoi annullare l'intera migrazione.",
+    "new": "Nuova migrazione",
+    "newTitle": "Nuova migrazione",
+    "list": {
+      "label": "Migrazioni",
+      "empty": "Nessuna migrazione",
+      "emptyBody": "Porta lo storico da un altro ATS in questo. Vedi un'anteprima prima che venga scritto qualcosa.",
+      "source": "da {source}",
+      "unknownSource": "pacchetto non ancora letto",
+      "jobs": "1 annuncio | {count} annunci",
+      "candidates": "1 persona | {count} persone",
+      "applications": "1 candidatura | {count} candidature",
+      "open": "Apri",
+      "resume": "Riprendi",
+      "undo": "Annulla migrazione",
+      "error": "Non siamo riusciti a caricare le migrazioni."
+    },
+    "status": {
+      "uploaded": "Caricata",
+      "fetching": "Recupero",
+      "analyzing": "In analisi",
+      "ready": "Da controllare",
+      "importing": "In migrazione",
+      "done": "Migrata",
+      "failed": "Fallita",
+      "undone": "Annullata"
+    },
+    "steps": {
+      "label": "Passaggi della migrazione",
+      "source": "Origine",
+      "upload": "Pacchetto",
+      "analysis": "Analisi",
+      "preview": "Anteprima",
+      "stages": "Annunci e fasi",
+      "confirm": "Responsabilità",
+      "result": "Risultato"
+    },
+    "source": {
+      "title": "Da dove arrivano i tuoi dati?",
+      "intro": "Ogni migrazione parte da un pacchetto di migrazione: uno ZIP con un file che descrive annunci, candidati e storico, più i CV. Scegli come portarlo qui.",
+      "chosen": "Scelta",
+      "package": {
+        "title": "Carica un pacchetto di migrazione",
+        "body": "Uno ZIP nel formato aperto del pacchetto. Usalo per un pacchetto preparato da un agente AI, da uno script o esportato da un'altra installazione.",
+        "action": "Scegli questa origine"
+      },
+      "where": {
+        "title": "Da dove arrivano i pacchetti?",
+        "skill": "Una skill per agenti insegna a Claude, Codex e assistenti simili a leggere il tuo vecchio ATS (tramite API, un export o un connettore MCP) e a scrivere il pacchetto al posto tuo. Poi lo carichi qui.",
+        "connectors": "I connettori integrati per i principali ATS arriveranno presto: inserirai una chiave di sola lettura e il pacchetto viene costruito per te, sempre con un'anteprima prima che venga scritto qualcosa."
+      }
+    },
+    "upload": {
+      "title": "Carica il pacchetto",
+      "intro": "Uno ZIP con il file migration.json e una cartella di file. Niente arriva ai tuoi candidati finché non hai visto l'anteprima e confermato.",
+      "drop": "Trascina qui lo ZIP",
+      "choose": "Scegli un file",
+      "limit": "Un solo ZIP, fino a {size}.",
+      "picked": "File scelto",
+      "remove": "Rimuovi {name}",
+      "send": "Carica e analizza",
+      "uploading": "Caricamento, {percent}%",
+      "cancel": "Interrompi",
+      "cancelled": "Caricamento interrotto",
+      "back": "Indietro",
+      "errors": {
+        "notZip": "Questo non è un file ZIP.",
+        "empty": "Il file è vuoto.",
+        "tooLarge": "Troppo grande: il limite è {size}.",
+        "tooLargeServer": "Il pacchetto supera il limite di dimensione."
+      }
+    },
+    "analysis": {
+      "title": "Analisi in corso",
+      "body": "Apriamo il pacchetto, controlliamo ogni riferimento e prepariamo l'anteprima. Puoi chiudere questa pagina: l'analisi prosegue e troverai la migrazione nell'elenco.",
+      "failed": "Non è stato possibile leggere il pacchetto",
+      "failedBody": "Non è stato scritto nulla nei tuoi dati. Correggi il pacchetto e caricalo di nuovo.",
+      "reason": "Motivo: {reason}",
+      "back": "Torna alle migrazioni"
+    },
+    "failure": {
+      "invalid_archive": "il file non è uno ZIP valido",
+      "unsafe_path": "lo ZIP contiene un percorso non sicuro",
+      "symlink": "lo ZIP contiene un collegamento, che non è ammesso",
+      "too_many_entries": "lo ZIP ha troppi elementi",
+      "too_large": "il pacchetto supera il limite",
+      "ratio_exceeded": "il pacchetto si espande molto più del dovuto",
+      "duplicate_entry": "lo ZIP ha due volte lo stesso elemento",
+      "unexpected_entry": "lo ZIP contiene qualcosa di diverso da migration.json e dalla cartella dei file",
+      "missing_manifest": "manca migration.json",
+      "invalid_manifest": "migration.json non rispetta il formato del pacchetto",
+      "missing_files": "mancano nello ZIP file citati in migration.json",
+      "privacy_notice_missing": "la tua organizzazione non ha un'informativa privacy pubblicata",
+      "organization_missing": "non troviamo l'organizzazione",
+      "job_content_invalid": "il contenuto di un annuncio del pacchetto non è valido",
+      "analysis_failed": "l'analisi è fallita in modo imprevisto",
+      "commit_failed": "la migrazione è fallita in modo imprevisto durante la scrittura",
+      "queue_unavailable": "non è stato possibile mettere in coda il lavoro",
+      "unknown": "un errore imprevisto"
+    },
+    "preview": {
+      "title": "Controlla cosa arriverà",
+      "intro": "Non è stato scritto ancora nulla. Questo è ciò che contiene il pacchetto e cosa succederà.",
+      "figures": {
+        "jobs": "Annunci",
+        "candidates": "Persone",
+        "applications": "Candidature",
+        "notes": "Note",
+        "messages": "Email",
+        "files": "File"
+      },
+      "leftOut": "1 annuncio escluso | {count} annunci esclusi",
+      "jobsTitle": "Annunci",
+      "jobs": {
+        "applications": "1 candidatura | {count} candidature",
+        "stages": "1 fase | {count} fasi",
+        "open": "{count} in corso",
+        "hired": "{count} assunti",
+        "notSelected": "{count} non selezionati",
+        "withdrawn": "{count} ritirati",
+        "status": {
+          "draft": "Bozza",
+          "open": "Aperto",
+          "closed": "Chiuso"
+        },
+        "leftOutPill": "Escluso"
+      },
+      "consent": {
+        "title": "Consenso delle persone",
+        "intro": "Le date di consenso e i tempi di conservazione sono presi dall'origine così come sono.",
+        "given": "Consenso dato",
+        "givenHint": "Il pacchetto ha una data di consenso: viene mantenuta e la conservazione segue l'origine.",
+        "toRenew": "Consenso da rinnovare",
+        "toRenewHint": "Nessuna data di consenso: ogni persona con un'email riceve la richiesta di conferma e, se non risponde, viene cancellata.",
+        "expired": "Escluse",
+        "expiredHint": "Conservazione già scaduta: queste persone non vengono riportate, con tutto ciò che le riguarda.",
+        "merged": "Già tra i tuoi candidati",
+        "mergedHint": "Riconosciute dall'email: il profilo non viene mai sovrascritto, lo storico viene aggiunto."
+      },
+      "issues": {
+        "title": "Segnalazioni",
+        "none": "L'analisi non ha trovato nulla da segnalare.",
+        "level": {
+          "error": "Errori",
+          "warning": "Da controllare",
+          "info": "Per tua informazione"
+        },
+        "levelHint": {
+          "error": "Bloccano la migrazione finché non sono risolti.",
+          "warning": "Qualcosa viene escluso o merita un'occhiata.",
+          "info": "Cosa succederà, non serve fare nulla."
+        },
+        "items": "1 segnalazione | {count} segnalazioni",
+        "show": "Mostra l'elenco",
+        "more": "Mostra altre",
+        "loading": "Caricamento",
+        "failed": "Non siamo riusciti a caricare le segnalazioni.",
+        "retry": "Riprova",
+        "refs": "Riferimenti: {refs}"
+      },
+      "next": "Continua",
+      "back": "Torna all'elenco",
+      "blocked": "Gli errori vanno risolti prima di poter confermare la migrazione."
+    },
+    "issue": {
+      "privacy_notice_missing": "La tua organizzazione non ha un'informativa privacy pubblicata. Pubblicane una nelle impostazioni privacy, poi carica di nuovo il pacchetto.",
+      "consent_expired": "1 persona esclusa: conservazione già scaduta | {count} persone escluse: conservazione già scaduta",
+      "consent_to_renew": "1 persona senza data di consenso: riceverà la richiesta di conferma | {count} persone senza data di consenso: riceveranno la richiesta di conferma",
+      "merge_existing": "1 persona è già tra i tuoi candidati: si aggiunge lo storico, il profilo non cambia | {count} persone sono già tra i tuoi candidati: si aggiunge lo storico, i profili non cambiano",
+      "no_email": "1 persona non ha email: non si può riconoscere né chiederle conferma | {count} persone non hanno email: non si possono riconoscere né chiedere loro conferma",
+      "duplicate_email": "1 email è usata da più voci: diventano una sola persona | {count} email sono usate da più voci: diventano una sola persona ciascuna",
+      "already_applied": "1 candidatura aperta ripete un'altra candidatura aperta della stessa persona per lo stesso annuncio: viene esclusa | {count} candidature aperte ripetono un'altra candidatura aperta della stessa persona per lo stesso annuncio: vengono escluse",
+      "stage_unmapped": "1 fase non ha ancora un tipo: sceglilo nel passaggio successivo | {count} fasi non hanno ancora un tipo: scegline uno nel passaggio successivo",
+      "too_many_stages": "1 annuncio ha più fasi di quante ne contenga una pipeline | {count} annunci hanno più fasi di quante ne contenga una pipeline",
+      "file_missing": "1 file citato nel pacchetto non è nello ZIP | {count} file citati nel pacchetto non sono nello ZIP",
+      "file_too_large": "1 file è troppo grande e viene escluso | {count} file sono troppo grandi e vengono esclusi",
+      "file_not_cv": "1 file indicato come CV non è un PDF né un documento Word: viene escluso | {count} file indicati come CV non sono PDF né documenti Word: vengono esclusi",
+      "file_unreferenced": "1 file nello ZIP non è usato da nessuna candidatura | {count} file nello ZIP non sono usati da nessuna candidatura"
+    },
+    "stages": {
+      "title": "Annunci e fasi",
+      "intro": "Scegli dove finisce ogni fase del vecchio processo nelle tue pipeline ed escludi gli annunci che non vuoi. Le fasi dello stesso annuncio che finiscono con lo stesso tipo e nome diventano una sola fase.",
+      "other": "Da scegliere",
+      "remaining": "1 fase ancora da scegliere | {count} fasi ancora da scegliere",
+      "allDone": "Ogni fase ha la sua destinazione.",
+      "byName": {
+        "title": "Lo stesso nome in ogni annuncio",
+        "intro": "Una scelta vale per ogni fase con quel nome, in tutti gli annunci.",
+        "jobs": "in 1 annuncio | in {count} annunci",
+        "select": "Dove finiscono le fasi chiamate {name}",
+        "mixed": "Diverso per annuncio"
+      },
+      "perJob": {
+        "title": "Annuncio per annuncio",
+        "include": "Porta questo annuncio",
+        "select": "Dove finisce {stage} in {job}",
+        "showMore": "Mostra altri annunci",
+        "stage": "Fase"
+      },
+      "received": "Ricevute è la prima colonna: le candidature arrivano lì.",
+      "saving": "Salvataggio",
+      "failed": "Non siamo riusciti a salvare la scelta.",
+      "back": "Indietro",
+      "next": "Continua"
+    },
+    "confirm": {
+      "title": "Prima di migrare",
+      "intro": "Stai per scrivere nel tuo account lo storico del pacchetto. Leggi e conferma le tre dichiarazioni qui sotto.",
+      "summary": "Verrà scritto: {jobs}, {applications}, {people}.",
+      "jobs": "1 annuncio | {count} annunci",
+      "applications": "1 candidatura | {count} candidature",
+      "people": "1 persona | {count} persone",
+      "box": {
+        "title": "La responsabilità resta tua",
+        "body": "{platform} sposta ciò che il pacchetto contiene. Non verifica la base giuridica dei dati di origine. La responsabilità della migrazione resta tua."
+      },
+      "declarationsTitle": "Le tue dichiarazioni",
+      "declarations": {
+        "controller": "La mia organizzazione è titolare del trattamento di questi dati e ha una base giuridica per trasferirli in {platform}.",
+        "previewChecked": "Ho controllato l'anteprima. So che le date di consenso e i tempi di conservazione sono presi dall'origine così come sono.",
+        "processorsOwned": "Se un agente AI o uno strumento di terze parti ha preparato questo pacchetto, la mia organizzazione lo ha scelto ed è coperto dai nostri accordi: è un nostro responsabile del trattamento, non di {platform}."
+      },
+      "recorded": "Le tue dichiarazioni vengono registrate nel registro attività con il tuo nome e l'orario.",
+      "unmapped": "1 fase non ha ancora un tipo. Torna indietro e scegli. | {count} fasi non hanno ancora un tipo. Torna indietro e scegli.",
+      "goBack": "Torna alle fasi",
+      "action": "Conferma e migra",
+      "acting": "Avvio",
+      "back": "Indietro",
+      "needAll": "Spunta tutte e tre le dichiarazioni per continuare."
+    },
+    "result": {
+      "importing": "Migrazione in corso",
+      "importingBody": "Stiamo scrivendo annunci, persone, candidature e storico. Può richiedere un po' di tempo: puoi chiudere questa pagina e ritrovare la migrazione nell'elenco.",
+      "done": "Migrazione completata",
+      "doneBody": "Lo storico è nel tuo account. Alle persone con consenso da rinnovare è stata chiesta la conferma.",
+      "failed": "La migrazione si è fermata",
+      "failedBody": "Una parte dello storico potrebbe essere stata scritta. Puoi annullare la migrazione per ripartire da zero.",
+      "counts": {
+        "jobs": "1 annuncio | {count} annunci",
+        "candidatesCreated": "1 persona nuova | {count} persone nuove",
+        "candidatesMerged": "1 persona unita a un candidato esistente | {count} persone unite a candidati esistenti",
+        "applications": "1 candidatura | {count} candidature",
+        "cvs": "1 CV | {count} CV",
+        "stageEvents": "1 cambio di fase nello storico | {count} cambi di fase nello storico",
+        "notes": "1 nota | {count} note",
+        "messages": "1 email nello storico | {count} email nello storico",
+        "reconfirmationsQueued": "1 richiesta di consenso inviata | {count} richieste di consenso inviate",
+        "skippedAlreadyApplied": "1 candidatura aperta ripetuta esclusa | {count} candidature aperte ripetute escluse"
+      },
+      "openJobs": "Apri gli annunci",
+      "openCandidates": "Apri i candidati",
+      "backToList": "Torna alle migrazioni",
+      "undo": "Annulla migrazione",
+      "undone": "Migrazione annullata il {date}",
+      "undoneBody": "Ciò che la migrazione aveva scritto è stato cancellato.",
+      "undoneCounts": "1 persona cancellata | {count} persone cancellate",
+      "undoneKept": "1 persona resta perché ha confermato o si è candidata di nuovo | {count} persone restano perché hanno confermato o si sono candidate di nuovo",
+      "undoneJobs": "1 annuncio rimosso | {count} annunci rimossi",
+      "undoneJobsKept": "1 annuncio resta perché è ancora in uso | {count} annunci restano perché sono ancora in uso",
+      "undoneFailed": "1 persona non è stata cancellata: annulla di nuovo per completare. | {count} persone non sono state cancellate: annulla di nuovo per completare."
+    },
+    "undo": {
+      "title": "Annullare la migrazione del {date}?",
+      "irreversible": "L'operazione non si può invertire.",
+      "intro": "Vengono cancellati definitivamente:",
+      "people": "le persone create dalla migrazione, con CV, note, email e candidature (1 persona) | le persone create dalla migrazione, con CV, note, email e candidature ({count} persone)",
+      "merged": "per le persone già presenti, solo ciò che la migrazione ha aggiunto: candidature, note, email e storico (1 persona) | per le persone già presenti, solo ciò che la migrazione ha aggiunto: candidature, note, email e storico ({count} persone)",
+      "jobs": "gli annunci creati dalla migrazione, quando nient'altro li usa (1 annuncio) | gli annunci creati dalla migrazione, quando nient'altro li usa ({count} annunci)",
+      "keptTitle": "Cosa resta",
+      "kept": "Restano le persone che hanno confermato il consenso o si sono candidate di nuovo dopo la migrazione: da quel momento i dati sono loro.",
+      "keptJobs": "Restano gli annunci pubblicati o con altre candidature.",
+      "record": "La scheda della migrazione resta nell'elenco, con i suoi numeri.",
+      "confirm": "Annulla migrazione",
+      "cancel": "Mantieni la migrazione",
+      "done": "Migrazione annullata"
+    },
+    "beta": {
+      "title": "Connettore beta",
+      "body": "Questo connettore è costruito sulla documentazione pubblica di {source}, non ancora verificato su un account reale. Controlla con attenzione l'anteprima prima di confermare."
+    },
+    "errors": {
+      "stagesUnmapped": "1 fase non ha ancora un tipo. Scegline uno per ogni fase. | {count} fasi non hanno ancora un tipo. Scegline uno per ogni fase.",
+      "tooManyStages": "Un annuncio ha più fasi di quante ne contenga una pipeline. Dai a alcune lo stesso tipo e nome così si uniscono.",
+      "privacyNoticeMissing": "La tua organizzazione non ha un'informativa privacy pubblicata. Pubblicane una prima nelle impostazioni privacy.",
+      "load": "Non siamo riusciti a caricare la migrazione."
     }
   },
   "consentRenew": {

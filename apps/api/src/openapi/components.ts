@@ -20,6 +20,7 @@ import {
   stageInterviewersSchema,
   staleJobSchema,
 } from './schemas-hr.js';
+import { migrationBatchSchema, migrationIssuesPageSchema, undoMigrationSchema } from './schemas-migration.js';
 import { consentRequestSchema, importBatchPageSchema, importBatchSchema, undoImportSchema } from './schemas-import.js';
 import {
   apiKeySchema,
@@ -59,6 +60,9 @@ export const COMPONENT_SCHEMAS = {
   ImportBatchPage: importBatchPageSchema,
   UndoImportResult: undoImportSchema,
   ConsentRequest: consentRequestSchema,
+  MigrationBatch: migrationBatchSchema,
+  MigrationIssuesPage: migrationIssuesPageSchema,
+  UndoMigrationResult: undoMigrationSchema,
   PublicCareers: publicCareersSchema,
   PublicJobPage: publicJobPageSchema,
   PublicOrganizationSummary: publicOrganizationSummarySchema,

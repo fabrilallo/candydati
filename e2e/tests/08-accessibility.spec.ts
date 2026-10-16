@@ -7,6 +7,7 @@ import { PASSWORD } from '../support/env';
 import { makePdf, makeZip } from '../support/files';
 import { fillJob, saveDraft } from '../support/jobs';
 import { linkIn, waitForMail } from '../support/mailpit';
+import { buildMigrationPackage } from '../support/migration';
 import { hydrated, load, open } from '../support/nav';
 import { applyAs, newApplicant, workspaceWithJob, type JobWorkspace } from '../support/scenario';
 import { createOrganization, newContext, signUp } from '../support/session';
@@ -213,6 +214,43 @@ test('imports wizard, every step', async () => {
     await closeClient(consent.context);
   }
   await audit(owner, '/app/imports', 'imports list with a batch');
+});
+
+test('migration wizard, every step and the undo dialog', async () => {
+  await audit(owner, '/app/migrations', 'migrations list');
+  await audit(owner, '/app/migrations/new', 'migrations: source step');
+  await owner.getByTestId('source-package').click();
+  await expect(owner.getByTestId('migration-upload-step')).toBeVisible();
+  await expectNoViolations(owner, 'migrations: package step');
+  const pkg = buildMigrationPackage();
+  await owner.getByTestId('migration-input').setInputFiles({ name: 'package.zip', mimeType: 'application/zip', buffer: pkg.zip });
+  await expect(owner.getByTestId('migration-picked')).toBeVisible();
+  await expectNoViolations(owner, 'migrations: package chosen');
+  await owner.getByTestId('migration-upload').click();
+  await expect(owner.getByTestId('migration-preview-step')).toBeVisible({ timeout: 90_000 });
+  await owner.getByTestId('migration-issues-show-warning').click();
+  await expect(owner.locator('[data-code="consent_expired"]')).toBeVisible();
+  await expectNoViolations(owner, 'migrations: preview step');
+  await owner.getByTestId('migration-preview-next').click();
+  await expect(owner.getByTestId('migration-stages-step')).toBeVisible();
+  await expectNoViolations(owner, 'migrations: stages step, stages to choose');
+  await owner.locator('[data-testid="migration-stage-names"] li', { hasText: pkg.sharedStage }).getByTestId('migration-name-select').selectOption('received');
+  await expect(owner.getByTestId('migration-all-mapped')).toBeVisible();
+  await expectNoViolations(owner, 'migrations: stages step, all mapped');
+  await owner.getByTestId('migration-stages-next').click();
+  await expect(owner.getByTestId('migration-confirm-step')).toBeVisible();
+  await expectNoViolations(owner, 'migrations: responsibility step');
+  for (const key of ['controller', 'previewChecked', 'processorsOwned']) await owner.getByTestId(`declaration-${key}`).check();
+  await owner.getByTestId('migration-confirm').click();
+  await expect(owner.getByTestId('migration-result-step')).toHaveAttribute('data-status', 'done', { timeout: 120_000 });
+  await expectNoViolations(owner, 'migrations: result step');
+  await owner.getByTestId('migration-undo').click();
+  await expect(owner.getByTestId('migration-undo-dialog')).toBeVisible();
+  await expectNoViolations(owner, 'migrations: undo dialog');
+  await owner.getByTestId('migration-undo-confirm').click();
+  await expect(owner.getByTestId('migration-result-step')).toHaveAttribute('data-status', 'undone');
+  await expectNoViolations(owner, 'migrations: undone');
+  await audit(owner, '/app/migrations', 'migrations list with a batch');
 });
 
 test('settings pages', async () => {

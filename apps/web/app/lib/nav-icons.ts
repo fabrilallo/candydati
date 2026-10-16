@@ -1,4 +1,4 @@
-import { BellRingIcon, LayoutTemplateIcon, ChartColumnIcon, ClipboardListIcon, RadioTowerIcon, BriefcaseBusinessIcon, ListTodoIcon, WebhookIcon, ContactIcon, DatabaseIcon, FileStackIcon, FileUpIcon, LayoutDashboardIcon, LockKeyholeIcon, MailIcon, MailsIcon, PlugZapIcon, ScrollTextIcon, ShieldCheckIcon, UsersIcon } from '@lucide/vue'
+import { ArrowRightLeftIcon, BellRingIcon, LayoutTemplateIcon, ChartColumnIcon, ClipboardListIcon, RadioTowerIcon, BriefcaseBusinessIcon, ListTodoIcon, WebhookIcon, ContactIcon, DatabaseIcon, FileStackIcon, FileUpIcon, LayoutDashboardIcon, LockKeyholeIcon, MailIcon, MailsIcon, PlugZapIcon, ScrollTextIcon, ShieldCheckIcon, UsersIcon } from '@lucide/vue'
 import type { NavId } from './permissions-ui'
 
 /** One icon per navigation entry, shared by the rail and the panel so they never disagree. */
@@ -22,5 +22,6 @@ export const NAV_ICONS = {
   careersPage: LayoutTemplateIcon,
   api: PlugZapIcon,
   data: DatabaseIcon,
+  migrations: ArrowRightLeftIcon,
   audit: ScrollTextIcon,
 } as const satisfies Record<NavId, unknown>
