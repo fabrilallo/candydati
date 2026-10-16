@@ -12,7 +12,7 @@ validation, preview and undo (ADR 0009).
 | Teamtailor | built-in connector | beta (built on public docs, not verified on a real account) | users, jobs and stages, candidates, applications with outcome and dates, notes, form answers, CVs and uploads; no scores, no consent date, one stage-history entry, no emails ([details](../../packages/providers/src/migration/sources/teamtailor/README.md)) | no |
 | Workable | built-in connector | beta (built on public docs, not verified on a real account) | jobs and their stages, candidates, applications with outcome and dates, stage history, notes, historical messages, CVs; [details](../../packages/providers/src/migration/sources/workable/README.md) | no |
 | Greenhouse | built-in connector | beta (built on public docs, not verified on a real account) | users, jobs and stages, candidates, applications with outcome, origin and stage history, notes, past emails, CVs and files; see its [README](../../packages/providers/src/migration/sources/greenhouse/README.md) | no |
-| Recruitee | built-in connector | planned | not yet defined | no |
+| Recruitee | built-in connector | beta (built on public docs, not verified on a real account; several endpoints assumed) | jobs (open, closed, archived), candidates with tags, source and GDPR expiry, applications with stage and outcome (hired, not selected), CVs, cover letters, notes. Not: ratings, evaluations, photos, emails, timeline | no |
 | Any other ATS or a spreadsheet | package built by the [agent skill](../../skills/candydati-migration/README.md) or by hand | available | whatever the package contains | not applicable |
 
 Connectors marked **beta** are built on public documentation and not yet verified on a real account. "Planned" means a
