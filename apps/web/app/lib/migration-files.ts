@@ -28,10 +28,11 @@ export const checkCvsFile = (file: Pick<File, 'name' | 'size'>): FileCheck => {
   return /\.zip$/i.test(file.name) ? { ok: true } : { ok: false, key: 'notZip' }
 }
 
-const GUIDE = 'https://github.com/fabrilallo/candydati/blob/main/website'
+/** Where the documentation site is published: change it here when it moves. */
+export const DOCS_BASE_URL = 'https://fabrilallo.github.io/candydati'
 
 /** The short guide for the connector's export, in the user's language (English when it is not Italian). */
-export const connectorGuideUrl = (connectorId: string, locale: string): string => `${GUIDE}${locale === 'it' ? '/it' : ''}/guide/migration.md#${encodeURIComponent(connectorId)}`
+export const connectorGuideUrl = (connectorId: string, locale: string): string => `${DOCS_BASE_URL}${locale === 'it' ? '/it' : ''}/guide/migration#${encodeURIComponent(connectorId)}`
 
 export interface FilesUpload {
   readonly sheet: File

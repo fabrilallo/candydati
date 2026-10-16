@@ -37,8 +37,8 @@ describe('file checks', () => {
 
 describe('guide link', () => {
   it('points to the connector section of the guide, in Italian or English', () => {
-    expect(connectorGuideUrl('inrecruiting', 'it')).toBe('https://github.com/fabrilallo/candydati/blob/main/website/it/guide/migration.md#inrecruiting')
-    expect(connectorGuideUrl('inrecruiting', 'en')).toBe('https://github.com/fabrilallo/candydati/blob/main/website/guide/migration.md#inrecruiting')
+    expect(connectorGuideUrl('inrecruiting', 'it')).toBe('https://fabrilallo.github.io/candydati/it/guide/migration#inrecruiting')
+    expect(connectorGuideUrl('inrecruiting', 'en')).toBe('https://fabrilallo.github.io/candydati/guide/migration#inrecruiting')
   })
 })
 

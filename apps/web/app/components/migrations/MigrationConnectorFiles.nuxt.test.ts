@@ -48,7 +48,7 @@ describe('file connector form', () => {
     const wrapper = await mountForm()
     expect(wrapper.find('[data-testid="migration-beta"]').text()).toContain('Zucchetti InRecruiting')
     expect(wrapper.find('[data-testid="migration-files-guide"]').attributes()).toMatchObject({ target: '_blank', rel: 'noopener noreferrer' })
-    expect(wrapper.find('[data-testid="migration-files-guide"]').attributes('href')).toContain('/it/guide/migration.md#inrecruiting')
+    expect(wrapper.find('[data-testid="migration-files-guide"]').attributes('href')).toBe('https://fabrilallo.github.io/candydati/it/guide/migration#inrecruiting')
     expect(wrapper.find('[data-testid="migration-files-submit"]').attributes('disabled')).toBeDefined()
     expect(wrapper.find('[data-testid="migration-files-cvs-input"]').exists()).toBe(true)
   })
