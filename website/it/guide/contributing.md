@@ -32,6 +32,13 @@ Questa documentazione sta nella cartella `website/`: `pnpm --filter @candydati/w
 - Segnala i problemi di sicurezza in privato, mai in una issue pubblica
   ([SECURITY.md](https://github.com/fabrilallo/candydati/blob/main/SECURITY.md)).
 
+## Con un agente di coding
+
+Claude Code, Codex, Cursor, Copilot e strumenti simili sono benvenuti. Leggono le regole del progetto da
+[AGENTS.md](https://github.com/fabrilallo/candydati/blob/main/AGENTS.md) (in inglese). Di ogni riga della tua pull
+request rispondi comunque tu: leggi il diff, lancia i controlli, tienila piccola e spiegata, e non dare mai a un agente
+segreti o dati reali di candidati. La CI ripete tutti i controlli e nulla viene unito finché non passano.
+
 L'architettura è descritta in
 [ARCHITECTURE.md](https://github.com/fabrilallo/candydati/blob/main/docs/ARCHITECTURE.md) e nei
 [decision record](https://github.com/fabrilallo/candydati/blob/main/docs/adr/README.md) (in inglese).

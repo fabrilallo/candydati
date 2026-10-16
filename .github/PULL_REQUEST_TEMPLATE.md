@@ -14,8 +14,11 @@
 - [ ] No secrets, personal data or third-party copyrighted material added
 - [ ] Docs, ADR or CHANGELOG updated if behavior changed
 - [ ] Commits follow Conventional Commits
+- [ ] If a coding agent helped: I read the whole diff, I can explain it, and no check was weakened to pass
 - [ ] I have read [CLA.md](../CLA.md) and I agree to it
 
 ## Test plan
+
+<!-- What you ran and what you checked by hand. -->
 
 - [ ] 

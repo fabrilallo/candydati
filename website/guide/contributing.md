@@ -32,6 +32,13 @@ This documentation lives in the `website/` folder: `pnpm --filter @candydati/web
 - Report security issues privately, never in a public issue
   ([SECURITY.md](https://github.com/fabrilallo/candydati/blob/main/SECURITY.md)).
 
+## With a coding agent
+
+Claude Code, Codex, Cursor, Copilot and similar tools are welcome. They read the project rules from
+[AGENTS.md](https://github.com/fabrilallo/candydati/blob/main/AGENTS.md). You still answer for every line of your pull
+request: read the diff, run the checks, keep it small and explained, and never give an agent secrets or real candidate
+data. CI runs every check again and nothing is merged until they pass.
+
 The architecture is described in
 [ARCHITECTURE.md](https://github.com/fabrilallo/candydati/blob/main/docs/ARCHITECTURE.md) and in the
 [decision records](https://github.com/fabrilallo/candydati/blob/main/docs/adr/README.md).

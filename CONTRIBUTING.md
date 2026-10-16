@@ -69,6 +69,19 @@ in `src/testing/`, never next to production code.
 CI also runs the Playwright flows (`e2e` job) and fails when the Drizzle migrations drift from the schema
 (`drizzle-kit check`, then `generate` must produce nothing).
 
+## Using coding agents
+
+Claude Code, Codex, Cursor, Copilot and similar tools are welcome. They read the project rules from
+[`AGENTS.md`](AGENTS.md) (Claude Code through `CLAUDE.md`), the same rules this guide gives you. The responsibility stays
+with you:
+
+- You open the pull request, so you answer for every line in it: read the diff and be able to explain it.
+- Run `pnpm lint`, `pnpm typecheck` and `pnpm test` yourself before opening it. CI runs them again, with coverage, the
+  end-to-end flows and the secret scan, and nothing is merged until they pass.
+- Small, explained pull requests: what changes, why, how you tested it. A large generated diff without that is closed.
+- Never paste secrets, `.env` values or real candidate data into an agent, and never let it put them in the code.
+- Never let an agent make a check pass by weakening it (lower thresholds, disabled rules, skipped tests).
+
 ## Commits and pull requests
 
 - Conventional commits: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `ci`.
