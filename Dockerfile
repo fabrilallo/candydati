@@ -14,9 +14,12 @@ RUN corepack enable
 WORKDIR /repo
 
 # ---------- fetch: download packages from the lockfile only (cacheable layer) ----------
+# The store lives in the layer, not in a BuildKit cache mount: CI restores layers from the GitHub Actions cache but not
+# cache mounts, so a cached fetch layer over an empty mount left the offline install below without packages.
 FROM base AS fetch
+ENV npm_config_store_dir=/pnpm/store
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm fetch
+RUN pnpm fetch
 
 # ---------- build: install offline, build everything ----------
 FROM fetch AS build
@@ -24,13 +27,12 @@ FROM fetch AS build
 ARG NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE=it
 ENV NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE=$NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE
 COPY . .
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store pnpm install --frozen-lockfile --offline
+RUN pnpm install --frozen-lockfile --offline
 RUN pnpm exec turbo run build --filter=@candydati/api --filter=@candydati/worker --filter=@candydati/web
 # Production dependencies of each service only, at the versions of the lockfile. The 7-day
 # minimumReleaseAge gate applies when new versions enter the lockfile (pnpm add, update), not here: `deploy --legacy` re-checks
 # every package against the clock, so a lockfile updated last week would otherwise stop building.
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
-    pnpm --config.minimum-release-age=0 --filter @candydati/api deploy --prod --legacy --frozen-lockfile /out/api \
+RUN pnpm --config.minimum-release-age=0 --filter @candydati/api deploy --prod --legacy --frozen-lockfile /out/api \
  && pnpm --config.minimum-release-age=0 --filter @candydati/worker deploy --prod --legacy --frozen-lockfile /out/worker \
  && rm -rf /out/api/src /out/api/eval /out/worker/src
 
