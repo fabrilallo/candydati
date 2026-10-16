@@ -211,9 +211,10 @@ describe('migrations: access', () => {
 });
 
 describe('migrations: connectors of a default build', () => {
-  it('offers none yet: no vendor connector ships before it is written, the test one never does', async () => {
+  it('offers the built-in vendor connectors (beta), never the test one', async () => {
     const w = await createWorld(t);
-    expect((await w.owner.get<unknown[]>('/api/v1/migrations/connectors')).body.data).toEqual([]);
+    const listed = (await w.owner.get<{ id: string; maturity: string }[]>('/api/v1/migrations/connectors')).body.data ?? [];
+    expect(listed.map((connector) => [connector.id, connector.maturity])).toEqual([['teamtailor', 'beta']]);
   });
 });
 
