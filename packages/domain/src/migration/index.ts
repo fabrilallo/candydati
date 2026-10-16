@@ -8,3 +8,4 @@ export * from './choices.js';
 export * from './commit-plan.js';
 export * from './migrated-job.js';
 export * from './dto.js';
+export * from './connector.js';

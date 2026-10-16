@@ -191,3 +191,31 @@ describe('historical messages', () => {
     expect(rows[0]?.indexdef).toMatch(/direction = 'outbound'.*historical = false/);
   });
 });
+
+describe('parts of a connector fetch', () => {
+  beforeAll(async () => {
+    await runMigrations(url);
+    handle = createDb(url);
+  });
+  afterAll(async () => {
+    await handle.close();
+  });
+
+  it('are plain batches by default, and carry a group and a part number together', async () => {
+    const world = await insertWorld();
+    const [row] = await handle.db.select().from(migrationBatch).where(eq(migrationBatch.id, world.batchId));
+    expect(row).toMatchObject({ groupId: null, part: null });
+    await handle.db.update(migrationBatch).set({ groupId: world.batchId, part: 1 }).where(eq(migrationBatch.id, world.batchId));
+    const second = randomUUID();
+    await handle.db.insert(migrationBatch).values({ id: second, organizationId: world.org, status: 'uploaded', sourceSystem: 'teamtailor', producer: 'p', connectorMaturity: 'beta', createdBy: 'u', packageKey: 'k', groupId: world.batchId, part: 2 });
+    const parts = await handle.db.select({ part: migrationBatch.part }).from(migrationBatch).where(eq(migrationBatch.groupId, world.batchId));
+    expect(parts.map((p) => p.part).toSorted()).toEqual([1, 2]);
+  });
+
+  it('refuses a group without a part, a part without a group and a part below 1', async () => {
+    const world = await insertWorld();
+    for (const values of [{ groupId: world.batchId, part: null }, { groupId: null, part: 1 }, { groupId: world.batchId, part: 0 }]) {
+      await expect(handle.db.update(migrationBatch).set(values).where(eq(migrationBatch.id, world.batchId))).rejects.toMatchObject(violates('migration_batch_part_check'));
+    }
+  });
+});

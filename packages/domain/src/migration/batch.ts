@@ -1,4 +1,5 @@
 import { STAGE_TYPES, type StageType } from '../job/taxonomy.js';
+import type { MigrationFetchCounts } from './connector.js';
 import type { MIGRATION_JOB_STATUSES } from './constants.js';
 
 /**
@@ -115,6 +116,8 @@ export interface MigrationUndoCounts {
 
 /** Totals of a batch: empty until the analysis fills them in; the commit and the undo add their own. */
 export type MigrationCounts = Partial<MigrationAnalysisCounts> & {
+  /** Set by a connector fetch: its progress, then how many parts it produced. */
+  readonly fetch?: MigrationFetchCounts | undefined;
   readonly commit?: MigrationCommitCounts | undefined;
   readonly undo?: MigrationUndoCounts | undefined;
 };
@@ -206,6 +209,12 @@ export interface MigrationBatch {
   readonly undoneAt: Date | null;
   /** When the package file and the issues were deleted, some days after the batch ended. */
   readonly purgedAt: Date | null;
+  /**
+   * Parts of one connector fetch: a source larger than one package (MIGRATION_LIMITS) is split into several packages,
+   * one batch each, previewed and confirmed one by one. `groupId` is the id of part 1; both are null for an upload.
+   */
+  readonly groupId: string | null;
+  readonly part: number | null;
 }
 
 /** Statuses after which nothing runs on the batch any more (except the undo of a `done` or `failed` one). */

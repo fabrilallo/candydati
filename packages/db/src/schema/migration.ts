@@ -7,7 +7,7 @@ import type {
   MigrationStatus,
 } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
-import { check, index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { check, index, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 
 const organizationRef = () =>
@@ -51,6 +51,12 @@ export const migrationBatch = pgTable(
     undoneAt: timestamp('undone_at', { withTimezone: true }),
     /** When the package file and the issues were deleted (some days after the batch ended): the purge is then done. */
     purgedAt: timestamp('purged_at', { withTimezone: true }),
+    /**
+     * A connector fetch larger than one package is split into parts, one batch each: `group_id` is the id of part 1,
+     * `part` the 1-based number. Both null for an uploaded package. No foreign key: part 1 is a batch like the others.
+     */
+    groupId: text('group_id'),
+    part: integer('part'),
   },
   (table) => [
     index('migration_batch_org_created_idx').on(table.organizationId, sql`${table.createdAt} desc`),
@@ -59,6 +65,7 @@ export const migrationBatch = pgTable(
       sql`${table.status} in ('uploaded', 'fetching', 'analyzing', 'ready', 'importing', 'done', 'failed', 'undone')`,
     ),
     check('migration_batch_maturity_check', sql`${table.connectorMaturity} in ('beta', 'stable', 'package')`),
+    check('migration_batch_part_check', sql`(${table.groupId} is null) = (${table.part} is null) and (${table.part} is null or ${table.part} >= 1)`),
   ],
 );
 

@@ -47,6 +47,8 @@ const batch = (organizationId: string, overrides: Partial<MigrationBatch> = {}):
     committedAt: null,
     undoneAt: null,
     purgedAt: null,
+    groupId: null,
+    part: null,
     ...overrides,
   };
 };
@@ -85,6 +87,32 @@ describe('createDrizzleMigrationBatches', () => {
     await handle.pool.query(`update migration_batch set credentials_ciphertext = 'v1.secret' where id = $1`, [created.id]);
     const read = [await repo.findById(org, created.id), ...(await repo.list(org)), await repo.transition(org, created.id, 'uploaded', { status: 'analyzing' })];
     for (const row of read) expect(row).not.toHaveProperty('credentialsCiphertext');
+  });
+});
+
+describe('createDrizzleMigrationBatches: connector credentials and parts', () => {
+  it('stores sealed credentials apart, reads them back only on request and wipes them on demand', async () => {
+    const org = await insertOrg();
+    const other = await insertOrg();
+    const repo = createDrizzleMigrationBatches(handle.db);
+    const created = await repo.create(batch(org, { status: 'fetching', groupId: null, part: null }), { credentialsCiphertext: 'sb1.sealed' });
+    expect(created).not.toHaveProperty('credentialsCiphertext');
+    expect(await repo.readCredentials(org, created.id)).toBe('sb1.sealed');
+    expect(await repo.readCredentials(other, created.id)).toBeNull();
+    await repo.wipeCredentials(other, created.id);
+    expect(await repo.readCredentials(org, created.id)).toBe('sb1.sealed');
+    await repo.wipeCredentials(org, created.id);
+    expect(await repo.readCredentials(org, created.id)).toBeNull();
+    expect(await repo.readCredentials(org, 'missing')).toBeNull();
+  });
+
+  it('keeps the group and the part of a batch', async () => {
+    const org = await insertOrg();
+    const repo = createDrizzleMigrationBatches(handle.db);
+    const lead = await repo.create(batch(org));
+    const part = await repo.create(batch(org, { groupId: lead.id, part: 2 }));
+    expect(await repo.findById(org, part.id)).toMatchObject({ groupId: lead.id, part: 2 });
+    expect(await repo.transition(org, lead.id, 'uploaded', { groupId: lead.id, part: 1 })).toMatchObject({ groupId: lead.id, part: 1 });
   });
 });
 

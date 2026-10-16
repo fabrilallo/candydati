@@ -63,6 +63,7 @@ const counts = z.object({
   issueWarnings: int,
   issueInfos: int,
   perJob: z.array(migrationJobCountSchema),
+  fetch: z.object({ done: int, total: int.nullable(), parts: int.optional() }).describe('Progress of a connector fetch, then the number of parts it produced.'),
   commit: commitCounts.optional(),
   undo: undoCounts.optional(),
 }).partial();
@@ -91,6 +92,8 @@ export const migrationBatchDtoSchema = z.object({
   committedAt: isoDate.nullable(),
   undoneAt: isoDate.nullable(),
   purgedAt: isoDate.nullable().describe('When the package file and the findings were deleted: the preview is gone after that.'),
+  groupId: z.string().nullable().describe('Parts of one connector fetch share it (the id of part 1); null for an uploaded package.'),
+  part: int.nullable().describe('1-based part number within the group; each part is previewed and confirmed on its own.'),
 });
 
 export const migrationIssueDtoSchema = z.object({

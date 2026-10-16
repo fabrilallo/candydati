@@ -33,6 +33,8 @@ const batchColumns = () => {
     committedAt: columns.committedAt,
     undoneAt: columns.undoneAt,
     purgedAt: columns.purgedAt,
+    groupId: columns.groupId,
+    part: columns.part,
   };
 };
 
@@ -44,10 +46,18 @@ export function createDrizzleMigrationBatches(db: DbExecutor): MigrationBatchRep
   const { migrationBatch } = schema;
   const one = (organizationId: string, id: string) => and(eq(migrationBatch.organizationId, organizationId), eq(migrationBatch.id, id));
   return {
-    async create(batch) {
-      const [row] = await db.insert(migrationBatch).values({ ...batch, excludedJobs: [...batch.excludedJobs] }).returning(batchColumns());
+    async create(batch, secrets) {
+      const values = { ...batch, excludedJobs: [...batch.excludedJobs], credentialsCiphertext: secrets?.credentialsCiphertext ?? null };
+      const [row] = await db.insert(migrationBatch).values(values).returning(batchColumns());
       if (!row) throw new Error('migration_batch insert returned no row');
       return row;
+    },
+    async readCredentials(organizationId, id) {
+      const [row] = await db.select({ ciphertext: migrationBatch.credentialsCiphertext }).from(migrationBatch).where(one(organizationId, id)).limit(1);
+      return row?.ciphertext ?? null;
+    },
+    async wipeCredentials(organizationId, id) {
+      await db.update(migrationBatch).set({ credentialsCiphertext: null }).where(one(organizationId, id));
     },
     async transition(organizationId, id, from, patch) {
       const [row] = await db

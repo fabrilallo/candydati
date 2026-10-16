@@ -17,6 +17,8 @@ const batch = {
   committedAt: null,
   undoneAt: null,
   purgedAt: null,
+  groupId: null,
+  part: null,
 };
 
 describe('migration dto', () => {
