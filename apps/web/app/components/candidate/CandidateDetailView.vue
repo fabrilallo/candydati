@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ApplicationCardDto, EmailTemplateKind, Outcome  } from '@candydati/domain'
-import { FileTextIcon, ListTodoIcon, MailIcon, MessagesSquareIcon, MessageSquareTextIcon, ShieldCheckIcon, UserRoundIcon } from '@lucide/vue'
+import { FileTextIcon, HistoryIcon, ListTodoIcon, MailIcon, MessagesSquareIcon, MessageSquareTextIcon, ShieldCheckIcon, UserRoundIcon } from '@lucide/vue'
 import { applicationStatus, currentApplication, fullName, stageOf } from '@/lib/candidate-view'
 import { renewalDeadline } from '@/lib/import-view'
 import { messageTotal, outcomeTemplateKind } from '@/lib/message-view'
@@ -36,7 +36,7 @@ const nowMs = useState('candidate-now', () => Date.now())
 const now = computed(() => new Date(nowMs.value))
 const renewBy = computed(() => (detail.value ? renewalDeadline(detail.value.applications) : null))
 
-type Tab = 'profile' | 'cv' | 'notes' | 'messages' | 'tasks' | 'feedback' | 'privacy'
+type Tab = 'profile' | 'cv' | 'notes' | 'messages' | 'tasks' | 'feedback' | 'timeline' | 'privacy'
 const tab = ref<Tab>('profile')
 const canRead = computed(() => can(role.value, 'message:read'))
 const canSend = computed(() => can(role.value, 'message:send'))
@@ -48,6 +48,7 @@ const tabs = computed<readonly TabItem<Tab>[]>(() => [
   ...(canRead.value ? [{ value: 'messages' as const, label: t('candidate.tabs.messages'), icon: MailIcon, count: messageTotal(detail.value?.applications ?? []), testId: 'tab-messages' }] : []),
   ...(can(role.value, 'task:read') && current.value ? [{ value: 'tasks' as const, label: t('candidate.tabs.tasks'), icon: ListTodoIcon, testId: 'tab-tasks' }] : []),
   ...(can(role.value, 'feedback:read') && current.value ? [{ value: 'feedback' as const, label: t('candidate.tabs.feedback'), icon: MessagesSquareIcon, testId: 'tab-feedback' }] : []),
+  ...(current.value ? [{ value: 'timeline' as const, label: t('candidate.tabs.timeline'), icon: HistoryIcon, testId: 'tab-timeline' }] : []),
   ...(canPrivacy.value ? [{ value: 'privacy' as const, label: t('candidate.tabs.privacy'), icon: ShieldCheckIcon, testId: 'tab-privacy' }] : []),
 ])
 /** One application erased while others stay: the profile is read again; the whole candidate gone: the parent leaves. */
@@ -159,6 +160,7 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
       />
       <ApplicationTasks v-else-if="tab === 'tasks' && current" :key="current.id" :application-id="current.id" :job-id="current.job.id" />
       <FeedbackPanel v-else-if="tab === 'feedback' && current" :key="current.id" :application="current" :can-manage="can(role, 'feedback:manage')" />
+      <ApplicationTimeline v-else-if="tab === 'timeline' && current" :key="current.id" :application-id="current.id" :stages="current.stages" :via-job-id="viaJobId" />
       <CandidatePrivacyPanel v-else-if="tab === 'privacy'" :detail="detail" :name="name" :now="now" :role="role" @updated="c.replace" @erased="erased" />
     </template>
   </div>

@@ -19,6 +19,8 @@ export const channelSettingPath = (channelId: string): string => `${DISTRIBUTION
 // Interviewers, feedback, job requests, approval, stale ads, reports
 export const jobInterviewersPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/interviewers`
 export const applicationFeedbackPath = (applicationId: string): string => `/api/v1/applications/${enc(applicationId)}/feedback`
+export const applicationTimelinePath = (applicationId: string, viaJobId?: string | null): string =>
+  `/api/v1/applications/${enc(applicationId)}/timeline${viaJobId ? `?viaJobId=${enc(viaJobId)}` : ''}`
 export const requestFeedbackPath = (applicationId: string): string => `${applicationFeedbackPath(applicationId)}/request`
 export const publicFeedbackPath = (token: string): string => `/api/v1/public/feedback/${enc(token)}`
 export const publicFeedbackCvPath = (token: string): string => `${publicFeedbackPath(token)}/cv`
