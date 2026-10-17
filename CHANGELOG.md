@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-10-17
+
+### Added
+
+- **Setup checklist** on the dashboard while anything is left to set up: email, privacy notice (publishing needs
+  it), careers page, first ad, first publication, team. Each step ticks from the real state, a role sees only the
+  steps it can take, and the list goes away once all are done.
+
+### Changed
+
+- The deploy skill keeps the Dokploy API key in the shell environment only, never in a file.
+
 ## [0.1.2] - 2026-10-17
 
 ### Changed
