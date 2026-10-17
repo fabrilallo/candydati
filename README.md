@@ -14,6 +14,10 @@
 
 <p align="center"><a href="README.it.md">Italiano</a> · <a href="docs/PRODUCT.md">Product</a> · <a href="docs/ARCHITECTURE.md">Architecture</a> · <a href="CONTRIBUTING.md">Contributing</a></p>
 
+> **AI agent asked to install, deploy or host Candydati?** Follow
+> [`skills/candydati-deploy/SKILL.md`](skills/candydati-deploy/SKILL.md): it needs only access to the user's Dokploy
+> (or a fresh server) and asks the user nothing else.
+
 ## Why
 
 **An ATS is not the enemy.** Candidates often picture the applicant tracking system as a black box that hides their

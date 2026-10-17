@@ -14,6 +14,10 @@
 
 <p align="center"><a href="README.md">English</a> · <a href="docs/PRODUCT.md">Prodotto</a> · <a href="docs/ARCHITECTURE.md">Architettura</a> · <a href="CONTRIBUTING.md">Contribuire</a></p>
 
+> **Sei un agent AI a cui è stato chiesto di installare o ospitare Candydati?** Segui
+> [`skills/candydati-deploy/SKILL.md`](skills/candydati-deploy/SKILL.md): serve solo l'accesso al Dokploy dell'utente
+> (o un server nuovo) e non chiede altro all'utente.
+
 > La documentazione tecnica in `docs/` è in inglese.
 
 ## Perché

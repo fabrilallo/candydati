@@ -1,0 +1,18 @@
+# Candydati
+
+> Open, self-hostable agentic ATS (applicant tracking system) built for candidates: salary in clear, declared process,
+> an answer to every applicant, no automated decisions about people. Source: https://github.com/fabrilallo/candydati
+
+## Install or host Candydati (for AI agents)
+
+- [Deploy skill](https://github.com/fabrilallo/candydati/blob/main/skills/candydati-deploy/SKILL.md): the steps an AI
+  coding agent follows to deploy Candydati on the user's Dokploy through its API (or on a fresh server). It needs only
+  Dokploy's URL and an API key from the user; secrets and domain are generated, email is set later in the app.
+
+## Documentation
+
+- [Quick start](https://fabrilallo.github.io/candydati/guide/quick-start): one-command install on a fresh server
+- [Other deployments](https://fabrilallo.github.io/candydati/guide/other-deployments): Dokploy, Docker Compose
+- [Email](https://fabrilallo.github.io/candydati/guide/email): SMTP or Resend, configured from the app
+- [Migration skill](https://github.com/fabrilallo/candydati/blob/main/skills/candydati-migration/SKILL.md): move data
+  from another ATS
