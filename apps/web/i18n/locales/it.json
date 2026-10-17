@@ -285,6 +285,12 @@
     "startTitle": "Primi passi",
     "startIntro": "Tre passi per mettere online il primo annuncio trasparente.",
     "start": {
+      "email": {
+        "title": "Configura l'email",
+        "body": "Inviti, risposte ai candidati e candidature passano tutti dall'email: finché non funziona, nulla si apre all'esterno.",
+        "cta": "Configura l'email",
+        "done": "L'email funziona"
+      },
       "job": {
         "title": "Scrivi il primo annuncio",
         "body": "Range RAL e fasi del processo sono obbligatori: senza, l'annuncio non si pubblica.",
@@ -642,7 +648,9 @@
     "tooManyAttempts": "Troppi tentativi. Aspetta qualche minuto e riprova.",
     "twoFactorExpired": "L'accesso ha richiesto troppo tempo. Accedi di nuovo.",
     "twoFactorRequired": "La tua organizzazione richiede la verifica in due passaggi: attivala per continuare",
-    "organizationCreationRestricted": "Su questa installazione non puoi creare un’altra organizzazione. Chiedi a un amministratore dell’installazione."
+    "organizationCreationRestricted": "Su questa installazione non puoi creare un’altra organizzazione. Chiedi a un amministratore dell’installazione.",
+    "emailNotConfigured": "Prima configura l'email (Impostazioni, Email): finché non è configurata, inviti, pubblicazione e candidature restano chiusi.",
+    "emailNotConfiguredLink": "Configura l'email"
   },
   "taxonomy": {
     "roleFamilies": {
@@ -1722,7 +1730,8 @@
       "invalid": "Alcuni dati non sono validi. Controlla i campi e riprova.",
       "closed": "Questa posizione non accetta più candidature.",
       "unreachable": "Il servizio non è raggiungibile in questo momento. Riprova tra poco.",
-      "generic": "Qualcosa non ha funzionato. Riprova tra poco."
+      "generic": "Qualcosa non ha funzionato. Riprova tra poco.",
+      "notOpen": "Le candidature non sono ancora aperte. Riprova tra qualche giorno."
     },
     "submit": "Invia la candidatura",
     "submitting": "Invio in corso…",
@@ -4119,6 +4128,78 @@
       "feedback": "Feedback del colloquio inviato ({stage})",
       "reconfirmationSent": "Riconferma richiesta",
       "reconfirmationAnswered": "Riconferma data"
+    }
+  },
+  "instanceEmail": {
+    "title": "Invio delle email",
+    "intro": "Come questa installazione invia le email: inviti, messaggi ai candidati e notifiche.",
+    "saved": "Impostazioni email salvate",
+    "loading": "Caricamento delle impostazioni email",
+    "state": {
+      "ready": "Funzionante",
+      "none": "Non configurata",
+      "environment": "Impostata sul server"
+    },
+    "explain": {
+      "ready": "Le email partono da {from}.",
+      "readyVerified": "Le email partono da {from}. Ultima email di prova consegnata il {date}.",
+      "none": "Finché l'email non funziona, inviti, pubblicazione e candidature restano chiusi.",
+      "environment": "L'ha configurata chi gestisce il server: si cambia lì, non qui.",
+      "askAdmin": "Deve configurarla l'amministratore di questa installazione. Fino ad allora inviti, pubblicazione e candidature restano chiusi."
+    },
+    "summary": {
+      "provider": "Servizio",
+      "host": "Server",
+      "from": "Mittente"
+    },
+    "provider": "Servizio di invio",
+    "providers": {
+      "smtp": "SMTP",
+      "resend": "Resend"
+    },
+    "providerHint": {
+      "smtp": "Qualsiasi server o servizio di posta che offra SMTP.",
+      "resend": "Servono una chiave API e un dominio verificato in Resend."
+    },
+    "form": {
+      "host": "Server SMTP",
+      "hostPlaceholder": "smtp.example.com",
+      "port": "Porta",
+      "portHint": "587 per STARTTLS, 465 per TLS dal primo byte.",
+      "secure": "TLS dal primo byte",
+      "secureHint": "Attivo per la porta 465. Lascialo spento per la 587: la connessione passa comunque a TLS.",
+      "user": "Nome utente (facoltativo)",
+      "password": "Password",
+      "apiKey": "Chiave API di Resend",
+      "secretKept": "salvata, lascia vuoto per mantenerla",
+      "sendingDomain": "Dominio di invio",
+      "sendingDomainHint": "Il dominio dell'indirizzo mittente, per esempio azienda.it.",
+      "sendingDomainPlaceholder": "azienda.it",
+      "fromLocal": "Nome mittente prima della {at}",
+      "fromPreview": "Le email arriveranno da",
+      "save": "Salva e invia un'email di prova",
+      "saving": "Invio dell'email di prova…"
+    },
+    "test": {
+      "sent": "Email di prova inviata a {email}: controlla che sia arrivata.",
+      "sentNoAddress": "Email di prova inviata al tuo indirizzo: controlla che sia arrivata.",
+      "hintResend": "Controlla che la chiave API sia valida e che il dominio di invio sia verificato in Resend.",
+      "hintSmtp": "Controlla server, porta, TLS e credenziali."
+    },
+    "banner": {
+      "message": "L'email non è configurata: inviti, pubblicazione e candidature restano chiusi finché non lo è.",
+      "link": "Configura l'email"
+    },
+    "errors": {
+      "testFailed": "L'email di prova non è stata accettata, quindi non è stato salvato nulla.",
+      "invalid": "Alcune impostazioni non sono valide. Controlla i campi e riprova.",
+      "host": "Scrivi l'indirizzo del server SMTP",
+      "port": "Scrivi una porta tra 1 e 65535",
+      "user": "Il nome utente è troppo lungo",
+      "password": "La password è troppo lunga",
+      "apiKey": "La chiave API è troppo lunga",
+      "sendingDomain": "Scrivi un nome di dominio, per esempio azienda.it",
+      "fromLocal": "Usa solo lettere, cifre, punti, trattini e trattini bassi"
     }
   }
 }

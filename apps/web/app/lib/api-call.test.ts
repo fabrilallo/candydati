@@ -64,4 +64,8 @@ describe('defaultFailureKey', () => {
     expect(defaultFailureKey({ status: 409, code: 'conflict', message: null, issues: [] })).toBe('errors.conflict')
     expect(defaultFailureKey({ status: 500, code: 'boom', message: null, issues: [] })).toBe('errors.unreachable')
   })
+
+  it('says to set up email first when the instance cannot send it', () => {
+    expect(defaultFailureKey({ status: 422, code: 'validation_failed', message: null, issues: [{ path: 'email', message: 'email_not_configured' }] })).toBe('errors.emailNotConfigured')
+  })
 })

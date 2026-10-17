@@ -285,6 +285,12 @@
     "startTitle": "First steps",
     "startIntro": "Three steps to put your first transparent job ad online.",
     "start": {
+      "email": {
+        "title": "Set up email",
+        "body": "Invitations, replies to candidates and applications all go out by email: nothing opens to the outside until it works.",
+        "cta": "Set up email",
+        "done": "Email is working"
+      },
       "job": {
         "title": "Write your first job ad",
         "body": "Salary range and process stages are required: without them the ad cannot be published.",
@@ -642,7 +648,9 @@
     "tooManyAttempts": "Too many attempts. Wait a few minutes and try again.",
     "twoFactorExpired": "The sign-in took too long. Sign in again.",
     "twoFactorRequired": "Your organization requires two-factor authentication: turn it on to continue",
-    "organizationCreationRestricted": "On this instance you cannot create another organization. Ask an administrator of the instance."
+    "organizationCreationRestricted": "On this instance you cannot create another organization. Ask an administrator of the instance.",
+    "emailNotConfigured": "Set up email first (Settings, Email): until it is configured, invitations, publishing and applications stay closed.",
+    "emailNotConfiguredLink": "Set up email"
   },
   "taxonomy": {
     "roleFamilies": {
@@ -1722,7 +1730,8 @@
       "invalid": "Some details are not valid. Check the fields and try again.",
       "closed": "This position no longer accepts applications.",
       "unreachable": "The service cannot be reached right now. Try again shortly.",
-      "generic": "Something went wrong. Try again shortly."
+      "generic": "Something went wrong. Try again shortly.",
+      "notOpen": "Applications are not open yet. Try again in a few days."
     },
     "submit": "Send application",
     "submitting": "Sending…",
@@ -4119,6 +4128,78 @@
       "feedback": "Interview feedback submitted ({stage})",
       "reconfirmationSent": "Reconfirmation requested",
       "reconfirmationAnswered": "Reconfirmation given"
+    }
+  },
+  "instanceEmail": {
+    "title": "Email sending",
+    "intro": "How this installation sends email: invitations, messages to candidates and notifications.",
+    "saved": "Email settings saved",
+    "loading": "Loading the email settings",
+    "state": {
+      "ready": "Working",
+      "none": "Not configured",
+      "environment": "Set on the server"
+    },
+    "explain": {
+      "ready": "Emails go out from {from}.",
+      "readyVerified": "Emails go out from {from}. Last test email delivered on {date}.",
+      "none": "Until email works, invitations, publishing and applications stay closed.",
+      "environment": "Whoever runs the server configured it: change it there, not here.",
+      "askAdmin": "The administrator of this installation has to configure it. Until then invitations, publishing and applications stay closed."
+    },
+    "summary": {
+      "provider": "Service",
+      "host": "Server",
+      "from": "Sender"
+    },
+    "provider": "Sending service",
+    "providers": {
+      "smtp": "SMTP",
+      "resend": "Resend"
+    },
+    "providerHint": {
+      "smtp": "Any mail server or service that offers SMTP.",
+      "resend": "Needs an API key and a domain verified in Resend."
+    },
+    "form": {
+      "host": "SMTP server",
+      "hostPlaceholder": "smtp.example.com",
+      "port": "Port",
+      "portHint": "587 for STARTTLS, 465 for TLS from the first byte.",
+      "secure": "TLS from the first byte",
+      "secureHint": "On for port 465. Leave it off for 587: the connection still switches to TLS.",
+      "user": "Username (optional)",
+      "password": "Password",
+      "apiKey": "Resend API key",
+      "secretKept": "stored, leave empty to keep",
+      "sendingDomain": "Sending domain",
+      "sendingDomainHint": "The domain in the sender address, for example company.com.",
+      "sendingDomainPlaceholder": "company.com",
+      "fromLocal": "Sender name before the {at}",
+      "fromPreview": "Emails will come from",
+      "save": "Save and send a test email",
+      "saving": "Sending the test email…"
+    },
+    "test": {
+      "sent": "Test email sent to {email}: check that it arrived.",
+      "sentNoAddress": "Test email sent to your address: check that it arrived.",
+      "hintResend": "Check that the API key is valid and that the sending domain is verified in Resend.",
+      "hintSmtp": "Check the server, the port, TLS and the credentials."
+    },
+    "banner": {
+      "message": "Email is not configured: invitations, publishing and applications are closed until it is.",
+      "link": "Set up email"
+    },
+    "errors": {
+      "testFailed": "The test email was not accepted, so nothing was saved.",
+      "invalid": "Some settings are not valid. Check the fields and try again.",
+      "host": "Enter the address of the SMTP server",
+      "port": "Enter a port between 1 and 65535",
+      "user": "The username is too long",
+      "password": "The password is too long",
+      "apiKey": "The API key is too long",
+      "sendingDomain": "Enter a domain name, for example company.com",
+      "fromLocal": "Use only letters, digits, dots, hyphens and underscores"
     }
   }
 }

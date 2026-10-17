@@ -1,11 +1,14 @@
-import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
+import { mountSuspended, mockNuxtImport, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { flushPromises, type VueWrapper } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppError } from '@/lib/auth-errors'
+import { instanceEmail } from '~~/test/fixtures/instance-email-fixtures'
+import { ok } from '~~/test/fixtures/job-fixtures'
 import InviteForm from './InviteForm.vue'
 
 const api = vi.hoisted(() => ({ inviteMember: vi.fn() }))
 mockNuxtImport('useAuthApi', () => () => api)
+registerEndpoint('/api/v1/instance/email-settings', { method: 'GET', handler: () => ok(instanceEmail()) })
 
 const optionValues = (wrapper: VueWrapper): string[] =>
   wrapper.findAll('#invite-role option').map((option) => option.attributes('value') ?? '')
@@ -64,5 +67,13 @@ describe('InviteForm', () => {
     await fill(wrapper, 'new@example.com')
     expect(wrapper.find('[role="alert"]').text()).toBe('Questa persona ha già un invito in sospeso')
     expect(wrapper.emitted('invited')).toBeUndefined()
+  })
+
+  it('says to set up email first when the instance cannot send the invitation', async () => {
+    api.inviteMember.mockRejectedValue(new AppError('errors.emailNotConfigured', 'EMAIL_NOT_CONFIGURED'))
+    const wrapper = await mountSuspended(InviteForm, { props: { actorRole: 'owner' } })
+    await fill(wrapper, 'new@example.com')
+    expect(wrapper.find('[role="alert"]').text()).toContain("Prima configura l'email")
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="email-setup-link"]').attributes('href')).toBe('/app/settings/email'))
   })
 })

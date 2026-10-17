@@ -13,8 +13,8 @@ const allowed = computed(() => can(viewer.value?.role ?? null, 'email_settings:m
   <AppPage :crumbs="[{ label: t('nav.sections.organization') }, { label: t('emailSettings.title') }]">
     <div class="grid gap-8">
       <PageHeader :title="t('emailSettings.title')" :description="t('emailSettings.subtitle')" :icon="MailIcon" />
+      <InstanceEmailPanel />
       <EmailSettingsPanel v-if="allowed" />
-      <FormAlert v-else message-key="errors.forbidden" />
     </div>
   </AppPage>
 </template>

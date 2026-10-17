@@ -1,4 +1,4 @@
-import type { PageMeta } from '@candydati/domain'
+import { EMAIL_NOT_CONFIGURED, type PageMeta } from '@candydati/domain'
 import { z } from 'zod'
 import { AppError, authErrorKey } from './auth-errors'
 import type { ApiCall, JobApiRequest } from './job-api'
@@ -32,9 +32,13 @@ const CODE_KEYS: Readonly<Record<string, string>> = {
   email_not_verified: 'errors.emailNotVerified',
 }
 
+/** Pure: the instance cannot send email yet, so the api refused an action that would (invite, publish, apply). */
+export const isEmailGate = (issues: readonly { readonly message: string }[]): boolean => issues.some((issue) => issue.message === EMAIL_NOT_CONFIGURED)
+
 /** Pure: translation key for a failure, by code first, then by HTTP status. */
 export const defaultFailureKey: FailureKey = (failure) => {
   if (failure.status === 0) return 'errors.unreachable'
+  if (isEmailGate(failure.issues)) return 'errors.emailNotConfigured'
   return (failure.code && CODE_KEYS[failure.code]) || authErrorKey({ status: failure.status })
 }
 
