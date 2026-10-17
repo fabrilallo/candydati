@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-10-17
+
+### Fixed
+
+- The first owner's sign-up page has no setup code field at all: the code comes with the link, survives a reload of
+  the page and is removed once the account exists. An operator's own `BOOTSTRAP_TOKEN` is opened as
+  `/signup?setup#code=<value>`.
+
 ## [0.1.3] - 2026-10-17
 
 ### Added
