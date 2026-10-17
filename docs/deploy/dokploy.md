@@ -16,7 +16,7 @@ steps through Dokploy's API.
    [`deploy/dokploy/template.base64`](https://raw.githubusercontent.com/fabrilallo/candydati/main/deploy/dokploy/template.base64)
    and import it. Dokploy writes the compose file, generates every secret and adds a domain for service `web`, port `3000`.
 3. **Domains**: edit that domain and turn **HTTPS** on with Let's Encrypt (keep the host Dokploy generated, or see
-   "Own domain" below). **Environment**: set `PLATFORM_SUPPORT_EMAIL` (the contact shown to candidates).
+   "Own domain" below).
 4. **Advanced**: turn on **Isolated Deployments**. Press **Deploy**: Dokploy pulls the images, no build.
 5. **Logs**, service `api`: open the link of the line `First owner setup: open https://.../signup?setup#code=...`,
    sign up (no confirmation email) and create the organization.

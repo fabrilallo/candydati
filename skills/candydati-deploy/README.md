@@ -8,8 +8,8 @@ configured afterwards from the app (Settings, Email).
 What is here:
 
 - `SKILL.md`: the instructions the agent follows, with the exact Dokploy API calls.
-- `scripts/dokploy-template.mjs`: prints the Dokploy template of the latest release (or `--ref`) with the user's name,
-  contact email and optional own domain filled in, as the base64 that Dokploy imports. Secrets stay Dokploy helpers,
+- `scripts/dokploy-template.mjs`: prints the Dokploy template of the latest release (or `--ref`) as the base64 that
+  Dokploy imports; an optional name and own domain can be filled in. Secrets stay Dokploy helpers,
   generated on import; passwords and API keys are refused. Node 24 or newer, no dependencies.
 
 The template itself is `deploy/dokploy/` in the repository, generated from `docker-compose.prod.yml`.

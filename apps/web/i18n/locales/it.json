@@ -198,7 +198,7 @@
       "hasAccount": "Hai già un account?",
       "loginLink": "Accedi",
       "setupToken": "Codice di configurazione",
-      "setupTokenHint": "Solo per il primo account di una nuova installazione: il codice nel link che il server stampa al primo avvio (o il BOOTSTRAP_TOKEN impostato da chi l’ha installata)."
+      "setupTokenHint": "Solo se l’indirizzo che hai aperto non conteneva il codice: il codice nel link che il server stampa nei log al primo avvio."
     },
     "verify": {
       "title": "Controlla la posta",
