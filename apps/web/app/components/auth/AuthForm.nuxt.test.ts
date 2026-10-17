@@ -11,6 +11,12 @@ const mocks = vi.hoisted(() => ({
 mockNuxtImport('useAuthApi', () => () => mocks.api)
 mockNuxtImport('navigateTo', () => mocks.navigateTo)
 
+const fill = async (wrapper: Awaited<ReturnType<typeof mountSuspended>>): Promise<void> => {
+  await wrapper.find('#name').setValue('Ada Lovelace')
+  await wrapper.find('#email').setValue('ada@example.com')
+  await wrapper.find('#password').setValue('long-enough-pw')
+}
+
 const submit = async (wrapper: Awaited<ReturnType<typeof mountSuspended>>): Promise<void> => {
   await wrapper.find('form').trigger('submit')
   await flushPromises()
@@ -19,6 +25,7 @@ const submit = async (wrapper: Awaited<ReturnType<typeof mountSuspended>>): Prom
 describe('AuthForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    window.sessionStorage.clear()
     mocks.api.signIn.mockResolvedValue({ twoFactor: false })
     mocks.api.signUp.mockResolvedValue({ confirmed: false })
     mocks.api.getSession.mockResolvedValue(null)
@@ -77,41 +84,38 @@ describe('AuthForm', () => {
     expect(wrapper.find('[data-testid="forgot-password-link"]').attributes('href')).toBe('/forgot-password')
   })
 
-  it('asks the first owner for the setup token only on /signup?setup, and passes it on', async () => {
-    const plain = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup' })
-    expect(plain.find('#setup-token').exists()).toBe(false)
-    const wrapper = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup?setup' })
-    await wrapper.find('#name').setValue('Ada Lovelace')
-    await wrapper.find('#email').setValue('ada@example.com')
-    await wrapper.find('#password').setValue('long-enough-pw')
-    await wrapper.find('#setup-token').setValue('one-time-token')
-    await submit(wrapper)
-    expect(mocks.api.signUp).toHaveBeenCalledWith(expect.objectContaining({ email: 'ada@example.com', bootstrapToken: 'one-time-token' }))
+  it('never shows a setup code field: the code comes only with the link the api logs, and is sent as a header', async () => {
+    for (const route of ['/signup', '/signup?setup', '/signup?setup#code=derived-setup-code']) {
+      const wrapper = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route })
+      expect(wrapper.find('#setup-token').exists()).toBe(false)
+      expect(wrapper.findAll('input').map((input) => input.attributes('id'))).toEqual(['name', 'email', 'password'])
+    }
   })
 
-  it('takes the setup code from the #code= of the link the api logs, without showing it, then drops it from the address', async () => {
+  it('takes the setup code from the #code= of the link, drops it from the address and sends it with the sign-up', async () => {
     const wrapper = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup?setup#code=derived-setup-code' })
     await vi.waitUntil(() => useRouter().currentRoute.value.hash === '', { timeout: 1000 })
-    // The person only creates the account: a code that came with the link is nothing for them to see or type.
-    expect(wrapper.find('#setup-token').exists()).toBe(false)
-    expect(useRouter().currentRoute.value.hash).toBe('')
     expect(useRouter().currentRoute.value.query).toHaveProperty('setup')
-    await wrapper.find('#name').setValue('Ada Lovelace')
-    await wrapper.find('#email').setValue('ada@example.com')
-    await wrapper.find('#password').setValue('long-enough-pw')
+    await fill(wrapper)
     await submit(wrapper)
     expect(mocks.api.signUp).toHaveBeenCalledWith(expect.objectContaining({ bootstrapToken: 'derived-setup-code' }))
   })
 
-  it('signs the first owner in at once when the setup code confirmed the address (no email needed yet)', async () => {
+  it('still has the code after a reload of the page, once the address lost it', async () => {
+    await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup?setup#code=kept-code' })
+    const reloaded = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup?setup' })
+    await fill(reloaded)
+    await submit(reloaded)
+    expect(mocks.api.signUp).toHaveBeenLastCalledWith(expect.objectContaining({ bootstrapToken: 'kept-code' }))
+  })
+
+  it('signs the first owner in at once when the setup code confirmed the address, and forgets the code', async () => {
     mocks.api.signUp.mockResolvedValueOnce({ confirmed: true })
-    const wrapper = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup?setup' })
-    await wrapper.find('#name').setValue('Ada Lovelace')
-    await wrapper.find('#email').setValue('ada@example.com')
-    await wrapper.find('#password').setValue('long-enough-pw')
-    await wrapper.find('#setup-token').setValue('setup-code')
+    const wrapper = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup?setup#code=setup-code' })
+    await fill(wrapper)
     await submit(wrapper)
     expect(mocks.api.signIn).toHaveBeenCalledWith(expect.objectContaining({ email: 'ada@example.com', password: 'long-enough-pw' }))
     expect(mocks.navigateTo).toHaveBeenCalledWith('/onboarding')
+    expect(window.sessionStorage.getItem('candydati.setup-code')).toBeNull()
   })
 })

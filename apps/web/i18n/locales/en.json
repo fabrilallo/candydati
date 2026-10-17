@@ -196,9 +196,7 @@
       "submit": "Create account",
       "submitting": "Creating account…",
       "hasAccount": "Already have an account?",
-      "loginLink": "Sign in",
-      "setupToken": "Setup token",
-      "setupTokenHint": "Only when the address you opened brought no code: the code in the link the server prints in its logs at first start."
+      "loginLink": "Sign in"
     },
     "verify": {
       "title": "Check your inbox",

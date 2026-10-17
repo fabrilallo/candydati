@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { loginSchema, signupSchema } from '@/lib/schemas'
 import { safeRedirect, verificationCallback, VERIFY_EMAIL } from '@/lib/auth-paths'
 import { AppError } from '@/lib/auth-errors'
+import { forgetSetupCode, takeSetupCode } from '@/lib/setup-code'
 
 const props = defineProps<{ mode: 'login' | 'signup' }>()
 const { t } = useI18n()
@@ -12,15 +13,16 @@ const route = useRoute()
 const { refresh } = useViewer()
 
 const isSignup = computed(() => props.mode === 'signup')
-/** `/signup?setup`: the first owner of a new instance gives the setup token. Never in the query: it would be logged. */
-const askSetupToken = computed(() => isSignup.value && route.query.setup !== undefined)
-/** The link the api logs at first start carries the code in the fragment (`#code=`), which no server ever receives. */
-const setupToken = ref(askSetupToken.value ? (new URLSearchParams(route.hash.slice(1)).get('code') ?? '') : '')
-/** The field shows only when the link brought no code (someone opened /signup?setup by hand): nothing to see otherwise. */
-const showSetupField = askSetupToken.value && setupToken.value === ''
+/**
+ * `/signup?setup#code=...`: the first owner's sign-up, through the link the api logs at first start. The code is read
+ * from the link (kept for this tab, so a reload does not lose it) and sent as a header: nothing to see or type.
+ */
+const isSetup = computed(() => isSignup.value && route.query.setup !== undefined)
+const setupCode = ref('')
 const router = useRouter()
-// Off the address bar (and the history) once read.
 onMounted(() => {
+  if (isSetup.value) setupCode.value = takeSetupCode(route.hash)
+  // Off the address bar (and the history) once read.
   if (route.hash !== '') void router.replace({ query: route.query, hash: '' })
 })
 const form = isSignup.value
@@ -40,8 +42,9 @@ const inbox = (email: string): Next => ({ path: VERIFY_EMAIL, query: redirect.va
 type Next = { readonly path: string; readonly query?: Record<string, string> } | string
 
 const signUp = async (data: { name: string; email: string; password: string }): Promise<Next> => {
-  const { confirmed } = await api.signUp({ ...data, callbackURL: callbackURL.value, ...(askSetupToken.value && setupToken.value.trim() !== '' ? { bootstrapToken: setupToken.value } : {}) })
+  const { confirmed } = await api.signUp({ ...data, callbackURL: callbackURL.value, ...(isSetup.value && setupCode.value !== '' ? { bootstrapToken: setupCode.value } : {}) })
   if (!confirmed) return inbox(data.email)
+  forgetSetupCode()
   // The first owner: the setup code confirmed the address, so straight in, to create the organization.
   await api.signIn({ email: data.email, password: data.password })
   await refresh()
@@ -85,11 +88,6 @@ const onSubmit = async (): Promise<void> => {
     <FormField id="password" :label="t('auth.password')" :error="form.errors.value.password" :hint="isSignup ? t('auth.passwordHint') : undefined">
       <template #default="{ invalid, describedBy }">
         <Input id="password" type="password" :autocomplete="isSignup ? 'new-password' : 'current-password'" :model-value="values.password" :aria-invalid="invalid" :aria-describedby="describedBy" @update:model-value="set('password', $event)" />
-      </template>
-    </FormField>
-    <FormField v-if="showSetupField" id="setup-token" :label="t('auth.signup.setupToken')" :hint="t('auth.signup.setupTokenHint')">
-      <template #default="{ describedBy }">
-        <Input id="setup-token" type="password" autocomplete="off" :model-value="setupToken" :aria-describedby="describedBy" data-testid="setup-token" @update:model-value="setupToken = String($event)" />
       </template>
     </FormField>
     <p v-if="!isSignup" class="-mt-2 text-sm">

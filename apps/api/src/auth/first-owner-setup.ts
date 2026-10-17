@@ -25,6 +25,7 @@ export const bootstrapTokenFor = (env: SetupEnv): string | null =>
 export const firstOwnerSetupNotice = (env: SetupEnv, bootstrapOpen: boolean): string | null => {
   if (!bootstrapOpen || env.SIGNUP_MODE !== 'invite_only' || env.NODE_ENV !== 'production') return null;
   const link = `${env.platform.url.replace(/\/+$/, '')}/signup?setup`;
-  if (env.BOOTSTRAP_TOKEN !== undefined) return `First owner setup: open ${link} and enter BOOTSTRAP_TOKEN`;
+  // The page has no field for the code: it comes in the link. The operator's own token is never printed.
+  if (env.BOOTSTRAP_TOKEN !== undefined) return `First owner setup: open ${link}#code=<BOOTSTRAP_TOKEN>`;
   return `First owner setup: open ${link}#code=${deriveSetupCode(env.BETTER_AUTH_SECRET)}`;
 };
