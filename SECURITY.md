@@ -56,8 +56,12 @@ What the code enforces, so an operator does not have to remember it:
   Generate each one with `openssl rand -base64 48`.
 - **Transport.** Production requires `https` for `BETTER_AUTH_URL` and `PLATFORM_URL`, so the session cookie is
   always `Secure`.
-- **Email.** `EMAIL_PROVIDER=log` (which sends nothing) is refused in production: confirmation, password reset and
-  invitation emails must arrive.
+- **Email.** `EMAIL_PROVIDER=log` (which sends nothing) is refused in production. Without `EMAIL_PROVIDER` the instance
+  starts and its first owner (or an instance admin, `INSTANCE_ADMIN_EMAILS`) configures SMTP or Resend from the app:
+  the settings are saved only after a test email to that admin went through, the SMTP password or Resend key is sealed
+  at rest (AES-256-GCM, key derived from `BETTER_AUTH_SECRET` with its own HKDF info) and never returned by the api.
+  Until email works, invitations, publishing a job or the careers page and public applications are refused, so no
+  candidate is left without an answer. `EMAIL_PROVIDER` set in the environment wins and the app shows it read-only.
 - **Accounts.** Every account confirms its email before the first sign-in; sign-up and password reset answer the
   same whether an address is registered or not. `SIGNUP_MODE=invite_only` is the production default: an account can be
   created only by an address with a pending invitation, which only a confirmed account with that address can accept.

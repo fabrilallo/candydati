@@ -89,3 +89,27 @@ export const organizationCreationQuota = pgTable('organization_creation_quota', 
   organizationId: text('organization_id').references(() => organization.id, { onDelete: 'restrict' }),
   claimedAt: timestamp('claimed_at', { withTimezone: true }).notNull(),
 });
+
+/**
+ * How the instance sends email when the environment does not say (EMAIL_PROVIDER unset): configured from the app by the
+ * first owner or an instance admin, saved only after a test email went through. One row at most (`slot = 'instance'`).
+ * The SMTP password or the Resend API key is sealed with the secret box (BETTER_AUTH_SECRET, info
+ * `candydati:instance-email`); everything else is plain configuration.
+ */
+export const instanceEmailSettings = pgTable('instance_email_settings', {
+  slot: text('slot').primaryKey(),
+  provider: text('provider').notNull(),
+  smtpHost: text('smtp_host'),
+  smtpPort: integer('smtp_port'),
+  smtpSecure: boolean('smtp_secure').notNull().default(false),
+  smtpUser: text('smtp_user'),
+  /** `sb1.` envelope of the SMTP password or the Resend API key; null when the provider needs none. */
+  secretCiphertext: text('secret_ciphertext'),
+  sendingDomain: text('sending_domain').notNull(),
+  fromLocal: text('from_local').notNull(),
+  verifiedAt: timestamp('verified_at', { withTimezone: true }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+  updatedBy: text('updated_by').references(() => user.id, { onDelete: 'set null' }),
+});
+
+export type InstanceEmailSettingsRow = typeof instanceEmailSettings.$inferSelect;

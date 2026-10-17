@@ -28,6 +28,15 @@ const submission = (overrides: Partial<ApplicationSubmission> = {}): Application
 const empty = () => seedCandidateWorld({ candidates: [], applications: [], extractions: [] });
 const rejection = (promise: Promise<unknown>) => promise.catch((e: unknown) => e);
 
+describe('submitApplication: instance email', () => {
+  it('refuses an application while the instance cannot send its receipt, and stores nothing', async () => {
+    const deps = { ...empty(), emailReady: () => false };
+    const error = await rejection(submitApplication(deps, submission()));
+    expect((error as ValidationError).issues).toEqual([{ path: 'email', message: 'email_not_configured' }]);
+    expect(deps.store.read().applications).toEqual([]);
+  });
+});
+
 describe('submitApplication: success', () => {
   it('stores candidate, application, CV and pending extraction; enqueues after commit; audits without personal data', async () => {
     const deps = empty();

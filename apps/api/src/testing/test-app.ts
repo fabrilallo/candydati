@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { DistributionChannel } from '@candydati/core';
+import type { DistributionChannel, InstanceEmailTester } from '@candydati/core';
 import type { AdQualityAnalyzer } from '@candydati/domain';
 import { createDb, type DbHandle } from '@candydati/db';
 import type { FastifyInstance } from 'fastify';
@@ -30,6 +30,8 @@ export const testEnv = (overrides: Record<string, string> = {}): Env =>
     S3_BUCKET: 'candydati-test',
     S3_ACCESS_KEY: 'test',
     S3_SECRET_KEY: 'test-secret',
+    // Set: the environment decides how the tests send email (ready). Tests about email from the app pass EMAIL_PROVIDER: ''.
+    EMAIL_PROVIDER: 'log',
     EMAIL_DOMAIN: 'mail.test.example',
     EMAIL_FROM_LOCAL: 'jobs',
     EMAIL_INBOUND_DOMAIN: 'in.test.example',
@@ -59,6 +61,7 @@ export interface TestAppOptions {
   readonly env?: Record<string, string>;
   readonly throttleStore?: ThrottleStore;
   readonly migrationConnectors?: MigrationConnectorRegistry;
+  readonly instanceEmailTester?: InstanceEmailTester;
 }
 
 export async function createTestApp(options: TestAppOptions = {}): Promise<TestApp> {
@@ -67,7 +70,7 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
   const files = createInMemoryFileStorage();
   const queue = createInMemoryTaskQueue();
   const fakeSender = createFakeEmailSender();
-  const app = await buildServer({ env: testEnv(options.env), throttleStore: options.throttleStore ?? createInMemoryThrottleStore(), db: handle.db, accountMailer: options.accountMailer ?? mailbox, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, migrationConnectors: options.migrationConnectors, reportClock: options.reportClock });
+  const app = await buildServer({ env: testEnv(options.env), throttleStore: options.throttleStore ?? createInMemoryThrottleStore(), db: handle.db, accountMailer: options.accountMailer ?? mailbox, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, migrationConnectors: options.migrationConnectors, reportClock: options.reportClock, instanceEmailTester: options.instanceEmailTester });
   await app.ready();
   registerMailbox(app, mailbox);
   return {

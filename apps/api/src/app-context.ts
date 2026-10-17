@@ -2,6 +2,8 @@ import { randomUUID } from 'node:crypto';
 import {
   createDrizzleUnitOfWork,
   type DrizzleUnitOfWork,
+  type InstanceEmailDeps,
+  type InstanceEmailTester,
   type AuditLogRepository,
   type CoreDeps,
   type ReportDeps,
@@ -55,7 +57,8 @@ import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
 import { createCareersDeps, type CareersWiring } from './wiring/careers-deps.js';
 import { createHrDeps, type HrWiring } from './wiring/hr-deps.js';
 import { createTeamDeps, type TeamWiring } from './wiring/team-deps.js';
-import { toMessagingConfig, type MigrationConnectorRegistry } from '@candydati/providers';
+import { liveMessagingConfig, type EmailRuntime, type MigrationConnectorRegistry } from '@candydati/providers';
+import { createInstanceEmailDeps } from './wiring/instance-email-deps.js';
 
 export interface RateLimitSettings {
   /** Requests per minute per client on every route. */
@@ -156,6 +159,9 @@ export interface AppContext {
   readonly staleJobDeps: HrWiring['staleJobDeps'];
   readonly jobTeamDeps: TeamWiring['jobTeamDeps'];
   readonly accessSettingDeps: TeamWiring['accessSettingDeps'];
+  /** How the instance sends email (settings saved from the app) and whether it can. */
+  readonly instanceEmailDeps: InstanceEmailDeps;
+  readonly emailRuntime: EmailRuntime;
 }
 
 export interface AppContextDeps {
@@ -183,26 +189,31 @@ export interface AppContextDeps {
   readonly reportClock?: (() => Date) | undefined;
   /** Test seam: the careers media transcoder (sharp by default). */
   readonly images?: ImageTranscoder | undefined;
+  /** The email settings in force (environment or app); gates publishing, applications and invitations until ready. */
+  readonly emailRuntime: EmailRuntime;
+  readonly emailLog?: ((line: string) => void) | undefined;
+  readonly instanceEmailTester?: InstanceEmailTester | undefined;
 }
 
 const isBindable = (queue: TaskQueue | BindableTaskQueue): queue is BindableTaskQueue => 'bindTo' in queue && typeof queue.bindTo === 'function';
 
-export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
   const { auditLog } = uow.repositories;
   const core: CoreDeps = { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams };
-  const auth = createAuth({ env, db, core, mailer, requiresTwoFactor: async (organizationId) => (await uow.repositories.securitySettings.get(organizationId)).requireTwoFactor });
-  const messaging = createMessagingDeps({ env, uow, queue, sender, identity, onReceiptError });
+  const auth = createAuth({ env, db, core, mailer, requiresTwoFactor: async (organizationId) => (await uow.repositories.securitySettings.get(organizationId)).requireTwoFactor, emailReady: () => emailRuntime.ready() });
+  const emailConfig = liveMessagingConfig(env.platform, emailRuntime);
+  const messaging = createMessagingDeps({ env, uow, queue, sender, identity, onReceiptError, config: emailConfig });
   const resolveFromHeaders = createSessionResolver(auth, db, uow);
   const apiKeyDeps = createApiKeyDeps(uow, env.API_KEY_DEFAULT_TTL_DAYS);
   const limits = rateLimit ?? DEFAULT_RATE_LIMIT;
   const actors = createActors({ env, limits, apiKeyDeps, resolveFromHeaders });
-  const hr = createHrDeps({ uow, files, sender, config: toMessagingConfig(env.platform, env.email), onFeedbackMailError: onReceiptError });
+  const hr = createHrDeps({ uow, files, sender, config: emailConfig, onFeedbackMailError: onReceiptError });
   const phase2 = createPhase2Deps({ uow, files, queue, receipts: messaging.receipts, feedback: hr.stageEntry });
   const phase5 = createPhase5Deps({ uow, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipStreamFactory, feedbackRecords: hr.feedbackRecords });
-  const jobDeps = createJobDeps(uow, adQuality, env.platform.adQualityThreshold);
+  const jobDeps = { ...createJobDeps(uow, adQuality, env.platform.adQualityThreshold), emailReady: () => emailRuntime.ready() };
   return {
     env,
     auth,
@@ -215,9 +226,8 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...phase5,
     ...createImportDeps({ uow, files, queue }),
     ...createMigrationDeps({ uow, files, queue, authSecret: env.BETTER_AUTH_SECRET, connectors: migrationConnectors }),
-    ...createCareersDeps({ uow, files, queue, defaultLocale: env.platform.defaultLocale, images }),
+    ...emailGatedContext({ env, db, uow, files, queue, images, phase2, runtime: emailRuntime, log: emailLog, tester: instanceEmailTester }),
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
-    submitDeps: withDailyCaps(env, phase2),
     timelineDeps: { ...phase2.candidateDeps, interviewFeedback: hr.feedbackRecords.interviewFeedback },
     ...hrContext(hr),
     ...createTeamDeps(uow),
@@ -234,6 +244,32 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     distributionDeps: createDistributionDeps({ uow, publicBaseUrl: env.platform.url, channels: distributionChannels }),
     jobViewDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, jobViews: uow.repositories.jobViews, now: () => new Date() },
     publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
+  };
+}
+
+interface EmailGatedInputs {
+  readonly env: Env;
+  readonly db: Db;
+  readonly uow: DrizzleUnitOfWork;
+  readonly files: FileStorage;
+  readonly queue: TaskQueue | BindableTaskQueue;
+  readonly images?: ImageTranscoder | undefined;
+  readonly phase2: ReturnType<typeof createPhase2Deps>;
+  readonly runtime: EmailRuntime;
+  readonly log?: ((line: string) => void) | undefined;
+  readonly tester?: InstanceEmailTester | undefined;
+}
+
+/** What waits for the instance email (careers page publishing, public applications) and the email settings themselves. */
+function emailGatedContext({ env, db, uow, files, queue, images, phase2, runtime, log, tester }: EmailGatedInputs) {
+  const emailReady = (): boolean => runtime.ready();
+  const careers = createCareersDeps({ uow, files, queue, defaultLocale: env.platform.defaultLocale, images });
+  return {
+    ...careers,
+    careersDeps: { ...careers.careersDeps, emailReady },
+    submitDeps: { ...withDailyCaps(env, phase2), emailReady },
+    instanceEmailDeps: createInstanceEmailDeps({ env, db, uow, runtime, log: log ?? (() => undefined), tester }),
+    emailRuntime: runtime,
   };
 }
 

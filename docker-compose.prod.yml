@@ -7,6 +7,7 @@
 # With development mail (Mailpit): add --profile mail and EMAIL_PROVIDER=smtp. With scheduled backups: --profile backup.
 # Only "web" is published on the host (WEB_BIND:WEB_PORT); api, worker, postgres and minio stay on the internal network.
 # The stack refuses to start with the example secrets, an http PLATFORM_URL or EMAIL_PROVIDER=log (config-check).
+# Without EMAIL_PROVIDER it starts and the first owner configures email from the app.
 # Variables are read from the .env in the current folder; internal service addresses are fixed here and override
 # the development ones (localhost) found in .env.
 # Every variable listed in docs/ENVIRONMENT.md is passed through (a test checks it).
@@ -27,7 +28,8 @@ x-app-env: &app-env
   PLATFORM_DEFAULT_LOCALE: ${PLATFORM_DEFAULT_LOCALE:-it}
   PLATFORM_TIME_ZONE: ${PLATFORM_TIME_ZONE:-Europe/Rome}
   PLATFORM_AD_QUALITY_THRESHOLD: ${PLATFORM_AD_QUALITY_THRESHOLD:-6}
-  EMAIL_PROVIDER: ${EMAIL_PROVIDER:?imposta EMAIL_PROVIDER (smtp o resend)}
+  # Empty: the first owner configures email from the app (Settings, Email); set, it wins and the app shows it read-only.
+  EMAIL_PROVIDER: ${EMAIL_PROVIDER:-}
   SMTP_HOST: ${SMTP_HOST:-mailpit}
   SMTP_PORT: ${SMTP_PORT:-1025}
   SMTP_SECURE: ${SMTP_SECURE:-false}
@@ -62,7 +64,7 @@ name: ${COMPOSE_PROJECT_NAME:-candydati-prod}
 
 services:
   # Refuses to start the stack with the example secrets of .env.example, short secrets, an http PLATFORM_URL or
-  # EMAIL_PROVIDER=log (docker/config-check.sh). The api and the worker apply the same rules again at boot.
+  # EMAIL_PROVIDER=log set on purpose (docker/config-check.sh). The api and the worker apply the same rules again at boot.
   config-check:
     image: busybox:1.38@sha256:fd7dc98638c8e305f4dc34e979f1c0fdfdcaeb0fbf8fcff77ae834b6da3d7e6e
     restart: "no"
@@ -76,7 +78,7 @@ services:
       S3_SECRET_KEY: ${S3_SECRET_KEY:-}
       BOOTSTRAP_TOKEN: ${BOOTSTRAP_TOKEN:-}
       PLATFORM_URL: ${PLATFORM_URL:-}
-      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-log}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER:-}
     # No `network_mode: none`: Dokploy's isolated deployments add a network to every service, and Compose refuses a
     # service with both (tools/deploy/compose.test.ts). The script opens no connection.
 

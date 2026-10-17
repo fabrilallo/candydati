@@ -3,7 +3,7 @@ import type { Db } from '@candydati/db';
 import { schema } from '@candydati/db';
 import { CREATOR_ROLE, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@candydati/domain';
 import { betterAuth } from 'better-auth';
-import { createAuthMiddleware } from 'better-auth/api';
+import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { organization, twoFactor } from 'better-auth/plugins';
 import type { Env } from '../config/env.js';
@@ -34,7 +34,12 @@ export interface AuthDependencies {
   readonly mailer: AccountMailer;
   /** The organization requires 2FA of owners and admins: the same setting the actor resolver reads. */
   readonly requiresTwoFactor: (organizationId: string) => Promise<boolean>;
+  /** The instance can send email: an invitation is an email, so none is created before. Absent: ready. */
+  readonly emailReady?: (() => boolean) | undefined;
 }
+
+/** Better Auth error code of an invitation refused while the instance cannot send email (the web app translates it). */
+export const EMAIL_NOT_CONFIGURED_CODE = 'EMAIL_NOT_CONFIGURED';
 
 const signupPolicy = (env: Env): SignupPolicy => ({ mode: env.SIGNUP_MODE, bootstrapToken: bootstrapTokenFor(env), requireBootstrapToken: env.NODE_ENV === 'production' });
 
@@ -78,9 +83,13 @@ const beforeHooks = (env: Env, db: Db, requiresTwoFactor: AuthDependencies['requ
  * Better Auth takes one function per organization hook: the role guards check the logo before the creation slot is
  * claimed (a refused logo uses no slot), and the creation is recorded before it is audited.
  */
-const organizationHooks = (creation: ReturnType<typeof organizationCreationHooks>, audit: ReturnType<typeof createAuditHooks>) => ({
+const organizationHooks = (creation: ReturnType<typeof organizationCreationHooks>, audit: ReturnType<typeof createAuditHooks>, emailReady: () => boolean) => ({
   ...roleGuardHooks,
   ...audit,
+  beforeCreateInvitation: async (data: Parameters<typeof roleGuardHooks.beforeCreateInvitation>[0]) => {
+    if (!emailReady()) throw new APIError('BAD_REQUEST', { code: EMAIL_NOT_CONFIGURED_CODE, message: 'Set up email first: an invitation is sent by email.' });
+    await roleGuardHooks.beforeCreateInvitation(data);
+  },
   beforeCreateOrganization: async (data: Parameters<typeof creation.beforeCreateOrganization>[0] & Parameters<typeof roleGuardHooks.beforeCreateOrganization>[0]) => {
     await roleGuardHooks.beforeCreateOrganization(data);
     await creation.beforeCreateOrganization(data);
@@ -96,7 +105,7 @@ const organizationHooks = (creation: ReturnType<typeof organizationCreationHooks
  * and an audit event for every organization action. The auth base URL is the WEB origin: the browser reaches this
  * api through the web app's /api/** proxy, so the links in the emails go through it too.
  */
-export function createAuth({ env, db, core, mailer, requiresTwoFactor }: AuthDependencies) {
+export function createAuth({ env, db, core, mailer, requiresTwoFactor, emailReady = () => true }: AuthDependencies) {
   const { ac, roles } = buildAccessControl();
   // The hooks need the session of the request being served, which only exists once `auth` is built.
   let resolveSessionUser: SessionUserResolver = async () => null;
@@ -133,7 +142,7 @@ export function createAuth({ env, db, core, mailer, requiresTwoFactor }: AuthDep
         // audit_log.organization_id is ON DELETE RESTRICT: an organization with history cannot be hard-deleted.
         disableOrganizationDeletion: true,
         sendInvitationEmail: emails.invitation,
-        organizationHooks: organizationHooks(organizationCreationHooks(creationPolicy, creationLookups), createAuditHooks({ core, lookups })),
+        organizationHooks: organizationHooks(organizationCreationHooks(creationPolicy, creationLookups), createAuditHooks({ core, lookups }), emailReady),
       }),
       // TOTP with backup codes; enforcement for owners and admins is an organization setting (security settings).
       twoFactor({ issuer: env.platform.name }),

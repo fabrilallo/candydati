@@ -1,6 +1,6 @@
 #!/bin/sh
 # Runs before every other service of docker-compose.prod.yml: refuses to start the stack with the example secrets of
-# .env.example, short secrets, an http PLATFORM_URL (cookies would not be Secure) or EMAIL_PROVIDER=log.
+# .env.example, short secrets, an http PLATFORM_URL (cookies would not be Secure) or EMAIL_PROVIDER=log set on purpose.
 # The api and the worker apply the same rules (and an entropy check) at boot; this only fails earlier and louder.
 # Prints variable names, never values.
 fail=0
@@ -37,9 +37,10 @@ case "${PLATFORM_URL:-}" in
   *) refuse "PLATFORM_URL must start with https:// (put a TLS reverse proxy in front of the web container)" ;;
 esac
 
-case "${EMAIL_PROVIDER:-log}" in
-  smtp | resend) ;;
-  *) refuse "EMAIL_PROVIDER must be smtp or resend: verification, password reset and invitation emails need a real provider" ;;
+# Unset: the first owner configures email from the app (the instance stays closed to the outside until then).
+case "${EMAIL_PROVIDER:-}" in
+  "" | smtp | resend) ;;
+  *) refuse "EMAIL_PROVIDER must be smtp or resend, or unset to configure email from the app ('log' sends nothing)" ;;
 esac
 
 if [ "$fail" -ne 0 ]; then

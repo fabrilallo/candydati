@@ -1,8 +1,8 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { safeErrorSerializer } from '@candydati/core';
-import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, TaskQueue } from '@candydati/core';
-import { createEmailProvider, createErrorReporter, type ErrorReporter, type MigrationConnectorRegistry } from '@candydati/providers';
+import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, TaskQueue } from '@candydati/core';
+import { createErrorReporter, type EmailRuntime, type ErrorReporter, type MigrationConnectorRegistry } from '@candydati/providers';
 import type { Db } from '@candydati/db';
 import type { AdQualityAnalyzer } from '@candydati/domain';
 import { createConfiguredAnalyzer } from './ai/ad-quality.js';
@@ -34,6 +34,7 @@ import { registerTaskRoutes } from './routes/tasks.js';
 import { registerWebhookRoutes } from './routes/webhooks.js';
 import { registerAuditLogRoutes } from './routes/audit-log.js';
 import { registerEmailSettingsRoutes } from './routes/email-settings.js';
+import { registerInstanceEmailRoutes } from './routes/instance-email.js';
 import { registerEmailTemplateRoutes } from './routes/email-templates.js';
 import { registerHealthRoutes } from './routes/health.js';
 import { createApiMetrics, type ApiMetrics } from './observability/api-metrics.js';
@@ -66,6 +67,7 @@ import { registerJobRequestRoutes } from './routes/job-requests.js';
 import { registerJobTeamRoutes } from './routes/job-team.js';
 import { registerStaleJobRoutes } from './routes/stale-jobs.js';
 import { registerSecuritySettingsRoutes } from './routes/security-settings.js';
+import { createApiEmailRuntime, EMAIL_SETTINGS_REFRESH_MS } from './wiring/instance-email-deps.js';
 
 export interface ServerDeps {
   readonly env: Env;
@@ -85,6 +87,8 @@ export interface ServerDeps {
   readonly distributionChannels?: readonly DistributionChannel[] | undefined;
   /** Migration source connectors: the built-in ones by default (none yet); tests register a fake one. */
   readonly migrationConnectors?: MigrationConnectorRegistry | undefined;
+  /** Test seam: what sends the test email of the instance email settings (the configured provider by default). */
+  readonly instanceEmailTester?: InstanceEmailTester | undefined;
   /** Test seam: the "now" of the reports. */
   readonly reportClock?: (() => Date) | undefined;
   /** Test seam: the careers media transcoder (sharp by default). */
@@ -123,6 +127,7 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   const metrics = createApiMetrics((error) => app.log.error({ err: error }, 'metrics collector failed'));
   const reporter = deps.errorReporter ?? createReporter(app, deps.env);
   const ctx = createContext(app, deps, metrics);
+  await startEmailRefresh(app, ctx.emailRuntime);
 
   registerRequestObservability(app, metrics);
   registerErrorHandler(app, reporter);
@@ -153,10 +158,23 @@ function createReporter(app: FastifyInstance, env: Env): ErrorReporter {
   });
 }
 
+/** Reads the saved email settings before serving, then every EMAIL_SETTINGS_REFRESH_MS (a save on another instance). */
+async function startEmailRefresh(app: FastifyInstance, runtime: EmailRuntime): Promise<void> {
+  await runtime.refresh();
+  const timer = setInterval(() => void runtime.refresh(), EMAIL_SETTINGS_REFRESH_MS);
+  timer.unref();
+  app.addHook('onClose', async () => clearInterval(timer));
+}
+
 function createContext(app: FastifyInstance, deps: ServerDeps, metrics: ApiMetrics): AppContext {
-  const provider = deps.messaging ? null : createEmailProvider(deps.env.email, (line) => app.log.info(line));
-  const messaging = deps.messaging ?? { sender: toEmailSender(provider!), identity: toEmailIdentity(provider!) };
+  const emailLog = (line: string): void => app.log.info(line);
+  const emailRuntime = createApiEmailRuntime(deps.env, deps.db, emailLog);
+  // The provider follows the settings in force at each send: saved from the app, they apply without a restart.
+  const messaging = deps.messaging ?? { sender: toEmailSender(emailRuntime.provider), identity: toEmailIdentity(emailRuntime.provider) };
   return createAppContext({
+    emailRuntime,
+    emailLog,
+    instanceEmailTester: deps.instanceEmailTester,
     env: deps.env,
     db: deps.db,
     mailer:
@@ -164,7 +182,7 @@ function createContext(app: FastifyInstance, deps: ServerDeps, metrics: ApiMetri
       createAccountMailer({
         sender: messaging.sender,
         platformName: deps.env.platform.name,
-        fromAddress: `${deps.env.email.fromLocal}@${deps.env.email.domain ?? 'localhost'}`,
+        fromAddress: () => `${emailRuntime.snapshot().fromLocal}@${emailRuntime.snapshot().domain ?? 'localhost'}`,
         onError: (error, kind) => {
           metrics.emailFailures.inc({ kind: 'account' });
           app.log.error({ err: error, kind }, 'account email not sent');
@@ -238,6 +256,7 @@ async function registerCandidateFacingRoutes(app: FastifyInstance, ctx: AppConte
   registerStatsRoutes(app, ctx);
   registerReportRoutes(app, ctx);
   registerEmailSettingsRoutes(app, ctx);
+  registerInstanceEmailRoutes(app, ctx);
   registerEmailTemplateRoutes(app, ctx);
   registerMessageRoutes(app, ctx);
   await registerInboundEmailRoutes(app, ctx);

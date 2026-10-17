@@ -13,22 +13,22 @@ export interface AccountMailer {
 export interface AccountMailerDeps {
   readonly sender: EmailSender;
   readonly platformName: string;
-  /** `EMAIL_FROM_LOCAL@EMAIL_DOMAIN`. */
-  readonly fromAddress: string;
+  /** `<local part>@<sending domain>` of the settings in force (they can change while the api runs). */
+  readonly fromAddress: () => string;
   readonly onError: (error: unknown, kind: AccountEmailKind) => void;
 }
 
 const displayName = (name: string): string => `"${name.replace(/["\\\r\n]/g, ' ')}"`;
 
 export function createAccountMailer({ sender, platformName, fromAddress, onError }: AccountMailerDeps): AccountMailer {
-  const from = `${displayName(platformName)} <${fromAddress}>`;
   return {
     send(to, input) {
       const email = buildAccountEmail(input);
+      const address = fromAddress();
       const delivery = (async () =>
         sender.send({
-          from,
-          replyTo: fromAddress,
+          from: `${displayName(platformName)} <${address}>`,
+          replyTo: address,
           to,
           subject: email.subject,
           text: email.text,

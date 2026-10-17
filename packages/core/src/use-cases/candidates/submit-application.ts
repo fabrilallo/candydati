@@ -1,3 +1,4 @@
+import { assertEmailReady } from '../../email-readiness.js';
 import {
   DAY_MS,
   applicationFormSchema,
@@ -258,6 +259,8 @@ export const submitApplication = definePublicCommand<SubmitApplicationDeps, type
   transaction: { skip: 'the CV upload comes before the intake transaction, which the intake opens itself' },
   handler: async ({ deps, input }) => {
     if (isFilledHoneypot(input.form)) return RECEIPT;
+    // Every application gets an answer: none is taken while the instance cannot send its receipt.
+    assertEmailReady(deps.emailReady);
     const form = parseInput(applicationFormSchema, input.form);
     const cv = inspectCv(deps, input.cv);
     const organization = await deps.organizations.findBySlug(input.organizationSlug);

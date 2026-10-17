@@ -28,7 +28,7 @@ Variables without a default are required or optional as described; see `.env.exa
 | `EMAIL_DOMAIN` | api, worker |  | Sending domain. |
 | `EMAIL_FROM_LOCAL` | api, worker | `noreply` | Local part of the default sender. |
 | `EMAIL_INBOUND_DOMAIN` | api, worker |  | Domain that receives replies (reply+<token>@<domain>). |
-| `EMAIL_PROVIDER` | api, worker | `log` | smtp, resend or log (log sends nothing; refused in production, where verification, reset and invitation emails must arrive). |
+| `EMAIL_PROVIDER` | api, worker | `log` | smtp, resend or log (log sends nothing, refused in production). Unset: the instance owner configures email from the app (Settings, Email), and invitations, publishing and applications wait until it works. Set, it wins and the app shows it read-only. |
 | `FAST_MODEL` | api, worker |  | Mastra provider/model for the ad quality score and CV structuring. Empty: rules only, plain text extraction. |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | api, worker |  | API key for google/* models. |
 | `GROQ_API_KEY` | api, worker |  | API key for groq/* models. |

@@ -1,4 +1,4 @@
-import { stripQuotedReply, type EmailConfig } from '@candydati/providers';
+import { stripQuotedReply, type EmailTransportConfig } from '@candydati/providers';
 import type { InboundEmail as ParsedEmail } from '@candydati/providers';
 import type { InboundEmail } from '@candydati/core';
 
@@ -21,5 +21,6 @@ export function toCoreInbound(parsed: ParsedEmail): InboundEmail {
   };
 }
 
-export const resendApiKey = (email: EmailConfig): string | undefined =>
-  email.transport.kind === 'resend' ? email.transport.apiKey : undefined;
+/** The Resend API key of the settings in force (environment or app), to fetch the content of an inbound email. */
+export const resendApiKey = (email: { readonly transport: EmailTransportConfig | null }): string | undefined =>
+  email.transport?.kind === 'resend' ? email.transport.apiKey : undefined;

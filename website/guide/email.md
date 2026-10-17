@@ -2,7 +2,11 @@
 
 Candydati needs a real email provider. Account confirmation, password reset, invitations, application receipts and
 every message to candidates are emails: if they do not arrive, people cannot sign in and candidates do not get their
-answer. That is why a production instance refuses to start without one.
+answer. That is why, until email works, an instance refuses invitations, publishing and applications.
+
+You can set it on the server (below) or, if the server leaves it empty, from the app: **Settings, Email**, choose SMTP
+or Resend, fill in the sending domain and press **Save and send a test email**. Only the first owner (or an
+`INSTANCE_ADMIN_EMAILS` address) can change it, and nothing is saved unless the test email went through.
 
 Two options, chosen during the installation (`CANDYDATI_EMAIL_PROVIDER`):
 

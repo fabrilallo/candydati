@@ -48,7 +48,7 @@ The stack refuses to start (`docker/config-check.sh`, then the api and the worke
 | `BETTER_AUTH_SECRET`, `INBOUND_WEBHOOK_SECRET` | `openssl rand -base64 48` |
 | `POSTGRES_PASSWORD`, `S3_SECRET_KEY` | `openssl rand -base64 36` (16 characters or more) |
 | `S3_ACCESS_KEY` | any name |
-| `EMAIL_PROVIDER` | `smtp` or `resend` (+ `SMTP_*` / `RESEND_API_KEY`, `EMAIL_DOMAIN`, `EMAIL_INBOUND_DOMAIN`) |
+| `EMAIL_PROVIDER` | optional: `smtp` or `resend` (+ `SMTP_*` / `RESEND_API_KEY`, `EMAIL_DOMAIN`, `EMAIL_INBOUND_DOMAIN`). Unset, the first owner configures email from the app (Settings, Email); the instance stays closed to the outside until it works |
 
 ## First start
 

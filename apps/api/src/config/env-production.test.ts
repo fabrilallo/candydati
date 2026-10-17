@@ -46,8 +46,11 @@ describe('parseEnv in production: transport and email', () => {
 
   it('refuses EMAIL_PROVIDER=log, which would silently drop every email', () => {
     expect(messageOf({ ...PRODUCTION, EMAIL_PROVIDER: 'log' })).toMatch(/EMAIL_PROVIDER/);
+  });
+
+  it('starts without EMAIL_PROVIDER: the owner configures email from the app', () => {
     const { EMAIL_PROVIDER: _unset, ...withoutProvider } = PRODUCTION;
-    expect(messageOf(withoutProvider)).toMatch(/EMAIL_PROVIDER/);
+    expect(parseEnv(withoutProvider).email.fromEnvironment).toBe(false);
   });
 });
 

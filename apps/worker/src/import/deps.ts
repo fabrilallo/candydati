@@ -1,3 +1,4 @@
+import type { MessagingConfig } from '@candydati/core';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import {
   type DrizzleUnitOfWork,
@@ -5,15 +6,14 @@ import {
   type ImportCommitDeps,
   type TaskQueue,
 } from '@candydati/core';
-import type { PlatformConfig } from '@candydati/domain';
-import { createCvExtractor, createMastraGenerator, newConversationToken, sniffCv, toMessagingConfig, type CvExtractor, type EmailConfig, type ImportAnalysisDeps } from '@candydati/providers';
+import { createCvExtractor, createMastraGenerator, newConversationToken, sniffCv, type CvExtractor, type ImportAnalysisDeps } from '@candydati/providers';
 
 export interface ImportWorkerWiring {
   readonly uow: DrizzleUnitOfWork;
   readonly files: FileStorage;
   readonly queue: TaskQueue;
-  readonly platform: PlatformConfig;
-  readonly email: EmailConfig;
+  /** Live: the From and Reply-To domains follow the instance email settings. */
+  readonly config: MessagingConfig;
   /** Mastra `provider/model`. Absent: CVs are read with text and regexes only. */
   readonly fastModel?: string | undefined;
   /** Failure message only: never the CV text or the model's answer. */
@@ -33,7 +33,7 @@ export const newConsentSecret = (): string => randomBytes(24).toString('base64ur
 export const hashConsentSecret = (secret: string): string => createHash('sha256').update(secret).digest('hex');
 
 /** Drizzle repositories and S3 for the import tasks. The model extractor exists only when `FAST_MODEL` is set. */
-export function createImportWorkerDeps({ uow, files, queue, platform, email, fastModel, onModelError, onMailError }: ImportWorkerWiring): ImportWorkerDeps {
+export function createImportWorkerDeps({ uow, files, queue, config, fastModel, onModelError, onMailError }: ImportWorkerWiring): ImportWorkerDeps {
   const r = uow.repositories;
   const analysis: ImportAnalysisDeps = {
     imports: r.imports,
@@ -59,7 +59,7 @@ export function createImportWorkerDeps({ uow, files, queue, platform, email, fas
       commit: r.commit,
       organizations: r.organizations,
       cvSniffer: sniffCv,
-      mail: { conversations: r.conversations, messages: r.messages, config: toMessagingConfig(platform, email), newToken: newConversationToken },
+      mail: { conversations: r.conversations, messages: r.messages, config: config, newToken: newConversationToken },
       newSecret: newConsentSecret,
       hash: hashConsentSecret,
       onMailError,

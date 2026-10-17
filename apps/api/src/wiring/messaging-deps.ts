@@ -4,12 +4,13 @@ import {
   type EmailIdentity,
   type EmailSender,
   type InboundDeps,
+  type MessagingConfig,
   type MessagingDeps,
   type ReceiptDeps,
   type TaskQueue,
 } from '@candydati/core';
 import type { Env } from '../config/env.js';
-import { newConversationToken, toMessagingConfig } from '@candydati/providers';
+import { newConversationToken } from '@candydati/providers';
 
 export interface MessagingWiring {
   readonly messagingDeps: MessagingDeps;
@@ -24,13 +25,14 @@ export interface MessagingInputs {
   readonly sender: EmailSender;
   readonly identity: EmailIdentity;
   readonly onReceiptError: (error: unknown) => void;
+  /** From and Reply-To domains: live, they follow the instance email settings. */
+  readonly config: MessagingConfig;
 }
 
 /** Templates, settings, conversations and messages on Postgres; sender and identity are injected. */
-export function createMessagingDeps({ env, uow, queue, sender, identity, onReceiptError }: MessagingInputs): MessagingWiring {
+export function createMessagingDeps({ env, uow, queue, sender, identity, onReceiptError, config }: MessagingInputs): MessagingWiring {
   const r = uow.repositories;
   const core = { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams };
-  const config = toMessagingConfig(env.platform, env.email);
   const clock = { newId: randomUUID, now: () => new Date() };
   const { candidates, applications, conversations, messages, templates } = r;
   return {

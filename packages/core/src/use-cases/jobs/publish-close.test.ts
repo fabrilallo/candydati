@@ -25,6 +25,14 @@ const seeded = (overrides = {}, depsOverrides: Partial<TestJobDeps> = {}) => {
 };
 
 describe('publishJob', () => {
+  it('waits for the instance email: a published ad brings applications that must get an answer', async () => {
+    const { job, deps } = seeded({}, { emailReady: () => false });
+    const error = await publishJob(deps, actor, { jobId: job.id }).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ValidationError);
+    expect((error as ValidationError).issues).toContainEqual({ path: 'email', message: 'email_not_configured' });
+    expect((await deps.jobs.findById('org_a', job.id))?.status).toBe('draft');
+  });
+
   it('publishes a draft, stores the report, returns the assessment and audits', async () => {
     const { job, deps } = seeded();
     const result = await publishJob(deps, actor, { jobId: job.id });

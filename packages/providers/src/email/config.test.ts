@@ -8,6 +8,13 @@ describe('loadEmailConfig', () => {
     expect(config.fromLocal).toBe('noreply');
     expect(config.webhookSecret).toBeUndefined();
   });
+  it('says whether EMAIL_PROVIDER comes from the environment (unset or empty: the app decides)', () => {
+    expect(loadEmailConfig({}).fromEnvironment).toBe(false);
+    expect(loadEmailConfig({ EMAIL_PROVIDER: '' }).fromEnvironment).toBe(false);
+    expect(loadEmailConfig({ EMAIL_PROVIDER: 'log' }).fromEnvironment).toBe(true);
+    expect(loadEmailConfig({ EMAIL_PROVIDER: 'resend', RESEND_API_KEY: 're_x' }).fromEnvironment).toBe(true);
+  });
+
   it('parses smtp', () => {
     const config = loadEmailConfig({
       EMAIL_PROVIDER: 'smtp', SMTP_HOST: 'localhost', SMTP_PORT: '1025', SMTP_SECURE: 'false', SMTP_USER: '',

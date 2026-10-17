@@ -1,5 +1,5 @@
 import { formatDigestFrom, type DrizzleUnitOfWork, type FileStorage, type TaskQueue } from '@candydati/core';
-import { createEmailProvider, toEmailIdentity, toEmailSender, toMessagingConfig } from '@candydati/providers';
+import { liveMessagingConfig, toEmailIdentity, toEmailSender, type EmailRuntime } from '@candydati/providers';
 import type { WorkerEnv } from './config/env.js';
 import { createDeliverDeps } from './email/deps.js';
 import { createHrWorkerDeps } from './hr/deps.js';
@@ -35,6 +35,8 @@ export interface Composition {
   /** Bound to pg-boss; tasks queued inside a transaction go out on its connection. */
   readonly queue: TaskQueue;
   readonly files: FileStorage;
+  /** The email settings in force (environment or saved from the app), read again periodically. */
+  readonly emailRuntime: EmailRuntime;
 }
 
 /** Every queue the worker serves: the static definitions plus one handler per task, wired from the same unit of work. */
@@ -45,17 +47,18 @@ export function createQueues(composition: Composition) {
 
 type Shared = ReturnType<typeof createSharedDeps>;
 
-function createSharedDeps({ env, logger, uow, files, queue }: Composition) {
-  const provider = createEmailProvider(env.email, (line) => logger.info(line));
+function createSharedDeps({ env, logger, uow, files, queue, emailRuntime }: Composition) {
+  // Sends with the settings in force at each call; while none, a send fails as transient and the job is retried.
+  const provider = emailRuntime.provider;
   const sender = toEmailSender(provider);
-  const messaging = toMessagingConfig(env.platform, env.email);
+  const messaging = liveMessagingConfig(env.platform, emailRuntime);
   const phase4 = createPhase4WorkerDeps({
     uow,
     queue,
     sender,
     identity: toEmailIdentity(provider),
     platform: env.platform,
-    email: env.email,
+    config: messaging,
     production: env.NODE_ENV === 'production',
     allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE,
   });
@@ -63,8 +66,7 @@ function createSharedDeps({ env, logger, uow, files, queue }: Composition) {
     uow,
     files,
     queue,
-    platform: env.platform,
-    email: env.email,
+    config: messaging,
     fastModel: env.FAST_MODEL,
     onModelError: (reason) => logger.warn({ reason }, 'cv model failed, keeping the plain text'),
     onMailError: (error) => logger.error({ err: error }, 'reconfirmation email not queued'),
@@ -74,7 +76,9 @@ function createSharedDeps({ env, logger, uow, files, queue }: Composition) {
     transaction: uow.transaction,
     mail: {
       sender,
-      from: formatDigestFrom(env.platform.name, `${messaging.emailFromLocal}@${messaging.emailDomain}`),
+      get from() {
+        return formatDigestFrom(env.platform.name, `${messaging.emailFromLocal}@${messaging.emailDomain}`);
+      },
       platformUrl: env.platform.url,
       locale: env.platform.defaultLocale,
     },
@@ -83,15 +87,14 @@ function createSharedDeps({ env, logger, uow, files, queue }: Composition) {
     uow,
     files,
     queue,
-    platform: env.platform,
-    email: env.email,
+    config: messaging,
     authSecret: env.BETTER_AUTH_SECRET,
     onFetchError: (info) => logger.warn({ ...info }, 'migration fetch failed'),
   });
-  return { sender, phase4, imports, hr, digest, migrations, privacy: createPrivacyWorkerDeps({ uow, files, queue }) };
+  return { sender, messaging, phase4, imports, hr, digest, migrations, privacy: createPrivacyWorkerDeps({ uow, files, queue }) };
 }
 
-function createTaskQueues({ env, logger, uow, files }: Composition, { sender, phase4, imports, hr, digest, migrations }: Shared) {
+function createTaskQueues({ env, logger, uow, files }: Composition, { sender, messaging, phase4, imports, hr, digest, migrations }: Shared) {
   const cvDeps = createCvExtractionDeps({
     uow,
     files,
@@ -101,7 +104,7 @@ function createTaskQueues({ env, logger, uow, files }: Composition, { sender, ph
   });
   return [
     createCvExtractQueue(cvDeps),
-    createEmailSendQueue(createDeliverDeps({ uow, sender, platform: env.platform, email: env.email })),
+    createEmailSendQueue(createDeliverDeps({ uow, sender, config: messaging })),
     createAutomationRunQueue(phase4.run),
     createWebhookDeliverQueue(phase4.deliver),
     createWebhookPublishQueue(phase4.publish),

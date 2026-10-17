@@ -51,7 +51,7 @@ export const DESCRIPTIONS = {
   S3_ACCESS_KEY: 'S3 access key.',
   S3_SECRET_KEY: 'S3 secret key. In production at least 16 random characters, not the example.',
   S3_FORCE_PATH_STYLE: 'Path-style S3 URLs (needed by MinIO).',
-  EMAIL_PROVIDER: 'smtp, resend or log (log sends nothing; refused in production, where verification, reset and invitation emails must arrive).',
+  EMAIL_PROVIDER: 'smtp, resend or log (log sends nothing, refused in production). Unset: the instance owner configures email from the app (Settings, Email), and invitations, publishing and applications wait until it works. Set, it wins and the app shows it read-only.',
   SMTP_HOST: 'SMTP host (EMAIL_PROVIDER=smtp).',
   SMTP_PORT: 'SMTP port.',
   SMTP_SECURE: 'Use TLS for SMTP.',

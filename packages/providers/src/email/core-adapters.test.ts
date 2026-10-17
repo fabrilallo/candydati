@@ -1,7 +1,7 @@
 import { EmailSendError, type EmailProvider } from './types.js';
 import { loadPlatformConfig } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
-import { newConversationToken, toEmailSender, toMessagingConfig } from './core-adapters.js';
+import { liveMessagingConfig, newConversationToken, toEmailSender, toMessagingConfig } from './core-adapters.js';
 
 const email = { from: 'a@x.it', replyTo: 'r@x.it', to: 'c@x.it', subject: 's', text: 't', html: '<p>t</p>', headers: {} };
 const providerFailing = (error: Error): EmailProvider => ({
@@ -47,9 +47,32 @@ describe('newConversationToken', () => {
   });
 });
 
+describe('liveMessagingConfig', () => {
+  it('reads the From and Reply-To domains from the runtime at each use', async () => {
+    let domain: string | undefined = undefined;
+    const runtime = { snapshot: () => ({ source: 'app' as const, transport: null, domain, fromLocal: 'jobs', inboundDomain: undefined, verifiedAt: null }) };
+    const config = liveMessagingConfig(loadPlatformConfig({ PLATFORM_NAME: 'P' }), runtime);
+    expect(config).toMatchObject({ platformName: 'P', emailFromLocal: 'jobs', emailDomain: 'localhost', emailInboundDomain: 'inbound.localhost' });
+    domain = 'mail.example.com';
+    expect(config.emailDomain).toBe('mail.example.com');
+    expect(config.emailInboundDomain).toBe('inbound.mail.example.com');
+  });
+});
+
+describe('toEmailSender deduplicates', () => {
+  it('follows the provider at each read (the runtime switches transports)', () => {
+    let kind = 'smtp';
+    const provider = { get deduplicates() { return kind === 'resend'; }, send: async () => ({ providerMessageId: 'x' }), domainStatus: async () => ({ status: 'unsupported' as const, records: [] }) };
+    const sender = toEmailSender(provider);
+    expect(sender.deduplicates).toBe(false);
+    kind = 'resend';
+    expect(sender.deduplicates).toBe(true);
+  });
+});
+
 describe('toMessagingConfig', () => {
   it('falls back to local domains', () => {
-    const config = toMessagingConfig(loadPlatformConfig({ PLATFORM_NAME: 'P' }), { transport: { kind: 'log' }, fromLocal: 'jobs' });
+    const config = toMessagingConfig(loadPlatformConfig({ PLATFORM_NAME: 'P' }), { fromEnvironment: true, transport: { kind: 'log' }, fromLocal: 'jobs' });
     expect(config).toMatchObject({ platformName: 'P', emailFromLocal: 'jobs', emailDomain: 'localhost', emailInboundDomain: 'inbound.localhost' });
   });
 });
