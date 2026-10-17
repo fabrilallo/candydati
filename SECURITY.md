@@ -70,8 +70,10 @@ What the code enforces, so an operator does not have to remember it:
   characters), else an HMAC-SHA256 of `BETTER_AUTH_SECRET` (it reveals nothing about the secret). While the bootstrap
   is open the api logs `First owner setup: open https://<host>/signup?setup#code=<code>` at every start: whoever reads
   the server's logs is the operator. The code travels in the URL fragment, which browsers never send, so no proxy or
-  access log records it; the form drops it from the address bar once read and sends it as the `x-bootstrap-token`
-  header. A `BOOTSTRAP_TOKEN` chosen by the operator is never logged. Keep the api logs as private as `.env` until the
+  access log records it. The sign-up page has no field for it: it reads the code from the link, keeps it in that tab's
+  `sessionStorage` (a reload does not lose it; it is removed once the account exists), drops it from the address bar
+  and sends it as the `x-bootstrap-token` header. A `BOOTSTRAP_TOKEN` chosen by the operator is never logged: the line
+  then reads `#code=<BOOTSTRAP_TOKEN>`, for the operator to fill in. Keep the api logs as private as `.env` until the
   first owner exists. The sign-up claims the bootstrap for one address under a Postgres advisory lock (two concurrent
   sign-ups cannot both get through). With the setup code, the claim holder's address is confirmed at sign-up, without an
   email: the code already proves the operator, and a new instance may have no email provider yet. The account is then

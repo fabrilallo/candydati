@@ -46,7 +46,7 @@ describe('firstOwnerSetupNotice', () => {
 
   it('points to BOOTSTRAP_TOKEN without printing it when the operator set one', () => {
     const notice = firstOwnerSetupNotice(env({ BOOTSTRAP_TOKEN: 'operator-chosen-token-of-32-chars-min' }), true);
-    expect(notice).toBe('First owner setup: open https://ats.example.com/signup?setup and enter BOOTSTRAP_TOKEN');
+    expect(notice).toBe('First owner setup: open https://ats.example.com/signup?setup#code=<BOOTSTRAP_TOKEN>');
     expect(notice).not.toContain('operator-chosen');
   });
 

@@ -196,9 +196,7 @@
       "submit": "Crea account",
       "submitting": "Creazione in corso…",
       "hasAccount": "Hai già un account?",
-      "loginLink": "Accedi",
-      "setupToken": "Codice di configurazione",
-      "setupTokenHint": "Solo se l’indirizzo che hai aperto non conteneva il codice: il codice nel link che il server stampa nei log al primo avvio."
+      "loginLink": "Accedi"
     },
     "verify": {
       "title": "Controlla la posta",

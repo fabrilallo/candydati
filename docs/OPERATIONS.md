@@ -56,7 +56,7 @@ The stack refuses to start (`docker/config-check.sh`, then the api and the worke
 2. Sign-up is `invite_only`: the first owner needs a setup code. The api logs
    `First owner setup: open https://<host>/signup?setup#code=...` at every start until an account is confirmed: open
    that link, sign up (the code confirms your address, no email needed) and create the organization. The code is derived from `BETTER_AUTH_SECRET`; to choose
-   your own, set `BOOTSTRAP_TOKEN` (then the log names it instead of printing a code).
+   your own, set `BOOTSTRAP_TOKEN` and open `/signup?setup#code=<your BOOTSTRAP_TOKEN>` (the log does not print it).
 3. Check `/api/ready` (below), send yourself a test message, create the first backup (`backup.sh once`).
 
 ## TLS and reverse proxy
