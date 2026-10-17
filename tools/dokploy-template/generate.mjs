@@ -17,8 +17,8 @@ const HEADER = `# Candydati for Dokploy, generated from docker-compose.prod.yml:
 `;
 
 /**
- * Secrets Dokploy generates when the template is used (\`\${password:N}\` is letters and digits), and the variables the
- * operator fills in the Environment tab before the first deploy: the email provider, which nothing can guess.
+ * Secrets Dokploy generates when the template is used (\`\${password:N}\` is letters and digits). No email settings:
+ * the first owner configures email from the app (Settings, Email), and the instance stays closed until it works.
  */
 const CONFIG = `[variables]
 main_domain = "\${domain}"
@@ -42,14 +42,6 @@ INBOUND_WEBHOOK_SECRET = "\${inbound_webhook_secret}"
 POSTGRES_PASSWORD = "\${postgres_password}"
 S3_ACCESS_KEY = "candydati"
 S3_SECRET_KEY = "\${s3_secret_key}"
-EMAIL_PROVIDER = ""
-SMTP_HOST = ""
-SMTP_PORT = "587"
-SMTP_SECURE = "false"
-SMTP_USER = ""
-SMTP_PASSWORD = ""
-RESEND_API_KEY = ""
-EMAIL_DOMAIN = "\${main_domain}"
 `;
 
 const version = () => JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')).version;

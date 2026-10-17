@@ -10,7 +10,7 @@ const SCRIPT = join(ROOT, 'skills', 'candydati-deploy', 'scripts', 'dokploy-temp
 const TEMPLATE = join(ROOT, 'deploy', 'dokploy');
 const CONFIG = readFileSync(join(TEMPLATE, 'template.toml'), 'utf8');
 
-const SMTP = { domain: 'jobs.example.com', name: 'Acme', supportEmail: 'hr@example.com', emailProvider: 'smtp', smtpHost: 'smtp.example.com', smtpPort: '465', smtpUser: 'apikey' } as const;
+const ANSWERS = { name: 'Acme', supportEmail: 'hr@example.com' } as const;
 const env = (config: string): Map<string, string> =>
   new Map([...(config.split('[config.env]')[1] ?? '').matchAll(/^([A-Z][A-Z0-9_]*) = "(.*)"$/gm)].map(([, k, v]) => [k!, v!]));
 
@@ -24,54 +24,41 @@ describe('candydati-deploy skill', () => {
 });
 
 describe('candydati-deploy: dokploy-template.mjs', () => {
-  it('puts the domain, the name and the SMTP settings in the template and leaves every secret to Dokploy', () => {
-    const config = customizeConfig(CONFIG, SMTP);
-    expect(config).toMatch(/^main_domain = "jobs\.example\.com"$/m);
+  it('puts the name and the support email in the template, keeps the generated domain and leaves every secret to Dokploy', () => {
+    const config = customizeConfig(CONFIG, ANSWERS);
+    expect(config).toMatch(/^main_domain = "\$\{domain\}"$/m);
     const values = env(config);
     expect(values.get('PLATFORM_URL')).toBe('https://${main_domain}');
     expect(values.get('PLATFORM_NAME')).toBe('Acme');
     expect(values.get('PLATFORM_SUPPORT_EMAIL')).toBe('hr@example.com');
-    expect(values.get('EMAIL_PROVIDER')).toBe('smtp');
-    expect(values.get('SMTP_HOST')).toBe('smtp.example.com');
-    expect(values.get('SMTP_PORT')).toBe('465');
-    expect(values.get('SMTP_SECURE')).toBe('true');
-    expect(values.get('SMTP_USER')).toBe('apikey');
-    expect(values.get('SMTP_PASSWORD')).toBe('');
     expect(values.get('BETTER_AUTH_SECRET')).toBe('${better_auth_secret}');
     expect(config).toMatch(/^better_auth_secret = "\$\{password:64\}"$/m);
+    expect(config).not.toMatch(/EMAIL_PROVIDER|SMTP_|RESEND_/);
   });
 
-  it('sets Resend without SMTP fields, and the mail domain when it differs from the site', () => {
-    const values = env(customizeConfig(CONFIG, { domain: 'jobs.example.com', name: 'Acme', supportEmail: 'hr@example.com', emailProvider: 'resend', emailDomain: 'mail.example.com' }));
-    expect(values.get('EMAIL_PROVIDER')).toBe('resend');
-    expect(values.get('EMAIL_DOMAIN')).toBe('mail.example.com');
-    expect(values.get('SMTP_HOST')).toBe('');
-    expect(values.get('RESEND_API_KEY')).toBe('');
+  it('uses an own domain when given one', () => {
+    expect(customizeConfig(CONFIG, { ...ANSWERS, domain: 'Jobs.Example.com' })).toMatch(/^main_domain = "jobs\.example\.com"$/m);
   });
 
   it('refuses values that would break the TOML or the stack', () => {
-    expect(() => customizeConfig(CONFIG, { ...SMTP, domain: 'not a domain' })).toThrow(/domain/);
-    expect(() => customizeConfig(CONFIG, { ...SMTP, name: 'A"; injected = "x' })).toThrow(/name/);
-    expect(() => customizeConfig(CONFIG, { ...SMTP, supportEmail: 'nope' })).toThrow(/support email/);
-    expect(() => customizeConfig(CONFIG, { ...SMTP, emailProvider: 'log' })).toThrow(/smtp or resend/);
-    expect(() => customizeConfig(CONFIG, { ...SMTP, smtpHost: undefined })).toThrow(/SMTP host/);
-    expect(() => customizeConfig(CONFIG, { ...SMTP, smtpPort: '99999' })).toThrow(/SMTP port/);
+    expect(() => customizeConfig(CONFIG, { domain: 'not a domain' })).toThrow(/domain/);
+    expect(() => customizeConfig(CONFIG, { name: 'A"; injected = "x' })).toThrow(/name/);
+    expect(() => customizeConfig(CONFIG, { supportEmail: 'nope' })).toThrow(/support email/);
   });
 
   it('prints the base64 that Dokploy imports, with the compose file unchanged', () => {
-    const result = run('--domain', 'jobs.example.com', '--name', 'Acme', '--support-email', 'hr@example.com', '--email-provider', 'smtp', '--smtp-host', 'smtp.example.com', '--smtp-user', 'apikey');
+    const result = run('--name', 'Acme', '--support-email', 'hr@example.com');
     expect(result.stderr).toBe('');
     const decoded = JSON.parse(Buffer.from(result.stdout.trim(), 'base64').toString('utf8')) as { compose: string; config: string };
     expect(decoded.compose).toBe(readFileSync(join(TEMPLATE, 'docker-compose.yml'), 'utf8'));
-    expect(decoded.config).toMatch(/^main_domain = "jobs\.example\.com"$/m);
-    expect(env(decoded.config).get('SMTP_PORT')).toBe('587');
+    expect(env(decoded.config).get('PLATFORM_NAME')).toBe('Acme');
   });
 
   it('never takes a password or an API key on the command line', () => {
     for (const flag of ['--smtp-password', '--resend-api-key']) {
-      const result = run('--domain', 'jobs.example.com', '--support-email', 'hr@example.com', '--email-provider', 'smtp', '--smtp-host', 'h', flag, 'secret');
+      const result = run('--name', 'Acme', flag, 'secret');
       expect(result.status).toBe(1);
-      expect(result.stderr).toMatch(/paste it in Dokploy/);
+      expect(result.stderr).toMatch(/configured from the app/);
       expect(result.stdout).toBe('');
     }
   });
