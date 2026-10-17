@@ -112,7 +112,17 @@ Locally, emails go to Mailpit (http://localhost:8025). Checks: `pnpm lint`, `pnp
 
 ## Self-hosting
 
-You need a Linux server with 2 vCPU and 4 GB RAM (for example Hetzner Cloud CX23 or the Arm CAX11, or OVHcloud
+**With a coding agent (the shortest way).** On a server with [Dokploy](https://dokploy.com), create an API key
+(Dokploy, Settings, Profile, API/CLI) and ask your agent (Claude Code, Codex, Cursor):
+
+> Deploy Candydati on my Dokploy at `<Dokploy URL>`, following
+> https://github.com/fabrilallo/candydati/blob/main/skills/candydati-deploy/SKILL.md
+
+It creates the service from the published template, deploys it and gives you the link to create the first account;
+you then set up email in the app (Settings, Email). Nothing else to prepare: Dokploy generates the secrets and the
+domain.
+
+**On a server without Dokploy.** You need a Linux server with 2 vCPU and 4 GB RAM (for example Hetzner Cloud CX23 or the Arm CAX11, or OVHcloud
 VPS-1: about €5–7 a month in October 2026), a domain pointing to it and an email account to send from (Resend or any
 SMTP, including your company mailbox). No other accounts. On the server:
 
@@ -131,7 +141,7 @@ Guides:
 
 - [Operations](docs/OPERATIONS.md): backups, upgrades, monitoring
 - [Deploy with Docker Compose](docs/deploy/docker-compose.md), with network, volumes and several instances on one host
-- [Deploy with Dokploy](docs/deploy/dokploy.md), also hands-off with a coding agent (Claude Code, Codex, Cursor) through [Dokploy's MCP server or CLI](docs/deploy/dokploy.md#set-it-up-with-an-ai-coding-agent-optional)
+- [Deploy with Dokploy](docs/deploy/dokploy.md), by hand or hands-off with a coding agent through the [deploy skill](skills/candydati-deploy/README.md)
 - [Environment variables](docs/ENVIRONMENT.md) and [reverse proxy log masking](SECURITY.md#reverse-proxy-access-logs)
 
 ## Architecture
