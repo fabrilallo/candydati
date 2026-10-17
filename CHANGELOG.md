@@ -6,6 +6,21 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-10-17
+
+### Added
+
+- **AI models configured from the app** (Settings, AI): the assistant model (side panel, job ad drafting) and the
+  fast model (ad quality score, CV reading), each with its own provider and switchable off, and the key of each
+  provider in use. Saved only after a test call to each model; keys sealed at rest; changes apply without a restart.
+  Suggested: `openai/gpt-6-luna` and `google/gemini-3.1-flash-lite` (the maintainers' own, not a benchmark).
+  `AGENT_MODEL` and `FAST_MODEL` still win. Migration `0038`.
+
+### Fixed
+
+- A fast model without its provider key is now off (it failed every call while MCP still spent budget).
+- The processing register shows no model provider when no model is on, instead of "nessuno".
+
 ## [0.1.4] - 2026-10-17
 
 ### Fixed
