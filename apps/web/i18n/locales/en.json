@@ -4267,7 +4267,10 @@
       "save": "Save",
       "saveAndTest": "Save and test the models",
       "saving": "Saving…",
-      "testing": "Testing the models…"
+      "testing": "Testing the models…",
+      "otherModel": "Another model…",
+      "otherModelName": "Model name",
+      "otherModelPlaceholder": "The exact name the provider gives"
     },
     "keys": {
       "title": "API keys",

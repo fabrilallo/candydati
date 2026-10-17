@@ -4267,7 +4267,10 @@
       "save": "Salva",
       "saveAndTest": "Salva e prova i modelli",
       "saving": "Salvataggio…",
-      "testing": "Prova dei modelli…"
+      "testing": "Prova dei modelli…",
+      "otherModel": "Altro modello…",
+      "otherModelName": "Nome del modello",
+      "otherModelPlaceholder": "Il nome esatto indicato dal fornitore"
     },
     "keys": {
       "title": "Chiavi API",
