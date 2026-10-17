@@ -126,7 +126,7 @@ creates the first owner. Day to day: `candydati status`, `candydati update`, `ca
 Step by step: the [documentation site](https://fabrilallo.github.io/candydati/).
 
 From the sources instead (`cp .env.example .env`, then `docker compose -f docker-compose.prod.yml up -d --build`), with
-`SIGNUP_MODE=invite_only` the first owner signs up at `/signup?setup` with the one-time `BOOTSTRAP_TOKEN` from `.env`.
+`SIGNUP_MODE=invite_only` the first owner signs up with the setup link the api prints in its logs at first start.
 Guides:
 
 - [Operations](docs/OPERATIONS.md): backups, upgrades, monitoring

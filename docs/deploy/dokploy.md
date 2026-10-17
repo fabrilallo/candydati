@@ -41,7 +41,6 @@ SMTP_USER=...
 SMTP_PASSWORD=...
 EMAIL_DOMAIN=mail.example.com
 EMAIL_INBOUND_DOMAIN=inbound.example.com
-BOOTSTRAP_TOKEN=<openssl rand -base64 48>
 WEB_BIND=127.0.0.1
 WEB_PORT=3000
 ```
@@ -72,8 +71,9 @@ write URLs with the link tokens: keep them off or mask them as in SECURITY.md.
 Press **Deploy**. The first build takes several minutes. In **Logs** choose service `api`: wait for "api ready" (the
 migrations ran). Check `https://ats.example.com/api/ready`.
 
-Bootstrap: open `https://ats.example.com/signup?setup`, enter `BOOTSTRAP_TOKEN`, confirm the email, create the
-organization. Then **delete `BOOTSTRAP_TOKEN` from the Environment tab and redeploy**.
+Bootstrap: in the `api` logs find the line `First owner setup: open https://ats.example.com/signup?setup#code=...`,
+open that link (the setup code is already filled in), confirm the email and create the organization. The line is
+printed at every start until the first account is confirmed; then the code opens nothing.
 
 ## 5. Health checks
 

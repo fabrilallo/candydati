@@ -198,7 +198,7 @@
       "hasAccount": "Already have an account?",
       "loginLink": "Sign in",
       "setupToken": "Setup token",
-      "setupTokenHint": "Only for the first account of a new instance: the BOOTSTRAP_TOKEN set by whoever installed it."
+      "setupTokenHint": "Only for the first account of a new instance: the code in the link the server prints at its first start (or the BOOTSTRAP_TOKEN set by whoever installed it)."
     },
     "verify": {
       "title": "Check your inbox",

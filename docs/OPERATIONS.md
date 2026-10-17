@@ -49,16 +49,15 @@ The stack refuses to start (`docker/config-check.sh`, then the api and the worke
 | `POSTGRES_PASSWORD`, `S3_SECRET_KEY` | `openssl rand -base64 36` (16 characters or more) |
 | `S3_ACCESS_KEY` | any name |
 | `EMAIL_PROVIDER` | `smtp` or `resend` (+ `SMTP_*` / `RESEND_API_KEY`, `EMAIL_DOMAIN`, `EMAIL_INBOUND_DOMAIN`) |
-| `BOOTSTRAP_TOKEN` | first start only, see below |
 
 ## First start
 
 1. `cp .env.example .env`, edit, then `docker compose -f docker-compose.prod.yml up -d --build`.
-2. Sign-up is `invite_only`: the first owner needs the one-time token. Open `https://<host>/signup?setup`, type
-   `BOOTSTRAP_TOKEN` in the "Setup token" field, confirm the email and create the organization.
-3. **Remove `BOOTSTRAP_TOKEN` from `.env` and redeploy.** After the first owner is confirmed it opens nothing, but a
-   secret you do not need should not stay around.
-4. Check `/api/ready` (below), send yourself a test message, create the first backup (`backup.sh once`).
+2. Sign-up is `invite_only`: the first owner needs a setup code. The api logs
+   `First owner setup: open https://<host>/signup?setup#code=...` at every start until an account is confirmed: open
+   that link, confirm the email and create the organization. The code is derived from `BETTER_AUTH_SECRET`; to choose
+   your own, set `BOOTSTRAP_TOKEN` (then the log names it instead of printing a code).
+3. Check `/api/ready` (below), send yourself a test message, create the first backup (`backup.sh once`).
 
 ## TLS and reverse proxy
 
@@ -342,7 +341,7 @@ CDN's equivalent); browsers that already downloaded it keep their local copy unt
 ## Security checklist for operators
 
 - [ ] Secrets are random and unique (`openssl rand -base64 48`); `.env` is `chmod 600`, not in git, copied to a password manager.
-- [ ] `BOOTSTRAP_TOKEN` removed after the first owner signed up; `SIGNUP_MODE=invite_only` (default in the compose file).
+- [ ] The first owner signed up and confirmed their email (that closes the bootstrap); `SIGNUP_MODE=invite_only` (default in the compose file).
 - [ ] Only the reverse proxy is reachable from outside: `web` on `127.0.0.1` (`WEB_BIND`), `API_PUBLISH` on loopback, no host ports for Postgres, MinIO or the worker; firewall allows 80/443 and SSH only.
 - [ ] TLS with a valid certificate and HSTS; `PLATFORM_URL` is https.
 - [ ] Proxy access logs mask the link tokens and drop `Referer` (SECURITY.md); log retention fits your privacy notice.

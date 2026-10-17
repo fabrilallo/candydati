@@ -42,18 +42,18 @@ The installer:
 3. checks that the domain points to this server (a warning only: you can go on);
 4. generates every secret and writes them to `/opt/candydati/.env`, readable only by root (`chmod 600`);
 5. downloads the images and starts everything, with automatic HTTPS and daily backups;
-6. prints the link to create the first account and the one-time **setup token**.
+6. prints the link to create the first account, with the one-time **setup code** already in it.
 
 ## Create the first account
 
-1. Open `https://<your domain>/signup?setup`.
-2. Fill in your details and paste the setup token printed by the installer in the **Setup token** field.
+1. Open the link printed by the installer (`https://<your domain>/signup?setup#code=...`): the setup code is already
+   filled in.
+2. Fill in your details.
 3. Confirm your email address with the link you receive.
 4. Create your organization.
 
-Sign-up is **invite-only**: from now on people join through invitations sent from the app. The token works only for the
-very first account. Once that account is confirmed it opens nothing; remove it anyway with `candydati config` (delete the
-`BOOTSTRAP_TOKEN` line, save, and the change is applied).
+Sign-up is **invite-only**: from now on people join through invitations sent from the app. The code works only for the
+very first account: once that account is confirmed it opens nothing, and there is nothing to remove.
 
 ## Check that it works
 

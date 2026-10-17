@@ -26,7 +26,7 @@ Full list: [SECURITY.md, Secure defaults](https://github.com/fabrilallo/candydat
 
 - Keep the server updated and the firewall closed except for 80, 443 and SSH.
 - Keep `/opt/candydati/.env` in a password manager, and an off-site copy of the backups.
-- Remove `BOOTSTRAP_TOKEN` once the first owner has signed up.
+- Create the first owner right after the install: until that account is confirmed, the setup link in the logs opens the instance.
 - Update Candydati when a release fixes a security issue (`candydati update`).
 
 The operator checklist is in

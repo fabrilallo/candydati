@@ -38,7 +38,7 @@ pass these checks: you only meet them if you edit the file by hand.
 | `SIGNUP_MODE` | `invite_only` | `invite_only`: people join only through an invitation (plus the first owner). `open`: anyone can create an account |
 | `ORGANIZATION_CREATION` | `one_per_user` with `invite_only` | who may create organizations: `open`, `one_per_user` (one organization ever created per account) or `instance_admins` |
 | `INSTANCE_ADMIN_EMAILS` | | comma-separated addresses that may always create organizations |
-| `BOOTSTRAP_TOKEN` | | one-time token of the first owner's sign-up. Remove it once that account is confirmed |
+| `BOOTSTRAP_TOKEN` | | optional: your own setup code for the first owner's sign-up. Unset, the api derives one and prints the setup link in its logs |
 
 Every account confirms its email before the first sign-in. Two-factor authentication is available to everyone, and
 owners and admins can require it in their organization.

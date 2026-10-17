@@ -14,7 +14,7 @@ managed from its interface. Candydati uses its **Docker Compose** deployment typ
 2. Paste the environment variables in Dokploy's Environment tab: the public `https` URL, the generated secrets, the
    email provider, `WEB_BIND=127.0.0.1`.
 3. Add the domain on service `web`, port `3000`, with HTTPS from Let's Encrypt, and deploy.
-4. Create the first owner at `/signup?setup` with the `BOOTSTRAP_TOKEN`.
+4. Open the `First owner setup` link printed in the logs of service `api` and create the first owner.
 
 Dokploy can also be driven by a coding agent (Claude Code, Codex, Cursor) through its MCP server or CLI. Full guide,
 including backups, troubleshooting and what an agent's key exposes:

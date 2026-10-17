@@ -5,6 +5,8 @@ import { loadEnv } from './config/env.js';
 import { createErrorReporter, createPgBossQueue, withRequestId, type ErrorReporter } from '@candydati/providers';
 import { safeErrorSerializer } from '@candydati/core';
 import { buildServer } from './server.js';
+import { firstOwnerSetupNotice } from './auth/first-owner-setup.js';
+import { bootstrapOpen } from './auth/signup-policy.js';
 
 const PG_BOSS_SCHEMA = 'pgboss';
 
@@ -63,6 +65,9 @@ async function main(): Promise<void> {
 
   await app.listen({ port: env.API_PORT, host: env.API_HOST });
   app.log.info({ platform: env.platform.name }, 'api ready');
+  // Until the first owner confirms their address, every start prints the setup link: no token to copy into the config.
+  const setupNotice = firstOwnerSetupNotice(env, await bootstrapOpen(database.db));
+  if (setupNotice !== null) app.log.info(setupNotice);
 }
 
 main().catch((error: unknown) => {

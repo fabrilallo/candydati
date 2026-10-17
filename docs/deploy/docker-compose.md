@@ -34,7 +34,6 @@ INBOUND_WEBHOOK_SECRET=$(openssl rand -base64 48)
 POSTGRES_PASSWORD=$(openssl rand -base64 36)
 S3_ACCESS_KEY=candydati-minio
 S3_SECRET_KEY=$(openssl rand -base64 36)
-BOOTSTRAP_TOKEN=$(openssl rand -base64 48)      # first start only
 EMAIL_PROVIDER=smtp                             # or resend
 SMTP_HOST=...  SMTP_PORT=587  SMTP_USER=...  SMTP_PASSWORD=...  EMAIL_DOMAIN=mail.example.com
 WEB_BIND=127.0.0.1                              # only Caddy reaches the web container
@@ -74,8 +73,8 @@ docker compose -f docker-compose.prod.yml ps          # all healthy after a minu
 curl -s https://ats.example.com/api/ready             # {"success":true,"data":{"status":"ready",...}}
 ```
 
-Open `https://ats.example.com/signup?setup`, enter `BOOTSTRAP_TOKEN`, confirm the email, create the organization. Then
-delete `BOOTSTRAP_TOKEN` from `.env` and run the `up -d` command again. `--profile backup` starts the daily backup;
+Open the link that `docker compose -f docker-compose.prod.yml logs api | grep "First owner setup"` prints (the setup
+code is already in it), confirm the email, create the organization. `--profile backup` starts the daily backup;
 point it at an offsite bucket (OPERATIONS.md, Backups) and run `docker/restore-test.sh` once.
 
 ## 5. Update
