@@ -106,6 +106,13 @@ describe('saveCareersPageDraft', () => {
 });
 
 describe('publishCareersPage', () => {
+  it('waits for the instance email (the page leads to applications)', async () => {
+    const deps = { ...createTestCareersDeps(), emailReady: () => false };
+    const error = await publishCareersPage(deps, owner, { revision: await revisionOf(deps) }).catch((e: unknown) => e);
+    expect((error as ValidationError).issues).toEqual([{ path: 'email', message: 'email_not_configured' }]);
+    expect(deps.careersPages.snapshot()).toEqual([]);
+  });
+
   it('publishes the saved draft and audits it', async () => {
     const deps = createTestCareersDeps({ careersMedia: createInMemoryCareersMedia(LIBRARY) });
     await saveCareersPageDraft(deps, owner, { revision: await revisionOf(deps), document: FIXTURE });

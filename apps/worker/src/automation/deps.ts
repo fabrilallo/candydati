@@ -1,3 +1,4 @@
+import type { MessagingConfig } from '@candydati/core';
 import { randomUUID } from 'node:crypto';
 import {
   type DrizzleUnitOfWork,
@@ -10,7 +11,7 @@ import {
   type WebhookPublishDeps,
 } from '@candydati/core';
 import type { PlatformConfig } from '@candydati/domain';
-import { createHostGuard, createHttpPoster, newConversationToken, toMessagingConfig, type EmailConfig } from '@candydati/providers';
+import { createHostGuard, createHttpPoster, newConversationToken } from '@candydati/providers';
 
 export interface AutomationWiring {
   readonly uow: DrizzleUnitOfWork;
@@ -18,7 +19,8 @@ export interface AutomationWiring {
   readonly sender: EmailSender;
   readonly identity: EmailIdentity;
   readonly platform: PlatformConfig;
-  readonly email: EmailConfig;
+  /** Live: the From and Reply-To domains follow the instance email settings. */
+  readonly config: MessagingConfig;
   readonly production: boolean;
   readonly allowPrivateWebhooks: boolean;
 }
@@ -52,7 +54,7 @@ export function createPhase4WorkerDeps(wiring: AutomationWiring): Phase4WorkerDe
       queue,
       identity: wiring.identity,
       sender: wiring.sender,
-      config: toMessagingConfig(wiring.platform, wiring.email),
+      config: wiring.config,
       newToken: newConversationToken,
       rules: r.rules,
       executions: r.executions,

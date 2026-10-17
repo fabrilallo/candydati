@@ -15,4 +15,5 @@ export { verifyResendSignature, verifyHmacSignature, signHmacPayload, HMAC_MAX_A
 export { stripQuotedReply } from './quoted-reply.js';
 export { extractReplyToken } from './reply-token.js';
 export { htmlToText } from './html-text.js';
-export { newConversationToken, toEmailIdentity, toEmailSender, toMessagingConfig } from './core-adapters.js';
+export { liveMessagingConfig, newConversationToken, toEmailIdentity, toEmailSender, toMessagingConfig } from './core-adapters.js';
+export { createEmailRuntime, EMAIL_NOT_CONFIGURED_MESSAGE, INSTANCE_EMAIL_SECRET_INFO, openStoredEmailSettings, storedTransport, type EmailRuntime, type EmailRuntimeDeps, type EmailSnapshot, type EmailSource, type StoredEmailSettings } from './runtime.js';

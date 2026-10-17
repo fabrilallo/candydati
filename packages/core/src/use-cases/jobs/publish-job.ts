@@ -1,3 +1,4 @@
+import { emailReadinessIssues } from '../../email-readiness.js';
 import { adQualityReportSchema, assess, checkPublishable, type AdQualityAssessment, type AdQualityReport, type Job } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
@@ -44,8 +45,10 @@ export const publishJob = defineJobUseCase({
     const issues = checkPublishable(job.content);
     const notice = await deps.privacyNotices.findActive(actor.organizationId);
     const approvalIssue = await approvalIssueOf(deps, job.organizationId, job.id, job.content);
-    if (issues.length > 0 || !notice || approvalIssue !== null) {
+    const emailIssues = emailReadinessIssues(deps.emailReady);
+    if (issues.length > 0 || !notice || approvalIssue !== null || emailIssues.length > 0) {
       throw new ValidationError([
+        ...emailIssues,
         ...issuesToValidationError(issues).issues,
         ...(notice ? [] : [{ path: PRIVACY_NOTICE_PATH, message: 'privacy_notice_required' }]),
         ...(approvalIssue === null ? [] : [{ path: APPROVAL_PATH, message: approvalIssue }]),

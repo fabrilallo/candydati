@@ -1,3 +1,4 @@
+import { createEmailRuntime, loadEmailConfig } from '@candydati/providers';
 import { createDrizzleUnitOfWork } from '@candydati/core';
 import { createInMemoryFileStorage, createInMemoryTaskQueue } from '@candydati/core/testing';
 import type { Db } from '@candydati/db';
@@ -23,6 +24,7 @@ const composition = {
   uow: createDrizzleUnitOfWork({} as Db),
   queue: createInMemoryTaskQueue(),
   files: createInMemoryFileStorage(),
+  emailRuntime: createEmailRuntime({ env: loadEmailConfig({}), load: async () => null, log: () => undefined }),
 };
 
 describe('createQueues', () => {

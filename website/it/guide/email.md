@@ -2,7 +2,12 @@
 
 Candydati ha bisogno di un vero fornitore email. Conferma dell'account, recupero della password, inviti, ricevute di
 candidatura e ogni messaggio ai candidati sono email: se non arrivano, le persone non riescono ad accedere e i
-candidati non ricevono la loro risposta. Per questo un'installazione in produzione non parte senza.
+candidati non ricevono la loro risposta. Per questo, finché l'email non funziona, un'installazione rifiuta inviti,
+pubblicazioni e candidature.
+
+Puoi impostarla sul server (sotto) oppure, se il server la lascia vuota, dall'app: **Impostazioni, Email**, scegli SMTP
+o Resend, inserisci il dominio di invio e premi **Salva e invia un'email di prova**. Può cambiarla solo il primo
+proprietario (o un indirizzo di `INSTANCE_ADMIN_EMAILS`), e non viene salvato nulla se l'email di prova non arriva.
 
 Due opzioni, da scegliere durante l'installazione (`CANDYDATI_EMAIL_PROVIDER`):
 

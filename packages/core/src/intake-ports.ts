@@ -1,3 +1,4 @@
+import type { EmailReadiness } from './instance-email-ports.js';
 import type { AttachmentMediaType, CvMediaType } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
@@ -211,6 +212,8 @@ export interface ApplicationDailyCaps {
 }
 
 export interface SubmitApplicationDeps {
+  /** The instance can send email: absent in unit tests (ready), always set by the api. Until then the action waits. */
+  readonly emailReady?: EmailReadiness | undefined;
   readonly organizations: OrganizationDirectory;
   readonly jobs: JobRepository;
   readonly privacyNotices: PrivacyNoticeRepository;

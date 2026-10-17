@@ -5,7 +5,7 @@ const optional = z.string().optional().transform((value) => (value === '' ? unde
 const WEBHOOK_SECRET_MIN = 32;
 
 const emailEnvSchema = z.object({
-  EMAIL_PROVIDER: z.enum(['smtp', 'resend', 'log']).default('log'),
+  EMAIL_PROVIDER: z.preprocess((value) => (value === '' ? undefined : value), z.enum(['smtp', 'resend', 'log']).default('log')),
   SMTP_HOST: optional,
   SMTP_PORT: z.coerce.number().int().min(1).max(65535).optional().or(z.literal('').transform(() => undefined)),
   SMTP_SECURE: booleanString.default(false),
@@ -31,6 +31,8 @@ export type EmailTransportConfig =
   | { readonly kind: 'resend'; readonly apiKey: string };
 
 export interface EmailConfig {
+  /** EMAIL_PROVIDER is set: the environment decides, and the settings saved from the app are not used. */
+  readonly fromEnvironment: boolean;
   readonly transport: EmailTransportConfig;
   readonly domain?: string | undefined;
   readonly fromLocal: string;
@@ -87,6 +89,7 @@ export function loadEmailConfig(
     return fail([...missing, ...(secretInvalid ? ['INBOUND_WEBHOOK_SECRET'] : [])]);
   }
   return {
+    fromEnvironment: (env['EMAIL_PROVIDER'] ?? '').trim() !== '',
     transport,
     domain: data.EMAIL_DOMAIN,
     fromLocal: data.EMAIL_FROM_LOCAL,

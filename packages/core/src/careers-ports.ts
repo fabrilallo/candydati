@@ -1,3 +1,4 @@
+import type { EmailReadiness } from './instance-email-ports.js';
 import type { CareersPageDocument, Locale, LocalizedText, MediaKind } from '@candydati/domain';
 import type { FileStorage, TaskQueue } from './intake-ports.js';
 import type { OrganizationDirectory } from './job-ports.js';
@@ -74,6 +75,8 @@ export class ImageRejectedError extends Error {
 }
 
 export interface CareersDeps extends CoreDeps {
+  /** The instance can send email: absent in unit tests (ready), always set by the api. Until then the action waits. */
+  readonly emailReady?: EmailReadiness | undefined;
   readonly careersPages: CareersPageRepository;
   readonly careersMedia: CareersMediaRepository;
   readonly organizations: OrganizationDirectory;

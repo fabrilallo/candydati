@@ -5,6 +5,7 @@ import { PgBoss } from 'pg-boss';
 import pino from 'pino';
 import type { Server } from 'node:http';
 import { createQueues } from './compose.js';
+import { startWorkerEmailRuntime } from './email/runtime.js';
 import { loadEnv, type WorkerEnv } from './config/env.js';
 import { registerBacklogMetrics } from './observability/backlog-metrics.js';
 import { startHealthServer } from './observability/health-server.js';
@@ -77,7 +78,8 @@ const main = async (): Promise<void> => {
   const uow = createDrizzleUnitOfWork(database.db, (error) => logger.error({ err: error }, 'side effect after commit failed'), queue);
   const files = createS3FileStorage(env.s3);
   await files.ensureBucket();
-  const queues = createQueues({ env, logger, uow, queue, files });
+  const email = await startWorkerEmailRuntime(env, database.db, (line) => logger.info(line));
+  const queues = createQueues({ env, logger, uow, queue, files, emailRuntime: email.runtime });
   const metrics = createWorkerMetrics((error) => logger.error({ err: error }, 'metrics collector failed'));
   registerBacklogMetrics(metrics.registry, database.pool);
   const worker = await startWorker({ boss, logger, queues, observer: metrics.observer, reporter });
@@ -95,7 +97,7 @@ const main = async (): Promise<void> => {
           onError: (error) => logger.error({ err: error }, 'worker health check failed'),
         });
   if (health) logger.info({ port: env.WORKER_PORT, metrics: env.observability.metricsToken !== null }, 'worker health server listening');
-  const lifecycle: Lifecycle = { worker, closeDb: database.close, health, logger, markStopping: () => void (ready = false) };
+  const lifecycle: Lifecycle = { worker, closeDb: async () => (email.stop(), database.close()), health, logger, markStopping: () => void (ready = false) };
   for (const signal of SHUTDOWN_SIGNALS) {
     process.on(signal, () => void shutdown(signal, lifecycle));
   }

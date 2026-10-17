@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import type { EmailIdentity, EmailSender, MessagingConfig } from '@candydati/core';
 import type { PlatformConfig } from '@candydati/domain';
 import type { EmailConfig } from './config.js';
+import type { EmailSnapshot } from './runtime.js';
 import { EmailSendError, type EmailProvider } from './types.js';
 
 const BASE32 = 'abcdefghijklmnopqrstuvwxyz234567';
@@ -9,7 +10,10 @@ const TOKEN_BYTES = 20;
 
 /** The core port: a permanent provider error carries `permanent: true` so the worker does not retry it. */
 export const toEmailSender = (provider: EmailProvider): EmailSender => ({
-  deduplicates: provider.deduplicates === true,
+  // Read at each use: the email runtime switches transports when the settings change.
+  get deduplicates() {
+    return provider.deduplicates === true;
+  },
   async send(email) {
     try {
       return await provider.send({
@@ -59,6 +63,29 @@ export function toMessagingConfig(platform: PlatformConfig, email: EmailConfig):
     emailFromLocal: email.fromLocal,
     emailDomain,
     emailInboundDomain: email.inboundDomain ?? `inbound.${emailDomain}`,
+    defaultLocale: platform.defaultLocale,
+    timeZone: platform.timeZone,
+  };
+}
+
+/**
+ * The messaging config of a process whose email settings can change at run time (api, worker): the From and Reply-To
+ * domains are read from the email runtime at each use, the rest is fixed.
+ */
+export function liveMessagingConfig(platform: PlatformConfig, runtime: { snapshot(): EmailSnapshot }): MessagingConfig {
+  const domain = (): string => runtime.snapshot().domain ?? 'localhost';
+  return {
+    platformName: platform.name,
+    platformUrl: platform.url,
+    get emailFromLocal() {
+      return runtime.snapshot().fromLocal;
+    },
+    get emailDomain() {
+      return domain();
+    },
+    get emailInboundDomain() {
+      return runtime.snapshot().inboundDomain ?? `inbound.${domain()}`;
+    },
     defaultLocale: platform.defaultLocale,
     timeZone: platform.timeZone,
   };

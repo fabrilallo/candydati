@@ -260,6 +260,13 @@
       "when": 1792179100249,
       "tag": "0036_migration_batch_parts_validate",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792246927360,
+      "tag": "0037_instance_email_settings",
+      "breakpoints": true
     }
   ]
 }

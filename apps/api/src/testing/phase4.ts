@@ -1,3 +1,4 @@
+import { toMessagingConfig } from '@candydati/providers';
 import { randomUUID } from 'node:crypto';
 import {
   createDrizzleUnitOfWork,
@@ -24,7 +25,7 @@ const systemActor = (organizationId: string): Actor => ({ type: 'system', id: 't
 export function automationRunDeps(t: TestApp): AutomationRunDeps {
   const uow = createDrizzleUnitOfWork(t.handle.db);
   const r = uow.repositories;
-  const { messagingDeps } = createMessagingDeps({ env: testEnv(), uow, queue: t.queue, sender: t.emailSender, identity: createFakeEmailIdentity(), onReceiptError: () => undefined });
+  const { messagingDeps } = createMessagingDeps({ env: testEnv(), uow, queue: t.queue, sender: t.emailSender, identity: createFakeEmailIdentity(), onReceiptError: () => undefined, config: toMessagingConfig(testEnv().platform, testEnv().email) });
   return { ...messagingDeps, rules: r.rules, executions: r.executions, tasks: r.tasks, notifications: r.notifications, members: r.members, queue: t.queue };
 }
 

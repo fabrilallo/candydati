@@ -1,6 +1,6 @@
+import type { MessagingConfig } from '@candydati/core';
 import { randomUUID } from 'node:crypto';
 import type { DrizzleUnitOfWork, FileStorage, MigrationAnalysisDeps, MigrationCommitDeps, MigrationFetchDeps, MigrationPurgeDeps, TaskQueue } from '@candydati/core';
-import type { PlatformConfig } from '@candydati/domain';
 import {
   createConnectorRegistry,
   createMigrationFetcher,
@@ -9,8 +9,6 @@ import {
   newConversationToken,
   sniffAttachment,
   sniffCv,
-  toMessagingConfig,
-  type EmailConfig,
   type FetchErrorInfo,
   type MigrationConnectorRegistry,
 } from '@candydati/providers';
@@ -20,8 +18,8 @@ export interface MigrationWorkerWiring {
   readonly uow: DrizzleUnitOfWork;
   readonly files: FileStorage;
   readonly queue: TaskQueue;
-  readonly platform: PlatformConfig;
-  readonly email: EmailConfig;
+  /** Live: the From and Reply-To domains follow the instance email settings. */
+  readonly config: MessagingConfig;
   /** `BETTER_AUTH_SECRET`: the connector credentials are sealed with a key derived from it. */
   readonly authSecret: string;
   /** The built-in connectors by default. */
@@ -41,7 +39,7 @@ export interface MigrationWorkerDeps {
  * Drizzle repositories, S3 and the package reader for the migration tasks. The commit asks people with no consent date
  * to reconfirm through the same path as the import (consent secret, hash, queued system message).
  */
-export function createMigrationWorkerDeps({ uow, files, queue, platform, email, authSecret, connectors, onFetchError }: MigrationWorkerWiring): MigrationWorkerDeps {
+export function createMigrationWorkerDeps({ uow, files, queue, config, authSecret, connectors, onFetchError }: MigrationWorkerWiring): MigrationWorkerDeps {
   const r = uow.repositories;
   const packages = createMigrationPackageReader(files);
   const analysis: MigrationAnalysisDeps = {
@@ -68,7 +66,7 @@ export function createMigrationWorkerDeps({ uow, files, queue, platform, email, 
     migratedRows: r.migratedRows,
     attachmentSniffer: sniffAttachment,
     consentTokens: r.consentTokens,
-    mail: { conversations: r.conversations, messages: r.messages, config: toMessagingConfig(platform, email), newToken: newConversationToken },
+    mail: { conversations: r.conversations, messages: r.messages, config: config, newToken: newConversationToken },
     newSecret: newConsentSecret,
     hash: hashConsentSecret,
   };

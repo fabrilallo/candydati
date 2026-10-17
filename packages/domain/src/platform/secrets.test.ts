@@ -65,10 +65,13 @@ describe('productionIssues', () => {
     expect(productionIssues({ NODE_ENV: 'development', BETTER_AUTH_SECRET: 'x' })).toEqual([]);
   });
 
-  it('wants https origins and a real email provider in production', () => {
+  it('wants https origins in production, and refuses the log email provider set on purpose', () => {
     expect(productionIssues({ NODE_ENV: 'production', ...strong })).toEqual([]);
     expect(productionIssues({ NODE_ENV: 'production', ...strong, PLATFORM_URL: 'http://a.example' })[0]).toMatch(/^PLATFORM_URL: /);
-    expect(productionIssues({ NODE_ENV: 'production', ...strong, EMAIL_PROVIDER: undefined })[0]).toMatch(/^EMAIL_PROVIDER: /);
+    expect(productionIssues({ NODE_ENV: 'production', ...strong, EMAIL_PROVIDER: 'log' })[0]).toMatch(/^EMAIL_PROVIDER: /);
+    // Unset: the instance starts and its owner configures email from the app (closed to the outside until then).
+    expect(productionIssues({ NODE_ENV: 'production', ...strong, EMAIL_PROVIDER: undefined })).toEqual([]);
+    expect(productionIssues({ NODE_ENV: 'production', ...strong, EMAIL_PROVIDER: '' })).toEqual([]);
     expect(productionIssues({ NODE_ENV: 'production', PLATFORM_URL: 'https://a.example', EMAIL_PROVIDER: 'smtp' }, ['PLATFORM_URL'])).toEqual([]);
   });
 });

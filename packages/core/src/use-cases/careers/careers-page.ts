@@ -1,3 +1,4 @@
+import { assertEmailReady } from '../../email-readiness.js';
 import { careersDraftSaveSchema, careersPublishSchema, type CareersPageEditorDto } from '@candydati/domain';
 import type { CareersPageRecord } from '../../careers-ports.js';
 import { StaleRevisionError } from '../../errors.js';
@@ -61,6 +62,7 @@ export const publishCareersPage = defineCareersUseCase({
     metadata: (_input, result: CareersPageEditorDto) => ({ sections: result.draft.sections.length, revision: result.revision }),
   },
   handler: async ({ deps, actor, input }): Promise<CareersPageEditorDto> => {
+    assertEmailReady(deps.emailReady);
     const organization = await requireOrganizationById(deps, actor.organizationId);
     const stored = await deps.careersPages.find(actor.organizationId);
     if ((stored?.revision ?? 0) !== input.revision) throw new StaleRevisionError();

@@ -57,7 +57,7 @@ const handleResend = ({ ctx, log, secret, store }: InboundHandlerDeps) => async 
       log.info('inbound webhook event ignored');
       return reply.status(202).send({ received: true });
     }
-    const apiKey = resendApiKey(ctx.env.email);
+    const apiKey = resendApiKey(ctx.emailRuntime.snapshot());
     const received = apiKey ? await fetchResendReceivedContent(event.data.data.email_id, { apiKey }) : undefined;
     await store(toCoreInbound(parseResendInbound(payload, received)));
   } catch (error) {

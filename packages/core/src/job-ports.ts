@@ -1,3 +1,4 @@
+import type { EmailReadiness } from './instance-email-ports.js';
 import type { AdQualityAnalyzer, Job, JobStatus, JobTemplate } from '@candydati/domain';
 import type { PrivacyNoticeRepository } from './candidate-ports.js';
 import type { AutomationRuleRepository } from './automation-ports.js';
@@ -122,6 +123,8 @@ export interface JobDeps extends CoreDeps {
   readonly adQuality: AdQualityAnalyzer;
   /** On the 0-10 scale; below it the ad is flagged, never blocked. */
   readonly adQualityThreshold: number;
+  /** The instance can send email: absent in unit tests (ready), always set by the api. Until then the action waits. */
+  readonly emailReady?: EmailReadiness | undefined;
   readonly newId: () => string;
   readonly now: () => Date;
 }

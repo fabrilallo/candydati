@@ -11,7 +11,8 @@ Dokploy's own documentation: <https://docs.dokploy.com/docs/core/docker-compose>
 - A server with Dokploy installed (2 vCPU, 4 GB RAM or more; the image build needs memory), and a DNS `A` record for
   the host name pointing at it.
 - The repository reachable by Dokploy (GitHub/GitLab/Git URL; a deploy key for a private one).
-- An SMTP account or a Resend API key (the stack refuses to start without a real email provider).
+- An SMTP account or a Resend API key: set it in the environment below, or leave `EMAIL_PROVIDER` out and configure it
+  from the app after the first sign-in (Settings, Email). Until email works, invitations, publishing and applications wait.
 
 ## 1. Create the application
 
