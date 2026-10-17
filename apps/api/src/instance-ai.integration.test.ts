@@ -34,7 +34,7 @@ afterAll(async () => {
 
 const settingsOf = async (user: TestUser) => (await user.get<InstanceAiSettingsDto>('/api/v1/instance/ai-settings')).body.data!;
 const assistantOf = async (user: TestUser) => (await user.get<AgentStatusDto>('/api/v1/agent/status')).body.data!;
-const INPUT = { provider: 'anthropic', apiKey: 'sk-ant-secret', assistantModel: 'claude-sonnet-5-5', fastModel: 'claude-haiku-5-5' };
+const INPUT = { assistant: { provider: 'openai', model: 'gpt-6-luna' }, fast: { provider: 'google', model: 'gemini-3.1-flash-lite' }, keys: { openai: 'sk-openai-secret', google: 'google-secret' } };
 
 describe('instance AI settings from the app', () => {
   it('starts with no model: the assistant is off', async () => {
@@ -55,14 +55,14 @@ describe('instance AI settings from the app', () => {
   it('saves after the test calls, seals the key and switches the assistant on at once, then off again', async () => {
     const reply = await admin.put('/api/v1/instance/ai-settings', INPUT);
     expect(reply.status).toBe(200);
-    expect(checked).toEqual([{ id: 'anthropic/claude-sonnet-5-5', apiKey: 'sk-ant-secret' }, { id: 'anthropic/claude-haiku-5-5', apiKey: 'sk-ant-secret' }]);
-    expect(JSON.stringify(reply.body)).not.toContain('sk-ant-secret');
+    expect(checked).toEqual([{ id: 'openai/gpt-6-luna', apiKey: 'sk-openai-secret' }, { id: 'google/gemini-3.1-flash-lite', apiKey: 'google-secret' }]);
+    expect(JSON.stringify(reply.body)).not.toMatch(/sk-openai-secret|google-secret/);
     const [row] = await t.handle.db.select().from(schema.instanceAiSettings);
-    expect(row?.secretCiphertext).toMatch(/^sb1\./);
-    expect(await assistantOf(colleague)).toEqual({ enabled: true, model: 'anthropic/claude-sonnet-5-5' });
-    expect(await settingsOf(colleague)).toMatchObject({ source: 'app', canManage: false, provider: 'anthropic', hasApiKey: true, fastEnabled: true });
+    expect(row?.keysCiphertext).toMatch(/^sb1\./);
+    expect(await assistantOf(colleague)).toEqual({ enabled: true, model: 'openai/gpt-6-luna' });
+    expect(await settingsOf(colleague)).toMatchObject({ source: 'app', canManage: false, storedKeys: ['google', 'openai'], fastEnabled: true });
 
-    expect((await admin.put('/api/v1/instance/ai-settings', { provider: 'anthropic', assistantModel: null, fastModel: null })).status).toBe(200);
+    expect((await admin.put('/api/v1/instance/ai-settings', { assistant: null, fast: null })).status).toBe(200);
     expect(await assistantOf(admin)).toEqual({ enabled: false, model: null });
   });
 });

@@ -33,12 +33,18 @@ export interface AiModelRef {
 export const toMastraModel = (ref: AiModelRef): `${string}/${string}` | { readonly id: `${string}/${string}`; readonly apiKey: string } =>
   ref.apiKey === undefined ? ref.id : { id: ref.id, apiKey: ref.apiKey };
 
-/** The instance's AI settings saved from the app (`instance_ai_settings`), with the key already opened. */
-export interface StoredAiSettings {
+/** One model saved from the app: the provider it is reached through and its name there. */
+export interface StoredAiModel {
   readonly provider: string;
-  readonly apiKey: string | null;
-  readonly assistantModel: string | null;
-  readonly fastModel: string | null;
+  readonly model: string;
+}
+
+/** The instance's AI settings saved from the app (`instance_ai_settings`), with the keys already opened. */
+export interface StoredAiSettings {
+  readonly assistant: StoredAiModel | null;
+  readonly fast: StoredAiModel | null;
+  /** The key of each provider in use. */
+  readonly keys: Readonly<Record<string, string>>;
   readonly verifiedAt: Date;
 }
 
@@ -48,8 +54,12 @@ export type AiSource = 'environment' | 'app' | 'none';
 export const INSTANCE_AI_SECRET_INFO = 'candydati:instance-ai';
 
 /** The saved settings with their key opened, for the AI runtime of the api and of the worker. */
-export const openStoredAiSettings = (record: InstanceAiRecord | null, secrets: CredentialsBox): StoredAiSettings | null =>
-  record === null ? null : { ...record, apiKey: record.secretCiphertext === null ? null : secrets.open(record.secretCiphertext, INSTANCE_AI_SECRET_CONTEXT) };
+export function openStoredAiSettings(record: InstanceAiRecord | null, secrets: CredentialsBox): StoredAiSettings | null {
+  if (record === null) return null;
+  const model = (provider: string | null, name: string | null): StoredAiModel | null => (provider !== null && name !== null ? { provider, model: name } : null);
+  const keys: Record<string, string> = record.keysCiphertext === null ? {} : JSON.parse(secrets.open(record.keysCiphertext, INSTANCE_AI_SECRET_CONTEXT));
+  return { assistant: model(record.assistantProvider, record.assistantModel), fast: model(record.fastProvider, record.fastModel), keys, verifiedAt: record.verifiedAt };
+}
 
 /** The models in force: `assistant` for the side panel and job drafting, `fast` for the ad score and CV reading. */
 export interface AiSnapshot {
@@ -78,8 +88,10 @@ const NONE: AiSnapshot = { source: 'none', provider: null, assistant: null, fast
 const fromEnv = (model: string | undefined, keys: Source): AiModelRef | null =>
   model !== undefined && hasProviderKey(model, keys) ? { id: model as `${string}/${string}` } : null;
 
-const fromApp = (stored: StoredAiSettings, model: string | null): AiModelRef | null =>
-  model === null || stored.apiKey === null ? null : { id: `${stored.provider}/${model}`, apiKey: stored.apiKey };
+const fromApp = (stored: StoredAiSettings, model: StoredAiModel | null): AiModelRef | null => {
+  const apiKey = model === null ? undefined : stored.keys[model.provider];
+  return model === null || apiKey === undefined ? null : { id: `${model.provider}/${model.model}`, apiKey };
+};
 
 const resolve = (env: AiEnv, stored: StoredAiSettings | null): AiSnapshot => {
   if (env.agentModel !== undefined || env.fastModel !== undefined) {
@@ -87,7 +99,8 @@ const resolve = (env: AiEnv, stored: StoredAiSettings | null): AiSnapshot => {
     return { source: 'environment', provider: provider === undefined ? null : providerOf(provider), assistant: fromEnv(env.agentModel, env.keys), fast: fromEnv(env.fastModel, env.keys), verifiedAt: null };
   }
   if (stored === null) return NONE;
-  return { source: 'app', provider: stored.provider, assistant: fromApp(stored, stored.assistantModel), fast: fromApp(stored, stored.fastModel), verifiedAt: stored.verifiedAt };
+  const assistant = fromApp(stored, stored.assistant);
+  return { source: 'app', provider: stored.assistant?.provider ?? stored.fast?.provider ?? null, assistant, fast: fromApp(stored, stored.fast), verifiedAt: stored.verifiedAt };
 };
 
 /**

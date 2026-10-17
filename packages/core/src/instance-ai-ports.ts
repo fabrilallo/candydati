@@ -5,12 +5,14 @@ import type { CoreDeps } from './ports.js';
 /** Binds the sealed key to its purpose: an envelope from another table cannot be replayed here. */
 export const INSTANCE_AI_SECRET_CONTEXT = 'instance-ai';
 
-/** The row of `instance_ai_settings`: the key only as a sealed envelope; a model null is switched off. */
+/** The row of `instance_ai_settings`: the keys only as one sealed envelope; a model without a provider is off. */
 export interface InstanceAiRecord {
-  readonly provider: string;
-  readonly secretCiphertext: string | null;
+  readonly assistantProvider: string | null;
   readonly assistantModel: string | null;
+  readonly fastProvider: string | null;
   readonly fastModel: string | null;
+  /** Sealed JSON `{ "<provider>": "<key>" }` of the providers in use; null when none. */
+  readonly keysCiphertext: string | null;
   readonly verifiedAt: Date;
   readonly updatedAt: Date;
   readonly updatedBy: string | null;

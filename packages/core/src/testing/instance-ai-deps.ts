@@ -21,7 +21,7 @@ export function createInstanceAiWorld(options: InstanceAiWorldOptions = {}): Ins
   const row = cell<InstanceAiRecord | null>(null);
   const calls = cell<readonly { id: string; apiKey: string }[]>([]);
   let refreshed = 0;
-  const onIf = (record: InstanceAiRecord | null, name: string | null) => (record && name !== null && record.secretCiphertext !== null ? `${record.provider}/${name}` : null);
+  const onIf = (record: InstanceAiRecord | null, provider: string | null, name: string | null) => (record && provider !== null && name !== null && record.keysCiphertext !== null ? `${provider}/${name}` : null);
   return {
     auditLog: createInMemoryAuditLog(),
     transaction: createInMemoryTransaction(),
@@ -30,7 +30,7 @@ export function createInstanceAiWorld(options: InstanceAiWorldOptions = {}): Ins
       snapshot: () => {
         if (options.environment) return { source: 'environment', ...options.environment };
         const record = row.get();
-        return { source: record ? 'app' : 'none', assistant: onIf(record, record?.assistantModel ?? null), fast: onIf(record, record?.fastModel ?? null) };
+        return { source: record ? 'app' : 'none', assistant: onIf(record, record?.assistantProvider ?? null, record?.assistantModel ?? null), fast: onIf(record, record?.fastProvider ?? null, record?.fastModel ?? null) };
       },
       refresh: async () => void (refreshed += 1),
     },
