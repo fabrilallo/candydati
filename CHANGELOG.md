@@ -6,6 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-17
+
+### Changed
+
+- The first owner's sign-up page no longer shows the setup code field when the link brings the code.
+- The deploy skill asks the user only for Dokploy's URL and an API key, and fetches the template without a checkout.
+- AI agents find the deploy skill on their own: a line for them atop both READMEs, and `llms.txt` on the
+  documentation site.
+
+### Fixed
+
+- The linear-time check of the tests compares an 8x growth (limit 16), so a slow CI runner no longer fails linear
+  code.
+
 ## [0.1.1] - 2026-10-17
 
 Self-hosting with the minimum: a server with Dokploy and, optionally, a coding agent. No email account or domain to
