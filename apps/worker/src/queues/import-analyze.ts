@@ -10,7 +10,8 @@ export const importPayload = z.object({ organizationId: z.string().min(1), batch
 export interface ImportAnalyzeDeps {
   readonly deps: ImportAnalysisDeps;
   /** Absent when no model is configured. */
-  readonly extractor: CvExtractor | null;
+  /** Read at each analysis: the fast model can change without a restart. */
+  readonly extractor: () => CvExtractor | null;
   readonly concurrency?: number;
   readonly budgetMs?: number;
 }
@@ -24,7 +25,7 @@ export const createImportAnalyzeQueue = ({ deps, extractor, concurrency = DEFAUL
     name: IMPORT_ANALYZE_QUEUE,
     payload: importPayload,
     handle: async ({ jobId, payload, logger, lastAttempt }) => {
-      const outcome = await runImportAnalysis(deps, payload, { extractor, concurrency, budgetMs, lastAttempt });
+      const outcome = await runImportAnalysis(deps, payload, { extractor: extractor(), concurrency, budgetMs, lastAttempt });
       logger.info({ jobId, batchId: payload.batchId, outcome }, 'import analysis finished');
     },
   });

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { Actor } from '../../actor.js';
 import { ConflictError, ForbiddenError, ValidationError } from '../../errors.js';
 import { INSTANCE_EMAIL_SECRET_CONTEXT, type InstanceEmailDeps, type InstanceEmailRecord, type InstanceEmailTransport } from '../../instance-email-ports.js';
-import { authorize } from '../../authorization.js';
+import { mayManageInstance } from '../instance/may-manage.js';
 import { defineUseCase } from '../../use-case.js';
 
 const DEFAULT_FROM_LOCAL = 'noreply';
@@ -11,16 +11,7 @@ const DETAIL_MAX = 300;
 
 const userOf = (actor: Actor): string => actor.onBehalfOfUserId ?? actor.id ?? 'system';
 
-/** The first owner or an instance admin, with the organization permission to manage email (never an API key alone). */
-const mayManage = async (deps: InstanceEmailDeps, actor: Actor): Promise<boolean> => {
-  if (actor.type !== 'user') return false;
-  try {
-    authorize(actor, 'email_settings:manage');
-  } catch {
-    return false;
-  }
-  return deps.instanceAdmins.isInstanceAdmin(actor.id);
-};
+const mayManage = (deps: InstanceEmailDeps, actor: Actor): Promise<boolean> => mayManageInstance(deps.instanceAdmins, actor);
 
 const toView = (deps: InstanceEmailDeps, record: InstanceEmailRecord | null, canManage: boolean): InstanceEmailSettingsDto => {
   const source = deps.emailState.source();

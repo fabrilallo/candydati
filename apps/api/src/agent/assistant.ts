@@ -1,5 +1,5 @@
 import { Agent } from '@mastra/core/agent';
-import type { MastraModelConfig } from '@mastra/core/llm';
+import type { AgentModel } from './model.js';
 import { buildInstructions } from './instructions.js';
 import { readPageContext } from './request-context.js';
 import type { AgentTools } from './tools/index.js';
@@ -9,8 +9,8 @@ export const ASSISTANT_AGENT_ID = 'assistant';
 export const MAX_STEPS = 8;
 
 export interface AssistantDeps {
-  /** AGENT_MODEL (`provider/model`) or a mock model in tests. */
-  readonly model: MastraModelConfig;
+  /** The assistant model in force, resolved at each call, or a mock model in tests. */
+  readonly model: AgentModel;
   readonly tools: AgentTools;
   readonly productName: string;
   readonly now?: () => Date;

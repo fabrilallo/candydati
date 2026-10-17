@@ -26,7 +26,8 @@ Principles and scope: `docs/PRODUCT.md`. Design system: `docs/DESIGN-SYSTEM.md`.
 - Every use case checks permissions and writes to the audit log (`audit_log`, append-only).
 - Every domain table has `organization_id`: no query without an organization filter.
 - Roles and permissions are declared only in `packages/domain/src/access/permissions.ts`.
-- LLM models only through Mastra, with `provider/model` strings from env (`AGENT_MODEL`, `FAST_MODEL`). Never a vendor SDK.
+- LLM models only through Mastra, with `provider/model` from env (`AGENT_MODEL`, `FAST_MODEL`, which win) or from the
+  instance AI settings saved in the app (key passed explicitly to Mastra, never written to the environment). Never a vendor SDK.
 - The agent never ranks, scores or rejects candidates.
 - Immutable data: return new objects, never modify inputs.
 - Files < 400 lines, functions < 50. Tests next to the code (`*.test.ts`), Vitest, written first; coverage ≥ 80%.

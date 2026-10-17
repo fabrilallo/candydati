@@ -125,7 +125,7 @@ export interface ConfiguredProviders {
   readonly storage: string;
   /** `smtp`, `resend`, ... */
   readonly email: string;
-  /** `provider/model` string of `AGENT_MODEL`, or null when no model is configured. */
+  /** Provider name of the AI model in force (assistant, else fast model), or null when no model is on. */
   readonly model: string | null;
 }
 

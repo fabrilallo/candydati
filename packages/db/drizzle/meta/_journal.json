@@ -267,6 +267,13 @@
       "when": 1792246927360,
       "tag": "0037_instance_email_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1792264374751,
+      "tag": "0038_instance_ai_settings",
+      "breakpoints": true
     }
   ]
 }

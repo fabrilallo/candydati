@@ -46,4 +46,9 @@ describe('createMastraGenerator', () => {
     generate.mockRejectedValue(new Error('boom'));
     await expect(createMastraGenerator('openai/m')(request)).rejects.toThrow('boom');
   });
+  it('passes an explicit key to the model when one is given (settings saved from the app)', async () => {
+    generate.mockResolvedValue({ object: { a: 1 } });
+    await createMastraGenerator({ id: 'anthropic/some-model', apiKey: 'sk-app' })(request);
+    expect((construct.mock.calls[0]![0] as Record<string, unknown>).model).toEqual({ id: 'anthropic/some-model', apiKey: 'sk-app' });
+  });
 });

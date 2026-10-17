@@ -13,9 +13,9 @@ const schemaKeys = (path) =>
     fallback: /\.default\(([^)]*)\)/.exec(rest)?.[1]?.replace(/^'|'$/g, '') ?? '',
   }));
 
-/** Provider keys the assistant knows (`PROVIDER_KEYS` in the agent config). */
+/** Provider keys the models can use (`AI_PROVIDER_KEYS` of the providers AI runtime). */
 const providerKeys = () =>
-  [...read('apps/api/src/agent/config.ts').matchAll(/: '([A-Z][A-Z0-9_]*_API_KEY)'/g)].map(([, name]) => ({ name, fallback: '' }));
+  [...read('packages/providers/src/ai/runtime.ts').matchAll(/: '([A-Z][A-Z0-9_]*_API_KEY)'/g)].map(([, name]) => ({ name, fallback: '' }));
 
 /** `runtimeConfig` of Nuxt: `apiInternalUrl` is `NUXT_API_INTERNAL_URL`, `public.timeZone` is `NUXT_PUBLIC_TIME_ZONE`. */
 const webKeys = () => {

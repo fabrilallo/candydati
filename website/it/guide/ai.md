@@ -1,14 +1,25 @@
-# Assistente AI (facoltativo)
+# AI (facoltativa)
 
-Candydati funziona del tutto anche senza AI. Con un modello configurato si attivano due cose:
+Candydati funziona del tutto anche senza AI. Si possono accendere due modelli, separatamente:
 
-| Variabile | Cosa attiva | Se vuota |
+| Modello | Cosa fa | Se spento |
 |---|---|---|
-| `AGENT_MODEL` | l'assistente nell'interfaccia | l'assistente è spento e nessun modello viene chiamato |
-| `FAST_MODEL` | il punteggio di qualità degli annunci con l'aiuto del modello, e i dati strutturati estratti dai CV | il punteggio usa solo regole, e dai CV si estrae solo il testo |
+| **Modello dell'assistente** | l'assistente nel pannello laterale: risponde a domande su annunci e candidati, scrive la bozza di un annuncio da una richiesta di assunzione, riassume le conversazioni | il pannello dice che l'assistente è spento; tutto il resto funziona |
+| **Modello veloce** | i lavori brevi e frequenti: il punteggio di qualità degli annunci (al salvataggio e alla pubblicazione, anche via API e MCP) e la lettura dei CV di candidature e importazioni (ruoli, competenze, lingue). Conviene un modello piccolo ed economico | il punteggio usa solo regole, e dei CV si legge solo il testo |
 
-Entrambe prendono una stringa `fornitore/modello`, per esempio `openai/<modello>` o `anthropic/<modello>`, più la
-chiave API di quel fornitore. L'installer le chiede; in seguito si cambiano con `candydati config`.
+**Dall'app (il modo più semplice).** Il primo proprietario o un amministratore dell'istanza apre **Impostazioni, AI**,
+sceglie il fornitore, incolla la sua chiave API e accende ciascun modello indicandone il nome (ci sono suggerimenti per
+fornitore). **Salva e prova i modelli** fa una piccola chiamata a ogni modello con la chiave e salva solo se rispondono.
+La chiave è cifrata e non viene più mostrata; le modifiche valgono subito, senza riavvio. Spegni entrambi i modelli per
+fermare ogni chiamata.
+
+**In alternativa, sul server.** `AGENT_MODEL` e `FAST_MODEL`, ciascuna una stringa `fornitore/modello`, più la chiave
+del fornitore (sotto). Se sono impostate valgono loro, e l'app le mostra in sola lettura. L'installer le chiede; in
+seguito si cambiano con `candydati config`.
+
+**Privacy.** Con il modello veloce acceso, il testo dei CV va al fornitore scelto; anche ciò che legge l'assistente gli
+arriva. Il fornitore diventa un sub-responsabile: va coperto dal tuo accordo sul trattamento dei dati e indicato
+nell'informativa privacy.
 
 ## Cosa fa l'assistente
 
@@ -31,7 +42,7 @@ e guida gli import.
 
 ## Fornitori
 
-Imposta la chiave del fornitore indicato prima della `/`:
+Sul server, imposta la chiave del fornitore indicato prima della `/` (dall'app, incollala in Impostazioni, AI):
 
 | Fornitore | Variabile |
 |---|---|

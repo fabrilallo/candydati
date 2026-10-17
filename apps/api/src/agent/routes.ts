@@ -10,7 +10,9 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { ASSISTANT_AGENT_ID } from './assistant.js';
 import { toAgentActor } from './agent-actor.js';
-import { agentStatus, type AgentStatus } from './config.js';
+import type { AgentStatus } from './config.js';
+import { liveAssistantModel } from './model.js';
+import type { AiRuntime } from '@candydati/providers';
 import type { JobDrafter } from './job-drafter.js';
 import { chatMessagesSchema, MAX_CHAT_MESSAGES, trimHistory } from './history.js';
 import { buildAgentRequestContext, pageContextSchema } from './request-context.js';
@@ -29,6 +31,8 @@ const chatBodySchema = z.object({
 });
 
 export interface AgentRouteContext extends AgentContext {
+  /** The AI settings in force: whether the assistant is on is read at each request. */
+  readonly aiRuntime: Pick<AiRuntime, 'snapshot'>;
   /** Session cookie only: an API key never reaches the assistant. */
   readonly resolveSessionActor: (request: FastifyRequest) => Promise<Actor>;
   /** Daily budget of chat requests per person and per organization (each request may make several model calls). */
@@ -43,7 +47,7 @@ const BUDGET_MESSAGE: Readonly<Record<string, string>> = {
 };
 
 export interface AgentRouteOptions {
-  /** Tests: a mock model instead of AGENT_MODEL (the assistant is then enabled). */
+  /** Tests: a mock model instead of the configured one (the assistant is then enabled). */
   readonly model?: MastraModelConfig | undefined;
   readonly draftJob?: JobDrafter | undefined;
 }
@@ -67,14 +71,19 @@ function lazy<T>(create: () => T): () => T {
 
 /** GET status and POST chat (AI SDK UI message stream). Stateless: nothing of the conversation is stored on the server. Session-authenticated like every /api/v1 route. */
 export function registerAgentRoutes(app: FastifyInstance, ctx: AgentRouteContext, options: AgentRouteOptions = {}): void {
-  const status: AgentStatus = options.model ? { enabled: true, model: 'test/mock' } : agentStatus(ctx.env.AGENT_MODEL);
-  const model = options.model ?? (ctx.env.AGENT_MODEL as MastraModelConfig | undefined);
+  // Read at each request: the assistant model can be switched on, off or changed from the app without a restart.
+  const status = (): AgentStatus => {
+    if (options.model) return { enabled: true, model: 'test/mock' };
+    const assistant = ctx.aiRuntime.snapshot().assistant;
+    return assistant === null ? { enabled: false, model: null } : { enabled: true, model: assistant.id };
+  };
+  const model = options.model ?? liveAssistantModel(ctx.aiRuntime);
   const onToolError = (error: unknown, tool: string) => app.log.error({ err: error, tool }, 'agent tool failed');
-  const runtime = lazy((): Mastra => createAgentRuntime(ctx, { model: model!, draftJob: options.draftJob, onToolError }));
+  const runtime = lazy((): Mastra => createAgentRuntime(ctx, { model, draftJob: options.draftJob, onToolError }));
 
   app.get('/api/v1/agent/status', async (request) => {
     await userOf(ctx, request);
-    return ok(status);
+    return ok(status());
   });
 
   app.post(
@@ -82,7 +91,7 @@ export function registerAgentRoutes(app: FastifyInstance, ctx: AgentRouteContext
     { bodyLimit: CHAT_BODY_LIMIT, config: { rateLimit: { max: CHAT_RATE_LIMIT_PER_MINUTE, timeWindow: '1 minute' } } },
     async (request, reply) => {
       const user = await userOf(ctx, request);
-      if (!status.enabled) return reply.status(503).send(fail(AGENT_DISABLED_CODE, 'The assistant is not configured on this instance.'));
+      if (!status().enabled) return reply.status(503).send(fail(AGENT_DISABLED_CODE, 'The assistant is not configured on this instance.'));
       const body = chatBodySchema.safeParse(request.body);
       if (!body.success) return reply.status(422).send(fail('validation_failed', body.error.issues.map((i) => `${i.path.join('.') || 'body'}: ${i.message}`).join('; ')));
       const messages = trimHistory(body.data.messages);

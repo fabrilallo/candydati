@@ -22,7 +22,7 @@ describe('import queues', () => {
 
   it('import.analyze leaves the batch ready, and fails it with a reason when nothing is usable', async () => {
     const deps = world();
-    const queue = createImportAnalyzeQueue({ deps, extractor: null });
+    const queue = createImportAnalyzeQueue({ deps, extractor: () => null });
     const good = await upload(deps, csv('Nome;Cognome;Email\nAnna;Verdi;anna@posta.it\n'));
     await queue.handle({ jobId: 'j1', payload: { organizationId: ORG_A, batchId: good.id }, logger, lastAttempt: false, attempt: 1 });
     expect(await deps.imports.findById(ORG_A, good.id)).toMatchObject({ status: 'ready', counts: { rows: 1 } });

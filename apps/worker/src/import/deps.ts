@@ -6,7 +6,8 @@ import {
   type ImportCommitDeps,
   type TaskQueue,
 } from '@candydati/core';
-import { createCvExtractor, createMastraGenerator, newConversationToken, sniffCv, type CvExtractor, type ImportAnalysisDeps } from '@candydati/providers';
+import { newConversationToken, sniffCv, type CvExtractor, type ImportAnalysisDeps } from '@candydati/providers';
+import { liveCvExtractor, type FastModel } from '../cv-extraction/live-extractor.js';
 
 export interface ImportWorkerWiring {
   readonly uow: DrizzleUnitOfWork;
@@ -14,8 +15,8 @@ export interface ImportWorkerWiring {
   readonly queue: TaskQueue;
   /** Live: the From and Reply-To domains follow the instance email settings. */
   readonly config: MessagingConfig;
-  /** Mastra `provider/model`. Absent: CVs are read with text and regexes only. */
-  readonly fastModel?: string | undefined;
+  /** The fast model in force at each analysis (null: contacts from text and patterns only). */
+  readonly fastModel: FastModel;
   /** Failure message only: never the CV text or the model's answer. */
   readonly onModelError: (reason: string) => void;
   /** A reconfirmation email that could not be queued. */
@@ -25,14 +26,15 @@ export interface ImportWorkerWiring {
 export interface ImportWorkerDeps {
   readonly analysis: ImportAnalysisDeps;
   readonly commit: ImportCommitDeps;
-  readonly extractor: CvExtractor | null;
+  /** The extractor of the fast model in force, read at each analysis; null while it is off. */
+  readonly extractor: () => CvExtractor | null;
 }
 
 /** A 192-bit secret: 32 URL-safe characters, shown only in the reconfirmation link. */
 export const newConsentSecret = (): string => randomBytes(24).toString('base64url');
 export const hashConsentSecret = (secret: string): string => createHash('sha256').update(secret).digest('hex');
 
-/** Drizzle repositories and S3 for the import tasks. The model extractor exists only when `FAST_MODEL` is set. */
+/** Drizzle repositories and S3 for the import tasks. The model extractor follows the fast model in force (null: off). */
 export function createImportWorkerDeps({ uow, files, queue, config, fastModel, onModelError, onMailError }: ImportWorkerWiring): ImportWorkerDeps {
   const r = uow.repositories;
   const analysis: ImportAnalysisDeps = {
@@ -47,9 +49,7 @@ export function createImportWorkerDeps({ uow, files, queue, config, fastModel, o
   };
   return {
     analysis,
-    extractor: fastModel
-      ? createCvExtractor({ generate: createMastraGenerator(fastModel), onModelError: (error) => onModelError(error instanceof Error ? error.message : 'unknown') })
-      : null,
+    extractor: liveCvExtractor(fastModel, onModelError),
     commit: {
       ...analysis,
       auditLog: r.auditLog,

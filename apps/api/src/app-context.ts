@@ -5,6 +5,8 @@ import {
   type InstanceEmailDeps,
   type InstanceEmailTester,
   type SetupProgressDeps,
+  type AiModelCheck,
+  type InstanceAiDeps,
   type AuditLogRepository,
   type CoreDeps,
   type ReportDeps,
@@ -58,7 +60,8 @@ import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
 import { createCareersDeps, type CareersWiring } from './wiring/careers-deps.js';
 import { createHrDeps, type HrWiring } from './wiring/hr-deps.js';
 import { createTeamDeps, type TeamWiring } from './wiring/team-deps.js';
-import { liveMessagingConfig, type EmailRuntime, type MigrationConnectorRegistry } from '@candydati/providers';
+import { liveMessagingConfig, type AiRuntime, type EmailRuntime, type MigrationConnectorRegistry } from '@candydati/providers';
+import { createInstanceAiDeps } from './wiring/instance-ai-deps.js';
 import { createInstanceEmailDeps } from './wiring/instance-email-deps.js';
 import { createSetupProgressDeps } from './wiring/setup-progress-deps.js';
 
@@ -164,6 +167,9 @@ export interface AppContext {
   /** How the instance sends email (settings saved from the app) and whether it can. */
   readonly instanceEmailDeps: InstanceEmailDeps;
   readonly setupProgressDeps: SetupProgressDeps;
+  /** Which AI models the instance uses (environment or saved from the app), read at each use. */
+  readonly aiRuntime: AiRuntime;
+  readonly instanceAiDeps: InstanceAiDeps;
   readonly emailRuntime: EmailRuntime;
 }
 
@@ -196,11 +202,14 @@ export interface AppContextDeps {
   readonly emailRuntime: EmailRuntime;
   readonly emailLog?: ((line: string) => void) | undefined;
   readonly instanceEmailTester?: InstanceEmailTester | undefined;
+  readonly aiRuntime: AiRuntime;
+  /** Test seam: the test call of the AI settings (the provider by default). */
+  readonly aiCheck?: AiModelCheck | undefined;
 }
 
 const isBindable = (queue: TaskQueue | BindableTaskQueue): queue is BindableTaskQueue => 'bindTo' in queue && typeof queue.bindTo === 'function';
 
-export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
@@ -215,7 +224,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
   const actors = createActors({ env, limits, apiKeyDeps, resolveFromHeaders });
   const hr = createHrDeps({ uow, files, sender, config: emailConfig, onFeedbackMailError: onReceiptError });
   const phase2 = createPhase2Deps({ uow, files, queue, receipts: messaging.receipts, feedback: hr.stageEntry });
-  const phase5 = createPhase5Deps({ uow, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env), zip: zipStreamFactory, feedbackRecords: hr.feedbackRecords });
+  const phase5 = createPhase5Deps({ uow, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env, aiRuntime), zip: zipStreamFactory, feedbackRecords: hr.feedbackRecords });
   const jobDeps = { ...createJobDeps(uow, adQuality, env.platform.adQualityThreshold), emailReady: () => emailRuntime.ready() };
   return {
     env,
@@ -229,7 +238,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...phase5,
     ...createImportDeps({ uow, files, queue }),
     ...createMigrationDeps({ uow, files, queue, authSecret: env.BETTER_AUTH_SECRET, connectors: migrationConnectors }),
-    ...emailGatedContext({ env, db, uow, files, queue, images, phase2, runtime: emailRuntime, log: emailLog, tester: instanceEmailTester }),
+    ...instanceContext({ env, db, uow, files, queue, images, phase2, runtime: emailRuntime, log: emailLog, tester: instanceEmailTester, aiRuntime, aiCheck }),
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     timelineDeps: { ...phase2.candidateDeps, interviewFeedback: hr.feedbackRecords.interviewFeedback },
     ...hrContext(hr),
@@ -261,10 +270,15 @@ interface EmailGatedInputs {
   readonly runtime: EmailRuntime;
   readonly log?: ((line: string) => void) | undefined;
   readonly tester?: InstanceEmailTester | undefined;
+  readonly aiRuntime: AiRuntime;
+  readonly aiCheck?: AiModelCheck | undefined;
 }
 
-/** What waits for the instance email (careers page publishing, public applications) and the email settings themselves. */
-function emailGatedContext({ env, db, uow, files, queue, images, phase2, runtime, log, tester }: EmailGatedInputs) {
+/**
+ * Instance-wide settings and what depends on them: what waits for the email (careers page publishing, public
+ * applications), the email settings, and the AI settings.
+ */
+function instanceContext({ env, db, uow, files, queue, images, phase2, runtime, log, tester, aiRuntime, aiCheck }: EmailGatedInputs) {
   const emailReady = (): boolean => runtime.ready();
   const careers = createCareersDeps({ uow, files, queue, defaultLocale: env.platform.defaultLocale, images });
   return {
@@ -274,6 +288,8 @@ function emailGatedContext({ env, db, uow, files, queue, images, phase2, runtime
     instanceEmailDeps: createInstanceEmailDeps({ env, db, uow, runtime, log: log ?? (() => undefined), tester }),
     emailRuntime: runtime,
     setupProgressDeps: createSetupProgressDeps(uow),
+    aiRuntime,
+    instanceAiDeps: createInstanceAiDeps({ env, db, uow, runtime: aiRuntime, check: aiCheck }),
   };
 }
 

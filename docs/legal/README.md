@@ -36,7 +36,7 @@ In app, la pagina `/app/settings/privacy` mostra il registro compilato con i dat
 | Registro delle azioni | Chi ha visto, modificato, esportato o cancellato cosa. Solo append, non modificabile | `audit_log` |
 | Minimizzazione | Nessun campo per dati particolari. L'estrazione dai CV scarta foto, data di nascita, stato civile | Modulo candidatura, estrazione CV |
 | Accessi | Permessi per ruolo e per annuncio: responsabili dell'assunzione e intervistatori (e i recruiter, se l'organizzazione lo sceglie) vedono solo i candidati delle posizioni del proprio gruppo di selezione. Fasi riservate non ancora disponibili | `packages/domain/src/access/permissions.ts`, `packages/domain/src/access/job-team.ts` |
-| Modelli linguistici | Fornitore configurabile, elencato tra i sub-responsabili. Nessun dato usato per addestramento. Modello locale possibile in self-hosting | `sub-responsabili.md`, variabili `AGENT_MODEL` e `FAST_MODEL` |
+| Modelli linguistici | Fornitore configurabile, elencato tra i sub-responsabili. Nessun dato usato per addestramento. Modello locale possibile in self-hosting | `sub-responsabili.md`, Impostazioni → AI nell'app (o variabili `AGENT_MODEL` e `FAST_MODEL`) |
 | Decisioni automatizzate (art. 22) | Nessuna. L'agente non ordina, non assegna punteggi e non scarta candidati; ogni messaggio ai candidati richiede conferma di una persona | Vincoli dell'agente |
 | Export completo | Archivio ZIP per candidato e export dell'intera organizzazione, anche a fine contratto | Scheda candidato, esportazioni |
 | Dati importati | Consenso segnato "da rinnovare", con email di riconferma | Import |
