@@ -62,16 +62,19 @@ What the code enforces, so an operator does not have to remember it:
   same whether an address is registered or not. `SIGNUP_MODE=invite_only` is the production default: an account can be
   created only by an address with a pending invitation, which only a confirmed account with that address can accept.
 - **First owner (bootstrap).** On an instance with no confirmed account, `invite_only` still accepts one sign-up: the
-  first owner. In production it needs the one-time `BOOTSTRAP_TOKEN` from the environment (at least 32 random
-  characters, `openssl rand -base64 48`): open `/signup?setup`, type it in the "Setup token" field (sent as the
-  `x-bootstrap-token` header, never in a URL), confirm the email and create the organization. Without the token
-  configured nobody can bootstrap a production instance. Only confirmed accounts close the bootstrap, so an unconfirmed
+  first owner. In production it needs a setup code: the operator's `BOOTSTRAP_TOKEN` when set (at least 32 random
+  characters), else an HMAC-SHA256 of `BETTER_AUTH_SECRET` (it reveals nothing about the secret). While the bootstrap
+  is open the api logs `First owner setup: open https://<host>/signup?setup#code=<code>` at every start: whoever reads
+  the server's logs is the operator. The code travels in the URL fragment, which browsers never send, so no proxy or
+  access log records it; the form drops it from the address bar once read and sends it as the `x-bootstrap-token`
+  header. A `BOOTSTRAP_TOKEN` chosen by the operator is never logged. Keep the api logs as private as `.env` until the
+  first owner is confirmed. Only confirmed accounts close the bootstrap, so an unconfirmed
   sign-up cannot squat it: the claim is held by one address under a Postgres advisory lock (two concurrent sign-ups
   cannot both get through) and lapses after 24 hours if never confirmed. Confirming the address checks the claim
   again: only the holder of a live claim becomes the first owner (its account id is recorded), and an account admitted
   by a claim that has since lapsed or been taken over cannot confirm its address. If you did not confirm within 24
-  hours, sign up again with the token, then use the new link. Once the first owner is confirmed the token
-  opens nothing: remove it from `.env`. From then on people join through invitations. To open sign-up on purpose, set
+  hours, sign up again with the code, then use the new link. Once the first owner is confirmed the code
+  opens nothing and the api stops logging it. From then on people join through invitations. To open sign-up on purpose, set
   `SIGNUP_MODE=open`.
 - **Organizations.** Each organization has its own model budgets, so who may create one is an instance setting
   (`ORGANIZATION_CREATION`): `one_per_user` by default with `invite_only`, `instance_admins` (only the first owner and

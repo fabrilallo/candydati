@@ -12,9 +12,15 @@ const route = useRoute()
 const { refresh } = useViewer()
 
 const isSignup = computed(() => props.mode === 'signup')
-/** `/signup?setup`: the first owner of a new instance types the one-time setup token (BOOTSTRAP_TOKEN). Never in the URL. */
+/** `/signup?setup`: the first owner of a new instance gives the setup token. Never in the query: it would be logged. */
 const askSetupToken = computed(() => isSignup.value && route.query.setup !== undefined)
-const setupToken = ref('')
+/** The link the api logs at first start carries the code in the fragment (`#code=`), which no server ever receives. */
+const setupToken = ref(askSetupToken.value ? (new URLSearchParams(route.hash.slice(1)).get('code') ?? '') : '')
+const router = useRouter()
+// Off the address bar (and the history) once read.
+onMounted(() => {
+  if (route.hash !== '') void router.replace({ query: route.query, hash: '' })
+})
 const form = isSignup.value
   ? useZodForm(signupSchema, { name: '', email: '', password: '' })
   : useZodForm(loginSchema, { email: '', password: '' })

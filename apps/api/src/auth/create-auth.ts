@@ -12,6 +12,7 @@ import type { AccountMailer } from './account-mailer.js';
 import { createActorLookups, type SessionUserResolver } from './actor-lookups.js';
 import { createAuditHooks } from './audit-hooks.js';
 import { createAuthEmails, type AuthEmails } from './auth-emails.js';
+import { bootstrapTokenFor } from './first-owner-setup.js';
 import { roleGuardHooks } from './role-guards.js';
 import { createOrganizationGateLookups, organizationTwoFactorCheck } from './organization-two-factor-gate.js';
 import { findMemberRole } from './member-role.js';
@@ -35,7 +36,7 @@ export interface AuthDependencies {
   readonly requiresTwoFactor: (organizationId: string) => Promise<boolean>;
 }
 
-const signupPolicy = (env: Env): SignupPolicy => ({ mode: env.SIGNUP_MODE, bootstrapToken: env.BOOTSTRAP_TOKEN ?? null, requireBootstrapToken: env.NODE_ENV === 'production' });
+const signupPolicy = (env: Env): SignupPolicy => ({ mode: env.SIGNUP_MODE, bootstrapToken: bootstrapTokenFor(env), requireBootstrapToken: env.NODE_ENV === 'production' });
 
 /**
  * Email + password: no session until the address is confirmed, a known address answers like a new one, reset by email.

@@ -88,4 +88,17 @@ describe('AuthForm', () => {
     await submit(wrapper)
     expect(mocks.api.signUp).toHaveBeenCalledWith(expect.objectContaining({ email: 'ada@example.com', bootstrapToken: 'one-time-token' }))
   })
+
+  it('fills the setup token from the #code= of the link the api logs, then drops it from the address', async () => {
+    const wrapper = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup?setup#code=derived-setup-code' })
+    await vi.waitUntil(() => useRouter().currentRoute.value.hash === '', { timeout: 1000 })
+    expect((wrapper.find('#setup-token').element as HTMLInputElement).value).toBe('derived-setup-code')
+    expect(useRouter().currentRoute.value.hash).toBe('')
+    expect(useRouter().currentRoute.value.query).toHaveProperty('setup')
+    await wrapper.find('#name').setValue('Ada Lovelace')
+    await wrapper.find('#email').setValue('ada@example.com')
+    await wrapper.find('#password').setValue('long-enough-pw')
+    await submit(wrapper)
+    expect(mocks.api.signUp).toHaveBeenCalledWith(expect.objectContaining({ bootstrapToken: 'derived-setup-code' }))
+  })
 })

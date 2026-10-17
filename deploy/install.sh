@@ -291,9 +291,9 @@ install_main() {
   start_stack
   say ""
   say "Candydati is running. Create the first account (owner) here:"
-  say "  https://$A_DOMAIN/signup?setup"
-  say "  setup code: $A_BOOTSTRAP_TOKEN"
-  say "Then remove BOOTSTRAP_TOKEN with: candydati config. Everyday commands: candydati help"
+  # The code rides in the fragment: the browser never sends it, the form fills it in.
+  say "  https://$A_DOMAIN/signup?setup#code=$A_BOOTSTRAP_TOKEN"
+  say "Once you have confirmed your email the code opens nothing. Everyday commands: candydati help"
 }
 
 upgrade_main() {

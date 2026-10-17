@@ -3,7 +3,7 @@ import { createDb, eq, schema, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { prepareTestDatabase } from '../testing/test-database.js';
 import { createOrganizationCreationLookups } from './organization-creation.js';
-import { BOOTSTRAP_CLAIM_TTL_MS, createSignupLookups } from './signup-policy.js';
+import { BOOTSTRAP_CLAIM_TTL_MS, bootstrapOpen, createSignupLookups } from './signup-policy.js';
 
 /** A database of its own: the bootstrap is about an instance with no confirmed account at all. */
 const URL_ = 'postgres://candydati:candydati@localhost:5434/candydati_api_bootstrap_test';
@@ -52,6 +52,16 @@ describe('bootstrap claim (L1)', () => {
     expect(await lookups.claimBootstrap('owner@example.test', NOW)).toBe(true);
     await handle.db.insert(schema.user).values(user(true));
     expect(await lookups.claimBootstrap('owner@example.test', NOW)).toBe(false);
+  });
+
+  it('reports the bootstrap open (the api then logs the setup link) until an account is confirmed', async () => {
+    await reset();
+    const user = (emailVerified: boolean) => ({ id: randomUUID(), name: 'U', email: `${randomUUID()}@example.test`, emailVerified, createdAt: NOW, updatedAt: NOW });
+    expect(await bootstrapOpen(handle.db)).toBe(true);
+    await handle.db.insert(schema.user).values(user(false));
+    expect(await bootstrapOpen(handle.db)).toBe(true);
+    await handle.db.insert(schema.user).values(user(true));
+    expect(await bootstrapOpen(handle.db)).toBe(false);
   });
 });
 

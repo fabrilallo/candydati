@@ -17,7 +17,7 @@ const BOOTSTRAP_SLOT = 'first_owner';
 
 export interface SignupPolicy {
   readonly mode: SignupMode;
-  /** BOOTSTRAP_TOKEN from the environment, or null when unset. */
+  /** BOOTSTRAP_TOKEN, else in production the code derived from BETTER_AUTH_SECRET (first-owner-setup.ts); null when none. */
   readonly bootstrapToken: string | null;
   /** Production: the first owner's sign-up needs the token; without one configured nobody can bootstrap. */
   readonly requireBootstrapToken: boolean;
@@ -75,12 +75,15 @@ export async function verificationAllowed(policy: SignupPolicy, user: { readonly
 const table = schema.instanceBootstrap;
 type Transaction = Parameters<Parameters<Db['transaction']>[0]>[0];
 const live = (claim: { readonly claimedAt: Date }, now: Date): boolean => now.getTime() - claim.claimedAt.getTime() < BOOTSTRAP_CLAIM_TTL_MS;
+const confirmedAccountExists = async (db: Pick<Db, 'execute'>): Promise<boolean> => (await db.execute(sql`select 1 from "user" where email_verified = true limit 1`)).rows.length > 0;
+
+/** The bootstrap is open while the instance has no confirmed account (the api then logs the first owner's setup link). */
+export const bootstrapOpen = async (db: Db): Promise<boolean> => !(await confirmedAccountExists(db));
 
 /** Takes the bootstrap lock for the transaction: `closed` once a confirmed account exists, else the claim (if any). */
 const lockBootstrap = async (tx: Transaction): Promise<'closed' | typeof table.$inferSelect | null> => {
   await tx.execute(sql`select pg_advisory_xact_lock(${BOOTSTRAP_LOCK_KEY})`);
-  const confirmed = await tx.execute(sql`select 1 from "user" where email_verified = true limit 1`);
-  if (confirmed.rows.length > 0) return 'closed';
+  if (await confirmedAccountExists(tx)) return 'closed';
   const [claim] = await tx.select().from(table).where(eq(table.slot, BOOTSTRAP_SLOT)).limit(1);
   return claim ?? null;
 };
