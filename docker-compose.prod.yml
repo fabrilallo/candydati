@@ -77,7 +77,8 @@ services:
       BOOTSTRAP_TOKEN: ${BOOTSTRAP_TOKEN:-}
       PLATFORM_URL: ${PLATFORM_URL:-}
       EMAIL_PROVIDER: ${EMAIL_PROVIDER:-log}
-    network_mode: none
+    # No `network_mode: none`: Dokploy's isolated deployments add a network to every service, and Compose refuses a
+    # service with both (tools/deploy/compose.test.ts). The script opens no connection.
 
   postgres:
     image: postgres:17@sha256:2d2b8998d31037bf721cfdf764d76ba74171b4fab3431b7f72c27c56ddbdf9e3

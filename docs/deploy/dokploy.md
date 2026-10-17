@@ -168,4 +168,6 @@ Give the agent Dokploy's documentation index, <https://docs.dokploy.com/llms.txt
 - **404 from Traefik after adding the domain**: redeploy (labels are read at deploy), check service `web` and port 3000.
 - **Port already allocated**: another service uses `WEB_PORT`; change it (the domain still works, Traefik uses the Docker network).
 - **Subnet overlap**: change `CANDYDATI_SUBNET` and `CANDYDATI_WEB_IP`.
+- **`declares mutually exclusive network_mode and networks`**: the compose file predates the fix for isolated
+  deployments; deploy a newer commit (no service may set `network_mode`).
 - **Build killed**: not enough memory; add swap or build images elsewhere.
