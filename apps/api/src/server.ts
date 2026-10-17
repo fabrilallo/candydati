@@ -1,11 +1,11 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { safeErrorSerializer } from '@candydati/core';
-import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, TaskQueue } from '@candydati/core';
-import { createErrorReporter, type EmailRuntime, type ErrorReporter, type MigrationConnectorRegistry } from '@candydati/providers';
+import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, AiModelCheck, TaskQueue } from '@candydati/core';
+import { createErrorReporter, type ErrorReporter, type MigrationConnectorRegistry } from '@candydati/providers';
 import type { Db } from '@candydati/db';
 import type { AdQualityAnalyzer } from '@candydati/domain';
-import { createConfiguredAnalyzer } from './ai/ad-quality.js';
+import { createLiveAnalyzer } from './ai/ad-quality.js';
 import { registerAgentRoutes } from './agent/routes.js';
 import { toEmailIdentity, toEmailSender } from '@candydati/providers';
 import { createAppContext, DEFAULT_AUTH_EMAIL_MAX, type AppContext, type RateLimitSettings } from './app-context.js';
@@ -35,6 +35,7 @@ import { registerWebhookRoutes } from './routes/webhooks.js';
 import { registerAuditLogRoutes } from './routes/audit-log.js';
 import { registerEmailSettingsRoutes } from './routes/email-settings.js';
 import { registerInstanceEmailRoutes } from './routes/instance-email.js';
+import { registerInstanceAiRoutes } from './routes/instance-ai.js';
 import { registerSetupProgressRoutes } from './routes/setup-progress.js';
 import { registerEmailTemplateRoutes } from './routes/email-templates.js';
 import { registerHealthRoutes } from './routes/health.js';
@@ -69,6 +70,7 @@ import { registerJobTeamRoutes } from './routes/job-team.js';
 import { registerStaleJobRoutes } from './routes/stale-jobs.js';
 import { registerSecuritySettingsRoutes } from './routes/security-settings.js';
 import { createApiEmailRuntime, EMAIL_SETTINGS_REFRESH_MS } from './wiring/instance-email-deps.js';
+import { createApiAiRuntime } from './wiring/instance-ai-deps.js';
 
 export interface ServerDeps {
   readonly env: Env;
@@ -90,6 +92,8 @@ export interface ServerDeps {
   readonly migrationConnectors?: MigrationConnectorRegistry | undefined;
   /** Test seam: what sends the test email of the instance email settings (the configured provider by default). */
   readonly instanceEmailTester?: InstanceEmailTester | undefined;
+  /** Test seam: the test call of the AI settings (the provider by default). */
+  readonly aiCheck?: AiModelCheck | undefined;
   /** Test seam: the "now" of the reports. */
   readonly reportClock?: (() => Date) | undefined;
   /** Test seam: the careers media transcoder (sharp by default). */
@@ -128,7 +132,7 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   const metrics = createApiMetrics((error) => app.log.error({ err: error }, 'metrics collector failed'));
   const reporter = deps.errorReporter ?? createReporter(app, deps.env);
   const ctx = createContext(app, deps, metrics);
-  await startEmailRefresh(app, ctx.emailRuntime);
+  await startSettingsRefresh(app, [ctx.emailRuntime, ctx.aiRuntime]);
 
   registerRequestObservability(app, metrics);
   registerErrorHandler(app, reporter);
@@ -159,10 +163,14 @@ function createReporter(app: FastifyInstance, env: Env): ErrorReporter {
   });
 }
 
-/** Reads the saved email settings before serving, then every EMAIL_SETTINGS_REFRESH_MS (a save on another instance). */
-async function startEmailRefresh(app: FastifyInstance, runtime: EmailRuntime): Promise<void> {
-  await runtime.refresh();
-  const timer = setInterval(() => void runtime.refresh(), EMAIL_SETTINGS_REFRESH_MS);
+/**
+ * Reads the instance settings saved from the app (email, AI) before serving, then every EMAIL_SETTINGS_REFRESH_MS, so a
+ * save on another instance applies here too.
+ */
+async function startSettingsRefresh(app: FastifyInstance, runtimes: readonly { refresh(): Promise<void> }[]): Promise<void> {
+  const refreshAll = (): Promise<void[]> => Promise.all(runtimes.map((runtime) => runtime.refresh()));
+  await refreshAll();
+  const timer = setInterval(() => void refreshAll(), EMAIL_SETTINGS_REFRESH_MS);
   timer.unref();
   app.addHook('onClose', async () => clearInterval(timer));
 }
@@ -172,7 +180,10 @@ function createContext(app: FastifyInstance, deps: ServerDeps, metrics: ApiMetri
   const emailRuntime = createApiEmailRuntime(deps.env, deps.db, emailLog);
   // The provider follows the settings in force at each send: saved from the app, they apply without a restart.
   const messaging = deps.messaging ?? { sender: toEmailSender(emailRuntime.provider), identity: toEmailIdentity(emailRuntime.provider) };
+  const aiRuntime = createApiAiRuntime(deps.env, deps.db, emailLog);
   return createAppContext({
+    aiRuntime,
+    aiCheck: deps.aiCheck,
     emailRuntime,
     emailLog,
     instanceEmailTester: deps.instanceEmailTester,
@@ -202,7 +213,7 @@ function createContext(app: FastifyInstance, deps: ServerDeps, metrics: ApiMetri
       metrics.emailFailures.inc({ kind: 'receipt' });
       app.log.error({ err: error }, 'receipt email not queued');
     },
-    adQuality: deps.adQuality ?? createConfiguredAnalyzer(deps.env.FAST_MODEL, app.log),
+    adQuality: deps.adQuality ?? createLiveAnalyzer(() => aiRuntime.snapshot().fast, app.log),
   });
 }
 
@@ -258,6 +269,7 @@ async function registerCandidateFacingRoutes(app: FastifyInstance, ctx: AppConte
   registerReportRoutes(app, ctx);
   registerEmailSettingsRoutes(app, ctx);
   registerInstanceEmailRoutes(app, ctx);
+  registerInstanceAiRoutes(app, ctx);
   registerSetupProgressRoutes(app, ctx);
   registerEmailTemplateRoutes(app, ctx);
   registerMessageRoutes(app, ctx);

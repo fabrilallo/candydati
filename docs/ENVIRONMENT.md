@@ -8,7 +8,7 @@ Variables without a default are required or optional as described; see `.env.exa
 
 | Variable | Read by | Default | Meaning |
 |---|---|---|---|
-| `AGENT_MODEL` | api |  | Mastra provider/model of the internal assistant. Empty: assistant off. |
+| `AGENT_MODEL` | api |  | provider/model of the assistant (side panel, job ad drafting). Set, it wins over Settings, AI in the app (shown read-only). Empty and nothing set in the app: assistant off. |
 | `ANTHROPIC_API_KEY` | api, worker |  | API key for anthropic/* models. |
 | `API_HOST` | api | `0.0.0.0` | Address the api binds to. |
 | `API_KEY_DEFAULT_TTL_DAYS` | api | `90` | Days an API key lives when its creator gives no expiry (1-365). Every key expires, at most after a year. |
@@ -29,16 +29,16 @@ Variables without a default are required or optional as described; see `.env.exa
 | `EMAIL_FROM_LOCAL` | api, worker | `noreply` | Local part of the default sender. |
 | `EMAIL_INBOUND_DOMAIN` | api, worker |  | Domain that receives replies (reply+<token>@<domain>). |
 | `EMAIL_PROVIDER` | api, worker | `log` | smtp, resend or log (log sends nothing, refused in production). Unset: the instance owner configures email from the app (Settings, Email), and invitations, publishing and applications wait until it works. Set, it wins and the app shows it read-only. |
-| `FAST_MODEL` | api, worker |  | Mastra provider/model for the ad quality score and CV structuring. Empty: rules only, plain text extraction. |
+| `FAST_MODEL` | api, worker |  | provider/model of the fast model: the ad quality score and CV reading (applications, imports). Set, it wins over Settings, AI in the app (shown read-only). Empty and nothing set in the app: rules only, plain text of CVs. |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | api, worker |  | API key for google/* models. |
 | `GROQ_API_KEY` | api, worker |  | API key for groq/* models. |
 | `IMPORT_STALE_DAYS` | worker | `7` | Worker: days after which an import never committed is purged. |
 | `INBOUND_WEBHOOK_SECRET` | api, worker |  | Inbound email webhook secret, at least 32 random characters; required in production, where example and low-entropy values are refused. |
 | `INSTANCE_ADMIN_EMAILS` | api |  | Comma-separated addresses that may always create organizations (ORGANIZATION_CREATION). |
 | `LOG_LEVEL` | api, worker | `info` | Log level: fatal, error, warn, info, debug, trace or silent. |
-| `MCP_MODEL_DAILY_BUDGET_PER_KEY` | api |  | MCP calls of model-backed tools (analyze_job_ad, publish_job) per API key per UTC day, when FAST_MODEL is set. |
-| `MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION` | api |  | MCP calls of model-backed tools per organization per UTC day, when FAST_MODEL is set. |
-| `MCP_MODEL_DAILY_BUDGET_PER_USER` | api |  | MCP calls of model-backed tools per person (across all their keys and organizations) per UTC day, when FAST_MODEL is set. |
+| `MCP_MODEL_DAILY_BUDGET_PER_KEY` | api |  | MCP calls of model-backed tools (analyze_job_ad, publish_job) per API key per UTC day, while a fast model is on. |
+| `MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION` | api |  | MCP calls of model-backed tools per organization per UTC day, while a fast model is on. |
+| `MCP_MODEL_DAILY_BUDGET_PER_USER` | api |  | MCP calls of model-backed tools per person (across all their keys and organizations) per UTC day, while a fast model is on. |
 | `METRICS_TOKEN` | api, worker |  | Bearer token (at least 16 characters) that opens GET /metrics (Prometheus) on the api and the worker. Unset: the endpoint does not exist. |
 | `MISTRAL_API_KEY` | api, worker |  | API key for mistral/* models. |
 | `NODE_ENV` | api, worker | `development` | development, test or production. |

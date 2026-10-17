@@ -5,7 +5,7 @@ import { MockLanguageModelV3, simulateReadableStream } from 'ai/test';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { seedAgentWorld, type AgentWorld } from '../../eval/seed.js';
-import { testEmailRuntime } from '../testing/email-runtime.js';
+import { testAiRuntime, testEmailRuntime } from '../testing/email-runtime.js';
 import { createAppContext } from '../app-context.js';
 import { registerErrorHandler } from '../http/error-handler.js';
 import { UnauthenticatedError } from '../http/errors.js';
@@ -43,6 +43,7 @@ async function mockApp(model: MockLanguageModelV3, actorOf: () => Actor = () => 
     db: t.handle.db,
     mailer: { send: () => undefined },
     emailRuntime: testEmailRuntime(),
+    aiRuntime: testAiRuntime(),
     adQuality: fakeAdQualityAnalyzer(),
     files: createInMemoryFileStorage(),
     queue: createInMemoryTaskQueue(),

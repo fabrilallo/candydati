@@ -611,6 +611,9 @@
         "fetched": "Fetched data from another ATS",
         "committed": "Migrated data from another ATS",
         "undone": "Undid a migration"
+      },
+      "ai_settings": {
+        "updated": "AI settings changed"
       }
     }
   },

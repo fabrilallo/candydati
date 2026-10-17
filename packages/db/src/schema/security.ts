@@ -113,3 +113,21 @@ export const instanceEmailSettings = pgTable('instance_email_settings', {
 });
 
 export type InstanceEmailSettingsRow = typeof instanceEmailSettings.$inferSelect;
+
+/**
+ * The instance's AI models when the environment does not set them (AGENT_MODEL and FAST_MODEL unset): one provider,
+ * its key sealed with the secret box (BETTER_AUTH_SECRET, info `candydati:instance-ai`), the assistant model and the
+ * fast model by name (null: switched off). Saved only after each chosen model answered a test call. One row at most.
+ */
+export const instanceAiSettings = pgTable('instance_ai_settings', {
+  slot: text('slot').primaryKey(),
+  provider: text('provider').notNull(),
+  secretCiphertext: text('secret_ciphertext'),
+  assistantModel: text('assistant_model'),
+  fastModel: text('fast_model'),
+  verifiedAt: timestamp('verified_at', { withTimezone: true }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+  updatedBy: text('updated_by').references(() => user.id, { onDelete: 'set null' }),
+});
+
+export type InstanceAiSettingsRow = typeof instanceAiSettings.$inferSelect;

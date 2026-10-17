@@ -143,7 +143,7 @@ describe('retention job', () => {
     expect(record.body.data).toMatchObject({
       organization: { name: 'Acme', contactEmail: 'privacy@acme.example' },
       privacyNoticeVersion: 1,
-      providers: { storage: 's3 (localhost:9000)', email: 'log', model: 'nessuno' },
+      providers: { storage: 's3 (localhost:9000)', email: 'log', model: null },
     });
     expect(JSON.stringify(record.body)).not.toMatch(/test-secret|S3_|password/i);
   });

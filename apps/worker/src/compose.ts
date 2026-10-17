@@ -1,5 +1,5 @@
 import { formatDigestFrom, type DrizzleUnitOfWork, type FileStorage, type TaskQueue } from '@candydati/core';
-import { liveMessagingConfig, toEmailIdentity, toEmailSender, type EmailRuntime } from '@candydati/providers';
+import { liveMessagingConfig, toEmailIdentity, toEmailSender, type AiRuntime, type EmailRuntime } from '@candydati/providers';
 import type { WorkerEnv } from './config/env.js';
 import { createDeliverDeps } from './email/deps.js';
 import { createHrWorkerDeps } from './hr/deps.js';
@@ -37,6 +37,8 @@ export interface Composition {
   readonly files: FileStorage;
   /** The email settings in force (environment or saved from the app), read again periodically. */
   readonly emailRuntime: EmailRuntime;
+  /** The AI settings in force (the fast model of CV reading), read again periodically. */
+  readonly aiRuntime: AiRuntime;
 }
 
 /** Every queue the worker serves: the static definitions plus one handler per task, wired from the same unit of work. */
@@ -47,7 +49,7 @@ export function createQueues(composition: Composition) {
 
 type Shared = ReturnType<typeof createSharedDeps>;
 
-function createSharedDeps({ env, logger, uow, files, queue, emailRuntime }: Composition) {
+function createSharedDeps({ env, logger, uow, files, queue, emailRuntime, aiRuntime }: Composition) {
   // Sends with the settings in force at each call; while none, a send fails as transient and the job is retried.
   const provider = emailRuntime.provider;
   const sender = toEmailSender(provider);
@@ -67,7 +69,7 @@ function createSharedDeps({ env, logger, uow, files, queue, emailRuntime }: Comp
     files,
     queue,
     config: messaging,
-    fastModel: env.FAST_MODEL,
+    fastModel: () => aiRuntime.snapshot().fast,
     onModelError: (reason) => logger.warn({ reason }, 'cv model failed, keeping the plain text'),
     onMailError: (error) => logger.error({ err: error }, 'reconfirmation email not queued'),
   });
@@ -94,11 +96,11 @@ function createSharedDeps({ env, logger, uow, files, queue, emailRuntime }: Comp
   return { sender, messaging, phase4, imports, hr, digest, migrations, privacy: createPrivacyWorkerDeps({ uow, files, queue }) };
 }
 
-function createTaskQueues({ env, logger, uow, files }: Composition, { sender, messaging, phase4, imports, hr, digest, migrations }: Shared) {
+function createTaskQueues({ logger, uow, files, aiRuntime, env }: Composition, { sender, messaging, phase4, imports, hr, digest, migrations }: Shared) {
   const cvDeps = createCvExtractionDeps({
     uow,
     files,
-    fastModel: env.FAST_MODEL,
+    fastModel: () => aiRuntime.snapshot().fast,
     modelDailyBudget: env.CV_MODEL_DAILY_BUDGET,
     onModelError: (reason) => logger.warn({ reason }, 'cv model failed, keeping the plain text'),
   });

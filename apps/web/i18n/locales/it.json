@@ -611,6 +611,9 @@
         "fetched": "Ha recuperato i dati da un altro ATS",
         "committed": "Ha migrato i dati da un altro ATS",
         "undone": "Ha annullato una migrazione"
+      },
+      "ai_settings": {
+        "updated": "Impostazioni AI modificate"
       }
     }
   },

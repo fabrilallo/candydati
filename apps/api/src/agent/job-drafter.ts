@@ -1,5 +1,5 @@
 import { jobContentSchema, type JobContent } from '@candydati/domain';
-import type { MastraModelConfig } from '@mastra/core/llm';
+import type { AgentModel } from './model.js';
 
 export const DRAFT_TIMEOUT_MS = 90_000;
 
@@ -24,8 +24,8 @@ interface StructuredAgent {
   generate(prompt: string, options: Record<string, unknown>): Promise<{ object?: unknown }>;
 }
 
-/** A Mastra agent with no tools: model string from env, structured output, hard timeout. */
-export function createModelJobDrafter(model: MastraModelConfig): JobDrafter {
+/** A Mastra agent with no tools on the assistant model in force, structured output, hard timeout. */
+export function createModelJobDrafter(model: AgentModel): JobDrafter {
   return async (input) => {
     const { Agent } = await import('@mastra/core/agent');
     const agent = new Agent({ id: 'job-drafter', name: 'Job drafter', instructions: SYSTEM, model }) as unknown as StructuredAgent;

@@ -13,12 +13,12 @@ const WHOSE: Readonly<Record<string, string>> = {
 };
 
 /**
- * A model-backed tool (one that may call FAST_MODEL) spends one unit of the key's, of the person's (across all their
+ * A model-backed tool (one that may call the fast model) spends one unit of the key's, of the person's (across all their
  * keys and organizations) and of the organization's daily budget. Without a model configured the tool runs on rules
  * only and costs nothing. Null when allowed.
  */
 export async function spendModelBudget({ app, actor }: ToolContext): Promise<ToolResult | null> {
-  if (!app.env.FAST_MODEL) return null;
+  if (app.aiRuntime.snapshot().fast === null) return null;
   const verdict = await app.budget.consume([
     { scope: MCP_MODEL_KEY_SCOPE, subject: actor.id ?? 'unknown', limit: app.env.MCP_MODEL_DAILY_BUDGET_PER_KEY },
     { scope: MCP_MODEL_USER_SCOPE, subject: actor.onBehalfOfUserId ?? 'unknown', limit: app.env.MCP_MODEL_DAILY_BUDGET_PER_USER },

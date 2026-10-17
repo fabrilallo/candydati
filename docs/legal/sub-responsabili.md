@@ -11,7 +11,7 @@ Nota: i fornitori effettivi dipendono dalla configurazione. In app, la pagina `/
 | Hosting dell'applicazione e del database | [Nome fornitore] | [es. server applicativo, Postgres gestito] | Tutti i dati della piattaforma, compresi dati dei candidati | [Paese e regione] | [Nessun trasferimento / decisione di adeguatezza / clausole contrattuali standard] |
 | Storage di file compatibile S3 | [Nome fornitore] | [es. archiviazione dei curriculum] | File caricati (curriculum, allegati) | [Paese e regione] | [...] |
 | Invio email | [Nome fornitore] | [es. invio di email transazionali ai candidati] | Indirizzo email, nome, contenuto dei messaggi | [Paese e regione] | [...] |
-| Modello linguistico | [Nome fornitore] (modello: [valore di AGENT_MODEL / FAST_MODEL]) | Estrazione di dati strutturati dai curriculum e assistenza dell'agente | Testo dei curriculum e dei contenuti sottoposti | [Paese e regione] | [...]. Condizioni: nessun addestramento sui dati, [retention zero o minima], contratto che esclude l'uso per migliorare i modelli |
+| Modello linguistico | [Nome fornitore] (modelli: [Impostazioni → AI, o AGENT_MODEL / FAST_MODEL]) | Estrazione di dati strutturati dai curriculum e assistenza dell'agente | Testo dei curriculum e dei contenuti sottoposti | [Paese e regione] | [...]. Condizioni: nessun addestramento sui dati, [retention zero o minima], contratto che esclude l'uso per migliorare i modelli |
 | Monitoraggio | [Nome fornitore] | [es. log di errore, metriche] | Metadati tecnici; nessun contenuto dei candidati (da verificare e configurare) | [Paese e regione] | [...] |
 
 In self-hosting con modello locale la riga "Modello linguistico" può indicare che nessun dato esce dall'infrastruttura del titolare.

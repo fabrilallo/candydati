@@ -4,7 +4,7 @@ import { createFakeEmailIdentity, createFakeEmailSender, createInMemoryFileStora
 import { and, eq, schema } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { CV_INJECTION, REPLY_INJECTION, seedAgentWorld, type AgentWorld } from '../../eval/seed.js';
-import { testEmailRuntime } from '../testing/email-runtime.js';
+import { testAiRuntime, testEmailRuntime } from '../testing/email-runtime.js';
 import { createAppContext } from '../app-context.js';
 import { createTestApp, testEnv, type TestApp } from '../testing/test-app.js';
 import { toAgentActor } from './agent-actor.js';
@@ -36,6 +36,7 @@ beforeAll(async () => {
     db: t.handle.db,
     mailer: { send: () => undefined },
     emailRuntime: testEmailRuntime(),
+    aiRuntime: testAiRuntime(),
     adQuality: fakeAdQualityAnalyzer(),
     files: createInMemoryFileStorage(),
     queue: createInMemoryTaskQueue(),

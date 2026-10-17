@@ -40,6 +40,7 @@ export const AUDIT_ACTIONS = [
   'email_template.saved',
   'email_template.deleted',
   'email_settings.updated',
+  'ai_settings.updated',
   'task.created',
   'task.completed',
   'task.reopened',

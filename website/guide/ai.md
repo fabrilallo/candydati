@@ -1,14 +1,24 @@
-# AI assistant (optional)
+# AI (optional)
 
-Candydati works completely without AI. With a model configured, two things switch on:
+Candydati works completely without AI. Two models can be switched on, separately:
 
-| Variable | What it enables | When empty |
+| Model | What it does | When off |
 |---|---|---|
-| `AGENT_MODEL` | the assistant in the interface | the assistant is off and no model is called |
-| `FAST_MODEL` | the model-assisted job ad quality score, and structured data extracted from CVs | the score uses rules only, and only the text is extracted from CVs |
+| **Assistant model** | the assistant in the side panel: answers questions about your jobs and candidates, drafts a job ad from a hiring request, summarises conversations | the panel says the assistant is off; everything else works |
+| **Fast model** | short, frequent tasks: the job ad quality score (on save and publish, also through the API and MCP) and reading CVs of applications and imports (roles, skills, languages). A small, inexpensive model is best | the score uses rules only, and only the plain text of CVs is read |
 
-Both take a `provider/model` string, for example `openai/<model>` or `anthropic/<model>`, plus the API key of that
-provider. The installer asks for them; later, change them with `candydati config`.
+**From the app (the simplest way).** The first owner or an instance admin opens **Settings, AI**, picks a provider,
+pastes its API key, and switches each model on with a model name (suggestions are offered per provider). **Save and
+test the models** sends one tiny call to each model with the key and saves only if they answer. The key is encrypted at
+rest and never shown again; changes apply without a restart. Switch both models off to stop every model call.
+
+**On the server instead.** `AGENT_MODEL` and `FAST_MODEL`, each a `provider/model` string, plus the provider key
+(below). When set, they win and the app shows them read-only. The installer asks for them; later, change them with
+`candydati config`.
+
+**Privacy.** With the fast model on, the text of CVs goes to the chosen provider; whatever the assistant reads goes to
+it too. The provider becomes a sub-processor: it must be covered by your data processing agreement and listed in your
+privacy notice.
 
 ## What the assistant does
 
@@ -30,7 +40,7 @@ and guides imports.
 
 ## Providers
 
-Set the key of the provider named before the `/`:
+On the server, set the key of the provider named before the `/` (from the app, paste it in Settings, AI):
 
 | Provider | Variable |
 |---|---|

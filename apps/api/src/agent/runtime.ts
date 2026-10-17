@@ -1,5 +1,5 @@
 import { Mastra } from '@mastra/core';
-import type { MastraModelConfig } from '@mastra/core/llm';
+import type { AgentModel } from './model.js';
 import type { AppContext } from '../app-context.js';
 import { ASSISTANT_AGENT_ID, createAssistantAgent } from './assistant.js';
 import { createModelJobDrafter, type JobDrafter } from './job-drafter.js';
@@ -8,7 +8,7 @@ import { createAgentTools } from './tools/index.js';
 export type AgentContext = Pick<AppContext, 'env' | 'jobDeps' | 'candidateDeps' | 'messagingDeps' | 'taskDeps' | 'reportDeps'>;
 
 export interface RuntimeOptions {
-  readonly model: MastraModelConfig;
+  readonly model: AgentModel;
   /** Defaults to a structured-output call on the agent model. */
   readonly draftJob?: JobDrafter | undefined;
   /** Server-side log of a tool failure the model only sees as a short code. */

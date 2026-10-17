@@ -40,7 +40,8 @@ These are enforced in review.
 - Every use case goes through the permission check and writes to the append-only `audit_log`.
 - Every domain table has `organization_id`; no query without an organization filter.
 - Roles and permissions are declared only in `packages/domain/src/access/permissions.ts`.
-- LLM models only through Mastra, with `provider/model` strings from env (`AGENT_MODEL`, `FAST_MODEL`). Never import a
+- LLM models only through Mastra, with `provider/model` from env (`AGENT_MODEL`, `FAST_MODEL`, which win) or from the
+  instance AI settings saved in the app. Never import a
   vendor SDK.
 - The assistant never ranks, scores or rejects candidates, and never messages one without a person's confirmation.
 - Validate with Zod at every boundary (HTTP, tool input, files, model output).

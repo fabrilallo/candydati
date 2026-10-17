@@ -22,7 +22,7 @@ describe('worker wiring', () => {
     const phase4 = createPhase4WorkerDeps({ uow, queue, sender, identity: createFakeEmailIdentity(), platform, config: testMessagingConfig, production: false, allowPrivateWebhooks: false });
     const deliver = createDeliverDeps({ uow, sender, config: testMessagingConfig });
     const hr = createHrWorkerDeps({ uow, sender, config: testMessagingConfig, onMailError: vi.fn() });
-    const imports = createImportWorkerDeps({ uow, files, queue, config: testMessagingConfig, onModelError: vi.fn(), onMailError: vi.fn() });
+    const imports = createImportWorkerDeps({ uow, files, queue, config: testMessagingConfig, fastModel: () => null, onModelError: vi.fn(), onMailError: vi.fn() });
     const privacy = createPrivacyWorkerDeps({ uow, files, queue });
     for (const deps of [phase4.run, phase4.deliver, deliver, imports.commit, privacy.organizationExport]) {
       expect(deps.transaction).toBe(uow.transaction);
@@ -38,13 +38,13 @@ describe('worker wiring', () => {
     // The delivery rotates the consent token of a reconfirmation request at send time.
     expect(deliver.reconfirmation?.consentTokens).toBe(r.consentTokens);
     expect(deliver.reconfirmation?.hash('s')).toBe(imports.commit.hash('s'));
-    expect(imports.extractor).toBeNull();
+    expect(imports.extractor()).toBeNull();
     expect(privacy.retention.erasure).toBe(r.erasure);
     expect(hr.feedback.hash('secret')).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it('builds the model extractor only with FAST_MODEL', () => {
+  it('builds the model extractor only while a fast model is on', () => {
     const onModelError = vi.fn();
-    expect(createImportWorkerDeps({ uow, files, queue, config: testMessagingConfig, fastModel: 'openai/gpt-test', onModelError, onMailError: vi.fn() }).extractor).not.toBeNull();
+    expect(createImportWorkerDeps({ uow, files, queue, config: testMessagingConfig, fastModel: () => ({ id: 'openai/gpt-test' }), onModelError, onMailError: vi.fn() }).extractor()).not.toBeNull();
   });
 });

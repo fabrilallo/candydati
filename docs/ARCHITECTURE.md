@@ -264,8 +264,9 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 
 ## Assistant and MCP constraints
 
-- Models are reached only through Mastra with `provider/model` strings from env (`AGENT_MODEL`, `FAST_MODEL`). Empty
-  means the assistant is off and no model is called.
+- Models are reached only through Mastra. The `provider/model` comes from env (`AGENT_MODEL`, `FAST_MODEL`, which win)
+  or from the instance AI settings saved in the app, read at each use by an AI runtime in api and worker (an app key is
+  passed to Mastra explicitly). No model means the assistant is off and no model is called.
 - The assistant acts with the permissions of the user it works for, and its actions are logged as agent actions.
 - It never ranks, scores or rejects candidates. Any message to a candidate needs a person's confirmation.
 - CV and email content is data, not instructions. An adversarial eval suite checks this (`pnpm --filter @candydati/api eval:agent`).
