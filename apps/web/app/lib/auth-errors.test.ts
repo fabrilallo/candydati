@@ -20,6 +20,7 @@ describe('authErrorKey', () => {
   it('maps the organization gates: 2FA required, organization creation restricted', () => {
     expect(authErrorKey({ code: 'TWO_FACTOR_REQUIRED', status: 403 })).toBe('errors.twoFactorRequired')
     expect(authErrorKey({ code: 'YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_ORGANIZATION', status: 403 })).toBe('errors.organizationCreationRestricted')
+    expect(authErrorKey({ code: 'EMAIL_NOT_CONFIGURED', status: 400 })).toBe('errors.emailNotConfigured')
   })
 
   it('falls back on the HTTP status', () => {

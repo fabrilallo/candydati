@@ -1,4 +1,5 @@
 import {
+  EMAIL_NOT_CONFIGURED,
   type AdQualityAssessment,
   type JobContent,
   type JobDto,
@@ -93,6 +94,8 @@ const call = async <T>(request: JobApiRequest, url: string, schema: z.ZodType<T>
     const { code, issues = [] } = failure.data.error
     // Publishing needs the organization's privacy notice first (Phase 2): a specific message with a way to fix it.
     if (issues.some((issue) => issue.message === PRIVACY_NOTICE_REQUIRED)) throw new AppError('job.errors.privacyNoticeRequired', PRIVACY_NOTICE_REQUIRED)
+    // The instance cannot send email yet: nothing goes public until it can.
+    if (issues.some((issue) => issue.message === EMAIL_NOT_CONFIGURED)) throw new AppError('errors.emailNotConfigured', EMAIL_NOT_CONFIGURED)
     // Approval on (Phase 9): the ad needs an approved request, or its range goes beyond the approved one.
     const approvalKey = approvalErrorKey(code, issues.map((issue) => issue.message))
     if (approvalKey) throw new AppError(approvalKey, code, issues)

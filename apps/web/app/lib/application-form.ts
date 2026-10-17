@@ -1,5 +1,5 @@
 import { applicationFormSchema, type ApplicationForm, type ConsentScope, receivedSchema } from '@candydati/domain'
-import { ApiFailure, callApi, type FailureInfo } from './api-call'
+import { ApiFailure, callApi, isEmailGate, type FailureInfo } from './api-call'
 import type { JobApiRequest } from './job-api'
 
 /** What the candidate types and ticks on the public form. Strings stay strings until the payload is built. */
@@ -82,6 +82,7 @@ const has = (failure: FailureInfo, token: string): boolean => failure.code === t
 /** Pure: the message to show for a failed submission. The candidate is never told more than they need. */
 export const applicationErrorKey = (failure: FailureInfo): string => {
   if (has(failure, 'privacy_notice_outdated')) return 'apply.errors.outdated'
+  if (isEmailGate(failure.issues)) return 'apply.errors.notOpen'
   if (has(failure, 'already_applied')) return 'apply.errors.alreadyApplied'
   if (has(failure, 'unsupported_file') || failure.status === 415) return 'apply.errors.unsupportedFile'
   const byStatus: Readonly<Record<number, string>> = { 0: 'apply.errors.unreachable', 404: 'apply.errors.closed', 413: 'apply.errors.tooLarge', 422: 'apply.errors.invalid', 429: 'apply.errors.tooMany' }

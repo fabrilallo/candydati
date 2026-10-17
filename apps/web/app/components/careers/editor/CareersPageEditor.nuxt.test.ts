@@ -4,10 +4,11 @@ import { flushPromises } from '@vue/test-utils'
 import { readBody, setResponseStatus, type H3Event } from 'h3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { editorDto, fixtureAssets, fixtureDocument, NOW, publicCareers } from '~~/test/fixtures/careers-editor-fixtures'
+import { instanceEmail } from '~~/test/fixtures/instance-email-fixtures'
 import { ok, viewerWith } from '~~/test/fixtures/job-fixtures'
 import CareersPageEditor from './CareersPageEditor.vue'
 
-const state = vi.hoisted(() => ({ editor: null as unknown, calls: [] as string[], puts: [] as unknown[], fail: null as 'save' | 'publish' | 'stale' | null, loads: 0 }))
+const state = vi.hoisted(() => ({ editor: null as unknown, calls: [] as string[], puts: [] as unknown[], fail: null as 'save' | 'publish' | 'stale' | 'email' | null, loads: 0 }))
 const refuse = (event: H3Event) => {
   setResponseStatus(event, 403)
   return { success: false, data: null, error: { code: 'forbidden', message: 'no' } }
@@ -16,6 +17,11 @@ const stale = (event: H3Event) => {
   setResponseStatus(event, 409)
   return { success: false, data: null, error: { code: 'stale_revision', message: 'stale' } }
 }
+const noEmail = (event: H3Event) => {
+  setResponseStatus(event, 422)
+  return { success: false, data: null, error: { code: 'validation_failed', message: 'invalid', issues: [{ path: 'email', message: 'email_not_configured' }] } }
+}
+registerEndpoint('/api/v1/instance/email-settings', { method: 'GET', handler: () => ok(instanceEmail()) })
 registerEndpoint('/api/v1/careers-page', {
   method: 'GET',
   handler: () => {
@@ -39,6 +45,7 @@ registerEndpoint('/api/v1/careers-page/publish', {
   handler: (event) => {
     state.calls.push('publish')
     if (state.fail === 'publish') return refuse(event)
+    if (state.fail === 'email') return noEmail(event)
     const last = (state.puts.at(-1) ?? fixtureDocument()) as CareersPageDocument
     return ok(editorDto({ draft: last, isDefault: false, draftUpdatedAt: NOW, publishedAt: '2026-10-14T09:00:00.000Z', hasUnpublishedChanges: false }))
   },
@@ -240,6 +247,17 @@ describe('careers page editor: validation, theme, save and publish', () => {
     await vi.waitFor(() => expect(state.calls).toEqual(['save', 'save', 'save', 'publish']))
     await flushPromises()
     expect(wrapper.find('[data-testid="careers-published-at"]').text()).toBe('Mai pubblicata')
+  })
+
+  it('says to set up email first when publishing is refused for it, with the way there', async () => {
+    const wrapper = await mountEditor()
+    state.fail = 'email'
+    await wrapper.find('[data-testid="careers-publish"]').trigger('click')
+    await vi.waitFor(() => expect(state.calls).toContain('publish'))
+    await flushPromises()
+    const alert = wrapper.find('[data-testid="careers-editor"] [role="alert"]')
+    expect(alert.text()).toContain("Prima configura l'email")
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="email-setup-link"]').attributes('href')).toBe('/app/settings/email'))
   })
 
   it('never overwrites a page someone else saved: says so and offers to reload their version', async () => {

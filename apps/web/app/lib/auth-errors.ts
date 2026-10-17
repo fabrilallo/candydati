@@ -47,6 +47,7 @@ const CODE_KEYS: Readonly<Record<string, string>> = {
   ACCOUNT_TEMPORARILY_LOCKED: 'errors.tooManyAttempts',
   INVALID_TWO_FACTOR_COOKIE: 'errors.twoFactorExpired',
   EMAIL_VERIFICATION_REQUIRED_FOR_INVITATION: 'errors.emailVerificationRequired',
+  EMAIL_NOT_CONFIGURED: 'errors.emailNotConfigured',
 }
 
 const STATUS_KEYS: ReadonlyArray<readonly [(status: number) => boolean, string]> = [

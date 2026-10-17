@@ -85,6 +85,7 @@ describe('application errors', () => {
     expect(applicationErrorKey(failure(413))).toBe('apply.errors.tooLarge')
     expect(applicationErrorKey(failure(429))).toBe('apply.errors.tooMany')
     expect(applicationErrorKey(failure(422, 'validation_failed', 'x'))).toBe('apply.errors.invalid')
+    expect(applicationErrorKey({ ...failure(422, 'validation_failed', 'x'), issues: [{ path: 'email', message: 'email_not_configured' }] })).toBe('apply.errors.notOpen')
     expect(applicationErrorKey(failure(404, 'not_found', 'x'))).toBe('apply.errors.closed')
     expect(applicationErrorKey(failure(0))).toBe('apply.errors.unreachable')
     expect(applicationErrorKey(failure(500))).toBe('apply.errors.generic')

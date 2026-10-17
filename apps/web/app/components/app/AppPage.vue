@@ -9,6 +9,7 @@ withDefaults(defineProps<{ crumbs: readonly Crumb[]; wide?: boolean }>(), { wide
   <AppTopBar :crumbs="crumbs">
     <template v-if="$slots.actions" #actions><slot name="actions" /></template>
   </AppTopBar>
+  <InstanceEmailBanner />
   <main id="main" tabindex="-1" class="mx-auto w-full flex-1 px-4 pt-6 pb-16 outline-none sm:px-6 sm:pt-8 lg:px-8" :class="wide ? 'max-w-7xl' : 'max-w-6xl'">
     <slot />
   </main>

@@ -107,6 +107,8 @@ describe('error mapping', () => {
     await expect(publishJob(send(fail(422, 'validation_failed')), 'j1')).rejects.toMatchObject({ key: 'job.errors.validationFailed', code: 'validation_failed' })
     const missingNotice = { status: 422, body: { success: false, data: null, error: { code: 'validation_failed', message: 'x', issues: [{ path: 'organization.privacyNotice', message: 'privacy_notice_required' }] } } }
     await expect(publishJob(send(missingNotice), 'j1')).rejects.toMatchObject({ key: 'job.errors.privacyNoticeRequired', code: 'privacy_notice_required' })
+    const noEmail = { status: 422, body: { success: false, data: null, error: { code: 'validation_failed', message: 'x', issues: [{ path: 'email', message: 'email_not_configured' }] } } }
+    await expect(publishJob(send(noEmail), 'j1')).rejects.toMatchObject({ key: 'errors.emailNotConfigured', code: 'email_not_configured' })
     await expect(getJob(send(fail(404, 'not_found')), 'j1')).rejects.toMatchObject({ key: 'errors.notFound' })
     await expect(publishJob(send(fail(422, 'approval_required')), 'j1')).rejects.toMatchObject({ key: 'job.approval.errors.required' })
   })

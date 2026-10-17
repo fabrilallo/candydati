@@ -104,6 +104,7 @@ describe('careersFailureKey', () => {
     expect(careersFailureKey(failure(413))).toBe('careersEditor.media.errors.too_large')
     expect(careersFailureKey(failure(0))).toBe('errors.unreachable')
     expect(careersFailureKey({ ...failure(403), code: 'forbidden' })).toBe('errors.forbidden')
+    expect(careersFailureKey(failure(422, [{ path: 'email', message: 'email_not_configured' }]))).toBe('errors.emailNotConfigured')
   })
 })
 
