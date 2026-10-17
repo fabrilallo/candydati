@@ -12,6 +12,12 @@ auditConfig:
     - GHSA-858h-whjf-mvg5
     - GHSA-86w9-cpqp-85rv
     - GHSA-vfj7-8cjw-p6xm
+# @nuxt/schema imports vite's types without declaring it, so they came from whichever vite pnpm hoisted (vite 5 from
+# VitePress in website/ broke `nuxt typecheck` on vite.plugins). Pin it to the vite the Nuxt builder uses.
+packageExtensions:
+  '@nuxt/schema@4':
+    dependencies:
+      vite: ^8.3.2
 onlyBuiltDependencies:
   - esbuild
   - sharp
