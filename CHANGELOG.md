@@ -6,7 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-Phases 0 to 10 of the roadmap are implemented. Nothing has been released yet.
+## [0.1.0] - 2026-10-17
+
+First release: phases 0 to 10 of the roadmap. Images `ghcr.io/fabrilallo/candydati-{api,worker,web,backup}:0.1.0`
+(amd64 and arm64); `install.sh` sets up a server in one command.
 
 ### Added
 
@@ -44,6 +47,10 @@ Phases 0 to 10 of the roadmap are implemented. Nothing has been released yet.
   page are public; drafts are protected by a revision number against concurrent edits; the organization export includes
   the page and its media. Migrations `0026` and `0027`.
 - Self-hosting stack (`docker-compose.prod.yml`), CI, end-to-end tests.
+- **First owner setup link:** with no `BOOTSTRAP_TOKEN`, the api logs
+  `First owner setup: open https://<host>/signup?setup#code=...` at start until an account is confirmed. The code is
+  derived from `BETTER_AUTH_SECRET` and travels in the URL fragment, which no server receives; nothing to generate,
+  paste or remove.
 
 ### Security
 
@@ -101,6 +108,8 @@ Phases 0 to 10 of the roadmap are implemented. Nothing has been released yet.
 
 ### Fixed
 
+- The production stack deploys with Dokploy's isolated deployments (`config-check` no longer sets `network_mode`).
+- `nuxt typecheck` no longer depends on which vite version pnpm hoists.
 - Confirmation link refused because the invitation lapsed or was withdrawn: the person lands on a page that
   explains it and asks for a new invitation, instead of a raw JSON answer.
 - Candidate page: server and browser rendered different markup on a production build (hydration mismatch).
