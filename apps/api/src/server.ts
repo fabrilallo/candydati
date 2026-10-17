@@ -35,6 +35,7 @@ import { registerWebhookRoutes } from './routes/webhooks.js';
 import { registerAuditLogRoutes } from './routes/audit-log.js';
 import { registerEmailSettingsRoutes } from './routes/email-settings.js';
 import { registerInstanceEmailRoutes } from './routes/instance-email.js';
+import { registerSetupProgressRoutes } from './routes/setup-progress.js';
 import { registerEmailTemplateRoutes } from './routes/email-templates.js';
 import { registerHealthRoutes } from './routes/health.js';
 import { createApiMetrics, type ApiMetrics } from './observability/api-metrics.js';
@@ -257,6 +258,7 @@ async function registerCandidateFacingRoutes(app: FastifyInstance, ctx: AppConte
   registerReportRoutes(app, ctx);
   registerEmailSettingsRoutes(app, ctx);
   registerInstanceEmailRoutes(app, ctx);
+  registerSetupProgressRoutes(app, ctx);
   registerEmailTemplateRoutes(app, ctx);
   registerMessageRoutes(app, ctx);
   await registerInboundEmailRoutes(app, ctx);

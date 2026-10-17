@@ -283,7 +283,7 @@
     "newJob": "New job ad",
     "invite": "Invite a colleague",
     "startTitle": "First steps",
-    "startIntro": "Three steps to put your first transparent job ad online.",
+    "startIntro": "Every ad states the salary and the process, every applicant gets an answer: these steps get the organization ready to do it. They tick themselves.",
     "start": {
       "email": {
         "title": "Set up email",
@@ -291,20 +291,35 @@
         "cta": "Set up email",
         "done": "Email is working"
       },
+      "privacy": {
+        "title": "Publish the privacy notice",
+        "body": "Without an active notice no ad can be published. Start from the default text and adapt it.",
+        "cta": "Prepare the notice",
+        "done": "Notice active"
+      },
+      "careers": {
+        "title": "Set up the careers page",
+        "body": "The public page of your ads: name, logo and a couple of lines about who you are.",
+        "cta": "Open the careers page",
+        "done": "Page published"
+      },
       "job": {
         "title": "Write your first job ad",
         "body": "Salary range and process stages are required: without them the ad cannot be published.",
-        "cta": "Create a job ad"
+        "cta": "Create a job ad",
+        "done": "Ad created"
       },
       "publish": {
-        "title": "Publish it",
-        "body": "It appears on the careers page with the response time you declared.",
-        "cta": "See the careers page"
+        "title": "Publish the first ad",
+        "body": "It appears on the careers page with the response times you declared.",
+        "cta": "Go to the ads",
+        "done": "Ad published"
       },
       "team": {
         "title": "Invite the people who hire with you",
         "body": "Every team action is kept in the audit log.",
-        "cta": "Invite a colleague"
+        "cta": "Invite a colleague",
+        "done": "Team on board"
       }
     },
     "teamTitle": "Your team",

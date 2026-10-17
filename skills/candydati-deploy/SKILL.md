@@ -67,6 +67,7 @@ tunnel: `ssh -N -L 3000:localhost:3000 <user>@<server>`, then `DOKPLOY_URL=http:
 
 - Never print, log or repeat a secret (the generated ones, the setup code in a shared channel). Never ask for an
   email password or API key: the user enters it in the app.
+- Keep the API key in the environment of your shell only: never write it to a file, a config or a commit.
 - Never delete a project, a service or a volume, never deploy with `freshVolumes`, never touch another project.
 - Never import the template again on a running instance: it generates new secrets that no longer match the data.
   Upgrade by asking the user to set `CANDYDATI_VERSION` (the new release, for example `0.2.0`) in the Environment tab,

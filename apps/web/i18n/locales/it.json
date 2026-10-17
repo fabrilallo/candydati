@@ -283,7 +283,7 @@
     "newJob": "Nuovo annuncio",
     "invite": "Invita un collega",
     "startTitle": "Primi passi",
-    "startIntro": "Tre passi per mettere online il primo annuncio trasparente.",
+    "startIntro": "Ogni annuncio dichiara RAL e processo, ogni candidato riceve una risposta: questi passi preparano l'organizzazione a farlo. Si spuntano da soli.",
     "start": {
       "email": {
         "title": "Configura l'email",
@@ -291,20 +291,35 @@
         "cta": "Configura l'email",
         "done": "L'email funziona"
       },
+      "privacy": {
+        "title": "Pubblica l'informativa privacy",
+        "body": "Senza un'informativa attiva nessun annuncio si pubblica. Parti dal testo predefinito e adattalo.",
+        "cta": "Prepara l'informativa",
+        "done": "Informativa attiva"
+      },
+      "careers": {
+        "title": "Prepara la pagina carriere",
+        "body": "È la pagina pubblica dei tuoi annunci: nome, logo e due righe su chi siete.",
+        "cta": "Apri la pagina carriere",
+        "done": "Pagina pubblicata"
+      },
       "job": {
         "title": "Scrivi il primo annuncio",
         "body": "Range RAL e fasi del processo sono obbligatori: senza, l'annuncio non si pubblica.",
-        "cta": "Crea un annuncio"
+        "cta": "Crea un annuncio",
+        "done": "Annuncio creato"
       },
       "publish": {
-        "title": "Pubblicalo",
+        "title": "Pubblica il primo annuncio",
         "body": "Compare sulla pagina carriere con i tempi di risposta che hai dichiarato.",
-        "cta": "Vedi la pagina carriere"
+        "cta": "Vai agli annunci",
+        "done": "Annuncio pubblicato"
       },
       "team": {
         "title": "Invita chi seleziona con te",
         "body": "Ogni azione del team resta nel registro delle azioni.",
-        "cta": "Invita un collega"
+        "cta": "Invita un collega",
+        "done": "Team al lavoro"
       }
     },
     "teamTitle": "Il tuo team",

@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
- * The overview: a bento grid of focused statistics, all computed by the api from stored ads. With no ads at all it
- * shows the first steps instead; each chart also has its own empty state for the partial cases.
+ * The overview: the setup checklist while the organization is not fully set up, then a bento grid of focused
+ * statistics, all computed by the api from stored ads; each chart also has its own empty state for the partial cases.
  */
-const props = defineProps<{ careersPath: string | null; canCreate: boolean; canInvite: boolean }>()
+defineProps<{ canCreate: boolean }>()
 const { t } = useI18n()
 const { stats, errorKey, loading, refresh } = useJobStats()
 const motion = usePreferredReducedMotion()
@@ -29,7 +29,7 @@ const empty = computed(() => stats.value !== null && stats.value.statusCounts.to
       </div>
     </div>
     <template v-else-if="stats">
-      <FirstSteps v-if="empty" :careers-path="props.careersPath" :can-create="props.canCreate" :can-invite="props.canInvite" />
+      <FirstSteps />
       <div class="grid gap-4 lg:grid-cols-12" :class="loading ? 'opacity-60 transition-opacity' : ''">
         <StatusCard v-if="!empty" :counts="stats.statusCounts" :duration="duration" class="lg:col-span-5" />
         <ActivityCard :weekly="stats.weekly" :duration="duration" :can-create="canCreate" :class="empty ? 'lg:col-span-12' : 'lg:col-span-7'" />

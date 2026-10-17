@@ -36,7 +36,7 @@ const firstName = computed(() => viewer.value?.user.name.split(' ')[0] ?? '')
         </template>
       </PageHeader>
       <PrivacyMissingBanner v-if="can(role, 'privacy:manage')" />
-      <DashboardOverview v-if="can(role, 'job:read')" :careers-path="publicPath" :can-create="can(role, 'job:create')" :can-invite="can(role, 'invitation:create')" />
+      <DashboardOverview v-if="can(role, 'job:read')" :can-create="can(role, 'job:create')" />
       <section v-else class="grid gap-1 rounded-xl border bg-card px-6 py-6">
         <h2 class="text-[0.9375rem] font-semibold">{{ t('dashboard.teamTitle') }}</h2>
         <p class="text-sm text-muted-foreground">{{ t('dashboard.teamBody') }}</p>

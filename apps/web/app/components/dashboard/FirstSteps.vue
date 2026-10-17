@@ -1,25 +1,44 @@
 <script setup lang="ts">
+import type { Permission } from '@candydati/domain'
 import { ArrowRightIcon, CheckIcon } from '@lucide/vue'
+import { can } from '@/lib/permissions-ui'
 
 /**
- * Guided empty state of the overview: set up email, then the three steps to a first transparent job ad. Steps the role
- * cannot do are hidden; the email step shows once its state is known and is ticked when email works.
+ * The setup checklist of the overview: what the organization needs before it can publish transparent ads and answer
+ * every applicant, in the order it is needed (the privacy notice before the first job: publishing needs it). Each step
+ * is ticked from the real state, a role sees only the steps it can take, and the list goes away once all are done.
  */
-const props = defineProps<{ careersPath: string | null; canCreate: boolean; canInvite: boolean }>()
 const { t } = useI18n()
+const { viewer } = useViewer()
 const { ready } = useInstanceEmailStatus()
-const steps = computed(() =>
-  [
-    { id: 'email', to: '/app/settings/email', show: ready.value !== null, done: ready.value === true },
-    { id: 'job', to: '/app/jobs/new', show: props.canCreate, done: false },
-    { id: 'publish', to: props.careersPath ?? '', show: props.careersPath !== null, done: false },
-    { id: 'team', to: '/app/settings/members', show: props.canInvite, done: false },
-  ].filter((step) => step.show),
-)
+const { progress } = useSetupProgress()
+const role = computed(() => viewer.value?.role ?? null)
+
+interface Step {
+  readonly id: string
+  readonly to: string
+  readonly permission: Permission | null
+  readonly done: boolean | null
+}
+
+const steps = computed(() => {
+  const state = progress.value
+  const all: readonly Step[] = [
+    { id: 'email', to: '/app/settings/email', permission: null, done: ready.value },
+    { id: 'privacy', to: '/app/settings/privacy', permission: 'privacy:manage', done: state?.privacyNotice ?? null },
+    { id: 'careers', to: '/app/settings/careers', permission: 'careers_page:manage', done: state?.careersPage ?? null },
+    { id: 'job', to: '/app/jobs/new', permission: 'job:create', done: state?.jobCreated ?? null },
+    { id: 'publish', to: '/app/jobs', permission: 'job:publish', done: state?.jobPublished ?? null },
+    { id: 'team', to: '/app/settings/members', permission: 'invitation:create', done: state?.team ?? null },
+  ]
+  return all.filter((step) => step.done !== null && (step.permission === null || can(role.value, step.permission)))
+})
+/** Shown once the state is known, and only while something is left to do. */
+const visible = computed(() => progress.value !== null && steps.value.some((step) => step.done !== true))
 </script>
 
 <template>
-  <section aria-labelledby="start-title" class="rounded-xl border bg-card shadow-xs" data-testid="first-steps">
+  <section v-if="visible" aria-labelledby="start-title" class="rounded-xl border bg-card shadow-xs" data-testid="first-steps">
     <div class="grid gap-1 border-b px-5 py-5 sm:px-6">
       <h2 id="start-title" class="text-lg font-semibold tracking-tight">{{ t('dashboard.startTitle') }}</h2>
       <p class="text-sm text-muted-foreground">{{ t('dashboard.startIntro') }}</p>

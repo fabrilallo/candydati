@@ -122,6 +122,7 @@ const ROWS: readonly Row[] = [
 const EXEMPT: Readonly<Record<string, string>> = {
   createJob: 'creates a new job; its creator joins the team',
   getInstanceEmailSettings: 'whether and how the instance sends email: no job, no candidate, never a secret',
+  getSetupProgress: 'yes or no per setup step, from job counts (never a job), the notice, the careers page and the member count',
   convertJobRequest: 'creates a new job from a request; requester and converter join the team',
   submitJobRequest: 'a hiring need, not a job or candidate',
   listJobRequests: 'hiring needs of the organization, not candidate data',

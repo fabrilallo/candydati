@@ -75,6 +75,7 @@ export * from './mappers/messaging-dto.js';
 export * from './use-cases/messaging/views.js';
 export * from './use-cases/messaging/email-settings.js';
 export * from './use-cases/messaging/instance-email.js';
+export * from './use-cases/setup/get-setup-progress.js';
 export * from './use-cases/messaging/email-templates.js';
 export * from './use-cases/messaging/send-message.js';
 export * from './use-cases/messaging/list-messages.js';
