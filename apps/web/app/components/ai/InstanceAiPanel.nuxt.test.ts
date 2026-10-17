@@ -51,13 +51,38 @@ describe('InstanceAiPanel', () => {
     expect(wrapper.find('[data-testid="instance-ai-save"]').text()).toBe('Salva')
   })
 
+  it('opens a free field for another model, and when the saved model is not among the suggestions', async () => {
+    const wrapper = await mountPanel()
+    await wrapper.find('[data-testid="ai-assistant-switch"]').setValue(true)
+    await wrapper.find('[data-testid="ai-assistant-model"]').setValue('__other__')
+    const custom = wrapper.find('[data-testid="ai-assistant-model-custom"]')
+    expect(custom.exists()).toBe(true)
+    await custom.setValue('gpt-7-preview')
+    expect((wrapper.find('[data-testid="ai-assistant-model"]').element as HTMLSelectElement).value).toBe('__other__')
+    expect((wrapper.find('[data-testid="ai-assistant-model-custom"]').element as HTMLInputElement).value).toBe('gpt-7-preview')
+    await wrapper.find('[data-testid="ai-assistant-model"]').setValue('gpt-6-luna')
+    expect(wrapper.find('[data-testid="ai-assistant-model-custom"]').exists()).toBe(false)
+  })
+
+  it('goes straight to the free field for a provider without suggestions', async () => {
+    const wrapper = await mountPanel()
+    await wrapper.find('[data-testid="ai-fast-switch"]').setValue(true)
+    await wrapper.find('[data-testid="ai-fast-provider"]').setValue('groq')
+    expect(wrapper.find('[data-testid="ai-fast-model-custom"]').exists()).toBe(true)
+  })
+
   it('proposes the recommended models, one key field per provider in use, and tests before saving', async () => {
     const wrapper = await mountPanel()
     expect(wrapper.find('[data-testid="instance-ai-keys"]').exists()).toBe(false)
     await wrapper.find('[data-testid="ai-assistant-switch"]').setValue(true)
     expect((wrapper.find('[data-testid="ai-assistant-provider"]').element as HTMLSelectElement).value).toBe('openai')
-    expect((wrapper.find('[data-testid="ai-assistant-model"]').element as HTMLInputElement).value).toBe('gpt-6-luna')
-    expect(wrapper.findAll('#ai-assistant-model-suggestions option').map((option) => option.attributes('value'))[0]).toBe('gpt-6-luna')
+    expect((wrapper.find('[data-testid="ai-assistant-model"]').element as HTMLSelectElement).value).toBe('gpt-6-luna')
+    // A real dropdown: every suggested model of the provider, then "another model".
+    const options = wrapper.findAll('#ai-assistant-model option').map((option) => option.text())
+    expect(options[0]).toBe('gpt-6-luna')
+    expect(options.length).toBeGreaterThan(2)
+    expect(options.at(-1)).toBe('Altro modello…')
+    expect(wrapper.find('[data-testid="ai-assistant-model-custom"]').exists()).toBe(false)
     expect(wrapper.find('[data-testid="ai-assistant-recommended"]').text()).toContain('non da un benchmark')
     expect(wrapper.find('[data-testid="instance-ai-save"]').text()).toBe('Salva e prova i modelli')
     expect(wrapper.findAll('[data-testid^="ai-key-"][type="password"]').map((field) => field.attributes('data-testid'))).toEqual(['ai-key-openai'])
@@ -68,7 +93,7 @@ describe('InstanceAiPanel', () => {
 
     await wrapper.find('[data-testid="ai-fast-switch"]').setValue(true)
     expect((wrapper.find('[data-testid="ai-fast-provider"]').element as HTMLSelectElement).value).toBe('google')
-    expect((wrapper.find('[data-testid="ai-fast-model"]').element as HTMLInputElement).value).toBe('gemini-3.1-flash-lite')
+    expect((wrapper.find('[data-testid="ai-fast-model"]').element as HTMLSelectElement).value).toBe('gemini-3.1-flash-lite')
     expect(wrapper.find('[data-testid="ai-key-link-google"]').attributes('href')).toBe('https://aistudio.google.com/app/apikey')
 
     await wrapper.find('[data-testid="instance-ai-form"]').trigger('submit')
@@ -93,7 +118,8 @@ describe('InstanceAiPanel', () => {
     const wrapper = await mountPanel()
     expect(wrapper.find('[data-testid="ai-key-anthropic"]').attributes('placeholder')).toBe('salvata, lascia vuoto per mantenerla')
     expect(wrapper.find('[data-testid="ai-key-google"]').attributes('placeholder')).toBe('salvata, lascia vuoto per mantenerla')
-    await wrapper.find('[data-testid="ai-fast-model"]').setValue('gemini-tiny')
+    await wrapper.find('[data-testid="ai-fast-model"]').setValue('__other__')
+    await wrapper.find('[data-testid="ai-fast-model-custom"]').setValue('gemini-tiny')
     await wrapper.find('[data-testid="instance-ai-form"]').trigger('submit')
     await vi.waitFor(() => expect(wrapper.find('[data-testid="ai-test-detail"]').exists()).toBe(true))
     expect(state.puts).toEqual([{ assistant: { provider: 'anthropic', model: 'claude-sonnet-5-5' }, fast: { provider: 'google', model: 'gemini-tiny' }, keys: {} }])

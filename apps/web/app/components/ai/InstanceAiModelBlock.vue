@@ -6,8 +6,9 @@ import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
 
 /**
- * One model of the instance: what it does and what happens without it, a switch, then its own provider and the model
- * name with that provider's suggestions (any name can be typed).
+ * One model of the instance: what it does and what happens without it, a switch, then its own provider and a dropdown
+ * of that provider's suggested models; "another model" (or a saved model outside the list, or a provider without
+ * suggestions) opens a free field, since any name the provider accepts works.
  */
 const props = defineProps<{ kind: AiModelSlot; draft: InstanceAiModelDraft; error?: string | undefined }>()
 const emit = defineEmits<{ toggle: [on: boolean]; provider: [value: AiProvider]; model: [value: string] }>()
@@ -16,7 +17,17 @@ const id = computed(() => `ai-${props.kind}-model`)
 const providerId = computed(() => `ai-${props.kind}-provider`)
 const suggestions = computed(() => modelSuggestions(props.draft.provider, props.kind))
 const recommended = computed(() => RECOMMENDED_MODELS[props.kind])
+/** The dropdown value that opens the free field. */
+const OTHER = '__other__'
+const otherChosen = ref(false)
+const custom = computed(() => otherChosen.value || suggestions.value.length === 0 || (props.draft.model !== '' && !suggestions.value.includes(props.draft.model)))
+const choice = computed(() => (custom.value ? OTHER : props.draft.model))
+const choose = (value: string): void => {
+  otherChosen.value = value === OTHER
+  if (value !== OTHER) emit('model', value)
+}
 const setProvider = (value: string): void => {
+  otherChosen.value = false
   if (isAiProvider(value)) emit('provider', value)
 }
 </script>
@@ -41,10 +52,25 @@ const setProvider = (value: string): void => {
         </FormField>
         <FormField :id="id" :label="t('instanceAi.form.model')" :hint="t('instanceAi.form.modelHint')" :error="error">
           <template #default="{ invalid, describedBy }">
-            <Input :id="id" autocomplete="off" spellcheck="false" :list="`${id}-suggestions`" :model-value="draft.model" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" :data-testid="id" @update:model-value="emit('model', String($event))" />
-            <datalist :id="`${id}-suggestions`">
-              <option v-for="name in suggestions" :key="name" :value="name" />
-            </datalist>
+            <div class="grid gap-2">
+              <NativeSelect :id="id" :model-value="choice" :aria-invalid="(invalid && !custom) || undefined" :aria-describedby="describedBy" :data-testid="id" @update:model-value="choose(String($event))">
+                <option v-for="name in suggestions" :key="name" :value="name">{{ name }}</option>
+                <option :value="OTHER">{{ t('instanceAi.form.otherModel') }}</option>
+              </NativeSelect>
+              <Input
+                v-if="custom"
+                :id="`${id}-custom`"
+                autocomplete="off"
+                spellcheck="false"
+                :aria-label="t('instanceAi.form.otherModelName')"
+                :placeholder="t('instanceAi.form.otherModelPlaceholder')"
+                :model-value="draft.model"
+                :aria-invalid="invalid || undefined"
+                :aria-describedby="describedBy"
+                :data-testid="`${id}-custom`"
+                @update:model-value="emit('model', String($event))"
+              />
+            </div>
           </template>
         </FormField>
       </div>
