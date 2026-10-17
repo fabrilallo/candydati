@@ -62,6 +62,7 @@ beforeEach(() => {
   state.enabled = true
   state.chatStatus = 200
   clearNuxtData()
+  clearNuxtState('assistant-configured')
   useViewer().viewer.value = viewerWith('recruiter')
 })
 afterEach(() => {
@@ -126,12 +127,13 @@ describe('assistant panel', () => {
     expect(useAssistant().open.value).toBe(false)
   })
 
-  it('explains calmly when no model is configured, with the variable for admins', async () => {
+  it('explains calmly when no model is configured, with the way to the AI settings for admins', async () => {
     state.enabled = false
     useViewer().viewer.value = viewerWith('admin')
     await mountPanel()
     await vi.waitFor(() => expect(byTestId('assistant-off')).not.toBeNull())
-    expect(byTestId('assistant-off')?.textContent).toContain('AGENT_MODEL')
+    expect(byTestId('assistant-off-settings')?.getAttribute('href')).toBe('/app/settings/ai')
+    expect(byTestId('assistant-off')?.textContent).not.toContain('AGENT_MODEL')
     expect(byTestId<HTMLTextAreaElement>('assistant-input')?.disabled).toBe(true)
   })
 
@@ -141,7 +143,8 @@ describe('assistant panel', () => {
     await mountPanel()
     await type('Ciao')
     await vi.waitFor(() => expect(byTestId('assistant-off')).not.toBeNull())
-    expect(byTestId('assistant-off')?.textContent).not.toContain('AGENT_MODEL')
+    expect(byTestId('assistant-off-settings')).toBeNull()
+    expect(byTestId('assistant-off')?.textContent).toContain("chiedi a chi amministra")
     expect(byTestId('assistant-error')).toBeNull()
     registerEndpoint('/api/v1/agent/status', () => ok({ enabled: state.enabled, model: state.enabled ? 'mistral/small' : null }))
   })

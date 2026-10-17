@@ -39,6 +39,7 @@
     "privacy": "Privacy",
     "candidateCount": "{count} candidati",
     "email": "Email",
+    "ai": "AI",
     "emailTemplates": "Modelli email",
     "attention": "Da gestire",
     "tasks": "Le mie attività",
@@ -2609,7 +2610,7 @@
     "off": {
       "title": "L'assistente non è attivo",
       "body": "Su questa installazione non è configurato un modello linguistico. Tutto il resto funziona come sempre.",
-      "admin": "Per attivarlo, imposta la variabile AGENT_MODEL del servizio api con un modello nel formato fornitore/modello, poi riavvia il servizio.",
+      "admin": "Configura un modello in Impostazioni, AI",
       "member": "Se ti serve, chiedi a chi amministra l'organizzazione."
     },
     "steps": {
@@ -4216,6 +4217,73 @@
       "apiKey": "La chiave API è troppo lunga",
       "sendingDomain": "Scrivi un nome di dominio, per esempio azienda.it",
       "fromLocal": "Usa solo lettere, cifre, punti, trattini e trattini bassi"
+    }
+  },
+  "instanceAi": {
+    "title": "Modelli linguistici",
+    "intro": "I modelli che questa installazione usa per l'assistente e per i compiti automatici brevi. Un fornitore e una chiave API per entrambi.",
+    "loading": "Caricamento delle impostazioni AI",
+    "saved": "Impostazioni AI salvate",
+    "page": {
+      "title": "AI",
+      "subtitle": "Quali modelli linguistici usano l'assistente, il punteggio di qualità degli annunci e la lettura dei CV."
+    },
+    "state": {
+      "environment": "Impostato sul server",
+      "assistantOn": "Assistente attivo",
+      "assistantOff": "Assistente spento",
+      "fastOn": "Modello rapido attivo",
+      "fastOff": "Modello rapido spento"
+    },
+    "explain": {
+      "environment": "Chi gestisce il server ha configurato i modelli: si cambiano lì, non qui.",
+      "verified": "Ultima prova dei modelli il {date}.",
+      "askAdmin": "Non è configurato nessun modello. Può attivarli l'amministratore di questa installazione; tutto il resto funziona come sempre."
+    },
+    "assistant": {
+      "title": "Modello dell'assistente",
+      "what": "Fa funzionare l'assistente nel pannello laterale: risponde a domande su annunci e candidati, scrive la bozza di un annuncio da una richiesta di assunzione e riassume le conversazioni. Agisce solo con i permessi di chi lo usa e non ordina, non valuta e non scarta le persone.",
+      "off": "Se è spento, il pannello dice che l'assistente non è attivo. Tutto il resto funziona."
+    },
+    "fast": {
+      "title": "Modello rapido",
+      "what": "Si occupa dei compiti brevi e frequenti: il punteggio di qualità degli annunci (al salvataggio e alla pubblicazione, anche tramite API e MCP) e la lettura dei CV di candidature e importazioni (ruoli, competenze, lingue). Conviene un modello piccolo ed economico.",
+      "off": "Se è spento, il punteggio degli annunci usa solo le regole e dei CV si legge solo il testo semplice."
+    },
+    "privacy": {
+      "title": "Dati inviati al fornitore",
+      "body": "Con il modello rapido attivo, il testo dei CV viene inviato al fornitore scelto. Quando si usa l'assistente, anche ciò che legge va al fornitore. Il fornitore diventa un sub-responsabile del trattamento: deve essere coperto dagli accordi della tua organizzazione (un accordo sul trattamento dei dati) e indicato nella sua informativa privacy."
+    },
+    "costs": {
+      "body": "Il fornitore addebita ogni chiamata sul tuo account. Limiti giornalieri per utente e per organizzazione contengono la spesa.",
+      "link": "Come funziona l'AI e quanto costa"
+    },
+    "form": {
+      "provider": "Fornitore",
+      "apiKey": "Chiave API",
+      "keyKept": "salvata, lascia vuoto per mantenerla",
+      "getKey": "Crea una chiave API su {provider}",
+      "on": "Attivo",
+      "off": "Spento",
+      "model": "Nome del modello",
+      "modelHint": "Come lo scrive il fornitore, senza il prefisso del fornitore. Scegli un suggerimento o scrivi qualsiasi nome.",
+      "save": "Salva",
+      "saveAndTest": "Salva e prova i modelli",
+      "saving": "Salvataggio…",
+      "testing": "Prova dei modelli…"
+    },
+    "test": {
+      "passed": "I modelli hanno risposto: impostazioni salvate.",
+      "turnedOff": "L'AI ora è spenta: impostazioni salvate.",
+      "hint": "Controlla la chiave API, il nome del modello e il credito sul tuo account del fornitore."
+    },
+    "errors": {
+      "testFailed": "Un modello non ha risposto alla chiamata di prova, quindi nulla è stato salvato.",
+      "invalid": "Alcune impostazioni non sono valide. Controlla i campi e riprova.",
+      "apiKeyMissing": "Inserisci la chiave API del fornitore",
+      "apiKey": "La chiave API è troppo lunga",
+      "modelMissing": "Inserisci il nome di un modello",
+      "model": "Usa solo il nome del modello, senza spazi né prefisso del fornitore"
     }
   }
 }

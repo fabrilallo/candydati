@@ -15,8 +15,8 @@ const BUSY: ReadonlySet<string> = new Set(['submitted', 'streaming'])
  */
 export const useAssistantChat = (page: () => PageContext) => {
   const request = useJobsApi()
-  /** null = not known yet (or an api without the status route): the chat itself will say. */
-  const configured = ref<boolean | null>(null)
+  /** null = not known yet (or an api without the status route): the chat itself will say. Shared with the settings. */
+  const configured = useAssistantConfigured()
 
   const transport = new DefaultChatTransport<UIMessage>({
     api: AGENT_CHAT_PATH,

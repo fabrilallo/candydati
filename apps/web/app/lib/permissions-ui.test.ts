@@ -77,7 +77,7 @@ describe('defaultInviteRole', () => {
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
     expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates', 'members', 'security', 'emailTemplates', 'distribution'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates', 'members', 'security', 'privacy', 'email', 'emailTemplates', 'webhooks', 'distribution', 'careersPage', 'api', 'data', 'migrations', 'audit'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates', 'members', 'security', 'privacy', 'email', 'ai', 'emailTemplates', 'webhooks', 'distribution', 'careersPage', 'api', 'data', 'migrations', 'audit'])
   })
 
   it('shows webhooks only with webhook:manage and the work queues to everyone who reads candidates', () => {
@@ -99,6 +99,7 @@ describe('visibleNav', () => {
     expect(visibleNav('admin').map((item) => item.id)).toContain('privacy')
     expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('privacy')
     expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('email')
+    expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('ai')
     expect(visibleNav('interviewer').map((item) => item.id)).not.toContain('emailTemplates')
   })
 
@@ -125,7 +126,7 @@ describe('navSections', () => {
   it('groups the visible items and drops nothing the role may see', () => {
     expect(navSections('owner').map((section) => [section.id, section.items.map((item) => item.id)])).toEqual([
       ['work', ['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates']],
-      ['organization', ['members', 'security', 'privacy', 'email', 'emailTemplates', 'webhooks', 'distribution', 'careersPage', 'api', 'data', 'migrations', 'audit']],
+      ['organization', ['members', 'security', 'privacy', 'email', 'ai', 'emailTemplates', 'webhooks', 'distribution', 'careersPage', 'api', 'data', 'migrations', 'audit']],
     ])
     expect(navSections(null).map((section) => section.id)).toEqual(['work', 'organization'])
   })
@@ -142,6 +143,7 @@ describe('activeNavId', () => {
     expect(activeNavId('/app/candidates/c1', items)).toBe('candidates')
     expect(activeNavId('/app/settings/privacy', items)).toBe('privacy')
     expect(activeNavId('/app/settings/email', items)).toBe('email')
+    expect(activeNavId('/app/settings/ai', items)).toBe('ai')
     expect(activeNavId('/app/settings/email-templates', items)).toBe('emailTemplates')
     expect(activeNavId('/app/settings/careers', items)).toBe('careersPage')
     expect(activeNavId('/elsewhere', items)).toBeNull()

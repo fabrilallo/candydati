@@ -18,7 +18,7 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   return allowed[0] ?? null
 }
 
-export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'emailTemplates' | 'webhooks' | 'distribution' | 'careersPage' | 'api' | 'data' | 'migrations' | 'audit'
+export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'ai' | 'emailTemplates' | 'webhooks' | 'distribution' | 'careersPage' | 'api' | 'data' | 'migrations' | 'audit'
 export type NavSectionId = 'work' | 'organization'
 
 export interface NavItem {
@@ -43,6 +43,8 @@ const NAV: readonly NavItem[] = [
   { id: 'security', to: '/app/settings/security', section: 'organization' },
   { id: 'privacy', to: '/app/settings/privacy', section: 'organization', permission: 'privacy:manage' },
   { id: 'email', to: '/app/settings/email', section: 'organization', permission: 'email_settings:manage' },
+  // The instance's language models: whoever manages its email finds them too; the page itself says who may change them.
+  { id: 'ai', to: '/app/settings/ai', section: 'organization', permission: 'email_settings:manage' },
   { id: 'emailTemplates', to: '/app/settings/email-templates', section: 'organization', permission: 'email_template:manage' },
   { id: 'webhooks', to: '/app/settings/webhooks', section: 'organization', permission: 'webhook:manage' },
   { id: 'distribution', to: '/app/settings/distribution', section: 'organization', permission: 'job:publish' },
