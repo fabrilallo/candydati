@@ -87,7 +87,8 @@ describe('getJson', () => {
   it('times out on a server that never answers, then gives up as unavailable', async () => {
     handlers = [() => undefined];
     expect((await failure(reader({ timeoutMs: 50, maxRetries: 1 }).getJson(`${base()}/x`, page))).code).toBe('source_unavailable');
-    expect(seen).toHaveLength(2);
+    // The client gives up on its own clock: on a slow runner the server may log the second attempt a moment later.
+    await vi.waitFor(() => expect(seen).toHaveLength(2));
   });
 
   it('times out while the body is still arriving', async () => {
