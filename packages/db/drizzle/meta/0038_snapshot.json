@@ -1,5 +1,5 @@
 {
-  "id": "179d9392-9f6b-4125-bf53-8c819006ec5b",
+  "id": "a362b2e4-8258-40b9-a1b7-80df77332c42",
   "prevId": "5f20e5c8-48eb-41ca-b474-6f15bb99348b",
   "version": "7",
   "dialect": "postgresql",
@@ -6579,14 +6579,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "provider": {
-          "name": "provider",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "secret_ciphertext": {
-          "name": "secret_ciphertext",
+        "assistant_provider": {
+          "name": "assistant_provider",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -6597,8 +6591,20 @@
           "primaryKey": false,
           "notNull": false
         },
+        "fast_provider": {
+          "name": "fast_provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "fast_model": {
           "name": "fast_model",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "keys_ciphertext": {
+          "name": "keys_ciphertext",
           "type": "text",
           "primaryKey": false,
           "notNull": false

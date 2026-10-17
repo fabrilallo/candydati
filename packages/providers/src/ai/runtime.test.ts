@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { createAiRuntime, hasProviderKey, toMastraModel, type StoredAiSettings } from './runtime.js';
 
-const STORED: StoredAiSettings = { provider: 'anthropic', apiKey: 'sk-app', assistantModel: 'claude-sonnet-5-5', fastModel: 'claude-haiku-5-5', verifiedAt: new Date('2026-10-17T10:00:00Z') };
+const STORED: StoredAiSettings = {
+  assistant: { provider: 'anthropic', model: 'claude-sonnet-5-5' },
+  fast: { provider: 'google', model: 'gemini-3.1-flash-lite' },
+  keys: { anthropic: 'sk-app', google: 'g-app' },
+  verifiedAt: new Date('2026-10-17T10:00:00Z'),
+};
 const noLog = () => undefined;
 
 describe('createAiRuntime', () => {
@@ -11,20 +16,20 @@ describe('createAiRuntime', () => {
     expect(runtime.snapshot()).toMatchObject({ source: 'none', assistant: null, fast: null });
   });
 
-  it('uses the saved settings: provider prefix and the key passed explicitly to each model', async () => {
+  it('uses the saved settings: each model with its provider and the key of that provider, passed explicitly', async () => {
     const runtime = createAiRuntime({ env: { keys: {} }, load: async () => STORED, log: noLog });
     await runtime.refresh();
     expect(runtime.snapshot()).toMatchObject({
-      source: 'app', provider: 'anthropic', verifiedAt: STORED.verifiedAt,
-      assistant: { id: 'anthropic/claude-sonnet-5-5', apiKey: 'sk-app' }, fast: { id: 'anthropic/claude-haiku-5-5', apiKey: 'sk-app' },
+      source: 'app', verifiedAt: STORED.verifiedAt,
+      assistant: { id: 'anthropic/claude-sonnet-5-5', apiKey: 'sk-app' }, fast: { id: 'google/gemini-3.1-flash-lite', apiKey: 'g-app' },
     });
   });
 
-  it('switches a role off when its model is null, and both off without a key', async () => {
-    const runtime = createAiRuntime({ env: { keys: {} }, load: async () => ({ ...STORED, fastModel: null }), log: noLog });
+  it('switches a role off when its model is null, and a model off without the key of its provider', async () => {
+    const runtime = createAiRuntime({ env: { keys: {} }, load: async () => ({ ...STORED, fast: null }), log: noLog });
     await runtime.refresh();
     expect(runtime.snapshot()).toMatchObject({ assistant: { id: 'anthropic/claude-sonnet-5-5' }, fast: null });
-    const keyless = createAiRuntime({ env: { keys: {} }, load: async () => ({ ...STORED, apiKey: null }), log: noLog });
+    const keyless = createAiRuntime({ env: { keys: {} }, load: async () => ({ ...STORED, keys: {} }), log: noLog });
     await keyless.refresh();
     expect(keyless.snapshot()).toMatchObject({ assistant: null, fast: null });
   });
@@ -45,7 +50,7 @@ describe('createAiRuntime', () => {
     fail = true;
     await runtime.refresh();
     expect(runtime.snapshot().source).toBe('app');
-    expect(lines.join('\n')).not.toContain('sk-app');
+    expect(lines.join('\n')).not.toMatch(/sk-app|g-app/);
   });
 });
 

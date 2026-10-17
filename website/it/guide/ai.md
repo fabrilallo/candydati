@@ -7,11 +7,16 @@ Candydati funziona del tutto anche senza AI. Si possono accendere due modelli, s
 | **Modello dell'assistente** | l'assistente nel pannello laterale: risponde a domande su annunci e candidati, scrive la bozza di un annuncio da una richiesta di assunzione, riassume le conversazioni | il pannello dice che l'assistente è spento; tutto il resto funziona |
 | **Modello veloce** | i lavori brevi e frequenti: il punteggio di qualità degli annunci (al salvataggio e alla pubblicazione, anche via API e MCP) e la lettura dei CV di candidature e importazioni (ruoli, competenze, lingue). Conviene un modello piccolo ed economico | il punteggio usa solo regole, e dei CV si legge solo il testo |
 
-**Dall'app (il modo più semplice).** Il primo proprietario o un amministratore dell'istanza apre **Impostazioni, AI**,
-sceglie il fornitore, incolla la sua chiave API e accende ciascun modello indicandone il nome (ci sono suggerimenti per
-fornitore). **Salva e prova i modelli** fa una piccola chiamata a ogni modello con la chiave e salva solo se rispondono.
+**Dall'app (il modo più semplice).** Il primo proprietario o un amministratore dell'istanza apre **Impostazioni, AI** e
+accende ciascun modello con il suo fornitore e il suo nome, poi incolla la chiave API di ogni fornitore usato (una sola
+se i due modelli usano lo stesso fornitore). **Salva e prova i modelli** fa una piccola chiamata a ogni modello con la
+sua chiave e salva solo se rispondono.
 La chiave è cifrata e non viene più mostrata; le modifiche valgono subito, senza riavvio. Spegni entrambi i modelli per
 fermare ogni chiamata.
+
+**Modelli suggeriti.** La pagina propone `openai/gpt-6-luna` per l'assistente e `google/gemini-3.1-flash-lite` per il
+modello veloce: quelli che usa chi sviluppa Candydati ogni giorno, non il risultato di un benchmark. Va bene qualsiasi
+modello offerto dal fornitore.
 
 **In alternativa, sul server.** `AGENT_MODEL` e `FAST_MODEL`, ciascuna una stringa `fornitore/modello`, più la chiave
 del fornitore (sotto). Se sono impostate valgono loro, e l'app le mostra in sola lettura. L'installer le chiede; in

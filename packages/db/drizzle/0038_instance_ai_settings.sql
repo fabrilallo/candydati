@@ -1,9 +1,10 @@
 CREATE TABLE "instance_ai_settings" (
 	"slot" text PRIMARY KEY NOT NULL,
-	"provider" text NOT NULL,
-	"secret_ciphertext" text,
+	"assistant_provider" text,
 	"assistant_model" text,
+	"fast_provider" text,
 	"fast_model" text,
+	"keys_ciphertext" text,
 	"verified_at" timestamp with time zone NOT NULL,
 	"updated_at" timestamp with time zone NOT NULL,
 	"updated_by" text

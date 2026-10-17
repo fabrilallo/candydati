@@ -115,16 +115,19 @@ export const instanceEmailSettings = pgTable('instance_email_settings', {
 export type InstanceEmailSettingsRow = typeof instanceEmailSettings.$inferSelect;
 
 /**
- * The instance's AI models when the environment does not set them (AGENT_MODEL and FAST_MODEL unset): one provider,
- * its key sealed with the secret box (BETTER_AUTH_SECRET, info `candydati:instance-ai`), the assistant model and the
- * fast model by name (null: switched off). Saved only after each chosen model answered a test call. One row at most.
+ * The instance's AI models when the environment does not set them (AGENT_MODEL and FAST_MODEL unset): the assistant
+ * model and the fast model, each with its own provider (null: switched off), and the API key of each provider in use,
+ * as one JSON map sealed with the secret box (BETTER_AUTH_SECRET, info `candydati:instance-ai`). Saved only after each
+ * model switched on answered a test call. One row at most.
  */
 export const instanceAiSettings = pgTable('instance_ai_settings', {
   slot: text('slot').primaryKey(),
-  provider: text('provider').notNull(),
-  secretCiphertext: text('secret_ciphertext'),
+  assistantProvider: text('assistant_provider'),
   assistantModel: text('assistant_model'),
+  fastProvider: text('fast_provider'),
   fastModel: text('fast_model'),
+  /** `sb1.` envelope of `{ "<provider>": "<key>" }`; null when no provider is in use. */
+  keysCiphertext: text('keys_ciphertext'),
   verifiedAt: timestamp('verified_at', { withTimezone: true }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
   updatedBy: text('updated_by').references(() => user.id, { onDelete: 'set null' }),

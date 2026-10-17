@@ -7,10 +7,15 @@ Candydati works completely without AI. Two models can be switched on, separately
 | **Assistant model** | the assistant in the side panel: answers questions about your jobs and candidates, drafts a job ad from a hiring request, summarises conversations | the panel says the assistant is off; everything else works |
 | **Fast model** | short, frequent tasks: the job ad quality score (on save and publish, also through the API and MCP) and reading CVs of applications and imports (roles, skills, languages). A small, inexpensive model is best | the score uses rules only, and only the plain text of CVs is read |
 
-**From the app (the simplest way).** The first owner or an instance admin opens **Settings, AI**, picks a provider,
-pastes its API key, and switches each model on with a model name (suggestions are offered per provider). **Save and
-test the models** sends one tiny call to each model with the key and saves only if they answer. The key is encrypted at
+**From the app (the simplest way).** The first owner or an instance admin opens **Settings, AI** and switches each
+model on with its own provider and model name, then pastes the API key of each provider in use (one key when both use
+the same provider). **Save and test the models** sends one tiny call to each model with its key and saves only if they
+answer. The key is encrypted at
 rest and never shown again; changes apply without a restart. Switch both models off to stop every model call.
+
+**Suggested models.** The page proposes `openai/gpt-6-luna` for the assistant and `google/gemini-3.1-flash-lite` for
+the fast model: the ones the maintainers use day to day, not the result of a benchmark. Any model the provider offers
+works.
 
 **On the server instead.** `AGENT_MODEL` and `FAST_MODEL`, each a `provider/model` string, plus the provider key
 (below). When set, they win and the app shows them read-only. The installer asks for them; later, change them with
