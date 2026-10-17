@@ -8,7 +8,7 @@ Non devi ricordartele: un'installazione in produzione le applica da sola.
 - **Trasporto**: l'indirizzo pubblico deve essere `https`, così i cookie di sessione sono sempre `Secure`. I
   certificati si rinnovano da soli.
 - **Solo il web è esposto**: database, archivio, api e worker restano su una rete interna.
-- **Account**: ogni account conferma l'email prima del primo accesso; la registrazione è solo su invito; gli accessi
+- **Account**: ogni account conferma l'email prima del primo accesso (il primo proprietario con il codice di setup); la registrazione è solo su invito; gli accessi
   falliti rallentano i tentativi successivi invece di bloccare l'account, e il proprietario viene avvisato dopo 10
   fallimenti. L'autenticazione a due fattori (TOTP con codici di riserva) è disponibile per tutti, e proprietari e
   amministratori possono renderla obbligatoria.

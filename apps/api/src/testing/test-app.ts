@@ -62,15 +62,18 @@ export interface TestAppOptions {
   readonly throttleStore?: ThrottleStore;
   readonly migrationConnectors?: MigrationConnectorRegistry;
   readonly instanceEmailTester?: InstanceEmailTester;
+  /** A database of its own (prepared by the caller), for tests about an instance with no account at all. */
+  readonly databaseUrl?: string;
 }
 
 export async function createTestApp(options: TestAppOptions = {}): Promise<TestApp> {
-  const handle = createDb(apiTestDatabaseUrl(), 4);
+  const databaseUrl = options.databaseUrl ?? apiTestDatabaseUrl();
+  const handle = createDb(databaseUrl, 4);
   const mailbox = createRecordingMailer();
   const files = createInMemoryFileStorage();
   const queue = createInMemoryTaskQueue();
   const fakeSender = createFakeEmailSender();
-  const app = await buildServer({ env: testEnv(options.env), throttleStore: options.throttleStore ?? createInMemoryThrottleStore(), db: handle.db, accountMailer: options.accountMailer ?? mailbox, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, migrationConnectors: options.migrationConnectors, reportClock: options.reportClock, instanceEmailTester: options.instanceEmailTester });
+  const app = await buildServer({ env: testEnv({ DATABASE_URL: databaseUrl, ...options.env }), throttleStore: options.throttleStore ?? createInMemoryThrottleStore(), db: handle.db, accountMailer: options.accountMailer ?? mailbox, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, migrationConnectors: options.migrationConnectors, reportClock: options.reportClock, instanceEmailTester: options.instanceEmailTester });
   await app.ready();
   registerMailbox(app, mailbox);
   return {

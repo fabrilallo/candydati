@@ -74,7 +74,7 @@ curl -s https://ats.example.com/api/ready             # {"success":true,"data":{
 ```
 
 Open the link that `docker compose -f docker-compose.prod.yml logs api | grep "First owner setup"` prints (the setup
-code is already in it), confirm the email, create the organization. `--profile backup` starts the daily backup;
+code is already in it), sign up and create the organization. `--profile backup` starts the daily backup;
 point it at an offsite bucket (OPERATIONS.md, Backups) and run `docker/restore-test.sh` once.
 
 ## 5. Update

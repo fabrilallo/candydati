@@ -48,9 +48,8 @@ The installer:
 
 1. Open the link printed by the installer (`https://<your domain>/signup?setup#code=...`): the setup code is already
    filled in.
-2. Fill in your details.
-3. Confirm your email address with the link you receive.
-4. Create your organization.
+2. Fill in your details: you are signed in at once, no confirmation email.
+3. Create your organization.
 
 Sign-up is **invite-only**: from now on people join through invitations sent from the app. The code works only for the
 very first account: once that account is confirmed it opens nothing, and there is nothing to remove.

@@ -41,7 +41,7 @@ questi controlli: li incontri solo se modifichi il file a mano.
 | `INSTANCE_ADMIN_EMAILS` | | indirizzi separati da virgola che possono sempre creare organizzazioni |
 | `BOOTSTRAP_TOKEN` | | token monouso per la registrazione del primo proprietario. Toglilo quando quell'account è confermato |
 
-Ogni account conferma l'email prima del primo accesso. L'autenticazione a due fattori è disponibile per tutti, e
+Ogni account conferma l'email prima del primo accesso, tranne il primo proprietario, confermato dal codice di setup. L'autenticazione a due fattori è disponibile per tutti, e
 proprietari e amministratori possono renderla obbligatoria nella loro organizzazione.
 
 ### Modulo di candidatura pubblico

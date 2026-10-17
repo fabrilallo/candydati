@@ -62,7 +62,7 @@ What the code enforces, so an operator does not have to remember it:
   at rest (AES-256-GCM, key derived from `BETTER_AUTH_SECRET` with its own HKDF info) and never returned by the api.
   Until email works, invitations, publishing a job or the careers page and public applications are refused, so no
   candidate is left without an answer. `EMAIL_PROVIDER` set in the environment wins and the app shows it read-only.
-- **Accounts.** Every account confirms its email before the first sign-in; sign-up and password reset answer the
+- **Accounts.** Every account confirms its email before the first sign-in (the first owner's is confirmed by the setup code, below); sign-up and password reset answer the
   same whether an address is registered or not. `SIGNUP_MODE=invite_only` is the production default: an account can be
   created only by an address with a pending invitation, which only a confirmed account with that address can accept.
 - **First owner (bootstrap).** On an instance with no confirmed account, `invite_only` still accepts one sign-up: the
@@ -72,12 +72,12 @@ What the code enforces, so an operator does not have to remember it:
   the server's logs is the operator. The code travels in the URL fragment, which browsers never send, so no proxy or
   access log records it; the form drops it from the address bar once read and sends it as the `x-bootstrap-token`
   header. A `BOOTSTRAP_TOKEN` chosen by the operator is never logged. Keep the api logs as private as `.env` until the
-  first owner is confirmed. Only confirmed accounts close the bootstrap, so an unconfirmed
-  sign-up cannot squat it: the claim is held by one address under a Postgres advisory lock (two concurrent sign-ups
-  cannot both get through) and lapses after 24 hours if never confirmed. Confirming the address checks the claim
-  again: only the holder of a live claim becomes the first owner (its account id is recorded), and an account admitted
-  by a claim that has since lapsed or been taken over cannot confirm its address. If you did not confirm within 24
-  hours, sign up again with the code, then use the new link. Once the first owner is confirmed the code
+  first owner exists. The sign-up claims the bootstrap for one address under a Postgres advisory lock (two concurrent
+  sign-ups cannot both get through). With the setup code, the claim holder's address is confirmed at sign-up, without an
+  email: the code already proves the operator, and a new instance may have no email provider yet. The account is then
+  recorded as the first owner; if that fails (the claim changed in between) the address goes back to unconfirmed, so
+  nobody passes the bootstrap without being its owner. Only confirmed accounts close the bootstrap; an unconfirmed claim
+  (a sign-up without a configured code, outside production) lapses after 24 hours. Once the first owner exists the code
   opens nothing and the api stops logging it. From then on people join through invitations. To open sign-up on purpose, set
   `SIGNUP_MODE=open`.
 - **Organizations.** Each organization has its own model budgets, so who may create one is an instance setting

@@ -40,7 +40,7 @@ pass these checks: you only meet them if you edit the file by hand.
 | `INSTANCE_ADMIN_EMAILS` | | comma-separated addresses that may always create organizations |
 | `BOOTSTRAP_TOKEN` | | optional: your own setup code for the first owner's sign-up. Unset, the api derives one and prints the setup link in its logs |
 
-Every account confirms its email before the first sign-in. Two-factor authentication is available to everyone, and
+Every account confirms its email before the first sign-in, except the first owner, whose setup code confirms it. Two-factor authentication is available to everyone, and
 owners and admins can require it in their organization.
 
 ### Public application form

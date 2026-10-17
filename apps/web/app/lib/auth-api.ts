@@ -38,6 +38,7 @@ export interface SessionUser {
   readonly twoFactorEnabled?: boolean
 }
 const signInSchema = z.object({ twoFactorRedirect: z.boolean().optional() }).passthrough().nullable()
+const signUpSchema = z.object({ user: z.object({ emailVerified: z.boolean() }).passthrough().optional() }).passthrough().nullable()
 const enableTwoFactorSchema = z.object({ totpURI: z.string(), backupCodes: z.array(z.string()) })
 
 /** What the person sees to enrol an authenticator: the otpauth URI and the backup codes, shown once. */
@@ -128,12 +129,14 @@ const accountMethods = (client: AuthClient) => ({
   },
   /**
    * No session: the account starts once the address is confirmed through the emailed link, which lands on `callbackURL`.
-   * The first owner of a new instance adds the one-time setup token (BOOTSTRAP_TOKEN), sent as a header only.
+   * The first owner of a new instance adds the setup code, sent as a header only; it confirms the address at once
+   * (`confirmed`), so the owner signs in without an email, which the instance may not be able to send yet.
    */
-  async signUp(input: { name: string; email: string; password: string; callbackURL?: string; bootstrapToken?: string }): Promise<void> {
+  async signUp(input: { name: string; email: string; password: string; callbackURL?: string; bootstrapToken?: string }): Promise<{ confirmed: boolean }> {
     const payload = { name: input.name, email: input.email, password: input.password, ...(input.callbackURL ? { callbackURL: input.callbackURL } : {}) }
     const token = input.bootstrapToken?.trim() ?? ''
-    await settle(() => (token === '' ? client.signUp.email(payload) : client.signUp.email(payload, { headers: { [BOOTSTRAP_TOKEN_HEADER]: token } })))
+    const result = parse(signUpSchema, await settle(() => (token === '' ? client.signUp.email(payload) : client.signUp.email(payload, { headers: { [BOOTSTRAP_TOKEN_HEADER]: token } }))))
+    return { confirmed: result?.user?.emailVerified === true }
   },
   async sendVerificationEmail(input: { email: string; callbackURL: string }): Promise<void> {
     await settle(() => client.sendVerificationEmail({ email: input.email, callbackURL: input.callbackURL }))

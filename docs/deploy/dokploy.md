@@ -73,7 +73,7 @@ Press **Deploy**. The first build takes several minutes. In **Logs** choose serv
 migrations ran). Check `https://ats.example.com/api/ready`.
 
 Bootstrap: in the `api` logs find the line `First owner setup: open https://ats.example.com/signup?setup#code=...`,
-open that link (the setup code is already filled in), confirm the email and create the organization. The line is
+open that link (the setup code is already filled in), sign up and create the organization (no email needed). The line is
 printed at every start until the first account is confirmed; then the code opens nothing.
 
 ## 5. Health checks
