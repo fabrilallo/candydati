@@ -1,15 +1,24 @@
 <script setup lang="ts">
-import { AI_PROVIDERS, type AiProvider, type InstanceAiSettingsDto } from '@candydati/domain'
-import { CircleCheckIcon, ExternalLinkIcon } from '@lucide/vue'
-import { AI_PROVIDER_LABELS, apiKeyUrl, type AiModelSlot } from '@/lib/ai-models'
-import { formFromAiSettings, instanceAiInput, keyIsStored, turnsAiOff, withAiProvider, withModelSlot, type InstanceAiErrors, type InstanceAiForm } from '@/lib/instance-ai-view'
+import type { AiProvider, InstanceAiSettingsDto } from '@candydati/domain'
+import { CircleCheckIcon } from '@lucide/vue'
+import type { AiModelSlot } from '@/lib/ai-models'
+import {
+  formFromAiSettings,
+  instanceAiInput,
+  providersInUse,
+  turnsAiOff,
+  withAiKey,
+  withModelName,
+  withModelSlot,
+  withSlotProvider,
+  type InstanceAiErrors,
+  type InstanceAiForm,
+} from '@/lib/instance-ai-view'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { NativeSelect } from '@/components/ui/native-select'
 
 /**
- * One provider, its key and the two models. The key is never shown: a stored one is said to be there and kept when the
- * field stays empty. Saving first sends a tiny test call to each model switched on; nothing is stored if one fails.
+ * The two models, each with its own provider, and one API key per provider in use. Saving first sends a tiny test call
+ * to each model switched on with the key of its provider; nothing is stored if one fails.
  */
 const props = defineProps<{ settings: InstanceAiSettingsDto }>()
 const { t } = useI18n()
@@ -17,54 +26,44 @@ const e = useInstanceAi()
 const form = ref<InstanceAiForm>(formFromAiSettings(props.settings))
 const errors = ref<InstanceAiErrors>({})
 const off = computed(() => turnsAiOff(form.value))
-const keyPlaceholder = computed(() => (keyIsStored(form.value, props.settings) ? t('instanceAi.form.keyKept') : undefined))
-const MODEL = { assistant: 'assistantModel', fast: 'fastModel' } as const
+const providers = computed(() => providersInUse(form.value))
 
-const setProvider = (value: string): void => {
-  if ((AI_PROVIDERS as readonly string[]).includes(value)) form.value = withAiProvider(form.value, value as AiProvider)
-}
-const setKey = (value: string | number): void => {
-  form.value = { ...form.value, apiKey: String(value) }
-}
 const toggle = (slot: AiModelSlot, on: boolean): void => {
   form.value = withModelSlot(form.value, slot, on)
 }
+const setProvider = (slot: AiModelSlot, provider: AiProvider): void => {
+  form.value = withSlotProvider(form.value, slot, provider)
+}
 const setModel = (slot: AiModelSlot, value: string): void => {
-  form.value = { ...form.value, [MODEL[slot]]: value }
+  form.value = withModelName(form.value, slot, value)
+}
+const setKey = (provider: AiProvider, value: string): void => {
+  form.value = withAiKey(form.value, provider, value)
 }
 
 const save = async (): Promise<void> => {
   const result = instanceAiInput(form.value, props.settings)
   errors.value = result.ok ? {} : result.errors
   if (!result.ok) return
-  // A saved key is never sent back: the field empties again and says one is stored.
-  if (await e.save(result.input)) form.value = { ...form.value, apiKey: '' }
+  // A saved key is never sent back: the fields empty again and say a key is stored.
+  if (await e.save(result.input)) form.value = { ...form.value, keys: {} }
+  else errors.value = e.fieldErrors.value
 }
 </script>
 
 <template>
   <form class="grid max-w-2xl gap-5" novalidate data-testid="instance-ai-form" @submit.prevent="save">
-    <div class="grid gap-5 sm:grid-cols-2">
-      <FormField id="ai-provider" :label="t('instanceAi.form.provider')">
-        <NativeSelect id="ai-provider" :model-value="form.provider" data-testid="ai-provider" @update:model-value="setProvider">
-          <option v-for="provider in AI_PROVIDERS" :key="provider" :value="provider">{{ AI_PROVIDER_LABELS[provider] }}</option>
-        </NativeSelect>
-      </FormField>
-      <FormField id="ai-api-key" :label="t('instanceAi.form.apiKey')" :error="errors.apiKey">
-        <template #default="{ invalid, describedBy }">
-          <Input id="ai-api-key" type="password" autocomplete="off" spellcheck="false" :model-value="form.apiKey" :placeholder="keyPlaceholder" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" data-testid="ai-api-key" @update:model-value="setKey" />
-        </template>
-      </FormField>
-    </div>
-    <p class="-mt-3 text-xs text-muted-foreground">
-      <a :href="apiKeyUrl(form.provider)" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-medium text-primary underline-offset-4 hover:underline" data-testid="ai-key-link">
-        {{ t('instanceAi.form.getKey', { provider: AI_PROVIDER_LABELS[form.provider] }) }}
-        <ExternalLinkIcon class="size-3.5" aria-hidden="true" />
-      </a>
-    </p>
-
-    <InstanceAiModelBlock kind="assistant" :provider="form.provider" :on="form.assistantOn" :model="form.assistantModel" :error="errors.assistantModel" @toggle="toggle('assistant', $event)" @model="setModel('assistant', $event)" />
-    <InstanceAiModelBlock kind="fast" :provider="form.provider" :on="form.fastOn" :model="form.fastModel" :error="errors.fastModel" @toggle="toggle('fast', $event)" @model="setModel('fast', $event)" />
+    <InstanceAiModelBlock
+      v-for="slot in (['assistant', 'fast'] as const)"
+      :key="slot"
+      :kind="slot"
+      :draft="form[slot]"
+      :error="errors[slot]"
+      @toggle="toggle(slot, $event)"
+      @provider="setProvider(slot, $event)"
+      @model="setModel(slot, $event)"
+    />
+    <InstanceAiKeys v-if="providers.length > 0" :providers="providers" :keys="form.keys" :stored="settings.storedKeys" :errors="errors" @key="setKey" />
 
     <div v-if="e.errorKey.value" class="grid gap-2">
       <FormAlert :message-key="e.errorKey.value" />

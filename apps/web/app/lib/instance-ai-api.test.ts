@@ -1,13 +1,13 @@
 import { describe, expect, it, vi } from 'vitest'
 import { aiReady, instanceAi } from '~~/test/fixtures/instance-ai-fixtures'
 import { ApiFailure } from './api-call'
-import { getInstanceAiSettings, isAiTestFailure, saveInstanceAiSettings, testFailureDetail } from './instance-ai-api'
+import { getInstanceAiSettings, isAiTestFailure, saveInstanceAiSettings, serverFieldErrors, testFailureDetail } from './instance-ai-api'
 import type { JobApiRequest } from './job-api'
 
 const ok = (data: unknown) => ({ status: 200, body: { success: true, data, error: null } })
 const send = (response: { status: number; body: unknown }) => vi.fn<JobApiRequest>(async () => response)
 const invalid = (issues: { path: string; message: string }[]) => ({ status: 422, body: { success: false, data: null, error: { code: 'validation_failed', message: 'invalid', issues } } })
-const INPUT = { provider: 'anthropic' as const, apiKey: 'a-key-for-tests', assistantModel: 'claude-sonnet-5-5', fastModel: null }
+const INPUT = { assistant: { provider: 'anthropic' as const, model: 'claude-sonnet-5-5' }, fast: null, keys: { anthropic: 'a-key-for-tests' } }
 
 describe('instance ai api', () => {
   it('reads the settings of the instance', async () => {
@@ -29,15 +29,25 @@ describe('instance ai api', () => {
   })
 
   it('names a refused model test and keeps the provider detail', async () => {
-    const error = await saveInstanceAiSettings(send(invalid([{ path: 'test', message: 'ai_test_failed' }, { path: 'test.detail', message: 'invalid x-api-key' }])), INPUT).catch((caught: unknown) => caught)
+    const issues = [{ path: 'test', message: 'ai_test_failed' }, { path: 'test.detail', message: 'assistant: invalid x-api-key' }]
+    const error = await saveInstanceAiSettings(send(invalid(issues)), INPUT).catch((caught: unknown) => caught)
     expect(error).toBeInstanceOf(ApiFailure)
     expect((error as ApiFailure).key).toBe('instanceAi.errors.testFailed')
     expect(isAiTestFailure(error)).toBe(true)
-    expect(testFailureDetail(error)).toBe('invalid x-api-key')
+    expect(testFailureDetail(error)).toBe('assistant: invalid x-api-key')
+    expect(serverFieldErrors(error)).toEqual({})
+  })
+
+  it('puts a missing key on the field of its provider and a refused name on its model', async () => {
+    const issues = [{ path: 'keys.google', message: 'required' }, { path: 'keys.nobody', message: 'required' }, { path: 'fast.model', message: 'bad' }, { path: 'keys.google', message: 'again' }]
+    const error = await saveInstanceAiSettings(send(invalid(issues)), INPUT).catch((caught: unknown) => caught)
+    expect((error as ApiFailure).key).toBe('instanceAi.errors.invalid')
+    expect(serverFieldErrors(error)).toEqual({ 'keys.google': 'instanceAi.errors.apiKeyMissing', fast: 'instanceAi.errors.model' })
+    expect(serverFieldErrors(new Error('x'))).toEqual({})
   })
 
   it('keeps the usual message for other refusals', async () => {
-    const error = await saveInstanceAiSettings(send(invalid([{ path: 'assistantModel', message: 'bad' }])), INPUT).catch((caught: unknown) => caught)
+    const error = await saveInstanceAiSettings(send(invalid([{ path: 'assistant', message: 'bad' }])), INPUT).catch((caught: unknown) => caught)
     expect((error as ApiFailure).key).toBe('instanceAi.errors.invalid')
     expect(isAiTestFailure(error)).toBe(false)
     expect(testFailureDetail(error)).toBeNull()

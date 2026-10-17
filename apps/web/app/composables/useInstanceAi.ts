@@ -1,7 +1,8 @@
 import type { InstanceAiSettingsDto, InstanceAiSettingsInput } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
-import { getInstanceAiSettings, isAiTestFailure, saveInstanceAiSettings, testFailureDetail } from '@/lib/instance-ai-api'
+import { getInstanceAiSettings, isAiTestFailure, saveInstanceAiSettings, serverFieldErrors, testFailureDetail } from '@/lib/instance-ai-api'
+import type { InstanceAiErrors } from '@/lib/instance-ai-view'
 import { loaded } from '@/lib/job-api'
 
 const KEY = 'instance-ai-settings'
@@ -32,18 +33,19 @@ export const useInstanceAi = () => {
   const testFailed = ref(false)
   const testDetail = ref<string | null>(null)
   const saved = ref(false)
+  const fieldErrors = ref<InstanceAiErrors>({})
 
+  /** Shows what a failed save said; `null` clears it before the next try. */
   const fail = (error: unknown): void => {
-    errorKey.value = errorKeyOf(error)
+    errorKey.value = error === null ? null : errorKeyOf(error)
     testFailed.value = isAiTestFailure(error)
     testDetail.value = testFailureDetail(error)
+    fieldErrors.value = serverFieldErrors(error)
   }
 
   const save = async (input: InstanceAiSettingsInput): Promise<boolean> => {
     busy.value = true
-    errorKey.value = null
-    testFailed.value = false
-    testDetail.value = null
+    fail(null)
     saved.value = false
     try {
       const fresh = await saveInstanceAiSettings(request, input)
@@ -69,6 +71,7 @@ export const useInstanceAi = () => {
     testFailed: computed(() => testFailed.value),
     /** What the provider said when a model did not answer (shown as plain text). */
     testDetail: computed(() => testDetail.value),
+    fieldErrors: computed(() => fieldErrors.value), // fields the server refused, e.g. a provider in use without a key
     saved: computed(() => saved.value),
     save,
   }

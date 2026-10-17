@@ -15,7 +15,7 @@ registerEndpoint('/api/v1/instance/ai-settings', {
 })
 registerEndpoint('/api/v1/instance/ai-settings', { method: 'PUT', handler: () => state.put })
 
-const INPUT = { provider: 'anthropic' as const, apiKey: 'a-key-for-tests', assistantModel: 'claude-sonnet-5-5', fastModel: 'claude-haiku-5-5' }
+const INPUT = { assistant: { provider: 'anthropic' as const, model: 'claude-sonnet-5-5' }, fast: { provider: 'google' as const, model: 'gemini-3.1-flash-lite' }, keys: { anthropic: 'a-key-for-tests' } }
 const TEST_FAILED = { success: false, data: null, error: { code: 'validation_failed', message: 'x', issues: [{ path: 'test', message: 'ai_test_failed' }, { path: 'test.detail', message: 'model not found' }] } }
 
 const probe = async () => {
@@ -67,9 +67,21 @@ describe('useInstanceAi', () => {
     expect(panel.errorKey.value).toBe('instanceAi.errors.testFailed')
     expect(panel.testFailed.value).toBe(true)
     expect(panel.testDetail.value).toBe('model not found')
+    expect(panel.fieldErrors.value).toEqual({})
     expect(panel.saved.value).toBe(false)
     expect(status.settings.value?.assistantEnabled).toBe(false)
     expect(useAssistantConfigured().value).toBe(false)
+  })
+
+  it('puts a key the server misses on the field of its provider', async () => {
+    state.put = { success: false, data: null, error: { code: 'validation_failed', message: 'x', issues: [{ path: 'keys.google', message: 'required' }] } }
+    const { panel } = await probe()
+    expect(await panel.save(INPUT)).toBe(false)
+    expect(panel.errorKey.value).toBe('instanceAi.errors.invalid')
+    expect(panel.fieldErrors.value).toEqual({ 'keys.google': 'instanceAi.errors.apiKeyMissing' })
+    state.put = ok(aiReady())
+    expect(await panel.save(INPUT)).toBe(true)
+    expect(panel.fieldErrors.value).toEqual({})
   })
 
   it('reports a load failure without a status', async () => {

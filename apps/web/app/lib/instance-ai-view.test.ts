@@ -1,59 +1,86 @@
 import { describe, expect, it } from 'vitest'
 import { aiReady, instanceAi } from '~~/test/fixtures/instance-ai-fixtures'
-import { emptyInstanceAiForm, formFromAiSettings, instanceAiInput, keyIsStored, turnsAiOff, withAiProvider, withModelSlot } from './instance-ai-view'
+import {
+  emptyInstanceAiForm,
+  formFromAiSettings,
+  instanceAiInput,
+  keyIsStored,
+  providersInUse,
+  turnsAiOff,
+  withAiKey,
+  withModelName,
+  withModelSlot,
+  withSlotProvider,
+} from './instance-ai-view'
 
 describe('instance ai view', () => {
-  it('starts with both models off and no key on a fresh instance', () => {
+  it('starts with both models off, on the recommended providers, with no key', () => {
     expect(formFromAiSettings(instanceAi())).toEqual(emptyInstanceAiForm)
+    expect(emptyInstanceAiForm).toEqual({ assistant: { on: false, provider: 'openai', model: '' }, fast: { on: false, provider: 'google', model: '' }, keys: {} })
     expect(turnsAiOff(emptyInstanceAiForm)).toBe(true)
+    expect(providersInUse(emptyInstanceAiForm)).toEqual([])
   })
 
-  it('fills the form from the stored settings, never the key', () => {
-    expect(formFromAiSettings(aiReady())).toEqual({ provider: 'anthropic', apiKey: '', assistantOn: true, assistantModel: 'claude-sonnet-5-5', fastOn: true, fastModel: 'claude-haiku-5-5' })
-    expect(formFromAiSettings(aiReady({ fastModel: null })).fastOn).toBe(false)
+  it('fills the form from the stored settings, never a key', () => {
+    expect(formFromAiSettings(aiReady())).toEqual({
+      assistant: { on: true, provider: 'anthropic', model: 'claude-sonnet-5-5' },
+      fast: { on: true, provider: 'google', model: 'gemini-3.1-flash-lite' },
+      keys: {},
+    })
+    expect(formFromAiSettings(aiReady({ fast: null })).fast).toEqual({ on: false, provider: 'google', model: '' })
+    expect(formFromAiSettings(aiReady({ assistant: { provider: 'ollama', model: 'x' } })).assistant).toEqual({ on: true, provider: 'openai', model: 'x' })
   })
 
-  it('keeps the stored key only for the provider it belongs to', () => {
+  it('proposes the recommended model when a model is switched on, and keeps a typed name when off', () => {
+    const on = withModelSlot(withModelSlot(emptyInstanceAiForm, 'assistant', true), 'fast', true)
+    expect(on.assistant).toEqual({ on: true, provider: 'openai', model: 'gpt-6-luna' })
+    expect(on.fast).toEqual({ on: true, provider: 'google', model: 'gemini-3.1-flash-lite' })
+    const typed = withModelName(on, 'fast', 'my-model')
+    expect(withModelSlot(withModelSlot(typed, 'fast', false), 'fast', true).fast.model).toBe('my-model')
+    expect(emptyInstanceAiForm.assistant.on).toBe(false)
+  })
+
+  it('suggests the models of a new provider for one slot only, keeping typed keys', () => {
+    const form = withAiKey(formFromAiSettings(aiReady()), 'anthropic', 'typed')
+    const next = withSlotProvider(form, 'fast', 'mistral')
+    expect(next.fast).toEqual({ on: true, provider: 'mistral', model: 'mistral-small-latest' })
+    expect(next.assistant).toBe(form.assistant)
+    expect(next.keys).toEqual({ anthropic: 'typed' })
+    expect(withSlotProvider(form, 'assistant', 'openrouter').assistant.model).toBe('')
+    expect(withSlotProvider(form, 'fast', 'google')).toBe(form)
+    expect(form.fast.provider).toBe('google')
+  })
+
+  it('lists each provider in use once, only for the models switched on', () => {
+    const form = formFromAiSettings(aiReady())
+    expect(providersInUse(form)).toEqual(['anthropic', 'google'])
+    expect(providersInUse(withSlotProvider(form, 'fast', 'anthropic'))).toEqual(['anthropic'])
+    expect(providersInUse(withModelSlot(form, 'assistant', false))).toEqual(['google'])
+  })
+
+  it('knows which providers have a key stored', () => {
+    expect(keyIsStored('google', aiReady())).toBe(true)
+    expect(keyIsStored('openai', aiReady())).toBe(false)
+  })
+
+  it('builds the input: switched-off models are null, empty keys keep the stored ones, unused keys are not sent', () => {
     const settings = aiReady()
-    const form = formFromAiSettings(settings)
-    expect(keyIsStored(form, settings)).toBe(true)
-    expect(keyIsStored(withAiProvider(form, 'openai'), settings)).toBe(false)
-    expect(keyIsStored(form, aiReady({ hasApiKey: false }))).toBe(false)
+    const form = withModelSlot(formFromAiSettings(settings), 'fast', false)
+    expect(instanceAiInput(form, settings)).toEqual({ ok: true, input: { assistant: { provider: 'anthropic', model: 'claude-sonnet-5-5' }, fast: null, keys: {} } })
+    const typed = withAiKey(withAiKey(form, 'anthropic', ' new-key '), 'google', 'unused')
+    expect(instanceAiInput(typed, settings)).toEqual({ ok: true, input: { assistant: { provider: 'anthropic', model: 'claude-sonnet-5-5' }, fast: null, keys: { anthropic: 'new-key' } } })
   })
 
-  it('suggests the models of a new provider and forgets the key typed for the old one', () => {
-    const form = { ...formFromAiSettings(aiReady()), apiKey: 'typed' }
-    const next = withAiProvider(form, 'mistral')
-    expect(next).toMatchObject({ provider: 'mistral', apiKey: '', assistantModel: 'mistral-large-latest', fastModel: 'mistral-small-latest' })
-    expect(withAiProvider(form, 'openrouter')).toMatchObject({ assistantModel: '', fastModel: '' })
-    expect(form.provider).toBe('anthropic')
-    expect(withAiProvider(form, 'anthropic')).toBe(form)
-  })
-
-  it('switches a model on with a suggestion and off keeping what was typed', () => {
-    const on = withModelSlot({ ...emptyInstanceAiForm, provider: 'anthropic' }, 'fast', true)
-    expect(on).toMatchObject({ fastOn: true, fastModel: 'claude-haiku-5-5' })
-    const typed = { ...on, fastModel: 'my-model' }
-    expect(withModelSlot(withModelSlot(typed, 'fast', false), 'fast', true).fastModel).toBe('my-model')
-    expect(withModelSlot({ ...emptyInstanceAiForm, provider: 'groq' }, 'assistant', true)).toMatchObject({ assistantOn: true, assistantModel: '' })
-  })
-
-  it('builds the input: switched-off models are null and an empty key keeps the stored one', () => {
-    const settings = aiReady()
-    const form = { ...formFromAiSettings(settings), fastOn: false }
-    expect(instanceAiInput(form, settings)).toEqual({ ok: true, input: { provider: 'anthropic', assistantModel: 'claude-sonnet-5-5', fastModel: null } })
-    expect(instanceAiInput({ ...form, apiKey: ' new-key ' }, settings)).toEqual({ ok: true, input: { provider: 'anthropic', apiKey: 'new-key', assistantModel: 'claude-sonnet-5-5', fastModel: null } })
-  })
-
-  it('asks for a key and a model name when a model is on', () => {
-    const settings = instanceAi()
-    const form = withModelSlot({ ...emptyInstanceAiForm, provider: 'groq' }, 'assistant', true)
-    expect(instanceAiInput(form, settings)).toEqual({ ok: false, errors: { apiKey: 'instanceAi.errors.apiKeyMissing', assistantModel: 'instanceAi.errors.modelMissing' } })
-    expect(instanceAiInput({ ...form, apiKey: 'k', assistantModel: 'groq/llama 3' }, settings)).toEqual({ ok: false, errors: { assistantModel: 'instanceAi.errors.model' } })
-    expect(instanceAiInput({ ...form, apiKey: 'k'.repeat(600), assistantModel: 'llama-3.3-70b' }, settings)).toEqual({ ok: false, errors: { apiKey: 'instanceAi.errors.apiKey' } })
+  it('asks for the key of each provider in use without one, and for model names', () => {
+    const settings = instanceAi({ storedKeys: ['google'] })
+    const form = withModelName(withModelSlot(withModelSlot(emptyInstanceAiForm, 'assistant', true), 'fast', true), 'assistant', ' ')
+    expect(instanceAiInput(form, settings)).toEqual({ ok: false, errors: { 'keys.openai': 'instanceAi.errors.apiKeyMissing', assistant: 'instanceAi.errors.modelMissing' } })
+    const keyed = withAiKey(form, 'openai', 'k')
+    expect(instanceAiInput(withModelName(keyed, 'assistant', 'openai/gpt 5'), settings)).toEqual({ ok: false, errors: { assistant: 'instanceAi.errors.model' } })
+    expect(instanceAiInput(withAiKey(withModelName(keyed, 'assistant', 'gpt-5'), 'openai', 'k'.repeat(600)), settings)).toEqual({ ok: false, errors: { 'keys.openai': 'instanceAi.errors.apiKey' } })
   })
 
   it('turns AI off without a key', () => {
-    expect(instanceAiInput(emptyInstanceAiForm, instanceAi())).toEqual({ ok: true, input: { provider: 'openai', assistantModel: null, fastModel: null } })
+    expect(instanceAiInput(emptyInstanceAiForm, instanceAi())).toEqual({ ok: true, input: { assistant: null, fast: null, keys: {} } })
   })
 })
