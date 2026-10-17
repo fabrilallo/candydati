@@ -9,15 +9,11 @@ You set up a Candydati instance for the user and hand them the link to create it
 minimum: a server with Dokploy and an API key for you. You never see a password: Dokploy generates the secrets, and
 email is configured by the user from the app after the first sign-in.
 
-## 1. Ask everything at once
+## 1. Ask for access, nothing else
 
-Ask in one message, and wait for the answers:
-
-1. **Dokploy**: its URL and an API key (Dokploy, Settings, Profile, API/CLI). Without Dokploy, see section 4.
-2. **Name** shown in the app and in emails (default `Candydati`), and a **contact email** shown to candidates.
-3. **Own domain**, optional: for example `jobs.example.com`, with a DNS `A` record pointing at the server. Without
-   one, the instance gets the domain Dokploy generates (`<app>.<ip-with-dashes>.sslip.io`), with HTTPS; the user can
-   move to their own domain later (section 5).
+Ask only for **Dokploy's URL and an API key** (Dokploy, Settings, Profile, API/CLI); without Dokploy, see section 4.
+Ask nothing else: the name has a default, the domain is the one Dokploy generates (with HTTPS), and email is set by
+the user in the app. Move to an own domain only if the user asks (section 5).
 
 Tell the user what the API key means: it acts as them on Dokploy, and what it returns (the environment of every service
 it can see) passes through you and your model provider. Prefer a Dokploy user that sees only this project, and
@@ -35,11 +31,13 @@ tunnel: `ssh -N -L 3000:localhost:3000 <user>@<server>`, then `DOKPLOY_URL=http:
 2. **Create**: `POST project.create {"name":"candydati"}`, take `environment.environmentId`; then
    `POST compose.create {"name":"candydati","environmentId":"...","composeType":"docker-compose"}`, take `composeId`
    and `appName`.
-3. **Import the template** with the user's answers (secrets stay for Dokploy to generate):
+3. **Import the template** (secrets and domain stay for Dokploy to generate):
 
    ```bash
-   node scripts/dokploy-template.mjs --name "Acme" --support-email hr@example.com [--domain jobs.example.com] > template.b64
+   node scripts/dokploy-template.mjs > template.b64
    ```
+
+   Only when the user gave them: `--name "Acme"` (shown in the app and in emails) and `--domain jobs.example.com`.
 
    Then `POST compose.import {"composeId":"...","base64":"<content of template.b64>"}`, and
    `POST compose.update {"composeId":"...","isolatedDeployment":true}`.
@@ -56,8 +54,8 @@ tunnel: `ssh -N -L 3000:localhost:3000 <user>@<server>`, then `DOKPLOY_URL=http:
    `api` one's `containerId`, then `GET compose.readLogs?composeId=...&containerId=...&tail=500&search=First%20owner%20setup`.
    The line holds `https://<host>/signup?setup#code=...`. Give it to the user only (it opens the instance until the
    first account exists).
-8. **Hand over**: tell the user to open the link and sign up (they are in at once, no email needed), create the
-   organization, then **Settings, Email**: choose SMTP or Resend, the sending domain, and "Save and send a test
+8. **Hand over**: give the user the address of the instance and the link; tell them to open it and sign up (they are
+   in at once, no email and nothing else to type), create the organization, then **Settings, Email**: choose SMTP or Resend, the sending domain, and "Save and send a test
    email". Until email works, invitations, publishing and applications wait. Remind them to revoke the API key and to
    set up backups (`docs/deploy/dokploy.md`, Backups).
 

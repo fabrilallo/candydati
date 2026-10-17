@@ -16,6 +16,8 @@ const isSignup = computed(() => props.mode === 'signup')
 const askSetupToken = computed(() => isSignup.value && route.query.setup !== undefined)
 /** The link the api logs at first start carries the code in the fragment (`#code=`), which no server ever receives. */
 const setupToken = ref(askSetupToken.value ? (new URLSearchParams(route.hash.slice(1)).get('code') ?? '') : '')
+/** The field shows only when the link brought no code (someone opened /signup?setup by hand): nothing to see otherwise. */
+const showSetupField = askSetupToken.value && setupToken.value === ''
 const router = useRouter()
 // Off the address bar (and the history) once read.
 onMounted(() => {
@@ -85,7 +87,7 @@ const onSubmit = async (): Promise<void> => {
         <Input id="password" type="password" :autocomplete="isSignup ? 'new-password' : 'current-password'" :model-value="values.password" :aria-invalid="invalid" :aria-describedby="describedBy" @update:model-value="set('password', $event)" />
       </template>
     </FormField>
-    <FormField v-if="askSetupToken" id="setup-token" :label="t('auth.signup.setupToken')" :hint="t('auth.signup.setupTokenHint')">
+    <FormField v-if="showSetupField" id="setup-token" :label="t('auth.signup.setupToken')" :hint="t('auth.signup.setupTokenHint')">
       <template #default="{ describedBy }">
         <Input id="setup-token" type="password" autocomplete="off" :model-value="setupToken" :aria-describedby="describedBy" data-testid="setup-token" @update:model-value="setupToken = String($event)" />
       </template>

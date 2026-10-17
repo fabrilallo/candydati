@@ -89,10 +89,11 @@ describe('AuthForm', () => {
     expect(mocks.api.signUp).toHaveBeenCalledWith(expect.objectContaining({ email: 'ada@example.com', bootstrapToken: 'one-time-token' }))
   })
 
-  it('fills the setup token from the #code= of the link the api logs, then drops it from the address', async () => {
+  it('takes the setup code from the #code= of the link the api logs, without showing it, then drops it from the address', async () => {
     const wrapper = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup?setup#code=derived-setup-code' })
     await vi.waitUntil(() => useRouter().currentRoute.value.hash === '', { timeout: 1000 })
-    expect((wrapper.find('#setup-token').element as HTMLInputElement).value).toBe('derived-setup-code')
+    // The person only creates the account: a code that came with the link is nothing for them to see or type.
+    expect(wrapper.find('#setup-token').exists()).toBe(false)
     expect(useRouter().currentRoute.value.hash).toBe('')
     expect(useRouter().currentRoute.value.query).toHaveProperty('setup')
     await wrapper.find('#name').setValue('Ada Lovelace')
