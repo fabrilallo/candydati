@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AI_PROVIDER_LABELS } from '@/lib/ai-models'
+import { providerLabel } from '@/lib/ai-models'
 import { formatDate } from '@/lib/format'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,13 @@ const settings = computed(() => s.settings.value)
 const fromServer = computed(() => settings.value?.source === 'environment')
 const editable = computed(() => Boolean(settings.value?.canManage) && !fromServer.value)
 const verified = computed(() => (settings.value?.verifiedAt && !fromServer.value ? formatDate(settings.value.verifiedAt, locale.value) : null))
+/** The models chosen, as the server returned them (an environment may name a provider this app does not list). */
+const chosen = computed(() =>
+  (['assistant', 'fast'] as const).flatMap((slot) => {
+    const model = settings.value?.[slot]
+    return model ? [{ slot, provider: model.provider, model: model.model }] : []
+  }),
+)
 const tone = (on: boolean) => (on ? 'success' : 'outline')
 </script>
 
@@ -44,18 +51,10 @@ const tone = (on: boolean) => (on ? 'success' : 'outline')
       <p v-else-if="verified" class="text-sm text-muted-foreground" data-testid="instance-ai-verified">{{ t('instanceAi.explain.verified', { date: verified }) }}</p>
       <InstanceAiForm v-if="editable" :settings="settings" />
       <template v-else>
-        <dl v-if="settings.assistantModel || settings.fastModel" class="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]" data-testid="instance-ai-summary">
-          <template v-if="settings.provider && !fromServer">
-            <dt class="text-muted-foreground">{{ t('instanceAi.form.provider') }}</dt>
-            <dd>{{ AI_PROVIDER_LABELS[settings.provider] }}</dd>
-          </template>
-          <template v-if="settings.assistantModel">
-            <dt class="text-muted-foreground">{{ t('instanceAi.assistant.title') }}</dt>
-            <dd class="font-mono break-all">{{ settings.assistantModel }}</dd>
-          </template>
-          <template v-if="settings.fastModel">
-            <dt class="text-muted-foreground">{{ t('instanceAi.fast.title') }}</dt>
-            <dd class="font-mono break-all">{{ settings.fastModel }}</dd>
+        <dl v-if="chosen.length > 0" class="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-[auto_1fr]" data-testid="instance-ai-summary">
+          <template v-for="row in chosen" :key="row.slot">
+            <dt class="text-muted-foreground">{{ t(`instanceAi.${row.slot}.title`) }}</dt>
+            <dd class="break-all">{{ providerLabel(row.provider) }} · <span class="font-mono">{{ row.model }}</span></dd>
           </template>
         </dl>
         <p v-if="!fromServer && !settings.assistantEnabled && !settings.fastEnabled" class="rounded-lg border border-warning/30 bg-warning-soft px-3.5 py-2.5 text-sm text-warning" data-testid="instance-ai-ask-admin">

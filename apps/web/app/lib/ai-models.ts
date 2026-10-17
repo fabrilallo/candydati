@@ -1,4 +1,4 @@
-import type { AiProvider } from '@candydati/domain'
+import { AI_PROVIDERS, type AiModelChoice, type AiProvider } from '@candydati/domain'
 
 /** Which model a setting is for: the assistant in the side panel, or the short frequent tasks. */
 export type AiModelSlot = 'assistant' | 'fast'
@@ -33,10 +33,25 @@ const API_KEY_URLS: Readonly<Record<AiProvider, string>> = {
  */
 const SUGGESTIONS: Readonly<Partial<Record<AiProvider, Readonly<Record<AiModelSlot, readonly string[]>>>>> = {
   anthropic: { assistant: ['claude-sonnet-5-5', 'claude-opus-5-5'], fast: ['claude-haiku-5-5'] },
-  openai: { assistant: ['gpt-5', 'gpt-5-mini'], fast: ['gpt-5-mini', 'gpt-5-nano'] },
-  google: { assistant: ['gemini-2.5-pro', 'gemini-2.5-flash'], fast: ['gemini-2.5-flash', 'gemini-2.5-flash-lite'] },
+  openai: { assistant: ['gpt-6-luna', 'gpt-5', 'gpt-5-mini'], fast: ['gpt-5-mini', 'gpt-5-nano'] },
+  google: { assistant: ['gemini-2.5-pro', 'gemini-2.5-flash'], fast: ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.5-flash-lite'] },
   mistral: { assistant: ['mistral-large-latest', 'mistral-medium-latest'], fast: ['mistral-small-latest'] },
 }
+
+/**
+ * What a fresh form proposes when a model is switched on. Chosen from the maintainers' own use, not from a benchmark:
+ * any model the provider offers works.
+ */
+export const RECOMMENDED_MODELS: Readonly<Record<AiModelSlot, AiModelChoice>> = {
+  assistant: { provider: 'openai', model: 'gpt-6-luna' },
+  fast: { provider: 'google', model: 'gemini-3.1-flash-lite' },
+}
+
+/** Pure: a provider this app knows (the server may report another one set in its environment). */
+export const isAiProvider = (value: string): value is AiProvider => (AI_PROVIDERS as readonly string[]).includes(value)
+
+/** Pure: the brand name of a known provider, or the name as the server wrote it. */
+export const providerLabel = (provider: string): string => (isAiProvider(provider) ? AI_PROVIDER_LABELS[provider] : provider)
 
 export const apiKeyUrl = (provider: AiProvider): string => API_KEY_URLS[provider]
 

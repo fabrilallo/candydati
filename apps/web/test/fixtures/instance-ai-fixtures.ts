@@ -4,26 +4,24 @@ import type { InstanceAiSettingsDto } from '@candydati/domain'
 export const instanceAi = (overrides: Partial<InstanceAiSettingsDto> = {}): InstanceAiSettingsDto => ({
   source: 'none',
   canManage: true,
-  provider: null,
-  hasApiKey: false,
-  assistantModel: null,
-  fastModel: null,
+  assistant: null,
+  fast: null,
   assistantEnabled: false,
   fastEnabled: false,
+  storedKeys: [],
   verifiedAt: null,
   ...overrides,
 })
 
-/** Configured from the app with Anthropic: both models on, a key stored. */
+/** Configured from the app: the assistant on Anthropic, the fast model on Google, a key stored for each. */
 export const aiReady = (overrides: Partial<InstanceAiSettingsDto> = {}): InstanceAiSettingsDto =>
   instanceAi({
     source: 'app',
-    provider: 'anthropic',
-    hasApiKey: true,
-    assistantModel: 'claude-sonnet-5-5',
-    fastModel: 'claude-haiku-5-5',
+    assistant: { provider: 'anthropic', model: 'claude-sonnet-5-5' },
+    fast: { provider: 'google', model: 'gemini-3.1-flash-lite' },
     assistantEnabled: true,
     fastEnabled: true,
+    storedKeys: ['anthropic', 'google'],
     verifiedAt: '2026-10-17T10:00:00.000Z',
     ...overrides,
   })

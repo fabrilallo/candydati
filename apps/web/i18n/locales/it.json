@@ -4221,7 +4221,7 @@
   },
   "instanceAi": {
     "title": "Modelli linguistici",
-    "intro": "I modelli che questa installazione usa per l'assistente e per i compiti automatici brevi. Un fornitore e una chiave API per entrambi.",
+    "intro": "I modelli che questa installazione usa per l'assistente e per i compiti automatici brevi. Ognuno può venire dal suo fornitore, con la chiave API di quel fornitore.",
     "loading": "Caricamento delle impostazioni AI",
     "saved": "Impostazioni AI salvate",
     "page": {
@@ -4260,9 +4260,6 @@
     },
     "form": {
       "provider": "Fornitore",
-      "apiKey": "Chiave API",
-      "keyKept": "salvata, lascia vuoto per mantenerla",
-      "getKey": "Crea una chiave API su {provider}",
       "on": "Attivo",
       "off": "Spento",
       "model": "Nome del modello",
@@ -4271,6 +4268,17 @@
       "saveAndTest": "Salva e prova i modelli",
       "saving": "Salvataggio…",
       "testing": "Prova dei modelli…"
+    },
+    "keys": {
+      "title": "Chiavi API",
+      "intro": "Una chiave per ogni fornitore dei modelli attivi. Una chiave salvata non viene più mostrata.",
+      "label": "Chiave API di {provider}",
+      "kept": "salvata, lascia vuoto per mantenerla",
+      "get": "Crea una chiave API su {provider}"
+    },
+    "recommended": {
+      "label": "Il nostro suggerimento: {provider} {model}.",
+      "note": "Suggerito dall'uso dei manutentori, non da un benchmark: va bene qualsiasi modello offerto dal fornitore."
     },
     "test": {
       "passed": "I modelli hanno risposto: impostazioni salvate.",

@@ -4221,7 +4221,7 @@
   },
   "instanceAi": {
     "title": "Language models",
-    "intro": "The models this installation uses for the assistant and for short automatic tasks. One provider and one API key for both.",
+    "intro": "The models this installation uses for the assistant and for short automatic tasks. Each can come from its own provider, with that provider's API key.",
     "loading": "Loading the AI settings",
     "saved": "AI settings saved",
     "page": {
@@ -4260,9 +4260,6 @@
     },
     "form": {
       "provider": "Provider",
-      "apiKey": "API key",
-      "keyKept": "stored, leave empty to keep",
-      "getKey": "Get an API key from {provider}",
       "on": "On",
       "off": "Off",
       "model": "Model name",
@@ -4271,6 +4268,17 @@
       "saveAndTest": "Save and test the models",
       "saving": "Saving…",
       "testing": "Testing the models…"
+    },
+    "keys": {
+      "title": "API keys",
+      "intro": "One key for each provider of the models switched on. A saved key is never shown again.",
+      "label": "API key for {provider}",
+      "kept": "stored, leave empty to keep",
+      "get": "Get an API key from {provider}"
+    },
+    "recommended": {
+      "label": "Our suggestion: {provider} {model}.",
+      "note": "Suggested from the maintainers' own use, not from a benchmark: any model the provider offers works."
     },
     "test": {
       "passed": "The models answered: settings saved.",

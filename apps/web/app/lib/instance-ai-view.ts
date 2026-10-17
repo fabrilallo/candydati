@@ -1,79 +1,94 @@
-import { AI_PROVIDERS, instanceAiSettingsInputSchema, type AiProvider, type InstanceAiSettingsDto, type InstanceAiSettingsInput } from '@candydati/domain'
-import { modelSuggestions, type AiModelSlot } from './ai-models'
+import { instanceAiSettingsInputSchema, type AiProvider, type InstanceAiSettingsDto, type InstanceAiSettingsInput } from '@candydati/domain'
+import { RECOMMENDED_MODELS, isAiProvider, modelSuggestions, type AiModelSlot } from './ai-models'
 
-/** What the form holds: model names as typed (kept while switched off), the key empty unless a new one is typed. */
-export interface InstanceAiForm {
+/** One model as the form holds it: the name as typed, kept while switched off. */
+export interface InstanceAiModelDraft {
+  readonly on: boolean
   readonly provider: AiProvider
-  readonly apiKey: string
-  readonly assistantOn: boolean
-  readonly assistantModel: string
-  readonly fastOn: boolean
-  readonly fastModel: string
+  readonly model: string
 }
 
-export type InstanceAiField = 'apiKey' | 'assistantModel' | 'fastModel'
+/** What the form holds: each model with its own provider, and the keys typed (empty unless a new one is typed). */
+export interface InstanceAiForm {
+  readonly assistant: InstanceAiModelDraft
+  readonly fast: InstanceAiModelDraft
+  readonly keys: Readonly<Partial<Record<AiProvider, string>>>
+}
+
+/** A model name field (`assistant`, `fast`) or the key field of a provider (`keys.openai`), as the server names them. */
+export type InstanceAiField = AiModelSlot | `keys.${AiProvider}`
 export type InstanceAiErrors = Partial<Record<InstanceAiField, string>>
 export type InstanceAiInputResult = { readonly ok: true; readonly input: InstanceAiSettingsInput } | { readonly ok: false; readonly errors: InstanceAiErrors }
 
-const DEFAULT_PROVIDER: AiProvider = AI_PROVIDERS[0]
+const SLOTS: readonly AiModelSlot[] = ['assistant', 'fast']
 
-export const emptyInstanceAiForm: InstanceAiForm = { provider: DEFAULT_PROVIDER, apiKey: '', assistantOn: false, assistantModel: '', fastOn: false, fastModel: '' }
+const offDraft = (slot: AiModelSlot): InstanceAiModelDraft => ({ on: false, provider: RECOMMENDED_MODELS[slot].provider, model: '' })
 
-const ON_FIELD = { assistant: 'assistantOn', fast: 'fastOn' } as const
-const MODEL_FIELD = { assistant: 'assistantModel', fast: 'fastModel' } as const
+export const emptyInstanceAiForm: InstanceAiForm = { assistant: offDraft('assistant'), fast: offDraft('fast'), keys: {} }
 
-/** Pure: the form for the stored settings. The key never reaches the browser, so it starts empty. */
+const draftFrom = (slot: AiModelSlot, chosen: InstanceAiSettingsDto['assistant']): InstanceAiModelDraft => {
+  if (!chosen) return offDraft(slot)
+  return { on: true, provider: isAiProvider(chosen.provider) ? chosen.provider : RECOMMENDED_MODELS[slot].provider, model: chosen.model }
+}
+
+/** Pure: the form for the stored settings. Keys never reach the browser, so none is filled. */
 export const formFromAiSettings = (settings: InstanceAiSettingsDto): InstanceAiForm => ({
-  ...emptyInstanceAiForm,
-  provider: settings.provider ?? DEFAULT_PROVIDER,
-  assistantOn: settings.assistantModel !== null,
-  assistantModel: settings.assistantModel ?? '',
-  fastOn: settings.fastModel !== null,
-  fastModel: settings.fastModel ?? '',
+  assistant: draftFrom('assistant', settings.assistant),
+  fast: draftFrom('fast', settings.fast),
+  keys: {},
 })
 
-/** Pure: a key is stored for the provider in the form, so leaving the field empty keeps it. */
-export const keyIsStored = (form: InstanceAiForm, settings: InstanceAiSettingsDto): boolean => settings.hasApiKey && settings.provider === form.provider
+/** Pure: a key is stored for the provider, so leaving its field empty keeps it. */
+export const keyIsStored = (provider: AiProvider, settings: InstanceAiSettingsDto): boolean => settings.storedKeys.includes(provider)
 
-/** Pure: another provider. Its model names differ and a key typed for the old one is wrong, so both start again. */
-export const withAiProvider = (form: InstanceAiForm, provider: AiProvider): InstanceAiForm => {
-  if (provider === form.provider) return form
-  return {
-    ...form,
-    provider,
-    apiKey: '',
-    assistantModel: modelSuggestions(provider, 'assistant')[0] ?? '',
-    fastModel: modelSuggestions(provider, 'fast')[0] ?? '',
-  }
+/** Pure: the providers of the models switched on, each once (one key field per provider). */
+export const providersInUse = (form: InstanceAiForm): readonly AiProvider[] =>
+  SLOTS.filter((slot) => form[slot].on).map((slot) => form[slot].provider).filter((provider, index, all) => all.indexOf(provider) === index)
+
+const withDraft = (form: InstanceAiForm, slot: AiModelSlot, draft: InstanceAiModelDraft): InstanceAiForm => ({ ...form, [slot]: draft })
+
+/** Pure: another provider for one model. Its names differ, so the model starts from that provider's first suggestion. */
+export const withSlotProvider = (form: InstanceAiForm, slot: AiModelSlot, provider: AiProvider): InstanceAiForm => {
+  if (provider === form[slot].provider) return form
+  return withDraft(form, slot, { ...form[slot], provider, model: modelSuggestions(provider, slot)[0] ?? '' })
 }
 
-/** Pure: a model switched on (an empty name gets the suggested one) or off (the name stays for later). */
+/** Pure: a model switched on (an empty name gets the first suggestion of its provider) or off (the name stays). */
 export const withModelSlot = (form: InstanceAiForm, slot: AiModelSlot, on: boolean): InstanceAiForm => {
-  const name = form[MODEL_FIELD[slot]]
-  const filled = on && name.trim() === '' ? (modelSuggestions(form.provider, slot)[0] ?? '') : name
-  return { ...form, [ON_FIELD[slot]]: on, [MODEL_FIELD[slot]]: filled }
+  const draft = form[slot]
+  const model = on && draft.model.trim() === '' ? (modelSuggestions(draft.provider, slot)[0] ?? '') : draft.model
+  return withDraft(form, slot, { ...draft, on, model })
 }
+
+export const withModelName = (form: InstanceAiForm, slot: AiModelSlot, model: string): InstanceAiForm => withDraft(form, slot, { ...form[slot], model })
+
+export const withAiKey = (form: InstanceAiForm, provider: AiProvider, key: string): InstanceAiForm => ({ ...form, keys: { ...form.keys, [provider]: key } })
 
 /** Pure: both models off. Saving then turns AI off, with no test call. */
-export const turnsAiOff = (form: InstanceAiForm): boolean => !form.assistantOn && !form.fastOn
+export const turnsAiOff = (form: InstanceAiForm): boolean => !form.assistant.on && !form.fast.on
+
+const typedKey = (form: InstanceAiForm, provider: AiProvider): string => (form.keys[provider] ?? '').trim()
 
 const missing = (form: InstanceAiForm, settings: InstanceAiSettingsDto): InstanceAiErrors => ({
-  ...(!turnsAiOff(form) && form.apiKey.trim() === '' && !keyIsStored(form, settings) ? { apiKey: 'instanceAi.errors.apiKeyMissing' } : {}),
-  ...(form.assistantOn && form.assistantModel.trim() === '' ? { assistantModel: 'instanceAi.errors.modelMissing' } : {}),
-  ...(form.fastOn && form.fastModel.trim() === '' ? { fastModel: 'instanceAi.errors.modelMissing' } : {}),
+  ...Object.fromEntries(
+    providersInUse(form)
+      .filter((provider) => typedKey(form, provider) === '' && !keyIsStored(provider, settings))
+      .map((provider) => [`keys.${provider}`, 'instanceAi.errors.apiKeyMissing']),
+  ),
+  ...Object.fromEntries(SLOTS.filter((slot) => form[slot].on && form[slot].model.trim() === '').map((slot) => [slot, 'instanceAi.errors.modelMissing'])),
 })
 
 const draftOf = (form: InstanceAiForm): unknown => ({
-  provider: form.provider,
-  ...(form.apiKey.trim() === '' ? {} : { apiKey: form.apiKey }),
-  assistantModel: form.assistantOn ? form.assistantModel : null,
-  fastModel: form.fastOn ? form.fastModel : null,
+  assistant: form.assistant.on ? { provider: form.assistant.provider, model: form.assistant.model } : null,
+  fast: form.fast.on ? { provider: form.fast.provider, model: form.fast.model } : null,
+  keys: Object.fromEntries(providersInUse(form).filter((provider) => typedKey(form, provider) !== '').map((provider) => [provider, form.keys[provider]])),
 })
 
-const KNOWN: readonly InstanceAiField[] = ['apiKey', 'assistantModel', 'fastModel']
-const fieldOf = (path: readonly PropertyKey[]): InstanceAiField | null => {
-  const first = String(path[0] ?? '')
-  return (KNOWN as readonly string[]).includes(first) ? (first as InstanceAiField) : null
+const fieldOf = (path: readonly PropertyKey[]): readonly [InstanceAiField, string] | null => {
+  const [head, next] = path.map(String)
+  if (head === 'keys' && next && isAiProvider(next)) return [`keys.${next}`, 'instanceAi.errors.apiKey']
+  if (head === 'assistant' || head === 'fast') return [head, 'instanceAi.errors.model']
+  return null
 }
 
 /** Pure: the input for the api, validated with the same schema; or the message of each invalid field. */
@@ -83,9 +98,8 @@ export const instanceAiInput = (form: InstanceAiForm, settings: InstanceAiSettin
   const parsed = instanceAiSettingsInputSchema.safeParse(draftOf(form))
   if (parsed.success) return { ok: true, input: parsed.data }
   const errors = parsed.error.issues.reduce<InstanceAiErrors>((acc, issue) => {
-    const field = fieldOf(issue.path)
-    if (!field || field in acc) return acc
-    return { ...acc, [field]: field === 'apiKey' ? 'instanceAi.errors.apiKey' : 'instanceAi.errors.model' }
+    const found = fieldOf(issue.path)
+    return found && !(found[0] in acc) ? { ...acc, [found[0]]: found[1] } : acc
   }, {})
   return { ok: false, errors }
 }
