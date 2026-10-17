@@ -39,6 +39,7 @@
     "privacy": "Privacy",
     "candidateCount": "{count} candidates",
     "email": "Email",
+    "ai": "AI",
     "emailTemplates": "Email templates",
     "attention": "Needs attention",
     "tasks": "My tasks",
@@ -2609,7 +2610,7 @@
     "off": {
       "title": "The assistant is not active",
       "body": "No language model is configured on this installation. Everything else works as usual.",
-      "admin": "To turn it on, set the AGENT_MODEL variable of the api service to a model in the provider/model format, then restart the service.",
+      "admin": "Configure a model in Settings, AI",
       "member": "If you need it, ask whoever administers the organization."
     },
     "steps": {
@@ -4216,6 +4217,73 @@
       "apiKey": "The API key is too long",
       "sendingDomain": "Enter a domain name, for example company.com",
       "fromLocal": "Use only letters, digits, dots, hyphens and underscores"
+    }
+  },
+  "instanceAi": {
+    "title": "Language models",
+    "intro": "The models this installation uses for the assistant and for short automatic tasks. One provider and one API key for both.",
+    "loading": "Loading the AI settings",
+    "saved": "AI settings saved",
+    "page": {
+      "title": "AI",
+      "subtitle": "Which language models the assistant, the ad quality score and CV reading use."
+    },
+    "state": {
+      "environment": "Set on the server",
+      "assistantOn": "Assistant on",
+      "assistantOff": "Assistant off",
+      "fastOn": "Fast model on",
+      "fastOff": "Fast model off"
+    },
+    "explain": {
+      "environment": "Whoever runs the server configured the models: change them there, not here.",
+      "verified": "Models last tested on {date}.",
+      "askAdmin": "No model is configured. The administrator of this installation can turn them on; everything else works as usual."
+    },
+    "assistant": {
+      "title": "Assistant model",
+      "what": "It powers the assistant in the side panel: it answers questions about jobs and candidates, drafts a job ad from a hiring request and summarises conversations. It acts only with the permissions of the person using it and never ranks, scores or rejects people.",
+      "off": "When it is off, the panel says the assistant is off. Everything else works."
+    },
+    "fast": {
+      "title": "Fast model",
+      "what": "It handles short, frequent tasks: the job ad quality score (on save and publish, also through the API and MCP) and reading the CVs of applications and imports (roles, skills, languages). A small, inexpensive model is the best fit.",
+      "off": "When it is off, the ad score uses rules only and only the plain text of CVs is read."
+    },
+    "privacy": {
+      "title": "Data sent to the provider",
+      "body": "When the fast model is on, the text of CVs is sent to the chosen provider. When the assistant is used, what it reads goes to the provider too. The provider becomes a sub-processor: it must be covered by your organization's agreements (a data processing agreement) and listed in its privacy notice."
+    },
+    "costs": {
+      "body": "The provider bills every call to your account. Daily caps per user and per organization limit the spend.",
+      "link": "How AI works and what it costs"
+    },
+    "form": {
+      "provider": "Provider",
+      "apiKey": "API key",
+      "keyKept": "stored, leave empty to keep",
+      "getKey": "Get an API key from {provider}",
+      "on": "On",
+      "off": "Off",
+      "model": "Model name",
+      "modelHint": "As the provider writes it, without the provider prefix. Pick a suggestion or type any name.",
+      "save": "Save",
+      "saveAndTest": "Save and test the models",
+      "saving": "Saving…",
+      "testing": "Testing the models…"
+    },
+    "test": {
+      "passed": "The models answered: settings saved.",
+      "turnedOff": "AI is now switched off: settings saved.",
+      "hint": "Check the API key, the model name and the credit on your provider account."
+    },
+    "errors": {
+      "testFailed": "A model did not answer the test call, so nothing was saved.",
+      "invalid": "Some settings are not valid. Check the fields and try again.",
+      "apiKeyMissing": "Enter the API key of the provider",
+      "apiKey": "The API key is too long",
+      "modelMissing": "Enter the name of a model",
+      "model": "Use the model name only, without spaces or provider prefix"
     }
   }
 }

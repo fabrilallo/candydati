@@ -13,6 +13,7 @@ import Templates from './app/jobs/templates.vue'
 import JobTeam from './app/jobs/[id]/team.vue'
 import JobAutomations from './app/jobs/[id]/automations.vue'
 import JobDistribution from './app/jobs/[id]/distribution.vue'
+import SettingsAi from './app/settings/ai.vue'
 import SettingsApi from './app/settings/api.vue'
 import SettingsAudit from './app/settings/audit-log.vue'
 import SettingsData from './app/settings/data.vue'
@@ -36,6 +37,7 @@ const PAGES = [
   ['job team', JobTeam, '/app/jobs/j1/team', 'JobTeamPanel'],
   ['job automations', JobAutomations, '/app/jobs/j1/automations', 'AutomationsPanel'],
   ['job distribution', JobDistribution, '/app/jobs/j1/distribution', 'JobDistributionPanel'],
+  ['settings: ai', SettingsAi, '/app/settings/ai', 'InstanceAiPanel'],
   ['settings: api', SettingsApi, '/app/settings/api', 'ApiKeysPanel'],
   ['settings: audit log', SettingsAudit, '/app/settings/audit-log', 'AuditLogPanel'],
   ['settings: data', SettingsData, '/app/settings/data', 'DataExportsPanel'],

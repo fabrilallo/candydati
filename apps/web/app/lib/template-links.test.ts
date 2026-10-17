@@ -40,6 +40,8 @@ const SAFE_BY_CONSTRUCTION = [
   // SVG data URL drawn in the browser by `totpQrDataUrl` from that same address.
   /^qrCode$/,
   /^OPENAPI_PATH$/,
+  // Fixed https pages of the AI providers' consoles, a static map keyed by the chosen provider (`lib/ai-models.ts`).
+  /^apiKeyUrl\(/,
 ]
 
 const BOUND = /(?:v-bind)?:(?:href|src)="([^"]+)"/g
