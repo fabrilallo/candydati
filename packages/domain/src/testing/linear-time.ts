@@ -11,28 +11,21 @@ const bestOf = (runs: number, task: () => void): number => {
   return best;
 };
 
-/** A baseline this long is well above timer noise and a garbage collection pause on a slow CI runner. */
-const STEADY_MS = 20;
-/** The baseline input grows at most 2^4 = 16× to reach STEADY_MS. */
-const MAX_DOUBLINGS = 4;
 const RUNS = 5;
+/** How much bigger the second input is: wide enough that runner noise cannot pass linear code for quadratic. */
+const GROWTH = 8;
 
 /**
- * How much slower `run` gets when the input grows 4×: about 4 for linear code, about 16 for a quadratic regex.
- * Independent of the machine's speed, unlike a fixed time limit. The baseline size doubles until one run takes
- * STEADY_MS, so the ratio compares two real timings rather than a large run against the noise floor.
+ * How much slower `run` gets when the input grows 8×: about 8 for linear code, about 64 for a quadratic regex.
+ * Independent of the machine's speed, unlike a fixed time limit; the wide gap between the two keeps a noisy CI runner
+ * (coverage, garbage collection) from failing linear code while quadratic code stays far above the limit.
  */
 export function growthRatio(run: (size: number) => void, size: number): number {
   run(size); // warm-up
-  let base = size;
-  let small = bestOf(RUNS, () => run(base));
-  for (let doubling = 0; small < STEADY_MS && doubling < MAX_DOUBLINGS; doubling += 1) {
-    base *= 2;
-    small = bestOf(RUNS, () => run(base));
-  }
-  const large = bestOf(RUNS, () => run(base * 4));
+  const small = bestOf(RUNS, () => run(size));
+  const large = bestOf(RUNS, () => run(size * GROWTH));
   return large / Math.max(small, FLOOR_MS);
 }
 
-/** Linear enough: quadratic code gives about 16. */
-export const LINEAR_GROWTH_MAX = 6;
+/** Linear enough: linear code gives about 8, quadratic code about 64. */
+export const LINEAR_GROWTH_MAX = 16;
