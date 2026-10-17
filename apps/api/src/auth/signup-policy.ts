@@ -36,13 +36,15 @@ export interface SignupLookups {
    * confirmed account. False otherwise: a lapsed claim, or one another address took over. Serialised with the claims.
    */
   confirmBootstrapOwner(user: { readonly id: string; readonly email: string }, now: Date): Promise<boolean>;
+  /** This address holds the live claim, not yet confirmed, on an instance with no confirmed account. */
+  holdsBootstrapClaim(email: string, now: Date): Promise<boolean>;
 }
 
 const digest = (value: string): Buffer => createHash('sha256').update(value).digest();
 const sameToken = (presented: string, expected: string): boolean => timingSafeEqual(digest(presented), digest(expected));
 
 /** The token rule of the bootstrap: required when configured, and always in production. */
-const bootstrapTokenAccepted = (policy: SignupPolicy, presented: string | null): boolean => {
+export const bootstrapTokenAccepted = (policy: SignupPolicy, presented: string | null): boolean => {
   if (policy.bootstrapToken === null) return !policy.requireBootstrapToken;
   return presented !== null && sameToken(presented, policy.bootstrapToken);
 };
@@ -75,15 +77,17 @@ export async function verificationAllowed(policy: SignupPolicy, user: { readonly
 const table = schema.instanceBootstrap;
 type Transaction = Parameters<Parameters<Db['transaction']>[0]>[0];
 const live = (claim: { readonly claimedAt: Date }, now: Date): boolean => now.getTime() - claim.claimedAt.getTime() < BOOTSTRAP_CLAIM_TTL_MS;
-const confirmedAccountExists = async (db: Pick<Db, 'execute'>): Promise<boolean> => (await db.execute(sql`select 1 from "user" where email_verified = true limit 1`)).rows.length > 0;
+/** A confirmed account other than `exceptUserId` (the first owner being confirmed does not close its own bootstrap). */
+const confirmedAccountExists = async (db: Pick<Db, 'execute'>, exceptUserId = ''): Promise<boolean> =>
+  (await db.execute(sql`select 1 from "user" where email_verified = true and id <> ${exceptUserId} limit 1`)).rows.length > 0;
 
 /** The bootstrap is open while the instance has no confirmed account (the api then logs the first owner's setup link). */
 export const bootstrapOpen = async (db: Db): Promise<boolean> => !(await confirmedAccountExists(db));
 
 /** Takes the bootstrap lock for the transaction: `closed` once a confirmed account exists, else the claim (if any). */
-const lockBootstrap = async (tx: Transaction): Promise<'closed' | typeof table.$inferSelect | null> => {
+const lockBootstrap = async (tx: Transaction, exceptUserId?: string): Promise<'closed' | typeof table.$inferSelect | null> => {
   await tx.execute(sql`select pg_advisory_xact_lock(${BOOTSTRAP_LOCK_KEY})`);
-  if (await confirmedAccountExists(tx)) return 'closed';
+  if (await confirmedAccountExists(tx, exceptUserId)) return 'closed';
   const [claim] = await tx.select().from(table).where(eq(table.slot, BOOTSTRAP_SLOT)).limit(1);
   return claim ?? null;
 };
@@ -106,10 +110,15 @@ export const createSignupLookups = (db: Db): SignupLookups => ({
     }),
   confirmBootstrapOwner: (user, now) =>
     db.transaction(async (tx) => {
-      const state = await lockBootstrap(tx);
+      const state = await lockBootstrap(tx, user.id);
       if (state === 'closed' || !state || state.email !== user.email || state.ownerUserId !== null || !live(state, now)) return false;
       await tx.update(table).set({ ownerUserId: user.id }).where(eq(table.slot, BOOTSTRAP_SLOT));
       return true;
+    }),
+  holdsBootstrapClaim: (email, now) =>
+    db.transaction(async (tx) => {
+      const state = await lockBootstrap(tx);
+      return state !== 'closed' && state !== null && state.email === email && state.ownerUserId === null && live(state, now);
     }),
 });
 

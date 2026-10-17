@@ -43,18 +43,17 @@ L'installer:
 3. controlla che il dominio punti a questo server (solo un avviso: puoi proseguire);
 4. genera tutti i segreti e li scrive in `/opt/candydati/.env`, leggibile solo da root (`chmod 600`);
 5. scarica le immagini e avvia tutto, con HTTPS automatico e backup giornalieri;
-6. stampa il link per creare il primo account e il **token di setup** monouso.
+6. stampa il link per creare il primo account, con il **codice di setup** monouso già dentro.
 
 ## Crea il primo account
 
-1. Apri `https://<tuo dominio>/signup?setup`.
-2. Inserisci i tuoi dati e incolla nel campo **Setup token** il token stampato dall'installer.
-3. Conferma il tuo indirizzo email con il link che ricevi.
-4. Crea la tua organizzazione.
+1. Apri il link stampato dall'installer (`https://<tuo dominio>/signup?setup#code=...`): il codice di setup è già
+   compilato.
+2. Inserisci i tuoi dati: entri subito, senza email di conferma.
+3. Crea la tua organizzazione.
 
-La registrazione è **solo su invito**: da qui in poi le persone entrano con gli inviti mandati dall'app. Il token vale
-solo per il primissimo account. Quando quell'account è confermato non apre più nulla; toglilo comunque con
-`candydati config` (cancella la riga `BOOTSTRAP_TOKEN`, salva, e la modifica viene applicata).
+La registrazione è **solo su invito**: da qui in poi le persone entrano con gli inviti mandati dall'app. Il codice vale
+solo per il primissimo account: dopo non apre più nulla, e non c'è niente da togliere.
 
 ## Controlla che funzioni
 

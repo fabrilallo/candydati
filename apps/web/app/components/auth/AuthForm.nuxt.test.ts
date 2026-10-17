@@ -20,7 +20,7 @@ describe('AuthForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mocks.api.signIn.mockResolvedValue({ twoFactor: false })
-    mocks.api.signUp.mockResolvedValue(undefined)
+    mocks.api.signUp.mockResolvedValue({ confirmed: false })
     mocks.api.getSession.mockResolvedValue(null)
   })
 
@@ -100,5 +100,17 @@ describe('AuthForm', () => {
     await wrapper.find('#password').setValue('long-enough-pw')
     await submit(wrapper)
     expect(mocks.api.signUp).toHaveBeenCalledWith(expect.objectContaining({ bootstrapToken: 'derived-setup-code' }))
+  })
+
+  it('signs the first owner in at once when the setup code confirmed the address (no email needed yet)', async () => {
+    mocks.api.signUp.mockResolvedValueOnce({ confirmed: true })
+    const wrapper = await mountSuspended(AuthForm, { props: { mode: 'signup' }, route: '/signup?setup' })
+    await wrapper.find('#name').setValue('Ada Lovelace')
+    await wrapper.find('#email').setValue('ada@example.com')
+    await wrapper.find('#password').setValue('long-enough-pw')
+    await wrapper.find('#setup-token').setValue('setup-code')
+    await submit(wrapper)
+    expect(mocks.api.signIn).toHaveBeenCalledWith(expect.objectContaining({ email: 'ada@example.com', password: 'long-enough-pw' }))
+    expect(mocks.navigateTo).toHaveBeenCalledWith('/onboarding')
   })
 })

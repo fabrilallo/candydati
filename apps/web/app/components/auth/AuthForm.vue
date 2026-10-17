@@ -38,8 +38,12 @@ const inbox = (email: string): Next => ({ path: VERIFY_EMAIL, query: redirect.va
 type Next = { readonly path: string; readonly query?: Record<string, string> } | string
 
 const signUp = async (data: { name: string; email: string; password: string }): Promise<Next> => {
-  await api.signUp({ ...data, callbackURL: callbackURL.value, ...(askSetupToken.value && setupToken.value.trim() !== '' ? { bootstrapToken: setupToken.value } : {}) })
-  return inbox(data.email)
+  const { confirmed } = await api.signUp({ ...data, callbackURL: callbackURL.value, ...(askSetupToken.value && setupToken.value.trim() !== '' ? { bootstrapToken: setupToken.value } : {}) })
+  if (!confirmed) return inbox(data.email)
+  // The first owner: the setup code confirmed the address, so straight in, to create the organization.
+  await api.signIn({ email: data.email, password: data.password })
+  await refresh()
+  return '/onboarding'
 }
 
 const signIn = async (data: { email: string; password: string }): Promise<Next> => {

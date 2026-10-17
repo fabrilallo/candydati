@@ -13,6 +13,7 @@ const lookups = (bootstrapOpen: boolean, invited: readonly string[], bootstrapOw
       claims.push(email);
       return bootstrapOpen;
     },
+    holdsBootstrapClaim: async (email) => bootstrapOpen && email === bootstrapOwner,
     confirmBootstrapOwner: async (user) => {
       if (user.email !== bootstrapOwner) return false;
       owners.push(user.id);

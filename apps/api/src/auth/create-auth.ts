@@ -12,6 +12,7 @@ import type { AccountMailer } from './account-mailer.js';
 import { createActorLookups, type SessionUserResolver } from './actor-lookups.js';
 import { createAuditHooks } from './audit-hooks.js';
 import { createAuthEmails, type AuthEmails } from './auth-emails.js';
+import { firstOwnerDatabaseHooks } from './first-owner-hooks.js';
 import { bootstrapTokenFor } from './first-owner-setup.js';
 import { roleGuardHooks } from './role-guards.js';
 import { createOrganizationGateLookups, organizationTwoFactorCheck } from './organization-two-factor-gate.js';
@@ -129,6 +130,7 @@ export function createAuth({ env, db, core, mailer, requiresTwoFactor, emailRead
     ...credentialOptions(emails, emailVerificationCheck(signupPolicy(env), createSignupLookups(db))),
     session: { expiresIn: SESSION_TTL_SECONDS, updateAge: 24 * 60 * 60 },
     hooks: { before: beforeHooks(env, db, requiresTwoFactor) },
+    databaseHooks: firstOwnerDatabaseHooks(signupPolicy(env), createSignupLookups(db)),
     plugins: [
       organization({
         ac,

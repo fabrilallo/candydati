@@ -293,7 +293,7 @@ install_main() {
   say "Candydati is running. Create the first account (owner) here:"
   # The code rides in the fragment: the browser never sends it, the form fills it in.
   say "  https://$A_DOMAIN/signup?setup#code=$A_BOOTSTRAP_TOKEN"
-  say "Once you have confirmed your email the code opens nothing. Everyday commands: candydati help"
+  say "Once that account exists the code opens nothing. Everyday commands: candydati help"
 }
 
 upgrade_main() {

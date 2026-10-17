@@ -8,7 +8,7 @@ You do not have to remember these: a production instance applies them on its own
 - **Transport**: the public address must be `https`, so session cookies are always `Secure`. Certificates are renewed
   automatically.
 - **Only the web is exposed**: the database, the storage, the api and the worker stay on an internal network.
-- **Accounts**: every account confirms its email before the first sign-in; sign-up is invite-only; failed sign-ins slow
+- **Accounts**: every account confirms its email before the first sign-in (the first owner through the setup code); sign-up is invite-only; failed sign-ins slow
   down further attempts instead of locking the account, and the owner is told after 10 failures. Two-factor
   authentication (TOTP with backup codes) is available to everyone, and owners and admins can require it.
 - **Visit counts** of the public ads are aggregate numbers per day, source and campaign: no cookies, no web storage, no

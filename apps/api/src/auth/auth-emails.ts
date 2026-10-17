@@ -20,8 +20,9 @@ export function createAuthEmails(mailer: AccountMailer, platform: PlatformConfig
   const common = (request: Request | undefined, link: string) => ({ locale: localeOf(request), platformName: platform.name, link });
   const forgotLink = `${platform.url}${FORGOT_PASSWORD_PATH}`;
   return {
-    verifyEmail: async ({ user, url }: { user: Recipient; url: string }, request?: Request) =>
-      mailer.send(user.email, { kind: 'verify_email', ...common(request, url), userName: user.name }),
+    // The first owner's address is confirmed by the setup code at sign-up (first-owner-hooks.ts): nothing to send.
+    verifyEmail: async ({ user, url }: { user: Recipient & { emailVerified?: boolean }; url: string }, request?: Request) =>
+      user.emailVerified === true ? undefined : mailer.send(user.email, { kind: 'verify_email', ...common(request, url), userName: user.name }),
     resetPassword: async ({ user, url }: { user: Recipient; url: string }, request?: Request) =>
       mailer.send(user.email, { kind: 'reset_password', ...common(request, url), userName: user.name }),
     existingAccount: async ({ user }: { user: Recipient }, request?: Request) =>

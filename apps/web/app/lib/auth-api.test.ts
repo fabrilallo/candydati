@@ -78,6 +78,13 @@ describe('createAuthApi', () => {
     expect(client.signUp.email).toHaveBeenCalledWith({ name: 'Ada', email: 'a@b.co', password: 'longpassword' }, { headers: { 'x-bootstrap-token': 'tok-123' } })
   })
 
+  it('signUp tells whether the address is already confirmed (the first owner through the setup link)', async () => {
+    const { api, client } = fakeClient()
+    expect(await api.signUp({ name: 'Ada', email: 'a@b.co', password: 'longpassword' })).toEqual({ confirmed: false })
+    client.signUp.email.mockReturnValueOnce(ok({ token: null, user: { emailVerified: true } }))
+    expect(await api.signUp({ name: 'Ada', email: 'a@b.co', password: 'longpassword', bootstrapToken: 'tok' })).toEqual({ confirmed: true })
+  })
+
   it('resends the verification, asks and completes a password reset', async () => {
     const { client, api } = fakeClient()
     await api.sendVerificationEmail({ email: 'a@b.co', callbackURL: '/onboarding' })
