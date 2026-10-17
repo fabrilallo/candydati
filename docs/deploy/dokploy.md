@@ -136,61 +136,21 @@ Redeploy: **Deploy** pulls the branch, rebuilds the images and recreates changed
 start. Enable **Auto Deploy** with the webhook only for a branch you control; pin a tag for production. Take a backup
 before an upgrade (`backup.sh once`). Never use "fresh volumes"/volume deletion options on this application.
 
-## Set it up with an AI coding agent (optional)
+## Set it up with an AI coding agent
 
-Dokploy can be driven from outside its UI with an API key, so a coding agent (Claude Code, Codex, Cursor and others)
-can do steps 1 to 5 for you while you watch: create the project and the compose service, set the non-secret
-variables, add the domain, deploy and read the logs.
+Use the [deploy skill](../../skills/candydati-deploy/README.md): give your agent (Claude Code, Codex, Cursor) Dokploy's
+URL and an API key and ask it to follow
+<https://github.com/fabrilallo/candydati/blob/main/skills/candydati-deploy/SKILL.md>. It does the quick path above
+through Dokploy's API and gives you the first owner link.
 
 **Get a key.** In Dokploy, open **Settings, Profile**, section **API/CLI**, and generate a key
 ([authentication docs](https://docs.dokploy.com/docs/cli/authentication)). The key acts with the permissions of the user
 who created it. Prefer a dedicated Dokploy user that can see only this project, and revoke the key when the setup is done.
 
-**Connect the agent**, in one of three ways:
-
-- **MCP server**, for agents that support the Model Context Protocol. Dokploy publishes one:
-  [github.com/dokploy/mcp](https://github.com/dokploy/mcp). It needs `DOKPLOY_URL` and `DOKPLOY_API_KEY`.
-  - Claude Code:
-
-    ```bash
-    claude mcp add dokploy-mcp -e DOKPLOY_URL=https://dokploy.example.com -e DOKPLOY_API_KEY="$DOKPLOY_API_KEY" -- npx -y @dokploy/mcp
-    ```
-
-  - Codex (`~/.codex/config.toml`):
-
-    ```toml
-    [mcp_servers.dokploy]
-    command = "npx"
-    args = ["-y", "@dokploy/mcp"]
-    env = { DOKPLOY_URL = "https://dokploy.example.com", DOKPLOY_API_KEY = "..." }
-    ```
-
-  - Cursor and other clients: the JSON configuration is in the repository's README.
-- **CLI**, for agents that run shell commands ([CLI docs](https://docs.dokploy.com/docs/cli)):
-
-  ```bash
-  npm install -g @dokploy/cli
-  dokploy auth -u https://dokploy.example.com -t "$DOKPLOY_API_KEY"
-  dokploy verify
-  ```
-
-- **REST API**, with the `x-api-key` header ([API reference](https://docs.dokploy.com/docs/api)). Dokploy also serves
-  its own OpenAPI document.
-
-Give the agent Dokploy's documentation index, <https://docs.dokploy.com/llms.txt>, together with this guide and
-[../ENVIRONMENT.md](../ENVIRONMENT.md). A prompt that works well:
-
-> Deploy this repository on my Dokploy server following `docs/deploy/dokploy.md`. Use the Docker Compose service type,
-> `docker-compose.prod.yml`, isolated deployments, and the domain `ats.example.com`. Set every non-secret variable from
-> `docs/ENVIRONMENT.md` and stop to let me paste the secrets myself. Then deploy, wait for the health checks of step 5,
-> and show me the logs of any service that is not healthy. Never delete volumes and never use "fresh volumes" options.
-
-**What the key exposes.**
-- The Dokploy API returns the environment variables, and database passwords, of every service the key can see. With
-  a key, whatever is in the Environment tab passes through the agent's context and through its model provider.
-- Safer: generate the secrets yourself (for example `openssl rand -base64 48` for `BETTER_AUTH_SECRET`), paste them in
-  the Environment tab by hand, and let the agent handle everything else.
-- Never commit the key, including inside a project's `.claude/settings.json` or `.mcp.json`.
+**What the key exposes.** The Dokploy API returns the environment variables, and database passwords, of every service
+the key can see: whatever is in the Environment tab passes through the agent's context and its model provider. The
+skill never asks for a password (Dokploy generates the secrets; email is set in the app). Never commit the key,
+including inside a project's `.claude/settings.json` or `.mcp.json`.
 
 ## Troubleshooting
 

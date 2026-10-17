@@ -31,13 +31,17 @@ tunnel: `ssh -N -L 3000:localhost:3000 <user>@<server>`, then `DOKPLOY_URL=http:
 2. **Create**: `POST project.create {"name":"candydati"}`, take `environment.environmentId`; then
    `POST compose.create {"name":"candydati","environmentId":"...","composeType":"docker-compose"}`, take `composeId`
    and `appName`.
-3. **Import the template** (secrets and domain stay for Dokploy to generate):
+3. **Import the template** (secrets and domain stay for Dokploy to generate). It is the file
+   `deploy/dokploy/template.base64` of the latest release; no checkout needed:
 
    ```bash
-   node scripts/dokploy-template.mjs > template.b64
+   TAG=$(curl -fsSL https://api.github.com/repos/fabrilallo/candydati/releases/latest | python3 -c 'import sys,json;print(json.load(sys.stdin)["tag_name"])')
+   curl -fsSL "https://raw.githubusercontent.com/fabrilallo/candydati/$TAG/deploy/dokploy/template.base64" > template.b64
    ```
 
-   Only when the user gave them: `--name "Acme"` (shown in the app and in emails) and `--domain jobs.example.com`.
+   Only when the user asked for a name or an own domain: `node scripts/dokploy-template.mjs --name "Acme"
+   --domain jobs.example.com > template.b64` (the script is in this skill's folder, or at the same path in the
+   repository; Node 24, no dependencies).
 
    Then `POST compose.import {"composeId":"...","base64":"<content of template.b64>"}`, and
    `POST compose.update {"composeId":"...","isolatedDeployment":true}`.
