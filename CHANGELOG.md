@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.6] - 2026-10-17
+
+### Fixed
+
+- The AI model field is a dropdown of every suggested model of the provider, with "Another model…" for any name; it
+  showed only the suggestion matching the prefilled value.
+
 ## [0.1.5] - 2026-10-17
 
 ### Added
