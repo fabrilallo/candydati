@@ -7,19 +7,24 @@ repository** (Dokploy builds the images from `docker-compose.prod.yml`). Concept
 
 ## Quick path: the template (recommended)
 
-You need a DNS `A` record for your host name pointing at the server, and an SMTP account or a Resend API key.
+Nothing to prepare: no domain (Dokploy generates one with HTTPS) and no email account (you configure it from the app
+after the first sign-in). With a coding agent, the [deploy skill](../../skills/candydati-deploy/README.md) does these
+steps through Dokploy's API.
 
 1. Create a **Project**, then **Create Service, Compose**. Name it (for example `ats`). Type: **Docker Compose**.
 2. In the service, **Advanced, Import**: paste the content of
    [`deploy/dokploy/template.base64`](https://raw.githubusercontent.com/fabrilallo/candydati/main/deploy/dokploy/template.base64)
    and import it. Dokploy writes the compose file, generates every secret and adds a domain for service `web`, port `3000`.
-3. **Domains**: edit that domain, set your host name and turn **HTTPS** on with Let's Encrypt.
-4. **Environment**: set `PLATFORM_URL` to `https://<your host name>` and `EMAIL_DOMAIN` to your mail domain, then the
-   email provider: `EMAIL_PROVIDER=smtp` with `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, or
-   `EMAIL_PROVIDER=resend` with `RESEND_API_KEY`. Leave the generated secrets as they are.
-5. **Advanced**: turn on **Isolated Deployments**. Press **Deploy**: Dokploy pulls the images, no build.
-6. **Logs**, service `api`: open the link of the line `First owner setup: open https://.../signup?setup#code=...`,
-   confirm the email and create the organization.
+3. **Domains**: edit that domain and turn **HTTPS** on with Let's Encrypt (keep the host Dokploy generated, or see
+   "Own domain" below). **Environment**: set `PLATFORM_SUPPORT_EMAIL` (the contact shown to candidates).
+4. **Advanced**: turn on **Isolated Deployments**. Press **Deploy**: Dokploy pulls the images, no build.
+5. **Logs**, service `api`: open the link of the line `First owner setup: open https://.../signup?setup#code=...`,
+   sign up (no confirmation email) and create the organization.
+6. **Settings, Email** in the app: SMTP or Resend, the sending domain, then **Save and send a test email**. Until
+   email works, invitations, publishing and applications wait.
+
+Own domain: point a DNS `A` record at the server, set it as the host of the domain (HTTPS on), set `PLATFORM_URL` to
+`https://<your domain>` in the Environment tab, and redeploy.
 
 Upgrade: set `CANDYDATI_VERSION` (for example `0.2.0`) in the Environment tab and redeploy; migrations run at api start.
 Do not import the template again on a running instance: it would generate new secrets that no longer match the data.
