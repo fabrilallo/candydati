@@ -4,6 +4,7 @@ import {
   type DrizzleUnitOfWork,
   type InstanceEmailDeps,
   type InstanceEmailTester,
+  type SetupProgressDeps,
   type AuditLogRepository,
   type CoreDeps,
   type ReportDeps,
@@ -59,6 +60,7 @@ import { createHrDeps, type HrWiring } from './wiring/hr-deps.js';
 import { createTeamDeps, type TeamWiring } from './wiring/team-deps.js';
 import { liveMessagingConfig, type EmailRuntime, type MigrationConnectorRegistry } from '@candydati/providers';
 import { createInstanceEmailDeps } from './wiring/instance-email-deps.js';
+import { createSetupProgressDeps } from './wiring/setup-progress-deps.js';
 
 export interface RateLimitSettings {
   /** Requests per minute per client on every route. */
@@ -161,6 +163,7 @@ export interface AppContext {
   readonly accessSettingDeps: TeamWiring['accessSettingDeps'];
   /** How the instance sends email (settings saved from the app) and whether it can. */
   readonly instanceEmailDeps: InstanceEmailDeps;
+  readonly setupProgressDeps: SetupProgressDeps;
   readonly emailRuntime: EmailRuntime;
 }
 
@@ -270,6 +273,7 @@ function emailGatedContext({ env, db, uow, files, queue, images, phase2, runtime
     submitDeps: { ...withDailyCaps(env, phase2), emailReady },
     instanceEmailDeps: createInstanceEmailDeps({ env, db, uow, runtime, log: log ?? (() => undefined), tester }),
     emailRuntime: runtime,
+    setupProgressDeps: createSetupProgressDeps(uow),
   };
 }
 

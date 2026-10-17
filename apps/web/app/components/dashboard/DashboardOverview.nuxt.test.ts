@@ -2,6 +2,7 @@ import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import type { JobStatsDto } from '@candydati/domain'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { emptyJobStats, jobStatsFixture } from '~~/test/fixtures/job-stats'
+import { viewerWith } from '~~/test/fixtures/job-fixtures'
 import DashboardOverview from './DashboardOverview.vue'
 
 // The charts draw with d3 into real layout, which happy-dom does not have; they are checked in the browser.
@@ -15,6 +16,9 @@ vi.mock('@unovis/vue', async () => {
 vi.mock('@unovis/ts', () => ({ Donut: { selectors: { segment: 'segment' } }, StackedBar: { selectors: { bar: 'bar' } } }))
 
 const state = vi.hoisted(() => ({ stats: null as JobStatsDto | null, failing: false }))
+const SET_UP = { privacyNotice: true, careersPage: true, jobCreated: true, jobPublished: true, team: true }
+const setup = { value: { ...SET_UP, privacyNotice: false, careersPage: false, jobCreated: false, jobPublished: false, team: false } }
+registerEndpoint('/api/v1/setup-progress', () => ({ success: true, data: setup.value, error: null }))
 registerEndpoint('/api/v1/stats/jobs', (event) => {
   if (state.failing) {
     event.node.res.statusCode = 403
@@ -26,8 +30,10 @@ registerEndpoint('/api/v1/stats/jobs', (event) => {
 /** Intl puts a no-break space before the euro sign. */
 const plain = (text: string): string => text.replace(/\s/g, ' ')
 const mounted: { unmount: () => void }[] = []
-const mountOverview = async (props = { careersPath: '/careers/acme', canCreate: true, canInvite: true }) => {
+const mountOverview = async (props = { canCreate: true }) => {
   clearNuxtData('job-stats')
+  clearNuxtData('setup-progress')
+  useViewer().viewer.value = viewerWith('owner')
   const wrapper = await mountSuspended(DashboardOverview, { props })
   mounted.push(wrapper)
   await vi.waitFor(() => expect(wrapper.find('[data-testid="stats-loading"]').exists()).toBe(false))
@@ -35,6 +41,7 @@ const mountOverview = async (props = { careersPath: '/careers/acme', canCreate: 
 }
 
 beforeEach(() => {
+  setup.value = { ...SET_UP, privacyNotice: false, careersPage: false, jobCreated: false, jobPublished: false, team: false }
   state.stats = jobStatsFixture()
   state.failing = false
 })
@@ -42,6 +49,7 @@ afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
 
 describe('DashboardOverview', () => {
   it('shows the real counts per status and every statistic card', async () => {
+    setup.value = SET_UP
     const wrapper = await mountOverview()
     await vi.waitFor(() => expect(wrapper.find('[data-testid="stat-status"]').exists()).toBe(true))
     const value = (status: string) => wrapper.find(`[data-testid="count-${status}"] [data-testid="count-value"]`).text()
@@ -50,6 +58,14 @@ describe('DashboardOverview', () => {
       expect(wrapper.find(`[data-testid="${id}"]`).exists(), id).toBe(true)
     }
     expect(wrapper.find('[data-testid="first-steps"]').exists()).toBe(false)
+  })
+
+  it('keeps the setup checklist above the statistics while something is left to set up', async () => {
+    state.stats = jobStatsFixture()
+    setup.value = { ...SET_UP, privacyNotice: false }
+    const wrapper = await mountOverview()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="first-steps"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="stat-status"]').exists()).toBe(true)
   })
 
   it('states the figures as text: medians, process averages, quality and blockers', async () => {
@@ -77,7 +93,7 @@ describe('DashboardOverview', () => {
 
   it('guides the first steps and shows honest empty states when there is no ad', async () => {
     state.stats = emptyJobStats()
-    const wrapper = await mountOverview({ careersPath: '/careers/acme', canCreate: true, canInvite: false })
+    const wrapper = await mountOverview({ canCreate: true })
     await vi.waitFor(() => expect(wrapper.find('[data-testid="first-steps"]').exists()).toBe(true))
     expect(wrapper.find('[data-testid="stat-status"]').exists()).toBe(false)
     expect(wrapper.findAll('[data-testid="chart-empty"]').length).toBeGreaterThanOrEqual(5)
