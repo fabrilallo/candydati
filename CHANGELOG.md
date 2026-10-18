@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-10-18
+
+### Added
+
+- The organization logo, set from the careers page editor: an image of the media library (re-encoded as WebP, served
+  from the public media route) or an https address. It changes at once on the careers page, every ad, search engine
+  data, the ad editor preview and the organization switcher. `GET`/`PUT /api/v1/organization/logo`, audited as
+  `organization.logo_changed`. Migrations 0039 (column) and 0040 (index, built concurrently).
+
 ## [0.1.6] - 2026-10-17
 
 ### Fixed
