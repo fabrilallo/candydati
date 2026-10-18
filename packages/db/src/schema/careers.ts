@@ -1,6 +1,6 @@
 import type { CareersPageDocument, LocalizedText, MediaKind } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
-import { check, index, integer, jsonb, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, check, index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 
 /**
@@ -47,12 +47,15 @@ export const careersMedia = pgTable(
     widths: jsonb('widths').$type<readonly number[]>().notNull().default(sql`'[]'::jsonb`),
     /** Default description, per language, proposed when the image is placed on the page. */
     alt: jsonb('alt').$type<LocalizedText>().notNull().default(sql`'{}'::jsonb`),
+    /** The organization's logo (at most one per organization); it then wins over `organization.logo`. */
+    isLogo: boolean('is_logo').notNull().default(false),
     createdBy: text('created_by').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.organizationId, table.id] }),
     index('careers_media_org_created_idx').on(table.organizationId, table.createdAt),
+    uniqueIndex('careers_media_org_logo_uidx').on(table.organizationId).where(sql`${table.isLogo}`),
     check('careers_media_kind_check', sql`${table.kind} in ('image', 'video')`),
   ],
 );

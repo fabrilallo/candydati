@@ -73,6 +73,7 @@ export const AUDIT_ACTIONS = [
   'careers_page.published',
   'careers_media.uploaded',
   'careers_media.deleted',
+  'organization.logo_changed',
   'migration.created',
   'migration.fetched',
   'migration.committed',

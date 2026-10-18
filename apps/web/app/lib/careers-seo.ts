@@ -1,6 +1,6 @@
 import { serializeJsonLd, type Locale, type PublicCareersPageDto } from '@candydati/domain'
 import { absoluteMediaUrl, imageSources, mediaOf, textIn } from './careers-site'
-import { safeExternalUrl, safeImageUrl } from './safe-url'
+import { absoluteLogoUrl, safeExternalUrl } from './safe-url'
 
 export interface CareersSeo {
   readonly title: string
@@ -33,7 +33,7 @@ export const careersPageSeo = (site: PublicCareersPageDto, options: CareersSeoOp
   const title = (hero?.type === 'hero' && tx(hero.headline)) || options.fallbackTitle
   const description = clip(((hero?.type === 'hero' && tx(hero.subheadline)) || options.fallbackDescription).replace(/\s+/g, ' '), DESCRIPTION_MAX)
   const sameAs = site.page.sections.flatMap((section) => (section.type === 'links' ? section.items.map((item) => safeExternalUrl(item.url)).filter((url): url is string => url !== null) : []))
-  const logo = safeImageUrl(site.organization.logo)
+  const logo = absoluteLogoUrl(options.siteUrl, site.organization.logo)
   const jsonLd = serializeJsonLd({
     '@context': 'https://schema.org',
     '@type': 'Organization',

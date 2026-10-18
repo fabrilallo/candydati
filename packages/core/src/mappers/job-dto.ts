@@ -1,6 +1,5 @@
 import {
   checkPublishable,
-  httpUrlOrNull,
   complianceWarnings,
   isPublishedContent,
   type Job,
@@ -15,6 +14,7 @@ import {
   type PublishedJobContent,
 } from '@candydati/domain';
 import type { PublicOrganization } from '../job-ports.js';
+import { logoUrlOf } from './logo.js';
 import type { PublishJobResult } from '../use-cases/jobs/publish-job.js';
 
 const iso = (date: Date): string => date.toISOString();
@@ -69,7 +69,7 @@ export const toPublishJobResultDto = (result: PublishJobResult): PublishJobResul
 export const toPublicOrganizationDto = (organization: PublicOrganization): PublicOrganizationDto => ({
   name: organization.name,
   slug: organization.slug,
-  logo: httpUrlOrNull(organization.logo, { httpsOnly: true }),
+  logo: logoUrlOf(organization),
 });
 
 /** A published job that fails the §5.1 rules is corrupted data, not a user error: fail loudly. */

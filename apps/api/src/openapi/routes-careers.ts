@@ -1,4 +1,4 @@
-import { careersDraftSaveSchema, careersPublishSchema, MEDIA_LIMITS } from '@candydati/domain';
+import { careersDraftSaveSchema, careersPublishSchema, MEDIA_LIMITS, setOrganizationLogoSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { idResult, type RouteSpec } from './spec.js';
 
@@ -40,7 +40,17 @@ export const careersRoutes: readonly RouteSpec[] = [
   },
   {
     method: 'delete', path: '/api/v1/careers-page/media/:id', tag: TAG, summary: 'Delete a media file', scope: PERMISSION, sessionOnly: true,
-    description: 'Refused with 422 (`in_published_page`, `in_draft`) while the published page or the draft uses it.',
+    description: 'Refused with 422 (`in_published_page`, `in_draft`, `in_logo`) while the published page or the draft uses it, or while it is the logo.',
     response: { schema: idResult },
+  },
+  {
+    method: 'get', path: '/api/v1/organization/logo', tag: TAG, summary: 'The organization logo', scope: null, sessionOnly: true,
+    description: 'Its source (an image of the media library, or an https address) and the address it is shown from: a same-origin path for a library image, else the https address. Any member may read it.',
+    response: { schema: 'OrganizationLogo' },
+  },
+  {
+    method: 'put', path: '/api/v1/organization/logo', tag: TAG, summary: 'Change the organization logo', scope: PERMISSION, sessionOnly: true,
+    description: '`source` is a library image (`{ kind: "media", mediaId }`, shown at its smallest width) or an https address (`{ kind: "url", url }`); null removes the logo. It changes at once on the careers page, every ad and the app. A video is refused with 422 `logo_not_image`.',
+    body: setOrganizationLogoSchema, response: { schema: 'OrganizationLogo' },
   },
 ];

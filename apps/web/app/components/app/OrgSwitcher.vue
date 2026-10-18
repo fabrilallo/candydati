@@ -5,12 +5,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import type { OrganizationSummary } from '@/lib/auth-api'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { initials } from '@/lib/initials'
+import { safeLogoUrl } from '@/lib/safe-url'
 
-/** Active organization, and the other ones the user belongs to (loaded when the menu opens). */
+/** Active organization (its logo, else its initials), and the other ones the user belongs to (loaded when the menu opens). */
 const props = defineProps<{ organization: OrganizationSummary; roleLabel: string }>()
 const { t } = useI18n()
 const api = useAuthApi()
 const { refresh } = useViewer()
+const logo = useOrganizationLogo()
 const organizations = ref<readonly OrganizationSummary[] | null>(null)
 const loadErrorKey = ref<string | null>(null)
 
@@ -45,7 +47,17 @@ const switchTo = async (target: OrganizationSummary): Promise<void> => {
       class="group flex w-full items-center gap-3 rounded-lg border border-transparent px-2 py-2 text-left transition-colors duration-150 hover:border-border hover:bg-card data-[state=open]:border-border data-[state=open]:bg-card"
     >
       <span class="sr-only">{{ t('shell.switchOrganization') }}:</span>
-      <span class="grid size-8 shrink-0 place-items-center rounded-md bg-foreground text-xs font-semibold text-background" aria-hidden="true">{{ initials(organization.name) }}</span>
+      <img
+        v-if="logo.url.value"
+        :src="safeLogoUrl(logo.url.value) ?? undefined"
+        alt=""
+        width="32"
+        height="32"
+        class="size-8 shrink-0 rounded-md border bg-card object-contain p-0.5"
+        referrerpolicy="no-referrer"
+        data-testid="org-logo"
+      >
+      <span v-else class="grid size-8 shrink-0 place-items-center rounded-md bg-foreground text-xs font-semibold text-background" aria-hidden="true">{{ initials(organization.name) }}</span>
       <span class="grid min-w-0 flex-1 leading-tight">
         <span class="truncate text-sm font-semibold">{{ organization.name }}</span>
         <span class="truncate text-xs text-muted-foreground">{{ roleLabel }}</span>

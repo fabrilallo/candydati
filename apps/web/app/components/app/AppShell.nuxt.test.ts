@@ -7,6 +7,8 @@ import AppTopBar from './AppTopBar.vue'
 
 registerEndpoint('/api/v1/stats/jobs', () => ({ success: true, data: jobStatsFixture(), error: null }))
 registerEndpoint('/api/v1/candidates', () => ({ success: true, data: [], error: null, meta: { total: 12, page: 1, limit: 1 } }))
+const logo = vi.hoisted(() => ({ url: null as string | null }))
+registerEndpoint('/api/v1/organization/logo', () => ({ success: true, data: { source: logo.url ? { kind: 'url', url: logo.url } : null, url: logo.url }, error: null }))
 
 const mounted: { unmount: () => void }[] = []
 const track = <T extends { unmount: () => void }>(wrapper: T): T => (mounted.push(wrapper), wrapper)
@@ -14,6 +16,8 @@ const track = <T extends { unmount: () => void }>(wrapper: T): T => (mounted.pus
 beforeEach(() => {
   clearNuxtData('job-stats')
   clearNuxtData('candidate-count')
+  clearNuxtData((key) => key.startsWith('organization-logo'))
+  logo.url = null
   window.localStorage.clear()
 })
 afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
@@ -44,6 +48,18 @@ describe('AppNavPanel', () => {
     expect(links).not.toContain('/app/jobs/templates')
     expect(links).not.toContain('/app/settings/privacy')
     expect(links).toContain('/app/candidates')
+  })
+
+  it("shows the organization's logo in the switcher, else its initials", async () => {
+    useViewer().viewer.value = viewerWith('recruiter')
+    const plain = track(await mountSuspended(AppNavPanel))
+    await vi.waitFor(() => expect(plain.find('[data-testid="nav-count-jobs"]').exists()).toBe(true))
+    expect(plain.find('[data-testid="org-logo"]').exists()).toBe(false)
+    plain.unmount()
+    clearNuxtData((key) => key.startsWith('organization-logo'))
+    logo.url = 'https://cdn.example/logo.png'
+    const branded = track(await mountSuspended(AppNavPanel))
+    await vi.waitFor(() => expect(branded.find('[data-testid="org-logo"]').attributes('src')).toBe('https://cdn.example/logo.png'))
   })
 
   it('carries language, theme and the user menu inside the mobile drawer only', async () => {

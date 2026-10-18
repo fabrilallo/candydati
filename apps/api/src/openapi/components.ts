@@ -38,6 +38,7 @@ import {
   webhookDeliverySchema,
   webhookEndpointSchema,
   careersMediaAssetSchema,
+  organizationLogoSchema,
   careersPageEditorSchema,
   publicCareersPageSchema,
 } from '@candydati/domain';
@@ -94,6 +95,7 @@ export const COMPONENT_SCHEMAS = {
   AuditEvent: auditEventSchema,
   CareersPageEditor: careersPageEditorSchema,
   CareersMediaAsset: careersMediaAssetSchema,
+  OrganizationLogo: organizationLogoSchema,
   PublicCareersPage: publicCareersPageSchema,
 } as const;
 export type ComponentName = keyof typeof COMPONENT_SCHEMAS;

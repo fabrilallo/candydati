@@ -214,5 +214,7 @@ export * from './careers-ports.js';
 export * from './use-cases/careers/careers-page.js';
 export * from './use-cases/careers/media.js';
 export * from './use-cases/careers/public.js';
+export * from './use-cases/careers/logo.js';
 export * from './adapters/drizzle-careers.js';
+export * from './adapters/drizzle-organization-logos.js';
 export * from './adapters/drizzle-two-factor.js';

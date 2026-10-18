@@ -44,7 +44,7 @@ export const deleteCareersMedia = async (request: JobApiRequest, id: string): Pr
 }
 
 /** Issues the api reports for media (`file` and `mediaId`), each with its own message in the interface. */
-const MEDIA_ISSUES = new Set(['unsupported_type', 'too_large', 'empty', 'alt_required', 'image_unreadable', 'image_too_big', 'library_full', 'in_published_page', 'in_draft'])
+const MEDIA_ISSUES = new Set(['unsupported_type', 'too_large', 'empty', 'alt_required', 'image_unreadable', 'image_too_big', 'library_full', 'in_published_page', 'in_draft', 'in_logo', 'logo_not_image'])
 
 /** Translation key of a careers page failure: the specific media issue when there is one, else the generic mapping. */
 export const careersFailureKey = (failure: FailureInfo): string => {

@@ -7,7 +7,9 @@ import {
   type CareersPageRecord,
   type CareersPageRepository,
   type ImageTranscoder,
+  type OrganizationLogoStore,
 } from '../careers-ports.js';
+import type { OrganizationLogoSource } from '@candydati/domain';
 import type { PublicOrganization } from '../job-ports.js';
 import { createInMemoryAuditLog, type InMemoryAuditLog } from './in-memory-audit-log.js';
 import { createInMemoryFileStorage, createInMemoryTaskQueue, type InMemoryFileStorage, type InMemoryTaskQueue } from './in-memory-files.js';
@@ -85,6 +87,28 @@ export function createInMemoryCareersMedia(initial: readonly CareersMediaRecord[
   };
 }
 
+export interface InMemoryOrganizationLogos extends OrganizationLogoStore {
+  snapshot(): ReadonlyMap<string, OrganizationLogoSource>;
+}
+
+/** Like the Postgres adapter: an image must be in the organization's library (`media`) to become its logo. */
+export function createInMemoryOrganizationLogos(media: CareersMediaRepository, initial: ReadonlyMap<string, OrganizationLogoSource> = new Map()): InMemoryOrganizationLogos {
+  const rows = cell<ReadonlyMap<string, OrganizationLogoSource>>(initial);
+  return {
+    async find(organizationId) {
+      return rows.get().get(organizationId) ?? null;
+    },
+    async set(organizationId, source) {
+      if (source?.kind === 'media' && !(await media.findById(organizationId, source.mediaId))) throw new Error('The logo image is not in the organization.');
+      const next = new Map(rows.get());
+      if (source) next.set(organizationId, source);
+      else next.delete(organizationId);
+      rows.set(next);
+    },
+    snapshot: () => rows.get(),
+  };
+}
+
 /** Reads the size from two bytes after the magic (a fake format for tests) and "re-encodes" by tagging the bytes. */
 export function fakeImageTranscoder(options: { readonly width?: number; readonly height?: number; readonly reject?: 'image_unreadable' | 'image_too_big' } = {}): ImageTranscoder {
   const width = options.width ?? 2400;
@@ -111,17 +135,20 @@ export type TestCareersDeps = CareersDeps & {
   readonly auditLog: InMemoryAuditLog;
   readonly careersPages: InMemoryCareersPages;
   readonly careersMedia: InMemoryCareersMedia;
+  readonly organizationLogos: InMemoryOrganizationLogos;
   readonly files: InMemoryFileStorage;
   readonly queue: InMemoryTaskQueue;
 };
 
 export function createTestCareersDeps(overrides: Partial<TestCareersDeps> & { readonly defaultLocale?: Locale } = {}): TestCareersDeps {
   let counter = 0;
+  const careersMedia = overrides.careersMedia ?? createInMemoryCareersMedia();
   return {
     auditLog: createInMemoryAuditLog(),
     transaction: createInMemoryTransaction(),
     careersPages: createInMemoryCareersPages(),
-    careersMedia: createInMemoryCareersMedia(),
+    careersMedia,
+    organizationLogos: createInMemoryOrganizationLogos(careersMedia),
     organizations: createInMemoryOrganizationDirectory([CAREERS_ORG, OTHER_ORG]),
     files: createInMemoryFileStorage(),
     queue: createInMemoryTaskQueue(),

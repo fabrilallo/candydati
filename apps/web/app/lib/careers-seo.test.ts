@@ -28,6 +28,12 @@ describe('careersPageSeo', () => {
     expect(seo.jsonLd).not.toContain('</script>')
   })
 
+  it('gives a library logo with the site in front', () => {
+    const logo = '/api/v1/public/organizations/acme/careers-media/m1/0123456789abcdef-w640.webp'
+    const site: PublicCareersPageDto = { organization: { ...organization, logo }, page: defaultCareersPage('Acme'), media: {}, publishedAt: null }
+    expect(JSON.parse(careersPageSeo(site, options).jsonLd)).toMatchObject({ logo: `https://jobs.example${logo}` })
+  })
+
   it('falls back to the default texts and no image', () => {
     const site: PublicCareersPageDto = { organization: { ...organization, logo: 'javascript:alert(1)' }, page: { ...defaultCareersPage('Acme'), sections: [{ id: 'jobs', type: 'jobs', visible: true, title: {}, intro: {} }] }, media: {}, publishedAt: null }
     const seo = careersPageSeo(site, options)

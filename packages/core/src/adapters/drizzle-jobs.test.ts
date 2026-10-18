@@ -208,7 +208,7 @@ describe('createDrizzleOrganizationDirectory', () => {
   it('finds an organization by slug with only the public fields', async () => {
     const directory = createDrizzleOrganizationDirectory(handle.db);
     const found = await directory.findBySlug(slugA);
-    expect(found).toEqual({ id: orgA, name: `Name ${orgA}`, slug: slugA, logo: 'https://x/logo.png' });
+    expect(found).toEqual({ id: orgA, name: `Name ${orgA}`, slug: slugA, logo: 'https://x/logo.png', logoFile: null });
     expect(await directory.findBySlug('does-not-exist')).toBeNull();
   });
 });

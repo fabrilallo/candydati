@@ -1,5 +1,5 @@
 import type { EmailReadiness } from './instance-email-ports.js';
-import type { CareersPageDocument, Locale, LocalizedText, MediaKind } from '@candydati/domain';
+import type { CareersPageDocument, Locale, LocalizedText, MediaKind, OrganizationLogoSource } from '@candydati/domain';
 import type { FileStorage, TaskQueue } from './intake-ports.js';
 import type { OrganizationDirectory } from './job-ports.js';
 import type { CoreDeps } from './ports.js';
@@ -52,6 +52,16 @@ export interface CareersMediaRepository {
   delete(organizationId: string, id: string): Promise<boolean>;
 }
 
+/**
+ * The organization's logo: an image of its careers library (flagged on the media row) or an https address (Better Auth's
+ * `organization.logo`). At most one of the two is set; the image wins if both ever are. Always filtered by organization.
+ */
+export interface OrganizationLogoStore {
+  find(organizationId: string): Promise<OrganizationLogoSource | null>;
+  /** Replaces the logo (null removes it): sets one source and clears the other. The image must be in the organization. */
+  set(organizationId: string, source: OrganizationLogoSource | null): Promise<void>;
+}
+
 /** An image decoded, stripped of every metadata block and re-encoded as WebP at each width. */
 export interface TranscodedImage {
   readonly width: number;
@@ -79,6 +89,7 @@ export interface CareersDeps extends CoreDeps {
   readonly emailReady?: EmailReadiness | undefined;
   readonly careersPages: CareersPageRepository;
   readonly careersMedia: CareersMediaRepository;
+  readonly organizationLogos: OrganizationLogoStore;
   readonly organizations: OrganizationDirectory;
   readonly files: FileStorage;
   /** `files.delete` tasks for files whose deletion failed after their row was gone. */
@@ -93,4 +104,4 @@ export interface CareersDeps extends CoreDeps {
 }
 
 /** What the visitors' reads need: no write, no actor. */
-export type PublicCareersDeps = Pick<CareersDeps, 'careersPages' | 'careersMedia' | 'organizations' | 'files' | 'defaultLocale'>;
+export type PublicCareersDeps = Pick<CareersDeps, 'careersPages' | 'careersMedia' | 'organizationLogos' | 'organizations' | 'files' | 'defaultLocale'>;

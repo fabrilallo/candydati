@@ -30,6 +30,7 @@ export function createCareersDeps({ uow, files, queue, defaultLocale, images }: 
     jobTeams: r.jobTeams,
     careersPages: r.careersPages,
     careersMedia: r.careersMedia,
+    organizationLogos: r.organizationLogos,
     organizations: r.organizations,
     files,
     queue,
@@ -39,6 +40,6 @@ export function createCareersDeps({ uow, files, queue, defaultLocale, images }: 
     newId: randomUUID,
     now: () => new Date(),
   };
-  const { careersPages, careersMedia, organizations } = careersDeps;
-  return { careersDeps, publicCareersDeps: { careersPages, careersMedia, organizations, files, defaultLocale } };
+  const { careersPages, careersMedia, organizationLogos, organizations } = careersDeps;
+  return { careersDeps, publicCareersDeps: { careersPages, careersMedia, organizationLogos, organizations, files, defaultLocale } };
 }

@@ -5,6 +5,7 @@ import { careersPageSeo } from '@/lib/careers-seo'
 import { fetchCareers } from '@/lib/job-api'
 import { absoluteUrl, careersPath } from '@/lib/job-view'
 import { failureStatus, loadPublic } from '@/lib/public-load'
+import { absoluteLogoUrl } from '@/lib/safe-url'
 
 definePageMeta({ layout: 'careers' })
 const { t, locale } = useI18n()
@@ -48,7 +49,7 @@ useSeoMeta({
   ogDescription: () => seo.value.description,
   ogUrl: canonical,
   ogType: 'website',
-  ogImage: () => seo.value.image ?? careers.organization.logo,
+  ogImage: () => seo.value.image ?? absoluteLogoUrl(config.public.siteUrl, careers.organization.logo),
   twitterCard: () => (seo.value.image ? 'summary_large_image' : 'summary'),
 })
 useHead({

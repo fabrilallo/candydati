@@ -253,8 +253,9 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
   `server/plugins/csp-nonce.ts` stamps the nonce on Nuxt's scripts. `/api/**` and `/mcp` keep the api's own headers (the CV
   viewer is a same-origin frame). A CDN that caches HTML caches its nonce too: keep public HTML out of long shared caches.
 - Anything a stranger can type that ends up in a link is http(s) only (`httpUrlSchema` in `@candydati/domain`), and templates
-  bind `href`/`src` from data only through `safeExternalUrl` / `safeImageUrl` (`app/lib/template-links.test.ts` fails on
-  any other binding). Organization logos are https only.
+  bind `href`/`src` from data only through `safeExternalUrl` / `safeLogoUrl` (`app/lib/template-links.test.ts` fails on
+  any other binding). An organization logo is an https address or an image of its careers library, served from the public
+  media route (`careers_media.is_logo`, one per organization; it wins over `organization.logo`).
 - Logs never carry query parameters: the `err` serializer (`safeErrorSerializer`) logs a database error as SQLSTATE,
   constraint and table only.
 - DOCX, XLSX and ZIP imports are inflated with the real output counted against a cap (`inflateBounded`), never trusting
@@ -306,5 +307,5 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 | Privacy | `privacy_notice`, `consent_token`, `data_export`, `retention_run` |
 | Import | `import_batch`, `import_item`, `import_analysis` |
 | HR tools | `feedback_request`, `interview_feedback` |
-| Careers page | `careers_page` (draft and published document), `careers_media` (images re-encoded as WebP, videos) |
+| Careers page | `careers_page` (draft and published document), `careers_media` (images re-encoded as WebP, videos; the logo is one of its images) |
 | Audit | `audit_log` (append-only, enforced by triggers) |

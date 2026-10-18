@@ -15,6 +15,7 @@ const deps = {
   organizations: createInMemoryOrganizationDirectory([
     { id: 'org_a', name: 'Acme', slug: 'acme', logo: 'https://cdn.test/logo.png' },
     { id: 'org_b', name: 'Beta', slug: 'beta', logo: null },
+    { id: 'org_c', name: 'Gamma', slug: 'gamma', logo: null, logoFile: { mediaId: 'm1', fileName: 'abc-w640.webp' } },
   ]),
   privacyNotices: createInMemoryPrivacyNoticeRepository(),
   publicBaseUrl: 'https://jobs.example.com/',
@@ -30,6 +31,10 @@ describe('getPublicOrganizationSummary', () => {
       feedUrl: 'https://jobs.example.com/careers/acme/jobs.xml',
       openPositions: 1,
     });
+  });
+
+  it('gives a library logo as an absolute address, for sites that embed it', async () => {
+    expect((await getPublicOrganizationSummary(deps, { organizationSlug: 'gamma' })).logo).toBe('https://jobs.example.com/api/v1/public/organizations/gamma/careers-media/m1/abc-w640.webp');
   });
 
   it('is not found for an unknown organization and validates the input', async () => {

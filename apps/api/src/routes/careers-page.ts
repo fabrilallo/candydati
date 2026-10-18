@@ -1,5 +1,16 @@
 import multipart from '@fastify/multipart';
-import { authorize, deleteCareersMedia, getCareersMediaFile, getCareersPageDraft, listCareersMedia, publishCareersPage, saveCareersPageDraft, uploadCareersMedia } from '@candydati/core';
+import {
+  authorize,
+  deleteCareersMedia,
+  getCareersMediaFile,
+  getCareersPageDraft,
+  getOrganizationLogo,
+  listCareersMedia,
+  publishCareersPage,
+  saveCareersPageDraft,
+  setOrganizationLogo,
+  uploadCareersMedia,
+} from '@candydati/core';
 import { ok } from '@candydati/domain';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { AppContext } from '../app-context.js';
@@ -10,7 +21,7 @@ import { AD_BODY_LIMIT, careersMediaRouteConfig } from './limits.js';
 import { bodyOf, paramOf } from './request.js';
 
 /**
- * The careers page builder: the draft, publishing and the media library. Session only: `careers_page:manage` is never
+ * The careers page builder: the draft, publishing, the media library and the organization logo. Session only: `careers_page:manage` is never
  * grantable to a key or the agent, and a request carrying a bearer is refused before anything runs. Thin adapters: the use
  * cases hold the rules (permission, audit, limits).
  */
@@ -38,6 +49,10 @@ export async function registerCareersPageRoutes(app: FastifyInstance, ctx: AppCo
   app.delete('/api/v1/careers-page/media/:id', async (request) =>
     ok(await deleteCareersMedia(deps, await actorOf(request), { mediaId: paramOf(request, 'id') })),
   );
+
+  // The logo: any member reads it (the app shows it), owners and admins change it.
+  app.get('/api/v1/organization/logo', async (request) => ok(await getOrganizationLogo(deps, await actorOf(request), {})));
+  app.put('/api/v1/organization/logo', async (request) => ok(await setOrganizationLogo(deps, await actorOf(request), bodyOf(request))));
 
   await app.register(async (scope) => {
     await scope.register(multipart, { limits: CAREERS_MEDIA_MULTIPART_LIMITS });

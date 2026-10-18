@@ -54,4 +54,11 @@ describe('toPublicOrganizationDto logo', () => {
     expect(toPublicOrganizationDto({ ...org, logo: 'http://a.example/l.png' }).logo).toBeNull();
     expect(toPublicOrganizationDto({ ...org, logo: 'https://a.example/l.png' }).logo).toBe('https://a.example/l.png');
   });
+
+  it('prefers the library image, served from the public media route under the slug', () => {
+    const org = { id: 'o', name: 'Acme', slug: 'acme', logo: 'https://a.example/l.png' };
+    const logoFile = { mediaId: 'm1', fileName: 'abc-640.webp' };
+    expect(toPublicOrganizationDto({ ...org, logoFile }).logo).toBe('/api/v1/public/organizations/acme/careers-media/m1/abc-640.webp');
+    expect(toPublicOrganizationDto({ ...org, logoFile: null }).logo).toBe('https://a.example/l.png');
+  });
 });

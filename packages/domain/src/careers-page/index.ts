@@ -7,3 +7,4 @@ export * from './sections.js';
 export * from './document.js';
 export * from './wire.js';
 export * from './fixtures.js';
+export * from './logo.js';

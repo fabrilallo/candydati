@@ -29,6 +29,7 @@ import { createDrizzleJobTeams } from './drizzle-job-teams.js';
 import { createDrizzleMemberDirectory } from './drizzle-members.js';
 import { createDrizzleMessages } from './drizzle-messages.js';
 import { createDrizzleNotifications } from './drizzle-notifications.js';
+import { createDrizzleOrganizationLogos } from './drizzle-organization-logos.js';
 import { createDrizzleOrganizationDirectory } from './drizzle-organizations.js';
 import { createDrizzleOutbox } from './drizzle-outbox.js';
 import { createDrizzleDataExports, createDrizzleRetentionRuns } from './drizzle-privacy.js';
@@ -75,6 +76,7 @@ const jobRepositories = (db: DbExecutor) => {
     jobViews: createDrizzleJobViews(db),
     careersPages: createDrizzleCareersPages(db),
     careersMedia: createDrizzleCareersMedia(db),
+    organizationLogos: createDrizzleOrganizationLogos(db),
   } as const;
 };
 

@@ -19,6 +19,7 @@ import { NotFoundError, ValidationError } from '../../errors.js';
 import { baseDeps } from '../../transaction.js';
 import { deleteFilesAfterErasure } from '../privacy/erase-candidate-data.js';
 import { defineCareersUseCase } from './define.js';
+import { logoMediaIdOf } from './logo.js';
 import { mediaFileInput, openMediaFile, type CareersMediaFile } from './media-file.js';
 import { referencedIds, requireOrganizationById, toMediaAssetDto } from './shared.js';
 
@@ -132,8 +133,8 @@ const fileKeysOf = (record: CareersMediaRecord): readonly string[] =>
 
 /**
  * Removes a file from the library and from storage (after the commit; a failed deletion is retried by the worker).
- * Refused while the published page or the draft uses it: visitors would get a broken page, the editor a draft it
- * cannot save.
+ * Refused while the published page or the draft uses it (visitors would get a broken page, the editor a draft it
+ * cannot save), and while it is the organization's logo.
  */
 export const deleteCareersMedia = defineCareersUseCase({
   name: 'deleteCareersMedia',
@@ -146,6 +147,7 @@ export const deleteCareersMedia = defineCareersUseCase({
     const usage = await usageOf(deps, actor.organizationId);
     if (usage.published.has(record.id)) throw new ValidationError([{ path: 'mediaId', message: 'in_published_page' }]);
     if (usage.draft.has(record.id)) throw new ValidationError([{ path: 'mediaId', message: 'in_draft' }]);
+    if ((await logoMediaIdOf(deps, actor.organizationId)) === record.id) throw new ValidationError([{ path: 'mediaId', message: 'in_logo' }]);
     await deps.careersMedia.delete(actor.organizationId, record.id);
     const base = baseDeps(deps);
     deps.afterCommit?.(async () => {

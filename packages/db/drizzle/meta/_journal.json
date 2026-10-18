@@ -274,6 +274,20 @@
       "when": 1792265804617,
       "tag": "0038_instance_ai_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1792323561386,
+      "tag": "0039_careers_media_logo",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1792323571633,
+      "tag": "0040_careers_media_logo_index",
+      "breakpoints": true
     }
   ]
 }
