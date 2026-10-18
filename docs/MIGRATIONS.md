@@ -95,3 +95,6 @@ Schema changes are Drizzle migrations in `packages/db/drizzle`. Generate with `p
   connector fetch too large for one package, one batch each. Their check (`migration_batch_part_check`: both null or both
   set, part ≥ 1) is added `NOT VALID` with a 5 s `lock_timeout`.
 - **0036** validates it (rule 5).
+- **0039** adds `careers_media.is_logo` (boolean, constant default false, no rewrite) with a 5 s `lock_timeout`: the
+  library image used as the organization's logo.
+- **0040** builds `careers_media_org_logo_uidx` concurrently (unique, partial on `is_logo`: one logo per organization).

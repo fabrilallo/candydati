@@ -496,7 +496,8 @@
         "exported": "Ha esportato tutti i dati dell'organizzazione",
         "approval_setting_updated": "Ha cambiato l'obbligo di approvazione degli annunci",
         "security_setting_updated": "Ha cambiato l'obbligo di verifica in due passaggi",
-        "access_setting_updated": "Ha cambiato chi vede quali annunci"
+        "access_setting_updated": "Ha cambiato chi vede quali annunci",
+        "logo_changed": "Ha cambiato il logo"
       },
       "invitation": {
         "created": "Ha invitato una persona",
@@ -3952,6 +3953,24 @@
         "sharp": "Netti"
       }
     },
+    "logo": {
+      "title": "Logo",
+      "hint": "Compare sulla pagina carriere, in ogni annuncio e nel menu dell'app. Cambia subito, senza pubblicare.",
+      "tip": "Meglio un PNG con sfondo trasparente, largo almeno 160 px.",
+      "none": "Nessun logo: al suo posto si vedono le iniziali.",
+      "current": "Logo attuale",
+      "choose": "Scegli o carica un'immagine",
+      "replace": "Cambia immagine",
+      "remove": "Rimuovi il logo",
+      "useUrl": "Oppure usa un indirizzo",
+      "urlLabel": "Indirizzo https dell'immagine",
+      "urlApply": "Usa questo indirizzo",
+      "saved": "Logo aggiornato",
+      "removed": "Logo rimosso",
+      "errors": {
+        "url": "Serve un indirizzo che inizi con https://"
+      }
+    },
     "preview": {
       "title": "Anteprima",
       "device": "Dimensione dell’anteprima",
@@ -4014,7 +4033,9 @@
         "in_published_page": "Il file è nella pagina pubblicata: toglilo e pubblica di nuovo prima di eliminarlo.",
         "in_draft": "Il file è nella bozza: toglilo dalla bozza e salva prima di eliminarlo.",
         "cancelled": "Caricamento annullato.",
-        "no_file": "Scegli un file da caricare."
+        "no_file": "Scegli un file da caricare.",
+        "in_logo": "È il logo dell'organizzazione: cambia o rimuovi il logo prima di eliminarla.",
+        "logo_not_image": "Il logo deve essere un’immagine, non un video."
       }
     },
     "errors": {

@@ -496,7 +496,8 @@
         "exported": "Exported all of the organization's data",
         "approval_setting_updated": "Changed whether ads need approval",
         "security_setting_updated": "Changed the two-factor authentication requirement",
-        "access_setting_updated": "Changed who sees which ads"
+        "access_setting_updated": "Changed who sees which ads",
+        "logo_changed": "Changed the logo"
       },
       "invitation": {
         "created": "Invited a person",
@@ -3952,6 +3953,24 @@
         "sharp": "Sharp"
       }
     },
+    "logo": {
+      "title": "Logo",
+      "hint": "It shows on the careers page, on every ad and in the app's menu. It changes at once, without publishing.",
+      "tip": "A PNG with a transparent background, at least 160 px wide, works best.",
+      "none": "No logo: the initials show in its place.",
+      "current": "Current logo",
+      "choose": "Choose or upload an image",
+      "replace": "Change image",
+      "remove": "Remove the logo",
+      "useUrl": "Or use an address",
+      "urlLabel": "https address of the image",
+      "urlApply": "Use this address",
+      "saved": "Logo updated",
+      "removed": "Logo removed",
+      "errors": {
+        "url": "Use an address that starts with https://"
+      }
+    },
     "preview": {
       "title": "Preview",
       "device": "Preview size",
@@ -4014,7 +4033,9 @@
         "in_published_page": "The file is on the published page: remove it and publish again before deleting it.",
         "in_draft": "The file is in the draft: remove it and save before deleting it.",
         "cancelled": "Upload cancelled.",
-        "no_file": "Choose a file to upload."
+        "no_file": "Choose a file to upload.",
+        "in_logo": "It is the organization's logo: change or remove the logo before deleting it.",
+        "logo_not_image": "The logo must be an image, not a video."
       }
     },
     "errors": {

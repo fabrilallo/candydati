@@ -71,6 +71,9 @@ const save = async (): Promise<void> => {
 }
 
 const editor = computed(() => ed.editor.value)
+// The logo is not part of the draft: the preview shows the current one, which the logo panel changes at once.
+const logo = useOrganizationLogo()
+const previewCareers = computed(() => ({ ...ed.careers.value, organization: { ...ed.careers.value.organization, logo: logo.url.value } }))
 const publicPath = computed(() => `/careers/${encodeURIComponent(editor.value?.organization.slug ?? '')}`)
 const unpublished = computed(() => Boolean(editor.value && (editor.value.hasUnpublishedChanges || ed.dirty.value || editor.value.publishedAt === null)))
 const publishable = computed(() => ed.issues.value.count === 0 && unpublished.value && !ed.stale.value)
@@ -127,10 +130,11 @@ const crumbs = computed(() => [{ label: t('nav.sections.organization') }, { labe
               @add="add"
             />
             <CareersSectionForm v-if="selected" :section="selected" :issues="ed.issues.value.sections[selected.id] ?? {}" @patch="patch" />
+            <CareersLogoPanel :organization-name="editor?.organization.name ?? ''" />
             <CareersThemePanel :theme="draft.theme" @patch="setTheme" />
           </div>
           <div :class="mode === 'preview' ? 'grid' : 'hidden xl:grid'" class="min-w-0 grid-cols-[minmax(0,1fr)] xl:sticky xl:top-[4.75rem]">
-            <CareersPreviewPane :page="draft" :media="ed.media.value" :careers="ed.careers.value" :locale="ed.editingLocale.value" />
+            <CareersPreviewPane :page="draft" :media="ed.media.value" :careers="previewCareers" :locale="ed.editingLocale.value" />
           </div>
         </div>
         <CareersMediaDialog

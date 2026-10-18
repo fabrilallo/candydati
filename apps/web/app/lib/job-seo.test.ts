@@ -57,6 +57,16 @@ describe('buildJobSeo', () => {
     expect(JSON.stringify(data.description)).toContain('What you will do')
     expect(seo.image).toBe('https://cdn.test/logo.png')
   })
+
+  it('gives a library logo and a stored script address the way crawlers can use them', () => {
+    const path = '/api/v1/public/organizations/acme/careers-media/m1/0123456789abcdef-w640.webp'
+    const seo = build(page({}, path), 'https://x.test/')
+    expect(seo.image).toBe(`https://x.test${path}`)
+    expect((JSON.parse(seo.jsonLd) as { hiringOrganization: { logo?: string } }).hiringOrganization.logo).toBe(`https://x.test${path}`)
+    const unsafe = build(page({}, 'javascript:alert(1)'), 'https://x.test')
+    expect(unsafe.image).toBeNull()
+    expect((JSON.parse(unsafe.jsonLd) as { hiringOrganization: Record<string, unknown> }).hiringOrganization).not.toHaveProperty('logo')
+  })
 })
 
 describe('adHeadings', () => {

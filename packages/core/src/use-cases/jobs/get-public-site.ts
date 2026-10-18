@@ -15,8 +15,11 @@ export const getPublicOrganizationSummary = definePublicQuery<PublicSiteDeps, ty
     const organization = await deps.organizations.findBySlug(organizationSlug);
     if (!organization) throw new NotFoundError('Organization not found.');
     const counts = await deps.jobs.countByStatus(organization.id);
+    const dto = toPublicOrganizationDto(organization);
     return {
-      ...toPublicOrganizationDto(organization),
+      ...dto,
+      // A library logo is a same-origin path: the sites that embed this summary need the whole address.
+      logo: dto.logo?.startsWith('/') ? `${deps.publicBaseUrl.replace(/\/$/, '')}${dto.logo}` : dto.logo,
       careersUrl: careersUrl(deps.publicBaseUrl, organization.slug),
       feedUrl: feedUrl(deps.publicBaseUrl, organization.slug),
       openPositions: counts.published,

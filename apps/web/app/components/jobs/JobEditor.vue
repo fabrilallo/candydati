@@ -51,7 +51,8 @@ const interviewerBinding = computed(() =>
 const templateOpen = ref(false)
 
 const orgSlug = computed(() => viewer.value?.organization?.slug ?? '')
-const organization = computed(() => ({ name: viewer.value?.organization?.name ?? '', logo: null }))
+const logo = useOrganizationLogo()
+const organization = computed(() => ({ name: viewer.value?.organization?.name ?? '', logo: logo.url.value }))
 const publicPath = computed(() => (ed.job.value ? publicJobPath(orgSlug.value, ed.job.value.slug) : ''))
 const publicUrl = computed(() => absoluteUrl(config.public.siteUrl, publicPath.value))
 const heading = computed(() => ed.form.value.title.trim() || t(ed.job.value ? 'job.editor.untitled' : 'job.editor.newTitle'))

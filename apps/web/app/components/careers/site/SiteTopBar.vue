@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { initials } from '@/lib/initials'
-import { safeImageUrl } from '@/lib/safe-url'
+import { safeLogoUrl } from '@/lib/safe-url'
 
 /** The page's own bar: the organization (logo and name), a jump to the open positions, language and theme. */
 const { t } = useI18n()
@@ -13,8 +13,8 @@ const organization = computed(() => site.value.careers.organization)
     <div class="cp-wrap flex h-16 items-center justify-between gap-4">
       <p class="flex min-w-0 items-center gap-3">
         <img
-          v-if="safeImageUrl(organization.logo)"
-          :src="safeImageUrl(organization.logo) ?? undefined"
+          v-if="safeLogoUrl(organization.logo)"
+          :src="safeLogoUrl(organization.logo) ?? undefined"
           :alt="t('careers.logo', { organization: organization.name })"
           width="36"
           height="36"

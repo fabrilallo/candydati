@@ -92,7 +92,16 @@ export interface PublicOrganization {
   readonly id: string;
   readonly name: string;
   readonly slug: string;
+  /** The https address stored by Better Auth (unchecked: mappers keep https only). */
   readonly logo: string | null;
+  /** The library image used as logo, when there is one: it wins over `logo`. */
+  readonly logoFile?: LogoFile | null;
+}
+
+/** The stored file of a library image used as logo, served from the organization's public media route. */
+export interface LogoFile {
+  readonly mediaId: string;
+  readonly fileName: string;
 }
 
 export interface OrganizationDirectory {

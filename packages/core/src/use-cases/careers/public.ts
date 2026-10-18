@@ -4,6 +4,7 @@ import { mediaFileInput, openMediaFile, type CareersMediaFile } from './media-fi
 import { NotFoundError } from '../../errors.js';
 import { toPublicOrganizationDto } from '../../mappers/job-dto.js';
 import { definePublicCareersQuery } from './define.js';
+import { logoMediaIdOf } from './logo.js';
 import { mediaMapOf, referencedIds } from './shared.js';
 
 const slugInput = z.object({ organizationSlug: z.string().min(1).max(200) });
@@ -30,8 +31,8 @@ export const getPublicCareersPage = definePublicCareersQuery({
 });
 
 /**
- * One stored file of the PUBLISHED page, for visitors: only media a visible section of the published page uses. Drafts,
- * hidden sections and the rest of the library go through the editor's own route (`getCareersMediaFile`), never here,
+ * One stored file of the PUBLISHED page, for visitors: only media a visible section of the published page uses, and the
+ * organization's logo (shown on the page and every ad). Drafts, hidden sections and the rest of the library go through the editor's own route (`getCareersMediaFile`), never here,
  * so nothing unpublished becomes reachable or lands in a shared cache.
  */
 export const getPublicCareersMedia = definePublicCareersQuery({
@@ -42,7 +43,7 @@ export const getPublicCareersMedia = definePublicCareersQuery({
     if (!organization) throw new NotFoundError('Not found.');
     const published = (await deps.careersPages.find(organization.id))?.published ?? null;
     const visible = published ? referencedIds(visibleSections(published)) : new Set<string>();
-    if (!visible.has(input.mediaId)) throw new NotFoundError('Not found.');
+    if (!visible.has(input.mediaId) && (await logoMediaIdOf(deps, organization.id)) !== input.mediaId) throw new NotFoundError('Not found.');
     return openMediaFile(deps, await deps.careersMedia.findById(organization.id, input.mediaId), input.fileName, input.range);
   },
 });

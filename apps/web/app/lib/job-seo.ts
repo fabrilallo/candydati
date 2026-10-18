@@ -1,6 +1,7 @@
 import { buildJobPostingJsonLd, serializeJsonLd, type JobPostingHeadings, type PublicJobPageDto } from '@candydati/domain'
 import type { Translate } from './ad-text'
 import { absoluteUrl, publicJobPath, salaryLine } from './job-view'
+import { absoluteLogoUrl } from './safe-url'
 
 const DESCRIPTION_MAX = 155
 
@@ -35,6 +36,7 @@ export const buildJobSeo = (page: PublicJobPageDto, siteUrl: string, tr: Transla
   const { content } = job
   const language = content.language
   const canonical = absoluteUrl(siteUrl, publicJobPath(organization.slug, job.slug))
+  const logo = absoluteLogoUrl(siteUrl, organization.logo)
   const fallback = tr('public.metaDescription', {
     title: content.title,
     role: tr(`taxonomy.roles.${content.role}`),
@@ -47,7 +49,7 @@ export const buildJobSeo = (page: PublicJobPageDto, siteUrl: string, tr: Transla
     description: clip(content.summary === '' ? fallback : content.summary, DESCRIPTION_MAX),
     canonical,
     locale: language,
-    image: organization.logo,
-    jsonLd: serializeJsonLd(buildJobPostingJsonLd({ job, organization, url: canonical, headings: adHeadings(tr) })),
+    image: logo,
+    jsonLd: serializeJsonLd(buildJobPostingJsonLd({ job, organization: { ...organization, logo }, url: canonical, headings: adHeadings(tr) })),
   }
 }
