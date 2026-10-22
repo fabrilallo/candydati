@@ -115,6 +115,8 @@ describe('instructions', () => {
     expect(text).toContain(CANDIDATE_DATA_OPEN);
     expect(text).toMatch(/user's language/);
     expect(text).toMatch(/other organizations/);
+    expect(text).toMatch(/first name and id only/);
+    expect(text).toContain('{{candidate.lastName}}');
     expect(text).toContain('jobId j-1, applicationId a-1');
     expect(buildInstructions({ productName: 'X', page: null, today: '2026-10-13' })).toContain('Page context: none.');
   });

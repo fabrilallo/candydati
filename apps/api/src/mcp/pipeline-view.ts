@@ -2,8 +2,8 @@ import type { PipelineView } from '@candydati/core';
 import type { JobStatus, ResponseState } from '@candydati/domain';
 
 /**
- * What the MCP `get_pipeline` returns: names, stage and response state, and nothing a candidate wrote (no message, no
- * CV text, no headline, no tags). An external agent reads where everyone stands, not who they are.
+ * What the MCP `get_pipeline` returns: first names, stage and response state, and nothing a candidate wrote (no
+ * surname, message, CV text, headline or tags). An external agent reads where everyone stands, not who they are.
  */
 export interface McpPipeline {
   readonly job: { readonly id: string; readonly title: string; readonly status: JobStatus };
@@ -12,7 +12,6 @@ export interface McpPipeline {
     readonly applicationId: string;
     readonly candidateId: string;
     readonly firstName: string;
-    readonly lastName: string;
     readonly stageId: string;
     readonly stageRemoved: boolean;
     readonly outcome: string | null;
@@ -33,7 +32,6 @@ export const toMcpPipeline = (view: PipelineView): McpPipeline => ({
     applicationId: application.id,
     candidateId: candidate.id,
     firstName: candidate.firstName,
-    lastName: candidate.lastName,
     stageId: application.stageId,
     stageRemoved,
     outcome: application.outcome,

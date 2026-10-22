@@ -19,7 +19,7 @@ export const createDraftMessageTool = (deps: MessagingDeps) =>
   createTool({
     id: 'draft_message',
     description:
-      'Prepares a message to the candidate of one application and shows it to the user as a DRAFT with a send button. It does NOT send anything: only the user can send it. Subject and body may use template variables such as {{candidate.firstName}}, {{job.title}}, {{organization.name}}.',
+      'Prepares a message to the candidate of one application and shows it to the user as a DRAFT with a send button. It does NOT send anything: only the user can send it. Subject and body may use template variables such as {{candidate.firstName}}, {{candidate.lastName}}, {{job.title}}, {{organization.name}}; {{candidate.lastName}} stays a variable in the result and is filled in by the composer.',
     inputSchema: z.object({
       applicationId: id,
       subject: z.string().trim().min(1).max(DRAFT_SUBJECT_MAX),

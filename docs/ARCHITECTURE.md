@@ -271,6 +271,12 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 - The assistant acts with the permissions of the user it works for, and its actions are logged as agent actions.
 - It never ranks, scores or rejects candidates. Any message to a candidate needs a person's confirmation.
 - CV and email content is data, not instructions. An adversarial eval suite checks this (`pnpm --filter @candydati/api eval:agent`).
+- Privacy by design: the assistant and MCP tools give a model candidates by first name and id only. Surnames, contacts
+  and direct identifiers (email, phone, links, street address, tax code, IBAN, full dates) are replaced by markers such
+  as `[surname]` by `pseudonymizeText` (`packages/domain/src/privacy`), in CV text, CV fields, cover letters and
+  messages too. Message drafts keep `{{candidate.lastName}}` as a variable that the person's composer fills in. This
+  is pseudonymization, not anonymization: CV content can still single someone out, so the rules above still apply.
+  CV structuring is the one model call that reads the whole document, because it has to extract it.
 - The conversation lives in the browser; the server stores nothing of it ([ADR 0007](adr/0007-stateless-assistant.md)).
 - MCP tools are thin wrappers on the same use cases, authorized by API key scopes. Each tool call of a JSON-RPC batch
   counts against the key's per-minute limit and a batch holds at most 20 messages. Reads are audited as `mcp.read` with
@@ -289,7 +295,8 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 - **Export:** per-candidate ZIP and whole-organization export, in the public schemas under [`schema/`](schema).
 - **Import:** imported people get consent marked "to renew" and an email asking to reconfirm; no reply in the window
   means erasure ([ADR 0008](adr/0008-imports-consent-renewal.md)).
-- **Minimization:** no special-category fields; CV extraction drops photo, birth date and marital status.
+- **Minimization:** no special-category fields; CV extraction drops photo, birth date and marital status; the assistant
+  and MCP never send a model a surname or contact (see the assistant and MCP constraints).
 - Legal templates (privacy notice, DPA, record of processing) are in [`legal/`](legal). They need legal review.
 
 ## Data model overview

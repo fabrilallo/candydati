@@ -5,6 +5,7 @@ import {
   renderTemplate,
   type EmailTemplate,
   type EmailTemplateKind,
+  type TemplateVariable,
 } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
@@ -128,10 +129,14 @@ const renderInput = z.object({
   applicationId: z.string().min(1),
 });
 
+/** Never filled in a draft for a model: the surname stays a variable, the composer renders it for the person. */
+const MODEL_HIDDEN_VARIABLES = ['candidate.lastName'] as const;
+
 async function renderForApplication(
   deps: MessagingDeps,
   organizationId: string,
   input: z.infer<typeof renderInput>,
+  hidden: readonly TemplateVariable[] = [],
 ): Promise<MessagePreview> {
   const application = await requireApplicationInOrganization(deps, organizationId, input.applicationId);
   const [organization, candidate, job] = await sequential(
@@ -139,7 +144,8 @@ async function renderForApplication(
     () => requireCandidate(deps, organizationId, application.candidateId),
     () => requireJob(deps, organizationId, application.jobId),
   );
-  const values = buildTemplateValues({ config: deps.config, organization, job, candidate, stageId: application.stageId });
+  const filled = buildTemplateValues({ config: deps.config, organization, job, candidate, stageId: application.stageId });
+  const values = { ...filled, ...Object.fromEntries(hidden.map((name) => [name, `{{${name}}}`])) };
   const subject = renderTemplate(input.subject, values);
   const body = renderTemplate(input.body, values);
   return {
@@ -160,12 +166,13 @@ export const previewMessage = defineMessagingUseCase({
 
 /**
  * Same rendering as `previewMessage`, readable by anyone who may read the conversation (`message:read`): the assistant
- * prepares drafts as itself, whoever the person is. `templateId` only names the template the text came from.
+ * prepares drafts as itself, whoever the person is. `templateId` only names the template the text came from. The draft
+ * goes back to the model, so the surname is left as `{{candidate.lastName}}`.
  */
 export const renderMessageDraft = defineMessagingUseCase({
   name: 'renderMessageDraft',
   input: renderInput.extend({ templateId: z.string().min(1).optional() }),
   permission: 'message:read',
   audit: { skip: 'render only: nothing is stored or sent' },
-  handler: ({ deps, actor, input }): Promise<MessagePreview> => renderForApplication(deps, actor.organizationId, input),
+  handler: ({ deps, actor, input }): Promise<MessagePreview> => renderForApplication(deps, actor.organizationId, input, MODEL_HIDDEN_VARIABLES),
 });

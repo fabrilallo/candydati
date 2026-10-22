@@ -11,13 +11,14 @@ import {
 import { ATTENTION_STATES, NOTE_MAX, TASK_TITLE_MAX } from '@candydati/domain';
 import { z } from 'zod';
 import { toTaskResponse } from '../routes/task-view.js';
+import { withoutSurname } from './privacy.js';
 import type { ToolDefinition } from './tool-support.js';
 
 export const listAttentionTool = {
   name: 'list_attention',
   title: 'Applications that need an answer',
   description:
-    'Open applications whose promised answer is due within 48 hours or overdue, most urgent first, with the candidate\'s name, job, stage and owner. ' +
+    'Open applications whose promised answer is due within 48 hours or overdue, most urgent first, with the candidate\'s first name and id, job, stage and owner. ' +
     'Read only: answering, moving or deciding on a candidate stays with a person.',
   shape: {
     state: z.enum(ATTENTION_STATES).optional(),
@@ -27,7 +28,8 @@ export const listAttentionTool = {
   readOnly: true,
   run: async ({ app, actor }, input) => {
     const page = await listAttention(app.candidateDeps, actor, input);
-    return { items: toAttentionItemDtos(page), meta: { total: page.total, page: page.page, limit: page.limit } };
+    const items = toAttentionItemDtos(page).map((item) => ({ ...item, candidate: withoutSurname(item.candidate) }));
+    return { items, meta: { total: page.total, page: page.page, limit: page.limit } };
   },
 } satisfies ToolDefinition<{ state: z.ZodOptional<z.ZodEnum<{ due_soon: 'due_soon'; overdue: 'overdue' }>>; page: z.ZodOptional<z.ZodNumber>; limit: z.ZodOptional<z.ZodNumber> }>;
 
@@ -60,7 +62,10 @@ export const createTaskTool = {
     dueAt: z.iso.datetime().optional(),
   },
   readOnly: false,
-  run: async ({ app, actor }, input) => toTaskResponse(app.taskDeps, actor.organizationId, await createTask(app.taskDeps, actor, input)),
+  run: async ({ app, actor }, input) => {
+    const task = await toTaskResponse(app.taskDeps, actor.organizationId, await createTask(app.taskDeps, actor, input));
+    return { ...task, candidate: withoutSurname(task.candidate) };
+  },
 } satisfies ToolDefinition<{ title: z.ZodString; assigneeId: z.ZodString; applicationId: z.ZodOptional<z.ZodString>; jobId: z.ZodOptional<z.ZodString>; dueAt: z.ZodOptional<z.ZodISODateTime> }>;
 
 export const listJobTemplatesTool = {
