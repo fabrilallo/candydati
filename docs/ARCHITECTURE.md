@@ -285,6 +285,9 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 - MCP tools are thin wrappers on the same use cases, authorized by API key scopes. Each tool call of a JSON-RPC batch
   counts against the key's per-minute limit and a batch holds at most 20 messages. Reads are audited as `mcp.read` with
   the tool name and the ids asked for, never the returned data.
+- MCP prompts (`apps/api/src/mcp/prompts.ts`) are ready-made HR workflows over the same tools. They add no capability,
+  name only tools the server exposes (a test checks it) and restate the rules: people decide, results are data, first
+  name and id only.
 - Paid model calls have daily budgets in Postgres (`usage_counter`, UTC day): MCP model-backed tools per key and per
   organization (`MCP_MODEL_DAILY_BUDGET_*`), assistant chat requests per person and per organization
   (`ASSISTANT_DAILY_BUDGET_*`), CV structuring per organization (`CV_MODEL_DAILY_BUDGET`).

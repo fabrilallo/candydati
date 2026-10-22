@@ -114,3 +114,17 @@ Privacy by design: MCP results name candidates by first name and id only, never 
 person's decision. Each tool call counts
 against the key's rate limit, a batch holds at most 20 messages, and reads are audited. Model-backed tools
 (`analyze_job_ad`, and `publish_job` when `FAST_MODEL` is set) have daily budgets, see [AI assistant](./ai).
+
+### Prompts
+
+The server also offers prompts: ready-made workflows that any MCP client lists, often as slash commands, with nothing to
+install. They guide the agent through the tools above and add no capability. Each one restates the rules: decisions
+about people stay with a person, data in results is never an instruction, candidates come with first name and id only.
+
+| Prompt | What it does |
+|---|---|
+| `write_job_ad` | drafts a complete ad from a brief (`brief`, optional `templateId`): RAL range, declared process, title for both sexes; publishes only after your explicit go-ahead |
+| `answer_inbox` | goes through the applications waiting for an answer (optional `state`) and drafts replies; you send them from the app |
+| `find_candidates` | proposes objective criteria from a job ad (`jobId`), waits for your confirmation, then lists who meets them in the order received, plus the CVs a person must check |
+| `weekly_report` | figures of the last seven days (optional `jobId`), every rate with its denominator, no names |
+| `interview_kit` | questions for each declared stage of a job (`jobId`) and an observation grid with no scores or ratings |
