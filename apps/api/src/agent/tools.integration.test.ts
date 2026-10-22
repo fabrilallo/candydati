@@ -133,9 +133,23 @@ describe('candidate-authored text', () => {
     await t.handle.db.update(schema.application).set({ responseDueAt: new Date(Date.now() - 3_600_000) }).where(eq(schema.application.id, luca.applicationId));
     const attention = (await call('list_attention', { state: 'overdue' })) as { items: { candidateName: string; applicationId: string; state: string }[] };
     expect(attention.items).toEqual([expect.objectContaining({ applicationId: luca.applicationId, state: 'overdue' })]);
-    expect(attention.items[0]!.candidateName).toBe(`${CANDIDATE_DATA_OPEN}\nLuca Neri\n${CANDIDATE_DATA_CLOSE}`);
+    expect(attention.items[0]!.candidateName).toBe(`${CANDIDATE_DATA_OPEN}\nLuca\n${CANDIDATE_DATA_CLOSE}`);
     const summary = (await call('get_pipeline_summary', { jobId: w.jobId })) as { stages: { overdue: number }[] };
     expect(summary.stages.reduce((sum, s) => sum + s.overdue, 0)).toBe(1);
+  });
+
+  it('reaches the model with the first name only: surname and contacts are replaced, in the CV too', async () => {
+    const giulia = w.candidates.find((c) => c.key === 'giulia')!;
+    await t.handle.db
+      .update(schema.cvExtraction)
+      .set({ text: 'Giulia Verdi, Via Roma 12, Milano. giulia.verdi@example.com, +39 333 123 4567. React dal 03/2019.' })
+      .where(eq(schema.cvExtraction.applicationId, giulia.applicationId));
+    const brief = (await call('get_candidate_brief', { candidateId: giulia.candidateId })) as Result;
+    const sent = JSON.stringify(brief);
+    expect(sent).toContain('Giulia [surname], [address], Milano. [email], [phone]. React dal 03/2019.');
+    expect(sent).not.toMatch(/Verdi|@example\.com|333 123/);
+    expect(brief).toMatchObject({ candidateId: giulia.candidateId });
+    await t.handle.db.update(schema.cvExtraction).set({ text: CV_INJECTION }).where(eq(schema.cvExtraction.applicationId, giulia.applicationId));
   });
 
   it('records the profile view as the agent on behalf of the user', async () => {
@@ -207,6 +221,13 @@ describe('action tools', () => {
     });
     const after = await t.handle.db.select().from(schema.message).where(eq(schema.message.applicationId, anna.applicationId));
     expect(after).toHaveLength(before.length);
+  });
+
+  it('leaves the surname as a variable in drafts, so the model never reads it back', async () => {
+    const anna = w.candidates.find((c) => c.key === 'anna')!;
+    const draft = await call('draft_message', { applicationId: anna.applicationId, subject: 'Ciao {{candidate.firstName}} {{ candidate.lastName }}', body: 'Gentile {{candidate.lastName}}' });
+    expect(draft).toMatchObject({ subject: 'Ciao Anna {{candidate.lastName}}', body: 'Gentile {{candidate.lastName}}', unknownVariables: [] });
+    expect(JSON.stringify(draft)).not.toContain('Rossi');
   });
 
   it('renders a draft for a person who can read but not send messages', async () => {

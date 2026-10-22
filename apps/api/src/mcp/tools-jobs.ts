@@ -132,8 +132,8 @@ export const getPipelineTool = {
   name: 'get_pipeline',
   title: 'Read the pipeline of a job',
   description:
-    'Where the applications of a job stand: the stages with how many open applications each has, and one card per application with the candidate\'s name, ' +
-    'stage, outcome and response state (on_track, due_soon, overdue, answered, closed). Names only: no CV text, messages or notes. ' +
+    'Where the applications of a job stand: the stages with how many open applications each has, and one card per application with the candidate\'s first name and id (never the surname), ' +
+    'stage, outcome and response state (on_track, due_soon, overdue, answered, closed). No CV text, messages or notes. ' +
     'Read only: there is no tool to move, decide on, message or erase a candidate, those stay with a person.',
   shape: { jobId },
   readOnly: true,

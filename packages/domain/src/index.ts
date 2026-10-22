@@ -20,6 +20,7 @@ export * from './job/job-posting.js';
 export * from './job/json-schema.js';
 export * from './job/stats.js';
 export * from './candidate/privacy.js';
+export * from './privacy/pseudonymize.js';
 export * from './candidate/application.js';
 export * from './candidate/attachment.js';
 export { isSafePersonName, personNameSchema, safePersonNameOrEmpty } from './candidate/person-name.js';

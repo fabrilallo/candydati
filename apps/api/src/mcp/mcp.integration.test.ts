@@ -123,7 +123,9 @@ describe('MCP tools', () => {
     expect(pipeline.data.job).toMatchObject({ id: world.job.id, status: 'published' });
     expect(pipeline.data.stages[0]).toMatchObject({ id: 'received', openCount: 1 });
     expect(pipeline.data.applications).toHaveLength(1);
-    expect(pipeline.data.applications[0]).toMatchObject({ firstName: 'Giulia', lastName: 'Bianchi', stageId: 'received', outcome: null });
+    expect(pipeline.data.applications[0]).toMatchObject({ firstName: 'Giulia', stageId: 'received', outcome: null });
+    expect(pipeline.data.applications[0]).not.toHaveProperty('lastName');
+    expect(pipeline.text).not.toContain('Bianchi');
     expect(['on_track', 'due_soon', 'overdue', 'answered', 'closed']).toContain(pipeline.data.applications[0].responseState);
     expect(pipeline.text).not.toContain(INJECTION);
     expect(pipeline.text).not.toMatch(/email|message|headline|tags|cv/i);
@@ -136,8 +138,10 @@ describe('MCP tools', () => {
     const note = await call(client, 'add_candidate_note', { candidateId, body: 'Called back, available from May.' });
     expect(note.data.body).toBe('Called back, available from May.');
     const session = (await world.owner.get('/api/auth/get-session')).body as unknown as { user: { id: string } };
-    const task = await call(client, 'create_task', { title: 'Send the offer draft to HR', assigneeId: session.user.id, dueAt: new Date(Date.now() + 86_400_000).toISOString() });
-    expect(task.data).toMatchObject({ title: 'Send the offer draft to HR', completedAt: null });
+    const applicationId = (await call(client, 'get_pipeline', { jobId: world.job.id })).data.applications[0].applicationId;
+    const task = await call(client, 'create_task', { title: 'Send the offer draft to HR', assigneeId: session.user.id, applicationId, dueAt: new Date(Date.now() + 86_400_000).toISOString() });
+    expect(task.data).toMatchObject({ title: 'Send the offer draft to HR', completedAt: null, candidate: { firstName: 'Giulia' } });
+    expect(task.text).not.toContain('Bianchi');
     expect((await call(client, 'list_attention')).data.meta).toMatchObject({ page: 1 });
     expect((await call(client, 'get_job_stats')).data.statusCounts.total).toBeGreaterThan(0);
   });

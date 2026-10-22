@@ -138,6 +138,16 @@ describe('renderMessageDraft', () => {
     expect(deps.messagingStore.read().messages).toHaveLength(0);
   });
 
+  it('keeps the surname as a variable: the draft goes back to a model, the composer fills it in', async () => {
+    const deps = seedMessagingWorld();
+    const draft = await renderMessageDraft(deps, recruiter, { subject: '{{candidate.lastName}}', body: 'Hi {{ candidate.firstName }} {{ candidate.lastName }}', applicationId: 'app_1' });
+    const preview = await previewMessage(deps, recruiter, { subject: '{{candidate.lastName}}', body: 'x', applicationId: 'app_1' });
+    expect(draft.subject).toBe('{{candidate.lastName}}');
+    expect(draft.body).toMatch(/^Hi \S+ \{\{candidate\.lastName\}\}$/);
+    expect(draft.unknownVariables).toEqual([]);
+    expect(preview.subject).not.toContain('{{');
+  });
+
   it('is not found for a foreign organization, for every role', async () => {
     for (const role of ['owner', 'interviewer'] as const) {
       expect(await rejection(renderMessageDraft(seedMessagingWorld(), userActor({ role, organizationId: ORG_B }), body))).toBeInstanceOf(NotFoundError);

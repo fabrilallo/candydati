@@ -199,6 +199,7 @@ Roles. The client company is the data controller. In the hosted offering the ser
 | Minimisation | No field for special-category data; CV extraction discards photo, date of birth, marital status |
 | Access | Permissions by role and by ad (§6.2) |
 | Language models | Configurable provider, listed as a sub-processor; no data used for training; a local model is possible when self-hosting |
+| Data sent to models | The assistant and the MCP server send first name and id only: surname, contacts and identifiers are removed, in CVs and messages too. Pseudonymized data is still personal data |
 | Automated decisions | None (§2.4) |
 | Documents | Data processing agreement template, sub-processor list, record of processing activities (`docs/legal/`) |
 | Public form | A submission never rewrites an existing person's profile: the typed contact data stays on the application and a recruiter reviews it ("new details from the application"). An existing open application is answered like a success (nothing reveals who applied), receipts have a per-recipient and a per-organization daily cap, and an optional Cloudflare Turnstile check can be switched on |
