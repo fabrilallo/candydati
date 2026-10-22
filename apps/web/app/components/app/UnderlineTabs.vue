@@ -3,7 +3,7 @@ import type { TabItem } from '@/lib/tabs'
 
 /**
  * Underline tabs that switch a view or a filter in place: toggle buttons (`aria-pressed`) in a labelled group.
- * The selection is the cobalt underline. Scrolls sideways inside itself on a phone, never the page.
+ * The selection is the ink underline. Scrolls sideways inside itself on a phone, never the page.
  */
 defineProps<{ items: readonly TabItem<T>[]; label: string }>()
 const model = defineModel<T>({ required: true })

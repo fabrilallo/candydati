@@ -64,7 +64,7 @@ const send = async (): Promise<void> => {
           :href="safeExternalUrl(field.howToUrl) ?? undefined"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex w-fit items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline"
+          class="inline-flex w-fit items-center gap-1 text-xs font-medium text-link underline-offset-4 hover:underline"
           :aria-label="t('migrations.connector.howToLabel', { field: label(field) })"
           data-testid="connector-how-to"
         >{{ t('migrations.connector.howTo') }}<ExternalLinkIcon class="size-3" aria-hidden="true" /></a>

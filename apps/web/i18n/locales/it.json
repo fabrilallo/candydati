@@ -1365,6 +1365,12 @@
     "protectedCategories": {
       "reserved": "Posizione riservata agli iscritti alle liste del collocamento mirato ai sensi della L. 68/99.",
       "also": "Posizione aperta anche agli iscritti alle liste del collocamento mirato ai sensi della L. 68/99."
+    },
+    "promise": {
+      "top": "ti rispondiamo",
+      "figure": "sempre",
+      "bottom": "a ogni fase",
+      "label": "Ti rispondiamo sempre, dopo ogni fase"
     }
   },
   "careers": {
@@ -1950,7 +1956,14 @@
     "overdueToday": "Scaduta oggi",
     "overdue": "In ritardo di 1 giorno | In ritardo di {count} giorni",
     "answered": "Risposto",
-    "dueAt": "Risposta promessa entro il {date}"
+    "dueAt": "Risposta promessa entro il {date}",
+    "sticker": {
+      "days": "{count}g",
+      "today": "oggi",
+      "reply": "risposta",
+      "lateFigure": "!",
+      "late": "ritardo"
+    }
   },
   "attention": {
     "title": "Da gestire",

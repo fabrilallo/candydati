@@ -2,7 +2,7 @@
 import { CheckIcon } from '@lucide/vue'
 import { MIGRATION_STEPS, type MigrationStep } from '@/lib/migration-view'
 
-/** Where the user is in the migration: numbered steps, done ones ticked, the current one in cobalt. */
+/** Where the user is in the migration: numbered steps, done ones ticked, the current one in ink. */
 const props = defineProps<{ current: MigrationStep }>()
 const { t } = useI18n()
 const SHOWN = MIGRATION_STEPS.filter((step) => step !== 'result')

@@ -5,7 +5,7 @@ import { imageSources, mediaOf, safeMediaUrl } from '@/lib/careers-site'
 
 /**
  * Opening of the page: the headline as the page `h1`, the call to action that scrolls to the open positions and their
- * count. Over an image or a video (full bleed) the text is light on a dark scrim; the image is the LCP element, so it
+ * count. Without media it sits in the candy hero panel (muted, ink outline, hard shadow). Over an image or a video (full bleed) the text is light on a dark scrim; the image is the LCP element, so it
  * loads first (`fetchpriority=high`). A video plays muted in a loop only without reduced motion, with a pause button.
  */
 const props = defineProps<{ section: SectionOf<'hero'>; first: boolean }>()
@@ -55,7 +55,7 @@ const scrim = computed(() => ({ backgroundColor: `rgb(11 13 16 / ${props.section
       <div class="absolute inset-0 -z-10" :style="scrim" aria-hidden="true" />
     </template>
     <div :class="['cp-wrap relative', onMedia ? 'pt-24 pb-20 @2xl:pb-24' : 'pt-12 pb-4 @2xl:pt-20 @2xl:pb-8']">
-      <div :class="['grid max-w-4xl gap-6', centered ? 'mx-auto justify-items-center text-center' : '']">
+      <div :class="['grid gap-6', centered ? 'mx-auto justify-items-center text-center' : '', onMedia ? 'max-w-4xl' : 'rounded-2xl border-2 border-ink bg-muted p-6 shadow-hard-lg @2xl:p-12']" data-testid="site-hero-panel">
         <h1 :id="`${section.id}-title`" :class="['cp-heading text-[2.625rem] leading-[1.02] @2xl:text-6xl @5xl:text-7xl', onMedia ? 'text-[#f6f7f9]' : '']" data-testid="site-hero-title">
           {{ headline }}
         </h1>

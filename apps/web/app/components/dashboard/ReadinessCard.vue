@@ -36,7 +36,7 @@ const width = (drafts: number): string => `${Math.max(6, (drafts / Math.max(1, p
       :body="readiness.draftCount > 0 ? t('dashboard.stats.readiness.allReadyBody') : t('dashboard.stats.readiness.emptyBody')"
     />
     <template v-if="readiness.draftCount > 0" #footer>
-      <NuxtLink to="/app/jobs" class="text-sm font-medium text-primary underline-offset-4 hover:underline">{{ t('dashboard.stats.readiness.open') }}</NuxtLink>
+      <NuxtLink to="/app/jobs" class="text-sm font-medium text-link underline-offset-4 hover:underline">{{ t('dashboard.stats.readiness.open') }}</NuxtLink>
     </template>
   </StatCard>
 </template>

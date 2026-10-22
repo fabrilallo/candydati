@@ -7,13 +7,13 @@ withDefaults(defineProps<{ columns?: number }>(), { columns: 4 })
 
 <template>
   <div class="-mx-4 flex gap-3 overflow-hidden px-4 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0" aria-busy="true" data-testid="pipeline-loading">
-    <div v-for="column in columns" :key="column" class="grid w-full shrink-0 content-start gap-2 rounded-xl bg-muted/60 p-2 md:w-80" :class="column > 1 ? 'max-md:hidden' : ''">
+    <div v-for="column in columns" :key="column" class="grid w-full shrink-0 content-start gap-2.5 rounded-xl bg-muted p-2.5 md:w-80" :class="column > 1 ? 'max-md:hidden' : ''">
       <div class="flex items-center gap-2 px-2 py-2">
         <Skeleton class="size-2 rounded-full" />
         <Skeleton class="h-4 w-28" />
         <Skeleton class="h-5 w-7 rounded-full" />
       </div>
-      <div v-for="card in 2" :key="card" class="grid gap-3 rounded-lg border bg-card p-4">
+      <div v-for="card in 2" :key="card" class="grid gap-3 rounded-lg border-2 bg-card p-4">
         <div class="flex items-center gap-3">
           <Skeleton class="size-9 rounded-full" />
           <div class="grid flex-1 gap-1.5">

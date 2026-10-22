@@ -1365,6 +1365,12 @@
     "protectedCategories": {
       "reserved": "Position reserved for people registered in the targeted placement lists under Italian Law 68/99.",
       "also": "Position also open to people registered in the targeted placement lists under Italian Law 68/99."
+    },
+    "promise": {
+      "top": "we reply",
+      "figure": "always",
+      "bottom": "at every stage",
+      "label": "We always reply, after every stage"
     }
   },
   "careers": {
@@ -1950,7 +1956,14 @@
     "overdueToday": "Overdue today",
     "overdue": "1 day late | {count} days late",
     "answered": "Answered",
-    "dueAt": "Answer promised by {date}"
+    "dueAt": "Answer promised by {date}",
+    "sticker": {
+      "days": "{count}d",
+      "today": "today",
+      "reply": "reply",
+      "lateFigure": "!",
+      "late": "late"
+    }
   },
   "attention": {
     "title": "Needs attention",

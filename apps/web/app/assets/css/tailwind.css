@@ -1,6 +1,8 @@
 /*
- * Design tokens (Tailwind 4 + shadcn-vue). Direction "Editoriale nitido": cool off-white and near-black, ONE cobalt
- * accent, Geist. State colours are used only for state. Contract and measured contrast ratios: docs/DESIGN-SYSTEM.md.
+ * Design tokens (Tailwind 4 + shadcn-vue). Direction "Candy, restrained": warm paper and deep ink, ONE yellow accent for
+ * what matters (salary, the response promise, highlights), ink for actions, a single coral alert for what is late.
+ * Bricolage Grotesque. Shape: 2px ink borders, generous radii, hard offset shadows (`shadow-hard`). State colours are
+ * used only for state. Contract and measured contrast ratios: docs/DESIGN-SYSTEM.md.
  * Dark mode = class `dark` on <html> (set by @nuxtjs/color-mode). Fonts are loaded in nuxt.config (`css`).
  */
 @import "tailwindcss";
@@ -10,58 +12,79 @@
 
 :root {
   color-scheme: light;
-  --background: #f6f7f9;
-  --foreground: #111318;
-  --card: #fdfdfe;
-  --card-foreground: #111318;
-  --popover: #fdfdfe;
-  --popover-foreground: #111318;
-  --primary: #1f47d6;
-  --primary-hover: #1a3cb8;
-  --primary-foreground: #f6f7f9;
-  --secondary: #eceef2;
-  --secondary-foreground: #111318;
-  --muted: #edeff3;
-  --muted-foreground: #596070;
-  --accent: #e8edfd;
-  --accent-foreground: #1a3bb8;
+  --background: #fbfaf7;
+  --foreground: #1b1530;
+  --card: #ffffff;
+  --card-foreground: #1b1530;
+  --popover: #ffffff;
+  --popover-foreground: #1b1530;
+  /* Actions are ink with paper text; links are their own colour. */
+  --primary: #1b1530;
+  --primary-hover: #2e2748;
+  --primary-foreground: #fbfaf7;
+  --secondary: #f1eee8;
+  --secondary-foreground: #1b1530;
+  --muted: #f1eee8;
+  --muted-foreground: #4a4360;
+  /* Selection and soft emphasis: a tint of the one accent. */
+  --accent: #fff0b3;
+  --accent-foreground: #1b1530;
+  /* The one accent: salary, a promise due soon, primary highlights. Always with ink text. */
+  --highlight: #ffd54f;
+  --highlight-foreground: #1b1530;
+  /* The one alert: overdue or late only. Always with ink text. */
+  --alert: #ff7a6b;
+  --alert-foreground: #1b1530;
+  --link: #3b23c9;
+  --link-hover: #2a178f;
+  /* Strong outline of cards and key panels, and the colour of the hard offset shadow. */
+  --ink: #1b1530;
+  --ink-shadow: #1b1530;
   --destructive: #b3261e;
-  --destructive-foreground: #f6f7f9;
-  --destructive-soft: #fbeae8;
+  --destructive-foreground: #fbfaf7;
+  --destructive-soft: #fde8e4;
   --success: #1e6b4b;
   --success-soft: #e4f2eb;
   --warning: #8a5300;
   --warning-soft: #faf0dc;
-  --border: #e3e6eb;
-  --input: #d2d7de;
-  --ring: #1f47d6;
-  --sidebar: #f0f2f5;
-  --overlay: rgb(17 19 24 / 0.42);
-  --shadow-color: 220 30% 20%;
+  --border: #e6e1d8;
+  --input: #8f879e;
+  --ring: #1b1530;
+  --sidebar: #fbfaf7;
+  --overlay: rgb(27 21 48 / 0.45);
+  --shadow-color: 255 39% 13%;
   /* Inverse surface for the auth promise panel. */
-  --inverse: #111318;
-  --inverse-foreground: #f6f7f9;
-  --inverse-muted: #a9b0bc;
-  --inverse-accent: #7d9bff;
+  --inverse: #1b1530;
+  --inverse-foreground: #fbfaf7;
+  --inverse-muted: #c9c3d9;
+  --inverse-accent: #ffd54f;
 }
 
 .dark {
   color-scheme: dark;
-  --background: #0e1013;
-  --foreground: #eceef2;
-  --card: #15181d;
-  --card-foreground: #eceef2;
-  --popover: #1a1d23;
-  --popover-foreground: #eceef2;
-  --primary: #7d9bff;
-  --primary-hover: #96afff;
-  --primary-foreground: #0b1020;
-  --secondary: #1f232a;
-  --secondary-foreground: #eceef2;
-  --muted: #1b1f25;
-  --muted-foreground: #9aa1ad;
-  --accent: #18213d;
-  --accent-foreground: #a9bdff;
+  --background: #14111f;
+  --foreground: #fbfaf7;
+  --card: #1d1930;
+  --card-foreground: #fbfaf7;
+  --popover: #231e38;
+  --popover-foreground: #fbfaf7;
+  --primary: #fbfaf7;
+  --primary-hover: #e6e2ef;
+  --primary-foreground: #1b1530;
+  --secondary: #29233f;
+  --secondary-foreground: #fbfaf7;
+  --muted: #241f37;
+  --muted-foreground: #bdb6cf;
+  --accent: #3a3216;
+  --accent-foreground: #ffe38a;
+  --highlight: #ffd54f;
+  --highlight-foreground: #1b1530;
+  --alert: #ff7a6b;
+  --alert-foreground: #1b1530;
+  --link: #b3a6ff;
+  --link-hover: #cfc6ff;
+  --ink: #d9d3ea;
+  --ink-shadow: #5b5378;
   --destructive: #f2938a;
   --destructive-foreground: #1a0b0a;
   --destructive-soft: #2c1615;
@@ -69,21 +92,23 @@
   --success-soft: #132620;
   --warning: #e2b864;
   --warning-soft: #2a2213;
-  --border: #252a31;
-  --input: #323842;
-  --ring: #7d9bff;
-  --sidebar: #111317;
-  --overlay: rgb(5 6 9 / 0.7);
-  --shadow-color: 220 40% 2%;
-  --inverse: #15181d;
-  --inverse-foreground: #eceef2;
-  --inverse-muted: #9aa1ad;
-  --inverse-accent: #7d9bff;
+  --border: #2e2843;
+  --input: #6e6689;
+  --ring: #fbfaf7;
+  --sidebar: #14111f;
+  --overlay: rgb(8 6 14 / 0.7);
+  --shadow-color: 255 40% 3%;
+  --inverse: #1d1930;
+  --inverse-foreground: #fbfaf7;
+  --inverse-muted: #bdb6cf;
+  --inverse-accent: #ffd54f;
 }
 
 @theme inline {
-  --font-sans: "Geist Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Bricolage Grotesque Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Big titles: weight 800, tight. */
+  --tracking-display: -0.035em;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -99,6 +124,13 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-alert: var(--alert);
+  --color-alert-foreground: var(--alert-foreground);
+  --color-link: var(--link);
+  --color-link-hover: var(--link-hover);
+  --color-ink: var(--ink);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-destructive-soft: var(--destructive-soft);
@@ -116,19 +148,23 @@
   --color-inverse-muted: var(--inverse-muted);
   --color-inverse-accent: var(--inverse-accent);
 
-  /* Radius rule: controls 8px (md), cards/panels/dialogs/menus 14px (lg, xl, 2xl), inner menu items 6px (sm). */
-  --radius: 0.5rem;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 14px;
-  --radius-xl: 14px;
-  --radius-2xl: 14px;
+  /* Radius rule: controls 12px (md), cards 18px (lg), panels and stage columns 24px (xl), heroes 32px (2xl). */
+  --radius: 0.75rem;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
 
-  /* Shadows tinted to the cool background hue, never pure black. */
+  /* Soft shadows tinted to the ink hue, never pure black: menus, dialogs, drag. */
   --shadow-xs: 0 1px 1px 0 hsl(var(--shadow-color) / 0.05);
   --shadow-sm: 0 1px 2px 0 hsl(var(--shadow-color) / 0.06), 0 1px 3px 0 hsl(var(--shadow-color) / 0.05);
   --shadow-md: 0 2px 4px -1px hsl(var(--shadow-color) / 0.06), 0 6px 16px -4px hsl(var(--shadow-color) / 0.1);
   --shadow-lg: 0 4px 8px -2px hsl(var(--shadow-color) / 0.08), 0 16px 40px -8px hsl(var(--shadow-color) / 0.18);
+  /* The signature hard offset shadow: cards and key panels (3px; 4px on hover), heroes (6px). */
+  --shadow-hard: 3px 3px 0 0 var(--ink-shadow);
+  --shadow-hard-md: 4px 4px 0 0 var(--ink-shadow);
+  --shadow-hard-lg: 6px 6px 0 0 var(--ink-shadow);
 
   /* Motion: one curve, short durations. */
   --ease-snap: cubic-bezier(0.16, 1, 0.3, 1);
@@ -150,6 +186,7 @@
   }
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-optical-sizing: auto;
   }
   h1, h2, h3 {
     text-wrap: balance;
@@ -158,7 +195,8 @@
     text-wrap: pretty;
   }
   ::selection {
-    background: color-mix(in srgb, var(--primary) 22%, transparent);
+    background: var(--accent);
+    color: var(--accent-foreground);
   }
   :focus-visible {
     outline: 2px solid var(--ring);
@@ -183,7 +221,7 @@
 
 /*
  * Charts (@unovis): themed through its CSS variables, mapped to our tokens so both themes follow automatically.
- * Series colours are passed per chart: cobalt for the main series, neutrals for the rest, state colours for state.
+ * Series colours are passed per chart: ink (`primary`) for the main series, neutrals for the rest, state colours for state.
  */
 :root {
   --chart-neutral: color-mix(in srgb, var(--muted-foreground) 38%, var(--card));

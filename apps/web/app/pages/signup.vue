@@ -14,7 +14,7 @@ const loginLink = computed(() => (typeof route.query.redirect === 'string' ? { p
     <AuthForm mode="signup" />
     <p class="border-t pt-6 text-sm text-muted-foreground">
       {{ t('auth.signup.hasAccount') }}
-      <NuxtLink :to="loginLink" rel="nofollow" class="font-medium text-primary underline-offset-4 hover:underline">{{ t('auth.signup.loginLink') }}</NuxtLink>
+      <NuxtLink :to="loginLink" rel="nofollow" class="font-medium text-link underline-offset-4 hover:underline">{{ t('auth.signup.loginLink') }}</NuxtLink>
     </p>
   </div>
 </template>

@@ -40,7 +40,7 @@ const contextLink = computed(() => (props.task.candidate ? `/app/candidates/${en
         <span v-if="done" class="font-medium text-success">{{ t('tasks.done') }}</span>
       </p>
       <p v-if="showContext && (task.candidate || jobTitle)" class="truncate text-xs text-muted-foreground">
-        <NuxtLink v-if="task.candidate && contextLink" :to="contextLink" class="font-medium text-primary underline-offset-4 hover:underline">{{ fullName(task.candidate) }}</NuxtLink>
+        <NuxtLink v-if="task.candidate && contextLink" :to="contextLink" class="font-medium text-link underline-offset-4 hover:underline">{{ fullName(task.candidate) }}</NuxtLink>
         <template v-if="task.candidate && jobTitle">, </template>{{ jobTitle }}
       </p>
     </div>

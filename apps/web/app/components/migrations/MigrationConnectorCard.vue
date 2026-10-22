@@ -24,7 +24,7 @@ const { t } = useI18n()
       </h3>
       <p v-if="connector.input === 'files'" class="max-w-xl text-sm text-pretty" data-testid="connector-files-sentence">{{ t('migrations.source.connectors.files', { vendor: connector.label }) }}</p>
       <p v-if="connector.maturity === 'beta'" class="max-w-xl text-sm text-pretty text-muted-foreground">{{ t('migrations.source.connectors.sentence', { vendor: connector.label }) }}</p>
-      <a v-if="safeExternalUrl(connector.docsUrl)" :href="safeExternalUrl(connector.docsUrl) ?? undefined" target="_blank" rel="noopener noreferrer" class="inline-flex w-fit items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline">
+      <a v-if="safeExternalUrl(connector.docsUrl)" :href="safeExternalUrl(connector.docsUrl) ?? undefined" target="_blank" rel="noopener noreferrer" class="inline-flex w-fit items-center gap-1 text-xs font-medium text-link underline-offset-4 hover:underline">
         {{ t('migrations.source.connectors.docs', { vendor: connector.label }) }}<ExternalLinkIcon class="size-3" aria-hidden="true" />
       </a>
     </div>

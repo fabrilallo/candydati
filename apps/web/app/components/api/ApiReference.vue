@@ -27,7 +27,7 @@ const envelope = `{ "success": true, "data": { … }, "error": null }
         <h2 id="api-reference-title" class="text-base font-semibold tracking-tight">{{ t('apiReference.title') }}</h2>
         <p class="max-w-prose text-sm text-muted-foreground">{{ t('apiReference.description') }}</p>
       </div>
-      <a :href="OPENAPI_PATH" target="_blank" rel="noopener" class="text-sm font-medium text-primary underline-offset-4 hover:underline">{{ t('apiReference.download') }}<span v-if="version" class="figure text-muted-foreground"> v{{ version }}</span></a>
+      <a :href="OPENAPI_PATH" target="_blank" rel="noopener" class="text-sm font-medium text-link underline-offset-4 hover:underline">{{ t('apiReference.download') }}<span v-if="version" class="figure text-muted-foreground"> v{{ version }}</span></a>
     </div>
     <div class="grid gap-3 text-sm sm:grid-cols-2">
       <div class="grid content-start gap-2">

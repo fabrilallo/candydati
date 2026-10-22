@@ -15,7 +15,7 @@ const { viewer } = useViewer()
 </script>
 
 <template>
-  <header class="sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md lg:rounded-t-xl" data-testid="top-bar">
+  <header class="sticky top-0 z-30 border-b bg-background/90 backdrop-blur-md" data-testid="top-bar">
     <div class="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2 sm:px-6 lg:px-8">
       <Button variant="ghost" size="icon-sm" class="-ml-1.5 lg:hidden" :aria-label="t('shell.openNav')" aria-controls="nav-drawer" :aria-expanded="drawerOpen" @click="drawerOpen = true">
         <MenuIcon class="size-5" aria-hidden="true" />

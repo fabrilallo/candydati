@@ -47,7 +47,7 @@ const resend = async (): Promise<void> => {
       <h1 class="text-3xl font-semibold tracking-tight">{{ t('auth.verify.inviteRequiredTitle') }}</h1>
       <p class="text-[0.9375rem] text-muted-foreground" data-testid="verify-email-invite-required">{{ t('auth.verify.inviteRequired') }}</p>
     </div>
-    <NuxtLink to="/login" rel="nofollow" class="text-sm font-medium text-primary underline-offset-4 hover:underline">{{ t('auth.verify.backToLogin') }}</NuxtLink>
+    <NuxtLink to="/login" rel="nofollow" class="text-sm font-medium text-link underline-offset-4 hover:underline">{{ t('auth.verify.backToLogin') }}</NuxtLink>
   </div>
   <div v-else class="grid gap-8">
     <div class="grid gap-3">
@@ -64,7 +64,7 @@ const resend = async (): Promise<void> => {
       <Button v-if="email" variant="outline" size="lg" :disabled="busy || sent" data-testid="verify-email-resend" @click="resend">
         {{ busy ? t('auth.verify.resending') : t('auth.verify.resend') }}
       </Button>
-      <NuxtLink to="/login" rel="nofollow" class="text-sm font-medium text-primary underline-offset-4 hover:underline">{{ t('auth.verify.backToLogin') }}</NuxtLink>
+      <NuxtLink to="/login" rel="nofollow" class="text-sm font-medium text-link underline-offset-4 hover:underline">{{ t('auth.verify.backToLogin') }}</NuxtLink>
     </div>
   </div>
 </template>

@@ -18,7 +18,7 @@ export default defineNuxtConfig({
   build: { transpile: ['@lucide/vue', 'reka-ui', 'vue-sonner'] },
   // Components are used by file name whatever their folder (`components/audit/ActorBadge.vue` is `<ActorBadge>`).
   components: [{ path: '~/components', pathPrefix: false, ignore: ['**/*.test.ts'] }],
-  css: ['@fontsource-variable/geist/wght.css', '@fontsource-variable/geist-mono/wght.css', '~/assets/css/tailwind.css'],
+  css: ['@fontsource-variable/bricolage-grotesque/opsz.css', '@fontsource-variable/geist-mono/wght.css', '~/assets/css/tailwind.css'],
   vite: { plugins: [tailwindcss()] },
   shadcn: { prefix: '', componentDir: './app/components/ui' },
   colorMode: { classSuffix: '', preference: 'system', fallback: 'light', storageKey: 'candydati.theme', disableTransition: true },

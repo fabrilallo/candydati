@@ -109,7 +109,7 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
             </p>
             <p v-else-if="current && stage" class="text-sm text-muted-foreground" data-testid="candidate-stage">
               {{ t('candidate.header.stage') }}
-              <NuxtLink :to="`/app/jobs/${current.job.id}/candidates`" class="font-medium text-primary underline-offset-4 hover:underline">{{ stageName(stage, t) }}</NuxtLink>
+              <NuxtLink :to="`/app/jobs/${current.job.id}/candidates`" class="font-medium text-link underline-offset-4 hover:underline">{{ stageName(stage, t) }}</NuxtLink>
               <span class="text-muted-foreground">, {{ current.job.title }}</span>
             </p>
             <p v-if="status" class="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground" data-testid="candidate-status">

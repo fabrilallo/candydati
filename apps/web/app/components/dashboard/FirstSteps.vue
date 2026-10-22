@@ -52,7 +52,7 @@ const visible = computed(() => progress.value !== null && steps.value.some((step
           <p class="text-sm text-muted-foreground">{{ t(`dashboard.start.${step.id}.body`) }}</p>
         </div>
         <p v-if="step.done" class="col-start-2 text-sm font-medium text-success sm:col-start-3" :data-testid="`step-${step.id}-done`">{{ t(`dashboard.start.${step.id}.done`) }}</p>
-        <NuxtLink v-else :to="step.to" class="col-start-2 inline-flex items-center gap-1.5 text-sm font-medium text-primary underline-offset-4 hover:underline sm:col-start-3">
+        <NuxtLink v-else :to="step.to" class="col-start-2 inline-flex items-center gap-1.5 text-sm font-medium text-link underline-offset-4 hover:underline sm:col-start-3">
           {{ t(`dashboard.start.${step.id}.cta`) }}
           <ArrowRightIcon class="size-4" aria-hidden="true" />
         </NuxtLink>
