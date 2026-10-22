@@ -5,7 +5,8 @@ import { careersPageSeo } from '@/lib/careers-seo'
 import { fetchCareers } from '@/lib/job-api'
 import { absoluteUrl, careersPath } from '@/lib/job-view'
 import { failureStatus, loadPublic } from '@/lib/public-load'
-import { absoluteLogoUrl } from '@/lib/safe-url'
+import { faviconLink } from '@/lib/favicon'
+import { absoluteLogoUrl, safeLogoUrl } from '@/lib/safe-url'
 
 definePageMeta({ layout: 'careers' })
 const { t, locale } = useI18n()
@@ -54,7 +55,8 @@ useSeoMeta({
 })
 useHead({
   titleTemplate: (value) => value ?? '',
-  link: [{ rel: 'canonical', href: canonical }],
+  // The organization's logo in the tab, when it has one; otherwise the platform icon of app.vue stays.
+  link: [{ rel: 'canonical', href: canonical }, ...(safeLogoUrl(careers.organization.logo) ? [faviconLink(careers.organization.logo)] : [])],
   script: [{ type: 'application/ld+json', innerHTML: () => seo.value.jsonLd }],
 })
 </script>
