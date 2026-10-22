@@ -22,6 +22,8 @@ export * from './job/stats.js';
 export * from './candidate/privacy.js';
 export * from './privacy/pseudonymize.js';
 export * from './candidate/application.js';
+export * from './candidate/criteria.js';
+export * from './candidate/criteria-match.js';
 export * from './candidate/attachment.js';
 export { isSafePersonName, personNameSchema, safePersonNameOrEmpty } from './candidate/person-name.js';
 export * from './messaging/variables.js';

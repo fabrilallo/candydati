@@ -34,7 +34,7 @@ Every candidate always receives an outcome. The system supports this structurall
 
 ### 2.4 No automated decisions about candidates
 
-The product does not rank, score, order or reject people, and it has no automation rule that moves or decides. Quality scores evaluate the ad, never candidates. Interview feedback describes what was seen and carries no score. This is also the GDPR position on automated decision-making (§6).
+The product does not rank, score, order or reject people, and it has no automation rule that moves or decides. A person may filter candidates on objective criteria they declare; every result meets every criterion and the list is ordered by date of application, never by merit. Quality scores evaluate the ad, never candidates. Interview feedback describes what was seen and carries no score. This is also the GDPR position on automated decision-making (§6).
 
 ### 2.5 Agentic-ready
 
@@ -77,7 +77,7 @@ HR tools in more detail:
 
 ### 3.2 Out of scope by choice
 
-A free-form career site builder (custom HTML, CSS or scripts, arbitrary layouts, several pages), automatic CV screening or ranking, email campaigns to candidates, on-site chat, onboarding, automatic "match" scores.
+A free-form career site builder (custom HTML, CSS or scripts, arbitrary layouts, several pages), automatic CV screening or ranking, email campaigns to candidates, on-site chat, onboarding, automatic "match" scores. Filtering candidates on objective criteria a person declares (skills, languages, minimum experience, location) is in scope: it is a filter, with no score and no order by merit ([ADR 0010](adr/0010-privacy-by-design-and-declared-criteria.md)).
 
 ### 3.3 Deferred
 

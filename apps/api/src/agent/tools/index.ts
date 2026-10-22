@@ -3,6 +3,7 @@ import type { JobDrafter } from '../job-drafter.js';
 import { createCreateTaskTool, createDraftMessageTool } from './action-tools.js';
 import { createCandidateBriefTool, createListAttentionTool, createPipelineSummaryTool } from './candidate-tools.js';
 import { createReportsSummaryTool } from './report-tools.js';
+import { createFindCandidatesTool } from './search-tools.js';
 import {
   createAnalyzeJobAdTool,
   createDraftJobContentTool,
@@ -24,7 +25,8 @@ export interface AgentToolDeps {
 
 /**
  * The assistant's tools, keyed by id (Mastra exposes the key as the function name). There is deliberately no tool to
- * publish or close an ad, move or decide on a candidate, send a message, erase data or rank anyone.
+ * publish or close an ad, move or decide on a candidate, send a message, erase data or rank anyone (the criteria search filters on what
+ * a person confirmed, it does not score).
  */
 export function createAgentTools(deps: AgentToolDeps) {
   const tools = [
@@ -37,6 +39,7 @@ export function createAgentTools(deps: AgentToolDeps) {
     createPipelineSummaryTool(deps.candidateDeps),
     createListAttentionTool(deps.candidateDeps),
     createCandidateBriefTool(deps.candidateDeps, deps.messagingDeps),
+    createFindCandidatesTool(deps.candidateDeps),
     createDraftMessageTool(deps.messagingDeps),
     createCreateTaskTool(deps.taskDeps),
     createReportsSummaryTool(deps.reportDeps),

@@ -88,6 +88,10 @@ export function scopeCandidateSearch(raw: CandidateSearch, ctx: JobScopeContext)
       const jobIds = await ctx.jobIds();
       return raw.search(jobIds === null ? query : { ...query, jobIds });
     },
+    async findByCriteria(query) {
+      const jobIds = await ctx.jobIds();
+      return raw.findByCriteria(jobIds === null ? query : { ...query, jobIds });
+    },
   };
 }
 

@@ -543,6 +543,7 @@
         "erased": "Erased a candidate's data",
         "exported": "Exported a candidate's data",
         "corrected": "Corrected a candidate's data",
+        "searched_by_criteria": "Searched candidates by objective criteria",
         "consent_reconfirmed": "An imported candidate confirmed consent"
       },
       "candidate_note": {

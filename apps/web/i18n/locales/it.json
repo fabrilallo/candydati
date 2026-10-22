@@ -543,6 +543,7 @@
         "erased": "Ha cancellato i dati di un candidato",
         "exported": "Ha esportato i dati di un candidato",
         "corrected": "Ha corretto i dati di un candidato",
+        "searched_by_criteria": "Ha cercato candidati per criteri oggettivi",
         "consent_reconfirmed": "Un candidato importato ha confermato il consenso"
       },
       "candidate_note": {

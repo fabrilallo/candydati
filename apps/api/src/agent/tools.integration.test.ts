@@ -65,6 +65,7 @@ describe('assistant tool list', () => {
       'create_task',
       'draft_job_content',
       'draft_message',
+      'find_candidates_by_criteria',
       'get_candidate_brief',
       'get_job',
       'get_pipeline_summary',
@@ -159,6 +160,28 @@ describe('candidate-authored text', () => {
       .where(and(eq(schema.auditLog.organizationId, w.organizationId), eq(schema.auditLog.action, 'candidate.viewed')));
     expect(rows.length).toBeGreaterThan(0);
     expect(rows.every((r) => r.actorType === 'agent' && r.actorId === 'assistant' && r.onBehalfOfUserId === w.ownerId)).toBe(true);
+  });
+});
+
+describe('criteria search', () => {
+  it('filters the job\'s candidates on confirmed criteria and returns first names and ids only', async () => {
+    const anna = w.candidates.find((c) => c.key === 'anna')!;
+    await t.handle.db
+      .insert(schema.cvExtraction)
+      .values({ applicationId: anna.applicationId, organizationId: w.organizationId, status: 'text_only', text: 'Anna Rossi, Kotlin e Postgres', data: null, source: 'text' })
+      .onConflictDoUpdate({ target: schema.cvExtraction.applicationId, set: { status: 'text_only', text: 'Anna Rossi, Kotlin e Postgres', data: null, source: 'text' } });
+    const input = { jobId: w.jobId, criteria: { skills: ['kotlin'] } };
+    const found = (await call('find_candidates_by_criteria', { ...input, confirmedByUser: true })) as Result & { items: { candidateId: string; firstName: string }[] };
+    expect(found).toMatchObject({ criteria: ['skill: kotlin'], total: 1, order: expect.stringMatching(/not a ranking/) });
+    expect(found.items.map((item) => item.candidateId)).toEqual([anna.candidateId]);
+    expect(found.items[0]!.firstName).toBe(`${CANDIDATE_DATA_OPEN}\nAnna\n${CANDIDATE_DATA_CLOSE}`);
+    expect(JSON.stringify(found)).not.toContain('Rossi');
+  });
+
+  it('needs the user\'s confirmation and refuses discriminatory criteria', async () => {
+    const input = { jobId: w.jobId, criteria: { skills: ['kotlin'] } };
+    expect(await call('find_candidates_by_criteria', input)).toHaveProperty('error');
+    expect(await call('find_candidates_by_criteria', { jobId: w.jobId, criteria: { keywords: ['under 30'] }, confirmedByUser: true })).toHaveProperty('error');
   });
 });
 

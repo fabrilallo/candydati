@@ -36,7 +36,10 @@ switch these principles off.
   score in the product rates the job ad, not who applies; the CV reader extracts facts (roles, skills, languages) shown
   next to the original, without judging them.
 - **Agentic-ready.** Everything in the UI is available through a REST API (OpenAPI) and an MCP server, with the same permissions.
-- **GDPR by design.** Versioned consent, retention and automatic erasure, data subject rights, full export in open formats.
+- **Privacy by design.** Versioned consent, retention and automatic erasure, data subject rights, full export in open
+  formats. AI included: the assistant and external agents over MCP (Claude Code, Codex, Cursor...) see candidates by
+  first name and id only. Surnames, emails, phone numbers, links, addresses and other identifiers are removed before
+  any text reaches a model, in CVs and messages too ([ADR 0010](docs/adr/0010-privacy-by-design-and-declared-criteria.md)).
 
 Status: pre-1.0 (see the [changelog](CHANGELOG.md)). Full product definition: [docs/PRODUCT.md](docs/PRODUCT.md).
 
@@ -48,6 +51,8 @@ Status: pre-1.0 (see the [changelog](CHANGELOG.md)). Full product definition: [d
 - Careers page builder: hero with image or video, gallery, values, numbers, testimonials and more, with live preview, drafts and publication; privacy-first video embeds
 - Applications without registration, with versioned consent
 - Pipeline whose stages are the ones declared in the ad; candidate database search; original CV next to extracted data
+- Find candidates for a job on objective criteria a person confirms (skills, languages, minimum experience, location):
+  a filter over the job's applicants and the talent pool, with no score and no ranking; CVs that could not be checked are reported, not dropped
 
 **Collaboration**
 - Organizations, roles and per-job selection teams
@@ -61,10 +66,14 @@ Status: pre-1.0 (see the [changelog](CHANGELOG.md)). Full product definition: [d
 
 **Agents and integrations**
 - REST API with OpenAPI, API keys, MCP server, process assistant (models via Mastra, off by default)
+- Pseudonymized data for every model: first name and id only, identifiers replaced by markers such as `[surname]`;
+  message drafts keep `{{candidate.lastName}}` as a variable that the person's composer fills in
 - Signed webhooks fed by a transactional outbox
 
 **Privacy and data**
 - Retention, automatic erasure, data subject rights, append-only audit log
+- Minimization: no special-category fields, CV extraction drops photo and birth date, models never receive surnames or contacts
+- Criteria searches only reach people whose consent covers the job, refuse protected characteristics and are audited
 - Import from CVs and spreadsheets with preview and undo; complete export
 - Migration from another ATS through an open package format, with preview, an explicit responsibility step and undo; an agent skill builds the package ([guide](website/guide/migration.md))
 

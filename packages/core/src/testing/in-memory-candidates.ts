@@ -17,6 +17,7 @@ import type { AuditLogRepository } from '../ports.js';
 import type { OutboxRepository } from '../webhook-ports.js';
 import { createInMemoryResponsePromises, createInMemoryStageEvents } from './in-memory-reports.js';
 import { cell } from './in-memory-transaction.js';
+import { findByCriteriaInMemory } from './in-memory-criteria-search.js';
 
 /** The rows of the four candidate tables. Replaced wholesale (never mutated) so a snapshot is just a reference. */
 export interface CandidateStoreState {
@@ -259,6 +260,9 @@ export function createInMemoryCandidateSearch(store: CandidateStore): CandidateS
       );
       const start = (query.page - 1) * query.limit;
       return { items: ordered.slice(start, start + query.limit), total: ordered.length };
+    },
+    async findByCriteria(query) {
+      return findByCriteriaInMemory(store.read(), query);
     },
   };
 }

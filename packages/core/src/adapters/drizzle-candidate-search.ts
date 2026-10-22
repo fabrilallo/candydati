@@ -2,6 +2,7 @@ import { and, asc, eq, gt, schema, sql, type SQL } from '@candydati/db';
 import type { CandidateSearch, CandidateSearchQuery } from '../candidate-ports.js';
 import { toCandidate } from './drizzle-candidates.js';
 import type { DbExecutor } from './db-executor.js';
+import { createDrizzleCriteriaSearch } from './drizzle-criteria-search.js';
 
 /** `%` and `_` typed by the user are literals, not wildcards. */
 export const escapeLike = (value: string): string => value.replace(/[\\%_]/g, (char) => `\\${char}`);
@@ -73,6 +74,7 @@ export function createDrizzleCandidateSearch(db: DbExecutor): CandidateSearch {
     sql<number>`(select count(*)::int from ${application} where "application"."candidate_id" = ${outer.id} and "application"."consent_status" = 'given' and ${inJobs(jobIds)})`;
   const total = sql<number>`count(*) over ()::int`;
   return {
+    findByCriteria: createDrizzleCriteriaSearch(db),
     async listAfter(organizationId, afterId, limit) {
       const rows = await db
         .select({ candidate })

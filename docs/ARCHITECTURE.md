@@ -277,6 +277,10 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
   messages too. Message drafts keep `{{candidate.lastName}}` as a variable that the person's composer fills in. This
   is pseudonymization, not anonymization: CV content can still single someone out, so the rules above still apply.
   CV structuring is the one model call that reads the whole document, because it has to extract it.
+- `find_candidates_by_criteria` (assistant and MCP) filters a job's applicants and the talent pool on criteria a person
+  confirmed, in Postgres (`drizzle-criteria-search.ts`, checked against the reference `cvMatchesCriteria`): no score,
+  ordered by date of application, unchecked CVs counted, protected characteristics refused, every search audited
+  ([ADR 0010](adr/0010-privacy-by-design-and-declared-criteria.md)).
 - The conversation lives in the browser; the server stores nothing of it ([ADR 0007](adr/0007-stateless-assistant.md)).
 - MCP tools are thin wrappers on the same use cases, authorized by API key scopes. Each tool call of a JSON-RPC batch
   counts against the key's per-minute limit and a batch holds at most 20 messages. Reads are audited as `mcp.read` with

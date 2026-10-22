@@ -14,3 +14,4 @@ a superseded ADR is marked, not deleted.
 | [0007](0007-stateless-assistant.md) | Stateless assistant |
 | [0008](0008-imports-consent-renewal.md) | Consent to renew for imported candidates |
 | [0009](0009-ats-migration-package.md) | ATS migration through one public, strict package; the operator answers for it |
+| [0010](0010-privacy-by-design-and-declared-criteria.md) | Pseudonymized data for models; candidate search on criteria a person declares, never a score |

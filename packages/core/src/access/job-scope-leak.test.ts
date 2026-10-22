@@ -46,6 +46,8 @@ const ROWS: readonly Row[] = [
   read('searchCandidates', { query: 'Bravoleak' }, { label: 'by name' }),
   read('searchCandidates', { tag: 'b-only' }, { label: 'by tag' }),
   read('getPipeline', { jobId: JOB_B }),
+  read('findCandidatesByCriteria', { jobId: JOB_B, criteria: { keywords: ['Kubernetes'] } }),
+  read('findCandidatesByCriteria', { jobId: 'job_1', criteria: { keywords: ['Kubernetes'] }, pool: 'both' }, { label: 'job A with the talent pool' }),
   read('openCv', { applicationId: 'app_b' }),
   read('openAttachment', { applicationId: 'app_b', attachmentId: 'att_b' }),
   read('openAttachment', { applicationId: 'app_a', attachmentId: 'att_b' }, { label: 'attachment of job B through an application of job A' }),
