@@ -117,6 +117,7 @@ describe('instructions', () => {
     expect(text).toMatch(/other organizations/);
     expect(text).toMatch(/first name and id only/);
     expect(text).toContain('{{candidate.lastName}}');
+    expect(text).toMatch(/find_candidates_by_criteria[\s\S]*explicit confirmation/);
     expect(text).toContain('jobId j-1, applicationId a-1');
     expect(buildInstructions({ productName: 'X', page: null, today: '2026-10-13' })).toContain('Page context: none.');
   });

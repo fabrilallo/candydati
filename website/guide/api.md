@@ -100,14 +100,17 @@ Tools:
 | `analyze_job_ad` | analyses the quality of the text and points out vague phrases |
 | `check_publishable` | tells what is missing for the ad to be publishable |
 | `publish_job` | publishes a complete job ad (needs the publish permission) |
-| `get_pipeline` | stages with counts and cards, without CV text |
+| `get_pipeline` | stages with counts and cards (first name and id), without CV text |
 | `list_attention` | applications waiting for a reply or close to their deadline |
+| `find_candidates_by_criteria` | candidates of a job's applicants and talent pool who meet objective criteria the person confirmed; no score, no ranking |
 | `add_candidate_note` | adds an internal note to a candidate |
 | `create_task` | creates a task on a candidate or a job ad |
 | `list_job_templates` | lists job ad templates |
 | `get_job_stats` | job ad figures for the overview |
 | `get_reports` | aggregated figures of a period, with no personal data |
 
-There are no tools to move, assess, reject or write to candidates: those stay a person's decision. Each tool call counts
+Privacy by design: MCP results name candidates by first name and id only, never surname or contacts (see
+[AI assistant](./ai#privacy-by-design)). There are no tools to move, assess, reject or write to candidates: those stay a
+person's decision. Each tool call counts
 against the key's rate limit, a batch holds at most 20 messages, and reads are audited. Model-backed tools
 (`analyze_job_ad`, and `publish_job` when `FAST_MODEL` is set) have daily budgets, see [AI assistant](./ai).

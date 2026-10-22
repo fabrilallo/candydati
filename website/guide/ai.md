@@ -31,9 +31,31 @@ It works on the process, with the permissions of the person using it, never more
 drafts replies, nudges whoever owes a response, flags applications about to expire, extracts structured data from CVs
 and guides imports.
 
+It also finds candidates for a job on objective criteria: ask, for example, "candidates for this ad with TypeScript and
+at least 3 years of experience". The assistant lists the criteria and waits for you to confirm them; then the database
+filters the job's applicants and the talent pool (people who applied to other positions only are never included). Every
+result meets every criterion, there is no score and the list is in order of application. CVs that could not be checked
+are counted, so a person can look at them. Criteria on age, sex, origin, family or other protected characteristics are
+refused, and every search is recorded in the audit log. The same search is available to your own agents over MCP
+(`find_candidates_by_criteria`).
+
+## Privacy by design
+
+Whatever reaches a model is pseudonymized, in the assistant and in the MCP tools used by Claude Code, Codex, Cursor or
+any other agent:
+
+- Candidates are identified by **first name and id** only. The surname never reaches the model.
+- In CVs, cover letters and messages, **emails, phone numbers, links, street addresses, tax codes, IBANs and full
+  dates** are replaced by markers such as `[surname]`, `[email]`, `[phone]`.
+- A message draft keeps `{{candidate.lastName}}` as a variable: your composer fills it in when you review and send.
+
+Pseudonymized data is still personal data: what a CV says about someone's career can still identify them, so the rules
+below still apply. CV structuring is the one model call that reads the whole document, because it has to extract it.
+
 ## What it never does
 
-- **It does not rank, score or reject candidates.** The product takes no automated decisions about people.
+- **It does not rank, score or reject candidates.** The product takes no automated decisions about people, also among
+  the results of a criteria search.
 - **It never sends a message to a candidate on its own.** A person confirms every message.
 - **Closing, deciding and administration stay with a person.** Neither the assistant nor API keys can be given those
   capabilities.

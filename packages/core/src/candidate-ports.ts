@@ -5,6 +5,7 @@ import type {
   Application,
   ApplicationAttachment,
   Candidate,
+  CandidateCriteria,
   CandidateNote,
   CvExtractionRecord,
   PrivacyNotice,
@@ -154,6 +155,41 @@ export interface CandidateSearch {
   listAfter(organizationId: string, afterId: string | null, limit: number): Promise<readonly Candidate[]>;
   /** Most recently applied first. */
   search(query: CandidateSearchQuery): Promise<{ readonly items: readonly CandidateSummary[]; readonly total: number }>;
+  /** Pool candidates with a CV that satisfies every criterion (`cvMatchesCriteria`), most recently applied first. */
+  findByCriteria(query: CriteriaSearchQuery): Promise<CriteriaSearchResult>;
+}
+
+/**
+ * Whom a search for one job may look at. Applicants of the job gave consent for that position; anyone else only if
+ * they joined the talent pool (consent to future positions, PRODUCT.md §6).
+ */
+export const CRITERIA_POOLS = ['applicants', 'talent_pool', 'both'] as const;
+export type CriteriaPool = (typeof CRITERIA_POOLS)[number];
+
+export interface CriteriaSearchQuery {
+  readonly organizationId: string;
+  readonly jobId: string;
+  readonly pool: CriteriaPool;
+  readonly criteria: CandidateCriteria;
+  /** Only candidates with an application in these jobs (per-job access). Absent: no job filter. */
+  readonly jobIds?: readonly string[] | undefined;
+  /** 1-based. */
+  readonly page: number;
+  readonly limit: number;
+}
+
+export interface CriteriaMatch {
+  readonly candidate: Candidate;
+  /** The candidate's application to the job searched for, if any. */
+  readonly applicationId: string | null;
+  readonly lastAppliedAt: Date | null;
+}
+
+export interface CriteriaSearchResult {
+  readonly items: readonly CriteriaMatch[];
+  readonly total: number;
+  /** Pool candidates whose CV could not be checked (not read, or not structured when a criterion needs it). */
+  readonly notEvaluable: number;
 }
 
 /** Display names of the members of an organization. Ids that are not members are absent from the result. */

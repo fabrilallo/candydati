@@ -62,7 +62,7 @@ describe('MCP tools', () => {
     expect([...names].sort()).toEqual([...MCP_TOOL_NAMES].sort());
     expect(names).toEqual([
       'list_jobs', 'get_job', 'create_job', 'update_job', 'analyze_job_ad', 'check_publishable', 'publish_job',
-      'get_pipeline', 'list_attention', 'add_candidate_note', 'create_task', 'list_job_templates', 'get_job_stats', 'get_reports',
+      'get_pipeline', 'list_attention', 'find_candidates_by_criteria', 'add_candidate_note', 'create_task', 'list_job_templates', 'get_job_stats', 'get_reports',
     ]);
     expect(names.filter((name) => /move|decid|messag|send|erase|delete|reject|hire|rank|score|compare/.test(name))).toEqual([]);
     for (const tool of tools) expect(tool.description!.length).toBeGreaterThan(40);
@@ -129,6 +129,16 @@ describe('MCP tools', () => {
     expect(['on_track', 'due_soon', 'overdue', 'answered', 'closed']).toContain(pipeline.data.applications[0].responseState);
     expect(pipeline.text).not.toContain(INJECTION);
     expect(pipeline.text).not.toMatch(/email|message|headline|tags|cv/i);
+  });
+
+  it('filters the job\'s candidates on confirmed criteria, first names only, and refuses discriminatory ones', async () => {
+    const client = await connect((await createKey(world.owner, [...ALL_SCOPES])).secret);
+    const found = await call(client, 'find_candidates_by_criteria', { jobId: world.job.id, criteria: { keywords: ['zzz-nothing'] }, confirmedByUser: true });
+    expect(found.data).toMatchObject({ items: [], meta: { total: 0 }, order: expect.stringMatching(/not a ranking/) });
+    const refused = await client.callTool({ name: 'find_candidates_by_criteria', arguments: { jobId: world.job.id, criteria: { keywords: ['donna'] }, confirmedByUser: true } });
+    expect(refused.isError).toBe(true);
+    const unconfirmed = await client.callTool({ name: 'find_candidates_by_criteria', arguments: { jobId: world.job.id, criteria: { skills: ['Go'] } } });
+    expect(unconfirmed.isError).toBe(true);
   });
 
   it('adds a note, creates a task, lists attention, and reads job stats', async () => {

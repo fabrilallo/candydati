@@ -32,6 +32,7 @@ export const AUDIT_ACTIONS = [
   'candidate.erased',
   'candidate.exported',
   'candidate.corrected',
+  'candidate.searched_by_criteria',
   'organization.exported',
   'candidate_note.created',
   'message.sent',
