@@ -13,7 +13,7 @@ const admin = computed(() => can(viewer.value?.role ?? null, 'organization:updat
     <p class="flex items-center gap-2 text-sm font-medium"><PowerOffIcon class="size-4 text-muted-foreground" aria-hidden="true" />{{ t('assistant.off.title') }}</p>
     <p class="text-sm text-muted-foreground text-pretty">{{ t('assistant.off.body') }}</p>
     <p v-if="admin" class="text-sm text-pretty">
-      <NuxtLink to="/app/settings/ai" class="font-medium text-primary underline-offset-4 hover:underline" data-testid="assistant-off-settings">{{ t('assistant.off.admin') }}</NuxtLink>
+      <NuxtLink to="/app/settings/ai" class="font-medium text-link underline-offset-4 hover:underline" data-testid="assistant-off-settings">{{ t('assistant.off.admin') }}</NuxtLink>
     </p>
     <p v-else class="text-sm text-muted-foreground">{{ t('assistant.off.member') }}</p>
   </div>

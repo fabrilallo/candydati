@@ -6,7 +6,7 @@ import { placeLine } from '@/lib/job-view'
 
 /**
  * The transparency band, right under the title: the salary as the headline figure, the number of stages beside it,
- * then the quieter facts (contract, level, work mode, place). One divided panel, not cards.
+ * then the quieter facts (contract, level, work mode, place). The salary is the one yellow block (DESIGN-SYSTEM.md §5.8).
  */
 const props = defineProps<{ content: JobContent }>()
 const ad = useAdContext()
@@ -35,25 +35,27 @@ const quiet = computed(() => {
 </script>
 
 <template>
-  <section :aria-label="ad.x('public.salary')" class="overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="job-facts">
-    <div class="grid @xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-      <div class="grid content-center gap-2 px-5 py-6 @md:px-6 @md:py-7" data-fact="salary">
-        <p class="text-sm font-medium text-muted-foreground first-letter:uppercase">{{ ad.x(salaryLabelKey(content.salary.period)) }}</p>
-        <p v-if="salary" class="figure text-[2rem] leading-none font-semibold tracking-tighter @md:text-[2.625rem]">{{ salary }}</p>
+  <section :aria-label="ad.x('public.salary')" class="grid gap-6" data-testid="job-facts">
+    <div class="flex flex-wrap gap-3">
+      <div
+        class="grid min-w-0 content-center gap-1 rounded-xl border-2 border-ink px-5 py-4"
+        :class="salary ? 'bg-highlight text-highlight-foreground' : 'bg-card'"
+        data-fact="salary"
+      >
+        <p class="text-sm font-semibold first-letter:uppercase">{{ ad.x(salaryLabelKey(content.salary.period)) }}</p>
+        <p v-if="salary" class="figure text-[1.75rem] leading-tight font-extrabold tracking-tight @md:text-[2rem]">{{ salary }}</p>
         <AdGap v-if="ad.gaps.salary" :gap="ad.gaps.salary" />
       </div>
-      <dl class="grid divide-y border-t @xl:border-t-0 @xl:border-l">
-        <div class="grid content-center gap-1 px-5 py-4 @md:px-6" data-fact="process">
-          <dt class="text-sm font-medium text-muted-foreground">{{ ad.x('public.process') }}</dt>
-          <dd v-if="stages > 0" class="figure text-xl font-semibold tracking-tight">{{ ad.x('public.facts.stages', { count: stages }) }}</dd>
-          <dd v-if="ad.gaps.process"><AdGap :gap="ad.gaps.process" size="sm" /></dd>
-        </div>
+      <dl class="grid min-w-0 content-center gap-1 rounded-xl border-2 border-ink bg-card px-5 py-4" data-fact="process">
+        <dt class="text-sm font-semibold text-muted-foreground">{{ ad.x('public.process') }}</dt>
+        <dd v-if="stages > 0" class="figure text-[1.75rem] leading-tight font-extrabold tracking-tight @md:text-[2rem]">{{ ad.x('public.facts.stages', { count: stages }) }}</dd>
+        <dd v-if="ad.gaps.process"><AdGap :gap="ad.gaps.process" size="sm" /></dd>
       </dl>
     </div>
-    <dl v-if="quiet.length" class="grid grid-cols-2 gap-px border-t bg-border @2xl:grid-cols-(--facts)" :style="{ '--facts': `repeat(${quiet.length}, minmax(0, 1fr))` }">
-      <div v-for="fact in quiet" :key="fact.key" class="grid content-start gap-1 bg-card px-5 py-3.5 odd:last:col-span-2 @md:px-6 @2xl:odd:last:col-span-1" :data-fact="fact.key">
-        <dt class="text-xs text-muted-foreground">{{ fact.label }}</dt>
-        <dd v-if="fact.value" class="text-sm font-medium">{{ fact.value }}</dd>
+    <dl v-if="quiet.length" class="grid grid-cols-2 gap-x-6 gap-y-4 @xl:grid-cols-3">
+      <div v-for="fact in quiet" :key="fact.key" class="grid content-start gap-0.5" :data-fact="fact.key">
+        <dt class="text-xs font-medium text-muted-foreground">{{ fact.label }}</dt>
+        <dd v-if="fact.value" class="text-sm font-semibold">{{ fact.value }}</dd>
         <dd v-if="fact.detail" class="text-xs text-muted-foreground">{{ fact.detail }}</dd>
         <dd v-if="fact.gap"><AdGap :gap="fact.gap" size="sm" /></dd>
       </div>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { StageTone } from '@/lib/pipeline-board'
 
-/** 8px dot coding the family of a stage: hollow for received, neutral scale for the rest, cobalt for the offer. */
+/** 8px dot coding the family of a stage: hollow for received, ink scale for the rest, solid ink for the offer. */
 defineProps<{ tone: StageTone }>()
 const TONES: Readonly<Record<StageTone, string>> = {
   received: 'border-[1.5px] border-muted-foreground bg-transparent',

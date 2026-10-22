@@ -2,7 +2,7 @@
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 
 /**
- * App shell: one navigation sidebar with labels (from lg), the page in an inset panel.
+ * App shell: one navigation sidebar with labels (from lg) and the page beside it, both on the paper background.
  * Below lg the panel becomes a drawer opened from the top bar. Pages render their own `AppPage` (top bar and main).
  */
 const { t } = useI18n()
@@ -29,8 +29,8 @@ watch(() => route.fullPath, () => {
         <AppNavPanel in-drawer />
       </SheetContent>
     </Sheet>
-    <div class="flex min-w-0 flex-1 flex-col lg:py-2 lg:pr-2">
-      <div class="flex min-h-dvh min-w-0 flex-1 flex-col bg-background lg:min-h-[calc(100dvh-1rem)] lg:rounded-xl lg:border lg:shadow-xs">
+    <div class="flex min-w-0 flex-1 flex-col">
+      <div class="flex min-h-dvh min-w-0 flex-1 flex-col bg-background">
         <slot />
       </div>
     </div>

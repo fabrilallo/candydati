@@ -3,10 +3,12 @@ import type { ApplicationCardDto, StageRef, Outcome  } from '@candydati/domain'
 import { BriefcaseIcon, MapPinIcon, MessageSquareTextIcon } from '@lucide/vue'
 import { fullName } from '@/lib/candidate-view'
 import { relativeTime } from '@/lib/job-list-view'
+import { effectiveResponseState } from '@/lib/response-countdown'
 
 /**
- * A candidate on the board (docs/DESIGN-SYSTEM.md "Card candidato"): initials, name, headline, experience and location,
- * tags, then the time in the stage and the notes. No score, no match: the product has none by choice.
+ * A candidate on the board (docs/DESIGN-SYSTEM.md §5.5): initials, name, headline and the response promise sticker,
+ * experience and location, tags, then the time in the stage and the notes. No score, no match: the product has none by
+ * choice.
  */
 const props = defineProps<{
   card: ApplicationCardDto
@@ -35,15 +37,17 @@ const since = computed(() => relativeTime(props.card.stageChangedAt, props.now, 
 const TAGS_SHOWN = 3
 const tags = computed(() => props.card.candidate.tags.slice(0, TAGS_SHOWN))
 const moreTags = computed(() => Math.max(0, props.card.candidate.tags.length - TAGS_SHOWN))
+/** Once answered the sticker goes away and the footer keeps a quiet "Risposto". */
+const answered = computed(() => effectiveResponseState(props.card, props.now) === 'answered')
 </script>
 
 <template>
   <article
-    class="group relative grid gap-3 rounded-lg border bg-card p-4 shadow-xs transition-[box-shadow,border-color,opacity] duration-150 ease-snap has-[button[data-card-open]:focus-visible]:ring-3 has-[button[data-card-open]:focus-visible]:ring-ring/35"
+    class="group relative grid gap-3 rounded-lg border-2 bg-card p-4 transition-[box-shadow,border-color,opacity,translate] duration-150 ease-snap has-[button[data-card-open]:focus-visible]:ring-3 has-[button[data-card-open]:focus-visible]:ring-ring/35"
     :class="[
-      placeholder ? 'border-dashed border-input bg-transparent opacity-50 shadow-none' : 'hover:border-input hover:shadow-sm',
-      grabbed ? 'border-primary shadow-lg ring-2 ring-primary/30' : '',
-      selected ? 'border-primary/60 bg-accent/40' : '',
+      placeholder ? 'border-dashed border-input bg-transparent opacity-50 shadow-none' : 'border-ink shadow-hard hover:-translate-x-px hover:-translate-y-px hover:shadow-hard-md',
+      grabbed ? 'shadow-hard-lg ring-3 ring-ring/35' : '',
+      selected ? 'bg-accent' : '',
       pending ? 'opacity-70' : '',
       draggable ? 'cursor-grab active:cursor-grabbing' : '',
     ]"
@@ -69,7 +73,7 @@ const moreTags = computed(() => Math.max(0, props.card.candidate.tags.length - T
         >
       </div>
       <div class="grid min-w-0 flex-1 gap-0.5">
-        <h3 class="text-[0.9375rem] font-medium leading-snug">
+        <h3 class="text-base font-bold leading-snug tracking-tight">
           <button
             type="button"
             data-card-open
@@ -84,6 +88,7 @@ const moreTags = computed(() => Math.max(0, props.card.candidate.tags.length - T
         </h3>
         <p v-if="card.candidate.headline" class="truncate text-sm text-muted-foreground">{{ card.candidate.headline }}</p>
       </div>
+      <ResponseSticker :application="card" :now="now" class="-my-1" />
       <CardMenu :name="name" :stages="stages" :stage-id="card.stageId" :can-move="canMove" :can-decide="canDecide" :decided="decided" @open="emit('open')" @move="emit('move', $event)" @decide="emit('decide', $event)" />
     </div>
 
@@ -106,7 +111,7 @@ const moreTags = computed(() => Math.max(0, props.card.candidate.tags.length - T
     <div class="flex items-center justify-between gap-3 border-t pt-3 text-xs text-muted-foreground">
       <div class="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
         <time :datetime="card.stageChangedAt" :title="t('pipeline.card.inStageSince')">{{ since }}</time>
-        <ResponsePill :application="card" :now="now" />
+        <ResponsePill v-if="answered" :application="card" :now="now" />
         <ConsentRenewPill :status="card.consentStatus" :expires-at="card.retentionExpiresAt" :now="now" />
       </div>
       <span v-if="card.stageRemoved" class="rounded-full bg-muted px-2 py-0.5 font-medium" data-testid="card-stage-removed">{{ t('pipeline.stageRemoved') }}</span>

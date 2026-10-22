@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import '@fontsource-variable/fraunces/wght.css'
-import '@fontsource-variable/bricolage-grotesque/wght.css'
+import '@fontsource-variable/geist/wght.css'
 import '@fontsource-variable/newsreader/wght.css'
 import type { CareersMediaDto, CareersPageDocument, CareersSection, Locale, PublicCareersDto } from '@candydati/domain'
 import type { Component } from 'vue'

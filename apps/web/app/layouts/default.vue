@@ -9,7 +9,7 @@ const platform = usePlatform()
     <div class="flex min-h-dvh flex-col">
       <header class="flex h-16 items-center justify-between gap-3 px-5 sm:px-10">
         <p class="flex items-center gap-2.5 text-[0.9375rem] font-semibold tracking-tight">
-          <span class="grid size-6 place-items-center rounded-[6px] bg-primary text-xs font-bold text-primary-foreground" aria-hidden="true">{{ platform.name.charAt(0).toUpperCase() }}</span>
+          <span class="grid size-7 place-items-center rounded-full border-2 border-ink bg-highlight text-xs font-extrabold text-highlight-foreground" aria-hidden="true">{{ platform.name.charAt(0).toUpperCase() }}</span>
           {{ platform.name }}
         </p>
         <div class="flex items-center gap-1">

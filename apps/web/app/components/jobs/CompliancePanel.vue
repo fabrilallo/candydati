@@ -50,7 +50,7 @@ const { t } = useI18n()
           </p>
           <p v-if="item.suggestion" class="text-xs leading-relaxed text-pretty text-muted-foreground" :lang="language">{{ item.suggestion }}</p>
           <div v-if="item.fixes.length && !disabled" class="flex flex-wrap gap-1.5">
-            <button v-for="fix in item.fixes" :key="fix.labelKey" type="button" class="rounded-md px-2 py-0.5 text-left text-xs font-medium text-primary hover:bg-accent" data-testid="compliance-fix" @click="emit('fix', fix)">
+            <button v-for="fix in item.fixes" :key="fix.labelKey" type="button" class="rounded-md px-2 py-0.5 text-left text-xs font-medium text-link hover:bg-accent" data-testid="compliance-fix" @click="emit('fix', fix)">
               {{ t(fix.labelKey, fix.params) }}
             </button>
           </div>

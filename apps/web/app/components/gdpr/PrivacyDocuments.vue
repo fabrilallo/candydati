@@ -30,7 +30,7 @@ const linked = computed(() => documents.value.some((doc) => doc.href !== null))
           <FileTextIcon class="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <div class="grid min-w-0 gap-0.5">
             <span class="text-sm font-medium">{{ t(`privacyDocs.docs.${doc.key}`) }}</span>
-            <a v-if="doc.href" :href="safeExternalUrl(doc.href) ?? undefined" target="_blank" rel="noopener noreferrer" class="truncate font-mono text-xs text-primary underline-offset-4 hover:underline">{{ doc.path }}</a>
+            <a v-if="doc.href" :href="safeExternalUrl(doc.href) ?? undefined" target="_blank" rel="noopener noreferrer" class="truncate font-mono text-xs text-link underline-offset-4 hover:underline">{{ doc.path }}</a>
             <code v-else class="truncate font-mono text-xs text-muted-foreground">{{ doc.path }}</code>
           </div>
         </li>

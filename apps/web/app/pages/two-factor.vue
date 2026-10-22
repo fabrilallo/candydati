@@ -52,7 +52,7 @@ const onSubmit = async (): Promise<void> => {
       <Button type="submit" size="lg" class="w-full" :disabled="form.pending.value">{{ form.pending.value ? t('auth.twoFactor.submitting') : t('auth.twoFactor.submit') }}</Button>
     </form>
     <div class="flex flex-wrap items-center justify-between gap-3 border-t pt-6 text-sm">
-      <button type="button" class="font-medium text-primary underline-offset-4 hover:underline" @click="toggle">{{ backup ? t('auth.twoFactor.useCode') : t('auth.twoFactor.useBackup') }}</button>
+      <button type="button" class="font-medium text-link underline-offset-4 hover:underline" @click="toggle">{{ backup ? t('auth.twoFactor.useCode') : t('auth.twoFactor.useBackup') }}</button>
       <NuxtLink to="/login" rel="nofollow" class="text-muted-foreground underline-offset-4 hover:underline">{{ t('auth.twoFactor.backToLogin') }}</NuxtLink>
     </div>
   </div>

@@ -2,7 +2,7 @@
 import { CheckIcon } from '@lucide/vue'
 import { WIZARD_STEPS, type WizardStep } from '@/lib/import-view'
 
-/** Where the user is in the import: five numbered steps, done ones ticked, the current one in cobalt. */
+/** Where the user is in the import: five numbered steps, done ones ticked, the current one in ink. */
 const props = defineProps<{ current: WizardStep }>()
 const { t } = useI18n()
 const SHOWN = WIZARD_STEPS.filter((step) => step !== 'result')

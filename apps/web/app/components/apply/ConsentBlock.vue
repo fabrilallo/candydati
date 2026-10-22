@@ -35,7 +35,7 @@ const boxClass = 'mt-0.5 size-4 shrink-0 cursor-pointer rounded border-input acc
 
     <p class="text-sm text-muted-foreground">
       {{ x('apply.consent.rights') }}
-      <a :href="`mailto:${notice.contactEmail}`" class="font-medium break-all text-primary underline-offset-4 hover:underline" data-testid="privacy-contact">{{ notice.contactEmail }}</a>
+      <a :href="`mailto:${notice.contactEmail}`" class="font-medium break-all text-link underline-offset-4 hover:underline" data-testid="privacy-contact">{{ notice.contactEmail }}</a>
     </p>
 
     <div class="grid gap-3 border-t pt-4">

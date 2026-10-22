@@ -36,7 +36,7 @@ const { t } = useI18n()
         </template>
       </FormField>
       <p class="text-xs">
-        <a :href="apiKeyUrl(provider)" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-medium text-primary underline-offset-4 hover:underline" :data-testid="`ai-key-link-${provider}`">
+        <a :href="apiKeyUrl(provider)" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 font-medium text-link underline-offset-4 hover:underline" :data-testid="`ai-key-link-${provider}`">
           {{ t('instanceAi.keys.get', { provider: AI_PROVIDER_LABELS[provider] }) }}
           <ExternalLinkIcon class="size-3.5" aria-hidden="true" />
         </a>

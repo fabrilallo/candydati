@@ -91,7 +91,7 @@ const onSubmit = async (): Promise<void> => {
       </template>
     </FormField>
     <p v-if="!isSignup" class="-mt-2 text-sm">
-      <NuxtLink to="/forgot-password" rel="nofollow" class="font-medium text-primary underline-offset-4 hover:underline" data-testid="forgot-password-link">{{ t('auth.login.forgot') }}</NuxtLink>
+      <NuxtLink to="/forgot-password" rel="nofollow" class="font-medium text-link underline-offset-4 hover:underline" data-testid="forgot-password-link">{{ t('auth.login.forgot') }}</NuxtLink>
     </p>
     <FormAlert :message-key="form.submitError.value" />
     <Button type="submit" size="lg" class="mt-1 w-full" :disabled="form.pending.value">

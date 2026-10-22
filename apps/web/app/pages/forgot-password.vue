@@ -41,6 +41,6 @@ const onSubmit = async (): Promise<void> => {
         <Button type="submit" size="lg" class="w-full" :disabled="form.pending.value">{{ form.pending.value ? t('auth.forgot.submitting') : t('auth.forgot.submit') }}</Button>
       </form>
     </template>
-    <p class="border-t pt-6 text-sm"><NuxtLink to="/login" rel="nofollow" class="font-medium text-primary underline-offset-4 hover:underline">{{ t('auth.forgot.backToLogin') }}</NuxtLink></p>
+    <p class="border-t pt-6 text-sm"><NuxtLink to="/login" rel="nofollow" class="font-medium text-link underline-offset-4 hover:underline">{{ t('auth.forgot.backToLogin') }}</NuxtLink></p>
   </div>
 </template>

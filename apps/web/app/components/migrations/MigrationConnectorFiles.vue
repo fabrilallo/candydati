@@ -37,7 +37,7 @@ const size = (bytes: number): string => formatBytes(bytes, locale.value)
     <div class="grid gap-1">
       <h2 class="text-lg font-semibold tracking-tight">{{ t('migrations.files.title', { vendor: connector.label }) }}</h2>
       <p class="max-w-2xl text-sm text-pretty text-muted-foreground">{{ t('migrations.files.intro', { vendor: connector.label }) }}</p>
-      <a :href="safeExternalUrl(guide) ?? undefined" target="_blank" rel="noopener noreferrer" class="inline-flex w-fit items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline" data-testid="migration-files-guide">
+      <a :href="safeExternalUrl(guide) ?? undefined" target="_blank" rel="noopener noreferrer" class="inline-flex w-fit items-center gap-1 text-sm font-medium text-link underline-offset-4 hover:underline" data-testid="migration-files-guide">
         {{ t('migrations.files.guide', { vendor: connector.label }) }}<ExternalLinkIcon class="size-3.5" aria-hidden="true" />
       </a>
     </div>

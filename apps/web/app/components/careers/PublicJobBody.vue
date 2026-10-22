@@ -49,7 +49,7 @@ useJobViewBeacon({ org: props.page.organization.slug, job: props.page.job.slug }
       :notice="page.privacyNotice"
     />
     <footer class="border-t pt-6">
-      <NuxtLink :to="back" :lang="lang" class="text-sm font-medium text-primary underline-offset-4 hover:underline">{{ x('public.backToJobs') }}</NuxtLink>
+      <NuxtLink :to="back" :lang="lang" class="text-sm font-medium text-link underline-offset-4 hover:underline">{{ x('public.backToJobs') }}</NuxtLink>
     </footer>
   </div>
 </template>

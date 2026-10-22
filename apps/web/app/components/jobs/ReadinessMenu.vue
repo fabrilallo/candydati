@@ -53,7 +53,7 @@ const onCloseAutoFocus = (event: Event): void => {
               <span class="text-xs text-muted-foreground">«{{ item.match }}»</span>
             </span>
           </DropdownMenuItem>
-          <DropdownMenuItem v-if="item.fixes[0]" class="ml-6 text-xs font-medium text-primary" data-testid="readiness-fix" @select="emit('fix', item.fixes[0])">
+          <DropdownMenuItem v-if="item.fixes[0]" class="ml-6 text-xs font-medium text-link" data-testid="readiness-fix" @select="emit('fix', item.fixes[0])">
             <WandSparklesIcon class="size-3.5" aria-hidden="true" />
             {{ t(item.fixes[0].labelKey, item.fixes[0].params) }}
           </DropdownMenuItem>

@@ -36,19 +36,19 @@ const labelClass = 'flex items-center gap-2 text-sm text-muted-foreground'
     <dl class="divide-y" data-testid="candidate-profile">
       <div :class="rowClass">
         <dt :class="labelClass"><MailIcon class="size-4" aria-hidden="true" />{{ t('candidate.fields.email') }}</dt>
-        <dd class="min-w-0 text-sm"><a :href="`mailto:${candidate.email}`" class="break-all text-primary underline-offset-4 hover:underline">{{ candidate.email }}</a></dd>
+        <dd class="min-w-0 text-sm"><a :href="`mailto:${candidate.email}`" class="break-all text-link underline-offset-4 hover:underline">{{ candidate.email }}</a></dd>
       </div>
       <div :class="rowClass">
         <dt :class="labelClass"><PhoneIcon class="size-4" aria-hidden="true" />{{ t('candidate.fields.phone') }}</dt>
         <dd class="text-sm">
-          <a v-if="candidate.phone" :href="`tel:${candidate.phone.replace(/[^+0-9]/g, '')}`" class="figure text-primary underline-offset-4 hover:underline">{{ candidate.phone }}</a>
+          <a v-if="candidate.phone" :href="`tel:${candidate.phone.replace(/[^+0-9]/g, '')}`" class="figure text-link underline-offset-4 hover:underline">{{ candidate.phone }}</a>
           <span v-else class="text-muted-foreground">{{ t('candidate.fields.notGiven') }}</span>
         </dd>
       </div>
       <div :class="rowClass">
         <dt :class="labelClass"><LinkIcon class="size-4" aria-hidden="true" />{{ t('candidate.fields.linkedin') }}</dt>
         <dd class="min-w-0 text-sm">
-          <a v-if="safeExternalUrl(candidate.linkedinUrl)" :href="safeExternalUrl(candidate.linkedinUrl) ?? undefined" target="_blank" rel="noopener noreferrer nofollow" class="break-all text-primary underline-offset-4 hover:underline">{{ candidate.linkedinUrl }}</a>
+          <a v-if="safeExternalUrl(candidate.linkedinUrl)" :href="safeExternalUrl(candidate.linkedinUrl) ?? undefined" target="_blank" rel="noopener noreferrer nofollow" class="break-all text-link underline-offset-4 hover:underline">{{ candidate.linkedinUrl }}</a>
           <span v-else class="text-muted-foreground">{{ t('candidate.fields.notGiven') }}</span>
         </dd>
       </div>
@@ -70,7 +70,7 @@ const labelClass = 'flex items-center gap-2 text-sm text-muted-foreground'
         <dt :class="labelClass"><MessageSquareQuoteIcon class="size-4" aria-hidden="true" />{{ t('candidate.fields.message') }}</dt>
         <dd class="grid justify-items-start gap-1 text-sm">
           <p class="whitespace-pre-line text-pretty" :class="showAll ? '' : 'line-clamp-3'">{{ current.message }}</p>
-          <button v-if="current.message.length > 180" type="button" class="text-sm font-medium text-primary underline-offset-4 hover:underline" @click="showAll = !showAll">{{ showAll ? t('candidate.fields.showLess') : t('candidate.fields.showAll') }}</button>
+          <button v-if="current.message.length > 180" type="button" class="text-sm font-medium text-link underline-offset-4 hover:underline" @click="showAll = !showAll">{{ showAll ? t('candidate.fields.showLess') : t('candidate.fields.showAll') }}</button>
         </dd>
       </div>
       <div v-if="current" :class="rowClass">

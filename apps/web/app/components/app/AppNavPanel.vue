@@ -36,10 +36,10 @@ const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount',
 <template>
   <div class="flex h-full flex-col gap-5 px-3 pt-4 pb-3">
     <NuxtLink to="/app" class="flex shrink-0 items-center gap-2.5 px-2 pt-1">
-      <span class="grid size-7 shrink-0 place-items-center rounded-[8px] bg-primary text-xs font-bold text-primary-foreground shadow-sm" aria-hidden="true">
+      <span class="grid size-8 shrink-0 place-items-center rounded-full border-2 border-ink bg-highlight text-sm font-extrabold text-highlight-foreground" aria-hidden="true">
         {{ platform.name.charAt(0).toUpperCase() }}
       </span>
-      <span class="truncate text-[0.9375rem] font-semibold tracking-tight">{{ platform.name }}</span>
+      <span class="truncate text-lg font-extrabold tracking-tight">{{ platform.name }}</span>
     </NuxtLink>
     <OrgSwitcher v-if="viewer?.organization" :organization="viewer.organization" :role-label="roleLabel" />
     <!-- min-h-0 + overflow: with every item (owners) the menu is taller than a short screen; it scrolls, the footer stays. -->
@@ -51,14 +51,14 @@ const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount',
             <NuxtLink
               :to="item.to"
               :aria-current="active === item.id ? 'page' : undefined"
-              class="flex h-9 items-center gap-3 rounded-md px-2.5 text-sm font-medium transition-colors duration-150"
-              :class="active === item.id ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'"
+              class="flex h-10 items-center gap-3 rounded-md px-3 text-[0.9375rem] transition-colors duration-150"
+              :class="active === item.id ? 'bg-primary font-semibold text-primary-foreground' : 'font-medium text-foreground hover:bg-muted'"
             >
               <component :is="NAV_ICONS[item.id]" class="size-[1.125rem] shrink-0" aria-hidden="true" />
               <span class="min-w-0 flex-1 truncate">{{ t(`nav.${item.id}`) }}</span>
               <span
                 v-if="counts[item.id] !== undefined"
-                class="figure rounded-full bg-card px-2 py-0.5 text-xs font-medium text-muted-foreground ring-1 ring-border"
+                class="figure rounded-full bg-card px-2 py-0.5 text-xs font-bold text-foreground ring-[1.5px] ring-ink"
                 :data-testid="`nav-count-${item.id}`"
               >
                 <span class="sr-only">{{ t(COUNT_KEYS[item.id] ?? 'nav.publishedCount', { count: counts[item.id] }) }}</span>

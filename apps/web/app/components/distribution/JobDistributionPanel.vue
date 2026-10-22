@@ -52,7 +52,7 @@ const registered = computed(() => hasRegisteredChannels(rows.value))
               :href="safeExternalUrl(row.url) ?? undefined"
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
+              class="inline-flex items-center gap-1 text-sm font-medium text-link underline-offset-4 hover:underline"
             >{{ t('distribution.job.open') }}<ExternalLinkIcon class="size-3.5" aria-hidden="true" /></a>
           </div>
           <p v-if="row.error" class="text-xs font-medium text-destructive" role="alert">{{ t('distribution.job.error', { message: row.error }) }}</p>

@@ -64,8 +64,8 @@ const submit = (): void => {
       <p v-if="state === 'exceeded' && !refusedKey" class="text-pretty">{{ t('job.approval.exceeded') }}</p>
       <p v-if="range" class="figure text-muted-foreground">{{ t('job.approval.range', { range }) }}</p>
       <p v-if="needsAsk">
-        <button v-if="canAsk" type="button" class="font-medium text-primary underline-offset-4 hover:underline" data-testid="approval-ask" @click="open = true">{{ t('job.approval.ask') }}</button>
-        <NuxtLink v-else :to="requestPath" class="font-medium text-primary underline-offset-4 hover:underline" data-testid="approval-request-link">{{ t('job.approval.ask') }}</NuxtLink>
+        <button v-if="canAsk" type="button" class="font-medium text-link underline-offset-4 hover:underline" data-testid="approval-ask" @click="open = true">{{ t('job.approval.ask') }}</button>
+        <NuxtLink v-else :to="requestPath" class="font-medium text-link underline-offset-4 hover:underline" data-testid="approval-request-link">{{ t('job.approval.ask') }}</NuxtLink>
       </p>
     </div>
     <Dialog v-model:open="open">

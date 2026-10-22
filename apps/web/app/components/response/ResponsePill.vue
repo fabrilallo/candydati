@@ -4,16 +4,16 @@ import { formatDate } from '@/lib/format'
 import { responseCountdown, type CountdownTone, type ResponseInput } from '@/lib/response-countdown'
 
 /**
- * The promise "risposta entro N giorni" for one application (docs/DESIGN-SYSTEM.md: neutral on track, warning when near,
- * destructive when late; "Risposto" stays quiet). Renders nothing for closed applications or without a deadline.
+ * The promise "risposta entro N giorni" for one application (docs/DESIGN-SYSTEM.md: neutral on track, the yellow accent when near,
+ * the coral alert when late; "Risposto" stays quiet). Renders nothing for closed applications or without a deadline.
  */
 const props = defineProps<{ application: ResponseInput; now: Date }>()
 const { t, locale } = useI18n()
 const countdown = computed(() => responseCountdown(props.application, props.now))
 const TONES: Readonly<Record<CountdownTone, string>> = {
   neutral: 'bg-secondary text-secondary-foreground',
-  warning: 'bg-warning-soft text-warning',
-  destructive: 'bg-destructive-soft text-destructive',
+  warning: 'bg-highlight text-highlight-foreground',
+  destructive: 'bg-alert text-alert-foreground',
   quiet: 'text-muted-foreground',
 }
 const title = computed(() => (props.application.responseDueAt && countdown.value?.state !== 'answered' ? t('response.dueAt', { date: formatDate(props.application.responseDueAt, locale.value) }) : t('response.label')))

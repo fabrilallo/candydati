@@ -18,7 +18,7 @@ const { t } = useI18n()
       <ReceiptTextIcon class="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
       <p class="text-pretty text-muted-foreground">
         {{ t('instanceAi.costs.body') }}
-        <a href="https://fabrilallo.github.io/candydati/guide/ai" target="_blank" rel="noopener noreferrer" class="font-medium text-primary underline-offset-4 hover:underline">{{ t('instanceAi.costs.link') }}</a>
+        <a href="https://fabrilallo.github.io/candydati/guide/ai" target="_blank" rel="noopener noreferrer" class="font-medium text-link underline-offset-4 hover:underline">{{ t('instanceAi.costs.link') }}</a>
       </p>
     </div>
   </div>
