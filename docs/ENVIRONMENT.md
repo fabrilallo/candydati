@@ -46,6 +46,7 @@ Variables without a default are required or optional as described; see `.env.exa
 | `NUXT_API_MAX_BODY_BYTES` | web |  | Web proxy: largest request body streamed to the api, in bytes (default 204 MiB); bigger ones get 413. |
 | `NUXT_API_TIMEOUT_MS` | web |  | Web proxy: milliseconds to wait for the api to start answering (default 300000). |
 | `NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE` | web |  | Default language of the web app: it or en. Read at build time too. |
+| `NUXT_PUBLIC_PLATFORM_ICON_URL` | web |  | Tab icon of the web app, an https address. Empty: the bundled mark. Careers pages show the organization logo when set. |
 | `NUXT_PUBLIC_PLATFORM_NAME` | web |  | Product name in the web app. |
 | `NUXT_PUBLIC_SITE_URL` | web |  | Public URL of the site (canonical links, sitemap). |
 | `NUXT_PUBLIC_SOURCE_URL` | web |  | Where repository files can be browsed (e.g. https://host/blob/main); empty: paths as text. |

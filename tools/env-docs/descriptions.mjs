@@ -77,6 +77,7 @@ export const DESCRIPTIONS = {
   NUXT_PUBLIC_SITE_URL: 'Public URL of the site (canonical links, sitemap).',
   NUXT_TRUSTED_PROXY: 'Web: address of the single reverse proxy in front of the web (the bundled Caddy, CANDYDATI_CADDY_IP); only from that socket is the client read from x-forwarded-for. Empty: the socket address is the client.',
   NUXT_PUBLIC_PLATFORM_NAME: 'Product name in the web app.',
+  NUXT_PUBLIC_PLATFORM_ICON_URL: 'Tab icon of the web app, an https address. Empty: the bundled mark. Careers pages show the organization logo when set.',
   NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE: 'Default language of the web app: it or en. Read at build time too.',
   NUXT_PUBLIC_TIME_ZONE: 'IANA time zone dates are shown in.',
   NUXT_PUBLIC_TURNSTILE_SITE_KEY: 'Cloudflare Turnstile site key: the application form shows the check and the page policy allows challenges.cloudflare.com. Empty: off.',

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { fetchPublicJob } from '@/lib/job-api'
+import { faviconLink } from '@/lib/favicon'
 import { buildJobSeo } from '@/lib/job-seo'
+import { safeLogoUrl } from '@/lib/safe-url'
 import { failureStatus, loadPublic } from '@/lib/public-load'
 
 definePageMeta({ layout: 'public' })
@@ -37,7 +39,8 @@ useSeoMeta({
 useHead({
   htmlAttrs: { lang: seo.locale },
   titleTemplate: (value) => value ?? '',
-  link: [{ rel: 'canonical', href: seo.canonical }],
+  // The organization's logo in the tab, when it has one; otherwise the platform icon of app.vue stays.
+  link: [{ rel: 'canonical', href: seo.canonical }, ...(safeLogoUrl(page.organization.logo) ? [faviconLink(page.organization.logo)] : [])],
   script: [{ type: 'application/ld+json', innerHTML: seo.jsonLd }],
 })
 </script>

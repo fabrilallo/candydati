@@ -60,6 +60,8 @@ export default defineNuxtConfig({
     public: {
       siteUrl: 'http://localhost:3000',
       platformName: '',
+      /** Tab icon of the web app (`NUXT_PUBLIC_PLATFORM_ICON_URL`, an https address); empty = the bundled mark. Careers pages use the organization logo. */
+      platformIconUrl: '',
       platformDefaultLocale: DEFAULT_LOCALE,
       /** Time zone dates are shown in, on the server and in the browser (`NUXT_PUBLIC_TIME_ZONE`, an IANA name). */
       timeZone: 'Europe/Rome',
