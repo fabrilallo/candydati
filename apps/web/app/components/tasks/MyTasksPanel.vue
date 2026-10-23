@@ -30,7 +30,7 @@ const groups = computed(() => groupTasks(tasks.tasks.value ?? [], now.value))
         {{ t(`tasks.groups.${entry.group}`) }}
         <span class="figure rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">{{ entry.tasks.length }}</span>
       </h2>
-      <ul class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+      <ul class="divide-y overflow-hidden rounded-xl panel">
         <TaskItem
           v-for="task in entry.tasks"
           :key="task.id"

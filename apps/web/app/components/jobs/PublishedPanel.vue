@@ -16,7 +16,7 @@ const copyUrl = async (): Promise<void> => {
 </script>
 
 <template>
-  <section aria-labelledby="published-title" class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2.5 rounded-xl border bg-card p-4 shadow-xs" data-testid="published-panel">
+  <section aria-labelledby="published-title" class="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2.5 rounded-xl panel p-4" data-testid="published-panel">
     <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
       <h2 id="published-title" class="text-sm font-semibold">{{ t('job.publish.doneTitle') }}</h2>
       <p class="text-xs text-muted-foreground">{{ t('job.publish.doneBody') }}</p>

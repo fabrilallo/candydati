@@ -23,7 +23,7 @@ const curl = computed(() => curlExample(apiUrl.value))
         <h2 id="addresses-title" class="text-base font-semibold tracking-tight">{{ t('distribution.settings.addresses') }}</h2>
         <p class="max-w-prose text-sm text-muted-foreground">{{ t('distribution.settings.addressesBody') }}</p>
       </div>
-      <div class="grid gap-5 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6">
+      <div class="grid gap-5 rounded-xl panel px-5 py-5 sm:px-6">
         <UrlField :label="t('distribution.feed.label')" :url="feedUrl(site, org)" :copy-label="t('distribution.copyUrl')" :hint="t('distribution.feed.hint')" test-id="url-feed" />
         <UrlField :label="t('distribution.llms.label')" :url="llmsUrl(site, org)" :copy-label="t('distribution.copyUrl')" :hint="t('distribution.llms.hint')" test-id="url-llms" />
         <UrlField :label="t('distribution.sitemap.label')" :url="sitemapUrl(site, org)" :copy-label="t('distribution.copyUrl')" :hint="t('distribution.sitemap.hint')" test-id="url-sitemap" />
@@ -49,7 +49,7 @@ const curl = computed(() => curlExample(apiUrl.value))
       </div>
       <div v-else-if="!settings.channels.value" class="grid gap-3" aria-busy="true"><Skeleton class="h-16 w-full" /></div>
       <p v-else-if="settings.channels.value.length === 0" class="rounded-xl border border-dashed border-input px-6 py-6 text-sm text-muted-foreground" data-testid="channels-empty">{{ t('distribution.settings.empty') }}</p>
-      <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+      <ul v-else class="divide-y overflow-hidden rounded-xl panel">
         <li v-for="channel in settings.channels.value" :key="channel.channelId" class="flex items-center gap-4 px-5 py-4 sm:px-6" :class="settings.busy.value === channel.channelId ? 'opacity-60' : ''" data-testid="channel-item">
           <p class="min-w-0 flex-1 text-sm font-medium">{{ channel.label || channel.channelId }}</p>
           <span class="text-xs text-muted-foreground">{{ channel.enabled ? t('distribution.settings.on') : t('distribution.settings.off') }}</span>

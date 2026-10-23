@@ -41,7 +41,7 @@ const registered = computed(() => hasRegisteredChannels(rows.value))
     </div>
     <div v-else-if="!distribution.channels.value" class="grid gap-3" aria-busy="true"><Skeleton class="h-16 w-full" /><Skeleton class="h-16 w-full" /></div>
     <template v-else>
-      <ul class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+      <ul class="divide-y overflow-hidden rounded-xl panel">
         <li v-for="row in rows" :key="row.id" class="grid gap-3 px-5 py-4 sm:px-6" data-testid="distribution-row" :data-channel="row.id">
           <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
             <p class="min-w-0 flex-1 text-sm font-medium">{{ row.labelKey ? t(row.labelKey) : row.label }}</p>

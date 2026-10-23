@@ -29,14 +29,14 @@ const RULES = ['renew', 'email', 'visible', 'erased'] as const
       <p v-if="jobTitle" class="text-sm text-muted-foreground" data-testid="confirm-target">{{ t('imports.confirm.into', { job: jobTitle, stage: stageName ?? '' }) }}</p>
     </div>
 
-    <ul class="grid divide-y overflow-hidden rounded-xl border bg-card shadow-xs sm:grid-cols-3 sm:divide-x sm:divide-y-0" data-testid="confirm-summary">
+    <ul class="grid divide-y overflow-hidden rounded-xl panel sm:grid-cols-3 sm:divide-x sm:divide-y-0" data-testid="confirm-summary">
       <li v-for="figure in figures" :key="figure.key" class="grid gap-0.5 px-5 py-4 sm:px-6" :data-figure="figure.key">
         <span class="figure text-3xl font-semibold tracking-tight">{{ figure.value }}</span>
         <span class="text-sm text-muted-foreground">{{ t(`imports.confirm.${figure.key}Label`, figure.value) }}</span>
       </li>
     </ul>
 
-    <section class="grid gap-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="confirm-consent-title" data-testid="confirm-consent">
+    <section class="grid gap-3 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="confirm-consent-title" data-testid="confirm-consent">
       <h3 id="confirm-consent-title" class="text-base font-semibold tracking-tight">{{ t('imports.confirm.consentTitle') }}</h3>
       <ol class="grid gap-2 text-sm text-pretty">
         <li v-for="(rule, index) in RULES" :key="rule" class="flex gap-3">

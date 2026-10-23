@@ -34,7 +34,7 @@ const FORMS: Readonly<Record<SectionType, Component>> = {
 </script>
 
 <template>
-  <section class="grid gap-5 rounded-xl border bg-card px-5 py-5 sm:px-6" :aria-labelledby="`cp-form-${section.id}`" data-testid="careers-section-form" :data-section-type="section.type">
+  <section class="grid gap-5 rounded-xl panel px-5 py-5 sm:px-6" :aria-labelledby="`cp-form-${section.id}`" data-testid="careers-section-form" :data-section-type="section.type">
     <header class="grid gap-1">
       <h2 :id="`cp-form-${section.id}`" class="text-base font-semibold tracking-tight">{{ t(`careersEditor.types.${section.type}.name`) }}</h2>
       <p class="text-sm text-muted-foreground">{{ t(`careersEditor.types.${section.type}.description`) }}</p>

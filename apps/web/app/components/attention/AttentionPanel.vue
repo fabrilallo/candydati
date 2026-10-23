@@ -99,7 +99,7 @@ const closeSheet = async (): Promise<void> => {
           <FormAlert :message-key="list.errorKey.value" />
           <div><Button variant="outline" @click="reload">{{ t('common.retry') }}</Button></div>
         </div>
-        <ul v-else-if="!list.page.value" class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" aria-busy="true" data-testid="attention-loading">
+        <ul v-else-if="!list.page.value" class="divide-y overflow-hidden rounded-xl panel" aria-busy="true" data-testid="attention-loading">
           <li v-for="n in 4" :key="n" class="flex items-center gap-3 px-5 py-4 sm:px-6">
             <Skeleton class="size-9 rounded-full" />
             <div class="grid flex-1 gap-2"><Skeleton class="h-4 w-2/5" /><Skeleton class="h-3 w-1/4" /></div>
@@ -108,7 +108,7 @@ const closeSheet = async (): Promise<void> => {
         </ul>
         <div v-else :class="list.loading.value ? 'opacity-60 transition-opacity' : ''" :aria-busy="list.loading.value">
           <p v-if="items.length === 0" class="rounded-xl border border-dashed border-input px-6 py-6 text-sm text-muted-foreground" data-testid="attention-empty">{{ t(`attention.empty.${state}`) }}</p>
-          <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" :aria-label="t('attention.list')">
+          <ul v-else class="divide-y overflow-hidden rounded-xl panel" :aria-label="t('attention.list')">
             <AttentionRow
               v-for="item in items"
               :key="item.applicationId"

@@ -43,7 +43,7 @@ const change = async (event: Event): Promise<void> => {
 </script>
 
 <template>
-  <section v-if="!hidden" class="grid gap-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="org-security-title" data-testid="org-security-panel">
+  <section v-if="!hidden" class="grid gap-3 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="org-security-title" data-testid="org-security-panel">
     <h2 id="org-security-title" class="text-base font-semibold">{{ t('security.organization.title') }}</h2>
     <p class="text-sm text-pretty text-muted-foreground">{{ t('security.organization.description') }}</p>
     <FormAlert :message-key="errorKey" />

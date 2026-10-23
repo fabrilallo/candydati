@@ -9,7 +9,7 @@ const { t, locale } = useI18n()
 </script>
 
 <template>
-  <article class="grid gap-3 rounded-xl border bg-card p-4" data-testid="feedback-item">
+  <article class="grid gap-3 rounded-xl panel p-4" data-testid="feedback-item">
     <header class="grid gap-0.5">
       <h4 class="text-[0.9375rem] font-semibold">{{ t('feedback.tab.feedbackBy', { name: item.interviewerName, stage: stageName }) }}</h4>
       <p class="figure text-xs text-muted-foreground">{{ t('feedback.tab.request.submittedAt', { date: formatDate(item.submittedAt, locale) }) }}</p>

@@ -21,7 +21,7 @@ defineExpose({ focus: () => field.value?.focus() })
 </script>
 
 <template>
-  <form class="flex items-end gap-2 rounded-xl border bg-card p-1.5 pl-3 shadow-xs focus-within:border-primary focus-within:ring-3 focus-within:ring-ring/20" @submit.prevent="submit">
+  <form class="flex items-end gap-2 rounded-xl panel p-1.5 pl-3 focus-within:border-primary focus-within:ring-3 focus-within:ring-ring/20" @submit.prevent="submit">
     <label for="assistant-input" class="sr-only">{{ t('assistant.input') }}</label>
     <textarea
       id="assistant-input"

@@ -65,7 +65,7 @@ const remove = async (): Promise<void> => {
         </div>
         <div><Button variant="outline" size="sm" data-testid="template-new" @click="pick('new')"><PlusIcon aria-hidden="true" />{{ t('emailTemplates.new') }}</Button></div>
       </nav>
-      <section class="rounded-xl border bg-card px-5 py-5 sm:px-6" :aria-label="selected?.name ?? t('emailTemplates.new')">
+      <section class="rounded-xl panel px-5 py-5 sm:px-6" :aria-label="selected?.name ?? t('emailTemplates.new')">
         <EmailTemplateEditor :key="`${selectedId}-${selected?.updatedAt ?? ''}`" :template="selected" :busy="lib.busy.value" :error-key="lib.saveErrorKey.value" @save="save" @remove="remove" />
       </section>
     </div>

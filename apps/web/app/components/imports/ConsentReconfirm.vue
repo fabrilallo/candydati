@@ -53,7 +53,7 @@ watch(selection, (value) => {
 </script>
 
 <template>
-  <div v-if="outcome" class="grid gap-3 rounded-xl border bg-card px-5 py-6 sm:px-6" role="status" data-testid="reconfirm-outcome" :data-outcome="outcome">
+  <div v-if="outcome" class="grid gap-3 rounded-xl panel px-5 py-6 sm:px-6" role="status" data-testid="reconfirm-outcome" :data-outcome="outcome">
     <h2 id="reconfirm-outcome" tabindex="-1" class="flex items-center gap-2 text-lg font-semibold tracking-tight outline-none">
       <CircleCheckIcon v-if="outcome === 'given'" class="size-5 text-success" aria-hidden="true" />
       <Trash2Icon v-else class="size-5 text-muted-foreground" aria-hidden="true" />

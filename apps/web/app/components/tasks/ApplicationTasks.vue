@@ -29,7 +29,7 @@ const add = async (value: { title: string; assigneeId: string; dueAt: string | n
     </div>
     <div v-else-if="!tasks.tasks.value" class="grid gap-3" aria-busy="true"><Skeleton class="h-12 w-full" /><Skeleton class="h-12 w-full" /></div>
     <p v-else-if="tasks.tasks.value.length === 0" class="rounded-xl border border-dashed border-input px-5 py-4 text-sm text-muted-foreground" data-testid="tasks-empty">{{ t('tasks.emptyApplication') }}</p>
-    <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+    <ul v-else class="divide-y overflow-hidden rounded-xl panel">
       <TaskItem
         v-for="task in tasks.tasks.value"
         :key="task.id"

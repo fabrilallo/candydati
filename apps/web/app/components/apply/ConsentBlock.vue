@@ -15,7 +15,7 @@ const boxClass = 'mt-0.5 size-4 shrink-0 cursor-pointer rounded border-input acc
 </script>
 
 <template>
-  <fieldset class="grid gap-4 rounded-xl border bg-card px-4 py-5 sm:px-5" data-testid="consent-block">
+  <fieldset class="grid gap-4 rounded-xl panel px-4 py-5 sm:px-5" data-testid="consent-block">
     <legend class="sr-only">{{ x('apply.consent.legend') }}</legend>
     <div class="grid gap-1">
       <p class="text-[0.9375rem] font-semibold">{{ x('apply.consent.title') }}</p>

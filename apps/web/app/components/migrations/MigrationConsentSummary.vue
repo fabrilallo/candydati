@@ -18,7 +18,7 @@ const rows = computed(() => [
       <h3 id="migration-consent-title" class="text-base font-semibold tracking-tight">{{ t('migrations.preview.consent.title') }}</h3>
       <p class="max-w-2xl text-sm text-pretty text-muted-foreground">{{ t('migrations.preview.consent.intro') }}</p>
     </div>
-    <dl class="grid divide-y overflow-hidden rounded-xl border bg-card shadow-xs sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
+    <dl class="grid divide-y overflow-hidden rounded-xl panel sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
       <div v-for="row in rows" :key="row.key" class="grid content-start gap-1 px-5 py-4 sm:px-6" :data-consent="row.key">
         <dt class="text-sm font-medium">{{ t(`migrations.preview.consent.${row.key}`) }}</dt>
         <dd class="figure text-3xl font-semibold tracking-tight">{{ row.value }}</dd>

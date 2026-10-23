@@ -50,7 +50,7 @@ const test = async (endpoint: WebhookEndpointDto, done: () => void): Promise<voi
       </div>
       <div v-else-if="!hooks.endpoints.value" class="grid gap-3" aria-busy="true"><Skeleton class="h-20 w-full" /><Skeleton class="h-20 w-full" /></div>
       <p v-else-if="hooks.endpoints.value.length === 0" class="rounded-xl border border-dashed border-input px-6 py-6 text-sm text-muted-foreground" data-testid="webhooks-empty">{{ t('webhooks.empty') }}</p>
-      <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+      <ul v-else class="divide-y overflow-hidden rounded-xl panel">
         <WebhookItem
           v-for="endpoint in hooks.endpoints.value"
           :key="endpoint.id"

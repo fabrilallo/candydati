@@ -15,7 +15,7 @@ const roleLabel = (raw: string): string => {
 </script>
 
 <template>
-  <ul class="divide-y rounded-xl border bg-card shadow-xs">
+  <ul class="divide-y rounded-xl panel">
     <li v-for="member in members" :key="member.id" class="flex items-center gap-3 px-4 py-3.5 sm:px-5" data-testid="member-row">
       <Avatar class="size-9">
         <AvatarFallback :class="member.userId === currentUserId ? '' : 'bg-secondary text-secondary-foreground'">{{ initials(member.name) }}</AvatarFallback>

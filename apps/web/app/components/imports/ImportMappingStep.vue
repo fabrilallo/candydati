@@ -35,7 +35,7 @@ const pick = (header: string, value: string): void => {
           <TriangleAlertIcon class="mt-0.5 size-4 shrink-0" aria-hidden="true" />{{ t(`imports.mapping.warnings.${warning}`) }}
         </li>
       </ul>
-      <div class="overflow-x-auto rounded-xl border bg-card shadow-xs">
+      <div class="overflow-x-auto rounded-xl panel">
         <table class="w-full min-w-[28rem] text-sm" data-testid="mapping-table">
           <thead class="border-b text-left text-xs text-muted-foreground">
             <tr>

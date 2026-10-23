@@ -31,7 +31,7 @@ const stats = computed(() => (['jobs', 'candidates', 'applications', 'notes', 'm
     </div>
 
     <div class="grid gap-2">
-      <dl class="grid grid-cols-2 divide-x divide-y overflow-hidden rounded-xl border bg-card shadow-xs sm:grid-cols-3 sm:divide-y-0 lg:grid-cols-6" data-testid="migration-figures">
+      <dl class="grid grid-cols-2 divide-x divide-y overflow-hidden rounded-xl panel sm:grid-cols-3 sm:divide-y-0 lg:grid-cols-6" data-testid="migration-figures">
         <div v-for="stat in stats" :key="stat.key" class="grid gap-1 px-5 py-4 sm:px-6" :data-figure="stat.key">
           <dt class="text-xs text-muted-foreground">{{ t(`migrations.preview.figures.${stat.key}`) }}</dt>
           <dd class="figure text-2xl font-semibold tracking-tight">{{ stat.value }}</dd>

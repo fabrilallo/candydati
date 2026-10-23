@@ -94,7 +94,7 @@ const copyUri = async (): Promise<void> => {
 </script>
 
 <template>
-  <section class="grid gap-4 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="two-factor-title" data-testid="two-factor-panel">
+  <section class="grid gap-4 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="two-factor-title" data-testid="two-factor-panel">
     <div class="flex flex-wrap items-center gap-3">
       <h2 id="two-factor-title" class="text-base font-semibold">{{ t('security.personal.title') }}</h2>
       <Badge :variant="enabled ? 'success' : 'outline'" data-testid="two-factor-status">{{ enabled ? t('security.personal.statusOn') : t('security.personal.statusOff') }}</Badge>

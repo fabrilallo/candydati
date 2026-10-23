@@ -16,7 +16,7 @@ const updated = computed(() => relativeTime(props.template.updatedAt, props.now,
 </script>
 
 <template>
-  <li class="grid content-between gap-5 rounded-xl border bg-card p-5 shadow-xs transition-colors duration-150 ease-snap hover:border-foreground/20" data-testid="template-row">
+  <li class="grid content-between gap-5 rounded-xl panel p-5 transition-colors duration-150 ease-snap hover:border-foreground/20" data-testid="template-row">
     <div class="grid gap-2">
       <div class="flex items-start justify-between gap-3">
         <h3 class="min-w-0 text-[0.9375rem] font-medium leading-snug">{{ template.name }}</h3>

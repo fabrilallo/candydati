@@ -25,8 +25,8 @@ const forwarded = useForwardPropsEmits(delegated, emits)
       data-slot="sheet-content"
       v-bind="{ ...$attrs, ...forwarded }"
       :class="cn(
-        'fixed inset-y-0 z-50 flex w-[min(20rem,calc(100%-3rem))] flex-col border-border bg-sidebar text-foreground shadow-lg outline-none duration-300 ease-snap data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200',
-        side === 'left' ? 'left-0 border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left' : 'right-0 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
+        'fixed inset-y-0 z-50 flex w-[min(20rem,calc(100%-3rem))] flex-col border-ink bg-sidebar text-foreground outline-none duration-300 ease-snap data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200',
+        side === 'left' ? 'left-0 border-r-2 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left' : 'right-0 border-l-2 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right',
         props.class,
       )"
       @close-auto-focus="restoreFocus"

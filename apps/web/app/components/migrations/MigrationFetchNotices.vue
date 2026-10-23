@@ -12,7 +12,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <section v-if="notices.length > 0" class="grid gap-3 rounded-xl border bg-card px-5 py-4 shadow-xs sm:px-6" aria-labelledby="migration-notices-title" data-testid="migration-notices">
+  <section v-if="notices.length > 0" class="grid gap-3 rounded-xl panel px-5 py-4 sm:px-6" aria-labelledby="migration-notices-title" data-testid="migration-notices">
     <h3 id="migration-notices-title" class="flex items-center gap-2 text-base font-semibold tracking-tight"><InfoIcon class="size-4 text-muted-foreground" aria-hidden="true" />{{ t('migrations.notices.title') }}</h3>
     <ul class="grid gap-2 text-sm">
       <li v-for="notice in notices" :key="notice.code" :data-notice="notice.code" class="grid gap-0.5">

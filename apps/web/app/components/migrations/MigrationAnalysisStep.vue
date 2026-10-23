@@ -25,7 +25,7 @@ const fetchFailed = computed(() => (MIGRATION_FETCH_ERRORS as readonly (string |
       <Button as-child variant="outline" size="sm"><NuxtLink to="/app/migrations">{{ t('migrations.analysis.back') }}</NuxtLink></Button>
     </div>
     <MigrationFetchProgress v-else-if="batch.status === 'fetching'" :batch="batch" />
-    <div v-else class="grid gap-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" role="status" aria-live="polite">
+    <div v-else class="grid gap-3 rounded-xl panel px-5 py-5 sm:px-6" role="status" aria-live="polite">
       <h2 id="migration-analysis-title" class="flex items-center gap-2 text-base font-semibold tracking-tight">
         <LoaderCircleIcon class="size-4 animate-spin text-muted-foreground motion-reduce:animate-none" aria-hidden="true" />{{ t('migrations.analysis.title') }}
       </h2>

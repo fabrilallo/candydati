@@ -36,7 +36,7 @@ defineExpose({ reveal })
       <h2 id="apply-title" class="text-xl font-semibold tracking-tight">{{ x('apply.title') }}</h2>
       <p class="max-w-xl text-[0.9375rem] text-muted-foreground">{{ x('apply.intro', { organization }) }}</p>
     </div>
-    <div v-if="sent" class="grid gap-3 rounded-xl border bg-card px-5 py-6 sm:px-6" role="status" data-testid="apply-success">
+    <div v-if="sent" class="grid gap-3 rounded-xl panel px-5 py-6 sm:px-6" role="status" data-testid="apply-success">
       <CircleCheckIcon class="size-6 text-success" aria-hidden="true" />
       <h3 id="apply-success-title" tabindex="-1" class="text-lg font-semibold tracking-tight outline-none">{{ x('apply.success.title', { name: sent.firstName }) }}</h3>
       <p class="text-[0.9375rem]">{{ x('apply.success.received', { title, organization }) }}</p>

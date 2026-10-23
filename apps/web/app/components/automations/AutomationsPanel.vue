@@ -85,7 +85,7 @@ const authorOf = (rule: AutomationRuleDto): string | null => team.nameOf(rule.cr
           @change="(list) => interviewers?.save(stage.id, list)"
         />
         <p v-if="(grouped[stage.id] ?? []).length === 0" class="rounded-xl border border-dashed border-input px-5 py-3.5 text-sm text-muted-foreground">{{ t('automations.empty') }}</p>
-        <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+        <ul v-else class="divide-y overflow-hidden rounded-xl panel">
           <AutomationRule
             v-for="rule in grouped[stage.id]"
             :key="rule.id"

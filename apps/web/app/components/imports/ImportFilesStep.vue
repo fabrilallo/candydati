@@ -44,7 +44,7 @@ const send = async (): Promise<void> => {
       </div>
       <ImportDropzone :disabled="uploading" :limits="limits" @add="upload.add" />
 
-      <div v-if="upload.files.value.length > 0" class="grid gap-3 rounded-xl border bg-card px-5 py-4 shadow-xs sm:px-6" data-testid="import-picked">
+      <div v-if="upload.files.value.length > 0" class="grid gap-3 rounded-xl panel px-5 py-4 sm:px-6" data-testid="import-picked">
         <div class="flex flex-wrap items-baseline justify-between gap-2">
           <p class="figure text-sm font-medium">
             {{ t('imports.files.count', { count: check.accepted.length }, check.accepted.length) }}, {{ formatBytes(check.totalBytes, locale) }}

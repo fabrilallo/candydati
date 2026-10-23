@@ -41,7 +41,7 @@ const link = (candidateId: string, applicationId: string): string => `/app/candi
         <p v-if="upcoming.length === 0" class="rounded-xl border border-dashed border-input px-5 py-5 text-sm text-muted-foreground" data-testid="retention-upcoming-empty">
           {{ t('retention.upcomingEmpty', { days: RETENTION_WARNING_DAYS }) }}
         </p>
-        <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="retention-upcoming">
+        <ul v-else class="divide-y overflow-hidden rounded-xl panel shadow-xs" data-testid="retention-upcoming">
           <li v-for="{ item, left } in upcoming" :key="item.applicationId" class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3.5" data-testid="retention-item">
             <div class="grid min-w-0 gap-0.5">
               <NuxtLink :to="link(item.candidateId, item.applicationId)" class="truncate text-sm font-medium underline-offset-4 hover:underline">{{ item.candidateName ?? t('retention.unnamed') }}</NuxtLink>
@@ -57,7 +57,7 @@ const link = (candidateId: string, applicationId: string): string => `/app/candi
       <div class="grid content-start gap-3">
         <h3 class="text-base font-semibold tracking-tight">{{ t('retention.runsTitle') }}</h3>
         <p v-if="runs.length === 0" class="rounded-xl border border-dashed border-input px-5 py-5 text-sm text-muted-foreground" data-testid="retention-runs-empty">{{ t('retention.runsEmpty') }}</p>
-        <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="retention-runs">
+        <ul v-else class="divide-y overflow-hidden rounded-xl panel shadow-xs" data-testid="retention-runs">
           <li v-for="run in runs" :key="run.id" class="grid gap-0.5 px-5 py-3.5" data-testid="retention-run">
             <time class="figure text-sm font-medium" :datetime="run.startedAt">{{ formatDateTime(run.startedAt, locale) }}</time>
             <span class="figure text-sm text-muted-foreground">{{ t('retention.warned', { count: run.warned }, run.warned) }}, {{ t('retention.erased', { count: run.erased }, run.erased) }}</span>

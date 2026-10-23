@@ -18,7 +18,7 @@ const tone: Readonly<Record<ScoreLevel, string>> = { low: 'text-warning', mid: '
 </script>
 
 <template>
-  <section aria-labelledby="quality-title" class="rounded-xl border bg-card shadow-xs" data-testid="quality-panel" :aria-busy="pending">
+  <section aria-labelledby="quality-title" class="rounded-xl panel" data-testid="quality-panel" :aria-busy="pending">
     <div class="flex flex-wrap items-center gap-x-4 gap-y-3 p-4">
       <p v-if="view" class="flex items-baseline gap-1" data-testid="quality-total" :class="pending ? 'opacity-60' : ''">
         <span class="figure text-[2rem] leading-none font-semibold tracking-tighter">{{ formatScore(view.total, locale) }}</span>

@@ -52,7 +52,7 @@ const submit = async (): Promise<void> => {
 </script>
 
 <template>
-  <div v-if="done" class="grid gap-3 rounded-xl border bg-card px-5 py-6" role="status" data-testid="feedback-done">
+  <div v-if="done" class="grid gap-3 rounded-xl panel px-5 py-6" role="status" data-testid="feedback-done">
     <h2 id="feedback-done" tabindex="-1" class="flex items-center gap-2 text-lg font-semibold tracking-tight outline-none">
       <CircleCheckIcon class="size-5 text-success" aria-hidden="true" />{{ x('feedback.public.done.title') }}
     </h2>

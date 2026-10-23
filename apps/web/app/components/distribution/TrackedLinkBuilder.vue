@@ -22,7 +22,7 @@ const presetLabel = (preset: (typeof CHANNEL_PRESETS)[number]): string => preset
 </script>
 
 <template>
-  <section class="grid gap-4 rounded-xl border bg-card p-5 shadow-xs sm:p-6" aria-labelledby="tracked-links-title" data-testid="tracked-links">
+  <section class="grid gap-4 rounded-xl panel p-5 sm:p-6" aria-labelledby="tracked-links-title" data-testid="tracked-links">
     <div class="grid gap-1">
       <h2 id="tracked-links-title" class="text-base font-semibold tracking-tight">{{ t('trackedLinks.title') }}</h2>
       <p class="max-w-prose text-sm text-muted-foreground">{{ t('trackedLinks.description') }}</p>

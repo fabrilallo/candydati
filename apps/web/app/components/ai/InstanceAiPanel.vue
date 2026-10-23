@@ -26,7 +26,7 @@ const tone = (on: boolean) => (on ? 'success' : 'outline')
 </script>
 
 <template>
-  <section class="grid gap-5 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="instance-ai-title" data-testid="instance-ai">
+  <section class="grid gap-5 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="instance-ai-title" data-testid="instance-ai">
     <div class="grid gap-2">
       <h2 id="instance-ai-title" class="text-base font-semibold tracking-tight">{{ t('instanceAi.title') }}</h2>
       <div v-if="settings" class="flex flex-wrap items-center gap-2">

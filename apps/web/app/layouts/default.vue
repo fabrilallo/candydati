@@ -5,7 +5,7 @@ const platform = usePlatform()
 
 <template>
   <div class="min-h-dvh lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:shadow-md">{{ t('common.skipToContent') }}</a>
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:border-2 focus:border-ink focus:shadow-hard">{{ t('common.skipToContent') }}</a>
     <div class="flex min-h-dvh flex-col">
       <header class="flex h-16 items-center justify-between gap-3 px-5 sm:px-10">
         <p class="flex items-center gap-2.5 text-[0.9375rem] font-semibold tracking-tight">

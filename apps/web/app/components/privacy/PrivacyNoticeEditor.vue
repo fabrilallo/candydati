@@ -66,7 +66,7 @@ const useTemplate = async (): Promise<void> => {
       </FormField>
     </div>
 
-    <fieldset class="grid gap-4 rounded-xl border bg-card px-5 py-5 sm:grid-cols-2 sm:px-6">
+    <fieldset class="grid gap-4 rounded-xl panel px-5 py-5 sm:grid-cols-2 sm:px-6">
       <legend class="px-1 text-sm font-semibold">{{ t('privacy.fields.retention') }}</legend>
       <FormField id="privacy-selection" v-slot="{ invalid, describedBy }" :label="t('privacy.fields.selectionDays')" :hint="t('privacy.fields.selectionHint', { period: periods.selection })" :error="errors.selectionDays">
         <Input id="privacy-selection" type="number" inputmode="numeric" :min="RETENTION_MIN_DAYS" :max="RETENTION_MAX_DAYS" :model-value="values.selectionDays ?? ''" :aria-invalid="invalid" :aria-describedby="describedBy" data-testid="privacy-selection" @update:model-value="set('selectionDays', days($event))" />

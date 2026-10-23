@@ -22,7 +22,7 @@ useHead({
 
 <template>
   <div class="flex min-h-dvh flex-col">
-    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:shadow-md">{{ t('common.skipToContent') }}</a>
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:border-2 focus:border-ink focus:shadow-hard">{{ t('common.skipToContent') }}</a>
     <header>
       <div class="mx-auto flex h-14 w-full max-w-3xl items-center justify-end gap-1 px-5 sm:px-8">
         <LocaleSwitcher />

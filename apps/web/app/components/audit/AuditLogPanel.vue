@@ -15,7 +15,7 @@ const pages = computed(() => (meta.value ? pageCount(meta.value) : 1))
       <div><Button variant="outline" @click="() => refresh()">{{ t('common.retry') }}</Button></div>
     </div>
     <template v-else>
-      <ol v-if="loading && events.length === 0" class="divide-y rounded-xl border bg-card" aria-busy="true" :aria-label="t('common.loading')">
+      <ol v-if="loading && events.length === 0" class="divide-y rounded-xl panel" aria-busy="true" :aria-label="t('common.loading')">
         <li v-for="n in 6" :key="n" class="grid grid-cols-[2rem_1fr_auto] items-center gap-x-4 px-5 py-4">
           <Skeleton class="row-span-2 size-8 rounded-full" />
           <Skeleton class="h-4 w-2/3 max-w-80" />

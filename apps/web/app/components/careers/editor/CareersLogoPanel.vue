@@ -43,7 +43,7 @@ const remove = (): Promise<void> => apply(null, 'careersEditor.logo.removed')
 </script>
 
 <template>
-  <section class="grid gap-4 rounded-xl border bg-card px-5 py-5 sm:px-6" aria-labelledby="cp-logo-title" data-testid="careers-logo">
+  <section class="grid gap-4 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="cp-logo-title" data-testid="careers-logo">
     <div class="grid gap-1">
       <h2 id="cp-logo-title" class="text-base font-semibold tracking-tight">{{ t('careersEditor.logo.title') }}</h2>
       <p class="max-w-prose text-sm text-muted-foreground">{{ t('careersEditor.logo.hint') }}</p>

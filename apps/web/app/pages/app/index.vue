@@ -37,7 +37,7 @@ const firstName = computed(() => viewer.value?.user.name.split(' ')[0] ?? '')
       </PageHeader>
       <PrivacyMissingBanner v-if="can(role, 'privacy:manage')" />
       <DashboardOverview v-if="can(role, 'job:read')" :can-create="can(role, 'job:create')" />
-      <section v-else class="grid gap-1 rounded-xl border bg-card px-6 py-6">
+      <section v-else class="grid gap-1 rounded-xl panel px-6 py-6">
         <h2 class="text-[0.9375rem] font-semibold">{{ t('dashboard.teamTitle') }}</h2>
         <p class="text-sm text-muted-foreground">{{ t('dashboard.teamBody') }}</p>
         <NuxtLink to="/app/settings/members" class="mt-2 text-sm font-medium text-link underline-offset-4 hover:underline">{{ t('nav.members') }}</NuxtLink>

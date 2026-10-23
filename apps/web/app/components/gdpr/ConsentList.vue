@@ -25,7 +25,7 @@ const toneClass = { neutral: 'text-muted-foreground', warning: 'text-warning fon
 </script>
 
 <template>
-  <ul class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="consent-list">
+  <ul class="divide-y overflow-hidden rounded-xl panel" data-testid="consent-list">
     <li v-for="{ app, left } in rows" :key="app.id" class="grid gap-3 px-5 py-4 sm:px-6" data-testid="consent-item" :data-application-id="app.id">
       <div class="grid gap-0.5">
         <h3 class="text-[0.9375rem] font-medium">{{ app.job.title }}</h3>

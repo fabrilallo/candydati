@@ -11,7 +11,7 @@ const toggle = (event: Event): void => {
 </script>
 
 <template>
-  <section class="grid gap-2 rounded-xl border bg-card px-5 py-4 shadow-xs sm:px-6" aria-labelledby="approval-setting" data-testid="approval-setting">
+  <section class="grid gap-2 rounded-xl panel px-5 py-4 sm:px-6" aria-labelledby="approval-setting" data-testid="approval-setting">
     <h2 id="approval-setting" class="sr-only">{{ t('jobRequests.settings.title') }}</h2>
     <FormAlert v-if="setting.errorKey.value" message-key="jobRequests.settings.loadFailed" />
     <template v-else-if="setting.value.value !== null">

@@ -28,7 +28,7 @@ const onSubmit = async (): Promise<void> => {
 </script>
 
 <template>
-  <section aria-labelledby="invite-title" class="grid gap-5 rounded-xl border bg-card p-5 shadow-xs sm:p-6">
+  <section aria-labelledby="invite-title" class="grid gap-5 rounded-xl panel p-5 sm:p-6">
     <div class="grid gap-1">
       <h2 id="invite-title" class="text-base font-semibold tracking-tight">{{ t('members.inviteTitle') }}</h2>
       <p class="text-sm text-muted-foreground">{{ roles.length ? t('members.inviteHint') : t('members.noInvitePermission') }}</p>

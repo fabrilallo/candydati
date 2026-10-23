@@ -38,7 +38,7 @@ const visible = computed(() => progress.value !== null && steps.value.some((step
 </script>
 
 <template>
-  <section v-if="visible" aria-labelledby="start-title" class="rounded-xl border bg-card shadow-xs" data-testid="first-steps">
+  <section v-if="visible" aria-labelledby="start-title" class="rounded-xl panel" data-testid="first-steps">
     <div class="grid gap-1 border-b px-5 py-5 sm:px-6">
       <h2 id="start-title" class="text-lg font-semibold tracking-tight">{{ t('dashboard.startTitle') }}</h2>
       <p class="text-sm text-muted-foreground">{{ t('dashboard.startIntro') }}</p>

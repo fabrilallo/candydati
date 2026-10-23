@@ -25,7 +25,7 @@ const removable = computed(() => props.section.type !== 'jobs')
   <li
     data-drag-row
     class="group flex items-center gap-1 rounded-lg border px-1.5 py-1.5 transition-[background-color,border-color,box-shadow] duration-150 ease-snap"
-    :class="[selected ? 'border-primary/40 bg-accent' : 'bg-card hover:bg-muted', dragging ? 'shadow-lg' : '']"
+    :class="[selected ? 'border-primary/40 bg-accent' : 'bg-card hover:bg-muted', dragging ? 'shadow-hard-md' : '']"
     data-testid="careers-section-row"
     :data-section-type="section.type"
     :data-section-id="section.id"

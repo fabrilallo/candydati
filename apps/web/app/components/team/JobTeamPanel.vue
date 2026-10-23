@@ -42,7 +42,7 @@ const add = async (): Promise<void> => {
       <div><Button variant="outline" @click="() => team.refresh()">{{ t('common.retry') }}</Button></div>
     </div>
     <template v-else-if="team.loaded.value">
-      <section class="rounded-xl border bg-card shadow-xs" aria-labelledby="team-title">
+      <section class="rounded-xl panel" aria-labelledby="team-title">
         <h2 id="team-title" class="border-b px-5 py-3 text-base font-semibold tracking-tight sm:px-6">
           {{ t('jobTeam.listTitle') }}
           <span class="figure ml-1 text-sm font-normal text-muted-foreground">{{ team.members.value.length }}</span>
@@ -63,7 +63,7 @@ const add = async (): Promise<void> => {
       </section>
       <form
         v-if="canManage"
-        class="grid gap-3 rounded-xl border bg-card px-5 py-4 shadow-xs sm:grid-cols-[minmax(0,1fr)_12rem_auto] sm:items-end sm:px-6"
+        class="grid gap-3 rounded-xl panel px-5 py-4 sm:grid-cols-[minmax(0,1fr)_12rem_auto] sm:items-end sm:px-6"
         data-testid="team-add-member"
         @submit.prevent="add"
       >

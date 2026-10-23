@@ -35,7 +35,7 @@ const cornerRadius = (corners: CornerStyle): string => (corners === 'soft' ? '99
 </script>
 
 <template>
-  <section class="grid gap-5 rounded-xl border bg-card px-5 py-5 sm:px-6" aria-labelledby="cp-theme-title" data-testid="careers-theme">
+  <section class="grid gap-5 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="cp-theme-title" data-testid="careers-theme">
     <h2 id="cp-theme-title" class="text-base font-semibold tracking-tight">{{ t('careersEditor.theme.title') }}</h2>
 
     <div class="grid gap-1.5">

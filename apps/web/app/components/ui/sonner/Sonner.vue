@@ -13,14 +13,14 @@ const props = defineProps<ToasterProps>()
     :style="{
       '--normal-bg': 'var(--popover)',
       '--normal-text': 'var(--popover-foreground)',
-      '--normal-border': 'var(--border)',
-      '--border-radius': '14px',
+      '--normal-border': 'var(--ink)',
+      '--border-radius': '18px',
       '--success-bg': 'var(--popover)',
       '--success-text': 'var(--popover-foreground)',
-      '--success-border': 'var(--border)',
+      '--success-border': 'var(--ink)',
       '--error-bg': 'var(--popover)',
       '--error-text': 'var(--popover-foreground)',
-      '--error-border': 'var(--border)',
+      '--error-border': 'var(--ink)',
     }"
     v-bind="props"
     :toast-options="{ ...props.toastOptions, class: cn('candydati-toast', props.toastOptions?.class) }"

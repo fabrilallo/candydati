@@ -44,7 +44,7 @@ useHead({ htmlAttrs: feedback ? { lang: feedback.language } : {}, meta: [{ name:
       <h1 class="text-[1.75rem] leading-tight font-semibold tracking-tight sm:text-3xl">{{ x('feedback.public.title') }}</h1>
       <p v-if="feedback.interviewerName" class="text-base">{{ x('feedback.public.hello', { name: feedback.interviewerName }) }}</p>
       <p class="text-base text-pretty" data-testid="feedback-intro">{{ x('feedback.public.intro', { organization: feedback.organizationName, candidate, job: feedback.jobTitle }) }}</p>
-      <dl class="grid gap-3 rounded-xl border bg-card p-4 text-[0.9375rem]">
+      <dl class="grid gap-3 rounded-xl panel p-4 text-[0.9375rem]">
         <div class="grid gap-0.5"><dt class="text-sm text-muted-foreground">{{ x('feedback.public.candidate') }}</dt><dd class="font-medium" data-testid="feedback-candidate">{{ candidate }}</dd></div>
         <div class="grid gap-0.5"><dt class="text-sm text-muted-foreground">{{ x('feedback.public.job') }}</dt><dd class="font-medium" data-testid="feedback-job">{{ feedback.jobTitle }}</dd></div>
         <div v-if="stageName" class="grid gap-0.5"><dt class="text-sm text-muted-foreground">{{ x('feedback.public.stage') }}</dt><dd class="font-medium" data-testid="feedback-stage">{{ stageName }}</dd></div>

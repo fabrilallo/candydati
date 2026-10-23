@@ -95,7 +95,7 @@ const rowClass = 'flex flex-wrap items-start gap-x-4 gap-y-3 px-5 py-4 sm:px-6'
 
     <section class="grid gap-3" aria-labelledby="gdpr-rights">
       <h2 id="gdpr-rights" class="text-base font-semibold tracking-tight">{{ t('gdpr.rights.title') }}</h2>
-      <ul class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="rights-list">
+      <ul class="divide-y overflow-hidden rounded-xl panel" data-testid="rights-list">
         <li v-if="canExport" :class="rowClass" data-testid="right-export">
           <div class="grid min-w-0 flex-1 gap-0.5">
             <h3 class="text-[0.9375rem] font-medium">{{ t('gdpr.rights.export.title') }}</h3>

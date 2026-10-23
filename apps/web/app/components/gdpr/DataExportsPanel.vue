@@ -24,7 +24,7 @@ const rows = computed(() => (exports.items.value ?? []).map((item) => ({ item, v
 
 <template>
   <div class="grid gap-8">
-    <section class="grid gap-4 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="export-contents">
+    <section class="grid gap-4 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="export-contents">
       <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
         <div class="grid max-w-2xl gap-1.5">
           <h2 id="export-contents" class="text-base font-semibold tracking-tight">{{ t('dataExport.contentsTitle') }}</h2>
@@ -49,7 +49,7 @@ const rows = computed(() => (exports.items.value ?? []).map((item) => ({ item, v
       </div>
       <div v-else-if="!exports.items.value" class="grid gap-3" aria-busy="true"><Skeleton class="h-16 w-full" /><Skeleton class="h-16 w-full" /></div>
       <p v-else-if="rows.length === 0" class="rounded-xl border border-dashed border-input px-5 py-5 text-sm text-muted-foreground" data-testid="exports-empty">{{ t('dataExport.empty') }}</p>
-      <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="export-list">
+      <ul v-else class="divide-y overflow-hidden rounded-xl panel" data-testid="export-list">
         <li v-for="{ item, view } in rows" :key="item.id" class="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 sm:px-6" data-testid="export-item" :data-state="view.state">
           <div class="grid min-w-0 flex-1 gap-1">
             <p class="flex flex-wrap items-center gap-2">

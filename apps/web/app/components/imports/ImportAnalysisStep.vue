@@ -24,14 +24,14 @@ const stats = computed(() => [
       <p class="text-sm text-foreground">{{ t('imports.analysis.failedBody') }}</p>
       <Button as-child variant="outline" size="sm"><NuxtLink to="/app/imports">{{ t('imports.analysis.back') }}</NuxtLink></Button>
     </div>
-    <div v-else class="grid gap-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" role="status" aria-live="polite">
+    <div v-else class="grid gap-3 rounded-xl panel px-5 py-5 sm:px-6" role="status" aria-live="polite">
       <h2 id="import-analysis-title" class="flex items-center gap-2 text-base font-semibold tracking-tight">
         <LoaderCircleIcon class="size-4 animate-spin text-muted-foreground motion-reduce:animate-none" aria-hidden="true" />{{ t('imports.analysis.title') }}
       </h2>
       <p class="max-w-2xl text-sm text-pretty text-muted-foreground">{{ t('imports.analysis.body') }}</p>
     </div>
 
-    <dl class="grid divide-x overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="import-analysis-counts" :style="{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }">
+    <dl class="grid divide-x overflow-hidden rounded-xl panel" data-testid="import-analysis-counts" :style="{ gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }">
       <div v-for="stat in stats" :key="stat.key" class="grid gap-1 px-5 py-4 sm:px-6">
         <dt class="text-xs text-muted-foreground">{{ t(`imports.analysis.${stat.key}`) }}</dt>
         <dd class="figure text-2xl font-semibold tracking-tight">{{ stat.value }}</dd>

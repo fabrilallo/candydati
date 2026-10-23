@@ -47,7 +47,7 @@ const submit = (): void => {
       </div>
     </aside>
 
-    <fieldset class="grid gap-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6">
+    <fieldset class="grid gap-3 rounded-xl panel px-5 py-5 sm:px-6">
       <legend class="px-1 text-base font-semibold tracking-tight">{{ t('migrations.confirm.declarationsTitle') }}</legend>
       <label v-for="key in STATEMENTS" :key="key" class="flex cursor-pointer items-start gap-3 text-sm text-pretty">
         <input v-model="ticked[key]" type="checkbox" class="mt-0.5 size-4 shrink-0 rounded-[4px] accent-primary" :disabled="pending" :data-testid="`declaration-${key}`" />

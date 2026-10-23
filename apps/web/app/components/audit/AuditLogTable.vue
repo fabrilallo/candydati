@@ -19,7 +19,7 @@ const detailValue = (key: string, value: string): string => {
 
 <template>
   <p v-if="events.length === 0" class="rounded-xl border border-dashed px-6 py-12 text-center text-sm text-muted-foreground">{{ t('audit.empty') }}</p>
-  <ol v-else class="divide-y rounded-xl border bg-card shadow-xs">
+  <ol v-else class="divide-y rounded-xl panel">
     <li v-for="event in events" :key="event.id" class="grid grid-cols-[2rem_minmax(0,1fr)] gap-x-3 gap-y-1 px-4 py-4 sm:grid-cols-[2rem_minmax(0,1fr)_auto] sm:gap-x-4 sm:px-5" data-testid="audit-row">
       <span
         class="row-span-2 grid size-8 place-items-center rounded-full text-xs font-semibold"

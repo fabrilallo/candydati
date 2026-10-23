@@ -39,7 +39,7 @@ const send = async (): Promise<void> => {
 
     <MigrationBetaNotice v-if="connector.maturity === 'beta'" :source="connector.label" />
 
-    <div class="grid max-w-xl gap-5 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6">
+    <div class="grid max-w-xl gap-5 rounded-xl panel px-5 py-5 sm:px-6">
       <div v-for="field in connector.fields" :key="field.name" class="grid gap-1.5" :data-field="field.name">
         <FormField :id="inputId(field)" :label="label(field)" :error="errorOf(field)" :hint="connectorText(field.help, locale) || undefined">
           <template #default="{ invalid, describedBy }">

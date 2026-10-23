@@ -24,7 +24,7 @@ const parts = computed<readonly Part[]>(() =>
   ),
 )
 const popover =
-  'z-50 grid w-[min(20rem,calc(100vw-2rem))] gap-2 rounded-xl border bg-popover p-4 text-sm text-popover-foreground shadow-lg duration-200 ease-snap data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-[0.98]'
+  'z-50 grid w-[min(20rem,calc(100vw-2rem))] gap-2 rounded-xl border-2 border-ink bg-popover p-4 text-sm text-popover-foreground shadow-hard duration-200 ease-snap data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-[0.98] data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-[0.98]'
 </script>
 
 <template>
