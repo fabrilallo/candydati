@@ -105,7 +105,7 @@ Headings use `text-wrap: balance`, paragraphs `pretty` (in the CSS base).
 - **Overlays:** dialogs `border-2 border-ink` with `shadow-hard-lg`; menus, popovers, the selection bar and toasts `border-2 border-ink` with `shadow-hard`; side sheets a 2px ink edge and no shadow (the dimmed backdrop separates them). No blurred shadow anywhere; the public careers site follows the organization's theme instead.
 - **Pills:** white with a 1.5px ink outline (`Badge outline`), the neutral `secondary` pill, or yellow for the salary (`Badge highlight`).
 - **Active nav item:** ink fill with paper text (`bg-primary text-primary-foreground`).
-- **Logo mark:** the product initial on a yellow circle with an ink outline.
+- **Logo mark:** one image everywhere, `public/favicon.svg` (a yellow circle with an ink outline, a C closing on a check mark): the tab icon, `PlatformMark` next to the product name in the app, and the README logo (`docs/assets/logo*.svg`, the name outlined in Bricolage Grotesque 800). `NUXT_PUBLIC_PLATFORM_ICON_URL` replaces it in the app for a rebranded deployment.
 - `tailwind-merge` knows the `shadow-hard*` names (`lib/utils.ts`), so a caller can replace them with `shadow-none`.
 
 ### 2.6 Motion

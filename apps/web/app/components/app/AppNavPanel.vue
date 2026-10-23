@@ -36,9 +36,7 @@ const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount',
 <template>
   <div class="flex h-full flex-col gap-5 px-3 pt-4 pb-3">
     <NuxtLink to="/app" class="flex shrink-0 items-center gap-2.5 px-2 pt-1">
-      <span class="grid size-8 shrink-0 place-items-center rounded-full border-2 border-ink bg-highlight text-sm font-extrabold text-highlight-foreground" aria-hidden="true">
-        {{ platform.name.charAt(0).toUpperCase() }}
-      </span>
+      <PlatformMark class="size-8" />
       <span class="truncate text-lg font-extrabold tracking-tight">{{ platform.name }}</span>
     </NuxtLink>
     <OrgSwitcher v-if="viewer?.organization" :organization="viewer.organization" :role-label="roleLabel" />
