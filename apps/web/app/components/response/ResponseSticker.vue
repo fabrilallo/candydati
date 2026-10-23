@@ -26,12 +26,12 @@ const title = computed(() => (props.application.responseDueAt ? t('response.dueA
     role="img"
     :aria-label="label"
     :title="title"
-    class="figure flex size-[3.375rem] shrink-0 -rotate-8 flex-col items-center justify-center gap-0.5 rounded-full border-2 border-ink leading-none select-none"
+    class="figure flex size-[3.75rem] shrink-0 -rotate-8 flex-col items-center justify-center gap-0.5 rounded-full border-2 border-ink leading-none select-none"
     :class="TONES[sticker.state]"
     :data-state="sticker.state"
     data-testid="response-sticker"
   >
     <span class="text-lg font-extrabold tracking-tight" aria-hidden="true">{{ t(sticker.figureKey, { count: sticker.count }) }}</span>
-    <span class="text-[0.625rem] font-bold" aria-hidden="true">{{ t(sticker.captionKey) }}</span>
+    <span class="text-[0.5625rem] font-bold tracking-tight" aria-hidden="true">{{ t(sticker.captionKey) }}</span>
   </span>
 </template>
