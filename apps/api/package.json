@@ -41,7 +41,7 @@
     "zod": "4.5.4"
   },
   "devDependencies": {
-    "@types/node": "26.4.1",
+    "@types/node": "26.6.5",
     "@types/pg": "8.23.1",
     "@vitest/coverage-v8": "5.0.0",
     "fflate": "0.8.3",
