@@ -6,6 +6,32 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-10-23
+
+### Added
+
+- Privacy by design for AI: the assistant and the MCP server give a model candidates by first name and id only.
+  Surnames, emails, phone numbers, links, street addresses, tax codes, IBANs and full dates are replaced by markers
+  (`[surname]`, `[email]`...) in CVs, cover letters and messages too; message drafts keep `{{candidate.lastName}}` as a
+  variable that the composer fills in (ADR 0010).
+- Find candidates for a job on objective criteria a person confirms (skills, languages, minimum experience, location,
+  words in the CV): `find_candidates_by_criteria` for the assistant and over MCP. A filter over the job's applicants and
+  the talent pool only, no score, ordered by date of application; CVs that could not be checked are reported;
+  protected characteristics and maximum experience are refused; every search is audited as
+  `candidate.searched_by_criteria`.
+- Five HR workflows as MCP prompts, for Claude Code, Codex and any MCP client: `write_job_ad`, `answer_inbox`,
+  `find_candidates`, `weekly_report`, `interview_kit`.
+- Tab icon: the platform mark (`NUXT_PUBLIC_PLATFORM_ICON_URL` replaces it); careers pages show the organization logo.
+
+### Changed
+
+- New visual identity: Bricolage Grotesque, ink on warm paper, one yellow accent for the salary and what is due soon,
+  coral only for what is late, 2px ink outlines and hard offset shadows on every panel, menu and dialog. New mark in the
+  app, the favicon and the README.
+- The public ad no longer mentions response times; copy that said they are visible before applying now matches
+  PRODUCT.md.
+- MCP `get_pipeline`, `list_attention` and `create_task` return candidates without surname.
+
 ## [0.1.7] - 2026-10-18
 
 ### Added
