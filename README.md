@@ -6,10 +6,10 @@
 <p align="center"><strong>An open, self-hostable agentic ATS built for candidates, not just recruiters.</strong></p>
 
 <p align="center">
-  <a href="LICENSE"><img alt="License: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1F47D6"></a>
+  <a href="LICENSE"><img alt="License: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1B1530"></a>
   <a href="https://github.com/fabrilallo/candydati/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/fabrilallo/candydati/actions/workflows/ci.yml/badge.svg"></a>
-  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-1F47D6"></a>
-  <img alt="Node 24+" src="https://img.shields.io/badge/node-%3E%3D24-1F47D6">
+  <a href="CONTRIBUTING.md"><img alt="PRs welcome" src="https://img.shields.io/badge/PRs-welcome-1B1530"></a>
+  <img alt="Node 24+" src="https://img.shields.io/badge/node-%3E%3D24-1B1530">
 </p>
 
 <p align="center"><a href="README.it.md">Italiano</a> · <a href="docs/PRODUCT.md">Product</a> · <a href="docs/ARCHITECTURE.md">Architecture</a> · <a href="CONTRIBUTING.md">Contributing</a></p>
