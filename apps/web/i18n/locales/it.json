@@ -1950,14 +1950,7 @@
     "overdueToday": "Scaduta oggi",
     "overdue": "In ritardo di 1 giorno | In ritardo di {count} giorni",
     "answered": "Risposto",
-    "dueAt": "Risposta promessa entro il {date}",
-    "sticker": {
-      "days": "{count}g",
-      "today": "oggi",
-      "reply": "risposta",
-      "lateFigure": "!",
-      "late": "ritardo"
-    }
+    "dueAt": "Risposta promessa entro il {date}"
   },
   "attention": {
     "title": "Da gestire",

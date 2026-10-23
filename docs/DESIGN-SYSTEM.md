@@ -8,12 +8,11 @@ Code cites it as `DESIGN-SYSTEM.md §n`.
 
 The direction is **Candy, with a restrained palette**: warm paper, deep ink, one yellow, bold type and a recognisable shape (ink outlines, round corners, hard offset shadows). Friendly and confident, never noisy. Intensity dials: app variance 6, motion 4, density 4; public pages 7 / 4 / 3.
 
-1. **Transparency is the visual hero.** Salary and process stages are the most prominent content, never a footnote. Inside the app, the response promise is (the sticker, §3.1).
+1. **Transparency is the visual hero.** Salary and process stages are the most prominent content, never a footnote.
 2. **One accent: yellow.** `highlight` (`#FFD54F`, always with ink text) marks only what matters: the salary, a response promise due soon, the primary highlight of a page. Actions are ink, not yellow. Links have their own colour (`link`). One alert colour, `alert` coral, only for what is overdue or late. Stages are never coloured differently: no pastel per stage.
 3. **Numbers matter.** Large, bold figures, tabular numerals (`figure`), never buried in sentences.
 4. **Shape carries the identity.** Cards and key panels have a 2px ink outline, generous radius and a hard offset shadow (§2.5). Everything else sits on the paper background, separated by space or a light border.
-5. **The response promise is a sticker.** A round, slightly rotated badge (§3.1), the signature element of the product.
-6. **Copy:** natural language, short sentences, no em or en dashes (use a hyphen, comma, colon or two sentences). The product name comes from `usePlatform()`, never typed by hand.
+5. **Copy:** natural language, short sentences, no em or en dashes (use a hyphen, comma, colon or two sentences). The product name comes from `usePlatform()`, never typed by hand.
 
 ## 2. Tokens
 
@@ -24,7 +23,7 @@ Defined in `app/assets/css/tailwind.css`.
 | Token | Light | Dark | Use |
 |---|---|---|---|
 | `background` | `#FBFAF7` (paper) | `#14111F` | page background, sidebar |
-| `card` / `popover` | `#FFFFFF` | `#1D1930` / `#231E38` | cards, menus, dialogs, the on-track sticker |
+| `card` / `popover` | `#FFFFFF` | `#1D1930` / `#231E38` | cards, menus, dialogs |
 | `foreground` | `#1B1530` (ink) | `#FBFAF7` | text |
 | `muted-foreground` | `#4A4360` | `#BDB6CF` | secondary text |
 | `muted` / `secondary` | `#F1EEE8` | `#241F37` / `#29233F` | stage columns, hero blocks, neutral pills, hover |
@@ -52,7 +51,7 @@ Never pure `#000`. White (`#FFFFFF`) only for cards and the surfaces that sit on
 | Pair | Light | Dark |
 |---|---|---|
 | foreground on background | 16.81 | 17.81 |
-| foreground on card (also the on-track sticker) | 17.55 | 16.30 |
+| foreground on card | 17.55 | 16.30 |
 | foreground on muted (stage columns, hero) | 15.16 | 15.17 |
 | muted-foreground on background | 8.89 | 9.52 |
 | muted-foreground on card | 9.28 | 8.72 |
@@ -95,7 +94,7 @@ Headings use `text-wrap: balance`, paragraphs `pretty` (in the CSS base).
 
 ### 2.4 Radius, spacing, icons
 
-- **Radius:** controls (buttons, inputs, selects) `rounded-md` = 12px (`xs` buttons `rounded-sm` = 8px). Cards `rounded-lg` = 18px; panels, stage columns, dialogs `rounded-xl` = 24px; heroes `rounded-2xl` = 32px. Items inside menus `rounded-md` within a `p-1.5` (concentric). Pills, badges and stickers `rounded-full`.
+- **Radius:** controls (buttons, inputs, selects) `rounded-md` = 12px (`xs` buttons `rounded-sm` = 8px). Cards `rounded-lg` = 18px; panels, stage columns, dialogs `rounded-xl` = 24px; heroes `rounded-2xl` = 32px. Items inside menus `rounded-md` within a `p-1.5` (concentric). Pills and badges `rounded-full`.
 - **Spacing:** Tailwind 4px scale. Inside a panel `px-5 py-5` (`sm:px-6`); between page sections `gap-8`; between form fields `gap-5`; list rows `py-3.5` / `py-4`. App layout: content `max-w-6xl`, gutter `px-4 sm:px-6 lg:px-10`.
 - **Icons:** `@lucide/vue` only, stroke 1.5 set once with `setLucideProps` (`app.vue`, `error.vue`). Sizes: 16px (`size-4`) in controls, 18px in navigation, 20px in the menu button.
 
@@ -109,7 +108,7 @@ Headings use `text-wrap: balance`, paragraphs `pretty` (in the CSS base).
 
 ### 2.6 Motion
 
-One easing, `ease-snap` = `cubic-bezier(0.16, 1, 0.3, 1)`. Durations: 150ms for hover and press, 200ms dialogs and menus, 300ms drawers. Buttons: `active:scale-[0.98]`. Menus and dialogs enter with a fade plus zoom 0.98, no bounce. Skeletons use `animate-shimmer`, which stops under `motion-reduce`. `prefers-reduced-motion` zeroes animations and transitions globally. Switching theme does not animate colours. The stickers' rotation is static, not motion.
+One easing, `ease-snap` = `cubic-bezier(0.16, 1, 0.3, 1)`. Durations: 150ms for hover and press, 200ms dialogs and menus, 300ms drawers. Buttons: `active:scale-[0.98]`. Menus and dialogs enter with a fade plus zoom 0.98, no bounce. Skeletons use `animate-shimmer`, which stops under `motion-reduce`. `prefers-reduced-motion` zeroes animations and transitions globally. Switching theme does not animate colours.
 
 ## 3. Components
 
@@ -139,13 +138,9 @@ Base components live in `app/components/ui/*`.
 
 App components: `AppPage` (top bar plus main column), `AppTopBar`, `AppBreadcrumbs`, `AppNavPanel`, `PageHeader` (icon tile, title, pill, meta, actions, tabs), `UnderlineTabs`, `OrgSwitcher`, `UserMenu`, `FormAlert`. Overview: `StatCard`, `ChartEmpty` and one card per statistic in `components/dashboard/`.
 
-### 3.1 The response promise sticker
+### 3.1 The response promise
 
-The signature element. Two forms, both round with a 2px ink outline, rotated (static, not animated), with ink text:
-
-- **`ResponseSticker`** (`components/response/`, logic in `lib/response-sticker.ts`): on a pipeline card, 60px, rotated -8 degrees, at the right end of the card footer overlapping its top rule (never next to the name, which keeps its full width). It shows the days left as a big figure ("5g" / "5d") over "risposta" / "reply"; "oggi" / "today" on the last day; "!" over "ritardo" / "late" once overdue. **White** (`card`) on track, **yellow** (`highlight`) within 48 hours (`DUE_SOON_HOURS`), **coral** (`alert`) when overdue. The words change with the state, so colour is never the only signal; it is `role="img"` with the full sentence as `aria-label` ("Risposta entro 5 giorni", "In ritardo di 2 giorni") and the promised date as `title`. Nothing is shown once answered (the card footer keeps a quiet "Risposto") or closed.
-
-`ResponsePill` stays for lists (attention, candidate detail), with the same colours: neutral on track, `highlight` when due soon, `alert` when late.
+No countdown on the pipeline board or on the public ad. `ResponsePill` shows it where a person acts on it, the attention list and the candidate detail, with these colours: neutral on track, `highlight` when due soon, `alert` when late.
 
 ## 4. Patterns
 
@@ -202,9 +197,9 @@ The structural model, in words: a pipeline board of fixed-width columns on a sof
 - **Page:** the ad's header as above (tile, title, "Published" pill, meta "Published on ... | Answer within N days"), tabs `Candidates 12 | Ad | Activity`. Right of the tabs: search, Filter (`outline`), the primary action and the view switcher (board, list) as an icon button group.
 - **Columns** = the stages declared in the ad (`PRODUCT.md §4.1`), in the same order. Fixed width `w-80`, solid `muted` fill (the same for every stage), `rounded-xl p-2.5`, horizontal scroll of the board only. Header: stage status dot (8px, one tone per stage *type* from the ink scale; never colours), name `text-lg font-extrabold`, count in an ink `figure` pill with paper text, the ... menu on the right. The assistant's help for the stage ("Ask the assistant") lives there too; it works on the process and does not rank people.
 - **Candidate card:** candy card, `bg-card rounded-lg border-2 border-ink p-4 shadow-hard`, 12px inner gap; on hover it lifts 1px with `shadow-hard-md`.
-  1. 36px avatar, name `text-base font-bold`, headline below in `muted`; the response sticker (§3.1) on the right, then the ... menu.
+  1. 36px avatar, name `text-base font-bold`, headline below in `muted`; the ... menu on the right.
   2. Meta rows with a 16px icon in `muted-foreground`: years of experience, location. No scores and no "match": the product has none by design (`PRODUCT.md §2.4`).
-  3. Separator, then the footer: relative time in the stage on the left, counters on the right (notes) with icon and `figure`. The sticker is the only colour on the card: white, then yellow when due soon, coral once late.
+  3. Separator, then the footer: relative time in the stage on the left, counters on the right (notes) with icon and `figure`.
 - **Dragging:** the grabbed card lifts (`shadow-hard-lg`, a focus ring, `cursor-grabbing`), a dashed placeholder stays in its place; the destination column turns `accent` with an ink ring and shows a 2px ink line where it will drop. Keyboard: space to pick up, arrows to move, space to drop, Esc to cancel, with an `aria-live` announcement of the destination stage. Under `prefers-reduced-motion` no rotation and no return animation. Moving never sends messages by itself: it asks for confirmation (`PRODUCT.md §5.3`).
 
 ### 5.6 Candidate detail
@@ -259,4 +254,4 @@ The structural model, in words: a pipeline board of fixed-width columns on a sof
 - Everything centred. Left-align by default; centre only a short empty state.
 - Fake screenshots made of divs, stock photos, decorative illustrations.
 - State colours used to decorate; yellow on more than what matters (salary, promise due soon, one highlight per view); coral for anything but overdue or late; a different colour per stage.
-- `#000`, white outside cards and stickers, blurred black shadows, `shadow-2xl`. Hard shadows only in `ink-shadow`, only on candy cards and heroes.
+- `#000`, white outside cards, blurred black shadows, `shadow-2xl`. Hard shadows only in `ink-shadow`, only on candy cards and heroes.

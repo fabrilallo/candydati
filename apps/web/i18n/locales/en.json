@@ -1950,14 +1950,7 @@
     "overdueToday": "Overdue today",
     "overdue": "1 day late | {count} days late",
     "answered": "Answered",
-    "dueAt": "Answer promised by {date}",
-    "sticker": {
-      "days": "{count}d",
-      "today": "today",
-      "reply": "reply",
-      "lateFigure": "!",
-      "late": "late"
-    }
+    "dueAt": "Answer promised by {date}"
   },
   "attention": {
     "title": "Needs attention",
