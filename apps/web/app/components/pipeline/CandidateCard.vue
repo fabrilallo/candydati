@@ -37,7 +37,7 @@ const since = computed(() => relativeTime(props.card.stageChangedAt, props.now, 
 const TAGS_SHOWN = 3
 const tags = computed(() => props.card.candidate.tags.slice(0, TAGS_SHOWN))
 const moreTags = computed(() => Math.max(0, props.card.candidate.tags.length - TAGS_SHOWN))
-/** Once answered the sticker goes away and the footer keeps a quiet "Risposto". */
+/** The board shows no countdown (it lives in the attention list and the profile); once answered the footer says so quietly. */
 const answered = computed(() => effectiveResponseState(props.card, props.now) === 'answered')
 </script>
 
@@ -120,8 +120,6 @@ const answered = computed(() => effectiveResponseState(props.card, props.now) ==
         <span class="sr-only">{{ t('pipeline.card.notes', { count: card.noteCount }, card.noteCount) }}</span>
         <span class="figure" aria-hidden="true">{{ card.noteCount }}</span>
       </span>
-      <!-- In the footer, not next to the name: the name and headline keep their full width; it overlaps the rule above. -->
-      <ResponseSticker :application="card" :now="now" class="-mt-7 -mb-1" />
     </div>
   </article>
 </template>
