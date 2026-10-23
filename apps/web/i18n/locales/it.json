@@ -310,7 +310,7 @@
       },
       "publish": {
         "title": "Pubblica il primo annuncio",
-        "body": "Compare sulla pagina carriere con i tempi di risposta che hai dichiarato.",
+        "body": "Compare sulla pagina carriere con retribuzione e processo di selezione dichiarati.",
         "cta": "Vai agli annunci",
         "done": "Annuncio pubblicato"
       },
@@ -1347,7 +1347,7 @@
     },
     "metaDescription": "{title}: {role}, {seniority}, {contract}. {salary}.",
     "poweredBy": "Pagina carriere su {name}",
-    "footer": "Qui retribuzione, processo di selezione e tempi di risposta sono sempre dichiarati.",
+    "footer": "Qui retribuzione e processo di selezione sono sempre dichiarati.",
     "feedLink": "Feed XML",
     "llmsLink": "llms.txt",
     "feedTitle": "Feed degli annunci",
@@ -1365,12 +1365,6 @@
     "protectedCategories": {
       "reserved": "Posizione riservata agli iscritti alle liste del collocamento mirato ai sensi della L. 68/99.",
       "also": "Posizione aperta anche agli iscritti alle liste del collocamento mirato ai sensi della L. 68/99."
-    },
-    "promise": {
-      "top": "ti rispondiamo",
-      "figure": "sempre",
-      "bottom": "a ogni fase",
-      "label": "Ti rispondiamo sempre, dopo ogni fase"
     }
   },
   "careers": {
@@ -1404,7 +1398,7 @@
     },
     "process": {
       "title": "Processo dichiarato.",
-      "body": "Fasi, chi le conduce, durata e tempi di risposta sono visibili prima di candidarsi."
+      "body": "Fasi, chi le conduce e quanto durano sono visibili prima di candidarsi."
     },
     "answer": {
       "title": "Ogni candidato riceve una risposta.",

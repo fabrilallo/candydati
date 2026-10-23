@@ -22,7 +22,7 @@ A job ad without a salary range cannot be published. The range is shown in the a
 
 ### 2.2 The selection process is declared
 
-Stages, who runs them, how long they take and how fast candidates get an answer are visible before anyone applies. The stages declared in the ad become the stages of the pipeline: what the candidate reads is what the recruiter uses.
+Stages, who runs them and how long they take are visible before anyone applies. The response time is a commitment the team keeps: deadlines and reminders inside, restated to the applicant after applying, never shown on the public ad (§4.1). The stages declared in the ad become the stages of the pipeline: what the candidate reads is what the recruiter uses.
 
 ### 2.3 Every application gets an answer
 

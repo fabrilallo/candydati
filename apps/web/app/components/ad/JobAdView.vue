@@ -50,8 +50,7 @@ provideAdContext(
 <template>
   <article :lang="language" :data-mode="mode" class="@container grid gap-10" data-testid="job-ad">
     <div class="relative grid gap-6 rounded-2xl border-2 border-ink bg-muted p-5 shadow-hard-lg @md:p-7 @2xl:p-10" data-testid="job-hero">
-      <PromiseSticker class="absolute -top-6 right-3 @md:right-6 @2xl:top-8 @2xl:right-8" />
-      <AdHeader :title="content.title" :role="content.role" :seniority="content.seniority" :organization="organization" :published-at="publishedAt" class="pr-28 @2xl:pr-44" />
+      <AdHeader :title="content.title" :role="content.role" :seniority="content.seniority" :organization="organization" :published-at="publishedAt" />
       <AdFacts :content="content" />
     </div>
     <slot name="cta" />

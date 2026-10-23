@@ -64,14 +64,12 @@ describe('JobAdView in preview', () => {
     expect(wrapper.find('[data-section="benefits"]').exists()).toBe(false)
   })
 
-  it('opens with the hero: salary in the yellow block and the promise sticker, never the number of response days', async () => {
+  it('opens with the hero: salary in the yellow block, and no response promise (restated only after applying)', async () => {
     const wrapper = await mountSuspended(JobAdView, { props: { content: completeContent, organization, mode: 'public' } })
     const hero = wrapper.find('[data-testid="job-hero"]')
     expect(hero.find('[data-fact="salary"]').classes()).toContain('bg-highlight')
-    const sticker = hero.find('[data-testid="promise-sticker"]')
-    expect(sticker.attributes('role')).toBe('img')
-    expect(sticker.attributes('aria-label')).toBe('Ti rispondiamo sempre, dopo ogni fase')
-    expect(sticker.text()).not.toMatch(/\d/)
+    expect(wrapper.find('[data-testid="promise-sticker"]').exists()).toBe(false)
+    expect(wrapper.text()).not.toMatch(/ti rispondiamo|entro \d+ giorni/i)
   })
 })
 

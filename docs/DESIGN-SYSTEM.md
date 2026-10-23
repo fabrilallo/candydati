@@ -8,7 +8,7 @@ Code cites it as `DESIGN-SYSTEM.md §n`.
 
 The direction is **Candy, with a restrained palette**: warm paper, deep ink, one yellow, bold type and a recognisable shape (ink outlines, round corners, hard offset shadows). Friendly and confident, never noisy. Intensity dials: app variance 6, motion 4, density 4; public pages 7 / 4 / 3.
 
-1. **Transparency is the visual hero.** Salary, process stages and the response promise are the most prominent content, never a footnote.
+1. **Transparency is the visual hero.** Salary and process stages are the most prominent content, never a footnote. Inside the app, the response promise is (the sticker, §3.1).
 2. **One accent: yellow.** `highlight` (`#FFD54F`, always with ink text) marks only what matters: the salary, a response promise due soon, the primary highlight of a page. Actions are ink, not yellow. Links have their own colour (`link`). One alert colour, `alert` coral, only for what is overdue or late. Stages are never coloured differently: no pastel per stage.
 3. **Numbers matter.** Large, bold figures, tabular numerals (`figure`), never buried in sentences.
 4. **Shape carries the identity.** Cards and key panels have a 2px ink outline, generous radius and a hard offset shadow (§2.5). Everything else sits on the paper background, separated by space or a light border.
@@ -62,7 +62,7 @@ Never pure `#000`. White (`#FFFFFF`) only for cards and the surfaces that sit on
 | link on background | 8.86 | 8.69 |
 | link on card | 9.25 | 7.95 |
 | accent-foreground on accent | 15.35 | 10.08 |
-| highlight-foreground on highlight (salary, due soon, hero sticker) | 12.44 | 12.44 |
+| highlight-foreground on highlight (salary, due soon) | 12.44 | 12.44 |
 | alert-foreground on alert (overdue) | 6.89 | 6.89 |
 | success on success-soft | 5.58 | 8.24 |
 | warning on warning-soft | 5.59 | 8.43 |
@@ -144,7 +144,6 @@ App components: `AppPage` (top bar plus main column), `AppTopBar`, `AppBreadcrum
 The signature element. Two forms, both round with a 2px ink outline, rotated (static, not animated), with ink text:
 
 - **`ResponseSticker`** (`components/response/`, logic in `lib/response-sticker.ts`): on a pipeline card, 54px, rotated -8 degrees. It shows the days left as a big figure ("5g" / "5d") over "risposta" / "reply"; "oggi" / "today" on the last day; "!" over "ritardo" / "late" once overdue. **White** (`card`) on track, **yellow** (`highlight`) within 48 hours (`DUE_SOON_HOURS`), **coral** (`alert`) when overdue. The words change with the state, so colour is never the only signal; it is `role="img"` with the full sentence as `aria-label` ("Risposta entro 5 giorni", "In ritardo di 2 giorni") and the promised date as `title`. Nothing is shown once answered (the card footer keeps a quiet "Risposto") or closed.
-- **`PromiseSticker`** (`components/ad/`): in the hero of the public ad, 112px (152px from `@2xl`), yellow, rotated 8 degrees: "ti rispondiamo / sempre / a ogni fase", in the ad's language, `role="img"` with the sentence as label. It states the principle, not the number of days: the response time is restated after applying, not shown on the public ad (`PRODUCT.md §4.1`).
 
 `ResponsePill` stays for lists (attention, candidate detail), with the same colours: neutral on track, `highlight` when due soon, `alert` when late.
 
@@ -224,7 +223,7 @@ The structural model, in words: a pipeline board of fixed-width columns on a sof
 
 ### 5.8 Public job ad (`JobAdView`)
 
-- **Hero:** one candy panel (`rounded-2xl border-2 border-ink bg-muted shadow-hard-lg`, padding 20 to 40px) with the organization, the title (`font-extrabold`, -0.045em, 56px from `@2xl`), the role line, the promise sticker (§3.1) in the top right corner, then the facts.
+- **Hero:** one candy panel (`rounded-2xl border-2 border-ink bg-muted shadow-hard-lg`, padding 20 to 40px) with the organization, the title (`font-extrabold`, -0.045em, 56px from `@2xl`), the role line, then the facts. No response promise on the public ad: it is restated after applying (`PRODUCT.md §4.1`).
 - **Facts:** the salary in the **yellow block** (`highlight`, ink outline, `rounded-xl`, figure 28 to 32px `font-extrabold`), beside it the process in a white bordered block ("4 stages"). Below, the quieter facts (contract, level, work mode, place, CCNL) as a label/value grid on the hero fill.
 - **Process:** the stages as white tiles with a 2px ink outline and no shadow (`rounded-xl p-5`), two per row from `@xl`: a 44px `font-extrabold` number, the title `text-lg font-bold`, then who runs it and the duration.
 - The same component is the editor preview: gaps and hints show in place.
