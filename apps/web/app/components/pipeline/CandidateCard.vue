@@ -88,7 +88,6 @@ const answered = computed(() => effectiveResponseState(props.card, props.now) ==
         </h3>
         <p v-if="card.candidate.headline" class="truncate text-sm text-muted-foreground">{{ card.candidate.headline }}</p>
       </div>
-      <ResponseSticker :application="card" :now="now" class="-my-1" />
       <CardMenu :name="name" :stages="stages" :stage-id="card.stageId" :can-move="canMove" :can-decide="canDecide" :decided="decided" @open="emit('open')" @move="emit('move', $event)" @decide="emit('decide', $event)" />
     </div>
 
@@ -121,6 +120,8 @@ const answered = computed(() => effectiveResponseState(props.card, props.now) ==
         <span class="sr-only">{{ t('pipeline.card.notes', { count: card.noteCount }, card.noteCount) }}</span>
         <span class="figure" aria-hidden="true">{{ card.noteCount }}</span>
       </span>
+      <!-- In the footer, not next to the name: the name and headline keep their full width; it overlaps the rule above. -->
+      <ResponseSticker :application="card" :now="now" class="-mt-7 -mb-1" />
     </div>
   </article>
 </template>
