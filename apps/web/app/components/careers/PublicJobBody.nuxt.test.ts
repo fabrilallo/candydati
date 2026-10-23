@@ -96,7 +96,7 @@ describe('PublicJobBody', () => {
     expect(wrapper.text()).toContain('What you will do')
     expect(wrapper.find('[data-fact="process"]').text()).toContain('2 stages')
     expect(wrapper.find('[data-fact="salary"]').text()).toContain('€45,000 - 60,000')
-    expect(wrapper.find('[data-testid="promise-sticker"]').attributes('aria-label')).toBe('We always reply, after every stage')
+    expect(wrapper.find('[data-testid="promise-sticker"]').exists()).toBe(false)
     expect(wrapper.text()).not.toContain('Processo di selezione')
   })
 

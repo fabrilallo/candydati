@@ -310,7 +310,7 @@
       },
       "publish": {
         "title": "Publish the first ad",
-        "body": "It appears on the careers page with the response times you declared.",
+        "body": "It appears on the careers page with the salary and selection process you declared.",
         "cta": "Go to the ads",
         "done": "Ad published"
       },
@@ -1347,7 +1347,7 @@
     },
     "metaDescription": "{title}: {role}, {seniority}, {contract}. {salary}.",
     "poweredBy": "Careers page on {name}",
-    "footer": "Here salary, selection process and response times are always declared.",
+    "footer": "Here salary and selection process are always declared.",
     "feedLink": "XML feed",
     "llmsLink": "llms.txt",
     "feedTitle": "Job ads feed",
@@ -1365,12 +1365,6 @@
     "protectedCategories": {
       "reserved": "Position reserved for people registered in the targeted placement lists under Italian Law 68/99.",
       "also": "Position also open to people registered in the targeted placement lists under Italian Law 68/99."
-    },
-    "promise": {
-      "top": "we reply",
-      "figure": "always",
-      "bottom": "at every stage",
-      "label": "We always reply, after every stage"
     }
   },
   "careers": {
@@ -1404,7 +1398,7 @@
     },
     "process": {
       "title": "A declared process.",
-      "body": "Stages, who runs them, how long they take and when you hear back, all visible before applying."
+      "body": "Stages, who runs them and how long they take, all visible before applying."
     },
     "answer": {
       "title": "Every candidate gets an answer.",
