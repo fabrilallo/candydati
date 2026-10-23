@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-10-23
+
+### Fixed
+
+- One logo everywhere: the app showed the product initial on a yellow circle, the favicon and the README the mark (a C
+  closing on a check). The app now shows the mark next to the product name (`NUXT_PUBLIC_PLATFORM_ICON_URL` replaces
+  it), and the README wordmark uses Bricolage Grotesque like the app.
+
 ## [0.1.8] - 2026-10-23
 
 ### Added
