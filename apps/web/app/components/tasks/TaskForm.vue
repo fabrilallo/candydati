@@ -30,7 +30,7 @@ const submit = (): void => {
 </script>
 
 <template>
-  <form class="grid gap-4 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" novalidate data-testid="task-form" @submit.prevent="submit">
+  <form class="grid gap-4 rounded-xl panel px-5 py-5 sm:px-6" novalidate data-testid="task-form" @submit.prevent="submit">
     <FormField :id="field('title')" :label="t('tasks.fields.title')" :error="errors.title">
       <template #default="{ invalid, describedBy }">
         <Input :id="field('title')" v-model="title" :maxlength="TASK_TITLE_MAX" :placeholder="t('tasks.fields.titlePlaceholder')" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" data-testid="task-title" />

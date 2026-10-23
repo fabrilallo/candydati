@@ -51,7 +51,7 @@ const providers = computed(() => (record.value ? providerRows(record.value.provi
       <div><Button variant="outline" @click="() => processing.refresh()">{{ t('common.retry') }}</Button></div>
     </div>
     <Skeleton v-else-if="!record" class="h-96 w-full rounded-xl" />
-    <article v-else id="processing-record" class="grid gap-5 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="record-title" data-testid="processing-record">
+    <article v-else id="processing-record" class="grid gap-5 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="record-title" data-testid="processing-record">
       <header class="flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
         <div class="grid gap-1">
           <h3 id="record-title" class="text-base font-semibold tracking-tight">{{ t('privacyDocs.register.title') }}</h3>

@@ -16,7 +16,7 @@ const snippet = computed(() => mcpConfigSnippet({ serverName: platform.value.nam
       <h2 id="mcp-title" class="text-base font-semibold tracking-tight">{{ t('mcp.title') }}</h2>
       <p class="max-w-prose text-sm text-muted-foreground">{{ t('mcp.description') }}</p>
     </div>
-    <div class="grid gap-5 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6">
+    <div class="grid gap-5 rounded-xl panel px-5 py-5 sm:px-6">
       <div class="grid gap-2">
         <p class="text-sm font-medium">{{ t('mcp.endpoint') }}</p>
         <div class="flex min-w-0 items-center gap-2">

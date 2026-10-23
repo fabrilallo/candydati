@@ -13,7 +13,7 @@ const starts = computed(() => props.status === null || props.status === 'draft')
 </script>
 
 <template>
-  <section class="grid gap-5 rounded-xl border bg-card px-6 py-10 shadow-xs sm:grid-cols-[auto_1fr] sm:gap-x-6 sm:px-8" data-testid="jobs-empty">
+  <section class="grid gap-5 rounded-xl panel px-6 py-10 sm:grid-cols-[auto_1fr] sm:gap-x-6 sm:px-8" data-testid="jobs-empty">
     <span class="grid size-11 place-items-center rounded-lg bg-accent text-accent-foreground" aria-hidden="true"><FilePlusIcon class="size-5" /></span>
     <div class="grid max-w-xl gap-4">
       <div class="grid gap-1.5">

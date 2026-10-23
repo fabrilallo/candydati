@@ -48,7 +48,7 @@ const pad = (n: number): string => String(n).padStart(2, '0')
 
     <div v-if="showRequirements" class="grid gap-3">
       <component :is="ad.heading(2)" class="text-base font-semibold tracking-tight">{{ ad.x('public.headings.requirements') }}</component>
-      <div class="grid overflow-hidden rounded-xl border bg-card" :class="niceToHave.length || hints.niceToHave ? '@xl:grid-cols-2' : ''">
+      <div class="grid overflow-hidden rounded-xl panel" :class="niceToHave.length || hints.niceToHave ? '@xl:grid-cols-2' : ''">
         <div class="grid content-start gap-3 p-5" data-section="mustHave">
           <component :is="ad.heading(3)" class="text-sm font-medium text-muted-foreground">{{ ad.x('public.headings.mustHave') }}</component>
           <ul v-if="mustHave.length" class="grid gap-2.5">

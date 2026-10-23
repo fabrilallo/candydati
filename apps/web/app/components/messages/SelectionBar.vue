@@ -10,7 +10,7 @@ const { t } = useI18n()
 
 <template>
   <div class="pointer-events-none sticky bottom-4 z-30 flex justify-center" data-testid="selection-bar">
-    <div role="region" :aria-label="t('pipeline.selection.bar')" class="pointer-events-auto flex flex-wrap items-center gap-2 rounded-xl border bg-popover py-2 pr-2 pl-4 shadow-lg">
+    <div role="region" :aria-label="t('pipeline.selection.bar')" class="pointer-events-auto flex flex-wrap items-center gap-2 rounded-xl border-2 border-ink bg-popover py-2 pr-2 pl-4 shadow-hard">
       <p class="text-sm font-medium" aria-live="polite" data-testid="selection-count">{{ t('pipeline.selection.count', { count }, count) }}</p>
       <Button size="sm" data-testid="selection-message" @click="emit('message')"><SendIcon aria-hidden="true" />{{ t('pipeline.selection.message') }}</Button>
       <Button size="sm" variant="ghost" data-testid="selection-clear" @click="emit('clear')"><XIcon aria-hidden="true" />{{ t('pipeline.selection.clear') }}</Button>

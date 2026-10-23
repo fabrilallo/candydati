@@ -29,7 +29,7 @@ const headingId = computed(() => `migration-issues-${props.level}`)
 </script>
 
 <template>
-  <section class="grid gap-3 rounded-xl border bg-card px-5 py-4 shadow-xs sm:px-6" :aria-labelledby="headingId" :data-testid="`migration-issues-${level}`">
+  <section class="grid gap-3 rounded-xl panel px-5 py-4 sm:px-6" :aria-labelledby="headingId" :data-testid="`migration-issues-${level}`">
     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
       <div class="grid gap-0.5">
         <h4 :id="headingId" class="flex items-center gap-2 text-[0.9375rem] font-semibold">

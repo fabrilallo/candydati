@@ -46,7 +46,7 @@ const items = computed(() => {
 </script>
 
 <template>
-  <section :aria-label="t('reports.headlines.title')" class="rounded-xl border bg-card shadow-xs" data-testid="report-headlines">
+  <section :aria-label="t('reports.headlines.title')" class="rounded-xl panel" data-testid="report-headlines">
     <dl class="grid divide-y sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
       <div
         v-for="(item, index) in items"

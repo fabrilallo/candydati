@@ -49,7 +49,7 @@ const respond = async (accept: boolean): Promise<void> => {
         <h1 class="text-3xl font-semibold tracking-tight">{{ t('invitation.title', { organization: invitation.organizationName }) }}</h1>
         <p v-if="roleLabel" class="text-[0.9375rem] text-muted-foreground">{{ t('invitation.subtitle', { role: roleLabel }) }}</p>
       </div>
-      <div class="grid gap-1 rounded-xl border bg-card px-5 py-4 text-sm shadow-xs">
+      <div class="grid gap-1 rounded-xl panel px-5 py-4 text-sm">
         <p v-if="invitation.inviterEmail">{{ t('invitation.from', { inviter: invitation.inviterEmail }) }}</p>
         <p class="text-muted-foreground">{{ t('invitation.forEmail', { email: invitation.email }) }}</p>
       </div>

@@ -13,7 +13,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <section v-if="view.blocking.length || view.warnings.length" :aria-label="t('job.compliance.title')" class="grid gap-3 rounded-xl border bg-card p-4 shadow-xs sm:p-5" data-testid="compliance-panel">
+  <section v-if="view.blocking.length || view.warnings.length" :aria-label="t('job.compliance.title')" class="grid gap-3 rounded-xl panel p-4 sm:p-5" data-testid="compliance-panel">
     <div class="flex items-start gap-2.5">
       <ScaleIcon class="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
       <div class="grid gap-0.5">

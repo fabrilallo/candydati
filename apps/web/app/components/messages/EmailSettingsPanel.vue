@@ -40,7 +40,7 @@ const save = async (): Promise<void> => {
       <Skeleton class="h-64 w-full rounded-xl" />
     </div>
     <template v-else>
-      <section class="grid gap-3 rounded-xl border bg-card px-5 py-5 sm:px-6" aria-labelledby="email-effective" data-testid="email-effective">
+      <section class="grid gap-3 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="email-effective" data-testid="email-effective">
         <h2 id="email-effective" class="text-base font-semibold tracking-tight">{{ t('emailSettings.effective.title') }}</h2>
         <p class="text-sm text-muted-foreground">{{ t('emailSettings.effective.from') }}</p>
         <p class="rounded-md bg-muted px-3 py-2 font-mono text-sm break-all" data-testid="effective-from">{{ settings.effectiveFrom }}</p>

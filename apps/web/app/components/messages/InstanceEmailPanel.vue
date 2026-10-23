@@ -26,7 +26,7 @@ const explain = computed(() => {
 </script>
 
 <template>
-  <section class="grid gap-5 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="instance-email-title" data-testid="instance-email">
+  <section class="grid gap-5 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="instance-email-title" data-testid="instance-email">
     <div class="grid gap-1">
       <div class="flex flex-wrap items-center gap-3">
         <h2 id="instance-email-title" class="text-base font-semibold tracking-tight">{{ t('instanceEmail.title') }}</h2>

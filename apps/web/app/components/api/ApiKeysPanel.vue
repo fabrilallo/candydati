@@ -51,7 +51,7 @@ const confirmRevoke = async (): Promise<void> => {
     </div>
     <div v-else-if="!keys.keys.value" class="grid gap-3" aria-busy="true"><Skeleton class="h-20 w-full" /><Skeleton class="h-20 w-full" /></div>
     <p v-else-if="keys.keys.value.length === 0" class="rounded-xl border border-dashed border-input px-6 py-6 text-sm text-muted-foreground" data-testid="api-keys-empty">{{ t('apiKeys.empty') }}</p>
-    <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+    <ul v-else class="divide-y overflow-hidden rounded-xl panel shadow-xs">
       <ApiKeyItem v-for="key in keys.keys.value" :key="key.id" :api-key="key" :now="now" :busy="keys.busy.value === key.id" @revoke="revoking = key" />
     </ul>
     <ApiKeyCreateDialog v-model:open="creating" :busy="keys.busy.value === 'new'" :error-key="keys.createErrorKey.value" :secret="secret" @create="create" @done="finish" />

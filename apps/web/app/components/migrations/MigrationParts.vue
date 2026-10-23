@@ -32,7 +32,7 @@ watch(() => props.batch.counts.fetch?.parts, (parts, before) => {
 </script>
 
 <template>
-  <nav v-if="batch.groupId !== null && total > 1" class="grid gap-3 rounded-xl border bg-card px-5 py-4 shadow-xs sm:px-6" :aria-label="t('migrations.parts.label')" data-testid="migration-parts">
+  <nav v-if="batch.groupId !== null && total > 1" class="grid gap-3 rounded-xl panel px-5 py-4 sm:px-6" :aria-label="t('migrations.parts.label')" data-testid="migration-parts">
     <div class="grid gap-1">
       <p class="text-sm font-semibold" data-testid="migration-part-current">{{ t('migrations.parts.current', { part: batch.part ?? 1, parts: total }) }}</p>
       <p class="max-w-2xl text-sm text-pretty text-muted-foreground">{{ t('migrations.parts.intro', { parts: total }) }}</p>

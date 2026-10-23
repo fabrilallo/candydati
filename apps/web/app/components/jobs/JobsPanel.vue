@@ -33,7 +33,7 @@ const showFilter = computed(() => counts.value === null || counts.value.total > 
       <JobListSkeleton v-if="loading && jobs.length === 0" />
       <div v-else :class="loading ? 'opacity-60 transition-opacity' : ''" :aria-busy="loading">
         <JobListEmpty v-if="jobs.length === 0" :status="status" :can-create="can(role, 'job:create')" :can-use-templates="can(role, 'job_template:read')" @show-all="setStatus(null)" />
-        <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+        <ul v-else class="divide-y overflow-hidden rounded-xl panel">
           <JobListItem v-for="job in jobs" :key="job.id" :job="job" :now="now" :stale="staleDaysOf(job) !== null" :stale-days="staleDaysOf(job) ?? 0" />
         </ul>
       </div>

@@ -55,7 +55,7 @@ const setProblem = (value: string): void => emit('update:filters', { ...props.fi
       </div>
 
       <p v-if="shown.length === 0" class="rounded-xl border border-dashed border-input px-5 py-5 text-sm text-muted-foreground" data-testid="preview-no-match">{{ t('imports.preview.noMatch') }}</p>
-      <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="preview-list">
+      <ul v-else class="divide-y overflow-hidden rounded-xl panel" data-testid="preview-list">
         <ImportPreviewItem v-for="item in shown" :key="item.id" :item="item" :included="selection.has(item.id)" :disabled="pending" @toggle="emit('toggle', item.id, $event)" />
       </ul>
     </template>

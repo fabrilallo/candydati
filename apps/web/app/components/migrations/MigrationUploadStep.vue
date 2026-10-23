@@ -53,7 +53,7 @@ const send = async (): Promise<void> => {
       <input ref="input" type="file" accept=".zip,application/zip" class="sr-only" tabindex="-1" aria-hidden="true" data-testid="migration-input" @change="picked" />
     </div>
 
-    <div v-if="upload.file.value" class="flex flex-wrap items-center gap-3 rounded-xl border bg-card px-5 py-4 shadow-xs sm:px-6" data-testid="migration-picked">
+    <div v-if="upload.file.value" class="flex flex-wrap items-center gap-3 rounded-xl panel px-5 py-4 sm:px-6" data-testid="migration-picked">
       <p class="sr-only">{{ t('migrations.upload.picked') }}</p>
       <span class="min-w-0 flex-1 truncate font-mono text-xs" :title="upload.file.value.name">{{ upload.file.value.name }}</span>
       <span class="figure shrink-0 text-xs text-muted-foreground">{{ formatBytes(upload.file.value.size, locale) }}</span>

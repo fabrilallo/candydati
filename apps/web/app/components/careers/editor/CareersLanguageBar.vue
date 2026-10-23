@@ -15,7 +15,7 @@ const asLocale = (value: string): Locale => SUPPORTED_LOCALES.find((code) => cod
 </script>
 
 <template>
-  <div class="flex flex-wrap items-end justify-between gap-4 rounded-xl border bg-card px-5 py-4 sm:px-6" data-testid="careers-languages">
+  <div class="flex flex-wrap items-end justify-between gap-4 rounded-xl panel px-5 py-4 sm:px-6" data-testid="careers-languages">
     <div class="grid gap-1.5">
       <p id="cp-editing-label" class="text-sm font-medium">{{ t('careersEditor.languages.editing') }}</p>
       <div role="group" aria-labelledby="cp-editing-label" class="inline-flex w-fit rounded-md border bg-background p-0.5">

@@ -62,7 +62,7 @@ const filtered = computed(() => list.query.value.trim() !== '' || list.talentPoo
       <div><Button variant="outline" @click="() => list.refresh()">{{ t('common.retry') }}</Button></div>
     </div>
     <template v-else>
-      <ul v-if="list.loading.value && list.candidates.value.length === 0" class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" aria-busy="true" data-testid="candidates-loading">
+      <ul v-if="list.loading.value && list.candidates.value.length === 0" class="divide-y overflow-hidden rounded-xl panel" aria-busy="true" data-testid="candidates-loading">
         <li v-for="n in 5" :key="n" class="flex items-center gap-3 px-5 py-4 sm:px-6">
           <Skeleton class="size-9 rounded-full" />
           <div class="grid flex-1 gap-2"><Skeleton class="h-4 w-2/5" /><Skeleton class="h-3 w-1/4" /></div>
@@ -75,7 +75,7 @@ const filtered = computed(() => list.query.value.trim() !== '' || list.talentPoo
           <p class="text-sm text-muted-foreground">{{ filtered ? t('candidates.emptyFilteredBody') : t('candidates.emptyBody') }}</p>
           <p v-if="filtered" class="text-sm text-muted-foreground" data-testid="candidates-imported-note">{{ t('candidates.importedNote') }}</p>
         </div>
-        <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+        <ul v-else class="divide-y overflow-hidden rounded-xl panel">
           <CandidateRow v-for="candidate in list.candidates.value" :key="candidate.id" :candidate="candidate" :now="now" :active-tag="list.tag.value" @tag="toggleTag" />
         </ul>
       </div>

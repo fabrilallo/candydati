@@ -7,7 +7,7 @@ defineProps<{ id: string; title: string; hint?: string | undefined }>()
 </script>
 
 <template>
-  <section :aria-labelledby="`${id}-title`" class="flex min-w-0 flex-col gap-4 rounded-xl border bg-card p-5 shadow-xs sm:p-6" :data-testid="id">
+  <section :aria-labelledby="`${id}-title`" class="flex min-w-0 flex-col gap-4 rounded-xl panel p-5 sm:p-6" :data-testid="id">
     <div class="flex items-start justify-between gap-3">
       <div class="grid min-w-0 gap-0.5">
         <h2 :id="`${id}-title`" class="text-sm font-semibold tracking-tight">{{ title }}</h2>

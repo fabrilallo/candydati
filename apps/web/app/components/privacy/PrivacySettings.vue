@@ -30,7 +30,7 @@ const editorKey = computed(() => active.value?.id ?? 'none')
       <Skeleton class="h-80 w-full rounded-xl" />
     </div>
     <template v-else>
-      <section class="grid gap-2 rounded-xl border bg-card px-5 py-5 sm:px-6" aria-labelledby="privacy-current" data-testid="privacy-current">
+      <section class="grid gap-2 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="privacy-current" data-testid="privacy-current">
         <h2 id="privacy-current" class="text-base font-semibold tracking-tight">{{ t('privacy.current') }}</h2>
         <template v-if="active && periods">
           <p class="text-sm">

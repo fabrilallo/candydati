@@ -11,7 +11,7 @@ const toggle = (event: Event): void => {
 </script>
 
 <template>
-  <section class="grid gap-2 rounded-xl border bg-card px-5 py-4 shadow-xs sm:px-6" aria-labelledby="access-setting" data-testid="access-setting">
+  <section class="grid gap-2 rounded-xl panel px-5 py-4 sm:px-6" aria-labelledby="access-setting" data-testid="access-setting">
     <h2 id="access-setting" class="text-base font-semibold tracking-tight">{{ t('members.access.title') }}</h2>
     <FormAlert v-if="setting.errorKey.value" message-key="members.access.loadFailed" />
     <template v-else-if="setting.value.value !== null">

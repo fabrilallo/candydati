@@ -46,7 +46,7 @@ const text = (value: string | number): string => String(value)
 
 <template>
   <form class="grid max-w-3xl gap-6" novalidate data-testid="request-form" @submit.prevent="submit">
-    <div class="grid gap-5 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6">
+    <div class="grid gap-5 rounded-xl panel px-5 py-5 sm:px-6">
       <FormField id="req-title" :label="t('jobRequests.fields.title')" :hint="t('jobRequests.fields.titleHint')" :error="errors.title">
         <template #default="{ invalid, describedBy }">
           <Input id="req-title" :model-value="form.title" maxlength="120" autocomplete="off" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" data-testid="req-title" @update:model-value="patch({ title: text($event) })" />
@@ -81,7 +81,7 @@ const text = (value: string | number): string => String(value)
       </div>
     </div>
 
-    <div class="grid gap-5 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6">
+    <div class="grid gap-5 rounded-xl panel px-5 py-5 sm:px-6">
       <div class="grid gap-1.5">
         <p class="text-sm leading-none font-medium">{{ t('jobRequests.fields.workMode') }}</p>
         <SegmentedControl id="req-work-mode" :model-value="form.workMode" :options="modeOptions" :label="t('jobRequests.fields.workMode')" @update:model-value="patch({ workMode: $event === form.workMode ? '' : $event })" />

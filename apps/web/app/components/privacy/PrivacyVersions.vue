@@ -14,7 +14,7 @@ const sorted = computed(() => props.versions.toSorted((a, b) => b.version - a.ve
 </script>
 
 <template>
-  <ol class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="privacy-versions">
+  <ol class="divide-y overflow-hidden rounded-xl panel" data-testid="privacy-versions">
     <li v-for="notice in sorted" :key="notice.id" data-testid="privacy-version">
       <details class="group">
         <summary class="flex cursor-pointer list-none items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/60 sm:px-6 [&::-webkit-details-marker]:hidden">

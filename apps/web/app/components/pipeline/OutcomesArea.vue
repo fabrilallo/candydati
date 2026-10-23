@@ -15,7 +15,7 @@ const open = ref(false)
 </script>
 
 <template>
-  <section class="grid gap-3 rounded-xl border bg-card px-4 py-3 sm:px-5" aria-labelledby="outcomes-title" data-testid="outcomes">
+  <section class="grid gap-3 rounded-xl panel px-4 py-3 sm:px-5" aria-labelledby="outcomes-title" data-testid="outcomes">
     <h2 id="outcomes-title" class="text-[0.9375rem] font-semibold">
       <button type="button" class="flex w-full items-center gap-2 py-1 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/35 rounded-md" :aria-expanded="open" aria-controls="outcomes-body" data-testid="outcomes-toggle" @click="open = !open">
         <ChevronDownIcon class="size-4 text-muted-foreground transition-transform duration-150 ease-snap" :class="open ? '' : '-rotate-90'" aria-hidden="true" />

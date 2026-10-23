@@ -25,7 +25,7 @@ const isTarget = (value: string): value is MigrationStageTarget => (STAGE_TARGET
     <h3 id="migration-jobs-stages-title" class="text-base font-semibold tracking-tight">{{ t('migrations.stages.perJob.title') }}</h3>
     <ul class="grid gap-2">
       <li v-for="(job, jobIndex) in visible" :key="job.count.jobRef" :data-job="job.count.jobRef">
-        <details class="group overflow-hidden rounded-xl border bg-card shadow-xs" :open="openAtStart.has(job.count.jobRef)">
+        <details class="group overflow-hidden rounded-xl panel" :open="openAtStart.has(job.count.jobRef)">
           <summary class="flex cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1 px-5 py-3.5 select-none focus-visible:ring-3 focus-visible:ring-ring/35 focus-visible:outline-none sm:px-6 [&::-webkit-details-marker]:hidden">
             <span class="text-[0.9375rem] font-medium">{{ job.count.title }}</span>
             <Badge variant="outline">{{ t(`migrations.preview.jobs.status.${job.count.status}`) }}</Badge>

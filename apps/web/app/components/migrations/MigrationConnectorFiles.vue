@@ -45,7 +45,7 @@ const size = (bytes: number): string => formatBytes(bytes, locale.value)
     <MigrationBetaNotice v-if="connector.maturity === 'beta'" :source="connector.label" />
 
     <div class="grid max-w-2xl gap-5">
-      <section class="grid gap-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="files-sheet-title">
+      <section class="grid gap-3 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="files-sheet-title">
         <div class="grid gap-1">
           <h3 id="files-sheet-title" class="text-[0.9375rem] font-medium">{{ t('migrations.files.sheet.title') }}</h3>
           <p class="text-sm text-pretty text-muted-foreground">{{ t('migrations.files.sheet.body', { size: size(SHEET_LIMIT_BYTES) }) }}</p>
@@ -61,7 +61,7 @@ const size = (bytes: number): string => formatBytes(bytes, locale.value)
         <input ref="sheetInput" type="file" accept=".csv,.tsv,.xlsx" class="sr-only" tabindex="-1" aria-hidden="true" data-testid="migration-files-sheet-input" @change="picked($event, upload.pickSheet)" />
       </section>
 
-      <section class="grid gap-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="files-cvs-title">
+      <section class="grid gap-3 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="files-cvs-title">
         <div class="grid gap-1">
           <h3 id="files-cvs-title" class="text-[0.9375rem] font-medium">{{ t('migrations.files.cvs.title') }}</h3>
           <p class="text-sm text-pretty text-muted-foreground">{{ t('migrations.files.cvs.body', { size: size(CVS_LIMIT_BYTES) }) }}</p>

@@ -30,7 +30,7 @@ const emptyKey = computed(() => requestsEmptyKey(role.value))
       </div>
       <Button v-if="can(role, 'job:create')" as-child size="sm"><NuxtLink to="/app/job-requests/new"><PlusIcon aria-hidden="true" />{{ t('jobRequests.new') }}</NuxtLink></Button>
     </div>
-    <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="request-list">
+    <ul v-else class="divide-y overflow-hidden rounded-xl panel" data-testid="request-list">
       <li v-for="item in requests.items.value" :key="item.id" class="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 sm:px-6" data-testid="request-item" :data-status="item.status">
         <ClipboardListIcon class="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
         <div class="grid min-w-0 flex-1 gap-1">

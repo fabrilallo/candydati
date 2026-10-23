@@ -38,7 +38,7 @@ const resumable = (batch: MigrationBatchDto): boolean => batch.status === 'ready
       </div>
       <Button as-child size="sm"><NuxtLink to="/app/migrations/new"><ArrowRightLeftIcon aria-hidden="true" />{{ t('migrations.new') }}</NuxtLink></Button>
     </div>
-    <ul v-else class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="migration-list">
+    <ul v-else class="divide-y overflow-hidden rounded-xl panel shadow-xs" data-testid="migration-list">
       <li v-for="batch in migrations.items.value" :key="batch.id" class="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 sm:px-6" data-testid="migration-item" :data-status="batch.status">
         <div class="grid min-w-0 flex-1 gap-1">
           <p class="flex flex-wrap items-center gap-2">

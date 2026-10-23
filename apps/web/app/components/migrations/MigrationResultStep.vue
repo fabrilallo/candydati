@@ -33,14 +33,14 @@ const canUndo = computed(() => props.batch.status === 'done' || (props.batch.sta
 
 <template>
   <section class="grid gap-6" aria-labelledby="migration-result-title" data-testid="migration-result-step" :data-status="batch.status">
-    <div v-if="batch.status === 'importing'" class="grid gap-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" role="status" aria-live="polite">
+    <div v-if="batch.status === 'importing'" class="grid gap-3 rounded-xl panel px-5 py-5 sm:px-6" role="status" aria-live="polite">
       <h2 id="migration-result-title" class="flex items-center gap-2 text-base font-semibold tracking-tight">
         <LoaderCircleIcon class="size-4 animate-spin text-muted-foreground motion-reduce:animate-none" aria-hidden="true" />{{ t('migrations.result.importing') }}
       </h2>
       <p class="max-w-2xl text-sm text-pretty text-muted-foreground">{{ t('migrations.result.importingBody') }}</p>
     </div>
 
-    <div v-else-if="batch.status === 'undone'" class="grid gap-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6">
+    <div v-else-if="batch.status === 'undone'" class="grid gap-3 rounded-xl panel px-5 py-5 sm:px-6">
       <div class="grid gap-1">
         <h2 id="migration-result-title" class="flex items-center gap-2 text-base font-semibold tracking-tight">
           <Undo2Icon class="size-4 text-muted-foreground" aria-hidden="true" />{{ t('migrations.result.undone', { date: batch.undoneAt ? formatDateTime(batch.undoneAt, locale) : '' }) }}
@@ -58,7 +58,7 @@ const canUndo = computed(() => props.batch.status === 'done' || (props.batch.sta
       <p v-if="batch.error" class="text-sm text-foreground">{{ t('migrations.analysis.reason', { reason: t(failureKey(batch.error)) }) }}</p>
     </div>
 
-    <div v-else class="grid gap-4 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6">
+    <div v-else class="grid gap-4 rounded-xl panel px-5 py-5 sm:px-6">
       <div class="grid gap-1">
         <h2 id="migration-result-title" class="flex items-center gap-2 text-base font-semibold tracking-tight text-success">
           <CircleCheckIcon class="size-4" aria-hidden="true" />{{ t('migrations.result.done') }}
@@ -70,7 +70,7 @@ const canUndo = computed(() => props.batch.status === 'done' || (props.batch.sta
       </ul>
     </div>
 
-    <div v-if="batch.status === 'failed' && written.length > 0" class="grid gap-1 rounded-xl border bg-card px-5 py-4 shadow-xs sm:px-6">
+    <div v-if="batch.status === 'failed' && written.length > 0" class="grid gap-1 rounded-xl panel px-5 py-4 sm:px-6">
       <ul class="grid gap-1 text-sm" data-testid="migration-written">
         <li v-for="line in written" :key="line.key" class="figure" :data-line="line.key">{{ t(`migrations.result.counts.${line.key}`, { count: line.value }, line.value) }}</li>
       </ul>

@@ -3,7 +3,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 </script>
 
 <template>
-  <ul class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" aria-busy="true" data-testid="jobs-loading">
+  <ul class="divide-y overflow-hidden rounded-xl panel" aria-busy="true" data-testid="jobs-loading">
     <li v-for="n in 5" :key="n" class="grid grid-cols-[minmax(0,1fr)_auto] gap-x-6 gap-y-3 px-5 py-4 sm:px-6 md:grid-cols-[minmax(0,1fr)_13rem_6.5rem_8.5rem] md:items-center">
       <div class="grid gap-2">
         <Skeleton class="h-4 w-3/5" />

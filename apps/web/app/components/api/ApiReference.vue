@@ -51,7 +51,7 @@ const envelope = `{ "success": true, "data": { … }, "error": null }
           {{ group.tag ?? t('apiReference.other') }}
           <span v-if="group.description" class="font-normal text-muted-foreground">{{ group.description }}</span>
         </h3>
-        <ul class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+        <ul class="divide-y overflow-hidden rounded-xl panel">
           <ApiOperation v-for="operation in group.operations" :key="operation.id" :operation="operation" />
         </ul>
       </div>

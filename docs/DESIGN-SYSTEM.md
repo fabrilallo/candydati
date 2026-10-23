@@ -101,6 +101,8 @@ Headings use `text-wrap: balance`, paragraphs `pretty` (in the CSS base).
 ### 2.5 Shape
 
 - **Candy card / key panel:** `border-2 border-ink` plus `shadow-hard` (`3px 3px 0` in `ink-shadow`); on hover a card may lift 1px towards the top left with `shadow-hard-md` (4px). Heroes use `shadow-hard-lg` (6px). The `Card` component carries this shape.
+- **Panels are one class:** `panel` (in `tailwind.css`) = 2px ink outline, `card` fill, `shadow-hard`; the radius stays in the markup (`rounded-xl panel` for panels and lists, `rounded-lg panel` for standalone cards). Rows and items inside a panel keep a light border. A test (`app/lib/candy-shape.test.ts`) refuses a hand-written `rounded-xl border bg-card` and any blurred shadow.
+- **Overlays:** dialogs `border-2 border-ink` with `shadow-hard-lg`; menus, popovers, the selection bar and toasts `border-2 border-ink` with `shadow-hard`; side sheets a 2px ink edge and no shadow (the dimmed backdrop separates them). No blurred shadow anywhere; the public careers site follows the organization's theme instead.
 - **Pills:** white with a 1.5px ink outline (`Badge outline`), the neutral `secondary` pill, or yellow for the salary (`Badge highlight`).
 - **Active nav item:** ink fill with paper text (`bg-primary text-primary-foreground`).
 - **Logo mark:** the product initial on a yellow circle with an ink outline.

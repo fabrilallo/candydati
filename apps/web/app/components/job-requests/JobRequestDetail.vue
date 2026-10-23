@@ -72,7 +72,7 @@ const processRows = (item: JobRequestDto): readonly (readonly [string, string])[
     <p v-if="action === 'wait'" class="text-sm text-muted-foreground" data-testid="request-waiting">{{ t(state.item.value.status === 'approved' ? 'jobRequests.detail.waitingConvert' : 'jobRequests.detail.waiting') }}</p>
     <FormAlert v-if="!dialogOpen" :message-key="state.errorKey.value" />
 
-    <section class="grid gap-4 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="request-need">
+    <section class="grid gap-4 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="request-need">
       <h2 id="request-need" class="text-base font-semibold">{{ t('jobRequests.detail.sections.need') }}</h2>
       <dl class="grid gap-x-6 gap-y-4 sm:grid-cols-2">
         <div v-for="[key, value] in rows(state.item.value)" :key="key" class="grid gap-0.5" :class="key === 'reason' ? 'sm:col-span-2' : ''">
@@ -90,7 +90,7 @@ const processRows = (item: JobRequestDto): readonly (readonly [string, string])[
       </dl>
     </section>
 
-    <section class="grid gap-4 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="request-process">
+    <section class="grid gap-4 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="request-process">
       <h2 id="request-process" class="text-base font-semibold">{{ t('jobRequests.detail.sections.process') }}</h2>
       <dl class="grid gap-4">
         <div v-for="[key, value] in processRows(state.item.value)" :key="key" class="grid gap-0.5">
@@ -100,7 +100,7 @@ const processRows = (item: JobRequestDto): readonly (readonly [string, string])[
       </dl>
     </section>
 
-    <section v-if="state.item.value.decidedAt" class="grid gap-2 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" aria-labelledby="request-decision" data-testid="request-decision">
+    <section v-if="state.item.value.decidedAt" class="grid gap-2 rounded-xl panel px-5 py-5 sm:px-6" aria-labelledby="request-decision" data-testid="request-decision">
       <h2 id="request-decision" class="text-base font-semibold">{{ t('jobRequests.detail.sections.decision') }}</h2>
       <p class="text-sm text-muted-foreground">{{ t('jobRequests.detail.decidedBy', { name: personName(state.item.value.decidedBy), date: formatDateTime(state.item.value.decidedAt, locale) }) }}</p>
       <p class="text-sm whitespace-pre-line" data-testid="request-decision-note">{{ state.item.value.decisionNote ?? t('jobRequests.detail.noNote') }}</p>

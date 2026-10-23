@@ -22,8 +22,8 @@ const connectors = useMigrationConnectors()
 
     <ul class="grid gap-3" :aria-label="t('migrations.source.connectors.label')">
       <li>
-        <div class="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6">
-          <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-muted text-foreground" aria-hidden="true"><FileArchiveIcon class="size-5" /></span>
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-xl panel px-5 py-5 sm:px-6">
+          <span class="grid size-11 shrink-0 place-items-center rounded-md bg-muted text-foreground" aria-hidden="true"><FileArchiveIcon class="size-5" /></span>
           <div class="grid min-w-0 flex-1 gap-1">
             <h3 class="text-[0.9375rem] font-medium">{{ t('migrations.source.package.title') }}</h3>
             <p class="max-w-xl text-sm text-pretty text-muted-foreground">{{ t('migrations.source.package.body') }}</p>

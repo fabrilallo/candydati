@@ -15,8 +15,8 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" :data-connector="connector.id" data-testid="migration-connector-card">
-    <span class="grid size-11 shrink-0 place-items-center rounded-xl bg-muted text-foreground" aria-hidden="true"><PlugIcon class="size-5" /></span>
+  <div class="flex flex-wrap items-center gap-x-5 gap-y-3 rounded-xl panel px-5 py-5 sm:px-6" :data-connector="connector.id" data-testid="migration-connector-card">
+    <span class="grid size-11 shrink-0 place-items-center rounded-md bg-muted text-foreground" aria-hidden="true"><PlugIcon class="size-5" /></span>
     <div class="grid min-w-0 flex-1 gap-1">
       <h3 class="flex flex-wrap items-center gap-2 text-[0.9375rem] font-medium">
         {{ connector.label }}

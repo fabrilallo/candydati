@@ -204,6 +204,18 @@
   }
 }
 
+/*
+ * The candy panel (docs/DESIGN-SYSTEM.md §2.5): 2px ink outline, card fill, hard offset shadow. The radius stays in
+ * the markup (`rounded-xl` for panels, `rounded-lg` for cards), so one class carries the identity everywhere.
+ */
+@utility panel {
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--color-ink);
+  background-color: var(--color-card);
+  box-shadow: var(--shadow-hard);
+}
+
 /* Figures that are compared at a glance: salaries, counts, dates in lists. */
 @utility figure {
   font-variant-numeric: tabular-nums;
@@ -290,10 +302,11 @@
   flex-shrink: 0;
 }
 
-/* Toasts (vue-sonner): same font, tinted shadow, quiet type. */
+/* Toasts (vue-sonner): same font, the candy shape (2px ink outline, hard shadow), quiet type. */
 [data-sonner-toaster] [data-sonner-toast].candydati-toast {
   font-family: var(--font-sans);
-  box-shadow: var(--shadow-lg);
+  border-width: 2px;
+  box-shadow: var(--shadow-hard);
   gap: 0.625rem;
   padding: 0.875rem 1rem;
 }

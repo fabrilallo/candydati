@@ -15,7 +15,7 @@ const source = computed(() => connectors.labelOf(props.batch.sourceSystem))
 </script>
 
 <template>
-  <div class="grid gap-3 rounded-xl border bg-card px-5 py-5 shadow-xs sm:px-6" role="status" aria-live="polite" data-testid="migration-fetching">
+  <div class="grid gap-3 rounded-xl panel px-5 py-5 sm:px-6" role="status" aria-live="polite" data-testid="migration-fetching">
     <h2 id="migration-analysis-title" class="flex items-center gap-2 text-base font-semibold tracking-tight">
       <LoaderCircleIcon class="size-4 animate-spin text-muted-foreground motion-reduce:animate-none" aria-hidden="true" />{{ t('migrations.analysis.fetchingTitle', { source }) }}
     </h2>

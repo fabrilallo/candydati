@@ -22,7 +22,7 @@ const empty = computed(() => stats.value !== null && stats.value.statusCounts.to
       <div><Button variant="outline" @click="() => refresh()">{{ t('common.retry') }}</Button></div>
     </div>
     <div v-else-if="loading && !stats" class="grid gap-4 lg:grid-cols-12" aria-busy="true" data-testid="stats-loading">
-      <div v-for="(span, n) in ['lg:col-span-5', 'lg:col-span-7', 'lg:col-span-7', 'lg:col-span-5']" :key="n" class="grid gap-4 rounded-xl border bg-card p-6" :class="span">
+      <div v-for="(span, n) in ['lg:col-span-5', 'lg:col-span-7', 'lg:col-span-7', 'lg:col-span-5']" :key="n" class="grid gap-4 rounded-xl panel p-6" :class="span">
         <Skeleton class="h-4 w-32" />
         <Skeleton class="h-9 w-20" />
         <Skeleton class="h-36 w-full" />

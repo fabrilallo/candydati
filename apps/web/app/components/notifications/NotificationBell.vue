@@ -87,7 +87,7 @@ const wording = (item: NotificationDto): string => {
       <PopoverContent
         align="end"
         :side-offset="6"
-        class="z-50 grid w-[min(24rem,calc(100vw-2rem))] gap-1 rounded-xl border bg-popover p-1.5 text-popover-foreground shadow-lg duration-150 ease-snap data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-[0.98]"
+        class="z-50 grid w-[min(24rem,calc(100vw-2rem))] gap-1 rounded-xl border-2 border-ink bg-popover p-1.5 text-popover-foreground shadow-hard duration-150 ease-snap data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-[0.98]"
         data-testid="notification-panel"
       >
         <div class="flex items-center justify-between gap-2 px-2.5 pt-1.5 pb-1">

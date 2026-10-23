@@ -25,7 +25,7 @@ const linked = computed(() => documents.value.some((doc) => doc.href !== null))
         <h3 class="text-base font-semibold tracking-tight">{{ t('privacyDocs.templatesTitle') }}</h3>
         <p class="text-sm text-muted-foreground">{{ t('privacyDocs.templatesNote') }}<template v-if="!linked"> {{ t('privacyDocs.noSource') }}</template></p>
       </div>
-      <ul class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" data-testid="legal-templates">
+      <ul class="divide-y overflow-hidden rounded-xl panel" data-testid="legal-templates">
         <li v-for="doc in documents" :key="doc.path" class="flex items-start gap-3 px-5 py-3.5" data-testid="legal-template">
           <FileTextIcon class="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
           <div class="grid min-w-0 gap-0.5">

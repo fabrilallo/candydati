@@ -48,7 +48,7 @@ const remove = async (): Promise<void> => {
       <Button id="apply-cv-button" type="button" variant="outline" size="sm" :disabled="disabled" data-testid="cv-choose" @click="input?.click()">{{ x('apply.cv.choose') }}</Button>
       <input ref="input" type="file" class="sr-only" tabindex="-1" aria-hidden="true" :accept="CV_ACCEPT" data-testid="cv-input" @change="pick" />
     </div>
-    <div v-else class="flex items-center gap-3 rounded-xl border bg-card px-4 py-3" data-testid="cv-file">
+    <div v-else class="flex items-center gap-3 rounded-xl panel px-4 py-3" data-testid="cv-file">
       <span class="grid size-10 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground" aria-hidden="true"><FileTextIcon class="size-5" /></span>
       <div class="grid min-w-0 flex-1 gap-0.5">
         <p class="truncate text-sm font-medium">{{ file.name }}</p>

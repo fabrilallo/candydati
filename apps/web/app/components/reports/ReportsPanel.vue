@@ -27,11 +27,11 @@ const SKELETON = ['lg:col-span-7', 'lg:col-span-5', 'lg:col-span-5', 'lg:col-spa
       <div><Button variant="outline" @click="() => refresh()">{{ t('common.retry') }}</Button></div>
     </div>
     <div v-else-if="loading && !report" class="grid gap-4" aria-busy="true" data-testid="reports-loading">
-      <div class="grid gap-6 rounded-xl border bg-card p-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="grid gap-6 rounded-xl panel p-6 sm:grid-cols-2 lg:grid-cols-4">
         <div v-for="n in 4" :key="n" class="grid gap-2"><Skeleton class="h-4 w-36" /><Skeleton class="h-9 w-20" /><Skeleton class="h-3 w-28" /></div>
       </div>
       <div class="grid gap-4 lg:grid-cols-12">
-        <div v-for="span in SKELETON" :key="span" class="grid gap-4 rounded-xl border bg-card p-6" :class="span">
+        <div v-for="span in SKELETON" :key="span" class="grid gap-4 rounded-xl panel p-6" :class="span">
           <Skeleton class="h-4 w-40" />
           <Skeleton v-for="n in 4" :key="n" class="h-2.5" :style="{ width: `${100 - n * 18}%` }" />
         </div>

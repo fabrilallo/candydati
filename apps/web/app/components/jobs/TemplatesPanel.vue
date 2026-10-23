@@ -49,7 +49,7 @@ const onOpen = (open: boolean): void => {
       <div><Button variant="outline" @click="() => refresh()">{{ t('common.retry') }}</Button></div>
     </div>
     <ul v-else-if="status === 'pending' && templates.length === 0" class="grid gap-4 md:grid-cols-2" aria-busy="true">
-      <li v-for="n in 4" :key="n" class="grid gap-4 rounded-xl border bg-card p-5 shadow-xs">
+      <li v-for="n in 4" :key="n" class="grid gap-4 rounded-xl panel p-5">
         <div class="grid gap-2">
           <Skeleton class="h-4 w-1/2" />
           <Skeleton class="h-3 w-4/5" />

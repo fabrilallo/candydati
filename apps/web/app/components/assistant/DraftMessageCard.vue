@@ -23,7 +23,7 @@ const review = (): void => emit('review', { ...props.draft, subject: subject.val
 </script>
 
 <template>
-  <section class="grid gap-3 rounded-lg border bg-card p-4 shadow-xs" :aria-labelledby="`${id}-title`" data-testid="draft-message-card">
+  <section class="grid gap-3 rounded-lg panel p-4" :aria-labelledby="`${id}-title`" data-testid="draft-message-card">
     <p :id="`${id}-title`" class="flex items-center gap-2 text-sm font-medium">
       <MailIcon class="size-4 text-muted-foreground" aria-hidden="true" />{{ t('assistant.draftMessage.title', { name: recipient }) }}
     </p>

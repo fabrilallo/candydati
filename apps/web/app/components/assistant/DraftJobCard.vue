@@ -30,7 +30,7 @@ const apply = async (): Promise<void> => {
 </script>
 
 <template>
-  <section class="grid gap-3 rounded-lg border bg-card p-4 shadow-xs" :aria-labelledby="`${id}-title`" data-testid="draft-job-card">
+  <section class="grid gap-3 rounded-lg panel p-4" :aria-labelledby="`${id}-title`" data-testid="draft-job-card">
     <p class="flex items-center gap-2 text-xs font-medium text-muted-foreground"><FilePenLineIcon class="size-4" aria-hidden="true" />{{ t('assistant.draftJob.label') }}</p>
     <p :id="`${id}-title`" class="text-[0.9375rem] font-medium">{{ facts.title }}</p>
     <dl class="grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-xs">

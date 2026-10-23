@@ -19,7 +19,7 @@ const choose = (name: string, value: string): void => {
       <h3 id="migration-names-title" class="text-base font-semibold tracking-tight">{{ t('migrations.stages.byName.title') }}</h3>
       <p class="text-sm text-muted-foreground">{{ t('migrations.stages.byName.intro') }}</p>
     </div>
-    <ul class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+    <ul class="divide-y overflow-hidden rounded-xl panel">
       <li v-for="(group, index) in groups" :key="group.key" class="grid items-center gap-x-4 gap-y-2 px-5 py-3 sm:grid-cols-[minmax(0,1fr)_16rem] sm:px-6" :data-name="group.key">
         <div class="grid min-w-0 gap-0.5">
           <label :for="`migration-name-${index}`" class="truncate text-[0.9375rem] font-medium">{{ group.name }}</label>

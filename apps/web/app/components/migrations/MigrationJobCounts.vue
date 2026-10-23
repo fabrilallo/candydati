@@ -11,7 +11,7 @@ const OUTCOMES = ['open', 'hired', 'notSelected', 'withdrawn'] as const
 <template>
   <section class="grid gap-3" aria-labelledby="migration-jobs-title" data-testid="migration-jobs">
     <h3 id="migration-jobs-title" class="text-base font-semibold tracking-tight">{{ t('migrations.preview.jobsTitle') }}</h3>
-    <ul class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs">
+    <ul class="divide-y overflow-hidden rounded-xl panel">
       <li v-for="job in jobs" :key="job.count.jobRef" class="grid gap-1 px-5 py-3.5 sm:px-6" :data-job="job.count.jobRef" :data-excluded="job.excluded">
         <p class="flex flex-wrap items-center gap-2">
           <span class="text-[0.9375rem] font-medium">{{ job.count.title }}</span>

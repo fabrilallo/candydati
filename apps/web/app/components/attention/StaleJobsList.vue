@@ -63,7 +63,7 @@ const confirmClose = async (): Promise<void> => {
       <FormAlert :message-key="errorKey" />
       <div><Button variant="outline" @click="emit('reload')">{{ t('common.retry') }}</Button></div>
     </div>
-    <ul v-else-if="loading && jobs.length === 0" class="divide-y overflow-hidden rounded-xl border bg-card shadow-xs" aria-busy="true">
+    <ul v-else-if="loading && jobs.length === 0" class="divide-y overflow-hidden rounded-xl panel" aria-busy="true">
       <li v-for="n in 3" :key="n" class="flex items-center gap-3 px-5 py-4 sm:px-6">
         <div class="grid flex-1 gap-2"><Skeleton class="h-4 w-2/5" /><Skeleton class="h-3 w-1/4" /></div>
       </li>
@@ -71,7 +71,7 @@ const confirmClose = async (): Promise<void> => {
     <p v-else-if="jobs.length === 0" class="rounded-xl border border-dashed border-input px-6 py-6 text-sm text-muted-foreground" data-testid="attention-stale-empty">
       {{ t('attention.stale.empty', { days: STALE_JOB_DAYS }) }}
     </p>
-    <ul v-else :class="['divide-y overflow-hidden rounded-xl border bg-card shadow-xs', loading ? 'opacity-60 transition-opacity' : '']" :aria-label="t('attention.stale.list')" :aria-busy="loading">
+    <ul v-else :class="['divide-y overflow-hidden rounded-xl panel shadow-xs', loading ? 'opacity-60 transition-opacity' : '']" :aria-label="t('attention.stale.list')" :aria-busy="loading">
       <li
         v-for="{ job, daysIdle } in jobs"
         :key="job.id"
