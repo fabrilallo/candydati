@@ -77,6 +77,7 @@ describe('DashboardOverview', () => {
     expect(wrapper.find('[data-testid="process-time"]').text()).toContain('2 h 30 min')
     expect(wrapper.find('[data-testid="process-response"]').text()).toContain('4,3 giorni')
     expect(wrapper.find('[data-testid="stat-quality"]').text()).toContain('1 sotto soglia')
+    expect(wrapper.find('[data-testid="quality-legend"]').text()).toContain('Soglia 6')
     const blockers = wrapper.findAll('[data-testid="blocker"]').map((row) => row.text())
     expect(blockers[0]).toContain('Manca: RAL minima')
     expect(blockers[0]).toContain('2 bozze')
