@@ -19,6 +19,8 @@ import {
   publicJobPageSchema,
   publishResultSchema,
   qualityResultSchema,
+  suggestResponsibilitiesResultSchema,
+  type SuggestResponsibilitiesResult,
   templateSchema,
   type PublicJobPage
 } from '@candydati/domain'
@@ -144,6 +146,21 @@ export interface QualityResult {
 }
 export const analyzeQuality = async (request: JobApiRequest, content: JobContent): Promise<QualityResult> =>
   (await call(request, '/api/v1/jobs/quality', qualityResultSchema, post({ content }))).data as QualityResult
+
+export interface ResponsibilityRequest {
+  readonly title?: string
+  readonly role?: string
+  readonly seniority?: string
+  readonly language: string
+  readonly existing: readonly string[]
+  readonly summary: string
+}
+/** Proposals only: the server saves nothing. `role` and `seniority` are sent only when the form has one. */
+export const suggestResponsibilities = async (request: JobApiRequest, input: ResponsibilityRequest): Promise<SuggestResponsibilitiesResult> => {
+  const { data } = await call(request, '/api/v1/jobs/responsibilities/suggest', suggestResponsibilitiesResultSchema, post(input))
+  if (data.status === 'proposed') return { status: 'proposed', responsibilities: data.responsibilities ?? [] }
+  return { status: data.status }
+}
 
 export const listTemplates = async (request: JobApiRequest): Promise<readonly JobTemplateDto[]> =>
   (await call(request, '/api/v1/job-templates', z.array(templateSchema))).data as readonly JobTemplateDto[]

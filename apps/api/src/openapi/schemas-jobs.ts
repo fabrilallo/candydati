@@ -11,6 +11,7 @@ import {
   jobDtoSchema,
   locationSchema,
   salarySchema,
+  suggestResponsibilitiesResultSchema,
   type AdQualityAssessment,
   type JobSummaryDto,
   type JobTemplateDto,
@@ -114,3 +115,5 @@ export const publicOrganizationSummarySchema = organizationSchema.extend({
 });
 
 export const publicFeedSchema = z.object({ organization: organizationSchema, jobs: z.array(publicJobSchema) });
+
+export const suggestResultSchema = suggestResponsibilitiesResultSchema;

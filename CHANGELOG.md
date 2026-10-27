@@ -30,6 +30,13 @@ All notable changes to this project are documented here. The format follows
   write instead, and the first advice asks to rewrite it. The model is told to judge substance, not length.
 - Ad editor: the details of the quality analysis (categories, vague phrases, advice) are open by default and can be
   folded away.
+### Added
+
+- Job editor: "Suggerisci responsabilità" proposes 3 to 6 responsibilities from the ad's title, role, seniority and
+  language (and what is already written, to avoid repeats), with the fast model. Each one is added by the person with
+  "Aggiungi", or all at once; nothing is saved or overwritten. Only the ad's own words reach the model, never candidate
+  data. The button appears when the instance has a fast model; each call is audited as
+  `job.responsibilities_suggested`. API: `POST /api/v1/jobs/responsibilities/suggest`.
 
 ## [0.1.10] - 2026-10-27
 

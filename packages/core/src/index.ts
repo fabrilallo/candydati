@@ -31,6 +31,7 @@ export * from './use-cases/jobs/get-job-stats.js';
 export * from './use-cases/jobs/publish-job.js';
 export * from './use-cases/jobs/close-job.js';
 export * from './use-cases/jobs/analyze-job-ad.js';
+export * from './use-cases/jobs/suggest-responsibilities.js';
 export * from './use-cases/jobs/draft-job-content.js';
 export * from './use-cases/jobs/create-job-template.js';
 export * from './use-cases/jobs/list-job-templates.js';

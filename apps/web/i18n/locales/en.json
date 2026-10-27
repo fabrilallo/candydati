@@ -523,6 +523,7 @@
         "updated": "Edited a job ad",
         "published": "Published a job ad",
         "closed": "Closed a job ad",
+        "responsibilities_suggested": "Asked for responsibility proposals for a job ad",
         "distribution_synced": "Synced a job ad with the distribution channels",
         "interviewers_updated": "Changed who interviews for an ad",
         "team_member_added": "Added a person to an ad's team",
@@ -1051,6 +1052,20 @@
         "growth": "Career paths, training budget, mentoring.",
         "workLifeBalance": "Working hours, flexibility, on-call duties.",
         "culture": "How the team works and which values matter."
+      },
+      "suggest": {
+        "button": "Suggest responsibilities",
+        "needsRole": "Set the title or the role of the ad first.",
+        "loading": "Preparing proposals",
+        "title": "Proposed responsibilities",
+        "note": "These are only proposals: add the ones you need and edit them as you like.",
+        "add": "Add",
+        "addItem": "Add: {text}",
+        "addAll": "Add all",
+        "dismiss": "Close the proposals",
+        "failed": "We could not prepare the proposals. Try again shortly.",
+        "unavailable": "Proposals are not available: AI is not configured on this installation.",
+        "empty": "No new proposals. Try again or write the items by hand."
       },
       "list": {
         "add": "Add item",

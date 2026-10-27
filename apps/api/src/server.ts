@@ -1,7 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { safeErrorSerializer } from '@candydati/core';
-import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, AiModelCheck, TaskQueue } from '@candydati/core';
+import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, AiModelCheck, TaskQueue, ResponsibilitySuggester } from '@candydati/core';
 import { createErrorReporter, type ErrorReporter, type MigrationConnectorRegistry } from '@candydati/providers';
 import type { Db } from '@candydati/db';
 import type { AdQualityAnalyzer } from '@candydati/domain';
@@ -45,6 +45,7 @@ import { registerCandidateRoutes } from './routes/candidates.js';
 import { registerInboundEmailRoutes } from './routes/inbound-email.js';
 import { registerJobRoutes } from './routes/jobs.js';
 import { registerJobQualityRoute } from './routes/job-quality.js';
+import { registerJobResponsibilitiesRoute } from './routes/job-responsibilities.js';
 import { registerJobTemplateRoutes } from './routes/job-templates.js';
 import { registerMessageRoutes } from './routes/messages.js';
 import { registerPipelineRoutes } from './routes/pipeline.js';
@@ -84,6 +85,8 @@ export interface ServerDeps {
   readonly queue: TaskQueue;
   /** Defaults to rules, or the model named by FAST_MODEL. */
   readonly adQuality?: AdQualityAnalyzer | undefined;
+  /** Defaults to the fast model in force; tests pass a fake. */
+  readonly responsibilitySuggester?: ResponsibilitySuggester | undefined;
   /** Messages to candidates: the provider chosen by EMAIL_PROVIDER by default, a fake in tests. */
   readonly messaging?: { readonly sender: MessageSender; readonly identity: EmailIdentity } | undefined;
   /** Channels to distribute ads to besides the built-in feed. Empty by default (self-hosted); hosted deployments pass theirs. */
@@ -213,6 +216,7 @@ function createContext(app: FastifyInstance, deps: ServerDeps, metrics: ApiMetri
       metrics.emailFailures.inc({ kind: 'receipt' });
       app.log.error({ err: error }, 'receipt email not queued');
     },
+    responsibilitySuggester: deps.responsibilitySuggester,
     adQuality: deps.adQuality ?? createLiveAnalyzer(() => aiRuntime.snapshot().fast, app.log),
   });
 }
@@ -233,6 +237,7 @@ function registerAccountRoutes(app: FastifyInstance, ctx: AppContext, deps: Serv
 function registerRecruitingRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerAuditLogRoutes(app, ctx);
   registerJobQualityRoute(app, ctx);
+  registerJobResponsibilitiesRoute(app, ctx);
   registerJobRoutes(app, ctx);
   registerStaleJobRoutes(app, ctx);
   registerFeedbackRoutes(app, ctx);
