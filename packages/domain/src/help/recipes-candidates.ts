@@ -146,14 +146,14 @@ export const CANDIDATE_RECIPES: readonly Recipe[] = [
     title: { it: 'Importare CV o un foglio di candidati', en: 'Import CVs or a sheet of candidates' },
     steps: {
       it: [
-        'Apri "Import" e premi "Nuovo import".',
+        'Apri "Importa candidati" e premi "Nuovo import".',
         'Carica CV in PDF o DOCX, uno ZIP oppure un CSV o Excel.',
         'In "Dove vanno i candidati" scegli l\'annuncio e la fase di partenza, poi "Carica e analizza".',
         'Per i fogli controlla le colonne, guarda l\'anteprima e premi "Importa".',
         'Un import finito si annulla dalla lista con "Annulla import".',
       ],
       en: [
-        'Open "Import" and press "New import".',
+        'Open "Import candidates" and press "New import".',
         'Upload PDF or DOCX CVs, a ZIP, or a CSV or Excel file.',
         'Under "Where the candidates go" choose the job and the starting stage, then "Upload and analyse".',
         'For sheets check the columns, look at the preview and press "Import".',

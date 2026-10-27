@@ -49,7 +49,7 @@
     "api": "API e integrazioni",
     "distribution": "Distribuzione",
     "careersPage": "Pagina carriera",
-    "imports": "Import",
+    "imports": "Importa candidati",
     "jobRequests": "Richieste",
     "reports": "Report",
     "security": "Sicurezza",
@@ -975,6 +975,10 @@
       "fromTemplate": "Creato dal template “{name}”.",
       "templateMissing": "Il template richiesto non esiste più: si parte da un annuncio vuoto.",
       "publishedNote": "L'annuncio è pubblicato e si può ancora modificare, purché continui a rispettare i requisiti di pubblicazione.",
+      "finish": {
+        "label": "Fine del modulo",
+        "jump": "Mostrami dove"
+      },
       "workspace": {
         "modes": "Vista dell'editor",
         "edit": "Modifica",
@@ -2748,8 +2752,8 @@
     }
   },
   "imports": {
-    "title": "Import",
-    "description": "Porta in una pipeline i CV e i fogli che hai già. Controlli tutto prima di confermare e puoi annullare l'import in qualsiasi momento.",
+    "title": "Importa candidati",
+    "description": "Hai già dei CV in una cartella o un foglio Excel con i candidati? Caricali qui: finiscono nella pipeline dell'annuncio che scegli. Controlli tutto prima di confermare e puoi annullare l'import in qualsiasi momento. Per spostare tutto da un altro ATS c'è Migrazione.",
     "new": "Nuovo import",
     "newTitle": "Nuovo import",
     "list": {

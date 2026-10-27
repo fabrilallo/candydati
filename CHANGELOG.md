@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Job editor: Publish also sits at the end of the form, with what is still missing and a link to the first gap.
+- "Import" in the sidebar is now "Importa candidati" / "Import candidates", and its page says what it is for (CVs and
+  spreadsheets you already have) and points to Migration for moving from another ATS.
+
 ## [0.1.10] - 2026-10-27
 
 ### Added

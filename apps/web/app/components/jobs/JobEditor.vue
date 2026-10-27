@@ -186,6 +186,17 @@ const saveTemplate = async (name: string): Promise<void> => {
             <JobExtrasSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
           </fieldset>
         </form>
+        <EditorFinish
+          v-if="ed.permissions.value.publish && ed.status.value === 'draft' && !ed.readOnly.value"
+          :gaps="gaps"
+          :blocking="ed.compliance.value.blocking"
+          :publishable="ed.check.value.publishable"
+          :busy="ed.busy.value"
+          :analysing="ed.quality.pending.value"
+          @publish="ed.publish"
+          @jump="jump"
+          @reveal="ed.reveal"
+        />
       </div>
 
       <div
