@@ -5,13 +5,13 @@ import { formatScore, type QualityView, type ScoreLevel } from '@/lib/quality-vi
 
 /**
  * On-demand quality analysis (never on keystroke). A compact strip with the total out of 10; the ten categories,
- * the vague phrases with their rewrite and the improvements open below. The score flags, it never blocks.
+ * the vague phrases with their rewrite and the improvements are open below and can be folded away. The score flags, it never blocks.
  */
 defineProps<{ view: QualityView | null; pending: boolean; stale: boolean; errorKey: string | null; disabled?: boolean }>()
 defineEmits<{ analyze: [] }>()
 const { t, locale } = useI18n()
-/** Closed by default: the strip and the underlined preview say enough; details open on request. */
-const open = ref(false)
+/** Open by default: the advice is the point of the analysis; the author can fold it away. */
+const open = ref(true)
 const detailsId = useId()
 /** Category scores: state colour only where it says something (weak or strong), neutral in between. */
 const tone: Readonly<Record<ScoreLevel, string>> = { low: 'text-warning', mid: 'text-foreground', high: 'text-success' }

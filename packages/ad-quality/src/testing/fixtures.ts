@@ -30,3 +30,21 @@ export const richAd = (overrides: Partial<JobContentInput> = {}): JobContent =>
     culture: 'Feedback 1:1 ogni due settimane, retrospettiva a fine sprint, code review obbligatoria e un hackathon interno ogni trimestre.',
     ...overrides,
   });
+
+/**
+ * Every structured field a publishable ad needs, with deliberately meaningless free text: placeholders, keyboard
+ * mashing, repeated words and lorem ipsum. It must score well below the default threshold.
+ */
+export const junkAd = (overrides: Partial<JobContentInput> = {}): JobContent =>
+  richAd({
+    summary: 'asdasd asdasd bla bla bla',
+    responsibilities: ['asdasd', 'bla bla bla bla', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit 2024'],
+    requirements: { mustHave: ['xxx', 'boh boh boh', 'sdfghjkl qwerty'], niceToHave: ['test'] },
+    technologies: ['asd', 'bla', 'xyz'],
+    benefits: ['bla bla', 'asdasd 100'],
+    employment: { monthlyPayments: 14 },
+    growth: 'bla bla bla bla bla',
+    workLifeBalance: 'asd asd asd 10 giorni',
+    culture: 'lorem ipsum feedback',
+    ...overrides,
+  });

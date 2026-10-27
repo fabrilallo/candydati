@@ -1,6 +1,7 @@
 import type { JobContent, Locale, QualityCategory, VaguePhrase } from '@candydati/domain';
 import { ENGLISH_PHRASES, ITALIAN_PHRASES, DEFAULT_SUGGESTIONS, type PhraseEntry } from './phrases/index.js';
 import { fragmentsOf, type Fragment } from './fragments.js';
+import { isFiller, kindOf } from './substance.js';
 import { fold, isWordChar } from './text.js';
 
 const MAX_VAGUE_PHRASES = 30;
@@ -32,6 +33,8 @@ export interface Hit {
 export interface AnnotatedFragment {
   readonly fragment: Fragment;
   readonly hits: readonly Hit[];
+  /** Placeholder, mashing or repetition: the fragment says nothing and counts as absent (see `substance.ts`). */
+  readonly filler: boolean;
 }
 
 const isBounded = (folded: string, start: number, end: number): boolean =>
@@ -62,8 +65,12 @@ export function findHits(text: string): readonly Hit[] {
   return [...taken].sort((a, b) => a.start - b.start);
 }
 
+/** Stock phrases of each fragment; a filler fragment is reported once as a whole, not phrase by phrase. */
 export const annotate = (content: JobContent): readonly AnnotatedFragment[] =>
-  fragmentsOf(content).map((fragment) => ({ fragment, hits: findHits(fragment.text) }));
+  fragmentsOf(content).map((fragment) => {
+    const filler = isFiller(fragment.text, content.language, kindOf(fragment.key));
+    return { fragment, hits: filler ? [] : findHits(fragment.text), filler };
+  });
 
 const suggestionFor = (hit: Hit, language: Locale): string =>
   hit.language === language && hit.entry.suggestion !== undefined ? hit.entry.suggestion : DEFAULT_SUGGESTIONS[language][hit.category];

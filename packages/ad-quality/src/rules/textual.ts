@@ -12,8 +12,9 @@ export const MOSTLY_VAGUE_COVERAGE = 0.5;
 export const SPECIFIC_SHARE_MIN = 0.6;
 export const MIN_SPECIFIC_WORDS = 3;
 
+/** Filler fragments count as absent: length or number of items never stand in for content. */
 const itemsOf = (annotated: readonly AnnotatedFragment[], key: FragmentKey): readonly AnnotatedFragment[] =>
-  annotated.filter(({ fragment }) => fragment.key === key);
+  annotated.filter(({ fragment, filler }) => fragment.key === key && !filler);
 
 const share = (count: number, total: number): number => (total === 0 ? 0 : count / total);
 

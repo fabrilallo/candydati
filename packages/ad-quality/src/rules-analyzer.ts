@@ -1,6 +1,9 @@
 import { totalOf, type AdQualityAnalyzer, type AdQualityReport, type JobContent } from '@candydati/domain';
 import { annotate, vaguePhrasesOf } from './detect.js';
+import { fillerImprovementsOf, fillerPhrasesOf } from './filler.js';
 import { evaluate, improvementsOf, scoresOf } from './rules/evaluate.js';
+
+const MAX_PHRASES = 30;
 
 /** Deterministic analysis: same ad, same report. No model, no network. */
 export function analyzeWithRules(content: JobContent): AdQualityReport {
@@ -10,8 +13,8 @@ export function analyzeWithRules(content: JobContent): AdQualityReport {
   return {
     scores,
     total: totalOf(scores),
-    vaguePhrases: [...vaguePhrasesOf(annotated, content.language)],
-    improvements: [...improvementsOf(evaluation, content.language)],
+    vaguePhrases: [...fillerPhrasesOf(annotated, content.language), ...vaguePhrasesOf(annotated, content.language)].slice(0, MAX_PHRASES),
+    improvements: [...fillerImprovementsOf(annotated, content.language), ...improvementsOf(evaluation, content.language)],
     source: 'rules',
   };
 }
