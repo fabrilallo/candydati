@@ -288,6 +288,13 @@
       "when": 1792323571633,
       "tag": "0040_careers_media_logo_index",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1793136276870,
+      "tag": "0041_free_fabian_cortez",
+      "breakpoints": true
     }
   ]
 }

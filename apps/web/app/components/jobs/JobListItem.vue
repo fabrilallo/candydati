@@ -10,7 +10,7 @@ const props = withDefaults(defineProps<{ job: JobSummaryDto; now: Date; stale?: 
 const { t, locale } = useI18n()
 const readiness = computed(() => readinessOf(props.job))
 const facts = computed(() => jobFacts(props.job))
-const meta = computed(() => [facts.value.roleKey ? t(facts.value.roleKey) : t('job.list.noRole'), facts.value.workModeKey ? t(facts.value.workModeKey) : ''].filter((part) => part !== '').join(' · '))
+const meta = computed(() => [facts.value.roleText ?? (facts.value.roleKey ? t(facts.value.roleKey) : t(props.job.role ? 'taxonomy.roleOther' : 'job.list.noRole')), facts.value.workModeKey ? t(facts.value.workModeKey) : ''].filter((part) => part !== '').join(' · '))
 const salary = computed(() => salaryRange(props.job.salary, locale.value))
 const score = computed(() => (props.job.qualityTotal === null ? null : formatScore(props.job.qualityTotal, locale.value)))
 const updated = computed(() => relativeTime(props.job.updatedAt, props.now, locale.value))

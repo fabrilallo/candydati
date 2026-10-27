@@ -12,6 +12,7 @@ import {
   type PublicOrganizationDto,
   type PublishJobResultDto,
   type PublishedJobContent,
+  CUSTOM_ROLE,
 } from '@candydati/domain';
 import type { PublicOrganization } from '../job-ports.js';
 import { logoUrlOf } from './logo.js';
@@ -43,6 +44,7 @@ export const toJobSummaryDto = (job: Job, qualityThreshold: number): JobSummaryD
     status: job.status,
     title: job.content.title,
     role: job.content.role ?? null,
+    customRole: job.content.role === CUSTOM_ROLE ? (job.content.customRole ?? null) : null,
     publishable: issueCount === 0,
     publishIssueCount: issueCount,
     salary: job.content.salary,
@@ -94,6 +96,7 @@ export function toPublicJobSummaryDto(job: Job): PublicJobSummaryDto {
     slug: job.slug,
     title: content.title,
     role: content.role,
+    ...(content.role === CUSTOM_ROLE && content.customRole ? { customRole: content.customRole } : {}),
     seniority: content.seniority,
     contractType: content.contractType,
     workMode: content.workMode,

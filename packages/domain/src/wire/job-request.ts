@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { JOB_REQUEST_STATUSES } from '../job-request/job-request.js';
 import { locationSchema } from '../job/content.js';
-import { JOB_ROLES, SALARY_CURRENCIES, SENIORITY_LEVELS, WORK_MODES } from '../job/taxonomy.js';
+import { CUSTOM_ROLE_MAX, JOB_ROLE_CHOICES, SALARY_CURRENCIES, SENIORITY_LEVELS, WORK_MODES } from '../job/taxonomy.js';
 import { SUPPORTED_LOCALES } from '../platform/config.js';
 import { isoDate } from './common.js';
 
@@ -13,7 +13,8 @@ import { isoDate } from './common.js';
 export const jobRequestSchema = z.object({
   id: z.string(),
   title: z.string(),
-  role: z.enum(JOB_ROLES).optional(),
+  role: z.enum(JOB_ROLE_CHOICES).optional(),
+  customRole: z.string().max(CUSTOM_ROLE_MAX).optional(),
   seniority: z.enum(SENIORITY_LEVELS).optional(),
   reason: z.string(),
   headcount: z.number().int().positive(),

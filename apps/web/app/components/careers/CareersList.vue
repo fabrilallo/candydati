@@ -38,7 +38,7 @@ const groups = computed(() => groupCareers(visible.value))
       <p class="sr-only" aria-live="polite">{{ t('careers.count', { count: visible.length }, visible.length) }}</p>
       <section v-for="group in groups" :key="group.family" :aria-labelledby="`family-${group.family}`" class="grid gap-1" data-testid="careers-group">
         <h3 :id="`family-${group.family}`" class="flex items-baseline gap-2 border-b pb-3 text-base font-semibold tracking-tight">
-          {{ t(`taxonomy.roleFamilies.${group.family}`) }}
+          {{ t(group.family === 'other' ? 'taxonomy.roleFamilyOther' : `taxonomy.roleFamilies.${group.family}`) }}
           <span class="figure text-sm font-normal text-muted-foreground">{{ group.jobs.length }}</span>
         </h3>
         <ul class="divide-y divide-border/70">

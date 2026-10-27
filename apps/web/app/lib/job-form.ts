@@ -1,4 +1,4 @@
-import { checkCompliance, checkPublishable, jobContentSchema, type ComplianceIssue, type JobContent, type PublishIssue, type SelectionStage } from '@candydati/domain'
+import { CUSTOM_ROLE, checkCompliance, checkPublishable, jobContentSchema, type ComplianceIssue, type JobContent, type PublishIssue, type SelectionStage } from '@candydati/domain'
 import { emptyEmployment, employmentToForm, employmentToInput, type EmploymentForm } from './employment-form'
 
 /** One stage as typed in the editor: numbers stay strings until the form is turned into content. */
@@ -18,6 +18,8 @@ export interface JobForm extends EmploymentForm {
   readonly title: string
   readonly language: string
   readonly role: string
+  /** Text of the role when `role` is `other`. */
+  readonly customRole: string
   readonly seniority: string
   readonly contractType: string
   readonly salaryMin: string
@@ -49,6 +51,7 @@ export const emptyForm = (language: string = 'it'): JobForm => ({
   title: '',
   language,
   role: '',
+  customRole: '',
   seniority: '',
   contractType: '',
   salaryMin: '',
@@ -89,6 +92,7 @@ export const contentToForm = (content: JobContent): JobForm => ({
   title: content.title,
   language: content.language,
   role: content.role ?? '',
+  customRole: content.customRole ?? '',
   seniority: content.seniority ?? '',
   contractType: content.contractType ?? '',
   salaryMin: str(content.salary.min),
@@ -146,6 +150,7 @@ export const formToInput = (form: JobForm): Record<string, unknown> => {
     title: form.title,
     language: form.language,
     role: optional(form.role),
+    customRole: form.role === CUSTOM_ROLE ? optional(form.customRole) : undefined,
     seniority: optional(form.seniority),
     contractType: optional(form.contractType),
     salary: { min: optionalNumber(form.salaryMin), max: optionalNumber(form.salaryMax), currency: form.currency, period: form.period },

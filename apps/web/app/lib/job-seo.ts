@@ -1,5 +1,6 @@
 import { buildJobPostingJsonLd, serializeJsonLd, type JobPostingHeadings, type PublicJobPageDto } from '@candydati/domain'
 import type { Translate } from './ad-text'
+import { roleLabel } from './role-label'
 import { absoluteUrl, publicJobPath, salaryLine } from './job-view'
 import { absoluteLogoUrl } from './safe-url'
 
@@ -39,7 +40,7 @@ export const buildJobSeo = (page: PublicJobPageDto, siteUrl: string, tr: Transla
   const logo = absoluteLogoUrl(siteUrl, organization.logo)
   const fallback = tr('public.metaDescription', {
     title: content.title,
-    role: tr(`taxonomy.roles.${content.role}`),
+    role: roleLabel(content.role, content.customRole, tr),
     seniority: tr(`taxonomy.seniority.${content.seniority}`),
     contract: tr(`taxonomy.contractTypes.${content.contractType}`),
     salary: salaryLine(content.salary, language, tr),

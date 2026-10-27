@@ -98,7 +98,8 @@
       "interviewersNotesHint": "Nomi o ruoli di chi incontrerà le persone candidate.",
       "budget": "Budget (RAL)",
       "requestedBy": "Richiesta di",
-      "requestedOn": "Inviata il"
+      "requestedOn": "Inviata il",
+      "customRole": "Il ruolo"
     },
     "form": {
       "submit": "Invia la richiesta",
@@ -116,7 +117,8 @@
       "salaryMax": "Indica la RAL massima.",
       "salaryOrder": "La RAL massima non può essere sotto la minima.",
       "desiredStart": "Usa una data valida.",
-      "noteRequired": "Spiega il motivo del rifiuto: chi ha chiesto la persona lo leggerà."
+      "noteRequired": "Spiega il motivo del rifiuto: chi ha chiesto la persona lo leggerà.",
+      "customRole": "Scrivi il ruolo, al massimo 80 caratteri."
     },
     "detail": {
       "back": "Tutte le richieste",
@@ -834,7 +836,9 @@
       "transport_refund": "Rimborso dei trasporti",
       "gym": "Palestra",
       "nursery": "Asilo aziendale"
-    }
+    },
+    "roleOther": "Altro (scrivi il ruolo)",
+    "roleFamilyOther": "Altri ruoli"
   },
   "quality": {
     "categories": {
@@ -876,7 +880,8 @@
       "responsibilities": "Responsabilità",
       "requirements": {
         "mustHave": "Requisiti obbligatori"
-      }
+      },
+      "customRole": "Nome del ruolo"
     },
     "rules": {
       "required": "Campo obbligatorio per pubblicare",
@@ -1030,7 +1035,9 @@
         "benefits": "Benefit",
         "growth": "Crescita e formazione",
         "workLifeBalance": "Equilibrio vita-lavoro",
-        "culture": "Cultura e valori"
+        "culture": "Cultura e valori",
+        "customRole": "Il ruolo",
+        "customRoleHint": "Scrivi il ruolo come lo chiameresti, per esempio Pasticcere."
       },
       "hints": {
         "salary": "Importi lordi, in unità intere. Con periodo annuale è la RAL (Retribuzione annua lorda).",

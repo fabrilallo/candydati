@@ -1,4 +1,4 @@
-import { jobRequestInputSchema, JOB_REQUEST_STATUSES, type JobRequest, type PageMeta } from '@candydati/domain';
+import { CUSTOM_ROLE, jobRequestInputSchema, JOB_REQUEST_STATUSES, type JobRequest, type PageMeta } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';
@@ -66,6 +66,7 @@ export const requestJobApproval = defineJobRequestUseCase({
       requestedBy: actor.onBehalfOfUserId ?? actor.id ?? 'system',
       title: content.title,
       ...(content.role === undefined ? {} : { role: content.role }),
+      ...(content.role === CUSTOM_ROLE && content.customRole ? { customRole: content.customRole } : {}),
       ...(content.seniority === undefined ? {} : { seniority: content.seniority }),
       reason: input.reason,
       headcount: 1,

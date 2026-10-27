@@ -8,6 +8,7 @@ const base: JobSummaryDto = {
   status: 'draft',
   title: 'Backend developer',
   role: 'backend_developer',
+  customRole: null,
   publishable: false,
   publishIssueCount: 3,
   salary: { currency: 'EUR', period: 'year' },
@@ -58,7 +59,11 @@ describe('relativeTime', () => {
 
 describe('jobFacts', () => {
   it('lists role and work mode keys, skipping what is not set', () => {
-    expect(jobFacts(base)).toEqual({ roleKey: 'taxonomy.roles.backend_developer', workModeKey: null })
-    expect(jobFacts({ ...base, role: null, workMode: 'remote' })).toEqual({ roleKey: null, workModeKey: 'taxonomy.workModes.remote' })
+    expect(jobFacts(base)).toEqual({ roleKey: 'taxonomy.roles.backend_developer', roleText: null, workModeKey: null })
+    expect(jobFacts({ ...base, role: null, workMode: 'remote' })).toEqual({ roleKey: null, roleText: null, workModeKey: 'taxonomy.workModes.remote' })
+  })
+
+  it('carries the text of a custom role instead of a taxonomy key', () => {
+    expect(jobFacts({ ...base, role: 'other', customRole: 'Pastry chef' })).toMatchObject({ roleKey: null, roleText: 'Pastry chef' })
   })
 })

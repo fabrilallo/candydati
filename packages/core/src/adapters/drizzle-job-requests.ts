@@ -19,6 +19,7 @@ const toRequest = (row: Row): JobRequest => ({
   requestedBy: row.requestedBy,
   title: row.title,
   ...(row.role === null ? {} : { role: row.role }),
+  ...(row.customRole === null ? {} : { customRole: row.customRole }),
   ...(row.seniority === null ? {} : { seniority: row.seniority }),
   reason: row.reason,
   headcount: row.headcount,
@@ -43,6 +44,7 @@ const toRequest = (row: Row): JobRequest => ({
 const toValues = (request: JobRequest) => ({
   ...request,
   role: request.role ?? null,
+  customRole: request.customRole ?? null,
   seniority: request.seniority ?? null,
   workMode: request.workMode ?? null,
   desiredStart: request.desiredStart ?? null,

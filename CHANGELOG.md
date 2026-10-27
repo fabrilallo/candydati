@@ -13,6 +13,10 @@ All notable changes to this project are documented here. The format follows
   spreadsheets you already have) and points to Migration for moving from another ATS.
 - Public job ad is more compact: smaller hero and title, salary and process side by side, key facts in four columns,
   tighter section gaps, process stages as slim rows, and the apply button inside the top block.
+- The role of a job ad (and of a job request) is no longer a closed list: pick a role or choose "Other" and write it.
+  The ad stores `role: other` plus `customRole` (80 characters at most, required to publish); the text is shown on the
+  public page, careers list, statistics and in the job posting data. The public schema `job-content.v1` gains the
+  optional `customRole` field and the `other` role value.
 
 ### Fixed
 

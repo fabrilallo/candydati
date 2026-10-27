@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { adQualityReportSchema } from '../job/quality.js';
 import { isPublishedContent, jobContentSchema, type PublishedJobContent } from '../job/content.js';
 import { jobDtoSchema, JOB_STATUSES, type PublicCareersDto, type PublicJobPageDto } from '../job/job.js';
-import { CONTRACT_TYPES, JOB_ROLES, SENIORITY_LEVELS, WORK_MODES } from '../job/taxonomy.js';
+import { CONTRACT_TYPES, CUSTOM_ROLE_MAX, JOB_ROLE_CHOICES, SENIORITY_LEVELS, WORK_MODES } from '../job/taxonomy.js';
 import { publicPrivacyNoticeSchema, type PublicPrivacyNoticeDto } from './privacy.js';
 import { isoDate } from './common.js';
 
@@ -14,7 +14,8 @@ export const jobSummarySchema = z.object({
   slug: z.string(),
   status: z.enum(JOB_STATUSES),
   title: z.string(),
-  role: z.enum(JOB_ROLES).nullable(),
+  role: z.enum(JOB_ROLE_CHOICES).nullable(),
+  customRole: z.string().max(CUSTOM_ROLE_MAX).nullable(),
   publishable: z.boolean(),
   publishIssueCount: z.number().int().min(0),
   salary: jobContentSchema.shape.salary,
@@ -41,7 +42,8 @@ const organizationSchema = z.object({ name: z.string(), slug: z.string(), logo: 
 const publicSummarySchema = z.object({
   slug: z.string(),
   title: z.string(),
-  role: z.enum(JOB_ROLES),
+  role: z.enum(JOB_ROLE_CHOICES),
+  customRole: z.string().max(CUSTOM_ROLE_MAX).optional(),
   seniority: z.enum(SENIORITY_LEVELS),
   contractType: z.enum(CONTRACT_TYPES),
   workMode: z.enum(WORK_MODES),

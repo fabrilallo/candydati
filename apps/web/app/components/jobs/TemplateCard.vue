@@ -2,6 +2,7 @@
 import type { JobTemplateDto } from '@candydati/domain'
 import { Trash2Icon } from '@lucide/vue'
 import { Badge } from '@/components/ui/badge'
+import { roleLabel } from '@/lib/role-label'
 import { Button } from '@/components/ui/button'
 import type { Params } from '@/lib/ad-text'
 import { relativeTime } from '@/lib/job-list-view'
@@ -20,7 +21,7 @@ const updated = computed(() => relativeTime(props.template.updatedAt, props.now,
     <div class="grid gap-2">
       <div class="flex items-start justify-between gap-3">
         <h3 class="min-w-0 text-[0.9375rem] font-medium leading-snug">{{ template.name }}</h3>
-        <Badge variant="secondary">{{ template.content.role ? t(`taxonomy.roles.${template.content.role}`) : t('job.list.noRole') }}</Badge>
+        <Badge variant="secondary">{{ roleLabel(template.content.role, template.content.customRole, t) || t('job.list.noRole') }}</Badge>
       </div>
       <p class="text-sm text-muted-foreground" data-testid="template-summary">{{ summary }}</p>
     </div>

@@ -26,6 +26,14 @@ describe('job mappers', () => {
     expect(draft.publishedAt).toBeNull();
   });
 
+  it('carries a custom role text in summaries, and only for the other role', () => {
+    const custom = buildJob({ status: 'published', publishedAt: new Date(), content: completeJobContent({ title: 'Pastry chef', role: 'other', customRole: 'Pastry chef' }) });
+    expect(toJobSummaryDto(custom, 6)).toMatchObject({ role: 'other', customRole: 'Pastry chef' });
+    expect(toPublicJobSummaryDto(custom)).toMatchObject({ role: 'other', customRole: 'Pastry chef' });
+    expect(toJobSummaryDto(published, 6).customRole).toBeNull();
+    expect(toPublicJobSummaryDto(published)).not.toHaveProperty('customRole');
+  });
+
   it('maps templates and publish results', () => {
     expect(toJobTemplateDto(buildJobTemplate()).updatedAt).toBe('2026-01-01T00:00:00.000Z');
     expect(toPublishJobResultDto({ job: published, quality: null })).toMatchObject({ quality: null, job: { id: 'job_1' } });

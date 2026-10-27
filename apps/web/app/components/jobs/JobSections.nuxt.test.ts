@@ -15,7 +15,7 @@ describe('JobBasicsSection', () => {
     const groups = wrapper.findAll('#job-field-role optgroup').map((node) => node.attributes('label'))
     expect(groups).toHaveLength(12)
     expect(groups[0]).toBe('Ingegneria software')
-    expect(wrapper.findAll('#job-field-role option')).toHaveLength(60)
+    expect(wrapper.findAll('#job-field-role option')).toHaveLength(61)
     expect(wrapper.findAll('#job-field-seniority option')).toHaveLength(10)
     expect(wrapper.findAll('#job-field-contractType option')).toHaveLength(7)
   })
@@ -25,7 +25,38 @@ describe('JobBasicsSection', () => {
     expect(wrapper.find('#job-field-title').attributes('aria-invalid')).toBe('true')
     expect(wrapper.find('#job-field-title').attributes('aria-describedby')).toBe('job-field-title-error')
     await wrapper.find('#job-field-role').setValue('recruiter')
-    expect(wrapper.emitted('patch')?.[0]).toEqual([{ role: 'recruiter' }])
+    expect(wrapper.emitted('patch')?.[0]).toEqual([{ role: 'recruiter', customRole: '' }])
+  })
+})
+
+describe('JobBasicsSection custom role', () => {
+  it('offers an option to write a role, last and outside the families', async () => {
+    const wrapper = await mountSuspended(JobBasicsSection, { props: props() })
+    const options = wrapper.findAll('#job-field-role option')
+    expect(options.at(-1)?.attributes('value')).toBe('other')
+    expect(options.at(-1)?.text()).toBe('Altro (scrivi il ruolo)')
+    expect(wrapper.find('#job-field-customRole').exists()).toBe(false)
+  })
+
+  it('reveals a labelled text input for the other role and patches what is typed', async () => {
+    const wrapper = await mountSuspended(JobBasicsSection, { props: props({ role: 'other', customRole: 'Pasticcere' }) })
+    const input = wrapper.find('#job-field-customRole')
+    expect(wrapper.find('label[for="job-field-customRole"]').text()).toBe('Il ruolo')
+    expect(input.attributes('maxlength')).toBe('80')
+    await input.setValue('Pastry chef')
+    expect(wrapper.emitted('patch')?.[0]).toEqual([{ customRole: 'Pastry chef' }])
+  })
+
+  it('ties the missing text to the field, the way the publish rules report it', async () => {
+    const wrapper = await mountSuspended(JobBasicsSection, { props: props({ role: 'other' }, { customRole: 'job.rules.required' }) })
+    expect(wrapper.find('#job-field-customRole').attributes('aria-invalid')).toBe('true')
+    expect(wrapper.find('#job-field-customRole').attributes('aria-describedby')).toContain('job-field-customRole-error')
+  })
+
+  it('drops the text when going back to a role of the list', async () => {
+    const wrapper = await mountSuspended(JobBasicsSection, { props: props({ role: 'other', customRole: 'Pasticcere' }) })
+    await wrapper.find('#job-field-role').setValue('recruiter')
+    expect(wrapper.emitted('patch')?.[0]).toEqual([{ role: 'recruiter', customRole: '' }])
   })
 })
 

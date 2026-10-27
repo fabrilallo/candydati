@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PublicJobSummaryDto } from '@candydati/domain'
 import { ArrowRightIcon, ListChecksIcon } from '@lucide/vue'
+import { roleLabel } from '@/lib/role-label'
 import { placeLine, publicJobPath, salaryRange } from '@/lib/job-view'
 
 const props = defineProps<{ orgSlug: string; job: PublicJobSummaryDto }>()
@@ -8,7 +9,7 @@ const { t, locale } = useI18n()
 const salary = computed(() => salaryRange(props.job.salary, locale.value))
 const quiet = computed(() =>
   [
-    t(`taxonomy.roles.${props.job.role}`),
+    roleLabel(props.job.role, props.job.customRole, t),
     t(`taxonomy.seniority.${props.job.seniority}`),
     t(`taxonomy.contractTypes.${props.job.contractType}`),
     t(`taxonomy.workModes.${props.job.workMode}`),

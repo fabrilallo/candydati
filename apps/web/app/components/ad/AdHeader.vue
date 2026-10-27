@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { JobContent } from '@candydati/domain'
 import { formatDate } from '@/lib/format'
+import { roleLabel } from '@/lib/role-label'
 import { safeLogoUrl } from '@/lib/safe-url'
 
 const props = defineProps<{
   title: string
   role: JobContent['role']
+  customRole?: JobContent['customRole']
   seniority: JobContent['seniority']
   organization: { readonly name: string; readonly logo: string | null }
   publishedAt: string | null
@@ -15,7 +17,7 @@ const ad = useAdContext()
 const roleLine = computed(() => {
   const { x, language } = ad.value
   return [
-    props.role ? x(`taxonomy.roles.${props.role}`) : '',
+    roleLabel(props.role, props.customRole, x),
     props.seniority ? x(`taxonomy.seniority.${props.seniority}`) : '',
     props.publishedAt ? x('public.published', { date: formatDate(props.publishedAt, language) }) : '',
   ].filter((part) => part !== '')

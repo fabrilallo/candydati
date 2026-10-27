@@ -1,0 +1,1 @@
+ALTER TABLE "job_request" ADD COLUMN "custom_role" text;

@@ -1,4 +1,5 @@
 import type { JobRequestDto, JobRequestStatus, Role } from '@candydati/domain'
+import { roleLabel } from './role-label'
 import { formatMoney } from './job-view'
 import { can } from './permissions-ui'
 
@@ -52,7 +53,7 @@ type Tr = (key: string, params?: Record<string, unknown>) => string
 export const requestSummary = (request: JobRequestDto, tr: Tr, language: string): string => {
   const rows: readonly (readonly [string, string])[] = [
     ['title', request.title],
-    ['role', request.role ? tr(`taxonomy.roles.${request.role}`) : ''],
+    ['role', roleLabel(request.role, request.customRole, tr)],
     ['reason', request.reason],
     ['headcount', String(request.headcount)],
     ['budget', requestBudget(request, language)],

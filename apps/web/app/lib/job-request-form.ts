@@ -1,9 +1,10 @@
-import { DEFAULT_LOCALE, HEADCOUNT_MAX, JOB_ROLES, SUPPORTED_LOCALES, type JobRequestInput, type JobRole, type Locale } from '@candydati/domain'
+import { CUSTOM_ROLE, CUSTOM_ROLE_MAX, DEFAULT_LOCALE, HEADCOUNT_MAX, JOB_ROLES, SUPPORTED_LOCALES, type JobRequestInput, type JobRoleChoice, type Locale } from '@candydati/domain'
 
 /** Form state: every field is a string until the form is turned into the wire input. Updates are `{ ...form, ...patch }`. */
 export interface JobRequestForm {
   readonly title: string
   readonly role: string
+  readonly customRole: string
   readonly reason: string
   readonly headcount: string
   readonly salaryMin: string
@@ -24,6 +25,7 @@ const err = (field: string): string => `jobRequests.errors.${field}`
 export const emptyRequestForm = (): JobRequestForm => ({
   title: '',
   role: '',
+  customRole: '',
   reason: '',
   headcount: '1',
   salaryMin: '',
@@ -48,7 +50,8 @@ export const validateRequestForm = (form: JobRequestForm): RequestFormErrors => 
   const headcount = positiveInt(form.headcount)
   const checks: readonly (readonly [keyof JobRequestForm, boolean, string])[] = [
     ['title', form.title.trim() === '', err('title')],
-    ['role', !(JOB_ROLES as readonly string[]).includes(form.role), err('role')],
+    ['role', form.role !== CUSTOM_ROLE && !(JOB_ROLES as readonly string[]).includes(form.role), err('role')],
+    ['customRole', form.role === CUSTOM_ROLE && (form.customRole.trim() === '' || form.customRole.trim().length > CUSTOM_ROLE_MAX), err('customRole')],
     ['reason', form.reason.trim() === '', err('reason')],
     ['headcount', headcount === null || headcount > HEADCOUNT_MAX, err('headcount')],
     ['salaryMin', min === null, err('salaryMin')],
@@ -67,7 +70,8 @@ export const requestLanguage = (uiLocale: string): Locale => SUPPORTED_LOCALES.f
 /** Pure: the body of `POST /job-requests`. Call only when `validateRequestForm` returned no errors. */
 export const toRequestInput = (form: JobRequestForm, language: Locale): JobRequestInput => ({
   title: form.title.trim(),
-  role: form.role as JobRole,
+  role: form.role as JobRoleChoice,
+  ...(form.role === CUSTOM_ROLE ? { customRole: form.customRole.trim() } : {}),
   reason: form.reason.trim(),
   headcount: Number(form.headcount),
   salaryMin: Number(form.salaryMin),

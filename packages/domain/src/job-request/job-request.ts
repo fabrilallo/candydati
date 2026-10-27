@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { SUPPORTED_LOCALES } from '../platform/config.js';
 import { JOB_TITLE_MAX, JOB_TEXT_MAX, type JobContentInput, locationSchema } from '../job/content.js';
-import { JOB_ROLES, SALARY_CURRENCIES, SENIORITY_LEVELS, WORK_MODES, type SalaryPeriod } from '../job/taxonomy.js';
+import { CUSTOM_ROLE, CUSTOM_ROLE_MAX, JOB_ROLE_CHOICES, SALARY_CURRENCIES, SENIORITY_LEVELS, WORK_MODES, type SalaryPeriod } from '../job/taxonomy.js';
 
 export const JOB_REQUEST_STATUSES = ['submitted', 'approved', 'rejected', 'converted'] as const;
 export type JobRequestStatus = (typeof JOB_REQUEST_STATUSES)[number];
@@ -13,7 +13,9 @@ export const REQUEST_NOTE_MAX = 2000;
 export const jobRequestInputSchema = z
   .object({
     title: z.string().trim().min(1).max(JOB_TITLE_MAX),
-    role: z.enum(JOB_ROLES).optional(),
+    role: z.enum(JOB_ROLE_CHOICES).optional(),
+    /** The role in the person's words; required when `role` is `other`. */
+    customRole: z.string().trim().min(1).max(CUSTOM_ROLE_MAX).optional(),
     seniority: z.enum(SENIORITY_LEVELS).optional(),
     reason: z.string().trim().min(1).max(JOB_TEXT_MAX),
     headcount: z.number().int().min(1).max(HEADCOUNT_MAX).default(1),
@@ -28,7 +30,8 @@ export const jobRequestInputSchema = z
     interviewersNotes: z.string().trim().max(REQUEST_NOTE_MAX).default(''),
     language: z.enum(SUPPORTED_LOCALES).default('it'),
   })
-  .refine((value) => value.salaryMax >= value.salaryMin, { path: ['salaryMax'], message: 'salary_max_below_min' });
+  .refine((value) => value.salaryMax >= value.salaryMin, { path: ['salaryMax'], message: 'salary_max_below_min' })
+  .refine((value) => value.role !== CUSTOM_ROLE || value.customRole !== undefined, { path: ['customRole'], message: 'required' });
 export type JobRequestInput = z.infer<typeof jobRequestInputSchema>;
 
 export interface JobRequest extends Omit<JobRequestInput, 'location'> {
@@ -95,6 +98,7 @@ export function jobContentFromRequest(request: JobRequest): JobContentInput {
     title: request.title,
     language: request.language,
     ...(request.role === undefined ? {} : { role: request.role }),
+    ...(request.customRole === undefined ? {} : { customRole: request.customRole }),
     ...(request.seniority === undefined ? {} : { seniority: request.seniority }),
     ...(request.workMode === undefined ? {} : { workMode: request.workMode }),
     salary: { min: request.salaryMin, max: request.salaryMax, currency: request.currency, period: 'year' },

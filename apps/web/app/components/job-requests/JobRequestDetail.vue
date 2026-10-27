@@ -2,6 +2,7 @@
 import type { JobRequestDto } from '@candydati/domain'
 import { CheckIcon, ExternalLinkIcon, SparklesIcon, XIcon } from '@lucide/vue'
 import { formatDate, formatDateTime } from '@/lib/format'
+import { roleLabel } from '@/lib/role-label'
 import { jobRequestAction, locationLine, noteOr, requestBudget } from '@/lib/job-request-view'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -32,7 +33,7 @@ const team = useMembers()
 /** The api sends user ids: the name comes from the team. */
 const personName = (userId: string | null): string => (userId ? team.nameOf(userId) : null) ?? none.value
 const rows = (item: JobRequestDto): readonly (readonly [string, string])[] => [
-  ['role', item.role ? t(`taxonomy.roles.${item.role}`) : none.value],
+  ['role', roleLabel(item.role, item.customRole, t) || none.value],
   ['reason', item.reason],
   ['headcount', String(item.headcount)],
   ['budget', requestBudget(item, locale.value) || none.value],

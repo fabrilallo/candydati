@@ -76,6 +76,7 @@ export const jobSummary = (id: string, title: string, status = 'published') => (
   status,
   title,
   role: 'backend_developer',
+  customRole: null,
   publishable: true,
   publishIssueCount: 0,
   salary: { min: 45000, max: 60000, currency: 'EUR', period: 'year' },

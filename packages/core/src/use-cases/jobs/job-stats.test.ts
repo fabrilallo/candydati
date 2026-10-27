@@ -52,6 +52,16 @@ describe('buildSalary', () => {
     salary: { min, max, currency, period },
   });
 
+  it('carries the text of a custom role and sorts by it', () => {
+    const { items } = buildSalary([
+      published('z', { title: 'z', role: 'other', customRole: 'Pastry chef', ...salary(30000, 40000) }),
+      published('a', { title: 'a', role: 'backend_developer', ...salary(30000, 40000) }),
+    ]);
+    expect(items.map((item) => item.id)).toEqual(['a', 'z']);
+    expect(items[1]).toMatchObject({ role: 'other', customRole: 'Pastry chef' });
+    expect(items[0]).not.toHaveProperty('customRole');
+  });
+
   it('lists published content by role then minimum, and skips content that is not publishable', () => {
     const jobs = [
       published('fe', { title: 'fe', role: 'frontend_developer', ...salary(30000, 40000) }),

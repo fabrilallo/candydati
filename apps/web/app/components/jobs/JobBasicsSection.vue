@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { JOB_ROLE_FAMILIES, CONTRACT_TYPES, SENIORITY_LEVELS, SUPPORTED_LOCALES } from '@candydati/domain'
+import { CUSTOM_ROLE, CUSTOM_ROLE_MAX, CONTRACT_TYPES, SENIORITY_LEVELS, SUPPORTED_LOCALES } from '@candydati/domain'
 import { Input } from '@/components/ui/input'
+import { roleOptions as buildRoleOptions } from '@/lib/role-options'
 import { fieldIdOf } from '@/lib/job-issues'
 import type { FieldErrors, JobForm } from '@/lib/job-form'
 
@@ -8,9 +9,7 @@ defineProps<{ form: JobForm; disabled: boolean; errors: FieldErrors }>()
 const emit = defineEmits<{ patch: [changes: Partial<JobForm>] }>()
 const { t } = useI18n()
 
-const roleOptions = (Object.keys(JOB_ROLE_FAMILIES) as (keyof typeof JOB_ROLE_FAMILIES)[]).flatMap((family) =>
-  JOB_ROLE_FAMILIES[family].map((role) => ({ value: role, label: t(`taxonomy.roles.${role}`), group: t(`taxonomy.roleFamilies.${family}`) })),
-)
+const roleOptions = buildRoleOptions(t)
 const seniorityOptions = SENIORITY_LEVELS.map((value) => ({ value, label: t(`taxonomy.seniority.${value}`) }))
 const contractOptions = CONTRACT_TYPES.map((value) => ({ value, label: t(`taxonomy.contractTypes.${value}`) }))
 const languageOptions = SUPPORTED_LOCALES.map((value) => ({ value, label: t(`locales.${value}`) }))
@@ -37,7 +36,24 @@ const languageOptions = SUPPORTED_LOCALES.map((value) => ({ value, label: t(`loc
       <div class="sm:col-span-2">
         <FormField :id="fieldIdOf('role')" :label="t('job.editor.fields.role')" :error="errors.role">
           <template #default="{ invalid, describedBy }">
-            <SelectInput :id="fieldIdOf('role')" :model-value="form.role" :options="roleOptions" :placeholder="t('job.editor.fields.rolePlaceholder')" :disabled="disabled" :invalid="invalid" :described-by="describedBy" @update:model-value="emit('patch', { role: $event })" />
+            <SelectInput :id="fieldIdOf('role')" :model-value="form.role" :options="roleOptions" :placeholder="t('job.editor.fields.rolePlaceholder')" :disabled="disabled" :invalid="invalid" :described-by="describedBy" @update:model-value="emit('patch', { role: $event, customRole: $event === CUSTOM_ROLE ? form.customRole : '' })" />
+          </template>
+        </FormField>
+      </div>
+      <div v-if="form.role === CUSTOM_ROLE" class="sm:col-span-2">
+        <FormField :id="fieldIdOf('customRole')" :label="t('job.editor.fields.customRole')" :hint="t('job.editor.fields.customRoleHint')" :error="errors.customRole">
+          <template #default="{ invalid, describedBy }">
+            <Input
+              :id="fieldIdOf('customRole')"
+              :model-value="form.customRole"
+              :disabled="disabled"
+              :maxlength="CUSTOM_ROLE_MAX"
+              autocomplete="off"
+              required
+              :aria-invalid="invalid"
+              :aria-describedby="describedBy"
+              @update:model-value="emit('patch', { customRole: String($event) })"
+            />
           </template>
         </FormField>
       </div>

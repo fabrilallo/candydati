@@ -13,6 +13,7 @@ const summary = (id: string, status: string, title = `Annuncio ${id}`) => ({
   status,
   title,
   role: 'backend_developer',
+  customRole: null,
   publishable: status !== 'draft',
   publishIssueCount: status === 'draft' ? 3 : 0,
   salary: { min: 45000, max: 60000, currency: 'EUR', period: 'year' },

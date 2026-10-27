@@ -78,6 +78,8 @@ export interface JobSummaryDto {
   readonly status: JobStatus;
   readonly title: string;
   readonly role: JobContent['role'] | null;
+  /** The role text when `role` is `other`, otherwise null. */
+  readonly customRole: string | null;
   readonly publishable: boolean;
   /** How many publication rules the draft still fails (0 when `publishable`). */
   readonly publishIssueCount: number;
@@ -122,6 +124,8 @@ export interface PublicJobSummaryDto {
   readonly slug: string;
   readonly title: string;
   readonly role: PublishedJobContent['role'];
+  /** The role text when `role` is `other`. */
+  readonly customRole?: string;
   readonly seniority: PublishedJobContent['seniority'];
   readonly contractType: PublishedJobContent['contractType'];
   readonly workMode: PublishedJobContent['workMode'];

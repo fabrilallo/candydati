@@ -11,6 +11,7 @@ const job = (id: string, daysIdle = 120): StaleJobDto => ({
     status: 'published',
     title: `Annuncio ${id}`,
     role: 'backend_developer',
+  customRole: null,
     publishable: true,
     publishIssueCount: 0,
     salary: { currency: 'EUR', period: 'year' },

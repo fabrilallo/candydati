@@ -76,8 +76,14 @@
         "general_manager",
         "chief_executive",
         "chief_technology_officer",
-        "chief_operating_officer"
+        "chief_operating_officer",
+        "other"
       ]
+    },
+    "customRole": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
     },
     "seniority": {
       "type": "string",

@@ -29,6 +29,14 @@ describe('job request form', () => {
     })
   })
 
+  it('accepts a custom role only with its text', () => {
+    const other = { ...valid, role: 'other' }
+    expect(validateRequestForm(other).customRole).toBe('jobRequests.errors.customRole')
+    expect(validateRequestForm({ ...other, customRole: ' Pastry chef ' })).toEqual({})
+    expect(toRequestInput({ ...other, customRole: ' Pastry chef ' }, 'it')).toMatchObject({ role: 'other', customRole: 'Pastry chef' })
+    expect(toRequestInput(valid, 'it')).not.toHaveProperty('customRole')
+  })
+
   it('wants at least one person, whole and not absurd', () => {
     expect(validateRequestForm({ ...valid, headcount: '0' }).headcount).toBe('jobRequests.errors.headcount')
     expect(validateRequestForm({ ...valid, headcount: '' }).headcount).toBe('jobRequests.errors.headcount')

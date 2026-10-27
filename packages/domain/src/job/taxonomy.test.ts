@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { JOB_ROLE_FAMILIES, JOB_ROLES, type JobRole, familyOfRole, SENIORITY_LEVELS, WORK_MODES } from './taxonomy.js';
+import { CUSTOM_ROLE, CUSTOM_ROLE_MAX, JOB_ROLE_CHOICES, JOB_ROLE_FAMILIES, JOB_ROLES, type JobRole, familyOfRole, SENIORITY_LEVELS, WORK_MODES } from './taxonomy.js';
 
 describe('JOB_ROLES', () => {
   it('has no duplicate ids across families', () => {
@@ -15,6 +15,19 @@ describe('JOB_ROLES', () => {
     for (const role of JOB_ROLES) {
       expect(role).toMatch(/^[a-z]+(_[a-z]+)*$/);
     }
+  });
+});
+
+describe('custom role', () => {
+  it('is one extra choice after the taxonomy, never part of it', () => {
+    expect(CUSTOM_ROLE).toBe('other');
+    expect(JOB_ROLES).not.toContain(CUSTOM_ROLE);
+    expect(JOB_ROLE_CHOICES).toEqual([...JOB_ROLES, CUSTOM_ROLE]);
+    expect(CUSTOM_ROLE_MAX).toBe(80);
+  });
+
+  it('has no taxonomy family', () => {
+    expect(familyOfRole(CUSTOM_ROLE)).toBe('other');
   });
 });
 

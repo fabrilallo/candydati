@@ -98,7 +98,8 @@
       "interviewersNotesHint": "Names or roles of the people who will meet candidates.",
       "budget": "Budget (gross annual)",
       "requestedBy": "Requested by",
-      "requestedOn": "Sent on"
+      "requestedOn": "Sent on",
+      "customRole": "The role"
     },
     "form": {
       "submit": "Send the request",
@@ -116,7 +117,8 @@
       "salaryMax": "Enter the maximum gross salary.",
       "salaryOrder": "The maximum cannot be below the minimum.",
       "desiredStart": "Use a valid date.",
-      "noteRequired": "Say why you are rejecting it: whoever asked will read it."
+      "noteRequired": "Say why you are rejecting it: whoever asked will read it.",
+      "customRole": "Write the role, 80 characters at most."
     },
     "detail": {
       "back": "All requests",
@@ -834,7 +836,9 @@
       "transport_refund": "Transport reimbursement",
       "gym": "Gym",
       "nursery": "Company nursery"
-    }
+    },
+    "roleOther": "Other (write the role)",
+    "roleFamilyOther": "Other roles"
   },
   "quality": {
     "categories": {
@@ -876,7 +880,8 @@
       "responsibilities": "Responsibilities",
       "requirements": {
         "mustHave": "Must-have requirements"
-      }
+      },
+      "customRole": "Role name"
     },
     "rules": {
       "required": "Required to publish",
@@ -1030,7 +1035,9 @@
         "benefits": "Benefits",
         "growth": "Growth and training",
         "workLifeBalance": "Work-life balance",
-        "culture": "Culture and values"
+        "culture": "Culture and values",
+        "customRole": "The role",
+        "customRoleHint": "Write the role as you would call it, for example Pastry chef."
       },
       "hints": {
         "salary": "Gross amounts, in whole units. With a yearly period this is the gross annual salary.",

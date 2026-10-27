@@ -17,6 +17,7 @@ export const jobRequest = pgTable(
     requestedBy: text('requested_by').notNull(),
     title: text('title').notNull(),
     role: text('role').$type<JobRequestInput['role']>(),
+    customRole: text('custom_role'),
     seniority: text('seniority').$type<JobRequestInput['seniority']>(),
     reason: text('reason').notNull(),
     headcount: integer('headcount').notNull().default(1),
