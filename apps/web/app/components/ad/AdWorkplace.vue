@@ -15,10 +15,10 @@ const rows = computed(() => {
 </script>
 
 <template>
-  <section v-if="rows.length" :aria-labelledby="id" class="grid gap-3">
+  <section v-if="rows.length" :aria-labelledby="id" class="grid gap-2">
     <component :is="ad.heading(1)" :id="id" class="text-xl font-semibold tracking-tight">{{ ad.x('public.headings.workplace') }}</component>
     <div class="divide-y border-y">
-      <div v-for="row in rows" :key="row.key" class="grid gap-1.5 py-4 @xl:grid-cols-[11rem_minmax(0,1fr)] @xl:gap-6" :data-section="row.body ? row.key : undefined">
+      <div v-for="row in rows" :key="row.key" class="grid gap-1 py-3 @xl:grid-cols-[11rem_minmax(0,1fr)] @xl:gap-6" :data-section="row.body ? row.key : undefined">
         <component :is="ad.heading(2)" class="text-sm font-medium text-muted-foreground @xl:pt-0.5">{{ ad.x(`public.headings.${row.key}`) }}</component>
         <p v-if="row.body" class="text-[0.9375rem] leading-relaxed whitespace-pre-line"><VagueText :text="row.body" /></p>
         <AdHint v-else-if="row.hint" :hint="row.hint" />

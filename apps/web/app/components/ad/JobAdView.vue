@@ -48,12 +48,12 @@ provideAdContext(
 </script>
 
 <template>
-  <article :lang="language" :data-mode="mode" class="@container grid gap-10" data-testid="job-ad">
-    <div class="relative grid gap-6 rounded-2xl border-2 border-ink bg-muted p-5 shadow-hard-lg @md:p-7 @2xl:p-10" data-testid="job-hero">
+  <article :lang="language" :data-mode="mode" class="@container grid gap-6 @2xl:gap-8" data-testid="job-ad">
+    <div class="relative grid gap-4 rounded-2xl border-2 border-ink bg-muted p-4 shadow-hard-lg @md:p-5 @2xl:p-6" data-testid="job-hero">
       <AdHeader :title="content.title" :role="content.role" :seniority="content.seniority" :organization="organization" :published-at="publishedAt" />
       <AdFacts :content="content" />
+      <slot name="cta" />
     </div>
-    <slot name="cta" />
     <AdProcess :process="content.process" />
     <AdRole :content="content" />
     <AdWorkplace :growth="content.growth" :work-life-balance="content.workLifeBalance" :culture="content.culture" />

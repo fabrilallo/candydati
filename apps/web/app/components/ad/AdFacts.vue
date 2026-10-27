@@ -35,24 +35,24 @@ const quiet = computed(() => {
 </script>
 
 <template>
-  <section :aria-label="ad.x('public.salary')" class="grid gap-6" data-testid="job-facts">
-    <div class="flex flex-wrap gap-3">
+  <section :aria-label="ad.x('public.salary')" class="grid gap-4" data-testid="job-facts">
+    <div class="grid gap-2.5 @md:grid-cols-2">
       <div
-        class="grid min-w-0 content-center gap-1 rounded-xl border-2 border-ink px-5 py-4"
+        class="grid min-w-0 content-center gap-0.5 rounded-xl border-2 border-ink px-4 py-3"
         :class="salary ? 'bg-highlight text-highlight-foreground' : 'bg-card'"
         data-fact="salary"
       >
         <p class="text-sm font-semibold first-letter:uppercase">{{ ad.x(salaryLabelKey(content.salary.period)) }}</p>
-        <p v-if="salary" class="figure text-[1.75rem] leading-tight font-extrabold tracking-tight @md:text-[2rem]">{{ salary }}</p>
+        <p v-if="salary" class="figure text-[1.5rem] leading-tight font-extrabold tracking-tight @md:text-[1.75rem]">{{ salary }}</p>
         <AdGap v-if="ad.gaps.salary" :gap="ad.gaps.salary" />
       </div>
-      <dl class="grid min-w-0 content-center gap-1 rounded-xl border-2 border-ink bg-card px-5 py-4" data-fact="process">
+      <dl class="grid min-w-0 content-center gap-0.5 rounded-xl border-2 border-ink bg-card px-4 py-3" data-fact="process">
         <dt class="text-sm font-semibold text-muted-foreground">{{ ad.x('public.process') }}</dt>
-        <dd v-if="stages > 0" class="figure text-[1.75rem] leading-tight font-extrabold tracking-tight @md:text-[2rem]">{{ ad.x('public.facts.stages', { count: stages }) }}</dd>
+        <dd v-if="stages > 0" class="figure text-[1.5rem] leading-tight font-extrabold tracking-tight @md:text-[1.75rem]">{{ ad.x('public.facts.stages', { count: stages }) }}</dd>
         <dd v-if="ad.gaps.process"><AdGap :gap="ad.gaps.process" size="sm" /></dd>
       </dl>
     </div>
-    <dl v-if="quiet.length" class="grid grid-cols-2 gap-x-6 gap-y-4 @xl:grid-cols-3">
+    <dl v-if="quiet.length" class="grid grid-cols-2 gap-x-5 gap-y-3 @xl:grid-cols-4">
       <div v-for="fact in quiet" :key="fact.key" class="grid content-start gap-0.5" :data-fact="fact.key">
         <dt class="text-xs font-medium text-muted-foreground">{{ fact.label }}</dt>
         <dd v-if="fact.value" class="text-sm font-semibold">{{ fact.value }}</dd>
