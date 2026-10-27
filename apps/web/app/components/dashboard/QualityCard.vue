@@ -7,7 +7,8 @@ import { CHART_COLORS, escapeHtml, formatDecimal, qualityRows, shortTitle, type 
 
 /**
  * Quality score of each published ad (0-10) against the instance threshold. Bars under the line are in the warning
- * colour: the score flags an ad, it never blocks it, and it never scores candidates.
+ * colour: the score flags an ad, it never blocks it, and it never scores candidates. The threshold line is named in the
+ * legend below, not on the chart, where its label would sit on the first bar.
  */
 const props = defineProps<{ quality: JobStatsDto['quality']; duration: number }>()
 const { t, locale } = useI18n()
@@ -43,7 +44,7 @@ const triggers = {
       <ClientOnly>
         <VisXYContainer :data="rows" :duration="duration" :height="height" :x-domain="[0, 10]" y-direction="south" :padding="{ top: 4, right: 8 }">
           <VisStackedBar :x="x" :y="y" :color="color" orientation="horizontal" :bar-max-width="10" :rounded-corners="5" :bar-padding="0.4" />
-          <VisPlotline axis="x" :value="quality.threshold" :line-width="1.5" :line-style="[4, 3]" :label-text="t('dashboard.stats.quality.thresholdLabel', { threshold: fmt(quality.threshold) })" label-position="top-right" :label-offset-y="2" />
+          <VisPlotline axis="x" :value="quality.threshold" :line-width="1.5" :line-style="[4, 3]" />
           <VisAxis type="x" :num-ticks="5" :tick-line="false" :domain-line="false" />
           <VisAxis type="y" :tick-format="yTick" :tick-text-width="labelWidth" tick-text-fit-mode="trim" tick-text-trim-type="end" :tick-values="rows.map((row) => row.index)" :grid-line="false" :tick-line="false" :domain-line="false" />
           <VisTooltip :triggers="triggers" />
@@ -52,6 +53,11 @@ const triggers = {
       </ClientOnly>
     </div>
     <ChartEmpty v-else :title="t('dashboard.stats.quality.emptyTitle')" :body="t('dashboard.stats.quality.emptyBody')" />
+    <template v-if="rows.length > 0" #footer>
+      <p class="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="quality-legend">
+        <span class="w-4 border-t border-dashed border-foreground" aria-hidden="true" />{{ t('dashboard.stats.quality.thresholdLabel', { threshold: fmt(quality.threshold) }) }}
+      </p>
+    </template>
     <template #table>
       <table v-if="rows.length > 0">
         <caption>{{ t('dashboard.stats.quality.title') }}</caption>
