@@ -31,7 +31,7 @@ services:
     networks:
       - internal
   api:
-    image: ghcr.io/fabrilallo/candydati-api:${CANDYDATI_VERSION:-0.1.11}
+    image: ghcr.io/fabrilallo/candydati-api:${CANDYDATI_VERSION:-0.1.12}
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -109,7 +109,7 @@ services:
       minio:
         condition: service_started
   worker:
-    image: ghcr.io/fabrilallo/candydati-worker:${CANDYDATI_VERSION:-0.1.11}
+    image: ghcr.io/fabrilallo/candydati-worker:${CANDYDATI_VERSION:-0.1.12}
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -174,7 +174,7 @@ services:
       api:
         condition: service_healthy
   web:
-    image: ghcr.io/fabrilallo/candydati-web:${CANDYDATI_VERSION:-0.1.11}
+    image: ghcr.io/fabrilallo/candydati-web:${CANDYDATI_VERSION:-0.1.12}
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -198,7 +198,7 @@ services:
       api:
         condition: service_healthy
   backup:
-    image: ghcr.io/fabrilallo/candydati-backup:${CANDYDATI_VERSION:-0.1.11}
+    image: ghcr.io/fabrilallo/candydati-backup:${CANDYDATI_VERSION:-0.1.12}
     restart: unless-stopped
     command:
       - backup.sh
