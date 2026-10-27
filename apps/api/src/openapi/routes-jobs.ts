@@ -1,4 +1,4 @@
-import { JOB_ROLES, JOB_STATUSES, SENIORITY_LEVELS, SUPPORTED_LOCALES, jobContentSchema } from '@candydati/domain';
+import { CUSTOM_ROLE_MAX, JOB_ROLES, JOB_STATUSES, SENIORITY_LEVELS, SUPPORTED_LOCALES, jobContentSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { idResult, page, type RouteSpec } from './spec.js';
 
@@ -35,9 +35,9 @@ export const jobRoutes: readonly RouteSpec[] = [
   },
   {
     method: 'post', path: '/api/v1/jobs/responsibilities/suggest', tag: 'Jobs', summary: 'Propose responsibilities for an ad', scope: 'job:update',
-    description: 'Asks the fast model for 3 to 6 responsibilities from the title, role, seniority and language (and the lines already written, to avoid repeats). Needs a title or a role. Nothing is saved; `status` is `proposed`, `unavailable` (no fast model on this instance) or `failed`.',
+    description: 'Asks the fast model for 3 to 6 responsibilities from the title, role, seniority and language (and the lines already written, to avoid repeats). Needs a title, a role or a `customRole` (a role written by hand, sent instead of `role`). Nothing is saved; `status` is `proposed`, `unavailable` (no fast model on this instance) or `failed`.',
     body: z.object({
-      title: z.string().optional(), role: z.enum(JOB_ROLES).optional(), seniority: z.enum(SENIORITY_LEVELS).optional(),
+      title: z.string().optional(), role: z.enum(JOB_ROLES).optional(), customRole: z.string().max(CUSTOM_ROLE_MAX).optional(), seniority: z.enum(SENIORITY_LEVELS).optional(),
       language: z.enum(SUPPORTED_LOCALES).optional(), existing: z.array(z.string()).optional(), summary: z.string().optional(),
     }),
     response: { schema: 'SuggestResponsibilitiesResult' },

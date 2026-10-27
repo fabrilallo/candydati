@@ -32,7 +32,7 @@ describe('suggestResponsibilities', () => {
     const { deps, calls, audit } = build({ responsibilities: THREE });
     const result = await suggestResponsibilities(deps, actor, { title: 'Backend dev', role: 'backend_developer', seniority: 'senior', language: 'en', existing: ['Scrive codice'], summary: 'We build APIs.' });
     expect(result).toEqual({ status: 'proposed', responsibilities: THREE });
-    expect(calls).toEqual([{ title: 'Backend dev', role: 'backend_developer', seniority: 'senior', language: 'en', existing: ['Scrive codice'], summary: 'We build APIs.' }]);
+    expect(calls).toEqual([{ title: 'Backend dev', role: 'backend_developer', customRole: null, seniority: 'senior', language: 'en', existing: ['Scrive codice'], summary: 'We build APIs.' }]);
     expect(audit.events()).toEqual([
       expect.objectContaining({ action: 'job.responsibilities_suggested', target: { type: 'organization', id: 'org_a' }, metadata: { role: 'backend_developer', seniority: 'senior', language: 'en', status: 'proposed', count: 3 } }),
     ]);
@@ -57,6 +57,13 @@ describe('suggestResponsibilities', () => {
     const { deps, calls } = build({ responsibilities: THREE }, false);
     expect(await suggestResponsibilities(deps, actor, { title: 'Dev' })).toEqual({ status: 'unavailable' });
     expect(calls).toEqual([]);
+  });
+
+  it('takes a role written by hand and hands it to the model as text', async () => {
+    const { deps, calls } = build({ responsibilities: THREE });
+    const result = await suggestResponsibilities(deps, actor, { customRole: ' Sommelier ', language: 'it' });
+    expect(result.status).toBe('proposed');
+    expect(calls).toEqual([expect.objectContaining({ title: null, role: null, customRole: 'Sommelier' })]);
   });
 
   it('needs job:update and a title or a role, with bounded input', async () => {

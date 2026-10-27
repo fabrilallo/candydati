@@ -11,7 +11,7 @@ export const responsibilityPrompt = (context: ResponsibilityContext): string =>
   [
     `Language: ${context.language}.`,
     `Job title: ${context.title ?? 'not given'}.`,
-    `Role: ${context.role ?? 'not given'}. Seniority: ${context.seniority ?? 'not given'}.`,
+    `Role: ${context.customRole ?? context.role ?? 'not given'}. Seniority: ${context.seniority ?? 'not given'}.`,
     context.summary ? `Summary of the ad:\n"""\n${context.summary.slice(0, 1500)}\n"""` : 'There is no summary yet.',
     context.existing.length > 0 ? `Responsibilities already written (do not repeat):\n${context.existing.map((line) => `- ${line}`).join('\n')}` : 'No responsibilities written yet.',
   ].join('\n\n');
