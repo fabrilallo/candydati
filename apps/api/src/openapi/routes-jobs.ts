@@ -1,4 +1,4 @@
-import { JOB_STATUSES, jobContentSchema } from '@candydati/domain';
+import { JOB_ROLES, JOB_STATUSES, SENIORITY_LEVELS, SUPPORTED_LOCALES, jobContentSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { idResult, page, type RouteSpec } from './spec.js';
 
@@ -32,6 +32,15 @@ export const jobRoutes: readonly RouteSpec[] = [
     method: 'post', path: '/api/v1/jobs/quality', tag: 'Jobs', summary: 'Analyze unsaved content', scope: 'job:update', body: contentBody,
     description: 'Quality feedback and the publication issues of content that is not saved. Changes nothing.',
     response: { schema: 'AnalyzeJobAdResult' },
+  },
+  {
+    method: 'post', path: '/api/v1/jobs/responsibilities/suggest', tag: 'Jobs', summary: 'Propose responsibilities for an ad', scope: 'job:update',
+    description: 'Asks the fast model for 3 to 6 responsibilities from the title, role, seniority and language (and the lines already written, to avoid repeats). Needs a title or a role. Nothing is saved; `status` is `proposed`, `unavailable` (no fast model on this instance) or `failed`.',
+    body: z.object({
+      title: z.string().optional(), role: z.enum(JOB_ROLES).optional(), seniority: z.enum(SENIORITY_LEVELS).optional(),
+      language: z.enum(SUPPORTED_LOCALES).optional(), existing: z.array(z.string()).optional(), summary: z.string().optional(),
+    }),
+    response: { schema: 'SuggestResponsibilitiesResult' },
   },
   { method: 'get', path: '/api/v1/stats/jobs', tag: 'Jobs', summary: 'Aggregates of the job ads', scope: 'job:read', response: { schema: 'JobStats' } },
   { method: 'get', path: '/api/v1/job-templates', tag: 'Templates', summary: 'List job templates', scope: 'job_template:read', response: { schema: 'JobTemplate', list: true } },

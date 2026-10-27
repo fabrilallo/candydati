@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { AiModelCheck, DistributionChannel, InstanceEmailTester } from '@candydati/core';
+import type { AiModelCheck, DistributionChannel, InstanceEmailTester, ResponsibilitySuggester } from '@candydati/core';
 import type { AdQualityAnalyzer } from '@candydati/domain';
 import { createDb, type DbHandle } from '@candydati/db';
 import type { FastifyInstance } from 'fastify';
@@ -56,6 +56,7 @@ export interface TestAppOptions {
   readonly rateLimit?: RateLimitSettings;
   readonly accountMailer?: AccountMailer;
   readonly adQuality?: AdQualityAnalyzer;
+  readonly responsibilitySuggester?: ResponsibilitySuggester;
   readonly distributionChannels?: readonly DistributionChannel[];
   readonly reportClock?: () => Date;
   readonly env?: Record<string, string>;
@@ -74,7 +75,7 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
   const files = createInMemoryFileStorage();
   const queue = createInMemoryTaskQueue();
   const fakeSender = createFakeEmailSender();
-  const app = await buildServer({ env: testEnv({ DATABASE_URL: databaseUrl, ...options.env }), throttleStore: options.throttleStore ?? createInMemoryThrottleStore(), db: handle.db, accountMailer: options.accountMailer ?? mailbox, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, migrationConnectors: options.migrationConnectors, reportClock: options.reportClock, instanceEmailTester: options.instanceEmailTester, aiCheck: options.aiCheck });
+  const app = await buildServer({ env: testEnv({ DATABASE_URL: databaseUrl, ...options.env }), throttleStore: options.throttleStore ?? createInMemoryThrottleStore(), db: handle.db, accountMailer: options.accountMailer ?? mailbox, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), responsibilitySuggester: options.responsibilitySuggester, files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, migrationConnectors: options.migrationConnectors, reportClock: options.reportClock, instanceEmailTester: options.instanceEmailTester, aiCheck: options.aiCheck });
   await app.ready();
   registerMailbox(app, mailbox);
   return {

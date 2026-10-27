@@ -523,6 +523,7 @@
         "updated": "Ha modificato un annuncio",
         "published": "Ha pubblicato un annuncio",
         "closed": "Ha chiuso un annuncio",
+        "responsibilities_suggested": "Ha chiesto proposte di responsabilità per un annuncio",
         "distribution_synced": "Ha sincronizzato un annuncio con i canali di distribuzione",
         "interviewers_updated": "Ha cambiato chi fa i colloqui di un annuncio",
         "team_member_added": "Ha aggiunto una persona al team di un annuncio",
@@ -1051,6 +1052,20 @@
         "growth": "Percorsi di crescita, budget per la formazione, mentoring.",
         "workLifeBalance": "Orari, flessibilità, reperibilità.",
         "culture": "Come si lavora e quali valori contano."
+      },
+      "suggest": {
+        "button": "Suggerisci responsabilità",
+        "needsRole": "Indica prima il titolo o il ruolo dell'annuncio.",
+        "loading": "Sto preparando le proposte",
+        "title": "Proposte per le responsabilità",
+        "note": "Sono solo proposte: aggiungi quelle che ti servono e modificale come vuoi.",
+        "add": "Aggiungi",
+        "addItem": "Aggiungi: {text}",
+        "addAll": "Aggiungi tutte",
+        "dismiss": "Chiudi le proposte",
+        "failed": "Non siamo riusciti a preparare le proposte. Riprova tra poco.",
+        "unavailable": "Le proposte non sono disponibili: l'IA non è configurata su questa installazione.",
+        "empty": "Nessuna proposta nuova. Riprova o scrivi le voci a mano."
       },
       "list": {
         "add": "Aggiungi voce",

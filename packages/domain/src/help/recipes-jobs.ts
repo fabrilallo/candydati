@@ -12,6 +12,7 @@ export const JOB_RECIPES: readonly Recipe[] = [
       it: [
         'Apri "Annunci" e premi "Nuovo annuncio", poi scegli "Annuncio vuoto" o "Da un template".',
         'Compila ruolo, seniority, contratto, modalità di lavoro e paese, poi in "Retribuzione" il minimo e il massimo lordo: senza fascia salariale l\'annuncio non si pubblica.',
+        'In "Il ruolo" premi "Suggerisci responsabilità" per avere qualche proposta in base a titolo e ruolo: aggiungi solo quelle che ti servono, con "Aggiungi". Per pubblicare ne servono almeno tre.',
         'Descrivi le fasi del "Processo di selezione" e i giorni entro cui rispondi ai candidati.',
         'Premi "Salva bozza", controlla con "Anteprima" e poi premi "Pubblica".',
         'Se l\'organizzazione richiede l\'approvazione, usa "Chiedi l\'approvazione" e scrivi la motivazione.',
@@ -20,6 +21,7 @@ export const JOB_RECIPES: readonly Recipe[] = [
       en: [
         'Open "Jobs" and press "New job ad", then pick "Blank ad" or "From a template".',
         'Fill in role, seniority, contract, work mode and country, then the gross minimum and maximum under "Salary": an ad without a salary range cannot be published.',
+        'Under "Description" press "Suggest responsibilities" to get a few proposals from the title and role: add only the ones you need, with "Add". Publishing needs at least three.',
         'Describe the stages of the "Selection process" and the days within which you answer candidates.',
         'Press "Save draft", check it with "Preview", then press "Publish".',
         'If your organization requires approval, use "Ask for approval" and write the reason.',

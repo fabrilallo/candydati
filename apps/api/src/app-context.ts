@@ -33,6 +33,7 @@ import {
   type BindableTaskQueue,
 } from '@candydati/core';
 import type { AdQualityAnalyzer } from '@candydati/domain';
+import { createLiveSuggester } from './ai/responsibility-suggester.js';
 import { sql, type Db } from '@candydati/db';
 import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyRequest } from 'fastify';
@@ -49,7 +50,7 @@ import { configuredProviders } from './wiring/configured-providers.js';
 import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
 import { zipStreamFactory } from '@candydati/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
-import type { Actor, ApiKeyDeps, DelegatedActor, SecurityDeps } from '@candydati/core';
+import type { Actor, ApiKeyDeps, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
 import { authenticateApiKey, withStorageErrors } from '@candydati/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
@@ -131,6 +132,8 @@ export interface AppContext {
   readonly budget: DailyBudget;
   readonly rateLimit: RateLimitSettings;
   readonly jobDeps: JobDeps;
+  /** The fast model that proposes responsibilities (off while none is configured). */
+  readonly responsibilitySuggester: ResponsibilitySuggester;
   /** Read-only aggregates of the history kept by core. */
   readonly reportDeps: ReportDeps;
   readonly candidateDeps: CandidateDeps;
@@ -182,6 +185,8 @@ export interface AppContextDeps {
   readonly budgetStore?: BudgetStore | undefined;
   readonly rateLimit?: RateLimitSettings | undefined;
   readonly adQuality: AdQualityAnalyzer;
+  /** Defaults to the fast model in force; tests pass a fake. */
+  readonly responsibilitySuggester?: ResponsibilitySuggester | undefined;
   readonly files: FileStorage;
   /** pg-boss in production (bindable: tasks are sent inside the transaction that queues them); a fake in tests. */
   readonly queue: TaskQueue | BindableTaskQueue;
@@ -209,7 +214,7 @@ export interface AppContextDeps {
 
 const isBindable = (queue: TaskQueue | BindableTaskQueue): queue is BindableTaskQueue => 'bindTo' in queue && typeof queue.bindTo === 'function';
 
-export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, responsibilitySuggester, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
@@ -252,6 +257,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     budget: createDailyBudget(budgetStore ?? createPgBudgetStore(db)),
     rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
     jobDeps,
+    responsibilitySuggester: responsibilitySuggester ?? createLiveSuggester(() => aiRuntime.snapshot().fast),
     reportDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, jobs: jobDeps.jobs, reports: uow.repositories.reports, now: reportClock ?? (() => new Date()) },
     distributionDeps: createDistributionDeps({ uow, publicBaseUrl: env.platform.url, channels: distributionChannels }),
     jobViewDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, jobViews: uow.repositories.jobViews, now: () => new Date() },

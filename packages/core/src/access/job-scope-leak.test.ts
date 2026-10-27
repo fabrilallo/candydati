@@ -135,6 +135,7 @@ const EXEMPT: Readonly<Record<string, string>> = {
   deleteJobTemplate: 'organization template',
   listJobTemplates: 'organization template',
   analyzeJobAd: 'scores the content it is given, reads no stored job',
+  suggestResponsibilities: 'proposes lines from the text it is given, reads no stored job',
   listEmailTemplates: 'organization template',
   saveEmailTemplate: 'organization template',
   deleteEmailTemplate: 'organization template',

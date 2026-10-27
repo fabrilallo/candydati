@@ -1,5 +1,6 @@
 import {
   analyzeResultSchema,
+  suggestResultSchema,
   jobSchema,
   jobSummarySchema,
   jobTemplateSchema,
@@ -51,6 +52,7 @@ export const COMPONENT_SCHEMAS = {
   JobTemplate: jobTemplateSchema,
   PublishJobResult: publishResultSchema,
   AnalyzeJobAdResult: analyzeResultSchema,
+  SuggestResponsibilitiesResult: suggestResultSchema,
   Pipeline: pipelineSchema,
   CandidateSummary: candidateSummarySchema,
   CandidateDetail: candidateDetailSchema,
