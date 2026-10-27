@@ -49,7 +49,7 @@ export const makeAssessment = (total: number, threshold = 6): AdQualityAssessmen
     total,
     vaguePhrases: [{ text: 'stipendio competitivo', category: 'salary_transparency', suggestion: 'Indica la fascia' }],
     improvements: ['Descrivi i benefit'],
-    source: 'rules',
+    source: 'model',
   },
   threshold,
   belowThreshold: total < threshold,

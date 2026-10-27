@@ -48,17 +48,17 @@ export const listJobsTool = {
   readOnly: true,
   run: async ({ app, actor }, input) => {
     const { items, meta } = await listJobs(app.jobDeps, actor, input);
-    return { items: items.map((job) => toJobSummaryDto(job, app.jobDeps.adQualityThreshold)), meta };
+    return { items: items.map((job) => toJobSummaryDto(job, app.jobDeps)), meta };
   },
 } satisfies ToolDefinition<{ status: z.ZodOptional<z.ZodEnum<{ draft: 'draft'; published: 'published'; closed: 'closed' }>>; page: z.ZodOptional<z.ZodNumber>; limit: z.ZodOptional<z.ZodNumber> }>;
 
 export const getJobTool = {
   name: 'get_job',
   title: 'Read a job ad',
-  description: 'Read one job ad with its full content, status, quality report and the publication issues still open. Read only.',
+  description: 'Read one job ad with its full content, status, quality report (null while the instance has no AI model) and the publication issues still open. Read only.',
   shape: { jobId },
   readOnly: true,
-  run: async ({ app, actor }, input) => toJobDto(await getJob(app.jobDeps, actor, input)),
+  run: async ({ app, actor }, input) => toJobDto(await getJob(app.jobDeps, actor, input), app.jobDeps),
 } satisfies ToolDefinition<{ jobId: typeof jobId }>;
 
 export const createJobTool = {
@@ -71,7 +71,7 @@ export const createJobTool = {
     'Optionally start from a template with templateId. Use check_publishable to see what is missing.',
   shape: { content: draftContent, templateId: z.string().min(1).optional().describe('A template from list_job_templates to start from.') },
   readOnly: false,
-  run: async ({ app, actor }, input) => toJobDto(await createJob(app.jobDeps, actor, input)),
+  run: async ({ app, actor }, input) => toJobDto(await createJob(app.jobDeps, actor, input), app.jobDeps),
 } satisfies ToolDefinition<{ content: typeof draftContent; templateId: z.ZodOptional<z.ZodString> }>;
 
 export const updateJobTool = {
@@ -82,7 +82,7 @@ export const updateJobTool = {
     'A published ad must keep satisfying the publication rules; a closed ad cannot be edited. The status never changes here: use publish_job to publish.',
   shape: { jobId, content: jobContentSchema },
   readOnly: false,
-  run: async ({ app, actor }, input) => toJobDto(await updateJob(app.jobDeps, actor, input)),
+  run: async ({ app, actor }, input) => toJobDto(await updateJob(app.jobDeps, actor, input), app.jobDeps),
 } satisfies ToolDefinition<{ jobId: typeof jobId; content: typeof jobContentSchema }>;
 
 export const analyzeJobAdTool = {
@@ -90,6 +90,7 @@ export const analyzeJobAdTool = {
   title: 'Analyze a job ad',
   description:
     'Score the quality of ad content that is not saved (vague phrases, missing transparency) and list its publication issues. ' +
+    'The score needs an AI model: without one status is "unavailable", assessment is null and only the publication issues are listed. ' +
     'It scores the ad, never people. Changes nothing.',
   shape: { content: jobContentSchema },
   readOnly: true,
@@ -106,7 +107,7 @@ export const checkPublishableTool = {
   shape: { jobId },
   readOnly: true,
   run: async ({ app, actor }, input) => {
-    const { id, status, publishIssues } = toJobDto(await getJob(app.jobDeps, actor, input));
+    const { id, status, publishIssues } = toJobDto(await getJob(app.jobDeps, actor, input), app.jobDeps);
     return {
       jobId: id,
       status,
@@ -121,11 +122,11 @@ export const publishJobTool = {
   title: 'Publish a job ad',
   description:
     'Publish a DRAFT job ad. Refused (with the list of what is missing) unless the ad declares the RAL and the selection process and passes every publication rule, ' +
-    'and the organization has an active privacy notice. Needs the job:publish scope. A quality score below the threshold is flagged, not blocking.',
+    'and the organization has an active privacy notice. Needs the job:publish scope. A quality score below the threshold is flagged, not blocking; without an AI model there is no score (qualityStatus unavailable).',
   shape: { jobId },
   readOnly: false,
   usesModel: true,
-  run: async ({ app, actor }, input) => toPublishJobResultDto(await publishJob(app.jobDeps, actor, input)),
+  run: async ({ app, actor }, input) => toPublishJobResultDto(await publishJob(app.jobDeps, actor, input), app.jobDeps),
 } satisfies ToolDefinition<{ jobId: typeof jobId }>;
 
 export const getPipelineTool = {

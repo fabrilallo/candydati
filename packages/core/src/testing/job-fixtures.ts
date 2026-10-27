@@ -29,7 +29,8 @@ export const completeJobContent = (overrides: JobContentInput = { title: 'Backen
     ...overrides,
   });
 
-export const fixedQualityReport = (total = 8): AdQualityReport => ({
+/** A report as the model analyzer returns it; pass `rules` for one the rules produced alone. */
+export const fixedQualityReport = (total = 8, source: AdQualityReport['source'] = 'model'): AdQualityReport => ({
   scores: {
     selection_process: 1,
     role_requirements: 1,
@@ -45,16 +46,26 @@ export const fixedQualityReport = (total = 8): AdQualityReport => ({
   total,
   vaguePhrases: [],
   improvements: [],
-  source: 'rules',
+  source,
 });
 
-/** Always returns the same report. */
+/** A model is configured and always returns the same report. */
 export const fakeAdQualityAnalyzer = (report: AdQualityReport = fixedQualityReport()): AdQualityAnalyzer => ({
+  available: () => true,
   analyze: async () => report,
 });
 
-/** An analyzer that always rejects. */
+/** No model is configured: there is no score, and asking for one is a bug. */
+export const unavailableAdQualityAnalyzer = (): AdQualityAnalyzer => ({
+  available: () => false,
+  analyze: async () => {
+    throw new Error('no model is configured: the score must not be asked for');
+  },
+});
+
+/** A model is configured but the analysis always rejects. */
 export const throwingAdQualityAnalyzer = (error: Error = new Error('analyzer down')): AdQualityAnalyzer => ({
+  available: () => true,
   analyze: async () => {
     throw error;
   },

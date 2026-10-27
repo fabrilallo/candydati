@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { COMPLIANCE_WARNING_RULES } from './compliance/types.js';
 import { jobContentSchema, type JobContent, type PublishIssue, type PublishedJobContent } from './content.js';
-import { adQualityReportSchema, type AdQualityAssessment, type AdQualityReport } from './quality.js';
+import { adQualityReportSchema, type AdQualityAssessment, type AdQualityReport, type AdQualityStatus } from './quality.js';
 
 /** draft -> published -> closed. A closed ad is never reopened: a new one is created from it. */
 export const JOB_STATUSES = ['draft', 'published', 'closed'] as const;
@@ -85,8 +85,9 @@ export interface JobSummaryDto {
   readonly publishIssueCount: number;
   readonly salary: JobContent['salary'];
   readonly workMode: JobContent['workMode'] | null;
+  /** The stored score a model produced, null without one or while no model is configured (PRODUCT.md §4.3). */
   readonly qualityTotal: number | null;
-  /** True when the stored score is under the platform threshold. Always false without a score. */
+  /** True when the shown score is under the platform threshold. Always false without a score. */
   readonly belowThreshold: boolean;
   readonly updatedAt: string;
   readonly publishedAt: string | null;
@@ -101,8 +102,9 @@ export interface JobTemplateDto {
 
 export interface PublishJobResultDto {
   readonly job: JobDto;
-  /** Null only when the analysis could not run: publication never waits on the score. */
+  /** Null unless `qualityStatus` is `assessed`: publication never waits on the score. */
   readonly quality: AdQualityAssessment | null;
+  readonly qualityStatus: AdQualityStatus;
 }
 
 /** What anyone can read without signing in. Never carries internal ids of people or the quality report. */

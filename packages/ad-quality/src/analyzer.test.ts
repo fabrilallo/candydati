@@ -109,10 +109,15 @@ describe('model analyzer', () => {
 });
 
 describe('createAdQualityAnalyzer', () => {
-  it('is the rules analyzer without a generator', async () => {
+  it('is the rules analyzer without a generator, and says no score is available', async () => {
     const report = await createAdQualityAnalyzer().analyze(richAd());
     expect(report.source).toBe('rules');
-    expect(createAdQualityAnalyzer({})).toBeDefined();
+    expect(createAdQualityAnalyzer({}).available()).toBe(false);
+  });
+
+  it('says the score is available with a generator', () => {
+    expect(createAdQualityAnalyzer({ generate: generating(modelAnswer()) }).available()).toBe(true);
+    expect(createModelAnalyzer(generating(modelAnswer())).available()).toBe(true);
   });
 
   it('uses the model when it answers', async () => {

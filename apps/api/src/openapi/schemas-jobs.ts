@@ -12,6 +12,7 @@ import {
   locationSchema,
   salarySchema,
   suggestResponsibilitiesResultSchema,
+  AD_QUALITY_STATUSES,
   type AdQualityAssessment,
   type JobSummaryDto,
   type JobTemplateDto,
@@ -60,11 +61,18 @@ export const publishIssueSchema = z.object({ path: z.string(), rule: z.enum(PUBL
 /** `jobDtoSchema` with the publish rule ids as an enum. */
 export const jobSchema = jobDtoSchema.extend({ publishIssues: z.array(publishIssueSchema) });
 
-export const analyzeResultSchema = z.object({ assessment: qualityAssessmentSchema, publishIssues: z.array(publishIssueSchema), complianceWarnings: jobDtoSchema.shape.complianceWarnings });
+/** Without a language model `status` is `unavailable` and `assessment` is null: no score at all, the publication rules still checked. */
+export const analyzeResultSchema = z.object({
+  status: z.enum(['assessed', 'unavailable']).describe('`unavailable` while the instance has no AI model: there is no score at all.'),
+  assessment: qualityAssessmentSchema.nullable(),
+  publishIssues: z.array(publishIssueSchema),
+  complianceWarnings: jobDtoSchema.shape.complianceWarnings,
+});
 
 export const publishResultSchema: z.ZodType<PublishJobResultDto> = z.object({
   job: jobSchema,
   quality: qualityAssessmentSchema.nullable(),
+  qualityStatus: z.enum(AD_QUALITY_STATUSES).describe('`assessed` with a score, `unavailable` without an AI model (no score at all), `failed` when the analysis could not run.'),
 });
 
 /** The content of a published ad: every §5.1 field present. */

@@ -148,7 +148,7 @@ The score has ten categories, each from 0 to 1: selection process, role requirem
 
 - The editor shows the score, the vague phrases found and a proposed rewrite while the author types.
 - The flagging threshold is configurable per instance. Below it, the editor warns before publication and says what to improve. The score never blocks: the author can always publish.
-- The analysis runs inside the repository (no external service), so it works when self-hosted. If the analysis fails, publication does not wait for it.
+- The score exists only when the instance has a language model configured (the fast model, from Settings, AI or the environment). The analysis combines the repository's deterministic rules with the model; without a model there is no score anywhere (editor, publication, job list, dashboard, API, MCP), and the editor says that AI must be turned on and where. A stored score the rules produced alone (saved before this rule, or when the model failed at publication) is never shown. The publication rules (§4.1) and the Italian compliance checks (§4.2) are not the score: they always run, with or without a model. If the analysis fails, publication does not wait for it.
 - The score evaluates the ad, never candidates.
 
 ### 4.4 Public schema

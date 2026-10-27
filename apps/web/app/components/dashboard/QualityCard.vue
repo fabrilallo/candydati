@@ -6,7 +6,8 @@ import { Badge } from '@/components/ui/badge'
 import { CHART_COLORS, escapeHtml, formatDecimal, qualityRows, shortTitle, type QualityItem } from '@/lib/stats-view'
 
 /**
- * Quality score of each published ad (0-10) against the instance threshold. Bars under the line are in the warning
+ * Quality score of each published ad (0-10) against the instance threshold. Without a language model there is no
+ * score at all (PRODUCT.md §4.3): the card says so and where AI is turned on, never an empty chart. Bars under the line are in the warning
  * colour: the score flags an ad, it never blocks it, and it never scores candidates. The threshold line is named in the
  * legend below, not on the chart, where its label would sit on the first bar.
  */
@@ -40,7 +41,10 @@ const triggers = {
         <Badge v-else variant="success" class="mb-1.5">{{ t('dashboard.stats.quality.allAbove') }}</Badge>
       </div>
     </template>
-    <div v-if="rows.length > 0" class="candydati-chart" :style="{ height: `${height}px` }" aria-hidden="true">
+    <div v-if="!quality.available" class="grid h-full min-h-32 content-center rounded-lg border border-dashed px-4 py-5">
+      <AiScoreOff />
+    </div>
+    <div v-else-if="rows.length > 0" class="candydati-chart" :style="{ height: `${height}px` }" aria-hidden="true">
       <ClientOnly>
         <VisXYContainer :data="rows" :duration="duration" :height="height" :x-domain="[0, 10]" y-direction="south" :padding="{ top: 4, right: 8 }">
           <VisStackedBar :x="x" :y="y" :color="color" orientation="horizontal" :bar-max-width="10" :rounded-corners="5" :bar-padding="0.4" />

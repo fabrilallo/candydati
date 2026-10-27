@@ -12,6 +12,7 @@ export const jobStatsFixture = (overrides: Partial<JobStatsDto> = {}): JobStatsD
   statusCounts: { draft: 2, published: 3, closed: 1, total: 6 },
   weekly: weeks(),
   quality: {
+    available: true,
     threshold: 6,
     items: [
       { id: 'j3', title: 'Data Engineer', total: 4.5, belowThreshold: true },
@@ -48,7 +49,7 @@ export const emptyJobStats = (): JobStatsDto =>
   jobStatsFixture({
     statusCounts: { draft: 0, published: 0, closed: 0, total: 0 },
     weekly: weeks().map((week) => ({ ...week, created: 0, published: 0 })),
-    quality: { threshold: 6, items: [], average: null, belowCount: 0 },
+    quality: { available: true, threshold: 6, items: [], average: null, belowCount: 0 },
     salary: { items: [], medians: [] },
     process: { jobCount: 0, averageStages: null, averageProcessMinutes: null, averageResponseDays: null },
     readiness: { draftCount: 0, readyCount: 0, blockers: [] },

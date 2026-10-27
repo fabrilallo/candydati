@@ -50,7 +50,7 @@ export const createAnalyzeJobAdTool = (deps: JobDeps) =>
   createTool({
     id: 'analyze_job_ad',
     description:
-      'Checks a job ad: the quality score with its suggestions and the rules that block publication. Pass jobId for a saved ad or content for a proposal. It changes nothing.',
+      'Checks a job ad: the quality score with its suggestions and the rules that block publication. Without a fast model there is no score (status unavailable, assessment null): say so and point to the AI settings. Pass jobId for a saved ad or content for a proposal. It changes nothing.',
     inputSchema: z.object({ jobId: jobId.nullish(), content: jobContentSchema.nullish() }),
     execute: async (input, context) =>
       runTool(async () => {

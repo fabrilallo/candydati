@@ -80,7 +80,7 @@ export const listJobTemplatesTool = {
 export const getJobStatsTool = {
   name: 'get_job_stats',
   title: 'Job ad statistics',
-  description: 'Aggregates over the organization\'s job ads: counts by status, weekly activity, quality scores, declared salaries and processes, and what blocks drafts from publication. Read only.',
+  description: 'Aggregates over the organization\'s job ads: counts by status, weekly activity, quality scores (none while the instance has no AI model: quality.available is false), declared salaries and processes, and what blocks drafts from publication. Read only.',
   shape: {},
   readOnly: true,
   run: async ({ app, actor }) => getJobStats(app.jobDeps, actor, {}),

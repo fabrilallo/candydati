@@ -11,6 +11,7 @@ import {
   fakeAdQualityAnalyzer,
   fixedQualityReport,
   throwingAdQualityAnalyzer,
+  unavailableAdQualityAnalyzer,
   userActor,
   type TestJobDeps,
 } from '../../testing/index.js';
@@ -38,12 +39,26 @@ describe('publishJob', () => {
     const result = await publishJob(deps, actor, { jobId: job.id });
     expect(result.job).toMatchObject({ status: 'published', publishedAt: deps.now(), quality: fixedQualityReport() });
     expect(result.quality).toEqual({ report: fixedQualityReport(), threshold: 6, belowThreshold: false });
+    expect(result.qualityStatus).toBe('assessed');
     expect(await deps.jobs.findById('org_a', job.id)).toEqual(result.job);
     expect(deps.auditLog.events()[0]).toMatchObject({
       action: 'job.published',
       target: { type: 'job', id: job.id },
-      metadata: { qualityTotal: 8, belowThreshold: false, threshold: 6 },
+      metadata: { qualityStatus: 'assessed', qualityTotal: 8, belowThreshold: false, threshold: 6 },
     });
+  });
+
+  it('publishes with no score at all without a model, and stores none', async () => {
+    const { job, deps } = seeded({}, { adQuality: unavailableAdQualityAnalyzer() });
+    const result = await publishJob(deps, actor, { jobId: job.id });
+    expect(result).toMatchObject({ job: { status: 'published', quality: null }, quality: null, qualityStatus: 'unavailable' });
+    expect((await deps.jobs.findById('org_a', job.id))?.quality).toBeNull();
+    expect(deps.auditLog.events()[0]?.metadata).toEqual({ qualityStatus: 'unavailable', qualityTotal: null, belowThreshold: null, threshold: null });
+  });
+
+  it('drops a score stored earlier when it publishes without a model', async () => {
+    const { job, deps } = seeded({ quality: fixedQualityReport(7, 'rules') }, { adQuality: unavailableAdQualityAnalyzer() });
+    expect((await publishJob(deps, actor, { jobId: job.id })).job.quality).toBeNull();
   });
 
   it('publishes below the threshold and records it', async () => {
@@ -51,7 +66,7 @@ describe('publishJob', () => {
     const result = await publishJob(deps, actor, { jobId: job.id });
     expect(result.job.status).toBe('published');
     expect(result.quality?.belowThreshold).toBe(true);
-    expect(deps.auditLog.events()[0]?.metadata).toEqual({ qualityTotal: 2, belowThreshold: true, threshold: 6 });
+    expect(deps.auditLog.events()[0]?.metadata).toEqual({ qualityStatus: 'assessed', qualityTotal: 2, belowThreshold: true, threshold: 6 });
   });
 
   it('publishes without a score when the analyzer fails', async () => {
@@ -59,11 +74,12 @@ describe('publishJob', () => {
     const result = await publishJob(deps, actor, { jobId: job.id });
     expect(result.job).toMatchObject({ status: 'published', quality: null });
     expect(result.quality).toBeNull();
-    expect(deps.auditLog.events()[0]?.metadata).toEqual({ qualityTotal: null, belowThreshold: null, threshold: null });
+    expect(result.qualityStatus).toBe('failed');
+    expect(deps.auditLog.events()[0]?.metadata).toEqual({ qualityStatus: 'failed', qualityTotal: null, belowThreshold: null, threshold: null });
   });
 
   it('treats a malformed report as an analyzer failure', async () => {
-    const bad = { analyze: async () => ({ total: 99 }) as unknown as AdQualityReport };
+    const bad = { available: () => true, analyze: async () => ({ total: 99 }) as unknown as AdQualityReport };
     const { job, deps } = seeded({}, { adQuality: bad });
     expect((await publishJob(deps, actor, { jobId: job.id })).quality).toBeNull();
   });

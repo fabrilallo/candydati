@@ -18,25 +18,25 @@ export function registerJobRoutes(app: FastifyInstance, ctx: AppContext): void {
 
   app.get('/api/v1/jobs', async (request) => {
     const { items, meta } = await listJobs(deps, await ctx.resolveActor(request), request.query);
-    return ok(items.map((job) => toJobSummaryDto(job, deps.adQualityThreshold)), meta);
+    return ok(items.map((job) => toJobSummaryDto(job, deps)), meta);
   });
 
   app.post('/api/v1/jobs', limit, async (request, reply) => {
     const job = await createJob(deps, await ctx.resolveActor(request), request.body);
-    return reply.status(201).send(ok(toJobDto(job)));
+    return reply.status(201).send(ok(toJobDto(job, deps)));
   });
 
-  app.get('/api/v1/jobs/:id', async (request) => ok(toJobDto(await getJob(deps, await ctx.resolveActor(request), withId(request)))));
+  app.get('/api/v1/jobs/:id', async (request) => ok(toJobDto(await getJob(deps, await ctx.resolveActor(request), withId(request)), deps)));
 
   app.put('/api/v1/jobs/:id', limit, async (request) =>
-    ok(toJobDto(await updateJob(deps, await ctx.resolveActor(request), withId(request, bodyOf(request))))),
+    ok(toJobDto(await updateJob(deps, await ctx.resolveActor(request), withId(request, bodyOf(request))), deps)),
   );
 
   app.post('/api/v1/jobs/:id/publish', async (request) =>
-    ok(toPublishJobResultDto(await publishJob(deps, await ctx.resolveActor(request), withId(request)))),
+    ok(toPublishJobResultDto(await publishJob(deps, await ctx.resolveActor(request), withId(request)), deps)),
   );
 
   app.post('/api/v1/jobs/:id/close', async (request) =>
-    ok(toJobDto(await closeJob(deps, await ctx.resolveActor(request), withId(request)))),
+    ok(toJobDto(await closeJob(deps, await ctx.resolveActor(request), withId(request)), deps)),
   );
 }

@@ -7,6 +7,6 @@ import type { AppContext } from '../app-context.js';
 export function registerStaleJobRoutes(app: FastifyInstance, ctx: AppContext): void {
   app.get('/api/v1/jobs/stale', async (request) => {
     const items = await listStaleJobs(ctx.staleJobDeps, await ctx.resolveActor(request), {});
-    return ok(items.map(({ job, lastActivityAt, daysIdle }) => ({ job: toJobSummaryDto(job, ctx.jobDeps.adQualityThreshold), lastActivityAt: lastActivityAt.toISOString(), daysIdle })));
+    return ok(items.map(({ job, lastActivityAt, daysIdle }) => ({ job: toJobSummaryDto(job, ctx.jobDeps), lastActivityAt: lastActivityAt.toISOString(), daysIdle })));
   });
 }

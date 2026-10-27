@@ -62,7 +62,24 @@ export const assess = (report: AdQualityReport, threshold: number): AdQualityAss
   belowThreshold: isBelowQualityThreshold(report, threshold),
 });
 
-/** Implemented by `@candydati/ad-quality`; `@candydati/core` depends only on this port. Must never throw for a valid content. */
+/**
+ * Whether the score could be computed: `assessed` (there is a report), `unavailable` (no language model is configured,
+ * so there is no score at all, PRODUCT.md §4.3), `failed` (the analysis could not run this time).
+ */
+export const AD_QUALITY_STATUSES = ['assessed', 'unavailable', 'failed'] as const;
+export type AdQualityStatus = (typeof AD_QUALITY_STATUSES)[number];
+
+/**
+ * The stored report people may see: only one a model produced, and only while a model is configured. A report the
+ * rules produced alone (before the score needed a model, or when the model failed at publication) is never shown.
+ */
+export const shownQualityReport = (report: AdQualityReport | null, modelAvailable: boolean): AdQualityReport | null =>
+  modelAvailable && report?.source === 'model' ? report : null;
+
+/** Implemented by `@candydati/ad-quality`; `@candydati/core` depends only on this port. */
 export interface AdQualityAnalyzer {
+  /** True while a language model is configured. Without one there is no score: callers never call `analyze`. */
+  available(): boolean;
+  /** Must never throw for a valid content while `available()` holds. */
   analyze(content: JobContent): Promise<AdQualityReport>;
 }

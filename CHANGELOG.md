@@ -6,6 +6,17 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The ad quality score ("Qualità dell'annuncio", 0-10) now exists only when the instance has a language model (the
+  fast model). Without one there is no score anywhere: "Analizza annuncio" says that AI must be turned on, with a link
+  to Impostazioni > AI for whoever can change the models and a word to ask the installation's administrator for
+  everyone else; publishing never shows the below-threshold step; the dashboard card and the job list show no score or
+  "Sotto soglia" badge. Scores stored earlier by the rules alone are no longer shown. Publication rules and compliance
+  checks work as before, with or without a model. API: `POST /api/v1/jobs/quality` returns `status` (`assessed` or
+  `unavailable`, with `assessment: null`), publishing returns `qualityStatus` (`assessed`, `unavailable`, `failed`),
+  job stats carry `quality.available`; the MCP and assistant tools return the same.
+
 ## [0.1.11] - 2026-10-27
 
 ### Added

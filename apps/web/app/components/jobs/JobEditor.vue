@@ -211,6 +211,7 @@ const saveTemplate = async (name: string): Promise<void> => {
           :pending="ed.quality.pending.value"
           :stale="ed.quality.stale.value"
           :error-key="ed.quality.errorKey.value"
+          :unavailable="ed.quality.unavailable.value"
           :disabled="ed.busy.value !== null"
           @analyze="ed.analyze"
         />

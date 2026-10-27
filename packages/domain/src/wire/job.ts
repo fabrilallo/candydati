@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { adQualityReportSchema } from '../job/quality.js';
+import { AD_QUALITY_STATUSES, adQualityReportSchema } from '../job/quality.js';
 import { isPublishedContent, jobContentSchema, type PublishedJobContent } from '../job/content.js';
 import { jobDtoSchema, JOB_STATUSES, type PublicCareersDto, type PublicJobPageDto } from '../job/job.js';
 import { CONTRACT_TYPES, CUSTOM_ROLE_MAX, JOB_ROLE_CHOICES, SENIORITY_LEVELS, WORK_MODES } from '../job/taxonomy.js';
@@ -29,9 +29,17 @@ export const jobSummarySchema = z.object({
 export const templateSchema = z.object({ id: z.string(), name: z.string(), content: jobContentSchema, updatedAt: isoDate });
 export const assessmentSchema = z.object({ report: adQualityReportSchema, threshold: z.number(), belowThreshold: z.boolean() });
 export const publishIssueSchema = z.object({ path: z.string(), rule: z.string() });
-export const publishResultSchema = z.object({ job: jobSchema, quality: assessmentSchema.nullable() });
-/** `POST /jobs/quality`: the analysis of unsaved content and what still blocks publication. */
-export const qualityResultSchema = z.object({ assessment: assessmentSchema, publishIssues: z.array(publishIssueSchema) });
+/** `quality` is present only when `qualityStatus` is `assessed`. */
+export const publishResultSchema = z.object({ job: jobSchema, quality: assessmentSchema.nullable(), qualityStatus: z.enum(AD_QUALITY_STATUSES) });
+/**
+ * `POST /jobs/quality`: the analysis of unsaved content and what still blocks publication. Without a language model
+ * `status` is `unavailable` and there is no assessment; the publication rules are checked all the same.
+ */
+export const qualityResultSchema = z.object({
+  status: z.enum(['assessed', 'unavailable']),
+  assessment: assessmentSchema.nullable(),
+  publishIssues: z.array(publishIssueSchema),
+});
 /** What a person gets back to accept line by line; never saved by the server. */
 export const SUGGESTED_RESPONSIBILITIES_MAX = 6;
 export const SUGGESTED_RESPONSIBILITY_MAX = 160;

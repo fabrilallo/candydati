@@ -1,6 +1,7 @@
 import {
   checkPublishable,
   isPublishedContent,
+  shownQualityReport,
   type Job,
   type JobStatsDto,
   type JobStatus,
@@ -38,13 +39,17 @@ export const buildStatusCounts = (counts: Record<JobStatus, number>): Stats['sta
   total: counts.draft + counts.published + counts.closed,
 });
 
-/** Published ads with a stored report, lowest score first. */
-export function buildQuality(published: readonly Job[], threshold: number): Stats['quality'] {
+/** Published ads with a score a model produced, lowest score first; none at all while no model is configured. */
+export function buildQuality(published: readonly Job[], threshold: number, available: boolean): Stats['quality'] {
   const items = published
-    .flatMap((job) => (job.quality === null ? [] : [{ id: job.id, title: job.content.title, total: job.quality.total }]))
+    .flatMap((job) => {
+      const report = shownQualityReport(job.quality, available);
+      return report === null ? [] : [{ id: job.id, title: job.content.title, total: report.total }];
+    })
     .toSorted((a, b) => a.total - b.total || compareText(a.id, b.id))
     .map((item) => ({ ...item, belowThreshold: item.total < threshold }));
   return {
+    available,
     threshold,
     items,
     average: round1(mean(items.map((item) => item.total))),

@@ -19,7 +19,7 @@ export const DESCRIPTIONS = {
   BETTER_AUTH_URL: 'The WEB origin: the browser reaches the api through the web proxy. Must be https in production (Secure cookies).',
   WEB_ORIGIN: 'Origin of the web app (CORS and trusted origin).',
   TRUSTED_ORIGINS: 'Extra browser origins allowed by CORS and Better Auth, comma-separated URLs.',
-  FAST_MODEL: 'provider/model of the fast model: the ad quality score and CV reading (applications, imports). Set, it wins over Settings, AI in the app (shown read-only). Empty and nothing set in the app: rules only, plain text of CVs.',
+  FAST_MODEL: 'provider/model of the fast model: the ad quality score and CV reading (applications, imports). Set, it wins over Settings, AI in the app (shown read-only). Empty and nothing set in the app: no ad quality score at all, plain text of CVs.',
   AGENT_MODEL: 'provider/model of the assistant (side panel, job ad drafting). Set, it wins over Settings, AI in the app (shown read-only). Empty and nothing set in the app: assistant off.',
   API_KEY_RATE_LIMIT: 'Requests per minute allowed to each API key (each MCP tool call counts as one).',
   API_KEY_DEFAULT_TTL_DAYS: 'Days an API key lives when its creator gives no expiry (1-365). Every key expires, at most after a year.',

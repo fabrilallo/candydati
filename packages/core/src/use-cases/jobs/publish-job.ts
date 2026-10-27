@@ -1,5 +1,5 @@
 import { emailReadinessIssues } from '../../email-readiness.js';
-import { adQualityReportSchema, assess, checkPublishable, type AdQualityAssessment, type AdQualityReport, type Job } from '@candydati/domain';
+import { adQualityReportSchema, assess, checkPublishable, type AdQualityAssessment, type AdQualityReport, type AdQualityStatus, type Job } from '@candydati/domain';
 import { z } from 'zod';
 import { ConflictError, ValidationError } from '../../errors.js';
 import type { JobDeps } from '../../job-ports.js';
@@ -12,16 +12,20 @@ const APPROVAL_PATH = 'approval';
 
 export interface PublishJobResult {
   readonly job: Job;
-  /** Null only when the analysis failed: publication never waits on the score (PRODUCT.md §4.3). */
+  /** Null unless `qualityStatus` is `assessed`: publication never waits on the score (PRODUCT.md §4.3). */
   readonly quality: AdQualityAssessment | null;
+  readonly qualityStatus: AdQualityStatus;
 }
 
-/** A failing or malformed analysis yields null: the caller sees it in `quality: null`, the ad is still published. */
-async function tryAnalyze(deps: JobDeps, job: Job): Promise<AdQualityReport | null> {
+type Analysis = { readonly status: AdQualityStatus; readonly report: AdQualityReport | null };
+
+/** No model: no score at all. A failing or malformed analysis is `failed`. Either way the ad is still published. */
+async function tryAnalyze(deps: JobDeps, job: Job): Promise<Analysis> {
+  if (!deps.adQuality.available()) return { status: 'unavailable', report: null };
   try {
-    return adQualityReportSchema.parse(await deps.adQuality.analyze(job.content));
+    return { status: 'assessed', report: adQualityReportSchema.parse(await deps.adQuality.analyze(job.content)) };
   } catch {
-    return null;
+    return { status: 'failed', report: null };
   }
 }
 
@@ -34,6 +38,7 @@ export const publishJob = defineJobUseCase({
     action: 'job.published',
     target: (_input, result: PublishJobResult) => ({ type: 'job', id: result.job.id }),
     metadata: (_input, result: PublishJobResult) => ({
+      qualityStatus: result.qualityStatus,
       qualityTotal: result.quality?.report.total ?? null,
       belowThreshold: result.quality?.belowThreshold ?? null,
       threshold: result.quality?.threshold ?? null,
@@ -54,10 +59,10 @@ export const publishJob = defineJobUseCase({
         ...(approvalIssue === null ? [] : [{ path: APPROVAL_PATH, message: approvalIssue }]),
       ]);
     }
-    const report = await tryAnalyze(deps, job);
+    const { status, report } = await tryAnalyze(deps, job);
     const now = deps.now();
     const saved = await deps.jobs.transition(job.organizationId, job.id, 'draft', { status: 'published', quality: report, publishedAt: now, updatedAt: now });
     await recordEvent(deps, saved.organizationId, 'job.published', { jobId: saved.id, slug: saved.slug });
-    return { job: saved, quality: report ? assess(report, deps.adQualityThreshold) : null };
+    return { job: saved, quality: report ? assess(report, deps.adQualityThreshold) : null, qualityStatus: status };
   },
 });

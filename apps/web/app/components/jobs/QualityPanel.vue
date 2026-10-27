@@ -6,8 +6,9 @@ import { formatScore, type QualityView, type ScoreLevel } from '@/lib/quality-vi
 /**
  * On-demand quality analysis (never on keystroke). A compact strip with the total out of 10; the ten categories,
  * the vague phrases with their rewrite and the improvements are open below and can be folded away. The score flags, it never blocks.
+ * Without a language model (`unavailable`) there is no score: the panel stays, and says where AI is turned on.
  */
-defineProps<{ view: QualityView | null; pending: boolean; stale: boolean; errorKey: string | null; disabled?: boolean }>()
+defineProps<{ view: QualityView | null; pending: boolean; stale: boolean; errorKey: string | null; unavailable?: boolean; disabled?: boolean }>()
 defineEmits<{ analyze: [] }>()
 const { t, locale } = useI18n()
 /** Open by default: the advice is the point of the analysis; the author can fold it away. */
@@ -26,8 +27,8 @@ const tone: Readonly<Record<ScoreLevel, string>> = { low: 'text-warning', mid: '
       </p>
       <div class="grid min-w-0 flex-1 basis-48 gap-0.5">
         <h2 id="quality-title" class="text-sm font-semibold">{{ t('job.quality.title') }}</h2>
-        <p v-if="!view" class="text-xs text-pretty text-muted-foreground">{{ t('job.quality.hint') }}</p>
-        <template v-else>
+        <p v-if="!view && !unavailable" class="text-xs text-pretty text-muted-foreground">{{ t('job.quality.hint') }}</p>
+        <template v-else-if="view">
           <p class="text-xs font-medium" :class="view.belowThreshold ? 'text-warning' : 'text-success'" role="status">{{ view.belowThreshold ? t('job.quality.below') : t('job.quality.above') }}</p>
           <p class="text-xs text-muted-foreground">{{ t('job.quality.threshold', { threshold: formatScore(view.threshold, locale) }) }}</p>
         </template>
@@ -36,6 +37,9 @@ const tone: Readonly<Record<ScoreLevel, string>> = { low: 'text-warning', mid: '
         <SparklesIcon :class="pending ? 'animate-pulse motion-reduce:animate-none' : ''" aria-hidden="true" />
         {{ pending ? t('job.quality.analyzing') : view ? t('job.quality.reanalyze') : t('job.quality.analyze') }}
       </Button>
+    </div>
+    <div v-if="unavailable && !view" class="border-t px-4 py-4">
+      <AiScoreOff />
     </div>
     <div v-if="errorKey || (view && stale)" class="grid gap-2 px-4 pb-4">
       <FormAlert :message-key="errorKey" />

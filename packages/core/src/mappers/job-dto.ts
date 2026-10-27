@@ -13,6 +13,7 @@ import {
   type PublishJobResultDto,
   type PublishedJobContent,
   CUSTOM_ROLE,
+  shownQualityReport,
 } from '@candydati/domain';
 import type { PublicOrganization } from '../job-ports.js';
 import { logoUrlOf } from './logo.js';
@@ -21,12 +22,18 @@ import type { PublishJobResult } from '../use-cases/jobs/publish-job.js';
 const iso = (date: Date): string => date.toISOString();
 const isoOrNull = (date: Date | null): string | null => (date ? date.toISOString() : null);
 
-export const toJobDto = (job: Job): JobDto => ({
+/** What the mappers read to decide which stored score people may see (PRODUCT.md §4.3). `JobDeps` satisfies it. */
+export interface QualityScoring {
+  readonly adQuality: { available(): boolean };
+  readonly adQualityThreshold: number;
+}
+
+export const toJobDto = (job: Job, scoring: QualityScoring): JobDto => ({
   id: job.id,
   slug: job.slug,
   status: job.status,
   content: job.content,
-  quality: job.quality,
+  quality: shownQualityReport(job.quality, scoring.adQuality.available()),
   // Compliance issues carry the offending text and a suggested fix for the editor.
   publishIssues: checkPublishable(job.content).map(({ path, rule, detail }) => (detail ? { path, rule, detail } : { path, rule })),
   complianceWarnings: complianceWarnings(job.content).map(({ path, rule, detail }) => ({ path, rule, detail })),
@@ -36,8 +43,9 @@ export const toJobDto = (job: Job): JobDto => ({
   closedAt: isoOrNull(job.closedAt),
 });
 
-export const toJobSummaryDto = (job: Job, qualityThreshold: number): JobSummaryDto => {
+export const toJobSummaryDto = (job: Job, scoring: QualityScoring): JobSummaryDto => {
   const issueCount = checkPublishable(job.content).length;
+  const quality = shownQualityReport(job.quality, scoring.adQuality.available());
   return {
     id: job.id,
     slug: job.slug,
@@ -49,8 +57,8 @@ export const toJobSummaryDto = (job: Job, qualityThreshold: number): JobSummaryD
     publishIssueCount: issueCount,
     salary: job.content.salary,
     workMode: job.content.workMode ?? null,
-    qualityTotal: job.quality?.total ?? null,
-    belowThreshold: job.quality !== null && job.quality.total < qualityThreshold,
+    qualityTotal: quality?.total ?? null,
+    belowThreshold: quality !== null && quality.total < scoring.adQualityThreshold,
     updatedAt: iso(job.updatedAt),
     publishedAt: isoOrNull(job.publishedAt),
   };
@@ -63,9 +71,10 @@ export const toJobTemplateDto = (template: JobTemplate): JobTemplateDto => ({
   updatedAt: iso(template.updatedAt),
 });
 
-export const toPublishJobResultDto = (result: PublishJobResult): PublishJobResultDto => ({
-  job: toJobDto(result.job),
+export const toPublishJobResultDto = (result: PublishJobResult, scoring: QualityScoring): PublishJobResultDto => ({
+  job: toJobDto(result.job, scoring),
   quality: result.quality,
+  qualityStatus: result.qualityStatus,
 });
 
 export const toPublicOrganizationDto = (organization: PublicOrganization): PublicOrganizationDto => ({

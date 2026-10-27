@@ -1,6 +1,7 @@
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { QUALITY_CATEGORIES, type AdQualityAssessment } from '@candydati/domain'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+import { instanceAi } from '~~/test/fixtures/instance-ai-fixtures'
 import { toQualityView } from '@/lib/quality-view'
 import QualityPanel from './QualityPanel.vue'
 
@@ -10,12 +11,19 @@ const assessment: AdQualityAssessment = {
     total: 5,
     vaguePhrases: [{ text: 'stipendio competitivo', category: 'salary_transparency', suggestion: 'Indica la fascia di RAL' }],
     improvements: ['Descrivi i benefit'],
-    source: 'rules',
+    source: 'model',
   },
   threshold: 6,
   belowThreshold: true,
 }
 const base = { view: null, pending: false, stale: false, errorKey: null }
+const ai = vi.hoisted(() => ({ settings: null as unknown }))
+registerEndpoint('/api/v1/instance/ai-settings', { method: 'GET', handler: () => ({ success: true, data: ai.settings, error: null }) })
+const mountOff = async (canManage: boolean) => {
+  ai.settings = instanceAi({ canManage })
+  clearNuxtData('instance-ai-settings')
+  return mountSuspended(QualityPanel, { props: { ...base, unavailable: true } })
+}
 
 describe('QualityPanel', () => {
   it('explains that the analysis runs on demand and asks for it', async () => {
@@ -50,6 +58,21 @@ describe('QualityPanel', () => {
     await toggle.trigger('click')
     expect(toggle.attributes('aria-expanded')).toBe('false')
     expect(details().attributes('style')).toContain('display: none')
+  })
+
+  it('without a model shows no score, says AI is needed and links the AI settings for whoever may change them', async () => {
+    const wrapper = await mountOff(true)
+    expect(wrapper.find('[data-testid="quality-total"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="quality-ai-off"]').text()).toContain("richiede l'AI")
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="quality-ai-settings"]').attributes('href')).toBe('/app/settings/ai'))
+    expect(wrapper.find('[data-testid="quality-ai-settings"]').text()).toContain('Impostazioni > AI')
+    expect(wrapper.find('[data-testid="analyze"]').exists()).toBe(true)
+  })
+
+  it('without a model tells everyone else to ask whoever runs the installation', async () => {
+    const wrapper = await mountOff(false)
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="quality-ai-ask"]').text()).toContain('chiedi a chi amministra'))
+    expect(wrapper.find('[data-testid="quality-ai-settings"]').exists()).toBe(false)
   })
 
   it('flags a stale result, disables the button while pending and shows errors', async () => {

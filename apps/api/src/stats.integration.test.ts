@@ -46,7 +46,7 @@ describe('GET /api/v1/stats/jobs', () => {
     expect(stats.statusCounts).toEqual({ draft: 1, published: 1, closed: 0, total: 2 });
     expect(stats.weekly).toHaveLength(STATS_WEEKS);
     expect(stats.weekly.at(-1)).toMatchObject({ created: 2, published: 1 });
-    expect(stats.quality).toMatchObject({ threshold: 6, average: 8, belowCount: 0 });
+    expect(stats.quality).toMatchObject({ available: true, threshold: 6, average: 8, belowCount: 0 });
     expect(stats.quality.items.map((i) => i.title)).toEqual(['Ready']);
     expect(stats.salary.medians).toEqual([{ currency: 'EUR', period: 'year', count: 1, medianMin: 35000, medianMax: 45000 }]);
     expect(stats.process).toEqual({ jobCount: 1, averageStages: 2, averageProcessMinutes: 90, averageResponseDays: 5 });

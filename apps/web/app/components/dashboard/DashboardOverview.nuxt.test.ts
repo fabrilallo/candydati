@@ -68,6 +68,16 @@ describe('DashboardOverview', () => {
     expect(wrapper.find('[data-testid="stat-status"]').exists()).toBe(true)
   })
 
+  it('shows no quality score while the instance has no model, and says why', async () => {
+    const stats = jobStatsFixture()
+    state.stats = { ...stats, quality: { ...stats.quality, available: false, items: [], average: null, belowCount: 0 } }
+    const wrapper = await mountOverview()
+    const card = wrapper.find('[data-testid="stat-quality"]')
+    expect(card.find('[data-testid="quality-ai-off"]').text()).toContain("richiede l'AI")
+    expect(card.text()).not.toContain('sotto soglia')
+    expect(card.find('[data-testid="chart-empty"]').exists()).toBe(false)
+  })
+
   it('states the figures as text: medians, process averages, quality and blockers', async () => {
     const wrapper = await mountOverview()
     await vi.waitFor(() => expect(wrapper.find('[data-testid="stat-salary"]').exists()).toBe(true))

@@ -91,6 +91,7 @@ export function reportFromModel(raw: unknown, content: JobContent): AdQualityRep
 /** Scores the free text with a model. Rejects when the model fails or answers with an invalid shape. */
 export function createModelAnalyzer(generate: StructuredGenerator): AdQualityAnalyzer {
   return {
+    available: () => true,
     async analyze(content) {
       const { system, prompt } = buildQualityPrompt(content);
       const raw = await generate({ system, prompt, schema: modelOutputSchema });

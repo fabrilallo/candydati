@@ -1,6 +1,6 @@
 import { jobStatsDtoSchema, ROLES, STATS_WEEKS, type Job } from '@candydati/domain';
 import { describe, expect, it } from 'vitest';
-import { buildJob, completeJobContent, createInMemoryJobRepository, createTestJobDeps, fixedQualityReport, userActor } from '../../testing/index.js';
+import { buildJob, completeJobContent, createInMemoryJobRepository, createTestJobDeps, fixedQualityReport, unavailableAdQualityAnalyzer, userActor } from '../../testing/index.js';
 import { getJobStats } from './get-job-stats.js';
 
 /** Wednesday: the current week opens on Monday 2026-06-01, the oldest shown on 2026-03-16. */
@@ -65,10 +65,16 @@ describe('getJobStats', () => {
     expect(stats.statusCounts).toEqual({ draft: 0, published: 0, closed: 0, total: 0 });
     expect(stats.weekly).toHaveLength(STATS_WEEKS);
     expect(stats.weekly.every((w) => w.created === 0 && w.published === 0)).toBe(true);
-    expect(stats.quality).toEqual({ threshold: 6, items: [], average: null, belowCount: 0 });
+    expect(stats.quality).toEqual({ available: true, threshold: 6, items: [], average: null, belowCount: 0 });
     expect(stats.salary).toEqual({ items: [], medians: [] });
     expect(stats.process).toEqual({ jobCount: 0, averageStages: null, averageProcessMinutes: null, averageResponseDays: null });
     expect(stats.readiness).toEqual({ draftCount: 0, readyCount: 0, blockers: [] });
+  });
+
+  it('reports no quality score while no model is configured', async () => {
+    const deps = createTestJobDeps({ jobs: createInMemoryJobRepository(fixture()), now: () => NOW, adQuality: unavailableAdQualityAnalyzer() });
+    const stats = await getJobStats(deps, actor, {});
+    expect(stats.quality).toMatchObject({ available: false, items: [], average: null, belowCount: 0 });
   });
 
   it('never counts jobs of another organization', async () => {

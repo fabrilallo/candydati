@@ -19,6 +19,8 @@ export function analyzeWithRules(content: JobContent): AdQualityReport {
   };
 }
 
+/** The fallback of the model and the structural part of its report: alone it never makes a score available. */
 export const createRulesAnalyzer = (): AdQualityAnalyzer => ({
+  available: () => false,
   analyze: (content) => Promise.resolve(analyzeWithRules(content)),
 });
