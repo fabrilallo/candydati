@@ -11,6 +11,14 @@ All notable changes to this project are documented here. The format follows
 - Job editor: Publish also sits at the end of the form, with what is still missing and a link to the first gap.
 - "Import" in the sidebar is now "Importa candidati" / "Import candidates", and its page says what it is for (CVs and
   spreadsheets you already have) and points to Migration for moving from another ATS.
+- Public job ad is more compact: smaller hero and title, salary and process side by side, key facts in four columns,
+  tighter section gaps, process stages as slim rows, and the apply button inside the top block.
+
+### Fixed
+
+- Sidebar candidate count stayed at the old number after an application until a full reload: it now refreshes on
+  focus and on navigation.
+- Dashboard quality chart: the threshold label sat on the first bar; it is now a legend under the chart.
 
 ## [0.1.10] - 2026-10-27
 

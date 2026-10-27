@@ -18,7 +18,7 @@ useJobViewBeacon({ org: props.page.organization.slug, job: props.page.job.slug }
 </script>
 
 <template>
-  <div class="grid gap-8" data-testid="public-job">
+  <div class="grid gap-6" data-testid="public-job">
     <NuxtLink
       :to="back"
       :lang="lang"

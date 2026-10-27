@@ -23,7 +23,7 @@ const roleLine = computed(() => {
 </script>
 
 <template>
-  <header class="grid gap-4">
+  <header class="grid gap-3">
     <p class="flex items-center gap-2.5 text-[0.9375rem] font-semibold">
       <img
         v-if="safeLogoUrl(organization.logo)"
@@ -35,8 +35,8 @@ const roleLine = computed(() => {
       >
       <span>{{ organization.name }}</span>
     </p>
-    <div class="grid gap-2.5">
-      <component :is="ad.heading(0)" v-if="title" class="text-[2.25rem] leading-[0.95] font-extrabold tracking-[-0.045em] @2xl:text-[3.5rem]" data-testid="ad-title">
+    <div class="grid gap-2">
+      <component :is="ad.heading(0)" v-if="title" class="text-[1.875rem] leading-[1] font-extrabold tracking-[-0.04em] @2xl:text-[2.5rem]" data-testid="ad-title">
         <VagueText :text="title" />
       </component>
       <AdGap v-else-if="ad.gaps.title" :gap="ad.gaps.title" size="lg" />
