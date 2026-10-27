@@ -101,7 +101,7 @@ test('onboarding', async () => {
   }
 });
 
-test('dashboard, lists and reports', async () => {
+test('dashboard, lists, reports and help', async () => {
   await audit(owner, '/app', 'dashboard');
   await audit(owner, '/app/jobs', 'jobs list');
   await audit(owner, '/app/attention', 'attention');
@@ -110,6 +110,8 @@ test('dashboard, lists and reports', async () => {
   await audit(owner, '/app/candidates', 'candidates database');
   await audit(owner, '/app/jobs/templates', 'job templates');
   await audit(owner, '/app/job-requests', 'job requests');
+  await audit(owner, '/app/help', 'help');
+  await audit(owner, '/app/help?q=link%20tracciato', 'help search');
 });
 
 test('job editor, empty and filled', async () => {
