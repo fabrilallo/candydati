@@ -9,7 +9,7 @@ vi.mock('@candydati/providers', () => ({
   },
 }));
 
-const context = { title: 'Dev', role: null, seniority: 'senior', language: 'en', existing: ['Writes code'], summary: '' } as const;
+const context = { title: 'Dev', role: null, customRole: null, seniority: 'senior', language: 'en', existing: ['Writes code'], summary: '' } as const;
 
 describe('responsibilityPrompt', () => {
   it('carries only the ad: language, title, role, seniority and the lines already written', () => {
@@ -19,6 +19,10 @@ describe('responsibilityPrompt', () => {
     expect(prompt).toContain('Role: not given. Seniority: senior.');
     expect(prompt).toContain('- Writes code');
     expect(prompt).toContain('There is no summary yet.');
+  });
+
+  it('names a role written by hand as the role', () => {
+    expect(responsibilityPrompt({ ...context, customRole: 'Sommelier' })).toContain('Role: Sommelier. Seniority: senior.');
   });
 });
 

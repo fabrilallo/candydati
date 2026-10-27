@@ -150,6 +150,7 @@ export const analyzeQuality = async (request: JobApiRequest, content: JobContent
 export interface ResponsibilityRequest {
   readonly title?: string
   readonly role?: string
+  readonly customRole?: string
   readonly seniority?: string
   readonly language: string
   readonly existing: readonly string[]

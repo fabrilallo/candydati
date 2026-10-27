@@ -14,6 +14,13 @@ describe('responsibility suggestions', () => {
     expect(responsibilityRequestOf(form)).toEqual({ title: 'Dev', seniority: 'senior', language: 'en', existing: ['Write code'], summary: 'We build APIs.' })
   })
 
+  it('sends a role written by hand as text, never the bare "other" value', () => {
+    const form = { ...emptyForm(), role: 'other', customRole: ' Sommelier ' }
+    expect(canSuggestResponsibilities({ ...emptyForm(), role: 'other', customRole: ' ' })).toBe(false)
+    expect(canSuggestResponsibilities(form)).toBe(true)
+    expect(responsibilityRequestOf(form)).toEqual({ customRole: 'Sommelier', language: 'it', existing: [], summary: '' })
+  })
+
   it('appends after what is written, drops empty rows and repeats', () => {
     expect(withResponsibilities(['Write code', ''], ['write code ', 'Review code'])).toEqual(['Write code', 'Review code'])
   })

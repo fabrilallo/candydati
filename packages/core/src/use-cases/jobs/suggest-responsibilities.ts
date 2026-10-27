@@ -1,4 +1,5 @@
 import {
+  CUSTOM_ROLE_MAX,
   JOB_LINE_MAX,
   JOB_LIST_MAX,
   JOB_ROLES,
@@ -20,6 +21,8 @@ import { defineUseCase } from '../../use-case.js';
 export interface ResponsibilityContext {
   readonly title: string | null;
   readonly role: JobRole | null;
+  /** A role written by hand (the ad's `customRole`), when the list has none that fits. */
+  readonly customRole: string | null;
   readonly seniority: SeniorityLevel | null;
   readonly language: 'it' | 'en';
   /** Lines already written, so the model does not repeat them. */
@@ -43,12 +46,13 @@ const inputSchema = z
   .object({
     title: z.string().trim().min(1).max(JOB_TITLE_MAX).optional(),
     role: z.enum(JOB_ROLES).optional(),
+    customRole: z.string().trim().min(1).max(CUSTOM_ROLE_MAX).optional(),
     seniority: z.enum(SENIORITY_LEVELS).optional(),
     language: z.enum(SUPPORTED_LOCALES).default('it'),
     existing: z.array(z.string().trim().max(JOB_LINE_MAX)).max(JOB_LIST_MAX).default([]),
     summary: z.string().trim().max(JOB_TEXT_MAX).default(''),
   })
-  .refine((input) => input.title !== undefined || input.role !== undefined, { message: 'title_or_role_required', path: ['title'] });
+  .refine((input) => input.title !== undefined || input.role !== undefined || input.customRole !== undefined, { message: 'title_or_role_required', path: ['title'] });
 
 const normalized = (line: string): string => line.trim().toLowerCase().replace(/\s+/g, ' ');
 
@@ -70,7 +74,7 @@ export const suggestResponsibilities = defineUseCase<SuggestResponsibilitiesDeps
     action: 'job.responsibilities_suggested',
     target: (_input, _result, actor) => ({ type: 'organization', id: actor.organizationId }),
     metadata: (input, result) => ({
-      role: input.role ?? null,
+      role: input.role ?? (input.customRole === undefined ? null : 'other'),
       seniority: input.seniority ?? null,
       language: input.language,
       status: result.status,
@@ -84,6 +88,7 @@ export const suggestResponsibilities = defineUseCase<SuggestResponsibilitiesDeps
       const context: ResponsibilityContext = {
         title: input.title ?? null,
         role: input.role ?? null,
+        customRole: input.customRole ?? null,
         seniority: input.seniority ?? null,
         language: input.language,
         existing: input.existing,
