@@ -39,6 +39,19 @@ describe('QualityPanel', () => {
     expect(wrapper.find('[data-testid="analyze"]').text()).toBe('Analizza di nuovo')
   })
 
+  it('opens the advice by default and lets the author fold it away', async () => {
+    const wrapper = await mountSuspended(QualityPanel, { props: { ...base, view: toQualityView(assessment) } })
+    const toggle = wrapper.find('[aria-controls]')
+    const details = () => wrapper.find(`[id="${toggle.attributes('aria-controls')}"]`)
+    expect(toggle.attributes('aria-expanded')).toBe('true')
+    expect(details().attributes('style') ?? '').not.toContain('display: none')
+    expect(details().find('[data-testid="improvements"]').exists()).toBe(true)
+    expect(details().find('[data-testid="vague-phrase"]').exists()).toBe(true)
+    await toggle.trigger('click')
+    expect(toggle.attributes('aria-expanded')).toBe('false')
+    expect(details().attributes('style')).toContain('display: none')
+  })
+
   it('flags a stale result, disables the button while pending and shows errors', async () => {
     const wrapper = await mountSuspended(QualityPanel, { props: { view: toQualityView(assessment), pending: true, stale: true, errorKey: 'errors.unreachable' } })
     expect(wrapper.find('[data-testid="quality-stale"]').exists()).toBe(true)

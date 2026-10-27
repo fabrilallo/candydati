@@ -19,6 +19,13 @@ All notable changes to this project are documented here. The format follows
 - Sidebar candidate count stayed at the old number after an application until a full reload: it now refreshes on
   focus and on navigation.
 - Dashboard quality chart: the threshold label sat on the first bar; it is now a legend under the chart.
+- Ad quality score: an ad with every structured field filled but meaningless free text (placeholders like "asd" or
+  "bla bla", lorem ipsum, keyboard mashing, the same word repeated) scored up to 9 out of 10, because the text
+  categories counted items and words instead of content. A deterministic check (Italian and English) now treats such
+  text as absent, so those categories score 0 also when a model scores the ad. Each filler text is listed with what to
+  write instead, and the first advice asks to rewrite it. The model is told to judge substance, not length.
+- Ad editor: the details of the quality analysis (categories, vague phrases, advice) are open by default and can be
+  folded away.
 
 ## [0.1.10] - 2026-10-27
 
