@@ -29,6 +29,10 @@ describe('rules analyzer', () => {
     expect(adQualityReportSchema.parse(report).source).toBe('rules');
   });
 
+  it('never makes a score available on its own: the score needs a model', () => {
+    expect(createRulesAnalyzer().available()).toBe(false);
+  });
+
   describe('selection_process', () => {
     const stage = { type: 'screening_call', durationMinutes: 30, conductedBy: 'recruiter' } as const;
     it('0 without stages', () => expect(scoreOf(draft(), 'selection_process')).toBe(0));

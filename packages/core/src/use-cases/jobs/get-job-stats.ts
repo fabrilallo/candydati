@@ -24,7 +24,7 @@ export const getJobStats = defineJobUseCase({
       generatedAt: now.toISOString(),
       statusCounts: buildStatusCounts(counts),
       weekly: fillWeeks(weekStarts(now, STATS_WEEKS), activity),
-      quality: buildQuality(published, deps.adQualityThreshold),
+      quality: buildQuality(published, deps.adQualityThreshold, deps.adQuality.available()),
       salary: buildSalary(published),
       process: buildProcess(published),
       readiness: buildReadiness(drafts),

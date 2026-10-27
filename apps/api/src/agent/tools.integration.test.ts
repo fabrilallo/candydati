@@ -201,7 +201,7 @@ describe('job tools', () => {
     expect(draft).toMatchObject({ saved: false, proposal: { title: 'Proposta' }, publishIssues: [] });
     expect(await call('get_job', { jobId: w.draftJobId })).toEqual(before);
     expect(await call('analyze_job_ad', { content: completeJobContent() })).toMatchObject({ publishIssues: [] });
-    expect(await call('analyze_job_ad', { jobId: w.jobId })).toHaveProperty('assessment');
+    expect(await call('analyze_job_ad', { jobId: w.jobId })).toMatchObject({ status: 'assessed', assessment: expect.any(Object) });
     expect(await call('analyze_job_ad', {})).toMatchObject({ error: { code: 'validation_failed' } });
   });
 

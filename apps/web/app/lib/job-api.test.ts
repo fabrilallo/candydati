@@ -64,17 +64,23 @@ describe('job calls', () => {
   })
 
   it('publishes and returns the optional assessment', async () => {
-    const result = await publishJob(send(ok({ job, quality: assessment })), 'j1')
+    const result = await publishJob(send(ok({ job, quality: assessment, qualityStatus: 'assessed' })), 'j1')
     expect(result.quality?.belowThreshold).toBe(true)
-    expect((await publishJob(send(ok({ job, quality: null })), 'j1')).quality).toBeNull()
+    const off = await publishJob(send(ok({ job, quality: null, qualityStatus: 'unavailable' })), 'j1')
+    expect(off).toMatchObject({ quality: null, qualityStatus: 'unavailable' })
   })
 
   it('analyses quality on demand', async () => {
-    const request = send(ok({ assessment, publishIssues: [{ path: 'role', rule: 'required' }] }))
+    const request = send(ok({ status: 'assessed', assessment, publishIssues: [{ path: 'role', rule: 'required' }] }))
     const result = await analyzeQuality(request, content as never)
-    expect(result.assessment.report.total).toBe(5)
+    expect(result.assessment?.report.total).toBe(5)
     expect(result.publishIssues).toEqual([{ path: 'role', rule: 'required' }])
     expect(request.mock.calls[0]?.[0]).toBe('/api/v1/jobs/quality')
+  })
+
+  it('reads an instance without a model as no score at all, with the publication issues still there', async () => {
+    const result = await analyzeQuality(send(ok({ status: 'unavailable', assessment: null, publishIssues: [{ path: 'role', rule: 'required' }] })), content as never)
+    expect(result).toEqual({ status: 'unavailable', assessment: null, publishIssues: [{ path: 'role', rule: 'required' }] })
   })
 
   it('refuses a body that does not match the contract', async () => {

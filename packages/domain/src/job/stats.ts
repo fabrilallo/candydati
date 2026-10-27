@@ -20,9 +20,11 @@ export const jobStatsDtoSchema = z.object({
   /** Oldest first, exactly `STATS_WEEKS` entries, empty weeks included. */
   weekly: z.array(z.object({ weekStart: day, created: count, published: count })),
   quality: z.object({
+    /** False while no language model is configured: then there is no score, so `items` is empty (PRODUCT.md §4.3). */
+    available: z.boolean(),
     /** On the 0-10 scale, set per instance. */
     threshold: z.number(),
-    /** Published ads with a stored score, lowest score first. */
+    /** Published ads with a score a model produced, lowest score first. */
     items: z.array(z.object({ id: z.string(), title: z.string(), total: z.number(), belowThreshold: z.boolean() })),
     average: z.number().nullable(),
     belowCount: count,

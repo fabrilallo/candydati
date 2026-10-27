@@ -140,8 +140,10 @@ export const closeJob = async (request: JobApiRequest, id: string): Promise<JobD
 export const publishJob = async (request: JobApiRequest, id: string): Promise<PublishJobResultDto> =>
   (await call(request, `/api/v1/jobs/${encodeURIComponent(id)}/publish`, publishResultSchema, post({}))).data as PublishJobResultDto
 
+/** `unavailable` while the instance has no language model: no score at all, the publication issues all the same. */
 export interface QualityResult {
-  readonly assessment: AdQualityAssessment
+  readonly status: 'assessed' | 'unavailable'
+  readonly assessment: AdQualityAssessment | null
   readonly publishIssues: readonly PublishIssue[]
 }
 export const analyzeQuality = async (request: JobApiRequest, content: JobContent): Promise<QualityResult> =>

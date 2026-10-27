@@ -30,7 +30,8 @@ describe('buildQuality', () => {
       published('unscored'),
       { ...published('c'), quality: fixedQualityReport(6) },
     ];
-    expect(buildQuality(jobs, 6)).toEqual({
+    expect(buildQuality(jobs, 6, true)).toEqual({
+      available: true,
       threshold: 6,
       items: [
         { id: 'b', title: 'b', total: 5.5, belowThreshold: true },
@@ -43,7 +44,17 @@ describe('buildQuality', () => {
   });
 
   it('has a null average when nothing is scored', () => {
-    expect(buildQuality([published('x')], 6)).toEqual({ threshold: 6, items: [], average: null, belowCount: 0 });
+    expect(buildQuality([published('x')], 6, true)).toEqual({ available: true, threshold: 6, items: [], average: null, belowCount: 0 });
+  });
+
+  it('leaves out the scores the rules produced alone', () => {
+    const jobs = [{ ...published('a'), quality: fixedQualityReport(3, 'rules') }, { ...published('b'), quality: fixedQualityReport(7) }];
+    expect(buildQuality(jobs, 6, true).items.map((item) => item.id)).toEqual(['b']);
+  });
+
+  it('has no score at all while no model is configured', () => {
+    const jobs = [{ ...published('a'), quality: fixedQualityReport(3) }];
+    expect(buildQuality(jobs, 6, false)).toEqual({ available: false, threshold: 6, items: [], average: null, belowCount: 0 });
   });
 });
 

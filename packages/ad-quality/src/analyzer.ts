@@ -4,7 +4,7 @@ import { createModelAnalyzer } from './model-analyzer.js';
 import { createRulesAnalyzer } from './rules-analyzer.js';
 
 export interface AdQualityAnalyzerOptions {
-  /** Without it the analysis is rules only. */
+  /** Without it the analysis is rules only and `available()` is false: the score needs a model (PRODUCT.md §4.3). */
   readonly generate?: StructuredGenerator;
   /** Called with the cause every time the model path fails and the rules answer instead. */
   readonly onModelError?: (error: unknown) => void;
@@ -17,6 +17,7 @@ export function createAdQualityAnalyzer(options: AdQualityAnalyzerOptions = {}):
   if (generate === undefined) return rules;
   const model = createModelAnalyzer(generate);
   return {
+    available: () => true,
     async analyze(content) {
       try {
         return await model.analyze(content);

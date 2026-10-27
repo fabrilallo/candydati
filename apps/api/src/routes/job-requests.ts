@@ -43,7 +43,7 @@ export function registerJobRequestRoutes(app: FastifyInstance, ctx: AppContext):
   );
 
   app.post('/api/v1/job-requests/:id/convert', async (request, reply) =>
-    reply.status(201).send(ok(toJobDto(await convertJobRequest(deps, await ctx.resolveActor(request), requestId(request))))),
+    reply.status(201).send(ok(toJobDto(await convertJobRequest(deps, await ctx.resolveActor(request), requestId(request)), ctx.jobDeps))),
   );
 
   app.get('/api/v1/settings/approval', async (request) => ok(await getApprovalSetting(deps, await ctx.resolveActor(request), {})));

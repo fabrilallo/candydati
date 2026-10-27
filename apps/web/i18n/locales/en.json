@@ -853,6 +853,12 @@
       "responsibilities_clarity": "Clarity of responsibilities",
       "culture": "Culture and values",
       "technologies": "Technologies and tools"
+    },
+    "aiOff": {
+      "title": "The ad score needs AI",
+      "body": "A language model computes the score out of 10, and none is active on this installation. Publication rules and compliance checks work all the same.",
+      "admin": "Turn on a model in Settings > AI",
+      "member": "To get it, ask whoever runs this installation to turn on a model."
     }
   },
   "job": {
@@ -4301,7 +4307,7 @@
     "fast": {
       "title": "Fast model",
       "what": "It handles short, frequent tasks: the job ad quality score (on save and publish, also through the API and MCP) and reading the CVs of applications and imports (roles, skills, languages). A small, inexpensive model is the best fit.",
-      "off": "When it is off, the ad score uses rules only and only the plain text of CVs is read."
+      "off": "When it is off, ads get no quality score (the publication rules still apply) and only the plain text of CVs is read."
     },
     "privacy": {
       "title": "Data sent to the provider",

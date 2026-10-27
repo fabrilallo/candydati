@@ -15,7 +15,7 @@ packages/
   db/         Drizzle schema, migrations, client (Postgres 17)
   core/       application services (use cases), ports and Drizzle adapters. The only place where logic lives
   providers/  email (SMTP, Resend), object storage (S3), CV and import parsing, distribution channels
-  ad-quality/ job ad quality score (rules plus optional model), no network
+  ad-quality/ job ad quality score (rules plus model; no score without a model), no network
 e2e/          Playwright flows
 ```
 

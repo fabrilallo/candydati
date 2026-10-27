@@ -1,4 +1,4 @@
-import { completeJobContent, fixedQualityReport, throwingAdQualityAnalyzer } from '@candydati/core/testing';
+import { completeJobContent, fakeAdQualityAnalyzer, fixedQualityReport, throwingAdQualityAnalyzer, unavailableAdQualityAnalyzer } from '@candydati/core/testing';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { TestUser } from './testing/client.js';
 import { publishNotice } from './testing/privacy.js';
@@ -69,6 +69,7 @@ describe('job lifecycle over HTTP', () => {
     expect(quality.status).toBe(200);
     expect(quality.body.data!.publishIssues).toEqual([]);
     expect(quality.body.data!.assessment.report.total).toBe(8);
+    expect(quality.body.data).toMatchObject({ status: 'assessed' });
 
     const published = await owner.post<{ job: JobBody; quality: { belowThreshold: boolean } }>(`/api/v1/jobs/${job.id}/publish`);
     expect(published.status).toBe(200);
@@ -92,7 +93,7 @@ describe('job lifecycle over HTTP', () => {
     const log = (await owner.get<Audit[]>('/api/v1/audit-log')).body.data!;
     const actions = log.map((e) => e.action);
     for (const action of ['job.created', 'job.updated', 'job.published', 'job.closed']) expect(actions).toContain(action);
-    expect(log.find((e) => e.action === 'job.published')!.metadata).toMatchObject({ qualityTotal: 8, belowThreshold: false, threshold: 6 });
+    expect(log.find((e) => e.action === 'job.published')!.metadata).toMatchObject({ qualityStatus: 'assessed', qualityTotal: 8, belowThreshold: false, threshold: 6 });
   });
 
   it('answers 404 in the envelope for unknown organization and job slugs', async () => {
@@ -174,7 +175,7 @@ describe('templates', () => {
 
 describe('quality scoring and publication', () => {
   it('publishes below the threshold and reports it', async () => {
-    const low = await createTestApp({ adQuality: { analyze: async () => fixedQualityReport(2) } });
+    const low = await createTestApp({ adQuality: fakeAdQualityAnalyzer(fixedQualityReport(2)) });
     try {
       const owner = await new TestUser(low.app, uniqueEmail('low'), 'Low').signUp();
       await owner.createOrganization('Low');
@@ -188,6 +189,29 @@ describe('quality scoring and publication', () => {
     }
   });
 
+  it('has no score anywhere without an AI model, and still checks the publication rules', async () => {
+    const off = await createTestApp({ adQuality: unavailableAdQualityAnalyzer() });
+    try {
+      const owner = await new TestUser(off.app, uniqueEmail('noai'), 'NoAi').signUp();
+      await owner.createOrganization('NoAi');
+      await publishNotice(owner);
+      const analyzed = await owner.post<{ status: string; assessment: unknown; publishIssues: unknown[] }>('/api/v1/jobs/quality', { content: { title: 'Dev' } });
+      expect(analyzed.status).toBe(200);
+      expect(analyzed.body.data).toMatchObject({ status: 'unavailable', assessment: null });
+      expect(analyzed.body.data!.publishIssues.length).toBeGreaterThan(0);
+      const id = (await owner.post<JobBody>('/api/v1/jobs', { content: full() })).body.data!.id;
+      const published = await owner.post<{ job: JobBody & { quality: unknown }; quality: unknown; qualityStatus: string }>(`/api/v1/jobs/${id}/publish`);
+      expect(published.status).toBe(200);
+      expect(published.body.data).toMatchObject({ job: { status: 'published', quality: null }, quality: null, qualityStatus: 'unavailable' });
+      const listed = await owner.get<{ qualityTotal: unknown; belowThreshold: boolean }[]>('/api/v1/jobs');
+      expect(listed.body.data!.map(({ qualityTotal, belowThreshold }) => ({ qualityTotal, belowThreshold }))).toEqual([{ qualityTotal: null, belowThreshold: false }]);
+      const stats = await owner.get<{ quality: { available: boolean; items: unknown[] } }>('/api/v1/stats/jobs');
+      expect(stats.body.data!.quality).toMatchObject({ available: false, items: [] });
+    } finally {
+      await off.close();
+    }
+  });
+
   it('publishes even when the analyzer throws', async () => {
     const broken = await createTestApp({ adQuality: throwingAdQualityAnalyzer() });
     try {
@@ -197,7 +221,7 @@ describe('quality scoring and publication', () => {
       const id = (await owner.post<JobBody>('/api/v1/jobs', { content: full() })).body.data!.id;
       const published = await owner.post<{ job: JobBody; quality: unknown }>(`/api/v1/jobs/${id}/publish`);
       expect(published.status).toBe(200);
-      expect(published.body.data).toMatchObject({ job: { status: 'published' }, quality: null });
+      expect(published.body.data).toMatchObject({ job: { status: 'published' }, quality: null, qualityStatus: 'failed' });
     } finally {
       await broken.close();
     }

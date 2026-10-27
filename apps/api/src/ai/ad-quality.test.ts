@@ -1,6 +1,6 @@
 import { completeJobContent } from '@candydati/core/testing';
 import { describe, expect, it, vi } from 'vitest';
-import { createConfiguredAnalyzer, createLiveAnalyzer } from './ad-quality.js';
+import { createLiveAnalyzer } from './ad-quality.js';
 
 const generators = vi.hoisted(() => ({ built: [] as unknown[] }));
 vi.mock('@candydati/providers', () => ({
@@ -12,32 +12,34 @@ vi.mock('@candydati/providers', () => ({
   },
 }));
 
-describe('createConfiguredAnalyzer', () => {
-  it('uses rules only without FAST_MODEL', async () => {
-    const report = await createConfiguredAnalyzer(undefined, { warn: vi.fn() }).analyze(completeJobContent());
-    expect(report.source).toBe('rules');
+describe('createLiveAnalyzer', () => {
+  it('has no score without a fast model: unavailable, and asking for one rejects instead of scoring with the rules', async () => {
+    const analyzer = createLiveAnalyzer(() => null, { warn: vi.fn() });
+    expect(analyzer.available()).toBe(false);
+    await expect(analyzer.analyze(completeJobContent())).rejects.toThrow(/no fast model/);
   });
 
   it('falls back to rules and logs only the error message when the model fails', async () => {
     const warn = vi.fn();
-    const report = await createConfiguredAnalyzer('openai/m', { warn }).analyze(completeJobContent());
-    expect(report.source).toBe('rules');
+    const analyzer = createLiveAnalyzer(() => ({ id: 'openai/m' }), { warn });
+    expect(analyzer.available()).toBe(true);
+    expect((await analyzer.analyze(completeJobContent())).source).toBe('rules');
     expect(warn).toHaveBeenCalledWith({ reason: 'model unavailable' }, expect.any(String));
   });
-});
 
-describe('createLiveAnalyzer', () => {
   it('follows the fast model in force at each call, and builds one generator per distinct model', async () => {
     generators.built.length = 0;
     let model: { id: `${string}/${string}`; apiKey?: string } | null = null;
     const warn = vi.fn();
     const analyzer = createLiveAnalyzer(() => model, { warn });
-    await analyzer.analyze(completeJobContent());
-    expect(warn).not.toHaveBeenCalled();
+    expect(analyzer.available()).toBe(false);
     model = { id: 'anthropic/m', apiKey: 'sk' };
+    expect(analyzer.available()).toBe(true);
     await analyzer.analyze(completeJobContent());
     await analyzer.analyze(completeJobContent());
     expect(generators.built).toEqual([{ id: 'anthropic/m', apiKey: 'sk' }]);
     expect(warn).toHaveBeenCalledTimes(2);
+    model = null;
+    expect(analyzer.available()).toBe(false);
   });
 });

@@ -11,7 +11,7 @@ mockNuxtImport('navigateTo', () => navigate)
 
 const job = makeJob()
 registerEndpoint('/api/v1/jobs', { method: 'POST', handler: async (e) => (state.calls.push('create'), (state.bodies.create = await readBody(e)), ok(makeJob({ id: 'j-new' }))) })
-registerEndpoint('/api/v1/jobs/quality', { method: 'POST', handler: () => (state.calls.push('quality'), ok({ assessment: state.assessment, publishIssues: [] })) })
+registerEndpoint('/api/v1/jobs/quality', { method: 'POST', handler: () => (state.calls.push('quality'), ok({ status: state.assessment ? 'assessed' : 'unavailable', assessment: state.assessment, publishIssues: [] })) })
 registerEndpoint('/api/v1/jobs/j1', { method: 'PUT', handler: () => (state.calls.push('update'), ok(job)) })
 registerEndpoint('/api/v1/jobs/j1/publish', {
   method: 'POST',
@@ -21,7 +21,7 @@ registerEndpoint('/api/v1/jobs/j1/publish', {
       setResponseStatus(event, 422)
       return { success: false, data: null, error: { code: 'validation_failed', message: 'x', issues: [{ path: 'organization.privacyNotice', message: 'privacy_notice_required' }] } }
     }
-    return ok({ job: makeJob({ status: 'published', publishedAt: '2026-10-13T11:00:00.000Z' }), quality: state.assessment })
+    return ok({ job: makeJob({ status: 'published', publishedAt: '2026-10-13T11:00:00.000Z' }), quality: state.assessment, qualityStatus: state.assessment ? 'assessed' : 'unavailable' })
   },
 })
 registerEndpoint('/api/v1/jobs/j1/close', { method: 'POST', handler: () => (state.calls.push('close'), ok(makeJob({ status: 'closed', closedAt: '2026-10-14T10:00:00.000Z' }))) })
@@ -227,6 +227,29 @@ describe('JobEditor publish flow', () => {
     await wrapper.find('[data-testid="publish"]').trigger('click')
     await settled(['update', 'quality', 'publish'])
     await vi.waitFor(() => expect(wrapper.find('[data-testid="unsaved"]').exists()).toBe(false))
+  })
+
+  it('publishes without any score or confirmation when the instance has no model', async () => {
+    state.assessment = null
+    const wrapper = await mountEditor()
+    await wrapper.find('[data-testid="publish"]').trigger('click')
+    await settled(['quality', 'publish'])
+    expect(byTestId('below-threshold-dialog')).toBeNull()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="published-panel"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="quality-total"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="quality-ai-off"]').exists()).toBe(true)
+    expect(body().textContent).not.toContain("L'analisi di qualità non è riuscita")
+    useState('job-just-published').value = null
+  })
+
+  it('says the score needs AI when asked for it on an instance without a model', async () => {
+    state.assessment = null
+    const wrapper = await mountEditor()
+    await wrapper.find('[data-testid="analyze"]').trigger('click')
+    await settled(['quality'])
+    expect(wrapper.find('[data-testid="quality-panel"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="quality-total"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="quality-ai-off"]').text()).toContain("richiede l'AI")
   })
 
   it('does not run the analysis on keystrokes', async () => {

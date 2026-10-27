@@ -4,7 +4,7 @@ import { publishJob } from '@/lib/job-api'
 import { snapshotOf, validateForm } from '@/lib/job-form'
 import { needsConfirmation } from '@/lib/quality-view'
 
-/** Publish: save if dirty -> analyse -> confirm when below threshold -> publish. */
+/** Publish: save if dirty -> analyse -> confirm when below threshold -> publish. Without a score there is nothing to confirm. */
 export const useJobEditorPublish = (state: JobEditorState, save: (options: { navigate: boolean }) => Promise<boolean>) => {
   const { t, api, draft, quality, job, busy, confirmOpen, permissions, fail, goToSaved } = state
   /** Shared across the navigation from `/app/jobs/new` to the saved ad, so the confirmation survives it. */
@@ -22,8 +22,9 @@ export const useJobEditorPublish = (state: JobEditorState, save: (options: { nav
       job.value = result.job
       if (result.job.status === 'published') justPublished.value = result.job.id
       if (result.quality) quality.set(result.quality, snapshotOf(draft.form.value))
+      if (result.qualityStatus === 'unavailable') quality.markUnavailable()
       toast.success(t('job.publish.published'))
-      if (!result.quality) toast.message(t('job.publish.noAnalysis'))
+      if (result.qualityStatus === 'failed') toast.message(t('job.publish.noAnalysis'))
       await goToSaved()
     } catch (error) {
       fail(error)

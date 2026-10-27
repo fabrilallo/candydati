@@ -5,6 +5,7 @@ import {
   assess,
   DEFAULT_AD_QUALITY_THRESHOLD,
   isBelowQualityThreshold,
+  shownQualityReport,
   QUALITY_CATEGORIES,
   QUALITY_MAX_TOTAL,
   totalOf,
@@ -82,5 +83,25 @@ describe('adQualityReportSchema', () => {
 
   it('rejects an unknown source', () => {
     expect(adQualityReportSchema.safeParse({ ...valid, source: 'oracle' }).success).toBe(false);
+  });
+});
+
+describe('shownQualityReport', () => {
+  const byModel: AdQualityReport = { ...report(7), source: 'model' };
+
+  it('shows a report a model produced while a model is configured', () => {
+    expect(shownQualityReport(byModel, true)).toBe(byModel);
+  });
+
+  it('shows nothing while no model is configured, whatever is stored', () => {
+    expect(shownQualityReport(byModel, false)).toBeNull();
+  });
+
+  it('never shows a report the rules produced alone', () => {
+    expect(shownQualityReport(report(7), true)).toBeNull();
+  });
+
+  it('shows nothing without a stored report', () => {
+    expect(shownQualityReport(null, true)).toBeNull();
   });
 });

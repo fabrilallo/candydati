@@ -853,6 +853,12 @@
       "responsibilities_clarity": "Chiarezza delle responsabilità",
       "culture": "Cultura e valori",
       "technologies": "Tecnologie e strumenti"
+    },
+    "aiOff": {
+      "title": "Il giudizio sull'annuncio richiede l'AI",
+      "body": "Il punteggio su 10 lo calcola un modello linguistico, e su questa installazione non ne è attivo nessuno. Le regole di pubblicazione e i controlli di conformità funzionano comunque.",
+      "admin": "Attiva un modello in Impostazioni > AI",
+      "member": "Per averlo, chiedi a chi amministra questa installazione di attivare un modello."
     }
   },
   "job": {
@@ -4301,7 +4307,7 @@
     "fast": {
       "title": "Modello rapido",
       "what": "Si occupa dei compiti brevi e frequenti: il punteggio di qualità degli annunci (al salvataggio e alla pubblicazione, anche tramite API e MCP) e la lettura dei CV di candidature e importazioni (ruoli, competenze, lingue). Conviene un modello piccolo ed economico.",
-      "off": "Se è spento, il punteggio degli annunci usa solo le regole e dei CV si legge solo il testo semplice."
+      "off": "Se è spento, gli annunci non hanno punteggio di qualità (le regole di pubblicazione valgono comunque) e dei CV si legge solo il testo semplice."
     },
     "privacy": {
       "title": "Dati inviati al fornitore",

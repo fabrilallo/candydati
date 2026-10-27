@@ -2,9 +2,11 @@
 
 Scores a job ad (never candidates) on ten categories, 0..1 each, total 0..10. No network, no LLM SDK.
 
-- `createRulesAnalyzer()` deterministic, `source: 'rules'`, works with no model (self-hosting).
+- `createRulesAnalyzer()` deterministic, `source: 'rules'`, no network. `available()` is false: the score exists only
+  with a model (PRODUCT.md §4.3), so the rules are the structural part of the model report and its fallback.
 - `createModelAnalyzer(generate)` model scores the free text, `source: 'model'`; structural categories always come from the rules.
 - `createAdQualityAnalyzer({ generate?, onModelError? })` model with fallback to the rules; never throws for a valid content.
+  Without `generate`, `available()` is false and callers show no score.
 
 ## Rubric of the rules analyzer
 
