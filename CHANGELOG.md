@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.11] - 2026-10-27
+
 ### Added
 
 - Job editor: "Suggerisci responsabilità" proposes 3 to 6 responsibilities from the ad's title, role, seniority and

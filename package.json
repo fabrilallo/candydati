@@ -1,7 +1,7 @@
 {
   "name": "candydati",
   "private": true,
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Candydati: Un ATS agentico, aperto e installabile sul tuo server, pensato per chi si candida, non solo per chi seleziona.",
   "license": "BUSL-1.1",
   "packageManager": "pnpm@10.33.0",
