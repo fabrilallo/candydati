@@ -54,6 +54,11 @@ describe('searchRecipes', () => {
     }
   });
 
+  it('finds how to change a member role and how to add a task', () => {
+    expect(searchRecipes(HELP_RECIPES, 'come cambio il ruolo di un collega?', 'it')[0]?.id).toBe('change-member-role');
+    expect(searchRecipes(HELP_RECIPES, 'create a follow-up task', 'en')[0]?.id).toBe('follow-up-task');
+  });
+
   it('finds the tracked link in English', () => {
     expect(searchRecipes(HELP_RECIPES, 'How do I create a tracked link?', 'en')[0]?.id).toBe('tracked-link');
   });

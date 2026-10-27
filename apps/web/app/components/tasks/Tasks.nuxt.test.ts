@@ -95,19 +95,49 @@ describe('my tasks', () => {
   it('groups by due date: overdue, today, upcoming, no due date', async () => {
     const wrapper = await mountSuspended(MyTasksPanel)
     mounted.push(wrapper)
-    await vi.waitFor(() => expect(wrapper.findAll('section').length).toBe(4))
-    const groups = wrapper.findAll('section').map((section) => [section.attributes('data-group'), section.findAll('[data-testid="task-item"]').map((item) => item.attributes('data-task-id'))])
+    await vi.waitFor(() => expect(wrapper.findAll('section[data-group]').length).toBe(4))
+    const groups = wrapper.findAll('section[data-group]').map((section) => [section.attributes('data-group'), section.findAll('[data-testid="task-item"]').map((item) => item.attributes('data-task-id'))])
     expect(groups).toEqual([
       ['overdue', ['late']],
       ['today', ['today']],
       ['upcoming', ['later']],
       ['none', ['none']],
     ])
-    expect(wrapper.find('h2').text()).toContain('Scadute')
+    expect(wrapper.find('section[data-group] h2').text()).toContain('Scadute')
     expect(wrapper.find('[data-task-id="late"] [data-testid="task-due"]').classes()).toContain('text-destructive')
     expect(wrapper.find('[data-task-id="late"]').text()).toContain('Giulia Rossi, Backend developer')
     expect(wrapper.find('[data-task-id="late"] a').attributes('href')).toBe('/app/candidates/c1?application=a1')
     expect(wrapper.find('[data-task-id="none"]').text()).toContain('Data engineer')
     await flushPromises()
+  })
+
+  it('adds a task of my own, not tied to a candidate, and shows it in its group', async () => {
+    const wrapper = await mountSuspended(MyTasksPanel)
+    mounted.push(wrapper)
+    await vi.waitFor(() => expect(wrapper.findAll('section[data-group]').length).toBe(4))
+    await wrapper.find('[data-testid="task-title"]').setValue('Preparare il piano colloqui')
+    await wrapper.find('[data-testid="task-form"]').trigger('submit')
+    await vi.waitFor(() => expect(state.created).toEqual([{ title: 'Preparare il piano colloqui', assigneeId: 'u1' }]))
+    await vi.waitFor(() => expect(wrapper.find('[data-task-id="t9"]').exists()).toBe(true))
+  })
+
+  it('does not list a task given to a colleague among mine', async () => {
+    const wrapper = await mountSuspended(MyTasksPanel)
+    mounted.push(wrapper)
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="task-assignee"] option[value="u2"]').exists()).toBe(true))
+    await wrapper.find('[data-testid="task-title"]').setValue('Rivedere le note')
+    await wrapper.find('[data-testid="task-assignee"]').setValue('u2')
+    await wrapper.find('[data-testid="task-form"]').trigger('submit')
+    await vi.waitFor(() => expect(state.created).toEqual([{ title: 'Rivedere le note', assigneeId: 'u2' }]))
+    await flushPromises()
+    expect(wrapper.find('[data-task-id="t9"]').exists()).toBe(false)
+  })
+
+  it('has no form for who cannot manage tasks', async () => {
+    useViewer().viewer.value = viewerWith('interviewer')
+    const wrapper = await mountSuspended(MyTasksPanel)
+    mounted.push(wrapper)
+    await flushPromises()
+    expect(wrapper.find('[data-testid="task-form"]').exists()).toBe(false)
   })
 })

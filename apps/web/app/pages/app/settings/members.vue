@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { UsersIcon } from '@lucide/vue'
+import type { Role } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { errorKeyOf } from '@/lib/auth-errors'
@@ -19,6 +20,21 @@ const role = computed(() => viewer.value?.role ?? null)
 const canManageInvitations = computed(() => can(role.value, 'invitation:cancel'))
 const canSetAccess = computed(() => can(role.value, 'organization:update'))
 const busyId = ref<string | null>(null)
+
+const changeRole = async (memberId: string, newRole: Role): Promise<void> => {
+  const name = organization.value?.members.find((member) => member.id === memberId)?.name ?? ''
+  busyId.value = memberId
+  try {
+    await api.updateMemberRole({ memberId, role: newRole })
+    toast.success(t('members.roleChanged', { name }))
+  } catch (error) {
+    toast.error(t(errorKeyOf(error)))
+  } finally {
+    // Reloaded either way: on a refusal the select goes back to the role actually stored.
+    await refresh()
+    busyId.value = null
+  }
+}
 
 const cancelInvitation = async (id: string): Promise<void> => {
   busyId.value = id
@@ -51,7 +67,7 @@ const cancelInvitation = async (id: string): Promise<void> => {
             {{ t('members.listTitle') }}
             <span class="figure text-sm font-normal text-muted-foreground">{{ organization.members.length }}</span>
           </h2>
-          <MembersTable :members="organization.members" :current-user-id="viewer?.user.id ?? ''" />
+          <MembersTable :members="organization.members" :current-user-id="viewer?.user.id ?? ''" :actor-role="role" :busy-id="busyId" @change-role="changeRole" />
         </section>
 
         <section v-if="canManageInvitations" aria-labelledby="pending-title" class="grid gap-3">

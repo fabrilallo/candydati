@@ -25,6 +25,7 @@ const fakeClient = (overrides: Record<string, unknown> = {}) => {
     ),
     inviteMember: vi.fn((): Settled => ok({ id: 'i2' })),
     cancelInvitation: vi.fn((): Settled => ok({})),
+    updateMemberRole: vi.fn((): Settled => ok({})),
     getInvitation: vi.fn((): Settled =>
       ok({ id: 'i1', email: 'new@example.com', role: 'recruiter', status: 'pending', organizationId: 'o1', organizationName: 'Acme', inviterEmail: 'ada@example.com' }),
     ),
@@ -179,6 +180,12 @@ describe('createAuthApi', () => {
     await api.cancelInvitation('i1')
     expect(organization.inviteMember).toHaveBeenCalledWith({ email: 'new@example.com', role: 'recruiter' })
     expect(organization.cancelInvitation).toHaveBeenCalledWith({ invitationId: 'i1' })
+  })
+
+  it('changes the role of a member', async () => {
+    const { organization, api } = fakeClient()
+    await api.updateMemberRole({ memberId: 'm2', role: 'hiring_manager' })
+    expect(organization.updateMemberRole).toHaveBeenCalledWith({ memberId: 'm2', role: 'hiring_manager' })
   })
 
   it('reads, accepts and rejects an invitation', async () => {

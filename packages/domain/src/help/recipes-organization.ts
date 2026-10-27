@@ -13,16 +13,41 @@ export const ORGANIZATION_RECIPES: readonly Recipe[] = [
         'Apri "Membri" nella barra laterale.',
         'In "Invita un collega" scrivi l\'email, scegli il "Ruolo" e premi "Invia invito".',
         'Gli inviti non ancora accettati sono in "Inviti in sospeso", dove puoi annullarli.',
-        'Il ruolo di un membro già entrato non si cambia da qui: si cambia il suo ruolo nel team di ogni annuncio.',
+        'Per cambiare il ruolo di chi è già entrato, vedi la guida "Cambiare il ruolo di un membro".',
       ],
       en: [
         'Open "Members" in the sidebar.',
         'Under "Invite a colleague" type the email, choose the "Role" and press "Send invitation".',
         'Invitations not accepted yet are under "Pending invitations", where you can cancel them.',
-        'The role of a member who already joined is not changed here: change their role in each job\'s team.',
+        'To change the role of someone who already joined, see "Change a member\'s role".',
       ],
     },
     keywords: { it: ['invito', 'utente', 'aggiungere persona', 'ruolo', 'accesso'], en: ['invitation', 'user', 'add person', 'role', 'access'] },
+  },
+  {
+    id: 'change-member-role',
+    area: 'team',
+    permission: 'member:update',
+    route: '/app/settings/members',
+    title: { it: 'Cambiare il ruolo di un membro', en: 'Change a member\'s role' },
+    steps: {
+      it: [
+        'Apri "Membri" nella barra laterale.',
+        'Accanto al nome della persona scegli il nuovo ruolo dal menu: la modifica si salva subito e finisce nel registro delle azioni.',
+        'Il ruolo di proprietario lo dà o lo toglie solo un proprietario, e l\'organizzazione tiene sempre almeno un proprietario.',
+        'Il tuo ruolo non lo cambi da solo: chiedilo a un altro proprietario o amministratore.',
+      ],
+      en: [
+        'Open "Members" in the sidebar.',
+        'Next to the person\'s name pick the new role from the menu: the change is saved at once and goes into the audit log.',
+        'Only an owner gives or takes away the owner role, and the organization always keeps at least one owner.',
+        'You do not change your own role: ask another owner or admin.',
+      ],
+    },
+    keywords: {
+      it: ['ruolo', 'collega', 'permessi', 'promuovere', 'amministratore', 'proprietario', 'accesso'],
+      en: ['role', 'colleague', 'permissions', 'promote', 'admin', 'owner', 'access'],
+    },
   },
   {
     id: 'job-team',

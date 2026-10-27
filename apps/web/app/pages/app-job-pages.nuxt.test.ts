@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   org: {
     getFullOrganization: vi.fn(),
     cancelInvitation: vi.fn(),
+    updateMemberRole: vi.fn(),
   },
   state: { job: 'ok' as 'ok' | 'missing' | 'down' },
 }))
@@ -27,7 +28,7 @@ const stubs = {
   PrivacySettings: { template: '<div data-testid="privacy-settings-stub" />' },
   RetentionOverview: { template: '<div data-testid="retention-stub" />' },
   PrivacyDocuments: { template: '<div data-testid="documents-stub" />' },
-  MembersTable: true,
+  MembersTable: { emits: ['changeRole'], template: '<button data-testid="role-stub" @click="$emit(\'changeRole\', \'m2\', \'hiring_manager\')">role</button>' },
   PendingInvitations: { props: ['invitations'], emits: ['cancel'], template: '<button data-testid="cancel-stub" @click="$emit(\'cancel\', \'inv1\')">cancel</button>' },
   InviteForm: true,
   AccessSetting: true,
@@ -120,6 +121,17 @@ describe('members settings page', () => {
     await wrapper.find('[data-testid="cancel-stub"]').trigger('click')
     await flushPromises()
     expect(mocks.org.cancelInvitation).toHaveBeenCalledWith('inv1')
+    expect(mocks.org.getFullOrganization).toHaveBeenCalledTimes(2)
+  })
+
+  it('changes the role of a member and reloads the list', async () => {
+    useViewer().viewer.value = viewerWith('owner')
+    mocks.org.updateMemberRole.mockResolvedValue(undefined)
+    const wrapper = await mountPage(MembersPage, '/app/settings/members')
+    await vi.waitFor(() => expect(wrapper.find('#members-title').exists()).toBe(true))
+    await wrapper.find('[data-testid="role-stub"]').trigger('click')
+    await flushPromises()
+    expect(mocks.org.updateMemberRole).toHaveBeenCalledWith({ memberId: 'm2', role: 'hiring_manager' })
     expect(mocks.org.getFullOrganization).toHaveBeenCalledTimes(2)
   })
 

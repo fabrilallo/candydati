@@ -12,6 +12,25 @@ export const can = (role: Role | null, permission: Permission): boolean => role 
 export const assignableRoles = (actorRole: Role | null): readonly Role[] =>
   actorRole === null ? [] : ROLES.filter((target) => canAssignRole(actorRole, target))
 
+export interface MemberRoleRef {
+  readonly userId: string
+  readonly role: string
+}
+
+/**
+ * The roles the actor may give an existing member, or none when the row is not theirs to change: never their own role
+ * (no locking oneself out), an owner only by an owner, and never the last owner (the organization keeps one). The api
+ * enforces the same rules; this only decides what the screen offers.
+ */
+export const editableRolesFor = (actorRole: Role | null, actorUserId: string, target: MemberRoleRef, members: readonly MemberRoleRef[]): readonly Role[] => {
+  if (!can(actorRole, 'member:update') || target.userId === actorUserId) return []
+  if (parseMemberRole(target.role) === 'owner') {
+    const owners = members.filter((member) => parseMemberRole(member.role) === 'owner').length
+    if (actorRole !== 'owner' || owners <= 1) return []
+  }
+  return assignableRoles(actorRole)
+}
+
 export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   const allowed = assignableRoles(actorRole)
   if (allowed.includes(DEFAULT_INVITE_ROLE)) return DEFAULT_INVITE_ROLE

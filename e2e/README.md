@@ -3,7 +3,7 @@
 End-to-end tests (Playwright, Chromium only) for the critical flows. One spec per flow:
 
 1. `01-invite-colleague` sign up (address confirmed through the emailed link), create organization, invite a recruiter
-   by email, accept, members page
+   by email, accept, members page, change their role
 2. `02-job-ad` privacy notice, job ad, publish blocked (missing field, one-sex title), public pages, XML feed
 3. `03-apply-and-pipeline` public application with PDF, receipt email, move, message, outcome
 4. `04-candidate-rights` ZIP export, erasure by typing the name, gone from search

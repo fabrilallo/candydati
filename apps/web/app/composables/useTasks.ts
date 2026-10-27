@@ -7,11 +7,13 @@ import type { TaskDto } from '@candydati/domain'
 
 /**
  * Tasks of one application, or the open tasks of the signed-in person (`applicationId` null). Completing keeps the
- * task on screen, struck through, so it can be reopened at once; a reload drops it from "Le mie attività".
+ * task on screen, struck through, so it can be reopened at once; a reload drops it from "Le mie attività". A task added
+ * there has no candidate or job: a personal follow-up.
  */
 export const useTasks = (applicationId: string | null) => {
   const { t } = useI18n()
   const request = useJobsApi()
+  const { viewer } = useViewer()
   const key = applicationId ? `tasks-application-${applicationId}` : 'tasks-mine'
   const { data, status, refresh } = useFreshAsyncData(key, () => loaded(() => (applicationId ? listApplicationTasks(request, applicationId) : listMyTasks(request))))
   const tasks = ref<readonly TaskDto[] | null>(data.value?.data ?? null)
@@ -24,7 +26,8 @@ export const useTasks = (applicationId: string | null) => {
     busy.value = 'create'
     try {
       const created = await createTask(request, { ...input, applicationId })
-      tasks.value = [...(tasks.value ?? []), created]
+      // "Le mie attività" lists only the person's own tasks: one handed to a colleague is created, not shown.
+      if (applicationId !== null || created.assignee.id === viewer.value?.user.id) tasks.value = [...(tasks.value ?? []), created]
       toast.success(t('tasks.created'))
       return true
     } catch (error) {

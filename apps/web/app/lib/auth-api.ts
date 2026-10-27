@@ -197,6 +197,9 @@ export const createAuthApi = (client: AuthClient) => {
     async inviteMember(input: { email: string; role: Role }): Promise<void> {
       await settle(() => org.inviteMember({ email: input.email, role: input.role as InviteRole }))
     },
+    async updateMemberRole(input: { memberId: string; role: Role }): Promise<void> {
+      await settle(() => org.updateMemberRole({ memberId: input.memberId, role: input.role as InviteRole }))
+    },
     async cancelInvitation(invitationId: string): Promise<void> {
       await settle(() => org.cancelInvitation({ invitationId }))
     },

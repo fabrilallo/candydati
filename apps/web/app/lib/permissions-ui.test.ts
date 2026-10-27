@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { activeNavId, assignableRoles, can, defaultInviteRole, navSections, parseMemberRole, visibleNav } from './permissions-ui'
+import { activeNavId, assignableRoles, can, defaultInviteRole, editableRolesFor, navSections, parseMemberRole, visibleNav } from './permissions-ui'
 
 describe('parseMemberRole', () => {
   it('reads a single role', () => {
@@ -147,5 +147,33 @@ describe('activeNavId', () => {
     expect(activeNavId('/app/settings/email-templates', items)).toBe('emailTemplates')
     expect(activeNavId('/app/settings/careers', items)).toBe('careersPage')
     expect(activeNavId('/elsewhere', items)).toBeNull()
+  })
+})
+
+describe('editableRolesFor', () => {
+  const owners = (count: number) => Array.from({ length: count }, (_, index) => ({ userId: `o${index}`, role: 'owner' }))
+  const team = [...owners(1), { userId: 'r1', role: 'recruiter' }, { userId: 'a1', role: 'admin' }]
+
+  it('lets an owner give any role to someone else', () => {
+    expect(editableRolesFor('owner', 'o0', { userId: 'r1', role: 'recruiter' }, team)).toEqual(['owner', 'admin', 'recruiter', 'hiring_manager', 'interviewer'])
+  })
+
+  it('lets an admin change non-owners, never to owner, and never touch an owner', () => {
+    expect(editableRolesFor('admin', 'a1', { userId: 'r1', role: 'recruiter' }, team)).toEqual(['admin', 'recruiter', 'hiring_manager', 'interviewer'])
+    expect(editableRolesFor('admin', 'a1', { userId: 'o0', role: 'owner' }, team)).toEqual([])
+  })
+
+  it('never lets a person change their own role', () => {
+    expect(editableRolesFor('owner', 'o0', { userId: 'o0', role: 'owner' }, [...owners(2)])).toEqual([])
+  })
+
+  it('keeps the last owner an owner', () => {
+    expect(editableRolesFor('owner', 'x', { userId: 'o0', role: 'owner' }, team)).toEqual([])
+    expect(editableRolesFor('owner', 'o1', { userId: 'o0', role: 'owner' }, owners(2))).toHaveLength(5)
+  })
+
+  it('gives nothing to roles that cannot update members', () => {
+    expect(editableRolesFor('recruiter', 'r1', { userId: 'a1', role: 'admin' }, team)).toEqual([])
+    expect(editableRolesFor(null, 'r1', { userId: 'a1', role: 'admin' }, team)).toEqual([])
   })
 })
