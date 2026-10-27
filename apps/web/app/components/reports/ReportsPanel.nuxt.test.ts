@@ -15,8 +15,8 @@ registerEndpoint('/api/v1/reports', (event) => {
 registerEndpoint('/api/v1/jobs', () => ({
   success: true,
   data: [
-    { id: 'j1', slug: 'data', status: 'published', title: 'Data Engineer', role: 'backend_developer', publishable: true, publishIssueCount: 0, salary: { min: 45000, max: 60000, currency: 'EUR', period: 'year' }, workMode: 'hybrid', qualityTotal: 7, belowThreshold: false, updatedAt: '2026-08-01T10:00:00.000Z', publishedAt: '2026-08-01T10:00:00.000Z' },
-    { id: 'j0', slug: 'draft', status: 'draft', title: 'Bozza', role: null, publishable: false, publishIssueCount: 2, salary: { min: 45000, max: 60000, currency: 'EUR', period: 'year' }, workMode: null, qualityTotal: null, belowThreshold: false, updatedAt: '2026-08-01T10:00:00.000Z', publishedAt: null },
+    { id: 'j1', slug: 'data', status: 'published', title: 'Data Engineer', role: 'backend_developer', customRole: null, publishable: true, publishIssueCount: 0, salary: { min: 45000, max: 60000, currency: 'EUR', period: 'year' }, workMode: 'hybrid', qualityTotal: 7, belowThreshold: false, updatedAt: '2026-08-01T10:00:00.000Z', publishedAt: '2026-08-01T10:00:00.000Z' },
+    { id: 'j0', slug: 'draft', status: 'draft', title: 'Bozza', role: null, customRole: null, publishable: false, publishIssueCount: 2, salary: { min: 45000, max: 60000, currency: 'EUR', period: 'year' }, workMode: null, qualityTotal: null, belowThreshold: false, updatedAt: '2026-08-01T10:00:00.000Z', publishedAt: null },
   ],
   meta: { total: 1, page: 1, limit: 100 },
   error: null,

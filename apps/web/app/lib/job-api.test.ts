@@ -32,7 +32,7 @@ const send = (response: { status: number; body: unknown }) => vi.fn<JobApiReques
 
 describe('listJobs', () => {
   it('builds the url and returns summaries with the page meta', async () => {
-    const summary = { id: 'j1', slug: 's', status: 'draft', title: 'Dev', role: null, publishable: false, publishIssueCount: 4, salary: { currency: 'EUR', period: 'year' }, workMode: null, qualityTotal: null, belowThreshold: false, updatedAt: NOW, publishedAt: null }
+    const summary = { id: 'j1', slug: 's', status: 'draft', title: 'Dev', role: null, customRole: null, publishable: false, publishIssueCount: 4, salary: { currency: 'EUR', period: 'year' }, workMode: null, qualityTotal: null, belowThreshold: false, updatedAt: NOW, publishedAt: null }
     const request = send(ok([summary], { total: 1, page: 2, limit: 20 }))
     const page = await listJobs(request, 'draft', 2)
     expect(request.mock.calls[0]?.[0]).toBe('/api/v1/jobs?status=draft&page=2&limit=20')

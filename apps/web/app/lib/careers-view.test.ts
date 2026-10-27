@@ -35,6 +35,11 @@ describe('groupCareers', () => {
     ])
   })
 
+  it('puts custom roles in their own group', () => {
+    const groups = groupCareers([job('x', 'other', 'remote'), job('y', 'backend_developer', 'remote')])
+    expect(groups.map((g) => g.family).sort()).toEqual(['engineering', 'other'])
+  })
+
   it('is empty for no jobs and does not mutate the input', () => {
     expect(groupCareers([])).toEqual([])
     const copy = [...jobs]

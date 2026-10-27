@@ -1,4 +1,4 @@
-import type { JobSummaryDto } from '@candydati/domain'
+import { CUSTOM_ROLE, type JobSummaryDto } from '@candydati/domain'
 
 export type Readiness = { readonly kind: 'ready' } | { readonly kind: 'missing'; readonly count: number }
 
@@ -35,7 +35,9 @@ export const relativeTime = (iso: string, now: Date, locale: string): string => 
 }
 
 /** Message keys for the quiet facts of a list item; null when the draft has not set them yet. */
-export const jobFacts = (job: JobSummaryDto): { readonly roleKey: string | null; readonly workModeKey: string | null } => ({
-  roleKey: job.role ? `taxonomy.roles.${job.role}` : null,
+export const jobFacts = (job: JobSummaryDto): { readonly roleKey: string | null; readonly roleText: string | null; readonly workModeKey: string | null } => ({
+  roleKey: job.role && job.role !== CUSTOM_ROLE ? `taxonomy.roles.${job.role}` : null,
+  /** Text of a custom role; null for a taxonomy role or a custom role still without text. */
+  roleText: job.role === CUSTOM_ROLE ? job.customRole?.trim() || null : null,
   workModeKey: job.workMode ? `taxonomy.workModes.${job.workMode}` : null,
 })

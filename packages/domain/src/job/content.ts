@@ -5,7 +5,9 @@ import type { ComplianceDetail } from './compliance/types.js';
 import { employmentSchema, PROTECTED_CATEGORIES } from './employment.js';
 import {
   CONTRACT_TYPES,
-  JOB_ROLES,
+  CUSTOM_ROLE,
+  CUSTOM_ROLE_MAX,
+  JOB_ROLE_CHOICES,
   SALARY_CURRENCIES,
   SALARY_PERIODS,
   SENIORITY_LEVELS,
@@ -68,7 +70,10 @@ export const jobContentSchema = z.object({
   title: z.string().trim().min(1).max(JOB_TITLE_MAX),
   /** Language the ad is written in. */
   language: z.enum(SUPPORTED_LOCALES).default('it'),
-  role: z.enum(JOB_ROLES).optional(),
+  /** A taxonomy id, or `other` together with `customRole`. */
+  role: z.enum(JOB_ROLE_CHOICES).optional(),
+  /** The role in the person's words. Only meaningful (and required to publish) when `role` is `other`. */
+  customRole: z.string().trim().min(1).max(CUSTOM_ROLE_MAX).optional(),
   seniority: z.enum(SENIORITY_LEVELS).optional(),
   contractType: z.enum(CONTRACT_TYPES).optional(),
   salary: salarySchema.default({ currency: 'EUR', period: 'year' }),
@@ -128,6 +133,7 @@ const requiredPaths = (content: JobContent): readonly string[] => {
     ['location.country', content.location.country],
     ['responseDays', content.responseDays],
   ];
+  if (content.role === CUSTOM_ROLE) missing.push(['customRole', content.customRole]);
   return missing.filter(([, value]) => value === undefined).map(([path]) => path);
 };
 
@@ -157,6 +163,8 @@ export const isPublishable = (content: JobContent): boolean => checkPublishable(
 /** Content of a published ad: every §5.1 field is present. Used for typing public pages, feeds and JSON-LD. */
 export type PublishedJobContent = JobContent & {
   readonly role: NonNullable<JobContent['role']>;
+  /** Present when `role` is `other`. */
+  readonly customRole?: string;
   readonly seniority: NonNullable<JobContent['seniority']>;
   readonly contractType: NonNullable<JobContent['contractType']>;
   readonly workMode: NonNullable<JobContent['workMode']>;

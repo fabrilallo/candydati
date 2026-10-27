@@ -56,6 +56,13 @@ describe('submitJobRequest', () => {
     expect(deps.jobRequests.snapshot()).toHaveLength(0);
   });
 
+  it('accepts a custom role with its text and refuses it without', async () => {
+    const deps = world();
+    const stored = await submitJobRequest(deps, hm, { ...REQUEST, role: 'other', customRole: ' Pastry chef ' });
+    expect(stored).toMatchObject({ role: 'other', customRole: 'Pastry chef' });
+    await expect(submitJobRequest(deps, hm, { ...REQUEST, role: 'other' })).rejects.toBeInstanceOf(ValidationError);
+  });
+
   it('survives a failing notification', async () => {
     const deps = world();
     const broken = { ...deps, members: { list: async () => Promise.reject(new Error('down')) } };

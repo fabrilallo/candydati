@@ -16,6 +16,19 @@ describe('jobRequestInputSchema', () => {
   });
 });
 
+describe('custom role', () => {
+  it('needs its text when the role is other', () => {
+    expect(jobRequestInputSchema.safeParse({ ...valid, role: 'other' }).success).toBe(false);
+    expect(jobRequestInputSchema.parse({ ...valid, role: 'other', customRole: ' Pastry chef ' }).customRole).toBe('Pastry chef');
+    expect(jobRequestInputSchema.safeParse({ ...valid, role: 'other', customRole: 'x'.repeat(81) }).success).toBe(false);
+  });
+
+  it('is carried into the draft made from the request', () => {
+    const request = { ...jobRequestInputSchema.parse({ ...valid, role: 'other', customRole: 'Pastry chef' }), id: 'r', organizationId: 'o', requestedBy: 'u', status: 'approved' } as unknown as JobRequest;
+    expect(jobContentFromRequest(request)).toMatchObject({ role: 'other', customRole: 'Pastry chef' });
+  });
+});
+
 describe('checkApproval', () => {
   const salary = (max: number, currency = 'EUR') => ({ min: 40000, max, currency });
   it('never blocks when approval is off', () => {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { staleJobSchema } from './stale-jobs.js';
 
 const job = {
-  id: 'j1', slug: 'dev', status: 'published', title: 'Dev', role: 'backend_developer', publishable: true, publishIssueCount: 0,
+  id: 'j1', slug: 'dev', status: 'published', title: 'Dev', role: 'backend_developer', customRole: null, publishable: true, publishIssueCount: 0,
   salary: { currency: 'EUR', period: 'year' }, workMode: null, qualityTotal: null, belowThreshold: false,
   updatedAt: '2026-06-15T10:00:00.000Z', publishedAt: '2026-06-01T10:00:00.000Z',
 };

@@ -1,4 +1,4 @@
-import { employmentSchema, jobContentSchema, locationSchema, salarySchema, selectionStageSchema, type Employment, type JobContent, type SelectionStage } from '@candydati/domain'
+import { CUSTOM_ROLE, employmentSchema, jobContentSchema, locationSchema, salarySchema, selectionStageSchema, type Employment, type JobContent, type SelectionStage } from '@candydati/domain'
 import { employmentToInput } from './employment-form'
 import type { JobForm, StageForm } from './job-form'
 
@@ -44,6 +44,7 @@ export const formToPreview = (form: JobForm): JobContent => {
     title: form.title.trim(),
     language: valid(shape.language, form.language) ?? 'it',
     role: valid(shape.role, text(form.role)),
+    customRole: form.role === CUSTOM_ROLE ? valid(shape.customRole, text(form.customRole)) : undefined,
     seniority: valid(shape.seniority, text(form.seniority)),
     contractType: valid(shape.contractType, text(form.contractType)),
     salary: salary ?? { currency: 'EUR', period: 'year' },

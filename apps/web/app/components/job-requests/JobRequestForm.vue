@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { JOB_ROLE_FAMILIES, WORK_MODES } from '@candydati/domain'
+import { CUSTOM_ROLE, CUSTOM_ROLE_MAX, WORK_MODES } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { createJobRequest } from '@/lib/job-request-api'
 import { requestFormFromTitle, requestLanguage, toRequestInput, validateRequestForm, type JobRequestForm, type RequestFormErrors } from '@/lib/job-request-form'
+import { roleOptions as buildRoleOptions } from '@/lib/role-options'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -21,9 +22,7 @@ const patch = (changes: Partial<JobRequestForm>): void => {
   form.value = { ...form.value, ...changes }
   errors.value = Object.fromEntries(Object.entries(errors.value).filter(([key]) => !(key in changes)))
 }
-const roleOptions = (Object.keys(JOB_ROLE_FAMILIES) as (keyof typeof JOB_ROLE_FAMILIES)[]).flatMap((family) =>
-  JOB_ROLE_FAMILIES[family].map((role) => ({ value: role, label: t(`taxonomy.roles.${role}`), group: t(`taxonomy.roleFamilies.${family}`) })),
-)
+const roleOptions = buildRoleOptions(t)
 const modeOptions = WORK_MODES.map((value) => ({ value, label: t(`taxonomy.workModes.${value}`) }))
 
 const submit = async (): Promise<void> => {
@@ -54,7 +53,12 @@ const text = (value: string | number): string => String(value)
       </FormField>
       <FormField id="req-role" :label="t('jobRequests.fields.role')" :error="errors.role">
         <template #default="{ invalid, describedBy }">
-          <SelectInput id="req-role" :model-value="form.role" :options="roleOptions" :placeholder="t('jobRequests.fields.choose')" :invalid="invalid" :described-by="describedBy" @update:model-value="patch({ role: $event })" />
+          <SelectInput id="req-role" :model-value="form.role" :options="roleOptions" :placeholder="t('jobRequests.fields.choose')" :invalid="invalid" :described-by="describedBy" @update:model-value="patch({ role: $event, customRole: $event === CUSTOM_ROLE ? form.customRole : '' })" />
+        </template>
+      </FormField>
+      <FormField v-if="form.role === CUSTOM_ROLE" id="req-custom-role" :label="t('jobRequests.fields.customRole')" :error="errors.customRole">
+        <template #default="{ invalid, describedBy }">
+          <Input id="req-custom-role" :model-value="form.customRole" :maxlength="CUSTOM_ROLE_MAX" autocomplete="off" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" data-testid="req-custom-role" @update:model-value="patch({ customRole: text($event) })" />
         </template>
       </FormField>
       <FormField id="req-reason" :label="t('jobRequests.fields.reason')" :hint="t('jobRequests.fields.reasonHint')" :error="errors.reason">

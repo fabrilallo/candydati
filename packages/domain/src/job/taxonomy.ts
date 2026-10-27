@@ -36,10 +36,22 @@ export type JobRole = (typeof JOB_ROLE_FAMILIES)[JobRoleFamily][number];
 
 export const JOB_ROLES = Object.values(JOB_ROLE_FAMILIES).flat() as unknown as readonly [JobRole, ...JobRole[]];
 
-export const familyOfRole = (role: JobRole): JobRoleFamily =>
-  (Object.keys(JOB_ROLE_FAMILIES) as JobRoleFamily[]).find((family) =>
-    (JOB_ROLE_FAMILIES[family] as readonly string[]).includes(role),
-  ) as JobRoleFamily;
+/**
+ * A role that is not in the list: `role` is `other` and the text the person wrote travels in `customRole`.
+ * The taxonomy stays closed (feeds, statistics and the public schema keep stable ids); this is the one escape hatch.
+ */
+export const CUSTOM_ROLE = 'other' as const;
+export const CUSTOM_ROLE_MAX = 80;
+export const JOB_ROLE_CHOICES = [...JOB_ROLES, CUSTOM_ROLE] as unknown as readonly [JobRole | typeof CUSTOM_ROLE, ...(JobRole | typeof CUSTOM_ROLE)[]];
+export type JobRoleChoice = JobRole | typeof CUSTOM_ROLE;
+
+/** Family of a role; a custom role belongs to none and groups under `other`. */
+export const familyOfRole = (role: JobRoleChoice): JobRoleFamily | typeof CUSTOM_ROLE =>
+  role === CUSTOM_ROLE
+    ? CUSTOM_ROLE
+    : ((Object.keys(JOB_ROLE_FAMILIES) as JobRoleFamily[]).find((family) =>
+        (JOB_ROLE_FAMILIES[family] as readonly string[]).includes(role),
+      ) as JobRoleFamily);
 
 export const SENIORITY_LEVELS = ['intern', 'junior', 'mid', 'senior', 'lead', 'principal', 'manager', 'director', 'executive'] as const;
 export type SeniorityLevel = (typeof SENIORITY_LEVELS)[number];

@@ -2,6 +2,7 @@
 import type { JobStatsDto } from '@candydati/domain'
 import { StackedBar } from '@unovis/ts'
 import { VisAxis, VisPlotline, VisStackedBar, VisTooltip, VisXYContainer } from '@unovis/vue'
+import { roleLabel } from '@/lib/role-label'
 import { formatMoney } from '@/lib/job-view'
 import { CHART_COLORS, compactMoney, escapeHtml, salaryView, shortTitle, type SalaryRow } from '@/lib/stats-view'
 
@@ -31,7 +32,7 @@ const x = (d: SalaryRow): number => d.index
 const y = [(d: SalaryRow): number => d.min, (d: SalaryRow): number => d.span]
 const color = [CHART_COLORS.none, CHART_COLORS.main]
 const yTick = (i: number | Date): string => (typeof i === 'number' && Number.isInteger(i) ? shortTitle(rows.value[i]?.title ?? '') : '')
-const roleOf = (row: SalaryRow): string => t(`taxonomy.roles.${row.role}`)
+const roleOf = (row: SalaryRow): string => roleLabel(row.role, row.customRole, t)
 const triggers = {
   [StackedBar.selectors.bar]: (d: SalaryRow) =>
     `<div class="candydati-tip"><p class="candydati-tip-title">${escapeHtml(d.title)}</p><p>${escapeHtml(roleOf(d))}</p><p>${money(d.min)} - ${money(d.max)}</p></div>`,

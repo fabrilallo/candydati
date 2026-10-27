@@ -1,9 +1,12 @@
-import { familyOfRole, WORK_MODES, type JobRoleFamily, type PublicJobSummaryDto } from '@candydati/domain'
+import { familyOfRole, WORK_MODES, type CUSTOM_ROLE, type JobRoleFamily, type PublicJobSummaryDto } from '@candydati/domain'
+
+/** A family of the taxonomy, or `other` for custom roles. */
+type Family = JobRoleFamily | typeof CUSTOM_ROLE
 
 type WorkMode = PublicJobSummaryDto['workMode']
 
 export interface CareersGroup {
-  readonly family: JobRoleFamily
+  readonly family: Family
   readonly jobs: readonly PublicJobSummaryDto[]
 }
 
@@ -11,7 +14,7 @@ const newestFirst = (a: PublicJobSummaryDto, b: PublicJobSummaryDto): number => 
 
 /** Role families, the one with most open positions first (ties keep first appearance), newest ad first inside. */
 export const groupCareers = (jobs: readonly PublicJobSummaryDto[]): readonly CareersGroup[] => {
-  const byFamily = jobs.reduce<ReadonlyMap<JobRoleFamily, readonly PublicJobSummaryDto[]>>((acc, job) => {
+  const byFamily = jobs.reduce<ReadonlyMap<Family, readonly PublicJobSummaryDto[]>>((acc, job) => {
     const family = familyOfRole(job.role)
     return new Map([...acc, [family, [...(acc.get(family) ?? []), job]]])
   }, new Map())
@@ -22,7 +25,7 @@ export const groupCareers = (jobs: readonly PublicJobSummaryDto[]): readonly Car
 
 export interface CareersFilter {
   readonly workMode: WorkMode | null
-  readonly family: JobRoleFamily | null
+  readonly family: Family | null
 }
 
 export const filterCareers = (jobs: readonly PublicJobSummaryDto[], { workMode, family }: CareersFilter): readonly PublicJobSummaryDto[] =>

@@ -1,3 +1,4 @@
+import { jobContentSchema } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { adoptStageIds, appendItem, checkForm, insertItem, contentToForm, emptyForm, emptyStage, formToInput, isCompleteStage, moveItem, removeItem, replaceItem, snapshotOf, validateForm, type JobForm } from './job-form'
 
@@ -122,6 +123,21 @@ describe('snapshotOf / formToInput', () => {
     const input = formToInput(emptyForm())
     expect(input.role).toBeUndefined()
     expect(input.responseDays).toBeUndefined()
+  })
+})
+
+describe('custom role', () => {
+  const custom: JobForm = { ...complete, role: 'other', customRole: '  Pastry chef ' }
+
+  it('round-trips through the content and keeps the text only for the other role', () => {
+    expect(formToInput(custom).customRole).toBe('Pastry chef')
+    expect(formToInput({ ...custom, role: 'recruiter' }).customRole).toBeUndefined()
+    expect(contentToForm(jobContentSchema.parse({ title: 'x', role: 'other', customRole: 'Pastry chef' })).customRole).toBe('Pastry chef')
+  })
+
+  it('blocks publication until the text is written', () => {
+    expect(checkForm({ ...custom, customRole: '' }).issues.map((issue) => issue.path)).toContain('customRole')
+    expect(checkForm(custom).issues.map((issue) => issue.path)).not.toContain('customRole')
   })
 })
 

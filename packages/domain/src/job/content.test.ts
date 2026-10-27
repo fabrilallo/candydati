@@ -34,6 +34,18 @@ describe('checkPublishable', () => {
     expect(isPublishable(draft({}))).toBe(true);
   });
 
+  it('accepts a custom role written by the person and requires its text', () => {
+    expect(jobContentSchema.safeParse({ title: 'ok', role: 'other', customRole: '  Pastry chef ' }).data?.customRole).toBe('Pastry chef');
+    expect(rulesOf({ role: 'other', customRole: 'Pastry chef' })).toEqual([]);
+    expect(rulesOf({ role: 'other' })).toEqual(['customRole:required']);
+  });
+
+  it('bounds the custom role text and ignores it when the role is in the list', () => {
+    expect(jobContentSchema.safeParse({ title: 'ok', role: 'other', customRole: 'x'.repeat(81) }).success).toBe(false);
+    expect(jobContentSchema.safeParse({ title: 'ok', role: 'other', customRole: '   ' }).success).toBe(false);
+    expect(rulesOf({ customRole: 'Stale text' })).toEqual([]);
+  });
+
   it.each(['role', 'seniority', 'contractType'] as const)('reports a missing %s as required', (field) => {
     expect(rulesOf({ [field]: undefined })).toEqual([`${field}:required`]);
   });

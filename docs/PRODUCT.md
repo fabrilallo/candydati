@@ -124,7 +124,7 @@ No model is involved. Without these fields the ad stays a draft.
 
 | Field | Rule |
 |---|---|
-| Title and role | Role chosen from the taxonomy, not free text |
+| Title and role | Role chosen from the taxonomy, or written by the person (`other` plus `customRole`, 80 characters at most, required to publish). The taxonomy still feeds feeds, statistics and the public schema; a custom role is shown as written and groups under "other roles" |
 | Experience level | Value from the taxonomy |
 | Salary | Minimum and maximum, currency, period, gross. Both required, maximum greater than or equal to minimum |
 | Contract type | Value from the list |

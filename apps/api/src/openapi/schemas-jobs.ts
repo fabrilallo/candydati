@@ -1,6 +1,7 @@
 import {
   CONTRACT_TYPES,
-  JOB_ROLES,
+  CUSTOM_ROLE_MAX,
+  JOB_ROLE_CHOICES,
   JOB_STATUSES,
   PUBLISH_RULES,
   SENIORITY_LEVELS,
@@ -25,7 +26,8 @@ export const jobSummarySchema: z.ZodType<JobSummaryDto> = z.object({
   slug: z.string(),
   status: z.enum(JOB_STATUSES),
   title: z.string(),
-  role: z.enum(JOB_ROLES).nullable(),
+  role: z.enum(JOB_ROLE_CHOICES).nullable(),
+  customRole: z.string().max(CUSTOM_ROLE_MAX).nullable(),
   publishable: z.boolean(),
   publishIssueCount: z.number().int(),
   salary: salarySchema,
@@ -66,7 +68,7 @@ export const publishResultSchema: z.ZodType<PublishJobResultDto> = z.object({
 
 /** The content of a published ad: every §5.1 field present. */
 export const publishedContentSchema = jobContentSchema.extend({
-  role: z.enum(JOB_ROLES),
+  role: z.enum(JOB_ROLE_CHOICES),
   seniority: z.enum(SENIORITY_LEVELS),
   contractType: z.enum(CONTRACT_TYPES),
   workMode: z.enum(WORK_MODES),
@@ -85,7 +87,8 @@ export const publicCareersSchema = z.object({
     z.object({
       slug: z.string(),
       title: z.string(),
-      role: z.enum(JOB_ROLES),
+      role: z.enum(JOB_ROLE_CHOICES),
+      customRole: z.string().max(CUSTOM_ROLE_MAX).optional(),
       seniority: z.enum(SENIORITY_LEVELS),
       contractType: z.enum(CONTRACT_TYPES),
       workMode: z.enum(WORK_MODES),

@@ -6,6 +6,7 @@ import {
   type JobStatus,
   type PublishedJobContent,
   type PublishIssue,
+  CUSTOM_ROLE,
 } from '@candydati/domain';
 import { groupBy } from './group-by.js';
 
@@ -60,6 +61,7 @@ const toSalaryItem = ({ id, content }: PublishedJob): SalaryItem => ({
   id,
   title: content.title,
   role: content.role,
+  ...(content.role === CUSTOM_ROLE && content.customRole ? { customRole: content.customRole } : {}),
   min: content.salary.min,
   max: content.salary.max,
   currency: content.salary.currency,
@@ -82,7 +84,7 @@ function salaryMedians(items: readonly SalaryItem[]): Stats['salary']['medians']
 export function buildSalary(published: readonly Job[]): Stats['salary'] {
   const items = narrowPublished(published)
     .map(toSalaryItem)
-    .toSorted((a, b) => compareText(a.role, b.role) || a.min - b.min || compareText(a.id, b.id));
+    .toSorted((a, b) => compareText(a.role, b.role) || compareText(a.customRole ?? '', b.customRole ?? '') || a.min - b.min || compareText(a.id, b.id));
   return { items, medians: salaryMedians(items) };
 }
 

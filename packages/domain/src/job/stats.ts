@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { JOB_ROLES, SALARY_CURRENCIES, SALARY_PERIODS } from './taxonomy.js';
+import { CUSTOM_ROLE_MAX, JOB_ROLE_CHOICES, SALARY_CURRENCIES, SALARY_PERIODS } from './taxonomy.js';
 import { PUBLISH_RULES } from './content.js';
 
 /** How many weeks of activity the overview shows, the current one included. */
@@ -33,7 +33,8 @@ export const jobStatsDtoSchema = z.object({
       z.object({
         id: z.string(),
         title: z.string(),
-        role: z.enum(JOB_ROLES),
+        role: z.enum(JOB_ROLE_CHOICES),
+        customRole: z.string().max(CUSTOM_ROLE_MAX).optional(),
         min: z.number(),
         max: z.number(),
         currency: z.enum(SALARY_CURRENCIES),

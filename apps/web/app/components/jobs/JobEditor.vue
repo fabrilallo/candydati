@@ -2,6 +2,7 @@
 import { BriefcaseBusinessIcon, ExternalLinkIcon, EyeIcon, HistoryIcon, LockIcon, PencilLineIcon } from '@lucide/vue'
 import type { JobDto, JobTemplateDto } from '@candydati/domain'
 import { gapList } from '@/lib/ad-gaps'
+import { roleLabel as labelOfRole } from '@/lib/role-label'
 import { APPROVAL_ERROR_KEYS, approvalState } from '@/lib/approval-view'
 import { complianceMarks } from '@/lib/compliance-view'
 import { formToPreview } from '@/lib/ad-preview'
@@ -61,7 +62,7 @@ const gaps = computed(() => gapList(ed.check.value.issues))
 const saveState = computed(() => saveStateOf({ busy: ed.busy.value, dirty: ed.dirty.value, saved: ed.job.value !== null }))
 const marks = computed(() => (ed.readOnly.value ? [] : complianceMarks(ed.compliance.value)))
 const phrases = computed(() => ed.quality.view.value?.vaguePhrases ?? [])
-const roleLabel = computed(() => (ed.form.value.role ? t(`taxonomy.roles.${ed.form.value.role}`) : null))
+const roleLabel = computed(() => labelOfRole(ed.form.value.role, ed.form.value.customRole, t) || null)
 const canAudit = computed(() => can(viewer.value?.role ?? null, 'audit:read'))
 const canReadCandidates = computed(() => can(viewer.value?.role ?? null, 'candidate:read'))
 const crumbs = computed(() => [{ label: t('nav.jobs'), to: '/app/jobs' }, { label: heading.value }])
