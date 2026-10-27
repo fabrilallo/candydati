@@ -6,7 +6,8 @@ import AppNavPanel from './AppNavPanel.vue'
 import AppTopBar from './AppTopBar.vue'
 
 registerEndpoint('/api/v1/stats/jobs', () => ({ success: true, data: jobStatsFixture(), error: null }))
-registerEndpoint('/api/v1/candidates', () => ({ success: true, data: [], error: null, meta: { total: 12, page: 1, limit: 1 } }))
+const candidates = vi.hoisted(() => ({ total: 12 }))
+registerEndpoint('/api/v1/candidates', () => ({ success: true, data: [], error: null, meta: { total: candidates.total, page: 1, limit: 1 } }))
 const logo = vi.hoisted(() => ({ url: null as string | null }))
 registerEndpoint('/api/v1/organization/logo', () => ({ success: true, data: { source: logo.url ? { kind: 'url', url: logo.url } : null, url: logo.url }, error: null }))
 
@@ -18,6 +19,7 @@ beforeEach(() => {
   clearNuxtData('candidate-count')
   clearNuxtData((key) => key.startsWith('organization-logo'))
   logo.url = null
+  candidates.total = 12
   window.localStorage.clear()
 })
 afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
@@ -38,6 +40,27 @@ describe('AppNavPanel', () => {
     const links = wrapper.findAll('nav a').map((link) => link.attributes('href'))
     expect(links).toContain('/app/candidates')
     expect(links).toContain('/app/settings/privacy')
+  })
+
+  it('updates the candidate count when someone applies while the app is open in another tab', async () => {
+    useViewer().viewer.value = viewerWith('owner')
+    const wrapper = track(await mountSuspended(AppNavPanel))
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="nav-count-candidates"]').text()).toContain('12 candidati'))
+    candidates.total = 13
+    const later = Date.now() + 60_000
+    const now = vi.spyOn(Date, 'now').mockReturnValue(later)
+    window.dispatchEvent(new Event('focus'))
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="nav-count-candidates"]').text()).toContain('13 candidati'))
+    now.mockRestore()
+  })
+
+  it('updates the candidate count on moving to another section', async () => {
+    useViewer().viewer.value = viewerWith('owner')
+    const wrapper = track(await mountSuspended(AppNavPanel, { route: '/app' }))
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="nav-count-candidates"]').text()).toContain('12 candidati'))
+    candidates.total = 14
+    await navigateTo('/app/candidates')
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="nav-count-candidates"]').text()).toContain('14 candidati'))
   })
 
   it('hides what the role cannot open and never asks for job stats without job:read', async () => {
