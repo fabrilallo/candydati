@@ -6,6 +6,17 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.10] - 2026-10-27
+
+### Added
+
+- Help page (`/app/help`, "Guida" in the sidebar): short recipes for the main tasks, filtered by role, searchable, each
+  with a link to the right page. The assistant answers "where do I..." questions from the same recipes
+  (`find_help_recipe`) and links to the page instead of inventing menus.
+- Members: owners and admins change a member's role from the list. Nobody changes their own role, only an owner touches
+  the owner role, and the last owner stays.
+- My tasks: who can manage tasks adds one from the page, for themselves or a colleague, not tied to a candidate.
+
 ## [0.1.9] - 2026-10-23
 
 ### Fixed
