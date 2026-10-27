@@ -442,7 +442,9 @@
       "off": "Recruiters see every ad of the organization. Hiring managers and interviewers see only their team's ads.",
       "saved": "Setting saved",
       "loadFailed": "We could not read the access setting."
-    }
+    },
+    "roleOf": "Role of {name}",
+    "roleChanged": "Role of {name} updated."
   },
   "audit": {
     "title": "Audit log",
@@ -670,7 +672,8 @@
     "twoFactorRequired": "Your organization requires two-factor authentication: turn it on to continue",
     "organizationCreationRestricted": "On this instance you cannot create another organization. Ask an administrator of the instance.",
     "emailNotConfigured": "Set up email first (Settings, Email): until it is configured, invitations, publishing and applications stay closed.",
-    "emailNotConfiguredLink": "Set up email"
+    "emailNotConfiguredLink": "Set up email",
+    "lastOwner": "The organization must keep at least one owner."
   },
   "taxonomy": {
     "roleFamilies": {
@@ -2055,7 +2058,8 @@
       "titleTooLong": "At most 200 characters",
       "assigneeRequired": "Choose who it is for",
       "dueInvalid": "Invalid date"
-    }
+    },
+    "newTitle": "New task"
   },
   "automations": {
     "title": "Automations",

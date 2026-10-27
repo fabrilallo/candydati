@@ -5,7 +5,7 @@ import { identity } from '../support/unique';
 import { open } from '../support/nav';
 import { invitationLink, newContext, newWorkspace, signUp } from '../support/session';
 
-test('owner invites a recruiter, who accepts and sees the members page', async ({ page, browser }) => {
+test('owner invites a recruiter, who accepts and sees the members page, then changes their role', async ({ page, browser }) => {
   const { org, owner } = await newWorkspace(page);
 
   await open(page, '/app/settings/members');
@@ -38,4 +38,11 @@ test('owner invites a recruiter, who accepts and sees the members page', async (
 
   await page.reload();
   await expect(page.getByTestId('pending-invitation')).toHaveCount(0);
+
+  const row = page.getByTestId('member-row').filter({ hasText: colleague.email });
+  await row.getByRole('combobox').selectOption('hiring_manager');
+  await expect(row.getByRole('combobox')).toHaveValue('hiring_manager');
+  await page.reload();
+  await expect(page.getByTestId('member-row').filter({ hasText: colleague.email }).getByRole('combobox')).toHaveValue('hiring_manager');
+  await expect(page.getByTestId('member-row').filter({ hasText: owner.email }).getByRole('combobox')).toHaveCount(0);
 });

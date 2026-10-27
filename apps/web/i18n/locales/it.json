@@ -442,7 +442,9 @@
       "off": "I recruiter vedono tutti gli annunci dell'organizzazione. Hiring manager e intervistatori vedono solo quelli del loro team.",
       "saved": "Impostazione salvata",
       "loadFailed": "Non siamo riusciti a leggere l'impostazione di accesso."
-    }
+    },
+    "roleOf": "Ruolo di {name}",
+    "roleChanged": "Ruolo di {name} aggiornato."
   },
   "audit": {
     "title": "Registro delle azioni",
@@ -670,7 +672,8 @@
     "twoFactorRequired": "La tua organizzazione richiede la verifica in due passaggi: attivala per continuare",
     "organizationCreationRestricted": "Su questa installazione non puoi creare un’altra organizzazione. Chiedi a un amministratore dell’installazione.",
     "emailNotConfigured": "Prima configura l'email (Impostazioni, Email): finché non è configurata, inviti, pubblicazione e candidature restano chiusi.",
-    "emailNotConfiguredLink": "Configura l'email"
+    "emailNotConfiguredLink": "Configura l'email",
+    "lastOwner": "L'organizzazione deve avere almeno un proprietario."
   },
   "taxonomy": {
     "roleFamilies": {
@@ -2055,7 +2058,8 @@
       "titleTooLong": "Al massimo 200 caratteri",
       "assigneeRequired": "Scegli a chi assegnarla",
       "dueInvalid": "Data non valida"
-    }
+    },
+    "newTitle": "Nuova attività"
   },
   "automations": {
     "title": "Automazioni",

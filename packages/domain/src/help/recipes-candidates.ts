@@ -127,11 +127,13 @@ export const CANDIDATE_RECIPES: readonly Recipe[] = [
         'Apri la scheda del candidato (anche dal pannello che si apre nella pipeline) e vai in "Attività".',
         'Scrivi l\'attività, scegli a chi è "Assegnata a" e la "Scadenza", poi premi "Aggiungi attività".',
         'Le tue attività le trovi in "Le mie attività", divise tra scadute, di oggi e prossime.',
+        'Da "Le mie attività" puoi aggiungere anche un\'attività non legata a un candidato, per te o per un collega.',
       ],
       en: [
         'Open the candidate\'s profile (also from the panel that opens in the pipeline) and go to "Tasks".',
         'Write the task, choose who it is "Assigned to" and the "Due date", then press "Add task".',
         'Your tasks are in "My tasks", grouped as overdue, today and upcoming.',
+        'From "My tasks" you can also add a task not tied to a candidate, for you or a colleague.',
       ],
     },
     keywords: { it: ['promemoria', 'todo', 'richiamare', 'scadenza'], en: ['reminder', 'todo', 'call back', 'due date'] },
