@@ -49,7 +49,7 @@
     "api": "API and integrations",
     "distribution": "Distribution",
     "careersPage": "Careers page",
-    "imports": "Import",
+    "imports": "Import candidates",
     "jobRequests": "Requests",
     "reports": "Reports",
     "security": "Security",
@@ -975,6 +975,10 @@
       "fromTemplate": "Created from the template “{name}”.",
       "templateMissing": "The requested template no longer exists: starting from a blank ad.",
       "publishedNote": "This ad is published and can still be edited, as long as it keeps meeting the publishing requirements.",
+      "finish": {
+        "label": "End of the form",
+        "jump": "Show me where"
+      },
       "workspace": {
         "modes": "Editor view",
         "edit": "Edit",
@@ -2748,8 +2752,8 @@
     }
   },
   "imports": {
-    "title": "Import",
-    "description": "Bring the CVs and spreadsheets you already have into a pipeline. You check everything before confirming and can undo the import at any time.",
+    "title": "Import candidates",
+    "description": "Already have CVs in a folder or a spreadsheet of candidates? Upload them here and they land in the pipeline of the job you choose. You check everything before confirming and can undo the import at any time. To move everything from another ATS, use Migration.",
     "new": "New import",
     "newTitle": "New import",
     "list": {

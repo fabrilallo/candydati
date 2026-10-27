@@ -80,6 +80,18 @@ describe('JobEditor readiness and gaps', () => {
     expect(wrapper.find('[data-testid="publish"]').attributes('disabled')).toBeUndefined()
   })
 
+  it('repeats Publish at the end of the form, with what is missing and a jump to the first gap', async () => {
+    const wrapper = await mountEditor({ job: makeJob({ content: { ...completeContent, responsibilities: ['una', 'due'] } }) })
+    const finish = wrapper.find('[data-testid="editor-finish"]')
+    expect(finish.text()).toContain('Manca 1 elemento')
+    expect(finish.find('[data-testid="publish-end"]').attributes('disabled')).toBeDefined()
+    expect(finish.find('[data-testid="finish-jump"]').exists()).toBe(true)
+    await wrapper.find('#job-field-responsibilities-1').trigger('keydown', { key: 'Enter' })
+    await wrapper.find('#job-field-responsibilities-2').setValue('tre')
+    expect(wrapper.find('[data-testid="editor-finish"]').text()).toContain('Pronto per pubblicare')
+    expect(wrapper.find('[data-testid="publish-end"]').attributes('disabled')).toBeUndefined()
+  })
+
   it('keeps a fresh draft quiet and shows a field rule once the user leaves the field', async () => {
     const wrapper = await mountEditor({ job: null })
     expect(wrapper.find('#job-field-role').attributes('aria-invalid')).toBeUndefined()
@@ -152,6 +164,16 @@ describe('JobEditor publish flow', () => {
     await vi.waitFor(() => expect(wrapper.find('[data-testid="public-url"]').text()).toBe('http://localhost:3000/careers/acme/backend-developer-abc123'))
     expect(wrapper.find('[data-testid="publish"]').exists()).toBe(false)
     expect(byTestId('published-dialog-url')?.textContent).toBe('http://localhost:3000/careers/acme/backend-developer-abc123')
+    useState('job-just-published').value = null
+  })
+
+  it('publishes from the button at the end of the form too', async () => {
+    state.assessment = makeAssessment(8)
+    const wrapper = await mountEditor()
+    await wrapper.find('[data-testid="publish-end"]').trigger('click')
+    await settled(['quality', 'publish'])
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="public-url"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="editor-finish"]').exists()).toBe(false)
     useState('job-just-published').value = null
   })
 
