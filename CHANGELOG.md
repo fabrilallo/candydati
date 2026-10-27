@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.12] - 2026-10-28
+
 ### Changed
 
 - The ad quality score ("Qualità dell'annuncio", 0-10) now exists only when the instance has a language model (the
