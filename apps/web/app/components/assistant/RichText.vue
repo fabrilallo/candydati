@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { NuxtLink } from '#components'
 import { parseMarkdownLite, type Inline } from '@/lib/markdown-lite'
 
-/** The assistant's reply with light formatting. Text interpolation only: no HTML, no links, no images. */
+/** The assistant's reply with light formatting. Text interpolation only: no HTML, no images, links to pages of the app only. */
 const props = defineProps<{ text: string }>()
 const blocks = computed(() => parseMarkdownLite(props.text))
 const InlineText = defineComponent({
@@ -10,6 +11,7 @@ const InlineText = defineComponent({
     inner.inlines.map((node) => {
       if (node.kind === 'bold') return h('strong', { class: 'font-semibold' }, node.text)
       if (node.kind === 'italic') return h('em', node.text)
+      if (node.kind === 'link') return h(NuxtLink, { to: node.href, class: 'font-medium text-link underline-offset-4 hover:underline' }, () => node.text)
       if (node.kind === 'code') return h('code', { class: 'rounded bg-muted px-1 py-0.5 font-mono text-[0.85em]' }, node.text)
       return node.text
     }),

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { GlobeIcon } from '@lucide/vue'
+import { GlobeIcon, LifeBuoyIcon } from '@lucide/vue'
 import { careersPath } from '@/lib/job-view'
 import { NAV_ICONS } from '@/lib/nav-icons'
 import { activeNavId, can, navSections, visibleNav, type NavId } from '@/lib/permissions-ui'
 
 /**
  * Navigation panel: organization switcher, then the sections with a heading and, where a real number exists, a count
- * (published ads), then the public careers page and the user menu. In the mobile drawer it also carries the language
+ * (published ads), then the help recipes, the public careers page and the user menu. In the mobile drawer it also carries the language
  * and theme controls, which on desktop sit in the top bar.
  */
 const props = defineProps<{ inDrawer?: boolean }>()
@@ -68,6 +68,15 @@ const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount',
       </section>
     </nav>
     <div class="grid shrink-0 gap-2 border-t pt-3" data-testid="nav-footer">
+      <NuxtLink
+        to="/app/help"
+        :aria-current="route.path === '/app/help' ? 'page' : undefined"
+        class="flex h-9 items-center gap-3 rounded-md px-2.5 text-sm font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground aria-[current=page]:text-foreground"
+        data-testid="nav-help"
+      >
+        <LifeBuoyIcon class="size-[1.125rem] shrink-0" aria-hidden="true" />
+        <span class="truncate">{{ t('shell.help') }}</span>
+      </NuxtLink>
       <a
         v-if="publicPath"
         :href="publicPath"

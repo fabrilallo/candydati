@@ -268,7 +268,8 @@
     "current": "Organizzazione attiva",
     "switched": "Ora lavori in {organization}",
     "careersPage": "Pagina carriere",
-    "breadcrumbs": "Percorso"
+    "breadcrumbs": "Percorso",
+    "help": "Guida"
   },
   "dashboard": {
     "title": "Panoramica",
@@ -4317,6 +4318,23 @@
       "apiKey": "La chiave API è troppo lunga",
       "modelMissing": "Inserisci il nome di un modello",
       "model": "Usa solo il nome del modello, senza spazi né prefisso del fornitore"
+    }
+  },
+  "help": {
+    "title": "Guida",
+    "description": "Come si fanno le cose principali, passo per passo, con il link alla pagina giusta.",
+    "search": "Cerca nella guida",
+    "searchPlaceholder": "Cerca: link tracciato, automazioni, invitare un collega...",
+    "results": "Nessun risultato | 1 risultato | {count} risultati",
+    "empty": "Nessuna guida per queste parole. Prova con un sinonimo o con il nome della pagina.",
+    "goThere": "Vai alla pagina",
+    "areas": {
+      "jobs": "Annunci e diffusione",
+      "candidates": "Candidati",
+      "team": "Team e accessi",
+      "setup": "Configurazione",
+      "integrations": "Integrazioni e dati",
+      "privacy": "Privacy"
     }
   }
 }

@@ -66,6 +66,7 @@ describe('assistant tool list', () => {
       'draft_job_content',
       'draft_message',
       'find_candidates_by_criteria',
+      'find_help_recipe',
       'get_candidate_brief',
       'get_job',
       'get_pipeline_summary',
