@@ -1,6 +1,7 @@
 import type { CandidateDeps, JobDeps, MessagingDeps, ReportDeps, TaskDeps } from '@candydati/core';
 import type { JobDrafter } from '../job-drafter.js';
 import { createCreateTaskTool, createDraftMessageTool } from './action-tools.js';
+import { createFindHelpRecipeTool } from './help-tools.js';
 import { createCandidateBriefTool, createListAttentionTool, createPipelineSummaryTool } from './candidate-tools.js';
 import { createReportsSummaryTool } from './report-tools.js';
 import { createFindCandidatesTool } from './search-tools.js';
@@ -43,6 +44,7 @@ export function createAgentTools(deps: AgentToolDeps) {
     createDraftMessageTool(deps.messagingDeps),
     createCreateTaskTool(deps.taskDeps),
     createReportsSummaryTool(deps.reportDeps),
+    createFindHelpRecipeTool(),
   ];
   return Object.freeze(Object.fromEntries(tools.map((tool) => [tool.id, tool])));
 }

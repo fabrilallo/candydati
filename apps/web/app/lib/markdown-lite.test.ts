@@ -35,6 +35,17 @@ describe('parseMarkdownLite', () => {
     ])
   })
 
+  it('turns only links to a page of the app into links: anything off-site or odd stays text', () => {
+    expect(parseInline('Vai a [Distribuzione](/app/jobs/j1/distribution).')).toEqual([
+      { kind: 'text', text: 'Vai a ' },
+      { kind: 'link', text: 'Distribuzione', href: '/app/jobs/j1/distribution' },
+      { kind: 'text', text: '.' },
+    ])
+    for (const href of ['https://evil.example/app', '//evil.example/app', '/app/../login', '/app?next=https://x', '/apps', '/app\\x', '/app/a b']) {
+      expect(parseInline(`[qui](${href})`), href).toEqual([{ kind: 'text', text: `[qui](${href})` }])
+    }
+  })
+
   it('returns nothing for empty text', () => {
     expect(parseMarkdownLite('\n\n')).toEqual([])
   })

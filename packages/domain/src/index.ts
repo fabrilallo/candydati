@@ -57,3 +57,4 @@ export * from './wire/index.js';
 export * from './careers-page/index.js';
 export * from './observability/index.js';
 export * from './migration/index.js';
+export * from './help/index.js';

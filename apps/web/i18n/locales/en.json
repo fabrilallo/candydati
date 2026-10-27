@@ -268,7 +268,8 @@
     "current": "Active organization",
     "switched": "You are now working in {organization}",
     "careersPage": "Careers page",
-    "breadcrumbs": "Breadcrumbs"
+    "breadcrumbs": "Breadcrumbs",
+    "help": "Help"
   },
   "dashboard": {
     "title": "Overview",
@@ -4317,6 +4318,23 @@
       "apiKey": "The API key is too long",
       "modelMissing": "Enter the name of a model",
       "model": "Use the model name only, without spaces or provider prefix"
+    }
+  },
+  "help": {
+    "title": "Help",
+    "description": "How to do the main things, step by step, with a link to the right page.",
+    "search": "Search the help",
+    "searchPlaceholder": "Search: tracked link, automations, invite a colleague...",
+    "results": "No results | 1 result | {count} results",
+    "empty": "No help for these words. Try a synonym or the name of the page.",
+    "goThere": "Go to the page",
+    "areas": {
+      "jobs": "Jobs and distribution",
+      "candidates": "Candidates",
+      "team": "Team and access",
+      "setup": "Setup",
+      "integrations": "Integrations and data",
+      "privacy": "Privacy"
     }
   }
 }
