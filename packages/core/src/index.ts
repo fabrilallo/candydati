@@ -202,6 +202,7 @@ export * from './adapters/drizzle-feedback.js';
 export * from './adapters/drizzle-job-requests.js';
 export * from './report-ports.js';
 export * from './use-cases/reports/get-reports.js';
+export * from './use-cases/reports/get-job-traffic.js';
 export * from './use-cases/reports/export-reports-csv.js';
 export * from './use-cases/reports/csv.js';
 export * from './use-cases/reports/build-reports.js';

@@ -53,6 +53,7 @@ export * from './report/origin.js';
 export * from './report/visits.js';
 export * from './report/response-promise.js';
 export * from './report/reports.js';
+export * from './report/traffic.js';
 export * from './wire/index.js';
 export * from './careers-page/index.js';
 export * from './observability/index.js';

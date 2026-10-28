@@ -111,6 +111,38 @@ describe('GET /api/v1/reports/export.csv', () => {
   });
 });
 
+describe('GET /api/v1/jobs/:id/traffic', () => {
+  const trafficOf = (jobId: string) => `/api/v1/jobs/${jobId}/traffic?${PERIOD}`;
+  type Traffic = { jobId: string; rows: { day: string; origin: string; campaign: string; visits: number; applications: number }[] };
+
+  it('gives the daily visits and applications of one job, matching the totals of the reports', async () => {
+    const reply = await owner.get<Traffic>(trafficOf(ids.backend));
+    expect(reply.status).toBe(200);
+    const rows = reply.body.data!.rows;
+    expect(reply.body.data!.jobId).toBe(ids.backend);
+    expect(rows.every((row) => /^2026-06-\d{2}$/.test(row.day))).toBe(true);
+    const report = (await owner.get<{ sources: { origin: string; applications: number; visits: number }[] }>(`${URL}&jobId=${ids.backend}`)).body.data!;
+    for (const source of report.sources) {
+      const ofSource = rows.filter((row) => row.origin === source.origin);
+      expect([source.origin, ofSource.reduce((sum, row) => sum + row.visits, 0), ofSource.reduce((sum, row) => sum + row.applications, 0)]).toEqual([source.origin, source.visits, source.applications]);
+    }
+  });
+
+  it('refuses a bad period, the interviewer and a key without report:read, and hides a foreign or unknown job', async () => {
+    expect((await owner.get(`/api/v1/jobs/${ids.backend}/traffic?from=${REPORT_TO.toISOString()}&to=${REPORT_FROM.toISOString()}`)).status).toBe(422);
+    expect((await owner.get(`/api/v1/jobs/${ids.backend}/traffic`)).status).toBe(422);
+    expect((await owner.get(trafficOf('does-not-exist'))).status).toBe(404);
+    expect((await (await member('interviewer')).get(trafficOf(ids.backend))).status).toBe(403);
+    const other = await new TestUser(t.app, uniqueEmail('traffic-other'), 'Other').signUp();
+    await other.createOrganization('Elsewhere traffic');
+    expect((await other.get(trafficOf(ids.backend))).status).toBe(404);
+    const allowed = await createKey(owner, ['report:read']);
+    expect((await withKey(t.app, allowed.secret, 'GET', trafficOf(ids.backend))).status).toBe(200);
+    const without = await createKey(owner, ['job:read']);
+    expect((await withKey(t.app, without.secret, 'GET', trafficOf(ids.backend))).status).toBe(403);
+  });
+});
+
 describe('origin of a public application', () => {
   it('stores a sanitized origin and refuses nothing because of it', async () => {
     const w = await createWorld(t, 'Origins');

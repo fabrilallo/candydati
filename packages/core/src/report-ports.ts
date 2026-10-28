@@ -81,8 +81,26 @@ export interface ReportAggregates {
   readonly coverage: readonly (JobCount & { readonly total: number; readonly decided: number })[];
 }
 
+/** One job, a closed period; `jobIds` narrows to the jobs the actor reaches (per-job access). Filtered by organization. */
+export interface TrafficQuery {
+  readonly organizationId: string;
+  readonly jobId: string;
+  readonly from: Date;
+  readonly to: Date;
+  readonly jobIds?: readonly string[] | undefined;
+}
+
+/** Counts per UTC day (`YYYY-MM-DD`), source and campaign (`''`: none); days with nothing are absent. */
+export interface DailyTraffic {
+  /** Visits of the public page, from the daily counters, on the days of the period. */
+  readonly visits: readonly { readonly day: string; readonly origin: string; readonly campaign: string; readonly visits: number }[];
+  /** Applications created in the period, by the day they arrived. */
+  readonly applications: readonly { readonly day: string; readonly origin: string; readonly campaign: string; readonly applications: number }[];
+}
+
 export interface ReportRepository {
   aggregate(query: ReportAggregateQuery): Promise<ReportAggregates>;
+  dailyTraffic(query: TrafficQuery): Promise<DailyTraffic>;
 }
 
 export interface ReportDeps extends CoreDeps {

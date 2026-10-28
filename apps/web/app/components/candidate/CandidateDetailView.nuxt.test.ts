@@ -69,6 +69,17 @@ describe('CandidateDetailView', () => {
     expect(wrapper.find('[data-testid="decide-menu"]').exists()).toBe(true)
   })
 
+  it('says where the application came from, with its campaign, or the system origin in words', async () => {
+    const wrapper = await mountDetail()
+    expect(wrapper.find('[data-testid="candidate-origin"]').text()).toBe('Provenienza: LinkedIn, campagna autumn-2026')
+    wrapper.unmount()
+    mounted.pop()
+    clearNuxtData('candidate-c1')
+    state.value = detail({ applications: detail().applications.map((app) => ({ ...app, origin: 'manual', campaign: null })) })
+    const manual = await mountDetail()
+    expect(manual.find('[data-testid="candidate-origin"]').text()).toBe('Provenienza: Inserita a mano')
+  })
+
   it('shows the title of the stage when it has one', async () => {
     const base = detail()
     state.value = detail({

@@ -7,7 +7,7 @@ import {
   type ResponsePromise,
   type StageEvent,
 } from '@candydati/domain';
-import type { ReportAggregateQuery, ReportAggregates, ReportRepository, ResponsePromiseRepository, StageEventRepository } from '../report-ports.js';
+import type { DailyTraffic, ReportAggregates, ReportRepository, ResponsePromiseRepository, StageEventRepository } from '../report-ports.js';
 import type { JobViewRow } from '../job-view-ports.js';
 import type { CandidateStore } from './in-memory-candidates.js';
 
@@ -56,7 +56,7 @@ export function createInMemoryResponsePromises(store: CandidateStore): ResponseP
   };
 }
 
-const within = (t: Date, query: ReportAggregateQuery): boolean => t >= query.from && t <= query.to;
+const within = (t: Date, query: { readonly from: Date; readonly to: Date }): boolean => t >= query.from && t <= query.to;
 
 const countBy = <T>(items: readonly T[], key: (item: T) => string): Map<string, T[]> => {
   const groups = new Map<string, T[]>();
@@ -172,6 +172,25 @@ export function createInMemoryReports(store: CandidateStore): ReportRepository {
       }));
 
       return { hireDays, firstHires, stageEntries, stageAdvances, outcomes, origins, campaigns, visits, promisesClosed, responseHours, promisesWaiting, coverage };
+    },
+    async dailyTraffic(query): Promise<DailyTraffic> {
+      const inScope = (row: { organizationId: string; jobId: string }): boolean =>
+        row.organizationId === query.organizationId && row.jobId === query.jobId && (query.jobIds === undefined || query.jobIds.includes(row.jobId));
+      const state = store.read();
+      const firstDay = viewDay(query.from);
+      const lastDay = viewDay(query.to);
+      const views = state.jobViews.filter((row) => inScope(row) && row.day >= firstDay && row.day <= lastDay);
+      const visits = [...countBy(views, (row) => `${row.day}\u0000${row.source}\u0000${row.campaign}`)].map(([, rows]) => {
+        const first = rows[0] as JobViewRow;
+        return { day: first.day, origin: first.source, campaign: first.campaign, visits: rows.reduce((sum, row) => sum + row.views, 0) };
+      });
+      const created = state.applications.filter((a) => inScope(a) && within(a.createdAt, query));
+      const campaignOf = (a: Application): string => a.originCampaign ?? '';
+      const applications = [...countBy(created, (a) => `${viewDay(a.createdAt)}\u0000${a.origin}\u0000${campaignOf(a)}`)].map(([, rows]) => {
+        const first = rows[0] as Application;
+        return { day: viewDay(first.createdAt), origin: first.origin, campaign: campaignOf(first), applications: rows.length };
+      });
+      return { visits, applications };
     },
   };
 }
