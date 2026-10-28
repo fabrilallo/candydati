@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.14] - 2026-10-28
+
 ### Added
 
 - Distribuzione shows visits and applications of the ad day by day: a chart over the last 7, 30 or 90 days (visits as
