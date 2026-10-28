@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.13] - 2026-10-28
+
 ### Added
 
 - Tracked links are saved on the ad. In Distribuzione > Link tracciati, "Salva link" keeps the channel and campaign
@@ -15,6 +17,11 @@ All notable changes to this project are documented here. The format follows
   removing need `job:publish` and are audited (`job.tracked_link_created`, `job.tracked_link_removed`). API:
   `GET` and `POST /api/v1/jobs/:id/tracked-links`, `DELETE /api/v1/jobs/:id/tracked-links/:linkId`. Migration 0042
   creates `job_tracked_link` (new table, no backfill).
+
+### Fixed
+
+- A tab left open across a deploy reloads itself on the next page change, instead of running the old version against
+  the new api (which showed "Qualcosa non ha funzionato" when publishing right after 0.1.12).
 
 ## [0.1.12] - 2026-10-28
 
