@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ORIGIN_DIRECT, ORIGIN_IMPORT, ORIGIN_MANUAL, type ReportsDto } from '@candydati/domain'
-import { campaignRows, formatRate, hasNoVisits, sourceRows } from '@/lib/report-view'
+import { campaignRows, formatRate, hasNoVisits, NO_VALUE, sourceRows } from '@/lib/report-view'
+import { conversionOf } from '@/lib/traffic-view'
 
 /**
  * Where applications come from: per source the visits of the ad page, the applications, the conversion between the two and
@@ -13,6 +14,18 @@ const campaigns = computed(() => campaignRows(props.campaigns ?? []))
 const noVisits = computed(() => hasNoVisits(props.sources ?? []))
 const NAMED: readonly string[] = [ORIGIN_DIRECT, ORIGIN_IMPORT, ORIGIN_MANUAL]
 const label = (origin: string): string => (NAMED.includes(origin) ? t(`reports.sources.named.${origin}`) : origin)
+/** "160 visite, 13 candidature ogni 100 visite"; under five visits the rate is named as missing, never a bare dash. */
+const visitsLine = (row: { readonly visits: number; readonly applications: number }): string => {
+  const visits = t('reports.sources.visits', row.visits)
+  const conversion = conversionOf(row.applications, row.visits)
+  if (conversion.state === 'no_visits') return visits
+  return `${visits}, ${conversion.per100 === null ? t('reports.sources.conversionFew') : t('reports.sources.conversion', { count: conversion.per100 })}`
+}
+/** "3 assunzioni, tasso di assunzione 20%"; without enough applications for a rate, the hires alone. */
+const hiresLine = (row: { readonly hires: number; readonly hireRate: Parameters<typeof formatRate>[0] }): string => {
+  const rate = formatRate(row.hireRate, locale.value)
+  return rate === NO_VALUE ? t('reports.sources.hires', row.hires) : `${t('reports.sources.hires', row.hires)}, ${t('reports.sources.hireRate', { rate })}`
+}
 </script>
 
 <template>
@@ -29,10 +42,10 @@ const label = (origin: string): string => (NAMED.includes(origin) ? t(`reports.s
             <div class="h-full rounded-full bg-primary" :style="{ width: `${Math.max(row.width, 1)}%` }" />
           </div>
           <p class="figure text-xs text-muted-foreground" data-testid="source-visits">
-            {{ t('reports.sources.visits', row.visits) }}, {{ t('reports.sources.conversion', { rate: formatRate(row.conversionRate, locale) }) }}
+            {{ visitsLine(row) }}
           </p>
           <p class="figure text-xs text-muted-foreground" data-testid="source-hires">
-            {{ t('reports.sources.hires', row.hires) }}, {{ t('reports.sources.hireRate', { rate: formatRate(row.hireRate, locale) }) }}
+            {{ hiresLine(row) }}
           </p>
         </li>
       </ul>
@@ -46,7 +59,7 @@ const label = (origin: string): string => (NAMED.includes(origin) ? t(`reports.s
               <span class="figure shrink-0 font-semibold">{{ row.applications }}</span>
             </div>
             <p class="figure text-xs text-muted-foreground">
-              {{ t('reports.sources.visits', row.visits) }}, {{ t('reports.sources.conversion', { rate: formatRate(row.conversionRate, locale) }) }}, {{ t('reports.sources.hires', row.hires) }}
+              {{ visitsLine(row) }}, {{ t('reports.sources.hires', row.hires) }}
             </p>
           </li>
         </ul>

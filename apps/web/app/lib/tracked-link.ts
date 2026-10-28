@@ -1,4 +1,4 @@
-import { CAMPAIGN_NONE, sanitizeCampaign, trackedLinkKey, type ReportsDto } from '@candydati/domain'
+import { CAMPAIGN_NONE, sanitizeCampaign, trackedLinkKey } from '@candydati/domain'
 
 /**
  * Channels a recruiter picks from when building a tracked link. The `source` is what `utm_source` carries and what the
@@ -67,19 +67,4 @@ export const channelLabel = (source: string, t: (key: string) => string): string
   const preset = CHANNEL_PRESETS.find((candidate) => candidate.source === source)
   if (!preset) return source
   return preset.name ?? t(`trackedLinks.presets.${preset.source}`)
-}
-
-type SourceFigures = { readonly sources: ReportsDto['sources'] | null; readonly campaigns: ReportsDto['campaigns'] | null }
-
-/**
- * Applications that arrived through one saved link, from the per-source figures of the ad (the same the sources panel
- * shows). A link with a campaign is its campaign row; a link without one is the channel minus its campaigns. Null when
- * the figures are not there.
- */
-export function applicationsThrough(report: SourceFigures | null, link: { readonly source: string; readonly campaign: string }): number | null {
-  if (!report?.sources || !report.campaigns) return null
-  const ofChannel = report.campaigns.filter((row) => row.origin === link.source)
-  if (link.campaign !== CAMPAIGN_NONE) return ofChannel.find((row) => row.campaign === link.campaign)?.applications ?? 0
-  const channel = report.sources.find((row) => row.origin === link.source)?.applications ?? 0
-  return Math.max(0, channel - ofChannel.reduce((total, row) => total + row.applications, 0))
 }

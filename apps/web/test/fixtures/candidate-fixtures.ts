@@ -30,6 +30,8 @@ export const card = (id: string, stageId = 'received', overrides: Partial<Applic
   noteCount: 0,
   stageRemoved: false,
   hasCv: true,
+  origin: 'direct',
+  campaign: null,
   responseDueAt: null,
   respondedAt: null,
   responseState: 'on_track',
@@ -96,6 +98,8 @@ export const detail = (overrides: Partial<CandidateDetailDto> = {}): CandidateDe
       responseDueAt: null,
       respondedAt: null,
       responseState: 'on_track',
+      origin: 'linkedin',
+      campaign: 'autumn-2026',
       extraction: {
         status: 'done',
         source: 'model',

@@ -8,7 +8,9 @@ import { seedRandomEvents } from '../testing/report-random.js';
 import { expectedJobFunnels, expectedReports, REPORT_FROM, REPORT_NOW, REPORT_TO, seedReportDataset, type DatasetRepositories } from '../testing/report-dataset.js';
 import type { ReportDeps } from '../report-ports.js';
 import { exportReportsCsv } from '../use-cases/reports/export-reports-csv.js';
+import { getJobTraffic } from '../use-cases/reports/get-job-traffic.js';
 import { getReports } from '../use-cases/reports/get-reports.js';
+import { seedCandidateWorld } from '../testing/candidate-seed.js';
 import { createDrizzleApplications } from './drizzle-applications.js';
 import { createDrizzleAuditLog } from './drizzle-audit-log.js';
 import { createDrizzleCandidates } from './drizzle-candidates.js';
@@ -163,5 +165,18 @@ describe('stage history on Postgres', () => {
     await expect(
       createDrizzleResponsePromises(handle.db).save({ id: randomUUID(), organizationId: org, applicationId: 'x', jobId: 'x', stageId: 'received', startedAt: REPORT_NOW, dueAt: REPORT_NOW, respondedAt: null, status: 'open', backfilled: false }),
     ).rejects.toThrow('not found');
+  });
+});
+
+describe('getJobTraffic on Postgres', () => {
+  it('gives the same daily rows as the in-memory adapter, per UTC day, source and campaign', async () => {
+    const { owner, ids } = await seeded();
+    const memory = seedCandidateWorld({ applications: [], candidates: [], extractions: [], jobs: [], overrides: { now: () => REPORT_NOW } });
+    const memoryIds = await seedReportDataset(memory, 'org_a', 'm');
+    const expected = await getJobTraffic(memory, userActor({ role: 'owner', organizationId: 'org_a' }), { ...query, jobId: memoryIds.backend });
+    const actual = await getJobTraffic(deps(), owner, { ...query, jobId: ids.backend });
+    expect(actual.rows).toEqual(expected.rows);
+    expect(actual.rows.reduce((sum, row) => sum + row.visits, 0)).toBeGreaterThan(0);
+    expect(actual.rows.reduce((sum, row) => sum + row.applications, 0)).toBeGreaterThan(0);
   });
 });

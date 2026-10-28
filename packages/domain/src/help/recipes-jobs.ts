@@ -47,7 +47,8 @@ export const JOB_RECIPES: readonly Recipe[] = [
         'Scegli il "Canale" (o "Altro canale…" e scrivi il nome) e, se vuoi, una "Campagna".',
         'Premi "Salva link": compare in "Link salvati", dove lo ritrovi ogni volta che torni. Ripeti per ogni canale o campagna.',
         'Premi "Copia" accanto al link e usalo nel post, nella newsletter o nell\'annuncio esterno. Il cestino rimuove un link, senza toccare le candidature arrivate da lì.',
-        'Visite e candidature per canale compaiono sotto, in "Da dove arrivano visite e candidature", e in "Report", alla voce "Provenienza".',
+        'Sotto, "Visite e candidature" mostra giorno per giorno le visite e le candidature degli ultimi 7, 30 o 90 giorni. Scegli un link salvato o una fonte in "Fonte" per vederla da sola; "Candidature ogni 100 visite" compare dalla quinta visita.',
+        'Premi "Vedi chi si è candidato da…" sotto un link salvato, o una fonte nella tabella, per l\'elenco delle persone: il loro profilo mostra la "Provenienza". Gli stessi numeri sono in "Report", alla voce "Provenienza".',
       ],
       en: [
         'Open "Jobs" and pick a published ad.',
@@ -55,12 +56,13 @@ export const JOB_RECIPES: readonly Recipe[] = [
         'Choose the "Channel" (or "Another channel…" and type its name) and, if you like, a "Campaign".',
         'Press "Save link": it shows under "Saved links", where you find it whenever you come back. Repeat for every channel or campaign.',
         'Press "Copy" next to the link and use it in the post, newsletter or external listing. The bin removes a link without touching the applications that came through it.',
-        'Visits and applications per channel show below, in "Where visits and applications come from", and in "Reports" under "Sources".',
+        'Below, "Visits and applications" shows visits and applications day by day over the last 7, 30 or 90 days. Pick a saved link or a source in "Source" to see it alone; "Applications per 100 visits" appears from the fifth visit.',
+        'Press "See who applied through…" under a saved link, or a source in the table, for the list of people: their profile shows where they "Came from". The same figures are in "Reports" under "Sources".',
       ],
     },
     keywords: {
-      it: ['utm', 'sorgente', 'canale', 'campagna', 'tracciamento', 'condividere', 'linkedin', 'provenienza', 'salvare', 'canali'],
-      en: ['utm', 'source', 'channel', 'campaign', 'tracking', 'share', 'linkedin', 'attribution', 'save', 'channels'],
+      it: ['utm', 'sorgente', 'canale', 'campagna', 'tracciamento', 'condividere', 'linkedin', 'provenienza', 'salvare', 'canali', 'visite', 'grafico'],
+      en: ['utm', 'source', 'channel', 'campaign', 'tracking', 'share', 'linkedin', 'attribution', 'save', 'channels', 'visits', 'chart'],
     },
   },
   {

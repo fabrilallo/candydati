@@ -66,6 +66,7 @@ const ROWS: readonly Row[] = [
   read('getReports', PERIOD),
   read('getReports', { ...PERIOD, jobId: JOB_B }, { label: 'one job' }),
   read('exportReportsCsv', PERIOD),
+  read('getJobTraffic', { ...PERIOD, jobId: JOB_B }),
   read('getJob', { jobId: JOB_B }),
   read('listJobs', {}),
   read('getJobStats', {}, { leaks: (value: { statusCounts: { total: number } }) => (value.statusCounts.total > 1 ? ['job B is counted'] : []) }),

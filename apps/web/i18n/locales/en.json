@@ -1532,7 +1532,8 @@
     },
     "header": {
       "stage": "Stage:",
-      "status": "Status:"
+      "status": "Status:",
+      "origin": "Came from:"
     },
     "actions": {
       "decide": "Outcome",
@@ -3600,9 +3601,10 @@
       "emptyTitle": "No applications in this period",
       "emptyBody": "Share the tracked link of each ad (Distribution tab of the ad, or add ?utm_source=linkedin by hand) to know where people come from.",
       "visits": "no visits | 1 visit | {count} visits",
-      "conversion": "conversion {rate}",
+      "conversion": "{count} applications per 100 visits",
       "campaigns": "Campaigns",
-      "noVisits": "No visits counted in this period. A visit is counted when someone opens the ad from the careers page or from a tracked link: build one in the Distribution tab of the ad."
+      "noVisits": "No visits counted in this period. A visit is counted when someone opens the ad from the careers page or from a tracked link: build one in the Distribution tab of the ad.",
+      "conversionFew": "too few for a rate"
     },
     "responses": {
       "title": "Response times",
@@ -4161,14 +4163,14 @@
       "university": "University"
     },
     "visits": {
-      "title": "Where visits and applications come from",
-      "description": "The last 90 days, for this ad only.",
+      "title": "Visits and applications",
+      "description": "For this ad only, day by day. Visits are anonymous counts: no cookies, no IP addresses.",
       "error": "The figures could not be loaded."
     },
     "saved": {
       "title": "Saved links",
       "none": "No saved links yet. Choose a channel below and press \"Save link\": you will find it here whenever you come back.",
-      "applications": "No applications in 90 days | 1 application in 90 days | {count} applications in 90 days",
+      "applications": "No applications | 1 application | {count} applications",
       "copy": "Copy the link for {name}",
       "remove": "Remove the link for {name}",
       "created": "Link saved",
@@ -4176,6 +4178,40 @@
       "removed": "Link removed. Applications that came through it stay counted.",
       "saveFailed": "The link was not saved",
       "removeFailed": "The link was not removed"
+    },
+    "traffic": {
+      "visits": "Visits",
+      "applications": "Applications",
+      "day": "Day",
+      "period": "Period",
+      "days": "{count} days",
+      "source": "Source",
+      "all": "All sources",
+      "groups": {
+        "links": "Saved links",
+        "sources": "Sources in the period"
+      },
+      "caption": "Visits and applications per day, {source}, last {count} days",
+      "noVisits": "No visits counted in this period. A visit is counted when someone opens the ad in a browser: share a tracked link to know where it comes from.",
+      "conversion": {
+        "label": "Applications per 100 visits",
+        "noVisits": "It cannot be worked out without counted visits.",
+        "fewVisits": "At least {min} visits are needed for a reliable figure: 1 visit so far. | At least {min} visits are needed for a reliable figure: {count} visits so far.",
+        "explain": "{applications} applications from {visits} visits. It can pass 100: an application counts even when the browser sent no visit."
+      },
+      "table": {
+        "caption": "Visits and applications per source",
+        "source": "Source",
+        "per100": "Per 100 visits",
+        "note": "Press a source or a campaign to see it alone in the chart and who applied through it. The figure per 100 visits appears from the fifth visit."
+      }
+    },
+    "people": {
+      "title": "Applications from {source}",
+      "none": "No applications came through here.",
+      "applied": "applied on {date}",
+      "pick": "Choose a source or a saved link to see who applied through it.",
+      "show": "See who applied through {name}"
     }
   },
   "timeline": {
@@ -4382,5 +4418,8 @@
       "integrations": "Integrations and data",
       "privacy": "Privacy"
     }
+  },
+  "origin": {
+    "withCampaign": "{source}, campaign {campaign}"
   }
 }

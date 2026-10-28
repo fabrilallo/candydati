@@ -1,6 +1,6 @@
 import { and, eq, gte, inArray, lte, schema, sql, type SQL } from '@candydati/db';
 import { viewDay } from '@candydati/domain';
-import type { ReportAggregateQuery, ReportAggregates } from '../report-ports.js';
+import type { DailyTraffic, ReportAggregateQuery, ReportAggregates, TrafficQuery } from '../report-ports.js';
 import type { DbExecutor } from './db-executor.js';
 
 const { application, jobViewDaily } = schema;
@@ -9,7 +9,7 @@ const ts = (date: Date): SQL => sql`${date.toISOString()}::timestamptz`;
 
 type Column = Parameters<typeof eq>[0];
 
-const scope = (query: ReportAggregateQuery, columns: { organizationId: Column; jobId: Column }) =>
+const scope = (query: Pick<ReportAggregateQuery, 'organizationId' | 'jobId' | 'jobIds'>, columns: { organizationId: Column; jobId: Column }) =>
   and(
     eq(columns.organizationId, query.organizationId),
     query.jobId === undefined ? undefined : eq(columns.jobId, query.jobId),
@@ -46,4 +46,24 @@ export async function queryVisits(db: DbExecutor, query: ReportAggregateQuery): 
     .where(and(scope(query, jobViewDaily), gte(jobViewDaily.day, viewDay(query.from)), lte(jobViewDaily.day, viewDay(query.to))))
     .groupBy(jobViewDaily.source, jobViewDaily.campaign);
   return rows;
+}
+
+/** Visits and applications of one job per UTC day, source and campaign: the daily chart of the Distribution tab. */
+export async function queryDailyTraffic(db: DbExecutor, query: TrafficQuery): Promise<DailyTraffic> {
+  const { from, to } = query;
+  const day = sql<string>`to_char(${application.createdAt} at time zone 'UTC', 'YYYY-MM-DD')`;
+  const campaign = sql<string>`coalesce(${application.originCampaign}, '')`;
+  const [visits, applications] = await Promise.all([
+    db
+      .select({ day: sql<string>`${jobViewDaily.day}::text`, origin: jobViewDaily.source, campaign: jobViewDaily.campaign, visits: sql<number>`sum(${jobViewDaily.views})::int` })
+      .from(jobViewDaily)
+      .where(and(scope(query, jobViewDaily), gte(jobViewDaily.day, viewDay(from)), lte(jobViewDaily.day, viewDay(to))))
+      .groupBy(jobViewDaily.day, jobViewDaily.source, jobViewDaily.campaign),
+    db
+      .select({ day, origin: application.origin, campaign, applications: sql<number>`count(*)::int` })
+      .from(application)
+      .where(and(scope(query, application), sql`${application.createdAt} >= ${ts(from)} and ${application.createdAt} <= ${ts(to)}`))
+      .groupBy(day, application.origin, campaign),
+  ]);
+  return { visits, applications };
 }

@@ -6,6 +6,27 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Distribuzione shows visits and applications of the ad day by day: a chart over the last 7, 30 or 90 days (visits as
+  light bars, applications as dark bars inside them), for every source or for one saved link, source or campaign,
+  with the totals above it ("Visite", "Candidature", "Candidature ogni 100 visite") and a table per source and
+  campaign. Screen readers get the same figures as a table. API: `GET /api/v1/jobs/:id/traffic` (`report:read`),
+  daily counts per source and campaign, documented in OpenAPI. Visits stay anonymous daily counts.
+- Who applied through a link: each saved link has "Vedi chi si è candidato da…", and choosing a source lists the
+  people too (name, date, where the application stands), linking to the profile. The list is the job's pipeline, so
+  it shows exactly the people the board shows the viewer.
+- The candidate profile says where the application came from ("Provenienza: LinkedIn, campagna autunno-2026", or
+  Diretta, Import, Inserita a mano). The pipeline and profile answers of the api carry `origin` and `campaign`.
+
+### Changed
+
+- "1 visita, conversione —" is gone. A rate is still shown only from the fifth visit (`REPORT_MIN_SAMPLE`), so one
+  visit and one application had no rate and showed a bare dash; now the figure is "candidature ogni 100 visite" and,
+  under five visits, the text says that more visits are needed (Distribuzione) or "troppo poche per un tasso"
+  (Report). The hire rate is left out instead of showing a dash when there are too few applications. The saved links
+  count every application that came through them, not only the last 90 days.
+
 ### Fixed
 
 - Panoramica: the note saying candidate metrics would come with applications is gone. In its place, for whoever can

@@ -3,7 +3,7 @@ import { EMPTY_DURATION, type DurationStat, type Outcome } from '@candydati/doma
 import type { ReportAggregateQuery, ReportAggregates, ReportRepository } from '../report-ports.js';
 import type { DbExecutor } from './db-executor.js';
 import { queryStageAdvances } from './drizzle-report-funnel.js';
-import { queryVisits, querySources } from './drizzle-report-sources.js';
+import { queryDailyTraffic, queryVisits, querySources } from './drizzle-report-sources.js';
 
 /**
  * Aggregates behind `getReports`, computed by Postgres. Every statement filters by `organization_id`; the period is closed on
@@ -115,5 +115,6 @@ export function createDrizzleReports(db: DbExecutor): ReportRepository {
         coverage,
       };
     },
+    dailyTraffic: (query) => queryDailyTraffic(db, query),
   };
 }

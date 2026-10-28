@@ -1,9 +1,9 @@
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { readBody } from 'h3'
-import type { TrackedLinkDto } from '@candydati/domain'
+import type { PipelineDto, TrackedLinkDto } from '@candydati/domain'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ok } from '~~/test/fixtures/job-fixtures'
-import { reportsFixture } from '~~/test/fixtures/phase10-fixtures'
+import { card, pipeline } from '~~/test/fixtures/candidate-fixtures'
 import TrackedLinksPanel from './TrackedLinksPanel.vue'
 
 const JOB = 'https://jobs.example.com/careers/acme/backend-1'
@@ -31,9 +31,15 @@ registerEndpoint('/api/v1/jobs/job-1/tracked-links/tl-1', {
 })
 
 const mounted: { unmount: () => void }[] = []
-const mountPanel = async (props: { jobUrl?: string | null; report?: unknown } = {}) => {
+const board = (): PipelineDto =>
+  pipeline([
+    card('a1', 'received', { origin: 'linkedin', campaign: 'autumn' }),
+    card('a2', 'stage-0', { origin: 'linkedin', campaign: 'autumn' }),
+    card('a3', 'received', { origin: 'indeed', campaign: null }),
+  ])
+const mountPanel = async (props: { jobUrl?: string | null; pipeline?: PipelineDto | null } = {}) => {
   const wrapper = await mountSuspended(TrackedLinksPanel, {
-    props: { jobId: 'job-1', jobUrl: props.jobUrl === undefined ? JOB : props.jobUrl, report: (props.report ?? null) as never },
+    props: { jobId: 'job-1', jobUrl: props.jobUrl === undefined ? JOB : props.jobUrl, pipeline: props.pipeline ?? null },
     attachTo: document.body,
   })
   mounted.push(wrapper)
@@ -51,15 +57,29 @@ afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
 
 describe('TrackedLinksPanel', () => {
   it('lists every saved link with its URL, copy button and the applications that came through it', async () => {
-    const wrapper = await mountPanel({ report: reportsFixture() })
+    const wrapper = await mountPanel({ pipeline: board() })
     await vi.waitFor(() => expect(wrapper.findAll('[data-testid="tracked-link-row"]')).toHaveLength(3))
     const names = wrapper.findAll('[data-testid="tracked-link-name"]').map((name) => name.text())
     expect(names).toEqual(['LinkedIn', 'LinkedIn · autumn', 'fiera-bologna'])
     const urls = wrapper.findAll('[data-testid="tracked-link-saved-url"]').map((url) => url.text())
     expect(urls).toEqual([`${JOB}?utm_source=linkedin`, `${JOB}?utm_source=linkedin&utm_campaign=autumn`, `${JOB}?utm_source=fiera-bologna`])
     const counts = wrapper.findAll('[data-testid="tracked-link-applications"]').map((count) => count.text())
-    expect(counts).toEqual(['Nessuna candidatura in 90 giorni', '14 candidature in 90 giorni', 'Nessuna candidatura in 90 giorni'])
+    expect(counts).toEqual(['Nessuna candidatura', '2 candidature', 'Nessuna candidatura'])
     expect(wrapper.find('button[aria-label="Copia il link per LinkedIn · autumn"]').exists()).toBe(true)
+    const people = wrapper.findAll('[data-testid="tracked-link-people"]')
+    expect(people).toHaveLength(1)
+    expect(people[0]!.find('summary').text()).toBe('Vedi chi si è candidato da LinkedIn · autumn')
+    expect(people[0]!.findAll('[data-testid="source-application"] a').map((a) => a.attributes('href'))).toEqual([
+      '/app/candidates/c-a1?application=a1&viaJobId=job-1',
+      '/app/candidates/c-a2?application=a2&viaJobId=job-1',
+    ])
+  })
+
+  it('shows no count and no names without access to candidates', async () => {
+    const wrapper = await mountPanel({ pipeline: null })
+    await vi.waitFor(() => expect(wrapper.findAll('[data-testid="tracked-link-row"]')).toHaveLength(3))
+    expect(wrapper.find('[data-testid="tracked-link-applications"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="tracked-link-people"]').exists()).toBe(false)
   })
 
   it('saves a new link and shows it in the list', async () => {

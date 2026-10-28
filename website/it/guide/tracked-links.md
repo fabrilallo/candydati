@@ -18,7 +18,8 @@ Apri un annuncio pubblicato, poi la scheda **Distribuzione**, poi **Link traccia
 https://jobs.example.com/careers/acme/backend-developer?utm_source=linkedin&utm_campaign=autunno-2026
 ```
 
-Ogni link salvato mostra quante candidature sono arrivate da lì negli ultimi 90 giorni. Si salvano solo il canale e la
+Ogni link salvato mostra quante candidature sono arrivate da lì e, con **Vedi chi si è candidato da…**, chi sono:
+nome, data e fase, con il link al profilo. Si salvano solo il canale e la
 campagna, mai l'indirizzo: se l'indirizzo dell'annuncio cambia, i link salvati lo seguono. Rimuovere un link non cambia
 nessun numero, le candidature arrivate da lì mantengono la loro provenienza. Salvare e rimuovere link richiede lo stesso
 permesso che serve per pubblicare l'annuncio, ed entrambe le azioni finiscono nel registro delle azioni.
@@ -29,14 +30,30 @@ La pagina mostra come il tuo testo comparirà nei Report. Un indirizzo email non
 Puoi anche aggiungere a mano `?utm_source=...` e `&utm_campaign=...`, oppure solo `?ref=...`. Un link senza parametri
 viene attribuito al sito di provenienza del visitatore (per esempio `google.com`) e a **diretta** quando non ce n'è.
 
+## Visite e candidature nella scheda Distribuzione
+
+Sotto i link, **Visite e candidature** mostra l'annuncio giorno per giorno negli ultimi 7, 30 o 90 giorni: le visite
+sono le barre chiare, le candidature le barre scure dentro di esse. In **Fonte** scegli tutte le fonti, un link salvato,
+una fonte o una campagna per vederla da sola. Sopra il grafico ci sono tre numeri:
+
+- **Visite** e **Candidature** del periodo.
+- **Candidature ogni 100 visite**: 20 vuol dire che su 100 aperture dell'annuncio sono arrivate 20 candidature. Compare
+  da 5 visite in su; sotto, il riquadro dice quante visite mancano invece di mostrare un numero che non vuol dire niente
+  (una visita e una candidatura non fanno un tasso).
+
+La tabella sotto il grafico riporta le stesse cifre per fonte e campagna. Premi una fonte per vederla da sola e per
+l'elenco di chi si è candidato da lì. L'elenco mostra le persone che vedi anche nella pipeline dell'annuncio, con gli
+stessi permessi. Il profilo di ogni candidato dice da dove è arrivata la candidatura, per esempio **Provenienza:
+LinkedIn, campagna autunno-2026**, oppure Diretta, Import o Inserita a mano.
+
 ## Cosa mostrano i Report
 
 Nei **Report**, la scheda **Provenienza** elenca ogni canale con le visite all'annuncio, le candidature, la conversione
-(candidature su visite) e le assunzioni con il loro tasso. Sotto, **Campagne** mostra le stesse cifre per canale e
-campagna. La scheda Distribuzione di ogni annuncio mostra le stesse cifre solo per quell'annuncio, negli ultimi 90
-giorni. L'esportazione CSV ha un blocco `sources` e uno `campaigns` con visite e conversione.
+(candidature ogni 100 visite) e le assunzioni con il loro tasso. Sotto, **Campagne** mostra le stesse cifre per canale
+e campagna. L'esportazione CSV ha un blocco `sources` e uno `campaigns` con visite e conversione.
 
-- La conversione si mostra da 5 visite in su; sotto vedi un trattino, come ogni percentuale nei Report.
+- La conversione si mostra da 5 visite in su; sotto si legge "troppo poche per un tasso". Il tasso di assunzione si
+  mostra da 5 candidature in su.
 - Una visita si conta quando un browser mostra la pagina dell'annuncio. Non si contano motori di ricerca e altri crawler,
   anteprime dei link e browser senza interfaccia, né chi ha un browser che invia Do Not Track o Global Privacy Control.
 - Un client può contare al massimo 30 visite al minuto, così un ciclo di ricariche non gonfia i numeri.

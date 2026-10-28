@@ -29,6 +29,10 @@ const person = z.object({ id: z.string(), firstName: z.string(), lastName: z.str
 const consentStatus = z.enum(CONSENT_STATUSES);
 const importBatchId = z.string().nullable();
 const stage = z.object({ id: z.string(), declared: selectionStageSchema.nullable() });
+const originFields = {
+  origin: z.string().describe('Where the application came from: `direct`, `import`, `manual`, or a channel (`utm_source`, `ref` or referrer host).'),
+  campaign: z.string().nullable().describe('The `utm_campaign` it came with; null when none.'),
+};
 
 export const applicationCardSchema: z.ZodType<ApplicationCardDto> = z.object({
   id: z.string(),
@@ -47,6 +51,7 @@ export const applicationCardSchema: z.ZodType<ApplicationCardDto> = z.object({
   retentionExpiresAt: isoDate,
   stageRemoved: z.boolean(),
   hasCv: z.boolean().describe('False only for an application migrated from another ATS without a CV.'),
+  ...originFields,
   candidate: person.extend({
     tags: z.array(z.string()),
     headline: z.string().nullable(),
@@ -112,6 +117,7 @@ export const candidateDetailSchema: z.ZodType<CandidateDetailDto> = z.object({
       responseDueAt: isoDate.nullable(),
       respondedAt: isoDate.nullable(),
       responseState: z.enum(RESPONSE_STATES),
+      ...originFields,
       consent: z.object({ status: consentStatus, privacyNoticeVersion: z.number().int().nullable(), scopes: z.array(z.enum(CONSENT_SCOPES)), givenAt: isoDate.nullable() }),
       importBatchId,
       retentionExpiresAt: isoDate,

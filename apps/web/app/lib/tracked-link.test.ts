@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applicationsThrough, buildTrackedLink, channelLabel, CHANNEL_PRESETS, trackedLabels } from './tracked-link'
+import { buildTrackedLink, channelLabel, CHANNEL_PRESETS, trackedLabels } from './tracked-link'
 
 const JOB = 'https://jobs.example.com/careers/acme/backend-1'
 
@@ -46,33 +46,5 @@ describe('channelLabel', () => {
     expect(channelLabel('linkedin', t)).toBe('LinkedIn')
     expect(channelLabel('career-fair', t)).toBe('t:trackedLinks.presets.career-fair')
     expect(channelLabel('fiera-bologna', t)).toBe('fiera-bologna')
-  })
-})
-
-describe('applicationsThrough', () => {
-  const sources = [
-    { origin: 'linkedin', applications: 9, hires: 0, visits: 40, conversion: 0.2 },
-    { origin: 'indeed', applications: 2, hires: 0, visits: 10, conversion: 0.2 },
-  ]
-  const campaigns = [
-    { origin: 'linkedin', campaign: 'autumn', applications: 4, hires: 0, visits: 20, conversion: 0.2 },
-    { origin: 'linkedin', campaign: 'spring', applications: 1, hires: 0, visits: 5, conversion: 0.2 },
-  ]
-  const report = { sources, campaigns }
-
-  it('counts a campaign link by its campaign row', () => {
-    expect(applicationsThrough(report, { source: 'linkedin', campaign: 'autumn' })).toBe(4)
-    expect(applicationsThrough(report, { source: 'linkedin', campaign: 'winter' })).toBe(0)
-  })
-
-  it('counts a link without campaign as the channel minus its campaigns', () => {
-    expect(applicationsThrough(report, { source: 'linkedin', campaign: '' })).toBe(4)
-    expect(applicationsThrough(report, { source: 'indeed', campaign: '' })).toBe(2)
-    expect(applicationsThrough(report, { source: 'glassdoor', campaign: '' })).toBe(0)
-  })
-
-  it('is null when the figures are missing', () => {
-    expect(applicationsThrough(null, { source: 'linkedin', campaign: '' })).toBeNull()
-    expect(applicationsThrough({ sources: null, campaigns }, { source: 'linkedin', campaign: '' })).toBeNull()
   })
 })

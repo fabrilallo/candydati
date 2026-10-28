@@ -58,9 +58,13 @@ describe('candidate DTO mappers', () => {
       retentionExpiresAt: '2027-01-01T00:00:00.000Z',
       stageRemoved: false,
       hasCv: true,
+      origin: 'direct',
+      campaign: null,
       candidate: { id: 'cand_1', firstName: 'Ada', lastName: 'Lovelace', tags: ['go'], headline: 'Senior engineer', location: 'Milano', yearsOfExperience: 8 },
     });
-    expect(toApplicationCardDto({ ...view, extraction: null, application: buildApplication() })).toMatchObject({
+    expect(toApplicationCardDto({ ...view, extraction: null, application: buildApplication({ origin: 'linkedin', originCampaign: 'autumn' }) })).toMatchObject({
+      origin: 'linkedin',
+      campaign: 'autumn',
       closedAt: null,
       candidate: { headline: null, location: null, yearsOfExperience: null },
     });
@@ -84,11 +88,12 @@ describe('candidate DTO mappers', () => {
       applications: [
         { application: buildApplication({ stageId: 'gone' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] },
         { application: buildApplication({ stageId: 'stage-0' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] },
-        { application: buildApplication({ stageId: 'received' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] },
+        { application: buildApplication({ stageId: 'received', origin: 'linkedin', originCampaign: 'autumn' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] },
       ],
       notes: [],
     });
     expect(detail.applications.map((a) => a.stageRemoved)).toEqual([true, false, false]);
+    expect(detail.applications.map((a) => [a.origin, a.campaign])).toEqual([['direct', null], ['direct', null], ['linkedin', 'autumn']]);
     expect(detail.applications.map((a) => a.messageCount)).toEqual([0, 0, 0]);
     const counted = toCandidateDetailDto({ candidate, applications: [{ application, job, stages, extraction: null, messageCount: 4, responseState: 'on_track' as const, attachments: [] }], notes: [] });
     expect(counted.applications[0]?.messageCount).toBe(4);

@@ -4,6 +4,7 @@ import { FileTextIcon, HistoryIcon, ListTodoIcon, MailIcon, MessagesSquareIcon, 
 import { applicationStatus, currentApplication, fullName, stageOf } from '@/lib/candidate-view'
 import { renewalDeadline } from '@/lib/import-view'
 import { messageTotal, outcomeTemplateKind } from '@/lib/message-view'
+import { originText } from '@/lib/origin-label'
 import { can } from '@/lib/permissions-ui'
 import { stageName } from '@/lib/pipeline-board'
 import type { TabItem } from '@/lib/tabs'
@@ -116,6 +117,10 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
               {{ t('candidate.header.status') }}
               <span class="font-medium" :class="status.tone === 'success' ? 'text-success' : 'text-foreground'">{{ t(status.key) }}</span>
               <ResponsePill v-if="current" :application="current" :now="now" class="ml-1" />
+            </p>
+            <p v-if="current" class="text-sm text-muted-foreground" data-testid="candidate-origin">
+              {{ t('candidate.header.origin') }}
+              <span class="font-medium text-foreground">{{ originText(current.origin, current.campaign, t) }}</span>
             </p>
             <p v-if="renewBy"><ConsentRenewPill status="to_renew" :expires-at="renewBy" :now="now" /></p>
           </div>

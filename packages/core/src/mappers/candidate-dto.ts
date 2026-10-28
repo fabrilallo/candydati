@@ -20,6 +20,11 @@ import type { CandidatePage } from '../use-cases/candidates/search-candidates.js
 import type { ApplicationCardView, ApplicationTimelineView, CandidateDetailView, NoteView, PipelineView } from '../use-cases/candidates/views.js';
 
 const iso = (date: Date): string => date.toISOString();
+/** The source and campaign an application arrived with; an empty campaign is none. */
+const originOf = (application: { readonly origin: string; readonly originCampaign?: string | null }): { readonly origin: string; readonly campaign: string | null } => ({
+  origin: application.origin,
+  campaign: application.originCampaign ? application.originCampaign : null,
+});
 const isoOrNull = (date: Date | null): string | null => (date ? date.toISOString() : null);
 
 export interface PrivacyNoticeDto {
@@ -64,6 +69,9 @@ export interface ApplicationCardDto {
   readonly stageRemoved: boolean;
   /** False only for an application brought by a migration without a CV: the card says so. */
   readonly hasCv: boolean;
+  /** Where it came from: a source label (`direct`, `import`, `manual` or a channel) and its `utm_campaign`, null when none. */
+  readonly origin: string;
+  readonly campaign: string | null;
   readonly candidate: {
     readonly id: string;
     readonly firstName: string;
@@ -135,6 +143,9 @@ export interface CandidateDetailDto {
     readonly responseDueAt: string | null;
     readonly respondedAt: string | null;
     readonly responseState: ResponseState;
+    /** Where it came from, as on the card. */
+    readonly origin: string;
+    readonly campaign: string | null;
     /** For `to_renew`: no version, no scopes, no date, because nothing was agreed. */
     readonly consent: {
       readonly status: ConsentStatus;
@@ -195,6 +206,7 @@ export const toApplicationCardDto = (view: ApplicationCardView): ApplicationCard
     retentionExpiresAt: iso(application.retentionExpiresAt),
     stageRemoved: view.stageRemoved,
     hasCv: application.cv !== null,
+    ...originOf(application),
     candidate: {
       id: candidate.id,
       firstName: candidate.firstName,
@@ -289,6 +301,7 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
     responseDueAt: isoOrNull(application.responseDueAt),
     respondedAt: isoOrNull(application.respondedAt),
     responseState,
+    ...originOf(application),
     consent:
       application.consentStatus === 'given'
         ? { status: 'given', privacyNoticeVersion: application.consent.privacyNoticeVersion, scopes: application.consent.scopes, givenAt: iso(application.consent.givenAt) }

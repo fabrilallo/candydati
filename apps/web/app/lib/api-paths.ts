@@ -17,6 +17,7 @@ export const jobDistributionSyncPath = (jobId: string): string => `${jobDistribu
 export const channelSettingPath = (channelId: string): string => `${DISTRIBUTION_PATH}/channels/${enc(channelId)}`
 export const trackedLinksPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/tracked-links`
 export const trackedLinkPath = (jobId: string, linkId: string): string => `${trackedLinksPath(jobId)}/${enc(linkId)}`
+export const jobTrafficPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/traffic`
 
 // Interviewers, feedback, job requests, approval, stale ads, reports
 export const jobInterviewersPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/interviewers`

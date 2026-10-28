@@ -12,6 +12,8 @@ import { applicationConsentSchema, cardConsentFields, importedFields } from './c
  * Every field is always present; `responseState` is never null (the api computes it for every application).
  */
 const count = z.number().int().nonnegative();
+/** Where the application came from: a source label (`direct`, `import`, `manual` or a channel) and its campaign. */
+const originFields = { origin: z.string(), campaign: z.string().nullable() };
 const responseFields = { responseDueAt: isoDate.nullable(), respondedAt: isoDate.nullable(), responseState: z.enum(RESPONSE_STATES) };
 
 /** A pipeline stage: `received` (declared null) or one declared stage of the ad. */
@@ -31,6 +33,7 @@ export const applicationCardSchema = z.object({
   stageRemoved: z.boolean(),
   /** false only for an application brought by a migration without a CV: the card says so. */
   hasCv: z.boolean(),
+  ...originFields,
   ...responseFields,
   ...cardConsentFields,
   candidate: z.object({
@@ -106,6 +109,7 @@ export const candidateApplicationSchema = z.object({
   stageChangedAt: isoDate,
   closedAt: isoDate.nullable(),
   ...responseFields,
+  ...originFields,
   /** Whether consent was given or is still to renew lives in `consent.status`. */
   consent: applicationConsentSchema,
   importBatchId: z.string().nullable(),

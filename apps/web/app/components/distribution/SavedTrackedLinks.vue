@@ -1,25 +1,29 @@
 <script setup lang="ts">
-import type { ReportsView } from '@candydati/domain'
+import type { PipelineDto } from '@candydati/domain'
 import { Trash2Icon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
-import { applicationsThrough, buildTrackedLink, channelLabel } from '@/lib/tracked-link'
+import { buildTrackedLink, channelLabel } from '@/lib/tracked-link'
 import type { TrackedLinkDto } from '@/lib/tracked-link-api'
+import { matchesSource } from '@/lib/traffic-view'
 
 /**
  * The tracked links saved on the ad, one per channel and campaign: the link to copy (while the ad is published) and,
- * with the source figures, how many applications came through it in the last 90 days. Removing a link changes no figure.
+ * for a viewer who reads candidates, how many applied through it, with the list of who they are. A link without a
+ * campaign counts the applications of that channel that came without one. Removing a link changes no figure.
  */
-const props = defineProps<{ links: readonly TrackedLinkDto[]; jobUrl: string | null; report: ReportsView | null; busy: string | null }>()
+const props = defineProps<{ jobId: string; links: readonly TrackedLinkDto[]; jobUrl: string | null; pipeline: PipelineDto | null; busy: string | null }>()
 const emit = defineEmits<{ remove: [linkId: string] }>()
 const { t } = useI18n()
 const rows = computed(() =>
   props.links.map((link) => {
     const name = channelLabel(link.source, t)
+    const filter = { origin: link.source, campaign: link.campaign }
     return {
       link,
+      filter,
       name: link.campaign ? `${name} · ${link.campaign}` : name,
       url: props.jobUrl === null ? null : (buildTrackedLink({ jobUrl: props.jobUrl, source: link.source, campaign: link.campaign })?.url ?? null),
-      applications: applicationsThrough(props.report, link),
+      applications: props.pipeline === null ? null : props.pipeline.applications.filter((card) => matchesSource(card, filter)).length,
     }
   }),
 )
@@ -53,6 +57,10 @@ const rows = computed(() =>
             <Trash2Icon aria-hidden="true" />
           </Button>
         </div>
+        <details v-if="pipeline && row.applications" class="group" data-testid="tracked-link-people">
+          <summary class="cursor-pointer text-xs font-medium text-link underline-offset-4 hover:underline">{{ t('trackedLinks.people.show', { name: row.name }) }}</summary>
+          <SourceApplications class="mt-2" :pipeline="pipeline" :filter="row.filter" :job-id="jobId" />
+        </details>
       </li>
     </ul>
   </div>

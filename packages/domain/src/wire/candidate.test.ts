@@ -12,6 +12,8 @@ const card = {
   noteCount: 0,
   stageRemoved: false,
   hasCv: true,
+  origin: 'linkedin',
+  campaign: 'autumn-2026',
   responseDueAt: null,
   respondedAt: null,
   responseState: 'on_track',
@@ -31,6 +33,13 @@ describe('candidate wire schemas', () => {
   it('reads a card without a CV and requires the flag', () => {
     expect(applicationCardSchema.parse({ ...card, hasCv: false }).hasCv).toBe(false);
     expect(() => applicationCardSchema.parse({ ...card, hasCv: undefined })).toThrow();
+  });
+
+  it('reads the origin of a card and requires it', () => {
+    expect(applicationCardSchema.parse(card)).toMatchObject({ origin: 'linkedin', campaign: 'autumn-2026' });
+    expect(applicationCardSchema.parse({ ...card, campaign: null }).campaign).toBeNull();
+    expect(() => applicationCardSchema.parse({ ...card, origin: undefined })).toThrow();
+    expect(candidateApplicationSchema.shape.origin.parse('direct')).toBe('direct');
   });
 
   it('reads a null CV on the detail and a note by an external author', () => {

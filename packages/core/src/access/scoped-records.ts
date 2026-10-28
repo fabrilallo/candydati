@@ -128,6 +128,10 @@ export function scopeReports(raw: ReportRepository, ctx: JobScopeContext): Repor
       const jobIds = await ctx.jobIds();
       return raw.aggregate(jobIds === null ? query : { ...query, jobIds });
     },
+    async dailyTraffic(query) {
+      const jobIds = await ctx.jobIds();
+      return raw.dailyTraffic(jobIds === null ? query : { ...query, jobIds });
+    },
   };
 }
 

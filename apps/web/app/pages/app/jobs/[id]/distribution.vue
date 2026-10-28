@@ -4,6 +4,7 @@ import { jobUrl } from '@candydati/domain'
 import { formatDate } from '@/lib/format'
 import { getJob, loaded } from '@/lib/job-api'
 import { can } from '@/lib/permissions-ui'
+import type { TrackedLinkDto } from '@/lib/tracked-link-api'
 
 definePageMeta({ layout: 'app' })
 const { t, locale } = useI18n()
@@ -25,8 +26,10 @@ const publicUrl = computed(() => {
   const org = viewer.value?.organization?.slug
   return job.value?.status === 'published' && slug && org ? jobUrl(config.public.siteUrl, org, slug) : null
 })
-// Read once for the sources panel and the saved tracked links (applications per link).
-const sources = useJobSources(id, () => allowed.value && canReadReports.value)
+const canReadCandidates = computed(() => can(viewer.value?.role ?? null, 'candidate:read'))
+// Who applied through each link or source: the job's pipeline, as the board shows it to this viewer (candidate:read only).
+const pipeline = canReadCandidates.value && allowed.value ? usePipelineData(id).pipeline : computed(() => null)
+const savedLinks = ref<readonly TrackedLinkDto[]>([])
 const title = computed(() => job.value?.content.title || t('job.editor.untitled'))
 useSeoMeta({ title: () => `${t('distribution.job.title')}: ${title.value}` })
 </script>
@@ -46,14 +49,8 @@ useSeoMeta({ title: () => `${t('distribution.job.title')}: ${title.value}` })
       <FormAlert v-else-if="!job" :message-key="errorKey ?? 'job.errors.loadFailed'" />
       <template v-else>
         <JobDistributionPanel :job="job" />
-        <TrackedLinksPanel :job-id="job.id" :job-url="publicUrl" :report="sources.report.value" />
-        <JobSourcesPanel
-          v-if="canReadReports"
-          :report="sources.report.value"
-          :error-key="sources.errorKey.value"
-          :loading="sources.loading.value"
-          @retry="() => sources.refresh()"
-        />
+        <TrackedLinksPanel :job-id="job.id" :job-url="publicUrl" :pipeline="pipeline" @links="(links) => (savedLinks = links)" />
+        <JobSourcesPanel v-if="canReadReports" :job-id="job.id" :links="savedLinks" :pipeline="pipeline" />
       </template>
     </div>
   </AppPage>
