@@ -403,13 +403,8 @@
         "open": "Vai agli annunci"
       },
       "candidates": {
-        "title": "Le metriche sui candidati arrivano con le candidature",
-        "body": "Per ora il prodotto gestisce solo gli annunci. Quando arriveranno le candidature, qui vedrai i numeri veri, mai stime.",
-        "items": {
-          "funnel": "Conversione per fase",
-          "timeToHire": "Tempo di assunzione",
-          "responseKept": "Tempi di risposta rispettati"
-        }
+        "title": "Candidati negli ultimi 30 giorni",
+        "open": "Apri i Report"
       }
     }
   },

@@ -12,7 +12,7 @@ const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 /**
  * Aggregates of the organization's job ads, for the overview. Real numbers only: every figure is computed
  * from stored ads, nothing is estimated. Averages are null when there is nothing to average.
- * Candidate metrics (funnel, time to hire, response times kept) arrive with applications.
+ * Candidate metrics (funnel, time to hire, response times kept) come from the reports (`/api/v1/reports`).
  */
 export const jobStatsDtoSchema = z.object({
   generatedAt: z.iso.datetime(),
