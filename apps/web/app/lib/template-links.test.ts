@@ -43,6 +43,8 @@ const SAFE_BY_CONSTRUCTION = [
   /^OPENAPI_PATH$/,
   // Fixed https pages of the AI providers' consoles, a static map keyed by the chosen provider (`lib/ai-models.ts`).
   /^apiKeyUrl\(/,
+  // A page of the public guide, a fixed https site (`lib/guide-links.ts`).
+  /^guideUrl\(/,
 ]
 
 const BOUND = /(?:v-bind)?:(?:href|src)="([^"]+)"/g
