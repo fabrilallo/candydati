@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { SaveIcon } from '@lucide/vue'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'
@@ -6,9 +8,11 @@ import { buildTrackedLink, CHANNEL_PRESETS, CUSTOM_CHANNEL, trackedLabels } from
 
 /**
  * Builds the link to share on one channel: the public ad URL with `utm_source` and, optionally, `utm_campaign`. What the
- * person types is shown back the way the reports will name it. `jobUrl` is null while the ad is not published.
+ * person types is shown back the way the reports will name it, and "Save link" keeps it on the ad (`save`); the saved
+ * links go in the `saved` slot. `jobUrl` is null while the ad is not published.
  */
-const props = defineProps<{ jobUrl: string | null }>()
+const props = defineProps<{ jobUrl: string | null; saving?: boolean }>()
+const emit = defineEmits<{ save: [link: { readonly source: string; readonly campaign: string }] }>()
 const { t } = useI18n()
 const choice = ref('')
 const custom = ref('')
@@ -18,6 +22,9 @@ const source = computed(() => (isCustom.value ? custom.value : choice.value))
 const labels = computed(() => trackedLabels({ source: source.value, campaign: campaign.value }))
 const link = computed(() => (props.jobUrl === null ? null : buildTrackedLink({ jobUrl: props.jobUrl, source: source.value, campaign: campaign.value })))
 const changed = (typed: string, saved: string): boolean => typed.trim() !== '' && typed.trim() !== saved
+const save = (): void => {
+  if (link.value) emit('save', { source: link.value.source, campaign: link.value.campaign })
+}
 const presetLabel = (preset: (typeof CHANNEL_PRESETS)[number]): string => preset.name ?? t(`trackedLinks.presets.${preset.source}`)
 </script>
 
@@ -27,6 +34,7 @@ const presetLabel = (preset: (typeof CHANNEL_PRESETS)[number]): string => preset
       <h2 id="tracked-links-title" class="text-base font-semibold tracking-tight">{{ t('trackedLinks.title') }}</h2>
       <p class="max-w-prose text-sm text-muted-foreground">{{ t('trackedLinks.description') }}</p>
     </div>
+    <slot name="saved" />
     <p v-if="jobUrl === null" class="text-sm text-muted-foreground" data-testid="tracked-links-unpublished">{{ t('trackedLinks.notPublished') }}</p>
     <template v-else>
       <div class="grid gap-4 sm:grid-cols-2">
@@ -53,9 +61,12 @@ const presetLabel = (preset: (typeof CHANNEL_PRESETS)[number]): string => preset
       </div>
       <div class="grid gap-2" aria-live="polite">
         <p class="text-sm font-medium">{{ t('trackedLinks.link') }}</p>
-        <div v-if="link" class="flex min-w-0 items-center gap-2">
-          <code class="min-w-0 flex-1 truncate rounded-md border bg-muted px-3 py-2 font-mono text-sm" data-testid="tracked-link-url">{{ link.url }}</code>
+        <div v-if="link" class="flex min-w-0 flex-wrap items-center gap-2">
+          <code class="min-w-0 basis-full truncate sm:basis-0 sm:flex-1 rounded-md border bg-muted px-3 py-2 font-mono text-sm" data-testid="tracked-link-url">{{ link.url }}</code>
           <CopyButton :text="link.url" :label="t('trackedLinks.copy')" />
+          <Button type="button" size="sm" :disabled="saving" data-testid="tracked-link-save" @click="save">
+            <SaveIcon aria-hidden="true" />{{ t('trackedLinks.save') }}
+          </Button>
         </div>
         <p v-else class="text-sm text-muted-foreground" data-testid="tracked-link-empty">{{ t('trackedLinks.pick') }}</p>
       </div>

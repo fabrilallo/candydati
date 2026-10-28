@@ -39,26 +39,28 @@ export const JOB_RECIPES: readonly Recipe[] = [
     permission: 'job:publish',
     route: '/app/jobs',
     jobTab: 'distribution',
-    title: { it: 'Creare un link tracciato per una sorgente', en: 'Create a tracked link for a source' },
+    title: { it: 'Creare e salvare link tracciati per i canali', en: 'Create and save tracked links for your channels' },
     steps: {
       it: [
         'Apri "Annunci" e scegli un annuncio pubblicato.',
         'Vai nella scheda "Distribuzione" e cerca la sezione "Link tracciati".',
         'Scegli il "Canale" (o "Altro canale…" e scrivi il nome) e, se vuoi, una "Campagna".',
-        'Premi "Copia il link tracciato" e usalo nel post, nella newsletter o nell\'annuncio esterno.',
+        'Premi "Salva link": compare in "Link salvati", dove lo ritrovi ogni volta che torni. Ripeti per ogni canale o campagna.',
+        'Premi "Copia" accanto al link e usalo nel post, nella newsletter o nell\'annuncio esterno. Il cestino rimuove un link, senza toccare le candidature arrivate da lì.',
         'Visite e candidature per canale compaiono sotto, in "Da dove arrivano visite e candidature", e in "Report", alla voce "Provenienza".',
       ],
       en: [
         'Open "Jobs" and pick a published ad.',
         'Go to the "Distribution" tab and find the "Tracked links" section.',
         'Choose the "Channel" (or "Another channel…" and type its name) and, if you like, a "Campaign".',
-        'Press "Copy tracked link" and use it in the post, newsletter or external listing.',
+        'Press "Save link": it shows under "Saved links", where you find it whenever you come back. Repeat for every channel or campaign.',
+        'Press "Copy" next to the link and use it in the post, newsletter or external listing. The bin removes a link without touching the applications that came through it.',
         'Visits and applications per channel show below, in "Where visits and applications come from", and in "Reports" under "Sources".',
       ],
     },
     keywords: {
-      it: ['utm', 'sorgente', 'canale', 'campagna', 'tracciamento', 'condividere', 'linkedin', 'provenienza'],
-      en: ['utm', 'source', 'channel', 'campaign', 'tracking', 'share', 'linkedin', 'attribution'],
+      it: ['utm', 'sorgente', 'canale', 'campagna', 'tracciamento', 'condividere', 'linkedin', 'provenienza', 'salvare', 'canali'],
+      en: ['utm', 'source', 'channel', 'campaign', 'tracking', 'share', 'linkedin', 'attribution', 'save', 'channels'],
     },
   },
   {

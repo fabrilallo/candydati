@@ -6,6 +6,9 @@ import {
   emailSettingsInputSchema,
   emailTemplateInputSchema,
   jobDistributionSchema,
+  savedTrackedLinkSchema,
+  trackedLinkInputSchema,
+  trackedLinksSchema,
   setChannelEnabledInputSchema,
   templatePreviewSchema,
   unreadCountSchema,
@@ -33,6 +36,20 @@ export const configRoutes: readonly RouteSpec[] = [
   {
     method: 'post', path: '/api/v1/jobs/:id/distribution/sync', tag: 'Distribution', summary: 'Push a job to the enabled channels now', scope: 'job:publish',
     response: { schema: jobDistributionSchema },
+  },
+  {
+    method: 'get', path: '/api/v1/jobs/:id/tracked-links', tag: 'Distribution', summary: 'Tracked links saved on a job', scope: 'job:publish',
+    description: 'One per channel (`utm_source`) and campaign (`utm_campaign`), oldest first. The URL is the public address of the ad with those two parameters.',
+    response: { schema: trackedLinksSchema },
+  },
+  {
+    method: 'post', path: '/api/v1/jobs/:id/tracked-links', tag: 'Distribution', summary: 'Save a tracked link for a channel and campaign', scope: 'job:publish', status: 201,
+    description: 'Both are sanitized the way the reports name them. A pair the job already has answers 200 with that link and `created: false`.',
+    body: trackedLinkInputSchema, response: { schema: savedTrackedLinkSchema },
+  },
+  {
+    method: 'delete', path: '/api/v1/jobs/:id/tracked-links/:linkId', tag: 'Distribution', summary: 'Remove a tracked link', scope: 'job:publish',
+    description: 'Applications that arrived through it keep their source: the reports do not change.', response: { schema: z.object({ removed: z.literal(true) }) },
   },
   { method: 'get', path: '/api/v1/distribution', tag: 'Distribution', summary: 'Feed URLs and channels of the organization', scope: 'job:read', response: { schema: distributionOverviewSchema } },
   {

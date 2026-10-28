@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Tracked links are saved on the ad. In Distribuzione > Link tracciati, "Salva link" keeps the channel and campaign
+  just built; "Link salvati" lists every saved link each time the tab opens, any number of them (one per channel and
+  campaign), with the URL to copy, the applications that came through it in the last 90 days and a button to remove it.
+  Only the pair is stored, the URL follows the public address of the ad; removing a link changes no figure. Saving and
+  removing need `job:publish` and are audited (`job.tracked_link_created`, `job.tracked_link_removed`). API:
+  `GET` and `POST /api/v1/jobs/:id/tracked-links`, `DELETE /api/v1/jobs/:id/tracked-links/:linkId`. Migration 0042
+  creates `job_tracked_link` (new table, no backfill).
+
 ## [0.1.12] - 2026-10-28
 
 ### Changed

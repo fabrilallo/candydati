@@ -25,6 +25,8 @@ const publicUrl = computed(() => {
   const org = viewer.value?.organization?.slug
   return job.value?.status === 'published' && slug && org ? jobUrl(config.public.siteUrl, org, slug) : null
 })
+// Read once for the sources panel and the saved tracked links (applications per link).
+const sources = useJobSources(id, () => allowed.value && canReadReports.value)
 const title = computed(() => job.value?.content.title || t('job.editor.untitled'))
 useSeoMeta({ title: () => `${t('distribution.job.title')}: ${title.value}` })
 </script>
@@ -44,8 +46,14 @@ useSeoMeta({ title: () => `${t('distribution.job.title')}: ${title.value}` })
       <FormAlert v-else-if="!job" :message-key="errorKey ?? 'job.errors.loadFailed'" />
       <template v-else>
         <JobDistributionPanel :job="job" />
-        <TrackedLinkBuilder :job-url="publicUrl" />
-        <JobSourcesPanel v-if="canReadReports" :job-id="job.id" />
+        <TrackedLinksPanel :job-id="job.id" :job-url="publicUrl" :report="sources.report.value" />
+        <JobSourcesPanel
+          v-if="canReadReports"
+          :report="sources.report.value"
+          :error-key="sources.errorKey.value"
+          :loading="sources.loading.value"
+          @retry="() => sources.refresh()"
+        />
       </template>
     </div>
   </AppPage>

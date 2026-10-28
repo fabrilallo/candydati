@@ -18,6 +18,7 @@ import {
   type TimelineDeps,
   type DistributionChannel,
   type DistributionDeps,
+  type TrackedLinkDeps,
   type PublicSiteDeps,
   type EmailIdentity,
   type EmailSender as MessageSender,
@@ -55,7 +56,7 @@ import { authenticateApiKey, withStorageErrors } from '@candydati/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
 import { createApiKeyDeps } from './wiring/api-key-deps.js';
-import { createDistributionDeps } from './wiring/distribution-deps.js';
+import { createDistributionDeps, createTrackedLinkDeps } from './wiring/distribution-deps.js';
 import { createMigrationDeps, type MigrationRouteDeps } from './wiring/migration-deps.js';
 import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
 import { createCareersDeps, type CareersWiring } from './wiring/careers-deps.js';
@@ -148,6 +149,7 @@ export interface AppContext {
   readonly automationDeps: AutomationRuleDeps;
   readonly webhookDeps: WebhookDeps;
   readonly distributionDeps: DistributionDeps;
+  readonly trackedLinkDeps: TrackedLinkDeps;
   /** What the public reads need: published jobs, organizations, the privacy notice and the public base URL. */
   readonly publicSiteDeps: PublicSiteDeps;
   /** The visit beacon of the public job page. */
@@ -260,6 +262,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     responsibilitySuggester: responsibilitySuggester ?? createLiveSuggester(() => aiRuntime.snapshot().fast),
     reportDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, jobs: jobDeps.jobs, reports: uow.repositories.reports, now: reportClock ?? (() => new Date()) },
     distributionDeps: createDistributionDeps({ uow, publicBaseUrl: env.platform.url, channels: distributionChannels }),
+    trackedLinkDeps: createTrackedLinkDeps(uow),
     jobViewDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, jobViews: uow.repositories.jobViews, now: () => new Date() },
     publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
   };

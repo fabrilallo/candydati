@@ -11,6 +11,7 @@ import { buildJob, completeJobContent } from './job-fixtures.js';
 import { buildMessage } from './messaging-fixtures.js';
 import { createDistributionRegistry } from '../distribution-registry.js';
 import { createFakeDistributionChannel, createInMemoryDistributionSettings, createInMemoryJobDistributions } from './in-memory-distribution.js';
+import { createInMemoryTrackedLinks, type InMemoryTrackedLinks } from './in-memory-tracked-links.js';
 
 /**
  * Two jobs of one organization: A (`job_1`, the actors' team) and B (`job_b`, nobody's but the owner's). Everything about
@@ -46,7 +47,7 @@ const APPLICATIONS = [
   buildApplication({ id: 'app_s2', candidateId: 'cand_s', jobId: JOB_B, cv: cv('app_s2'), ...org }),
 ];
 
-export type JobScopeWorld = TestImportDeps & TestHrDeps;
+export type JobScopeWorld = TestImportDeps & TestHrDeps & { readonly trackedLinks: InMemoryTrackedLinks };
 
 /** Everything about job B the use cases could expose: candidate, CV, notes, messages, tasks, feedback, rules, imports. */
 export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
@@ -94,6 +95,9 @@ export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
     staleJobs: createInMemoryStaleJobs(world.jobs, world.store),
     distributions: createInMemoryJobDistributions(),
     distributionSettings: createInMemoryDistributionSettings(),
+    trackedLinks: createInMemoryTrackedLinks([
+      { id: 'link_b', organizationId: ORG_A, jobId: JOB_B, source: 'b-only-board', campaign: '', createdBy: 'user_test', createdAt: new Date('2026-05-01T00:00:00Z') },
+    ]),
     registry: createDistributionRegistry([createFakeDistributionChannel()]),
     publicBaseUrl: 'https://jobs.example.org',
   };

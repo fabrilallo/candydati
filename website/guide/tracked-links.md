@@ -10,11 +10,18 @@ Open a published ad, then its **Distribution** tab, then **Tracked links**.
 1. Pick a channel: LinkedIn, Indeed, InfoJobs, Glassdoor, Facebook, Instagram, X, Newsletter, Referral, Career fair,
    University, or **Another channel** and type its name.
 2. Optionally type a campaign, for example `autumn-2026`. Use the same campaign name on every channel of that campaign.
-3. Copy the link. It is the public address of the ad with two parameters added:
+3. Press **Save link**. It goes under **Saved links**, where you find it every time you come back to the tab. Save
+   as many as you need, one per channel and campaign: saving a pair you already have keeps the one you have.
+4. Copy the link. It is the public address of the ad with two parameters added:
 
 ```text
 https://jobs.example.com/careers/acme/backend-developer?utm_source=linkedin&utm_campaign=autumn-2026
 ```
+
+Each saved link shows how many applications came through it in the last 90 days. Only the channel and the campaign are
+saved, never the address: if the address of the ad changes, the saved links follow it. Removing a link changes no figure,
+the applications that came through it keep their source. Saving and removing links takes the same permission as
+publishing the ad, and both are written to the audit log.
 
 Names are lowercased and limited to letters, numbers, dots, dashes and underscores (60 characters at most). The page
 shows how your text will appear in Reports. An email address is never accepted as a name.

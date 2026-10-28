@@ -314,7 +314,7 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 |---|---|
 | Auth and tenancy | `user`, `session`, `account`, `verification`, `two_factor`, `organization`, `member`, `invitation`, `api_key`, `organization_setting`, `organization_security_setting` |
 | Abuse limits | `auth_throttle` (failed sign-ins), `usage_counter` (daily model budgets) |
-| Jobs | `job`, `job_team_member`, `job_template`, `job_stage_interviewer`, `job_request`, `job_distribution`, `distribution_setting` |
+| Jobs | `job`, `job_team_member`, `job_template`, `job_stage_interviewer`, `job_request`, `job_distribution`, `distribution_setting`, `job_tracked_link` |
 | Candidates | `candidate`, `application`, `application_stage_event`, `candidate_note`, `cv_extraction`, `response_promise` |
 | Communication | `conversation`, `message`, `email_template`, `email_settings` |
 | Automation | `automation_rule`, `automation_execution`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |

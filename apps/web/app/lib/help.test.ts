@@ -21,7 +21,7 @@ describe('helpSections', () => {
   it('groups the recipes of the role by area, in the language asked', () => {
     const sections = helpSections('recruiter', 'en')
     expect(sections.map((section) => section.area)).toContain('jobs')
-    expect(sections.flatMap((section) => section.recipes).find((recipe) => recipe.id === 'tracked-link')?.title).toBe('Create a tracked link for a source')
+    expect(sections.flatMap((section) => section.recipes).find((recipe) => recipe.id === 'tracked-link')?.title).toBe('Create and save tracked links for your channels')
     expect(sections.flatMap((section) => section.recipes).some((recipe) => recipe.id === 'migrate-ats')).toBe(false)
   })
 })
