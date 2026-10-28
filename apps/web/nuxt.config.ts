@@ -1,4 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
+import { OUTDATED_BUILD_CHECK_INTERVAL_MS } from './app/lib/outdated-build'
 
 /**
  * Origin of the Fastify api. The browser only ever talks to this app's origin: `/api/**` is forwarded there by
@@ -33,6 +34,8 @@ export default defineNuxtConfig({
     // remembered by `app/plugins/locale.ts`.
     detectBrowserLanguage: false,
   },
+  // A tab open across a deploy learns about the new build (see `app/plugins/reload-after-deploy.client.ts`).
+  experimental: { appManifest: true, checkOutdatedBuildInterval: OUTDATED_BUILD_CHECK_INTERVAL_MS, emitRouteChunkError: 'automatic' },
   eslint: { config: { stylistic: false } },
   typescript: { typeCheck: false },
   app: {
