@@ -1,4 +1,5 @@
 import { completeJobContent, fakeAdQualityAnalyzer, fixedQualityReport, throwingAdQualityAnalyzer, unavailableAdQualityAnalyzer } from '@candydati/core/testing';
+import { publishResultSchema, qualityResultSchema } from '@candydati/domain';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { TestUser } from './testing/client.js';
 import { publishNotice } from './testing/privacy.js';
@@ -199,10 +200,13 @@ describe('quality scoring and publication', () => {
       expect(analyzed.status).toBe(200);
       expect(analyzed.body.data).toMatchObject({ status: 'unavailable', assessment: null });
       expect(analyzed.body.data!.publishIssues.length).toBeGreaterThan(0);
+      expect(qualityResultSchema.safeParse(analyzed.body.data).error).toBeUndefined();
       const id = (await owner.post<JobBody>('/api/v1/jobs', { content: full() })).body.data!.id;
       const published = await owner.post<{ job: JobBody & { quality: unknown }; quality: unknown; qualityStatus: string }>(`/api/v1/jobs/${id}/publish`);
       expect(published.status).toBe(200);
       expect(published.body.data).toMatchObject({ job: { status: 'published', quality: null }, quality: null, qualityStatus: 'unavailable' });
+      // The web client reads the answer with this schema: an answer it rejects shows as a generic error after publishing.
+      expect(publishResultSchema.safeParse(published.body.data).error).toBeUndefined();
       const listed = await owner.get<{ qualityTotal: unknown; belowThreshold: boolean }[]>('/api/v1/jobs');
       expect(listed.body.data!.map(({ qualityTotal, belowThreshold }) => ({ qualityTotal, belowThreshold }))).toEqual([{ qualityTotal: null, belowThreshold: false }]);
       const stats = await owner.get<{ quality: { available: boolean; items: unknown[] } }>('/api/v1/stats/jobs');
