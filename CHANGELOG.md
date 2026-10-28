@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Panoramica: the note saying candidate metrics would come with applications is gone. In its place, for whoever can
+  read the reports, the four headline figures of the last 30 days (time to hire, answers given, coverage, applications
+  received) and a link to Report.
+
 ## [0.1.13] - 2026-10-28
 
 ### Added

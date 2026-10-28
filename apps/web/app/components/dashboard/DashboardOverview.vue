@@ -2,14 +2,17 @@
 import { usePreferredReducedMotion } from '@vueuse/core'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { can } from '@/lib/permissions-ui'
 
 /**
  * The overview: the setup checklist while the organization is not fully set up, then a bento grid of focused
- * statistics, all computed by the api from stored ads; each chart also has its own empty state for the partial cases.
+ * statistics, all computed by the api from stored ads and applications; each chart also has its own empty state for the partial cases.
  */
 defineProps<{ canCreate: boolean }>()
 const { t } = useI18n()
 const { stats, errorKey, loading, refresh } = useJobStats()
+const { viewer } = useViewer()
+const canReadReports = computed(() => can(viewer.value?.role ?? null, 'report:read'))
 const motion = usePreferredReducedMotion()
 const duration = computed(() => (motion.value === 'reduce' ? 0 : 450))
 const empty = computed(() => stats.value !== null && stats.value.statusCounts.total === 0)
@@ -37,7 +40,7 @@ const empty = computed(() => stats.value !== null && stats.value.statusCounts.to
         <ProcessCard :process="stats.process" class="lg:col-span-5" />
         <SalaryCard :salary="stats.salary" :duration="duration" class="lg:col-span-8" />
         <ReadinessCard :readiness="stats.readiness" class="lg:col-span-4" />
-        <CandidateMetricsNote class="lg:col-span-12" />
+        <CandidateMetricsCard v-if="canReadReports" class="lg:col-span-12" />
       </div>
     </template>
   </div>

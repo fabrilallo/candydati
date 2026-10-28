@@ -403,13 +403,8 @@
         "open": "Go to job ads"
       },
       "candidates": {
-        "title": "Candidate metrics arrive with applications",
-        "body": "For now the product handles job ads only. Once applications arrive, real numbers show up here, never estimates.",
-        "items": {
-          "funnel": "Conversion by stage",
-          "timeToHire": "Time to hire",
-          "responseKept": "Response times kept"
-        }
+        "title": "Candidates in the last 30 days",
+        "open": "Open the reports"
       }
     }
   },

@@ -3,6 +3,7 @@ import type { JobStatsDto } from '@candydati/domain'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { emptyJobStats, jobStatsFixture } from '~~/test/fixtures/job-stats'
 import { viewerWith } from '~~/test/fixtures/job-fixtures'
+import { reportsFixture } from '~~/test/fixtures/phase10-fixtures'
 import DashboardOverview from './DashboardOverview.vue'
 
 // The charts draw with d3 into real layout, which happy-dom does not have; they are checked in the browser.
@@ -27,13 +28,16 @@ registerEndpoint('/api/v1/stats/jobs', (event) => {
   return { success: true, data: state.stats, error: null }
 })
 
+registerEndpoint('/api/v1/reports', () => ({ success: true, data: reportsFixture(), error: null }))
+
 /** Intl puts a no-break space before the euro sign. */
 const plain = (text: string): string => text.replace(/\s/g, ' ')
 const mounted: { unmount: () => void }[] = []
-const mountOverview = async (props = { canCreate: true }) => {
+const mountOverview = async (props = { canCreate: true }, role: Parameters<typeof viewerWith>[0] = 'owner') => {
   clearNuxtData('job-stats')
   clearNuxtData('setup-progress')
-  useViewer().viewer.value = viewerWith('owner')
+  clearNuxtData('dashboard-reports')
+  useViewer().viewer.value = viewerWith(role)
   const wrapper = await mountSuspended(DashboardOverview, { props })
   mounted.push(wrapper)
   await vi.waitFor(() => expect(wrapper.find('[data-testid="stats-loading"]').exists()).toBe(false))
@@ -54,7 +58,7 @@ describe('DashboardOverview', () => {
     await vi.waitFor(() => expect(wrapper.find('[data-testid="stat-status"]').exists()).toBe(true))
     const value = (status: string) => wrapper.find(`[data-testid="count-${status}"] [data-testid="count-value"]`).text()
     expect([value('draft'), value('published'), value('closed')]).toEqual(['2', '3', '1'])
-    for (const id of ['stat-activity', 'stat-quality', 'stat-process', 'stat-salary', 'stat-readiness', 'candidate-metrics-note']) {
+    for (const id of ['stat-activity', 'stat-quality', 'stat-process', 'stat-salary', 'stat-readiness', 'candidate-metrics']) {
       expect(wrapper.find(`[data-testid="${id}"]`).exists(), id).toBe(true)
     }
     expect(wrapper.find('[data-testid="first-steps"]').exists()).toBe(false)
@@ -108,7 +112,21 @@ describe('DashboardOverview', () => {
     await vi.waitFor(() => expect(wrapper.find('[data-testid="first-steps"]').exists()).toBe(true))
     expect(wrapper.find('[data-testid="stat-status"]').exists()).toBe(false)
     expect(wrapper.findAll('[data-testid="chart-empty"]').length).toBeGreaterThanOrEqual(5)
-    expect(wrapper.find('[data-testid="candidate-metrics-note"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="candidate-metrics"]').exists()).toBe(true)
+  })
+
+  it('heads the candidate figures with the real numbers of the reports, and links to them', async () => {
+    const wrapper = await mountOverview()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="report-headlines"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="candidate-metrics"]').text()).toContain('Candidati negli ultimi 30 giorni')
+    expect(wrapper.find('[data-testid="candidate-metrics-reports"]').attributes('href')).toBe('/app/reports')
+    expect(wrapper.text()).not.toContain('arrivano con le candidature')
+  })
+
+  it('leaves the candidate figures out for whoever may not read the reports', async () => {
+    const wrapper = await mountOverview({ canCreate: false }, 'interviewer')
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="stat-quality"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="candidate-metrics"]').exists()).toBe(false)
   })
 
   it('shows the error with a retry instead of made-up numbers', async () => {
