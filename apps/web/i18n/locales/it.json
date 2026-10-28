@@ -527,7 +527,9 @@
         "distribution_synced": "Ha sincronizzato un annuncio con i canali di distribuzione",
         "interviewers_updated": "Ha cambiato chi fa i colloqui di un annuncio",
         "team_member_added": "Ha aggiunto una persona al team di un annuncio",
-        "team_member_removed": "Ha tolto una persona dal team di un annuncio"
+        "team_member_removed": "Ha tolto una persona dal team di un annuncio",
+        "tracked_link_created": "Ha salvato un link tracciato di un annuncio",
+        "tracked_link_removed": "Ha rimosso un link tracciato di un annuncio"
       },
       "job_template": {
         "created": "Ha salvato un modello di annuncio",
@@ -4153,6 +4155,7 @@
     "invalidCampaign": "Non è un nome di campagna utilizzabile, verrà omesso.",
     "link": "Link da condividere",
     "copy": "Copia il link tracciato",
+    "save": "Salva link",
     "pick": "Scegli un canale per ottenere il link.",
     "notPublished": "Pubblica l'annuncio per ottenere link da condividere.",
     "privacy": "Solo conteggi: niente cookie, niente indirizzi IP, nessuno viene seguito da una pagina all'altra.",
@@ -4166,6 +4169,18 @@
       "title": "Da dove arrivano visite e candidature",
       "description": "Gli ultimi 90 giorni, solo per questo annuncio.",
       "error": "Non è stato possibile caricare i dati."
+    },
+    "saved": {
+      "title": "Link salvati",
+      "none": "Nessun link salvato. Scegli un canale qui sotto e premi \"Salva link\": lo ritrovi qui ogni volta che torni.",
+      "applications": "Nessuna candidatura in 90 giorni | 1 candidatura in 90 giorni | {count} candidature in 90 giorni",
+      "copy": "Copia il link per {name}",
+      "remove": "Rimuovi il link per {name}",
+      "created": "Link salvato",
+      "exists": "Questo link era già salvato",
+      "removed": "Link rimosso. Le candidature arrivate da lì restano contate.",
+      "saveFailed": "Il link non è stato salvato",
+      "removeFailed": "Il link non è stato rimosso"
     }
   },
   "timeline": {

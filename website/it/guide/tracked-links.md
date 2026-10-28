@@ -10,11 +10,18 @@ Apri un annuncio pubblicato, poi la scheda **Distribuzione**, poi **Link traccia
 1. Scegli un canale: LinkedIn, Indeed, InfoJobs, Glassdoor, Facebook, Instagram, X, Newsletter, Segnalazione, Fiera del
    lavoro, Università, oppure **Altro canale** e scrivine il nome.
 2. Se vuoi, scrivi una campagna, per esempio `autunno-2026`. Usa lo stesso nome su ogni canale della campagna.
-3. Copia il link. È l'indirizzo pubblico dell'annuncio con due parametri in più:
+3. Premi **Salva link**. Compare in **Link salvati**, dove lo ritrovi ogni volta che torni nella scheda. Salvane quanti
+   ne servono, uno per canale e campagna: salvare una coppia che hai già tiene quella che hai.
+4. Copia il link. È l'indirizzo pubblico dell'annuncio con due parametri in più:
 
 ```text
 https://jobs.example.com/careers/acme/backend-developer?utm_source=linkedin&utm_campaign=autunno-2026
 ```
+
+Ogni link salvato mostra quante candidature sono arrivate da lì negli ultimi 90 giorni. Si salvano solo il canale e la
+campagna, mai l'indirizzo: se l'indirizzo dell'annuncio cambia, i link salvati lo seguono. Rimuovere un link non cambia
+nessun numero, le candidature arrivate da lì mantengono la loro provenienza. Salvare e rimuovere link richiede lo stesso
+permesso che serve per pubblicare l'annuncio, ed entrambe le azioni finiscono nel registro delle azioni.
 
 I nomi diventano minuscoli e ammettono solo lettere, numeri, punti, trattini e trattini bassi (al massimo 60 caratteri).
 La pagina mostra come il tuo testo comparirà nei Report. Un indirizzo email non viene mai accettato come nome.

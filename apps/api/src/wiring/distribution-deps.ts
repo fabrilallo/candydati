@@ -1,8 +1,10 @@
+import { randomUUID } from 'node:crypto';
 import {
   createDistributionRegistry,
   type DrizzleUnitOfWork,
   type DistributionChannel,
   type DistributionDeps,
+  type TrackedLinkDeps,
 } from '@candydati/core';
 
 export interface DistributionInputs {
@@ -28,4 +30,10 @@ export function createDistributionDeps({ uow, publicBaseUrl, channels = [] }: Di
     publicBaseUrl,
     now: () => new Date(),
   };
+}
+
+/** Tracked links saved on jobs, on Postgres. */
+export function createTrackedLinkDeps(uow: DrizzleUnitOfWork): TrackedLinkDeps {
+  const r = uow.repositories;
+  return { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams, jobs: r.jobs, trackedLinks: r.trackedLinks, newId: randomUUID, now: () => new Date() };
 }

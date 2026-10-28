@@ -527,7 +527,9 @@
         "distribution_synced": "Synced a job ad with the distribution channels",
         "interviewers_updated": "Changed who interviews for an ad",
         "team_member_added": "Added a person to an ad's team",
-        "team_member_removed": "Removed a person from an ad's team"
+        "team_member_removed": "Removed a person from an ad's team",
+        "tracked_link_created": "Saved a tracked link of an ad",
+        "tracked_link_removed": "Removed a tracked link of an ad"
       },
       "job_template": {
         "created": "Saved a job ad template",
@@ -4153,6 +4155,7 @@
     "invalidCampaign": "This is not a usable campaign name, it will be left out.",
     "link": "Link to share",
     "copy": "Copy tracked link",
+    "save": "Save link",
     "pick": "Choose a channel to get the link.",
     "notPublished": "Publish the ad to get links you can share.",
     "privacy": "Counts only: no cookies, no IP addresses, nobody is followed from page to page.",
@@ -4166,6 +4169,18 @@
       "title": "Where visits and applications come from",
       "description": "The last 90 days, for this ad only.",
       "error": "The figures could not be loaded."
+    },
+    "saved": {
+      "title": "Saved links",
+      "none": "No saved links yet. Choose a channel below and press \"Save link\": you will find it here whenever you come back.",
+      "applications": "No applications in 90 days | 1 application in 90 days | {count} applications in 90 days",
+      "copy": "Copy the link for {name}",
+      "remove": "Remove the link for {name}",
+      "created": "Link saved",
+      "exists": "This link was already saved",
+      "removed": "Link removed. Applications that came through it stay counted.",
+      "saveFailed": "The link was not saved",
+      "removeFailed": "The link was not removed"
     }
   },
   "timeline": {

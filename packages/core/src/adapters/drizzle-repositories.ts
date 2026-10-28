@@ -38,6 +38,7 @@ import { createDrizzleResponsePromises, createDrizzleStageEvents } from './drizz
 import { createDrizzleJobViews } from './drizzle-job-views.js';
 import { createDrizzleReports } from './drizzle-reports.js';
 import { createDrizzleTasks } from './drizzle-tasks.js';
+import { createDrizzleTrackedLinks } from './drizzle-tracked-links.js';
 import { createDrizzleUserDirectory } from './drizzle-user-directory.js';
 import { createDrizzleWebhookDeliveries, createDrizzleWebhookEndpoints } from './drizzle-webhooks.js';
 import { toSqlExecutor } from './sql-executor.js';
@@ -69,6 +70,7 @@ const jobRepositories = (db: DbExecutor) => {
     deliveries: createDrizzleWebhookDeliveries(db),
     distributions: createDrizzleJobDistributions(db),
     distributionSettings: createDrizzleDistributionSettings(db),
+    trackedLinks: createDrizzleTrackedLinks(db),
     apiKeys: createDrizzleApiKeys(db),
     memberRoles: createDrizzleMemberRoles(db),
     twoFactor: createDrizzleTwoFactor(db),

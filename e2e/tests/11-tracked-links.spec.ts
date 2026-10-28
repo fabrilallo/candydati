@@ -41,6 +41,16 @@ test('a tracked link brings visits and an application, and Reports show the sour
   await page.locator('#tracked-campaign').fill('Autumn 2026');
   await expect(page.getByTestId('tracked-link-url')).toContainText(`/careers/${workspace.org.slug}/${workspace.job.slug}?utm_source=linkedin&utm_campaign=autumn-2026`);
   await expect(page.getByTestId('job-sources').getByTestId('source-row').filter({ hasText: 'linkedin' })).toContainText('1 visita');
+
+  // Saved, the link the applicant used is still there when the tab is opened again, with the application it brought.
+  await page.locator('#tracked-campaign').fill('autumn');
+  await page.getByTestId('tracked-link-save').click();
+  await expect(page.getByTestId('tracked-link-row')).toHaveCount(1);
+  await open(page, `/app/jobs/${workspace.job.id}/distribution`);
+  const saved = page.getByTestId('tracked-link-row');
+  await expect(saved).toHaveCount(1);
+  await expect(saved.getByTestId('tracked-link-saved-url')).toContainText('?utm_source=linkedin&utm_campaign=autumn');
+  await expect(saved.getByTestId('tracked-link-applications')).toContainText('1 candidatura');
 });
 
 test('a crawler or a visitor who sent Do Not Track is not counted', async ({ page, browser }) => {

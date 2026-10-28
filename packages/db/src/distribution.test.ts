@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { and, eq } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDb, runMigrations, type DbHandle } from './index.js';
-import { distributionSetting, job, jobDistribution, organization } from './schema/index.js';
+import { distributionSetting, job, jobDistribution, jobTrackedLink, organization } from './schema/index.js';
 import { testDatabaseUrl } from './testing/test-database.js';
 
 let handle: DbHandle;
@@ -53,5 +53,16 @@ describe('job_distribution and distribution_setting', () => {
     const [row] = await handle.db.select().from(distributionSetting).where(eq(distributionSetting.organizationId, organizationId));
     expect(row).toMatchObject({ channelId: 'board', enabled: true });
     await expect(handle.db.insert(distributionSetting).values({ organizationId, channelId: 'board', enabled: false })).rejects.toThrow();
+  });
+
+  it('keeps one tracked link per job, channel and campaign, the empty campaign included', async () => {
+    const { organizationId, jobId } = await insertOrgWithJob();
+    const link = { organizationId, jobId, source: 'linkedin', createdBy: 'user_1' };
+    await handle.db.insert(jobTrackedLink).values({ ...link, id: randomUUID() });
+    await expect(handle.db.insert(jobTrackedLink).values({ ...link, id: randomUUID() })).rejects.toThrow();
+    await handle.db.insert(jobTrackedLink).values({ ...link, id: randomUUID(), campaign: 'autumn' });
+    const rows = await handle.db.select().from(jobTrackedLink).where(eq(jobTrackedLink.jobId, jobId));
+    expect(rows.map((row) => row.campaign).toSorted()).toEqual(['', 'autumn']);
+    await expect(handle.db.insert(jobTrackedLink).values({ ...link, id: randomUUID(), jobId: randomUUID() })).rejects.toThrow();
   });
 });

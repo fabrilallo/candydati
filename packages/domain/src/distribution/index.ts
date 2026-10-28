@@ -5,3 +5,4 @@ export * from './llms-txt.js';
 export * from './sitemap.js';
 export { cdata, escapeXml, stripInvalidXmlChars } from './xml.js';
 export { childText, childrenNamed, parseXml, type XmlElement } from './xml-reader.js';
+export * from './tracked-link.js';

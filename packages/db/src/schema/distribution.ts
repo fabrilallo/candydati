@@ -1,5 +1,5 @@
 import type { DistributionStatus } from '@candydati/domain';
-import { index, boolean, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
+import { index, boolean, pgTable, primaryKey, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { job } from './job.js';
 
@@ -44,5 +44,32 @@ export const distributionSetting = pgTable(
   (table) => [primaryKey({ columns: [table.organizationId, table.channelId] })],
 );
 
+/**
+ * Tracked links saved on a job: one per (job, channel, campaign). Only the pair is stored, the URL is built from the
+ * job's public address. Applications never point here: removing a link changes no figure, the counts come from
+ * `application.origin` and the visit counters.
+ */
+export const jobTrackedLink = pgTable(
+  'job_tracked_link',
+  {
+    id: text('id').primaryKey(),
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'restrict' }),
+    jobId: text('job_id')
+      .notNull()
+      .references(() => job.id, { onDelete: 'restrict' }),
+    /** `utm_source`, sanitized like `application.origin`. */
+    source: text('source').notNull(),
+    /** `utm_campaign`, sanitized; the empty string for no campaign (so the unique index sees it). */
+    campaign: text('campaign').notNull().default(''),
+    /** The user who saved it. */
+    createdBy: text('created_by').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex('job_tracked_link_job_pair_uidx').on(table.organizationId, table.jobId, table.source, table.campaign)],
+);
+
 export type JobDistributionRow = typeof jobDistribution.$inferSelect;
 export type DistributionSettingRow = typeof distributionSetting.$inferSelect;
+export type JobTrackedLinkRow = typeof jobTrackedLink.$inferSelect;

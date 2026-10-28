@@ -60,6 +60,17 @@ describe('TrackedLinkBuilder', () => {
     vi.unstubAllGlobals()
   })
 
+  it('saves the sanitized channel and campaign, not the URL', async () => {
+    const wrapper = await mountBuilder()
+    expect(wrapper.find('[data-testid="tracked-link-save"]').exists()).toBe(false)
+    await wrapper.find('#tracked-channel').setValue('__custom')
+    await wrapper.find('#tracked-custom').setValue('Fiera Lavoro')
+    await wrapper.find('#tracked-campaign').setValue('Autunno 2026')
+    await wrapper.find('[data-testid="tracked-link-save"]').trigger('click')
+    expect(wrapper.emitted('save')).toEqual([[{ source: 'fiera-lavoro', campaign: 'autunno-2026' }]])
+    expect(wrapper.find('[data-testid="tracked-link-save"]').text()).toContain('Salva link')
+  })
+
   it('gives no link while the ad is not published', async () => {
     const wrapper = await mountBuilder(null)
     expect(wrapper.find('[data-testid="tracked-links-unpublished"]').exists()).toBe(true)
