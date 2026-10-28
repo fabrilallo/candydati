@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import type { MigrationConnectorDto } from '@candydati/domain'
-import { ArrowRightIcon, FileArchiveIcon } from '@lucide/vue'
+import { ArrowRightIcon, ExternalLinkIcon, FileArchiveIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
  * Step 1 "Source": an uploaded package, or one of the built-in connectors this installation offers (each with its beta
- * notice). The package card is always there: a connector list that is loading, empty or failed never hides it.
+ * notice). The package card is always there, and below it how to get a package without one: a connector list that is loading, empty or failed never hides it.
  */
 const emit = defineEmits<{ choose: [source: 'package']; connect: [connector: MigrationConnectorDto] }>()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const connectors = useMigrationConnectors()
+const steps = ['one', 'two', 'three'] as const
+/** The public guide, in the language of the interface. */
+const guideUrl = computed(() => `https://fabrilallo.github.io/candydati/${locale.value === 'it' ? 'it/' : ''}guide/migration`)
 </script>
 
 <template>
@@ -42,10 +45,16 @@ const connectors = useMigrationConnectors()
     </ul>
     <p v-if="connectors.errorKey.value" class="text-sm text-muted-foreground" role="status" data-testid="migration-connectors-error">{{ t('migrations.source.connectors.error') }}</p>
 
-    <section class="grid gap-2 border-t pt-6" aria-labelledby="migration-where-title" data-testid="migration-where">
+    <section class="grid gap-3 border-t pt-6" aria-labelledby="migration-where-title" data-testid="migration-where">
       <h3 id="migration-where-title" class="text-base font-semibold tracking-tight">{{ t('migrations.source.where.title') }}</h3>
-      <p class="max-w-2xl text-sm text-pretty">{{ t('migrations.source.where.skill') }}</p>
-      <p class="max-w-2xl text-sm text-pretty text-muted-foreground">{{ t('migrations.source.where.connectors') }}</p>
+      <p class="max-w-2xl text-sm text-pretty">{{ t('migrations.source.where.connectors') }}</p>
+      <p class="max-w-2xl text-sm text-pretty">{{ t('migrations.source.where.intro') }}</p>
+      <ol class="grid max-w-2xl list-decimal gap-1.5 pl-5 text-sm text-pretty text-muted-foreground">
+        <li v-for="step in steps" :key="step">{{ t(`migrations.source.where.steps.${step}`) }}</li>
+      </ol>
+      <a :href="guideUrl" target="_blank" rel="noopener noreferrer" class="flex w-fit items-center gap-1 text-sm font-medium text-link underline-offset-4 hover:underline" data-testid="migration-guide">
+        {{ t('migrations.source.where.guide') }}<ExternalLinkIcon class="size-3.5" aria-hidden="true" />
+      </a>
     </section>
   </section>
 </template>

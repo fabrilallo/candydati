@@ -3028,17 +3028,23 @@
     },
     "source": {
       "title": "Where does your data come from?",
-      "intro": "Every migration starts from a migration package: one ZIP with a file that describes jobs, candidates and history, plus the CVs. Choose how to bring it in.",
+      "intro": "To bring in the data of your old ATS (jobs, candidates, history and CVs) you need a migration package, a ZIP file prepared for this. If your ATS is among the connectors below, the connector prepares the package. Otherwise you prepare it first and then upload it. Either way you see a preview before anything is written.",
       "chosen": "Chosen",
       "package": {
         "title": "Upload a migration package",
-        "body": "A ZIP in the open package format. Use it for a package prepared by an AI agent, by a script, or exported from another installation.",
-        "action": "Choose this source"
+        "body": "Pick this if you already have the ZIP. Usually an AI assistant prepares it from your old ATS, or you export it from another installation of this product. Do not have one yet? See below how to get it.",
+        "action": "I have the package"
       },
       "where": {
-        "title": "Where do packages come from?",
-        "skill": "An agent skill teaches Claude, Codex and similar assistants to read your old ATS (through its API, an export or an MCP connector) and write the package for you. You then upload it here.",
-        "connectors": "Built-in connectors read the API of your previous ATS with a key you enter here and build the package for you. Every connector is in beta: you always check a preview before anything is written."
+        "title": "No package yet?",
+        "connectors": "If your old ATS is among the connectors above, you do not need one: press Connect, enter an API key of that system and the connector prepares the package for you. Connectors are in beta, so check the preview carefully.",
+        "intro": "Otherwise let an AI assistant prepare it, with our migration skill:",
+        "steps": {
+          "one": "Open an AI assistant that works on your computer, for example Claude Code or Codex.",
+          "two": "Give it the migration skill (the guide says where to find it) and ask it to read the data of your old ATS: through its API, a CSV or Excel export, or an MCP connector.",
+          "three": "The assistant writes the ZIP. Come back here, choose I have the package and upload it."
+        },
+        "guide": "Read the migration guide"
       },
       "connectors": {
         "label": "Connectors",

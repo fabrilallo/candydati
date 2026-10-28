@@ -13,11 +13,15 @@ const pick = async (wrapper: Awaited<ReturnType<typeof mountSuspended>>, file: F
 }
 
 describe('migration source step', () => {
-  it('offers the package and says where packages come from', async () => {
+  it('offers the package and says, step by step, how to get one', async () => {
     const wrapper = await mountSuspended(MigrationSourceStep)
     mounted.push(wrapper)
-    expect(wrapper.find('[data-testid="migration-where"]').text()).toContain('skill')
-    expect(wrapper.find('[data-testid="migration-where"]').text()).toContain('connettori integrati')
+    const where = wrapper.find('[data-testid="migration-where"]')
+    expect(where.text()).toContain('Non hai ancora un pacchetto?')
+    expect(where.text()).toContain('skill di migrazione')
+    expect(where.text()).toContain('Collega')
+    expect(where.findAll('ol li')).toHaveLength(3)
+    expect(wrapper.find('[data-testid="migration-guide"]').attributes('href')).toBe('https://fabrilallo.github.io/candydati/it/guide/migration')
     await wrapper.find('[data-testid="source-package"]').trigger('click')
     expect(wrapper.emitted('choose')).toEqual([['package']])
   })
