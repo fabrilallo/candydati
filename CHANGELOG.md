@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Migrazione > Nuova migrazione: the first step says in plain words what a migration package is, when to upload one
+  ("Ho il pacchetto") and, for whoever has none, how to get it: a connector when the old ATS is listed, otherwise
+  three steps with an AI assistant and the migration skill, with a link to the guide.
+
 ## [0.1.14] - 2026-10-28
 
 ### Added

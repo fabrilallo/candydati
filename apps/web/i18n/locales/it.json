@@ -3028,17 +3028,23 @@
     },
     "source": {
       "title": "Da dove arrivano i tuoi dati?",
-      "intro": "Ogni migrazione parte da un pacchetto di migrazione: uno ZIP con un file che descrive annunci, candidati e storico, più i CV. Scegli come portarlo qui.",
+      "intro": "Per portare qui i dati del tuo vecchio ATS (annunci, candidati, storico e CV) serve un pacchetto di migrazione, cioè un file ZIP preparato apposta. Se il tuo ATS è tra i connettori qui sotto, il pacchetto lo prepara il connettore. Altrimenti lo prepari prima e poi lo carichi. In entrambi i casi vedi un'anteprima prima che venga scritto qualcosa.",
       "chosen": "Scelta",
       "package": {
         "title": "Carica un pacchetto di migrazione",
-        "body": "Uno ZIP nel formato aperto del pacchetto. Usalo per un pacchetto preparato da un agente AI, da uno script o esportato da un'altra installazione.",
-        "action": "Scegli questa origine"
+        "body": "Scegli questa strada se hai già lo ZIP pronto. Di solito lo prepara un assistente AI partendo dal tuo vecchio ATS, oppure lo esporti da un'altra installazione di questo prodotto. Non ce l'hai ancora? Più sotto trovi come ottenerlo.",
+        "action": "Ho il pacchetto"
       },
       "where": {
-        "title": "Da dove arrivano i pacchetti?",
-        "skill": "Una skill per agenti insegna a Claude, Codex e assistenti simili a leggere il tuo vecchio ATS (tramite API, un export o un connettore MCP) e a scrivere il pacchetto al posto tuo. Poi lo carichi qui.",
-        "connectors": "I connettori integrati leggono le API del tuo ATS precedente con una chiave che inserisci qui e preparano il pacchetto per te. Ogni connettore è in beta: controlli sempre un'anteprima prima che venga scritto qualcosa."
+        "title": "Non hai ancora un pacchetto?",
+        "connectors": "Se il tuo vecchio ATS è tra i connettori qui sopra, non ti serve: premi Collega, inserisci una chiave API di quel sistema e il connettore prepara il pacchetto per te. I connettori sono in beta, quindi controlla bene l'anteprima.",
+        "intro": "Altrimenti fallo preparare a un assistente AI, con la nostra skill di migrazione:",
+        "steps": {
+          "one": "Apri un assistente AI che lavora sul tuo computer, per esempio Claude Code o Codex.",
+          "two": "Dagli la skill di migrazione (la guida spiega dove trovarla) e chiedigli di leggere i dati dal tuo vecchio ATS: tramite le sue API, un export in CSV o Excel, o un connettore MCP.",
+          "three": "L'assistente scrive lo ZIP. Torna qui, scegli Ho il pacchetto e caricalo."
+        },
+        "guide": "Leggi la guida alla migrazione"
       },
       "connectors": {
         "label": "Connettori",
