@@ -28,13 +28,13 @@
   "dependencies": {
     "@candydati/db": "workspace:*",
     "@candydati/domain": "workspace:*",
-    "drizzle-orm": "0.45.2",
-    "zod": "4.5.4"
+    "drizzle-orm": "0.45.4",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@types/node": "26.4.1",
-    "@vitest/coverage-v8": "5.0.0",
+    "@vitest/coverage-v8": "5.0.5",
     "typescript": "5.9.3",
-    "vitest": "5.0.0"
+    "vitest": "5.0.5"
   }
 }
