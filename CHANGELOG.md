@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.15] - 2026-11-03
+
 ### Changed
 
 - Migrazione > Nuova migrazione: the first step says in plain words what a migration package is, when to upload one
