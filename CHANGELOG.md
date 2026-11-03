@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.18] - 2026-11-04
+
 ### Fixed
 
 - Annunci: a long title is cut with an ellipsis in its column instead of running over the salary, and the status
