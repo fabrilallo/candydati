@@ -8,7 +8,7 @@ import { AUDIT_PAGE_SIZE, loadAuditPage } from '@/lib/audit-api'
 export const useAuditLog = () => {
   const page = ref(1)
   const { baseURL, headers } = useApiTransport()
-  const request = toApiRequest((url, options) => $fetch.raw(url, { ...options, ...(baseURL ? { baseURL } : {}), headers: { ...options.headers, ...headers } }))
+  const request = toApiRequest((url, options) => $fetch.raw<unknown, string>(url, { ...options, ...(baseURL ? { baseURL } : {}), headers: { ...options.headers, ...headers } }))
   const { data, status, refresh } = useFreshAsyncData('audit-log', () => loadAuditPage(request, page.value, AUDIT_PAGE_SIZE), { watch: [page] })
 
   const goTo = (next: number): void => {
