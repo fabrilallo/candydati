@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { trimTrailing } from '../text/trim-trailing.js';
 import { COMPLIANCE_WARNING_RULES } from './compliance/types.js';
 import { jobContentSchema, type JobContent, type PublishIssue, type PublishedJobContent } from './content.js';
 import { adQualityReportSchema, type AdQualityAssessment, type AdQualityReport, type AdQualityStatus } from './quality.js';
@@ -38,14 +39,14 @@ export const SLUG_MAX = 80;
 
 /** `Backend Developer (Milano)` + `a1b2c3` -> `backend-developer-milano-a1b2c3`. */
 export function jobSlug(title: string, suffix: string): string {
-  const base = title
+  const collapsed = title
     .normalize('NFKD')
     .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, SLUG_MAX - suffix.length - 1)
-    .replace(/-+$/g, '');
+    .replace(/^-+/, '');
+  // Trailing separators go with a backwards scan, linear on any input (see trimTrailing).
+  const base = trimTrailing(trimTrailing(collapsed, '-').slice(0, SLUG_MAX - suffix.length - 1), '-');
   return base.length > 0 ? `${base}-${suffix}` : suffix;
 }
 

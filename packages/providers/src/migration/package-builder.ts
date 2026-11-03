@@ -1,5 +1,5 @@
 import type { FileStorage } from '@candydati/core';
-import { migrationFetchFileKey, migrationPackageItemSchemas, type MigrationPackage } from '@candydati/domain';
+import { migrationFetchFileKey, migrationPackageItemSchemas, trimTrailing, type MigrationPackage } from '@candydati/domain';
 import type { z } from 'zod';
 import type { DownloadStore } from '../http/index.js';
 
@@ -95,7 +95,9 @@ const UNSAFE_NAME = /[\u0000-\u001f\u007f-\u009f"'`<>:*?|;&$%{}[\]^~#\\/‪-‮�
 /** A file name safe as the last segment of a package path: no path, control or bidi characters. */
 export function packageFileName(name: string): string {
   const last = name.split(/[\\/]/).pop() ?? '';
-  const clean = last.normalize('NFC').replace(UNSAFE_NAME, '').replace(/\s+/g, ' ').replace(/^[.\s-]+|[.\s]+$/g, '').trim();
+  const collapsed = last.normalize('NFC').replace(UNSAFE_NAME, '').replace(/\s+/g, ' ').replace(/^[.\s-]+/, '');
+  // Whitespace is a single space by now; a backwards scan keeps the trailing trim linear (see trimTrailing).
+  const clean = trimTrailing(collapsed, '. ').trim();
   return Array.from(clean).slice(0, FILE_NAME_MAX).join('').trim() || 'file';
 }
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
 import { jobSlug, SLUG_MAX } from './job.js';
 
 describe('jobSlug', () => {
@@ -29,5 +30,12 @@ describe('jobSlug', () => {
     const slug = jobSlug(`${'a'.repeat(75)} b`, 'abc');
     expect(slug).toBe(`${'a'.repeat(75)}-abc`);
     expect(slug).not.toContain('--');
+  });
+
+  it('stays linear on a long run of separators that is not at the end', () => {
+    const run = (size: number) => {
+      jobSlug(`a${' -'.repeat(size)}b`, 'x1');
+    };
+    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
   });
 });
