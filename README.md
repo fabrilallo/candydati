@@ -280,10 +280,3 @@ this project is derived from FuffAnnuncio.
   embedding it in a product you sell. Write to fabrizio.lallo95@gmail.com.
 - **Becomes open source:** each version converts to [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html)
   (`AGPL-3.0-only`) four years after its first public release.
-
-The license text is binding; this summary is not.
-
----
-
-**Italiano.** ATS agentico, aperto e installabile sul tuo server, pensato per chi si candida: RAL in chiaro
-obbligatoria, processo dichiarato, nessuna candidatura senza esito. Questo README in italiano: [README.it.md](README.it.md).
