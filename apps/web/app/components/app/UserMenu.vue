@@ -41,8 +41,8 @@ const signOut = async (): Promise<void> => {
     <DropdownMenuTrigger
       v-else
       class="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left transition-colors duration-150 hover:bg-muted data-[state=open]:bg-muted"
-      :aria-label="t('shell.openMenu')"
     >
+      <span class="sr-only">{{ t('shell.openMenu') }}:</span>
       <Avatar class="size-8">
         <AvatarFallback>{{ initials(props.name) }}</AvatarFallback>
       </Avatar>
