@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.16] - 2026-11-03
+
+### Changed
+
+- Dependencies updated (Fastify, Nuxt, Vue, zod, Drizzle, pg-boss, Playwright, axe and others). better-auth, the AI SDK
+  and Mastra stay at their current versions until they can move together.
+
+### Fixed
+
+- The user menu in the sidebar keeps its visible name and email in its accessible name, so screen readers read what
+  is on screen.
+
 ## [0.1.15] - 2026-11-03
 
 ### Changed
