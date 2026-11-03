@@ -31,7 +31,7 @@
     "@candydati/domain": "workspace:*",
     "@unovis/ts": "1.7.1",
     "@unovis/vue": "1.7.1",
-    "@vueuse/core": "14.4.0",
+    "@vueuse/core": "15.0.0",
     "@vueuse/nuxt": "14.4.0",
     "ai": "7.0.97",
     "better-auth": "1.7.2",
