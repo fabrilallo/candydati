@@ -9,9 +9,10 @@ updates:
       minor-and-patch:
         update-types: [minor, patch]
     ignore:
-      # vue-tsc 3.3.13 loses v-for and scoped slot variables in templates (TS2304 on `item`, `index`).
+      # vue-tsc 3.3.12 and 3.3.13 lose v-for and scoped slot variables in templates (TS2304 on `item`, `index`,
+      # `invalid`, `describedBy`): stay on 3.3.11 until a release fixes it.
       - dependency-name: vue-tsc
-        versions: ["3.3.13"]
+        versions: ["3.3.12", "3.3.13"]
     commit-message:
       prefix: chore
       include: scope

@@ -1,6 +1,7 @@
 import { completeJobContent } from '@candydati/core/testing';
 import { MockLanguageModelV3, simulateReadableStream } from 'ai/test';
 import { describe, expect, it } from 'vitest';
+import { asAgentModel } from '../testing/mock-model.js';
 import { createModelJobDrafter, draftPrompt } from './job-drafter.js';
 
 const usage = {
@@ -30,13 +31,13 @@ describe('job drafter', () => {
   it('returns content validated by the job content schema', async () => {
     const content = completeJobContent({ title: 'Data Engineer' });
     const model = jsonModel(content);
-    const result = await createModelJobDrafter(model)({ brief: 'Data engineer a Milano', base: null, language: 'it' });
+    const result = await createModelJobDrafter(asAgentModel(model))({ brief: 'Data engineer a Milano', base: null, language: 'it' });
     expect(result).toEqual(content);
     expect(JSON.stringify([...model.doStreamCalls, ...model.doGenerateCalls].map((c) => c.prompt))).toContain('Data engineer a Milano');
   });
 
   it('rejects output that is not a job content', async () => {
-    await expect(createModelJobDrafter(jsonModel({ nope: true }))({ brief: 'x', base: null, language: 'en' })).rejects.toThrow();
+    await expect(createModelJobDrafter(asAgentModel(jsonModel({ nope: true })))({ brief: 'x', base: null, language: 'en' })).rejects.toThrow();
   });
 
   it('puts the current draft and the language in the prompt', () => {

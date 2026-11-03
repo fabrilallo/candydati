@@ -302,6 +302,13 @@
       "when": 1793179771785,
       "tag": "0042_job_tracked_link",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1793733245458,
+      "tag": "0043_account_issuer_optional",
+      "breakpoints": true
     }
   ]
 }

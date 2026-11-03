@@ -47,8 +47,10 @@ export const account = pgTable(
   "account",
   {
     id: text("id").primaryKey(),
-    // Better Auth 1.7 scopes account identity by issuer: required, unique together with the account id.
-    issuer: text("issuer").notNull(),
+    // Written only by Better Auth 1.7.0-1.7.2, which required it. From 1.7.3 accounts are keyed by provider and account id
+    // again and the column is never written: nullable so an older replica still running during a deploy keeps working.
+    // Drop it in a later release (docs/MIGRATIONS.md, rule 1).
+    issuer: text("issuer"),
     accountId: text("account_id").notNull(),
     providerId: text("provider_id").notNull(),
     userId: text("user_id")
@@ -66,10 +68,7 @@ export const account = pgTable(
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (table) => [
-    index("account_userId_idx").on(table.userId),
-    uniqueIndex("account_issuer_account_id_uidx").on(table.issuer, table.accountId),
-  ],
+  (table) => [index("account_userId_idx").on(table.userId)],
 );
 
 export const verification = pgTable(
