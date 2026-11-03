@@ -13,6 +13,10 @@ updates:
       # `invalid`, `describedBy`): stay on 3.3.11 until a release fixes it.
       - dependency-name: vue-tsc
         versions: ["3.3.12", "3.3.13"]
+      # Nuxt 4 runs on Nitro 2, whose events are h3 1: the server middleware in apps/web cannot move to h3 2 before
+      # Nuxt moves to Nitro 3.
+      - dependency-name: h3
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: chore
       include: scope

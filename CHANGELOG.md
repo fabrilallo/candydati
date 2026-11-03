@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.17] - 2026-11-03
+
+### Changed
+
+- TypeScript 6, better-auth 1.7.14, the AI SDK 7.0.154, Mastra 1.79, VueUse 15 and Caddy 2.11.7.
+- Database: `account.issuer` becomes optional and loses its unique index (Better Auth 1.7.3+ no longer writes it).
+  The column is dropped in a later release.
+
 ## [0.1.16] - 2026-11-03
 
 ### Changed
