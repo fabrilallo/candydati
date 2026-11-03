@@ -1,4 +1,4 @@
-import type { AttachmentMediaType } from '@candydati/domain';
+import { trimTrailing, type AttachmentMediaType } from '@candydati/domain';
 
 export const FILE_NAME_MAX = 120;
 /** Every CV type is an attachment type too. */
@@ -24,12 +24,9 @@ export function safeFileName(name: string, mediaType: AttachmentMediaType, fallb
   const extension = EXTENSIONS[mediaType];
   const lastSegment = name.split(/[\\/]/).pop() ?? '';
   const withoutExtension = lastSegment.replace(/\.[A-Za-z0-9]{1,5}$/, '');
-  const base = withoutExtension
-    .normalize('NFC')
-    .replace(UNSAFE, '')
-    .replace(/\s+/g, ' ')
-    .replace(/^[.\s-]+|[.\s]+$/g, '')
-    .trim();
+  const collapsed = withoutExtension.normalize('NFC').replace(UNSAFE, '').replace(/\s+/g, ' ').replace(/^[.\s-]+/, '');
+  // Whitespace is a single space by now; a backwards scan keeps the trailing trim linear (see trimTrailing).
+  const base = trimTrailing(collapsed, '. ').trim();
   const limited = Array.from(base || fallback)
     .slice(0, FILE_NAME_MAX - extension.length - 1)
     .join('')

@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Security
+
+- File names of uploads and migration packages, and job slugs, trim their trailing characters with a linear scan:
+  a long run of dots and spaces inside a name no longer costs quadratic time (code scanning js/polynomial-redos).
+
 ## [0.1.17] - 2026-11-03
 
 ### Changed
