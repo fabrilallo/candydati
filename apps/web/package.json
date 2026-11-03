@@ -31,8 +31,8 @@
     "@candydati/domain": "workspace:*",
     "@unovis/ts": "1.7.1",
     "@unovis/vue": "1.7.1",
-    "@vueuse/core": "14.4.0",
-    "@vueuse/nuxt": "14.4.0",
+    "@vueuse/core": "15.0.0",
+    "@vueuse/nuxt": "15.0.0",
     "ai": "7.0.154",
     "better-auth": "1.7.14",
     "class-variance-authority": "0.7.1",
@@ -58,7 +58,7 @@
     "@vue/test-utils": "2.5.1",
     "eslint": "10.13.0",
     "happy-dom": "21.0.4",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vitest": "5.0.5",
     "vue-tsc": "3.3.11"
   }
