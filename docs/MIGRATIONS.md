@@ -98,3 +98,6 @@ Schema changes are Drizzle migrations in `packages/db/drizzle`. Generate with `p
 - **0039** adds `careers_media.is_logo` (boolean, constant default false, no rewrite) with a 5 s `lock_timeout`: the
   library image used as the organization's logo.
 - **0040** builds `careers_media_org_logo_uidx` concurrently (unique, partial on `is_logo`: one logo per organization).
+- **0043** drops `NOT NULL` from `account.issuer` and drops `account_issuer_account_id_uidx`, with a 5 s
+  `lock_timeout`: Better Auth 1.7.3 and later never write the column that 1.7.0 to 1.7.2 required, so every sign-up
+  failed. The column stays for the previous release's replicas during the deploy; drop it in a later release (rule 1).

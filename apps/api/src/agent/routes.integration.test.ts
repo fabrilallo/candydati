@@ -10,6 +10,7 @@ import { createAppContext } from '../app-context.js';
 import { registerErrorHandler } from '../http/error-handler.js';
 import { UnauthenticatedError } from '../http/errors.js';
 import { createKey, withKey } from '../testing/api-keys.js';
+import { asAgentModel } from '../testing/mock-model.js';
 import { TestUser } from '../testing/client.js';
 import { createTestApp, testEnv, uniqueEmail, type TestApp } from '../testing/test-app.js';
 import { AGENT_DISABLED_CODE, registerAgentRoutes } from './routes.js';
@@ -53,7 +54,7 @@ async function mockApp(model: MockLanguageModelV3, actorOf: () => Actor = () => 
   });
   const app = Fastify();
   registerErrorHandler(app);
-  registerAgentRoutes(app, { ...ctx, resolveSessionActor: async () => actorOf() }, { model });
+  registerAgentRoutes(app, { ...ctx, resolveSessionActor: async () => actorOf() }, { model: asAgentModel(model) });
   await app.ready();
   return app;
 }
