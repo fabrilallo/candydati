@@ -18,11 +18,11 @@ const updated = computed(() => relativeTime(props.job.updatedAt, props.now, loca
 
 <template>
   <li
-    class="group relative grid grid-cols-[minmax(0,1fr)_auto] gap-x-6 gap-y-3 px-5 py-4 transition-colors duration-150 ease-snap hover:bg-muted/60 has-[a:focus-visible]:bg-muted/60 has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-inset has-[a:focus-visible]:ring-ring/50 sm:px-6 md:grid-cols-[minmax(0,1fr)_13rem_6.5rem_8.5rem] md:items-center"
+    class="group relative grid grid-cols-[minmax(0,1fr)_auto] gap-x-6 gap-y-3 px-5 py-4 transition-colors duration-150 ease-snap hover:bg-muted/60 has-[a:focus-visible]:bg-muted/60 has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-inset has-[a:focus-visible]:ring-ring/50 sm:px-6 md:grid-cols-[minmax(0,1fr)_13rem_6.5rem_11rem] md:items-center"
     data-testid="job-row"
   >
     <div class="grid min-w-0 gap-0.5">
-      <h3 class="text-[0.9375rem] font-medium leading-snug">
+      <h3 class="min-w-0 text-[0.9375rem] font-medium leading-snug">
         <NuxtLink :to="`/app/jobs/${job.id}`" class="block truncate outline-none after:absolute after:inset-0" data-testid="job-link">{{ job.title || t('job.list.untitled') }}</NuxtLink>
       </h3>
       <p class="truncate text-xs text-muted-foreground">{{ meta }}</p>
@@ -57,7 +57,7 @@ const updated = computed(() => relativeTime(props.job.updatedAt, props.now, loca
         <JobStatusBadge :status="job.status" />
         <Badge v-if="stale" variant="outline" data-testid="job-stale">{{ t('job.list.stale', { count: staleDays }) }}</Badge>
       </div>
-      <p class="whitespace-nowrap text-xs text-muted-foreground">
+      <p class="text-right text-xs text-muted-foreground">
         <time :datetime="job.updatedAt">{{ t('job.list.updatedAgo', { time: updated }) }}</time>
       </p>
     </div>
