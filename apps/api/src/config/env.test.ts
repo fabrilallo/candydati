@@ -159,3 +159,26 @@ describe('parseEnv MCP_MODEL_DAILY_BUDGET_PER_USER', () => {
     expect(parseEnv(valid).MCP_MODEL_DAILY_BUDGET_PER_USER).toBe(300);
   });
 });
+
+describe('parseEnv MCP OAuth', () => {
+  it('is on by default with short-lived access tokens, a month of refresh and no extra redirect URIs', () => {
+    const env = parseEnv(valid);
+    expect(env.MCP_OAUTH_ENABLED).toBe(true);
+    expect(env.MCP_OAUTH_ACCESS_TOKEN_TTL_SECONDS).toBe(900);
+    expect(env.MCP_OAUTH_REFRESH_TOKEN_TTL_DAYS).toBe(30);
+    expect(env.MCP_OAUTH_REDIRECT_URIS).toEqual([]);
+    expect(env.MCP_OAUTH_ALLOW_LOOPBACK_REDIRECTS).toBe(false);
+    expect(parseEnv({ ...valid, MCP_OAUTH_ENABLED: 'off' }).MCP_OAUTH_ENABLED).toBe(false);
+  });
+
+  it('bounds the lifetimes and accepts only https redirect URIs without fragment or credentials', () => {
+    expect(() => parseEnv({ ...valid, MCP_OAUTH_ACCESS_TOKEN_TTL_SECONDS: '7200' })).toThrow(/MCP_OAUTH_ACCESS_TOKEN_TTL_SECONDS/);
+    expect(() => parseEnv({ ...valid, MCP_OAUTH_ACCESS_TOKEN_TTL_SECONDS: '10' })).toThrow(/MCP_OAUTH_ACCESS_TOKEN_TTL_SECONDS/);
+    expect(() => parseEnv({ ...valid, MCP_OAUTH_REFRESH_TOKEN_TTL_DAYS: '365' })).toThrow(/MCP_OAUTH_REFRESH_TOKEN_TTL_DAYS/);
+    expect(parseEnv({ ...valid, MCP_OAUTH_REDIRECT_URIS: 'https://a.example/cb, https://b.example/cb' }).MCP_OAUTH_REDIRECT_URIS).toEqual(['https://a.example/cb', 'https://b.example/cb']);
+    for (const bad of ['http://a.example/cb', 'https://a.example/cb#x', 'https://user:pw@a.example/cb', 'not a url']) {
+      expect(() => parseEnv({ ...valid, MCP_OAUTH_REDIRECT_URIS: bad })).toThrow(/MCP_OAUTH_REDIRECT_URIS/);
+    }
+    expect(parseEnv({ ...valid, MCP_OAUTH_ALLOW_LOOPBACK_REDIRECTS: 'true' }).MCP_OAUTH_ALLOW_LOOPBACK_REDIRECTS).toBe(true);
+  });
+});

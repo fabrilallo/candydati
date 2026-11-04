@@ -19,6 +19,8 @@ import { createOrganizationGateLookups, organizationTwoFactorCheck } from './org
 import { findMemberRole } from './member-role.js';
 import { createOrganizationCreationLookups, organizationCreationAllowed, organizationCreationHooks } from './organization-creation.js';
 import { createSignupLookups, emailVerificationCheck, signupPolicyCheck, type SignupPolicy } from './signup-policy.js';
+import { mcpOAuthHooks, mcpOAuthPlugin, type GrantedConnection } from './mcp-oauth.js';
+import { mcpOAuthSettings } from './mcp-oauth-settings.js';
 
 export const INVITATION_TTL_SECONDS = 7 * 24 * 60 * 60;
 export const SESSION_TTL_SECONDS = 30 * 24 * 60 * 60;
@@ -37,6 +39,8 @@ export interface AuthDependencies {
   readonly requiresTwoFactor: (organizationId: string) => Promise<boolean>;
   /** The instance can send email: an invitation is an email, so none is created before. Absent: ready. */
   readonly emailReady?: (() => boolean) | undefined;
+  /** Audits a connection granted to an MCP app on the consent page. Absent: nothing is recorded (tests of other flows). */
+  readonly onConnectionGranted?: ((grant: GrantedConnection) => Promise<void>) | undefined;
 }
 
 /** Better Auth error code of an invitation refused while the instance cannot send email (the web app translates it). */
@@ -70,15 +74,31 @@ const credentialOptions = (emails: AuthEmails, beforeEmailVerification: (user: {
   },
 });
 
-/** Every `hooks.before` step, in order: the sign-up policy, then the 2FA requirement on organization changes. */
-const beforeHooks = (env: Env, db: Db, requiresTwoFactor: AuthDependencies['requiresTwoFactor']) => {
+type McpHooks = ReturnType<typeof mcpOAuthHooks> | null;
+
+/** Every `hooks.before` step, in order: the sign-up policy, the 2FA requirement on organization changes, the MCP OAuth gates. */
+const beforeHooks = (env: Env, db: Db, requiresTwoFactor: AuthDependencies['requiresTwoFactor'], mcpHooks: McpHooks) => {
   const signup = signupPolicyCheck(signupPolicy(env), createSignupLookups(db));
   const twoFactor = organizationTwoFactorCheck(createOrganizationGateLookups(db, requiresTwoFactor, (userId, organizationId) => findMemberRole(db, userId, organizationId)));
   return createAuthMiddleware(async (ctx) => {
     await signup(ctx);
     await twoFactor(ctx);
+    await mcpHooks?.before(ctx);
   });
 };
+
+/** OAuth for MCP clients when on (MCP_OAUTH_ENABLED, an https or loopback origin): the plugin and its hooks. */
+function mcpOAuth(env: Env, db: Db, requiresTwoFactor: AuthDependencies['requiresTwoFactor'], onGranted: AuthDependencies['onConnectionGranted']) {
+  const settings = mcpOAuthSettings(env);
+  if (!settings.enabled || settings.resource === null) return { plugins: [], hooks: null };
+  const deps = {
+    env,
+    settings: { ...settings, resource: settings.resource },
+    lookups: { roleOf: (userId: string, organizationId: string) => findMemberRole(db, userId, organizationId), requiresTwoFactor },
+    onGranted: onGranted ?? (async () => undefined),
+  };
+  return { plugins: [mcpOAuthPlugin(deps)], hooks: mcpOAuthHooks(deps) };
+}
 
 /**
  * Better Auth takes one function per organization hook: the role guards check the logo before the creation slot is
@@ -106,7 +126,7 @@ const organizationHooks = (creation: ReturnType<typeof organizationCreationHooks
  * and an audit event for every organization action. The auth base URL is the WEB origin: the browser reaches this
  * api through the web app's /api/** proxy, so the links in the emails go through it too.
  */
-export function createAuth({ env, db, core, mailer, requiresTwoFactor, emailReady = () => true }: AuthDependencies) {
+export function createAuth({ env, db, core, mailer, requiresTwoFactor, emailReady = () => true, onConnectionGranted }: AuthDependencies) {
   const { ac, roles } = buildAccessControl();
   // The hooks need the session of the request being served, which only exists once `auth` is built.
   let resolveSessionUser: SessionUserResolver = async () => null;
@@ -114,6 +134,7 @@ export function createAuth({ env, db, core, mailer, requiresTwoFactor, emailRead
   const emails = createAuthEmails(mailer, env.platform);
   const creationPolicy = { mode: env.ORGANIZATION_CREATION, instanceAdmins: env.INSTANCE_ADMIN_EMAILS };
   const creationLookups = createOrganizationCreationLookups(db);
+  const oauth = mcpOAuth(env, db, requiresTwoFactor, onConnectionGranted);
 
   const auth = betterAuth({
     appName: env.platform.name,
@@ -129,7 +150,7 @@ export function createAuth({ env, db, core, mailer, requiresTwoFactor, emailRead
     database: drizzleAdapter(db, { provider: 'pg', schema }),
     ...credentialOptions(emails, emailVerificationCheck(signupPolicy(env), createSignupLookups(db))),
     session: { expiresIn: SESSION_TTL_SECONDS, updateAge: 24 * 60 * 60 },
-    hooks: { before: beforeHooks(env, db, requiresTwoFactor) },
+    hooks: { before: beforeHooks(env, db, requiresTwoFactor, oauth.hooks), ...(oauth.hooks ? { after: oauth.hooks.after } : {}) },
     databaseHooks: firstOwnerDatabaseHooks(signupPolicy(env), createSignupLookups(db)),
     plugins: [
       organization({
@@ -148,6 +169,7 @@ export function createAuth({ env, db, core, mailer, requiresTwoFactor, emailRead
       }),
       // TOTP with backup codes; enforcement for owners and admins is an organization setting (security settings).
       twoFactor({ issuer: env.platform.name }),
+      ...oauth.plugins,
     ],
   });
 

@@ -25,6 +25,20 @@ const strictFlag = z
   .optional()
   .transform((value) => (value ?? '').trim().toLowerCase() === 'true');
 
+/** An exact https URL with no fragment and no credentials: what an OAuth redirect URI must be. */
+const isExactHttpsUri = (value: string): boolean => {
+  if (!URL.canParse(value) || value.includes('#')) return false;
+  const url = new URL(value);
+  return url.protocol === 'https:' && url.username === '' && url.password === '';
+};
+
+/** Extra OAuth callbacks of MCP clients an operator trusts: exact https URLs, comma-separated. */
+const redirectUriList = z
+  .string()
+  .optional()
+  .transform(splitList)
+  .pipe(z.array(z.string().refine(isExactHttpsUri, 'must be https URLs without fragment or credentials')));
+
 /** A positive whole number with a default: used by the daily caps. */
 const dailyCap = (fallback: number) => z.coerce.number().int().min(1).default(fallback);
 
@@ -96,6 +110,16 @@ const envSchema = z.object({
   MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION: dailyCap(1000),
   /** The same calls per person, across every key they created and every organization they belong to. */
   MCP_MODEL_DAILY_BUDGET_PER_USER: dailyCap(300),
+  /** OAuth for MCP clients (Claude custom connectors). `off`: API keys are the only way in. */
+  MCP_OAUTH_ENABLED: flag,
+  /** Seconds an OAuth access token of an MCP client lives (the client refreshes it): short, so a stolen one soon dies. */
+  MCP_OAUTH_ACCESS_TOKEN_TTL_SECONDS: z.coerce.number().int().min(60).max(3600).default(900),
+  /** Days an OAuth refresh token lives; after that the person connects the app again. */
+  MCP_OAUTH_REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(30),
+  /** Extra OAuth callback URLs accepted besides Claude's (comma-separated, exact https URLs). */
+  MCP_OAUTH_REDIRECT_URIS: redirectUriList,
+  /** `true`: native MCP clients may use http://127.0.0.1 or localhost callbacks (Claude Code, Cursor...). Off by default. */
+  MCP_OAUTH_ALLOW_LOOPBACK_REDIRECTS: strictFlag,
   /** Assistant chat requests per person and per organization in a day. */
   ASSISTANT_DAILY_BUDGET_PER_USER: dailyCap(200),
   ASSISTANT_DAILY_BUDGET_PER_ORGANIZATION: dailyCap(2000),

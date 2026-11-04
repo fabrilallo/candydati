@@ -7,8 +7,8 @@ export const MCP_MODEL_ORGANIZATION_SCOPE = 'mcp_model:organization';
 export const MCP_MODEL_USER_SCOPE = 'mcp_model:user';
 
 const WHOSE: Readonly<Record<string, string>> = {
-  [MCP_MODEL_KEY_SCOPE]: 'this API key',
-  [MCP_MODEL_USER_SCOPE]: 'the person behind this key',
+  [MCP_MODEL_KEY_SCOPE]: 'this API key or connected app',
+  [MCP_MODEL_USER_SCOPE]: 'the person behind it',
   [MCP_MODEL_ORGANIZATION_SCOPE]: 'the organization',
 };
 
@@ -43,7 +43,7 @@ export async function auditRead({ app, actor }: ToolContext, tool: string, input
   await recordAuditEvent(app.core, actor, {
     organizationId: actor.organizationId,
     action: 'mcp.read',
-    target: { type: 'api_key', id: actor.id ?? 'unknown' },
+    target: { type: actor.type, id: actor.id ?? 'unknown' },
     metadata: { tool, ...idsOf(input) },
   });
 }

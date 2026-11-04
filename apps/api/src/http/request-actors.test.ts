@@ -59,3 +59,42 @@ describe('request actors', () => {
     await expect(a.resolveSessionActor(request())).resolves.toBe(user);
   });
 });
+
+describe('MCP actors (API key or OAuth access token)', () => {
+  const OAUTH = `candydati_oat_${'A'.repeat(32)}`;
+  const app: DelegatedActor = { type: 'connected_app', id: 'g1', organizationId: 'o1', role: 'recruiter', onBehalfOfUserId: 'u1', scopes: null };
+
+  function mcpActors(consume = vi.fn((_id: string, _cost?: number) => ({ allowed: true, retryAfterMs: 0 }))) {
+    const authenticate = vi.fn(async (secret: string) => (secret === 'good' ? key : null));
+    const authenticateConnectedApp = vi.fn(async (token: string) => (token === OAUTH ? app : null));
+    const built = createRequestActors({ session: vi.fn(async () => user), authenticate, authenticateConnectedApp, limiter: { consume } });
+    return { ...built, authenticate, authenticateConnectedApp, consume };
+  }
+
+  it('takes an OAuth access token to the connected app, never to the key store, and charges its grant', async () => {
+    const a = mcpActors();
+    await expect(a.resolveMcpActor(request(`Bearer ${OAUTH}`), 3)).resolves.toBe(app);
+    expect(a.authenticate).not.toHaveBeenCalled();
+    expect(a.consume).toHaveBeenCalledWith('g1', 3);
+  });
+
+  it('still takes an API key, unchanged', async () => {
+    const a = mcpActors();
+    await expect(a.resolveMcpActor(request('Bearer good'))).resolves.toBe(key);
+    expect(a.authenticateConnectedApp).not.toHaveBeenCalled();
+  });
+
+  it('is unauthenticated without a bearer or with a dead token, and 429 over budget', async () => {
+    const a = mcpActors();
+    await expect(a.resolveMcpActor(request())).rejects.toBeInstanceOf(UnauthenticatedError);
+    await expect(a.resolveMcpActor(request(`Bearer candydati_oat_${'B'.repeat(32)}`))).rejects.toBeInstanceOf(UnauthenticatedError);
+    const limited = mcpActors(vi.fn(() => ({ allowed: false, retryAfterMs: 5 })));
+    await expect(limited.resolveMcpActor(request(`Bearer ${OAUTH}`))).rejects.toMatchObject({ statusCode: 429 });
+  });
+
+  it('never accepts an OAuth token on the REST api: it is bound to the MCP resource', async () => {
+    const a = mcpActors();
+    await expect(a.resolveActor(request(`Bearer ${OAUTH}`))).rejects.toBeInstanceOf(UnauthenticatedError);
+    expect(a.authenticateConnectedApp).not.toHaveBeenCalled();
+  });
+});
