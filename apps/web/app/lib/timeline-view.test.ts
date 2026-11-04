@@ -52,5 +52,6 @@ describe('timeline view', () => {
     expect(timelineActor({ type: 'person', name: 'Rita' }, t)).toBe('Rita')
     expect(timelineActor({ type: 'person', name: null }, t)).toBeNull()
     expect(timelineActor({ type: 'system', name: null }, t)).toBe('timeline.actor.system')
+    expect(timelineActor({ type: 'connected_app', name: null }, t)).toBe('timeline.actor.connected_app')
   })
 })

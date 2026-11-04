@@ -11,13 +11,15 @@ export interface AuditEventView {
   readonly occurredAt: string
 }
 
-export type ActorKind = 'user' | 'agent' | 'api_key' | 'system'
+export type ActorKind = 'user' | 'agent' | 'api_key' | 'connected_app' | 'system'
+
+const MACHINE_KINDS: readonly string[] = ['agent', 'api_key', 'connected_app', 'system'] satisfies readonly ActorKind[]
 
 const isKnownAction = (action: string): boolean => (AUDIT_ACTIONS as readonly string[]).includes(action)
 
 export const actionLabelKey = (action: string): string => (isKnownAction(action) ? `audit.actions.${action}` : 'audit.actions.unknown')
 
-export const actorKind = (actor: AuditEventView['actor']): ActorKind => (actor.type === 'agent' || actor.type === 'api_key' || actor.type === 'system' ? actor.type : 'user')
+export const actorKind = (actor: AuditEventView['actor']): ActorKind => (MACHINE_KINDS.includes(actor.type) ? (actor.type as ActorKind) : 'user')
 
 const DETAIL_KEYS = ['email', 'role', 'previousRole', 'name'] as const
 

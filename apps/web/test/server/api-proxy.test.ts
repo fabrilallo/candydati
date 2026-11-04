@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { API_UNREACHABLE, apiTarget, downstreamResponseHeaders, isApiPath, isMcpPath, proxyToApi, upstreamRequestHeaders, type FetchLike, type ProxyRequest } from '~~/server/lib/api-proxy'
+import { API_UNREACHABLE, apiTarget, downstreamResponseHeaders, isApiPath, isMcpPath, isOAuthDiscoveryPath, isReadMethod, proxyToApi, upstreamRequestHeaders, type FetchLike, type ProxyRequest } from '~~/server/lib/api-proxy'
 
 const API = 'https://api.internal'
 
@@ -29,6 +29,42 @@ describe('api proxy paths', () => {
     expect(isMcpPath('/mcp/')).toBe(true)
     expect(isMcpPath('/mcpx')).toBe(false)
     expect(isMcpPath('/app/mcp')).toBe(false)
+  })
+
+  it('forwards exactly the OAuth discovery documents, with or without a query', () => {
+    for (const path of [
+      '/.well-known/oauth-protected-resource',
+      '/.well-known/oauth-protected-resource/mcp',
+      '/.well-known/oauth-authorization-server',
+      '/.well-known/oauth-authorization-server/api/auth',
+    ]) {
+      expect(isOAuthDiscoveryPath(path)).toBe(true)
+      expect(isOAuthDiscoveryPath(`${path}?resource=x`)).toBe(true)
+    }
+    for (const path of [
+      '/.well-known',
+      '/.well-known/',
+      '/.well-known/security.txt',
+      '/.well-known/openid-configuration',
+      '/.well-known/oauth-protected-resource/',
+      '/.well-known/oauth-protected-resource/other',
+      '/.well-known/oauth-protected-resource/mcp/../../api/v1/jobs',
+      '/.well-known/oauth-authorization-server/api/auth/../../v1/jobs',
+      '/.well-known/oauth-authorization-server/api',
+      '/.well-known/oauth-authorization-serverx',
+      '/x/.well-known/oauth-authorization-server',
+      '/.well-known/oauth-protected-resource%2Fmcp',
+      '/.well-known/oauth-protected-resource#x',
+    ]) {
+      expect(isOAuthDiscoveryPath(path), path).toBe(false)
+    }
+  })
+
+  it('reads discovery documents with GET and HEAD only', () => {
+    expect(isReadMethod('GET')).toBe(true)
+    expect(isReadMethod('head')).toBe(true)
+    expect(isReadMethod('POST')).toBe(false)
+    expect(isReadMethod('OPTIONS')).toBe(false)
   })
 
   it('joins the api origin and the path without double slashes', () => {

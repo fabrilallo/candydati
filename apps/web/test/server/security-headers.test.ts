@@ -45,8 +45,16 @@ describe('buildSecurityHeaders', () => {
     expect(buildSecurityHeaders({ ...base, dev: true })['strict-transport-security']).toBeUndefined()
   })
 
-  it.each(['/consent/x', '/feedback/abc', '/shortlist/abc', '/accept-invitation/xyz', '/accept-invitation'])('sends no referrer from %s', (pathname) => {
+  it.each(['/consent/x', '/feedback/abc', '/shortlist/abc', '/accept-invitation/xyz', '/accept-invitation', '/oauth/authorize', '/oauth/consent'])('sends no referrer from %s', (pathname) => {
     expect(buildSecurityHeaders({ ...base, pathname })['referrer-policy']).toBe('no-referrer')
+  })
+
+  it('keeps the OAuth pages out of any frame', () => {
+    for (const pathname of ['/oauth/authorize', '/oauth/consent']) {
+      const headers = buildSecurityHeaders({ ...base, pathname })
+      expect(headers['x-frame-options']).toBe('DENY')
+      expect(headers['content-security-policy']).toContain("frame-ancestors 'none'")
+    }
   })
 
   it('keeps the origin as referrer elsewhere', () => {

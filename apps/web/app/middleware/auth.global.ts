@@ -20,7 +20,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (['/login', '/signup', '/forgot-password', '/reset-password', '/verify-email', '/two-factor'].includes(to.path)) return
     throw createError({ statusCode: 503, statusMessage: 'Service unavailable', fatal: true })
   }
-  const target = resolveGuard(to.path, viewer, to.query.redirect)
+  const target = resolveGuard(to.path, viewer, to.query.redirect, to.fullPath)
   if (target && target !== to.fullPath) return navigateTo(target)
   // An owner or admin without a second factor, in an organization that requires one: enrol first (checked once per load).
   if (mayNeedTwoFactor(to.path, viewer ?? null)) {

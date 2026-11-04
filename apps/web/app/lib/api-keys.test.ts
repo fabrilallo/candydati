@@ -28,6 +28,13 @@ describe('scopeGroups', () => {
   it('offers nothing without a role', () => {
     expect(scopeGroups(null)).toEqual([])
   })
+
+  it('lists what a connected app may do with the same machine limits as a key', () => {
+    const offered = scopeGroups('owner', 'connected_app').flatMap((group) => group.scopes)
+    expect(offered).toEqual(scopeGroups('owner').flatMap((group) => group.scopes))
+    expect(offered).not.toContain('member:invite')
+    expect(scopeGroups('interviewer', 'connected_app').flatMap((group) => group.scopes)).toContain('feedback:read')
+  })
 })
 
 describe('scopeLabelKey', () => {

@@ -27,6 +27,7 @@ describe('actorKind', () => {
     expect(actorKind({ ...base.actor, type: 'agent' })).toBe('agent')
     expect(actorKind({ ...base.actor, type: 'api_key' })).toBe('api_key')
     expect(actorKind({ ...base.actor, type: 'system', id: null })).toBe('system')
+    expect(actorKind({ ...base.actor, type: 'connected_app' })).toBe('connected_app')
     expect(actorKind({ ...base.actor, type: 'robot' })).toBe('user')
   })
 })

@@ -10,6 +10,14 @@ export const OPENAPI_PATH = '/api/v1/openapi.json'
 export const AGENT_CHAT_PATH = '/api/v1/agent/chat'
 export const AGENT_STATUS_PATH = '/api/v1/agent/status'
 
+// Connected apps (MCP clients authorized with OAuth) and the Better Auth steps of their authorization
+export const CONNECTED_APPS_PATH = '/api/v1/connected-apps'
+export const connectedAppPath = (id: string): string => `${CONNECTED_APPS_PATH}/${enc(id)}`
+export const CONSENT_PREVIEW_PATH = `${CONNECTED_APPS_PATH}/consent-preview`
+export const OAUTH_CONTINUE_PATH = '/api/auth/oauth2/continue'
+export const OAUTH_CONSENT_PATH = '/api/auth/oauth2/consent'
+export const SET_ACTIVE_ORGANIZATION_PATH = '/api/auth/organization/set-active'
+
 // Distribution
 export const DISTRIBUTION_PATH = '/api/v1/distribution'
 export const jobDistributionPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/distribution`

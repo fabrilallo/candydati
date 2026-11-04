@@ -1,4 +1,4 @@
-import { API_KEY_NAME_MAX, grantablePermissions, type Permission, type Resource, type Role } from '@candydati/domain'
+import { API_KEY_NAME_MAX, grantablePermissions, type ActorType, type Permission, type Resource, type Role } from '@candydati/domain'
 
 /** Areas of the scope picker, in order, and the resources each one gathers. */
 const AREAS = [
@@ -25,9 +25,9 @@ const resourceOf = (permission: Permission): Resource => permission.split(':')[0
  * What a key created by `role` may hold, grouped by area: the role's permissions minus what a machine may never do
  * (`grantablePermissions` of the domain). A key never has more than its creator. Empty areas are left out.
  */
-export const scopeGroups = (role: Role | null): readonly ScopeGroup[] => {
+export const scopeGroups = (role: Role | null, actorType: Extract<ActorType, 'api_key' | 'connected_app'> = 'api_key'): readonly ScopeGroup[] => {
   if (role === null) return []
-  const grantable = grantablePermissions(role, 'api_key')
+  const grantable = grantablePermissions(role, actorType)
   const known = new Set<Resource>(AREAS.flatMap(([, resources]) => resources))
   const grouped: readonly ScopeGroup[] = AREAS.map(([area, resources]) => ({
     area,

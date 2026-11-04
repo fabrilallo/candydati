@@ -462,7 +462,8 @@
       "api_key": "Chiave API",
       "system": "Sistema",
       "unknown": "Sconosciuto",
-      "onBehalf": "per conto di un utente"
+      "onBehalf": "per conto di un utente",
+      "connected_app": "App collegata"
     },
     "detail": {
       "email": "Email",
@@ -481,7 +482,8 @@
       "candidate": "Candidato",
       "candidate_note": "Nota",
       "client": "Cliente",
-      "shortlist": "Shortlist"
+      "shortlist": "Shortlist",
+      "connected_app": "App collegata"
     },
     "empty": "Ancora nessuna azione registrata.",
     "loadFailed": "Non siamo riusciti a caricare il registro.",
@@ -647,6 +649,10 @@
         "opened": "Ha aperto una shortlist",
         "cv_opened": "Ha aperto un CV da una shortlist",
         "answered": "Ha risposto su un candidato di una shortlist"
+      },
+      "connected_app": {
+        "granted": "Ha collegato un'app al proprio account",
+        "revoked": "Ha scollegato un'app"
       }
     }
   },
@@ -2677,9 +2683,9 @@
   },
   "mcp": {
     "title": "Come collegare un agente (MCP)",
-    "description": "Un agente compatibile con MCP (Model Context Protocol) può lavorare sugli annunci e leggere la pipeline con una chiave API. Usa gli stessi servizi dell'interfaccia e i permessi della chiave.",
+    "description": "Un agente compatibile con MCP (Model Context Protocol) può lavorare sugli annunci e leggere la pipeline. Usa gli stessi servizi dell'interfaccia, con i permessi del tuo ruolo o della chiave.",
     "endpoint": "Indirizzo del server",
-    "endpointHint": "Streamable HTTP. Autenticazione solo con chiave API.",
+    "endpointHint": "Streamable HTTP. Accesso con il tuo account (OAuth) o con una chiave API.",
     "copyEndpoint": "Copia l'indirizzo del server MCP",
     "config": "Configurazione per il client",
     "copyConfig": "Copia la configurazione",
@@ -2705,6 +2711,14 @@
       "set_evaluation_criteria": "Sostituisce i criteri di valutazione di un annuncio dopo il tuo assenso. I criteri già usati restano con le loro parole; niente punteggi né classifiche.",
       "get_reports": "Numeri aggregati del periodo: tempi, passaggi tra le fasi, provenienza e risposte, senza dati personali.",
       "list_clients": "Per un'agenzia: i clienti con il numero di posizioni, senza i referenti."
+    },
+    "claude": {
+      "title": "Collegare Claude (connettore personalizzato)",
+      "step1": "In Claude apri Impostazioni, poi Connettori, e scegli \"Aggiungi connettore personalizzato\".",
+      "step2": "Incolla l'indirizzo del server qui sopra. Non serve nessuna chiave API.",
+      "step3": "Accedi con il tuo account e scegli l'organizzazione: il connettore lavora come te, con il tuo ruolo.",
+      "note": "Le chiavi API restano per gli altri client e per gli script. Le app collegate si vedono, e si scollegano, nelle impostazioni di sicurezza.",
+      "manageLink": "App collegate"
     }
   },
   "apiReference": {
@@ -4411,7 +4425,8 @@
       "system": "automatico",
       "candidate": "candidato",
       "external": "esterno",
-      "person": "persona"
+      "person": "persona",
+      "connected_app": "app collegata"
     },
     "item": {
       "received": "Candidatura ricevuta ({source})",
@@ -4822,6 +4837,61 @@
         "title": "La pagina non è disponibile al momento",
         "body": "Riprova tra qualche minuto."
       }
+    }
+  },
+  "connectedApps": {
+    "title": "App collegate",
+    "description": "Le app, come Claude, a cui è stato permesso di lavorare in {organization} per conto di una persona, con il suo ruolo. Ogni loro chiamata finisce nel registro delle azioni.",
+    "empty": "Nessuna app collegata.",
+    "emptyHow": "Per collegare Claude: in Claude apri Impostazioni, Connettori, \"Aggiungi connettore personalizzato\" e incolla {url}. Poi accedi e scegli l'organizzazione.",
+    "apiLink": "Guida in API e integrazioni",
+    "declared": "nome dichiarato dall'app",
+    "unnamed": "App senza nome",
+    "connectedOn": "Collegata il {date}",
+    "connectedBy": "Collegata da {name}",
+    "connectedByFormer": "Collegata da un ex membro",
+    "access": "Accesso",
+    "scope": {
+      "mcp": "Strumenti MCP",
+      "offline_access": "Resta collegata"
+    },
+    "revoke": "Scollega",
+    "revokeTitle": "Scollegare l'app?",
+    "revokeBody": "{name} smette subito di funzionare. Per usarla di nuovo bisogna ricollegarla dall'app.",
+    "revokeConfirm": "Scollega",
+    "revoked": "App scollegata"
+  },
+  "oauth": {
+    "authorize": {
+      "pageTitle": "Collegamento in corso",
+      "working": "Controlliamo il tuo accesso e torniamo alla richiesta…"
+    },
+    "failedTitle": "Non siamo riusciti a continuare",
+    "consent": {
+      "pageTitle": "Permetti l'accesso",
+      "loading": "Carichiamo la richiesta…",
+      "title": "{name} vuole lavorare con il tuo account",
+      "titleUnnamed": "Un'app vuole lavorare con il tuo account",
+      "declared": "Nome e indirizzo li dichiara l'app stessa: continua solo se hai avviato tu questo collegamento.",
+      "returnTo": "Dopo la tua risposta torni su",
+      "organization": "Organizzazione",
+      "organizationHint": "L'app lavora solo in questa organizzazione.",
+      "twoFactorOption": "{name} (serve la verifica in due passaggi)",
+      "twoFactorWarning": "{name} chiede la verifica in due passaggi per il tuo ruolo. Attivala, poi avvia di nuovo il collegamento.",
+      "twoFactorLink": "Attiva la verifica in due passaggi",
+      "can": "Come {role} in {organization}, l'app può:",
+      "never": "Non ha strumenti per spostare candidati tra le fasi, decidere su di loro, scrivere loro o cancellarli, né per gestire membri, chiavi o impostazioni.",
+      "asYou": "Lavora come te, con il tuo ruolo, e ogni chiamata finisce nel registro delle azioni. Puoi scollegarla quando vuoi dalle impostazioni di sicurezza.",
+      "allow": "Permetti",
+      "deny": "Rifiuta",
+      "noOrganization": "Non fai ancora parte di nessuna organizzazione. Creane una o accetta un invito, poi avvia di nuovo il collegamento dall'app."
+    },
+    "errors": {
+      "expired": "La richiesta è scaduta o non è più valida. Avvia di nuovo il collegamento dalla tua app.",
+      "twoFactorRequired": "Questa organizzazione chiede la verifica in due passaggi per il tuo ruolo. Attivala, poi riprova.",
+      "notAMember": "Non fai parte di questa organizzazione.",
+      "noOrganization": "Scegli un'organizzazione prima di permettere l'accesso.",
+      "generic": "Qualcosa non ha funzionato. Avvia di nuovo il collegamento dalla tua app."
     }
   }
 }

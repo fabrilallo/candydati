@@ -55,4 +55,14 @@ describe('mcp guide', () => {
     expect(wrapper.findAll('[data-testid="mcp-tools"] dt').length).toBe(MCP_TOOL_NAMES.length)
     expect(wrapper.text()).toContain('Non ci sono strumenti per spostare')
   })
+
+  it('explains how to add Claude as a custom connector, without a key', async () => {
+    const wrapper = await mountSuspended(McpGuide)
+    mounted.push(wrapper)
+    const claude = wrapper.find('[data-testid="mcp-claude"]')
+    expect(claude.text()).toContain('Collegare Claude (connettore personalizzato)')
+    expect(claude.text()).toContain('Aggiungi connettore personalizzato')
+    expect(claude.text()).toContain('Non serve nessuna chiave API')
+    expect(claude.find('a[href="/app/settings/security"]').exists()).toBe(true)
+  })
 })

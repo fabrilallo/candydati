@@ -16,6 +16,11 @@ export const safeRedirect = (raw: unknown): string | null => {
 
 export const loginLocation = (fullPath: string): string => (fullPath === HOME || fullPath === '/' ? LOGIN : `${LOGIN}?redirect=${encodeURIComponent(fullPath)}`)
 
+/**
+ * The MCP connection pages (OAuth login and consent): open to any signed-in person, with or without an organization
+ * (the consent page says what is missing), never bounced to onboarding.
+ */
+export const isOAuthPath = (path: string): boolean => path.startsWith('/oauth/')
 const isInvitationPath = (path: string): boolean => path.startsWith('/accept-invitation/')
 const isAppPath = (path: string): boolean => path === HOME || path.startsWith(`${HOME}/`)
 /**
@@ -36,10 +41,11 @@ const afterSignIn = (viewer: Viewer, redirect: unknown): string => safeRedirect(
 /**
  * Pure routing rule of the route middleware: where to send this navigation, or `null` to let it through.
  * Anonymous -> login; signed in without organization -> onboarding; signed in with one -> never back to login/onboarding.
+ * `fullPath` (path and query): the OAuth pages come back from login with their signed query intact.
  */
-export const resolveGuard = (path: string, viewer: Viewer | null, redirect?: unknown): string | null => {
+export const resolveGuard = (path: string, viewer: Viewer | null, redirect?: unknown, fullPath: string = path): string | null => {
   if (isPublicPath(path) || isOpenAuthPath(path)) return null
-  if (!viewer) return path === '/' ? LOGIN : isGuestPath(path) ? null : loginLocation(path)
+  if (!viewer) return path === '/' ? LOGIN : isGuestPath(path) ? null : loginLocation(isOAuthPath(path) ? fullPath : path)
   // A session of an address never confirmed (created before verification was required): nothing else until it is.
   if (viewer.user.emailVerified === false) return VERIFY_EMAIL
   if (path === '/') return viewer.organization ? HOME : ONBOARDING
