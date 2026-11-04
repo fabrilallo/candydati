@@ -19,7 +19,7 @@ const { api, state } = vi.hoisted(() => ({
       invitations: [],
     }),
   },
-  state: { puts: [] as unknown[], deletes: [] as string[] },
+  state: { puts: [] as unknown[], deletes: [] as string[], restricted: [] as string[], canManage: true, restrictions: [] as unknown[] },
 }))
 mockNuxtImport('useAuthApi', () => () => api)
 
@@ -28,6 +28,12 @@ const TEAM = { jobId: 'j1', members: [member('u1', 'Anna Bianchi'), member('u2',
 const job = makeJob({ content: { ...makeJob().content, process: [{ id: 'stage-0', type: 'screening_call', durationMinutes: 30, conductedBy: 'recruiter' }] } })
 
 registerEndpoint('/api/v1/jobs/j1/team', () => ok(TEAM))
+registerEndpoint('/api/v1/jobs/j1/restricted-stages', () => ok({ jobId: 'j1', stageIds: state.restricted, canManage: state.canManage }))
+registerEndpoint('/api/v1/jobs/j1/stages/stage-0/restriction', async (event) => {
+  const body = (await readBody(event)) as { restricted: boolean }
+  state.restrictions.push(body)
+  return ok({ jobId: 'j1', stageIds: body.restricted ? ['stage-0'] : [], canManage: true })
+})
 registerEndpoint('/api/v1/jobs/j1/team/u3', async (event) => {
   state.puts.push({ user: 'u3', body: await readBody(event) })
   return ok({ jobId: 'j1', members: [...TEAM.members, member('u3', 'Carla Verdi', { role: 'hiring_manager' })] })
@@ -51,7 +57,11 @@ const mountIt = async () => {
 beforeEach(() => {
   state.puts.length = 0
   state.deletes.length = 0
+  state.restrictions.length = 0
+  state.restricted = []
+  state.canManage = true
   clearNuxtData('job-team-j1')
+  clearNuxtData('restricted-stages-j1')
   useViewer().viewer.value = viewerWith('recruiter')
 })
 afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
@@ -90,5 +100,27 @@ describe('JobTeamPanel', () => {
     const wrapper = await mountIt()
     expect(wrapper.find('[data-testid="team-add-member"]').exists()).toBe(false)
     expect(wrapper.find('[data-testid="team-remove"]').exists()).toBe(false)
+  })
+
+  it('marks a declared stage restricted with its switch, when the api says the viewer can manage it', async () => {
+    const wrapper = await mountIt()
+    await vi.waitFor(() => expect(wrapper.findAll('[data-testid="restricted-stage-toggle"]').length).toBe(1))
+    const toggle = wrapper.find('[data-testid="restricted-stage-toggle"]')
+    expect(wrapper.find('[data-testid="restricted-stages"]').text()).toContain('Chiamata conoscitiva')
+    expect(wrapper.find('[data-testid="restricted-stages"]').text()).not.toContain('Ricevut')
+    expect(toggle.attributes('aria-checked')).toBe('false')
+    await toggle.trigger('click')
+    await flushPromises()
+    expect(state.restrictions).toEqual([{ restricted: true }])
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="restricted-stage-toggle"]').attributes('aria-checked')).toBe('true'))
+  })
+
+  it('shows restricted stages read-only, with a lock, to whoever cannot manage them', async () => {
+    state.canManage = false
+    state.restricted = ['stage-0']
+    useViewer().viewer.value = viewerWith('interviewer')
+    const wrapper = await mountIt()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="restricted-stage-lock"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="restricted-stage-toggle"]').exists()).toBe(false)
   })
 })

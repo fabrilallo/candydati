@@ -59,3 +59,19 @@ export function jobScopeIncludes(scope: JobScope, jobId: string | null | undefin
   if (scope.kind === 'organization') return true;
   return jobId !== null && jobId !== undefined && scope.jobIds.includes(jobId);
 }
+
+/**
+ * A stage of a job marked restricted (PRODUCT.md §6.2): the notes and feedback written at it are read only by owners,
+ * admins, the job's hiring manager and their own authors. Everyone else sees nothing of them, not even a count.
+ */
+export interface RestrictedStage {
+  readonly organizationId: string;
+  readonly jobId: string;
+  readonly stageId: string;
+  /** Who marked it. */
+  readonly restrictedBy: string;
+  readonly createdAt: Date;
+}
+
+/** Owners and admins read every restricted stage; for anyone else it depends on the job's team. */
+export const readsEveryRestrictedStage = (role: Role): boolean => role === 'owner' || role === 'admin';

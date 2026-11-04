@@ -110,6 +110,8 @@ export interface CandidateNoteRepository {
   create(note: CandidateNote): Promise<CandidateNote>;
   /** Newest first. */
   listByCandidate(organizationId: string, candidateId: string): Promise<readonly CandidateNote[]>;
+  /** The notes about these applications, newest first. */
+  listByApplications(organizationId: string, applicationIds: readonly string[]): Promise<readonly CandidateNote[]>;
   /** Notes per application id; applications without notes are 0. */
   countByApplication(organizationId: string, applicationIds: readonly string[]): Promise<Readonly<Record<string, number>>>;
 }

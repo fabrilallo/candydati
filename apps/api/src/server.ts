@@ -1,7 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { safeErrorSerializer } from '@candydati/core';
-import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, AiModelCheck, TaskQueue, ResponsibilitySuggester } from '@candydati/core';
+import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, AiModelCheck, TaskQueue, ResponsibilitySuggester, CriteriaDrafter } from '@candydati/core';
 import { createErrorReporter, type ErrorReporter, type MigrationConnectorRegistry } from '@candydati/providers';
 import type { Db } from '@candydati/db';
 import type { AdQualityAnalyzer } from '@candydati/domain';
@@ -87,6 +87,7 @@ export interface ServerDeps {
   readonly adQuality?: AdQualityAnalyzer | undefined;
   /** Defaults to the fast model in force; tests pass a fake. */
   readonly responsibilitySuggester?: ResponsibilitySuggester | undefined;
+  readonly criteriaDrafter?: CriteriaDrafter | undefined;
   /** Messages to candidates: the provider chosen by EMAIL_PROVIDER by default, a fake in tests. */
   readonly messaging?: { readonly sender: MessageSender; readonly identity: EmailIdentity } | undefined;
   /** Channels to distribute ads to besides the built-in feed. Empty by default (self-hosted); hosted deployments pass theirs. */
@@ -217,6 +218,7 @@ function createContext(app: FastifyInstance, deps: ServerDeps, metrics: ApiMetri
       app.log.error({ err: error }, 'receipt email not queued');
     },
     responsibilitySuggester: deps.responsibilitySuggester,
+    criteriaDrafter: deps.criteriaDrafter,
     adQuality: deps.adQuality ?? createLiveAnalyzer(() => aiRuntime.snapshot().fast, app.log),
   });
 }

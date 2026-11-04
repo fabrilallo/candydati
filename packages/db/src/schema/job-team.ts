@@ -31,4 +31,25 @@ export const jobTeamMember = pgTable(
   ],
 );
 
+/**
+ * Stages of a job marked restricted (PRODUCT.md §6.2). A row means restricted; no row (every stage before this table) means
+ * not restricted. `stage_id` is the id of a stage declared in the job content (text, like everywhere else).
+ */
+export const jobStageRestriction = pgTable(
+  'job_stage_restriction',
+  {
+    organizationId: text('organization_id')
+      .notNull()
+      .references(() => organization.id, { onDelete: 'restrict' }),
+    jobId: text('job_id')
+      .notNull()
+      .references(() => job.id, { onDelete: 'restrict' }),
+    stageId: text('stage_id').notNull(),
+    restrictedBy: text('restricted_by').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [primaryKey({ name: 'job_stage_restriction_pk', columns: [table.organizationId, table.jobId, table.stageId] })],
+);
+
+export type JobStageRestrictionRow = typeof jobStageRestriction.$inferSelect;
 export type JobTeamMemberRow = typeof jobTeamMember.$inferSelect;

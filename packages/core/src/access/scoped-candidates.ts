@@ -113,6 +113,7 @@ export function scopeNotes(raw: CandidateNoteRepository, ctx: JobScopeContext): 
       return raw.create(note);
     },
     listByCandidate: async (organizationId, candidateId) => visibleNotes(await raw.listByCandidate(organizationId, candidateId)),
+    listByApplications: async (organizationId, applicationIds) => visibleNotes(await raw.listByApplications(organizationId, await ctx.applicationsIn(applicationIds))),
     countByApplication: async (organizationId, applicationIds) => raw.countByApplication(organizationId, await ctx.applicationsIn(applicationIds)),
   };
 }

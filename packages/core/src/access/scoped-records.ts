@@ -1,6 +1,6 @@
 import type { AutomationRuleRepository, NotificationRepository, TaskRepository } from '../automation-ports.js';
 import { NotFoundError } from '../errors.js';
-import type { FeedbackRequestRepository, InterviewFeedbackRepository, StageInterviewerRepository } from '../feedback-ports.js';
+import type { FeedbackRequestRepository, InterviewFeedbackRepository, ScorecardRepository, StageInterviewerRepository } from '../feedback-ports.js';
 import type { ImportBatchRepository } from '../import-ports.js';
 import type { ConversationRepository, MessageRepository } from '../messaging-ports.js';
 import type { ReportRepository, ResponsePromiseRepository, StageEventRepository } from '../report-ports.js';
@@ -78,6 +78,18 @@ export function scopeStageInterviewers(raw: StageInterviewerRepository, ctx: Job
     async replaceForJob(organizationId, jobId, interviewers) {
       if (!(await ctx.allowsJob(jobId))) notFound('Job');
       return raw.replaceForJob(organizationId, jobId, interviewers);
+    },
+  };
+}
+
+/** The scorecard of a job follows the job. The writes by id run after the use case found the job in scope. */
+export function scopeScorecards(raw: ScorecardRepository, ctx: JobScopeContext): ScorecardRepository {
+  return {
+    ...raw,
+    listByJob: async (organizationId, jobId) => ((await ctx.allowsJob(jobId)) ? raw.listByJob(organizationId, jobId) : []),
+    async create(criteria) {
+      for (const criterion of criteria) if (!(await ctx.allowsJob(criterion.jobId))) notFound('Job');
+      return raw.create(criteria);
     },
   };
 }

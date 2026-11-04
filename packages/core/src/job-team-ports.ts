@@ -1,4 +1,4 @@
-import type { JobTeamMember } from '@candydati/domain';
+import type { JobTeamMember, RestrictedStage } from '@candydati/domain';
 
 /**
  * Job teams and the lookups behind per-job access (PRODUCT.md §6). Every method filters by organization.
@@ -21,4 +21,10 @@ export interface JobTeamRepository {
   addIfAbsent(member: JobTeamMember): Promise<void>;
   /** True when a row was removed. */
   remove(organizationId: string, jobId: string, userId: string): Promise<boolean>;
+  /** Restricted stages of the organization (PRODUCT.md §6.2), of one job when `jobId` is given. */
+  listRestrictedStages(organizationId: string, jobId?: string): Promise<readonly RestrictedStage[]>;
+  /** Marks the stage restricted (idempotent: an existing mark is kept as it was). True when it was not restricted before. */
+  restrictStage(stage: RestrictedStage): Promise<boolean>;
+  /** Removes the mark. True when the stage was restricted. */
+  unrestrictStage(organizationId: string, jobId: string, stageId: string): Promise<boolean>;
 }

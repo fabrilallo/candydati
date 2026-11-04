@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { useEventListener } from '@vueuse/core'
+import { LockIcon } from '@lucide/vue'
 import { NOTE_MAX, type CandidateApplicationDto, type NoteDto } from '@candydati/domain'
 import { formatDateTime } from '@/lib/format'
+import { atRestrictedStage } from '@/lib/restricted-stages-api'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 
 /**
  * Internal notes (docs/DESIGN-SYSTEM.md "Feed delle note"): composer on top, N to focus it, Ctrl or Cmd + Enter to save;
- * then the notes, newest first, with the job they are about. Candidates never see them.
+ * then the notes, newest first, with the job they are about. Candidates never see them. A note written at a restricted
+ * stage (PRODUCT.md §6.2) carries a lock: only owners, admins, the hiring manager and its author read it.
  */
 const props = defineProps<{ notes: readonly NoteDto[]; applications: readonly CandidateApplicationDto[]; currentId: string | null; canCreate: boolean; busy: boolean; authorName: string }>()
 const emit = defineEmits<{ submit: [body: string, applicationId: string | null, done: (ok: boolean) => void] }>()
@@ -17,6 +21,11 @@ const body = ref('')
 const about = ref<string>(props.currentId ?? '')
 const field = ref<InstanceType<typeof Textarea> | null>(null)
 const textarea = (): HTMLTextAreaElement | null => (field.value?.$el as HTMLTextAreaElement | undefined) ?? null
+/** The note being written is about an application sitting at a restricted stage: say who will read it. */
+const restrictedHere = computed(() => {
+  const app = props.applications.find((candidate) => candidate.id === about.value)
+  return app !== undefined && atRestrictedStage(app.stageId, app.restrictedStageIds)
+})
 const jobOf = (applicationId: string | null): string | null => props.applications.find((app) => app.id === applicationId)?.job.title ?? null
 
 const send = (): void => {
@@ -55,7 +64,7 @@ useEventListener(globalThis.document, 'keydown', (event: KeyboardEvent) => {
             :maxlength="NOTE_MAX"
             :placeholder="t('candidate.notes.placeholder')"
             class="min-h-11 resize-y pr-36"
-            aria-describedby="note-hint"
+            :aria-describedby="restrictedHere ? 'note-hint note-restricted-hint' : 'note-hint'"
             data-testid="note-body"
             @keydown="onKey"
           />
@@ -64,7 +73,10 @@ useEventListener(globalThis.document, 'keydown', (event: KeyboardEvent) => {
           </p>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <p id="note-hint" class="text-xs text-muted-foreground">{{ t('candidate.notes.internal') }}</p>
+          <div class="grid gap-1">
+            <p id="note-hint" class="text-xs text-muted-foreground">{{ t('candidate.notes.internal') }}</p>
+            <p v-if="restrictedHere" id="note-restricted-hint" class="flex items-center gap-1.5 text-xs font-medium" data-testid="note-restricted-hint"><LockIcon class="size-3.5 shrink-0" aria-hidden="true" />{{ t('candidate.notes.restrictedComposer') }}</p>
+          </div>
           <div class="flex items-center gap-2">
             <NativeSelect v-if="applications.length > 1" v-model="about" class="w-auto max-w-56" :aria-label="t('candidate.notes.about')" data-testid="note-about">
               <option value="">{{ t('candidate.notes.general') }}</option>
@@ -85,6 +97,7 @@ useEventListener(globalThis.document, 'keydown', (event: KeyboardEvent) => {
             <p class="flex flex-wrap items-center gap-2 text-sm font-medium">
               {{ note.author.name }}
               <span v-if="note.author.external" class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground" :title="t('candidate.notes.importedHint')" data-testid="note-imported">{{ t('candidate.notes.imported') }}</span>
+              <Badge v-if="note.restricted" variant="outline" :title="t('candidate.notes.restrictedHint')" data-testid="note-restricted"><LockIcon aria-hidden="true" />{{ t('candidate.notes.restricted') }}</Badge>
             </p>
             <p v-if="jobOf(note.applicationId)" class="truncate text-xs text-muted-foreground">{{ t('candidate.notes.on', { job: jobOf(note.applicationId) }) }}</p>
           </div>

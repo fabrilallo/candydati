@@ -24,6 +24,7 @@ export const MACHINE_FORBIDDEN_PERMISSIONS: readonly Permission[] = PERMISSIONS.
       'job:approve',
       // Who sees which candidates is an access decision: it stays with a person.
       'job_team:manage',
+      'restricted_stage:manage',
       // What the organization says publicly about itself, under its name: a person decides it.
       'careers_page:manage',
       // A migration moves a whole history under the operator's responsibility (ADR 0009): a person confirms it.

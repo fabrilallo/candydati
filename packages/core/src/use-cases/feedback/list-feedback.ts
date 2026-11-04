@@ -1,6 +1,7 @@
 import {
   feedbackQuestionsFor,
   localizeQuestions,
+  type CriterionObservation,
   type FeedbackRecommendation,
   type InterviewFeedback,
   type Job,
@@ -11,6 +12,7 @@ import { requireJob } from '../jobs/shared.js';
 import { defineFeedbackUseCase } from './define.js';
 import { stageContextOf, toRequestView, type FeedbackRequestView } from './shared.js';
 import { sequential } from '../../sequential.js';
+import { scorecardMatrix, type ScorecardRowView } from './scorecard-matrix.js';
 
 export interface FeedbackAnswerView {
   readonly questionId: string;
@@ -26,12 +28,18 @@ export interface FeedbackView {
   readonly interviewerName: string;
   readonly answers: readonly FeedbackAnswerView[];
   readonly recommendation: FeedbackRecommendation;
+  /** What the interviewer saw for each criterion of the scorecard, with evidence. */
+  readonly observations: readonly CriterionObservation[];
   readonly submittedAt: Date;
 }
 
 export interface ApplicationFeedbackView {
   readonly requests: readonly FeedbackRequestView[];
   readonly feedback: readonly FeedbackView[];
+  /** Restricted stages of the job (PRODUCT.md §6.2): what is shown from them, the viewer may read; others see none of it. */
+  readonly restrictedStageIds: readonly string[];
+  /** The criteria with each interviewer's evidence side by side: no count, no total, no order of merit. */
+  readonly scorecard: readonly ScorecardRowView[];
 }
 
 function toFeedbackView(feedback: InterviewFeedback, job: Job): FeedbackView {
@@ -48,6 +56,7 @@ function toFeedbackView(feedback: InterviewFeedback, job: Job): FeedbackView {
       return answer === undefined ? [] : [{ questionId: question.id, question: question.label, answer }];
     }),
     recommendation: feedback.recommendation,
+    observations: feedback.observations,
     submittedAt: feedback.submittedAt,
   };
 }
@@ -61,14 +70,19 @@ export const listApplicationFeedback = defineFeedbackUseCase({
   handler: async ({ deps, actor, input }): Promise<ApplicationFeedbackView> => {
     const application = await requireApplication(deps, actor.organizationId, input.applicationId);
     const job = await requireJob(deps, actor.organizationId, application.jobId);
-    const [requests, feedback] = await sequential(
+    const [requests, feedback, restricted, criteria] = await sequential(
       () => deps.feedbackRequests.listByApplication(actor.organizationId, application.id),
       () => deps.interviewFeedback.listByApplication(actor.organizationId, application.id),
+      async () => (deps.jobTeams ? deps.jobTeams.listRestrictedStages(actor.organizationId, job.id) : []),
+      () => deps.scorecards.listByJob(actor.organizationId, job.id),
     );
     const now = deps.now();
+    const views = feedback.map((item) => toFeedbackView(item, job));
     return {
       requests: requests.map((request) => toRequestView(request, job, now)),
-      feedback: feedback.map((item) => toFeedbackView(item, job)),
+      feedback: views,
+      restrictedStageIds: restricted.map((stage) => stage.stageId),
+      scorecard: scorecardMatrix(views, criteria),
     };
   },
 });

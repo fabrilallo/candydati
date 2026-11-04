@@ -25,6 +25,15 @@ export function createDrizzleCandidateNotes(db: DbExecutor): CandidateNoteReposi
         .orderBy(desc(candidateNote.createdAt), desc(candidateNote.id));
       return rows.map(toNote);
     },
+    async listByApplications(organizationId, applicationIds) {
+      if (applicationIds.length === 0) return [];
+      const rows = await db
+        .select()
+        .from(candidateNote)
+        .where(and(eq(candidateNote.organizationId, organizationId), inArray(candidateNote.applicationId, [...applicationIds])))
+        .orderBy(desc(candidateNote.createdAt), desc(candidateNote.id));
+      return rows.map(toNote);
+    },
     async countByApplication(organizationId, applicationIds) {
       const zero = Object.fromEntries(applicationIds.map((id) => [id, 0]));
       if (applicationIds.length === 0) return zero;

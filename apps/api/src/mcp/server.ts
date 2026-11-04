@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { z } from 'zod';
 import { MCP_PROMPT_NAMES, registerPrompts } from './prompts.js';
 import { getReportsTool } from './tools-reports.js';
+import { getEvaluationCriteriaTool, setEvaluationCriteriaTool } from './tools-criteria.js';
 import { findCandidatesTool } from './tools-search.js';
 import { addCandidateNoteTool, createTaskTool, getJobStatsTool, listAttentionTool, listJobTemplatesTool } from './tools-work.js';
 import {
@@ -33,6 +34,8 @@ const TOOLS = [
   analyzeJobAdTool,
   checkPublishableTool,
   publishJobTool,
+  getEvaluationCriteriaTool,
+  setEvaluationCriteriaTool,
   getPipelineTool,
   listAttentionTool,
   findCandidatesTool,

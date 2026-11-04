@@ -180,6 +180,9 @@ export function createInMemoryCandidateNoteRepository(store: CandidateStore): Ca
     async listByCandidate(organizationId, candidateId) {
       return newestFirst(inOrg(organizationId).filter((n) => n.candidateId === candidateId));
     },
+    async listByApplications(organizationId, applicationIds) {
+      return newestFirst(inOrg(organizationId).filter((n) => n.applicationId !== null && applicationIds.includes(n.applicationId)));
+    },
     async countByApplication(organizationId, applicationIds) {
       const notes = inOrg(organizationId);
       return Object.fromEntries(applicationIds.map((id) => [id, notes.filter((n) => n.applicationId === id).length]));

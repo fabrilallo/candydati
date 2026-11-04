@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Restricted stages:** an owner, an admin or the job's hiring manager can mark a stage of a job restricted (Team tab).
+  Notes and interview feedback written at that stage are then read only by owners, admins, the hiring manager and their
+  authors; the rest of the team, keys and the assistant acting for them see nothing of them, not even a count, in the
+  profile, the timeline, the pipeline and exports. Marking and unmarking are audited. Existing stages stay open.
+- **Scorecards without scores:** each job can declare its evaluation criteria before the interviews, for every stage or
+  one. On the feedback link the interviewer marks each criterion observed, not observed or to explore and writes the
+  evidence; the candidate's feedback shows the criteria with each interviewer's evidence side by side. No rating, no
+  total, no ranking. A criterion is locked once a feedback uses it (later changes retire it). The AI can draft criteria
+  from the ad; the MCP server gets `get_evaluation_criteria` and `set_evaluation_criteria`, and the interview kit prompt
+  builds on them. The candidate export carries the observations.
+
 ### Fixed
 
 - Docs: the READMEs and the website no longer say the MCP server covers everything in the interface. REST covers the

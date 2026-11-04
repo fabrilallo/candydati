@@ -86,16 +86,16 @@ describe('candidate DTO mappers', () => {
     const detail = toCandidateDetailDto({
       candidate,
       applications: [
-        { application: buildApplication({ stageId: 'gone' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] },
-        { application: buildApplication({ stageId: 'stage-0' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] },
-        { application: buildApplication({ stageId: 'received', origin: 'linkedin', originCampaign: 'autumn' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] },
+        { application: buildApplication({ stageId: 'gone' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [], restrictedStageIds: [] },
+        { application: buildApplication({ stageId: 'stage-0' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [], restrictedStageIds: [] },
+        { application: buildApplication({ stageId: 'received', origin: 'linkedin', originCampaign: 'autumn' }), job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [], restrictedStageIds: [] },
       ],
       notes: [],
     });
     expect(detail.applications.map((a) => a.stageRemoved)).toEqual([true, false, false]);
     expect(detail.applications.map((a) => [a.origin, a.campaign])).toEqual([['direct', null], ['direct', null], ['linkedin', 'autumn']]);
     expect(detail.applications.map((a) => a.messageCount)).toEqual([0, 0, 0]);
-    const counted = toCandidateDetailDto({ candidate, applications: [{ application, job, stages, extraction: null, messageCount: 4, responseState: 'on_track' as const, attachments: [] }], notes: [] });
+    const counted = toCandidateDetailDto({ candidate, applications: [{ application, job, stages, extraction: null, messageCount: 4, responseState: 'on_track' as const, attachments: [], restrictedStageIds: [] }], notes: [] });
     expect(counted.applications[0]?.messageCount).toBe(4);
   });
 
@@ -103,11 +103,11 @@ describe('candidate DTO mappers', () => {
     const stages = pipelineStagesOf(job.content.process);
     const attachment = buildAttachment();
     const answered = buildApplication({ answers: [{ question: 'Q', answer: 'A' }] });
-    const detail = toCandidateDetailDto({ candidate, applications: [{ application: answered, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [attachment] }], notes: [] });
+    const detail = toCandidateDetailDto({ candidate, applications: [{ application: answered, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [attachment], restrictedStageIds: [] }], notes: [] });
     expect(detail.applications[0]?.attachments).toEqual([{ id: 'att_1', kind: 'cover_letter', fileName: 'lettera.pdf', mediaType: 'application/pdf', sizeBytes: 64, createdAt: '2026-01-01T00:00:00.000Z' }]);
     expect(JSON.stringify(detail)).not.toContain(attachment.key);
     expect(detail.applications[0]?.answers).toEqual([{ question: 'Q', answer: 'A' }]);
-    const bare = toCandidateDetailDto({ candidate, applications: [{ application, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] }], notes: [] });
+    const bare = toCandidateDetailDto({ candidate, applications: [{ application, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [], restrictedStageIds: [] }], notes: [] });
     expect(bare.applications[0]).toMatchObject({ attachments: [], answers: [] });
   });
 
@@ -131,9 +131,11 @@ describe('candidate DTO mappers', () => {
   });
 
   it('maps a note', () => {
-    expect(toNoteDto({ note: buildNote({ applicationId: 'app_1' }), authorName: 'Rita' })).toEqual({
+    expect(toNoteDto({ note: buildNote({ applicationId: 'app_1', stageId: 'stage-1' }), authorName: 'Rita', restricted: true })).toEqual({
       id: 'note_1',
       applicationId: 'app_1',
+      stageId: 'stage-1',
+      restricted: true,
       author: { id: 'user_test', name: 'Rita', external: false },
       body: 'Strong profile.',
       createdAt: '2026-01-01T00:00:00.000Z',
@@ -144,8 +146,8 @@ describe('candidate DTO mappers', () => {
     const stages = pipelineStagesOf(job.content.process);
     const dto = toCandidateDetailDto({
       candidate,
-      applications: [{ application, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] }],
-      notes: [{ note: buildNote(), authorName: 'Rita' }],
+      applications: [{ application, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [], restrictedStageIds: [] }],
+      notes: [{ note: buildNote(), authorName: 'Rita', restricted: false }],
     });
     expect(dto.candidate).toEqual({
       id: 'cand_1',
@@ -177,7 +179,7 @@ describe('candidate DTO mappers', () => {
   it('maps a migrated application without a CV: null CV on the detail, hasCv false on the card', () => {
     const migrated = buildApplication({ cv: null, migrationBatchId: 'mig_1' });
     const stages = pipelineStagesOf(job.content.process);
-    const dto = toCandidateDetailDto({ candidate, applications: [{ application: migrated, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [] }], notes: [] });
+    const dto = toCandidateDetailDto({ candidate, applications: [{ application: migrated, job, stages, extraction: null, messageCount: 0, responseState: 'on_track' as const, attachments: [], restrictedStageIds: [] }], notes: [] });
     expect(dto.applications[0]?.cv).toBeNull();
     const card = (app: typeof migrated) => toApplicationCardDto({ application: app, candidate, extraction: null, noteCount: 0, stageRemoved: false, responseState: 'on_track' as const });
     expect(card(migrated).hasCv).toBe(false);
@@ -186,6 +188,6 @@ describe('candidate DTO mappers', () => {
 
   it('maps a note by an external author: no id, the stored name, marked external', () => {
     const note = buildNote({ authorId: null, authorName: 'Giulia Rossi' });
-    expect(toNoteDto({ note, authorName: 'Giulia Rossi' }).author).toEqual({ id: null, name: 'Giulia Rossi', external: true });
+    expect(toNoteDto({ note, authorName: 'Giulia Rossi', restricted: false }).author).toEqual({ id: null, name: 'Giulia Rossi', external: true });
   });
 });

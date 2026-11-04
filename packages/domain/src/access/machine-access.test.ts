@@ -27,6 +27,7 @@ describe('machine access', () => {
       'data:export',
       'api_key:manage',
       'job_team:manage',
+      'restricted_stage:manage',
       'careers_page:manage',
       'migration:manage',
     ] as const) {

@@ -73,6 +73,10 @@ export type CandidateSummaryDto = z.infer<typeof candidateSummarySchema>;
 export const noteSchema = z.object({
   id: z.string(),
   applicationId: z.string().nullable(),
+  /** The application's stage when the note was written; null without an application and for older notes. */
+  stageId: z.string().nullable(),
+  /** Written at a restricted stage (PRODUCT.md §6.2): read only by owners, admins, the hiring manager and the author. */
+  restricted: z.boolean(),
   /** `external`: a migrated note by someone who is not a member (`id` null, `name` as stored with the note). */
   author: z.object({ id: z.string().nullable(), name: z.string(), external: z.boolean() }),
   body: z.string(),
@@ -124,6 +128,8 @@ export const candidateApplicationSchema = z.object({
   extraction: extractionSchema,
   /** Messages in the conversation of this application (sent, received and failed). */
   messageCount: count,
+  /** Stages of the job marked restricted (PRODUCT.md §6.2). */
+  restrictedStageIds: z.array(z.string()),
   /** Files other than the CV (only migrations bring them today); each downloads from its own route, audited like the CV. */
   attachments: z.array(applicationAttachmentSchema).optional(),
   /** Form answers kept from the previous ATS. */
@@ -151,3 +157,7 @@ export const candidateDetailSchema = z.object({
 export type CandidateDetailDto = z.infer<typeof candidateDetailSchema>;
 
 export const receivedSchema = z.object({ received: z.literal(true) });
+
+/** `GET /jobs/:id/restricted-stages` and `PUT /jobs/:id/stages/:stageId/restriction` (PRODUCT.md §6.2). */
+export const restrictedStagesSchema = z.object({ jobId: z.string(), stageIds: z.array(z.string()), canManage: z.boolean() });
+export type RestrictedStagesDto = z.infer<typeof restrictedStagesSchema>;

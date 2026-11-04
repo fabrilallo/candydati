@@ -9,9 +9,12 @@ import { isVisibleApplication, requireApplication } from './shared.js';
 import { chronological, consentItems, feedbackItems, isIntake, messageItems, noteItems, receivedItem, stageItems } from './timeline-items.js';
 import type { ApplicationTimelineView, TimelineItemView } from './views.js';
 
-/** What the timeline composes: the repositories the sheet already reads, scoped to the actor's jobs by the use case runner. */
+/**
+ * What the timeline composes: the repositories the sheet already reads, scoped to the actor's jobs and to the stages they
+ * may read by the use case runner. The feedback requests say who wrote each feedback (an author reads their own).
+ */
 export type TimelineDeps = Pick<CandidateDeps, 'auditLog' | 'transaction' | 'jobTeams' | 'applications' | 'notes' | 'messages' | 'stageEvents' | 'users'> &
-  Pick<FeedbackRecords, 'interviewFeedback'>;
+  FeedbackRecords;
 
 const none: readonly TimelineItemView[] = [];
 

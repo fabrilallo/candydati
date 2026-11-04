@@ -9,6 +9,7 @@ import { createDrizzleApplications } from './drizzle-applications.js';
 import { createDrizzleAuditLog } from './drizzle-audit-log.js';
 import { createDrizzleAutomationExecutions, createDrizzleAutomationRules } from './drizzle-automation-rules.js';
 import { createDrizzleCandidateNotes } from './drizzle-candidate-notes.js';
+import { createDrizzleScorecards } from './drizzle-scorecards.js';
 import { createDrizzleCandidateSearch } from './drizzle-candidate-search.js';
 import { createDrizzleCandidates } from './drizzle-candidates.js';
 import { createDrizzleConversations } from './drizzle-conversations.js';
@@ -101,6 +102,7 @@ const candidateRepositories = (db: DbExecutor) =>
     intake: createDrizzleApplicationIntake(db),
     feedbackRequests: createDrizzleFeedbackRequests(db),
     interviewFeedback: createDrizzleInterviewFeedback(db),
+    scorecards: createDrizzleScorecards(db),
     stageInterviewers: createDrizzleStageInterviewers(db),
     notifications: createDrizzleNotifications(db),
     tasks: createDrizzleTasks(db),

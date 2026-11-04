@@ -164,6 +164,8 @@ export const candidateNote = pgTable(
       .notNull()
       .references(() => candidate.id, { onDelete: 'restrict' }),
     applicationId: text('application_id').references(() => application.id, { onDelete: 'restrict' }),
+    /** The application's stage when the note was written; null without an application and for older notes (never restricted). */
+    stageId: text('stage_id'),
     /** Plain text with no foreign key: notes survive the removal of the user who wrote them. Null for an external author. */
     authorId: text('author_id'),
     /** Who wrote a migrated note when they are not a member here (the previous ATS's user). */

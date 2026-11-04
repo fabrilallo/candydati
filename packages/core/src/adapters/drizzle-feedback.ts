@@ -1,12 +1,13 @@
 import { and, asc, eq, gt, isNull, schema } from '@candydati/db';
-import type { FeedbackRequest, InterviewFeedback, StageInterviewer } from '@candydati/domain';
+import { storedObservationsSchema, type FeedbackRequest, type InterviewFeedback, type StageInterviewer } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import type { FeedbackRequestRepository, InterviewFeedbackRepository, StageInterviewerRepository } from '../feedback-ports.js';
 import { isUniqueViolation, type DbExecutor } from './db-executor.js';
 
 const toInterviewer = (row: typeof schema.jobStageInterviewer.$inferSelect): StageInterviewer => ({ ...row });
 const toRequest = (row: typeof schema.feedbackRequest.$inferSelect): FeedbackRequest => ({ ...row });
-const toFeedback = (row: typeof schema.interviewFeedback.$inferSelect): InterviewFeedback => ({ ...row });
+/** `observations` is jsonb: read through its schema, so a corrupted row fails loudly. */
+const toFeedback = (row: typeof schema.interviewFeedback.$inferSelect): InterviewFeedback => ({ ...row, observations: storedObservationsSchema.parse(row.observations) });
 
 /** Postgres implementation. Every statement filters by `organization_id`, except the lookup by the hash of a secret. */
 export function createDrizzleStageInterviewers(db: DbExecutor): StageInterviewerRepository {

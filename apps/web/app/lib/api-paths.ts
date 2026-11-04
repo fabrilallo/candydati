@@ -21,6 +21,8 @@ export const jobTrafficPath = (jobId: string): string => `/api/v1/jobs/${enc(job
 
 // Interviewers, feedback, job requests, approval, stale ads, reports
 export const jobInterviewersPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/interviewers`
+export const jobScorecardPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/scorecard`
+export const suggestScorecardPath = (jobId: string): string => `${jobScorecardPath(jobId)}/suggest`
 export const applicationFeedbackPath = (applicationId: string): string => `/api/v1/applications/${enc(applicationId)}/feedback`
 export const applicationTimelinePath = (applicationId: string, viaJobId?: string | null): string =>
   `/api/v1/applications/${enc(applicationId)}/timeline${viaJobId ? `?viaJobId=${enc(viaJobId)}` : ''}`
@@ -36,6 +38,8 @@ export const APPROVAL_SETTINGS_PATH = '/api/v1/settings/approval'
 export const ACCESS_SETTINGS_PATH = '/api/v1/settings/access'
 export const jobTeamPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/team`
 export const jobTeamMemberPath = (jobId: string, userId: string): string => `${jobTeamPath(jobId)}/${enc(userId)}`
+export const restrictedStagesPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/restricted-stages`
+export const stageRestrictionPath = (jobId: string, stageId: string): string => `/api/v1/jobs/${enc(jobId)}/stages/${enc(stageId)}/restriction`
 export const jobApprovalPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/approval`
 export const jobApprovalRequestPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/approval-request`
 export const STALE_JOBS_PATH = '/api/v1/jobs/stale'

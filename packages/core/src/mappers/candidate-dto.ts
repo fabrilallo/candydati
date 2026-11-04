@@ -107,6 +107,10 @@ export interface CandidateSummaryDto {
 export interface NoteDto {
   readonly id: string;
   readonly applicationId: string | null;
+  /** The stage of the application when it was written (null without an application and for older notes). */
+  readonly stageId: string | null;
+  /** Written at a restricted stage (PRODUCT.md §6.2): shown with a lock to the few who read it. */
+  readonly restricted: boolean;
   /** `external`: a migrated note by someone who is not a member here (`id` null, `name` as stored). */
   readonly author: { readonly id: string | null; readonly name: string; readonly external: boolean };
   readonly body: string;
@@ -161,6 +165,8 @@ export interface CandidateDetailDto {
     readonly extraction: { readonly status: ExtractionStatus; readonly data: CvExtraction | null; readonly source: 'model' | 'text' | null };
     /** Messages in the conversation of this application (sent, received and failed). */
     readonly messageCount: number;
+    /** Stages of the job marked restricted: notes and feedback there are read only by owners, admins and the hiring manager. */
+    readonly restrictedStageIds: readonly string[];
     /** Files other than the CV (only migrations bring them): downloaded one by one, like the CV. */
     readonly attachments: readonly AttachmentDto[];
     /** Form answers kept from the previous ATS. */
@@ -243,9 +249,11 @@ const toCandidateSummaryDto = ({ candidate, applicationCount, lastAppliedAt }: C
 
 export const toCandidateSummaryDtos = (page: CandidatePage): readonly CandidateSummaryDto[] => page.items.map(toCandidateSummaryDto);
 
-export const toNoteDto = ({ note, authorName }: NoteView): NoteDto => ({
+export const toNoteDto = ({ note, authorName, restricted }: NoteView): NoteDto => ({
   id: note.id,
   applicationId: note.applicationId,
+  stageId: note.stageId,
+  restricted,
   author: { id: note.authorId, name: authorName, external: note.authorId === null },
   body: note.body,
   createdAt: iso(note.createdAt),
@@ -287,7 +295,7 @@ const toAttachmentDto = (attachment: ApplicationAttachment): AttachmentDto => ({
 
 export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetailDto => ({
   candidate: toCandidateDto(view.candidate, view.applications.some((a) => a.application.consentStatus === 'given') ? 'given' : 'to_renew'),
-  applications: view.applications.map(({ application, job, stages, extraction, messageCount, responseState, attachments }) => ({
+  applications: view.applications.map(({ application, job, stages, extraction, messageCount, responseState, attachments, restrictedStageIds }) => ({
     id: application.id,
     job: { id: job.id, title: job.content.title, slug: job.slug },
     stageId: application.stageId,
@@ -312,6 +320,7 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
     submittedContact: application.submittedContact ?? null,
     extraction: { status: extraction?.status ?? 'pending', data: extraction?.data ?? null, source: extraction?.source ?? null },
     messageCount,
+    restrictedStageIds,
     attachments: attachments.map(toAttachmentDto),
     answers: (application.answers ?? []).map(({ question, answer }) => ({ question, answer })),
   })),

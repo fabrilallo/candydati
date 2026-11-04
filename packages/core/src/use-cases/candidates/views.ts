@@ -34,11 +34,15 @@ export interface CandidateApplicationView {
   readonly responseState: ResponseState;
   /** Files of the application other than its CV, oldest first. */
   readonly attachments: readonly ApplicationAttachment[];
+  /** Stages of the job marked restricted (PRODUCT.md §6.2): a note written there is read only by who may read the stage. */
+  readonly restrictedStageIds: readonly string[];
 }
 
 export interface NoteView {
   readonly note: CandidateNote;
   readonly authorName: string;
+  /** Written at a restricted stage: only who may read that stage sees it (the viewer is one of them). */
+  readonly restricted: boolean;
 }
 
 export interface CandidateDetailView {

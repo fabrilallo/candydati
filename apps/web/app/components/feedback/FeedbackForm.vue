@@ -5,11 +5,13 @@ import type { Translate } from '@/lib/ad-text'
 import { buildSubmission, checkSubmission, type SubmitIssue } from '@/lib/feedback-view'
 import { feedbackFailure, submitPublicFeedback, type FeedbackFailure } from '@/lib/feedback-api'
 import { formatDate } from '@/lib/format'
+import { checkObservations, EMPTY_OBSERVATION, observationsBody, type ObservationDraft, type ObservationError } from '@/lib/observation-form'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 
 /**
- * The fixed questions as large fields (16px, so a phone does not zoom), the indication, and one full-width submit
+ * The fixed questions as large fields (16px, so a phone does not zoom), the job's criteria (a word and the evidence
+ * each, PRODUCT.md §2.4), the indication, and one full-width submit
  * that sticks to the bottom of the screen. One call, nothing polled; the thank-you state replaces the form.
  */
 const props = defineProps<{ token: string; feedback: PublicFeedbackDto; x: Translate }>()
@@ -22,22 +24,30 @@ const tooLong = ref<readonly string[]>([])
 const pending = ref(false)
 const done = ref(false)
 const errorKey = ref<string | null>(null)
+const observations = ref<Readonly<Record<string, ObservationDraft>>>({})
+const observationErrors = ref<Readonly<Record<string, readonly ObservationError[]>>>({})
+const criteriaMissing = computed(() => Object.keys(observationErrors.value).length > 0)
 const ids = computed(() => props.feedback.questions.map((question) => question.id))
 
 const setAnswer = (id: string, value: string | number): void => {
   answers.value = { ...answers.value, [id]: String(value) }
+}
+const setObservation = (id: string, value: ObservationDraft): void => {
+  observations.value = { ...observations.value, [id]: value }
 }
 const issueText = (issue: SubmitIssue): string => props.x(`feedback.public.errors.${issue}`, { max: FEEDBACK_ANSWER_MAX })
 
 const submit = async (): Promise<void> => {
   errorKey.value = null
   const check = checkSubmission(ids.value, answers.value, recommendation.value)
+  const criteria = checkObservations(props.feedback.criteria, observations.value)
   issues.value = check.issues
   tooLong.value = check.tooLong
-  if (!check.ok || recommendation.value === null) return
+  observationErrors.value = criteria.errors
+  if (!check.ok || !criteria.ok || recommendation.value === null) return
   pending.value = true
   try {
-    await submitPublicFeedback(request, props.token, buildSubmission(ids.value, answers.value, recommendation.value))
+    await submitPublicFeedback(request, props.token, buildSubmission(ids.value, answers.value, recommendation.value, observationsBody(props.feedback.criteria, observations.value)))
     done.value = true
     await nextTick()
     document.getElementById('feedback-done')?.focus()
@@ -77,11 +87,30 @@ const submit = async (): Promise<void> => {
       </div>
     </section>
 
+    <section v-if="feedback.criteria.length" class="grid gap-6" aria-labelledby="feedback-criteria" aria-describedby="feedback-criteria-note" data-testid="feedback-criteria">
+      <div class="grid gap-1">
+        <h2 id="feedback-criteria" class="text-lg font-semibold tracking-tight">{{ x('feedback.public.criteria.title') }}</h2>
+        <p id="feedback-criteria-note" class="text-[0.9375rem] text-pretty text-muted-foreground">{{ x('feedback.public.criteria.note') }}</p>
+      </div>
+      <ObservationField
+        v-for="criterion in feedback.criteria"
+        :key="criterion.id"
+        :criterion="criterion"
+        :options="feedback.observations"
+        :model-value="observations[criterion.id] ?? EMPTY_OBSERVATION"
+        :errors="observationErrors[criterion.id] ?? []"
+        :x="x"
+        :disabled="pending"
+        @update:model-value="setObservation(criterion.id, $event)"
+      />
+    </section>
+
     <RecommendationPicker v-model="recommendation" :x="x" :invalid="issues.includes('recommendation_required')" :disabled="pending" />
 
     <div class="sticky bottom-0 z-10 -mx-4 grid gap-2 border-t bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
-      <ul v-if="issues.length > 0 || errorKey" class="grid gap-1 text-sm text-destructive" role="alert" data-testid="feedback-issues">
+      <ul v-if="issues.length > 0 || criteriaMissing || errorKey" class="grid gap-1 text-sm text-destructive" role="alert" data-testid="feedback-issues">
         <li v-for="issue in issues" :key="issue">{{ issueText(issue) }}</li>
+        <li v-if="criteriaMissing">{{ x('feedback.public.errors.criteria_required') }}</li>
         <li v-if="errorKey">{{ x(errorKey) }}</li>
       </ul>
       <Button type="submit" size="lg" class="h-12 w-full text-base sm:w-auto sm:self-start" :disabled="pending" data-testid="feedback-submit">

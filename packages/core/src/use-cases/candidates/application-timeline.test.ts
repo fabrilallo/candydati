@@ -39,7 +39,7 @@ async function world(): Promise<TestHrDeps> {
     interviewerEmail: 'e@x.example', interviewerName: 'Eva External', tokenHash: 'h', expiresAt: at(20), remindersSent: 0, lastReminderAt: null,
     requestedBy: 'user_test', createdAt: at(5), submittedAt: at(8),
   } as never);
-  await deps.interviewFeedback.create({ id: 'f1', organizationId: ORG_A, applicationId: 'app_1', requestId: 'fr1', stageId: 'stage-1', interviewerName: 'Eva External', answers: { tech_open: 'secret' }, recommendation: 'proceed', submittedAt: at(8) });
+  await deps.interviewFeedback.create({ id: 'f1', organizationId: ORG_A, applicationId: 'app_1', requestId: 'fr1', stageId: 'stage-1', interviewerName: 'Eva External', answers: { tech_open: 'secret' }, recommendation: 'proceed', observations: [], submittedAt: at(8) });
   return deps;
 }
 

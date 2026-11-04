@@ -42,18 +42,20 @@ const kitShape = { jobId: idArgument('The job ad the interviews are for (list_jo
 export const interviewKitPrompt = {
   name: 'interview_kit',
   title: 'Interview kit',
-  description: 'Questions for each declared stage of a job, tied to the ad\'s requirements, and a descriptive observation grid with no scores or ratings.',
+  description: 'Questions for each declared stage of a job, tied to the ad and to its evaluation criteria, and an observation grid with the three words and evidence: no scores or ratings.',
   shape: kitShape,
   text: ({ jobId }) =>
     withRules(
       `Prepare an interview kit for the job "${jobId}".`,
       '',
       'Steps:',
-      '1. Read the job with get_job: responsibilities, requirements and the declared selection process.',
-      '2. For each declared stage, in order, propose three to five questions. Tie each one to a requirement or responsibility of the ad and say which. Every candidate of a stage gets the same questions.',
-      '3. For each stage, an observation grid: one row per requirement, where the interviewer writes facts and examples the candidate gave, and what was not covered. ' +
-        'Descriptive only: no scores, ratings, stars, numeric scales, pass or fail fields. A person decides after reading the notes.',
-      '4. No question touches a protected characteristic or private life, not even indirectly (year of graduation for age, plans for children, where the family is from).',
-      '5. If the process declares no stages, say so and suggest completing it in the ad first. The kit is a text for me: nothing is saved.',
+      '1. Read the job with get_job (responsibilities, requirements, declared selection process) and its evaluation criteria with get_evaluation_criteria.',
+      '2. If the job has no criteria, propose three to eight short ones tied to its requirements (a label each, no weight) and ask me whether to save them. ' +
+        'Save them with set_evaluation_criteria only after I agree, keeping the id of any criterion that already exists.',
+      '3. For each declared stage, in order, propose three to five questions. Tie each one to a criterion of that stage (or of every stage) and say which. Every candidate of a stage gets the same questions.',
+      '4. For each stage, the observation grid is its criteria: for each one the interviewer marks observed, not observed or to explore and writes the evidence (facts and examples the candidate gave). ' +
+        'Descriptive only: no scores, ratings, stars, numeric scales, totals, pass or fail fields. A person decides after reading the evidence side by side.',
+      '5. No question or criterion touches a protected characteristic or private life, not even indirectly (year of graduation for age, plans for children, where the family is from).',
+      '6. If the process declares no stages, say so and suggest completing it in the ad first. Apart from criteria I approved, the kit is a text for me: nothing else is saved.',
     ),
 } satisfies PromptDefinition<typeof kitShape>;

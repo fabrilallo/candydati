@@ -153,6 +153,11 @@ export interface CandidateNote {
   readonly candidateId: string;
   /** The application the note is about, if any. */
   readonly applicationId: string | null;
+  /**
+   * The stage the application was at when the note was written (null without an application, and for notes older than
+   * restricted stages). A note at a restricted stage is read only by who may read that stage (PRODUCT.md §6.2).
+   */
+  readonly stageId: string | null;
   /** The member who wrote it; null for a note brought by a migration whose author is not a member here. */
   readonly authorId: string | null;
   /** The external author of a migrated note (`authorId` null); null for notes written here. */

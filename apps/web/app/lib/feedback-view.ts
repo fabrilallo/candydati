@@ -8,6 +8,7 @@ import {
   type FeedbackRequestDto,
   type FeedbackSubmission,
   type InterviewerInput,
+  type ObservationInput,
   type StageType,
 } from '@candydati/domain'
 import { z } from 'zod'
@@ -66,14 +67,16 @@ export const checkSubmission = (questionIds: readonly string[], answers: Readonl
   return { ok: issues.length === 0, issues, tooLong }
 }
 
-/** The body sent: trimmed, empty answers left out, questions in the order shown. */
+/** The body sent: trimmed, empty answers left out, questions in the order shown, one observation per criterion. */
 export const buildSubmission = (
   questionIds: readonly string[],
   answers: Readonly<Record<string, string>>,
   recommendation: FeedbackRecommendation,
+  observations: readonly ObservationInput[] = [],
 ): FeedbackSubmission => ({
   answers: Object.fromEntries(questionIds.map((questionId) => [questionId, (answers[questionId] ?? '').trim()]).filter(([, answer]) => answer !== '')),
   recommendation,
+  observations: [...observations],
 })
 
 /** An external interviewer asked by hand: name and a valid email. */
