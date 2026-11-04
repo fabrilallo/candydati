@@ -35,7 +35,7 @@ export async function readJobs(run: Run): Promise<JobStructure> {
   const stageTypes = new Map<string, string | undefined>();
   for await (const job of run.client.list('/jobs', 'jobs', { 'filter[status]': 'all' }, run.tick)) {
     const stages: TeamtailorResource<'stages'>[] = [];
-    for await (const stage of run.client.list(`/jobs/${encodeURIComponent(job.id)}/stages`, 'stages', { sort: 'row_order' }, run.tick)) stages.push(stage);
+    for await (const stage of run.client.list(`/jobs/${encodeURIComponent(job.id)}/stages`, 'stages', { sort: 'row_order' }, async () => run.tick(0))) stages.push(stage);
     const mapped = mapJob(job, stages, run.now);
     if (mapped === undefined || !(await attempt(() => run.builder.addJob(mapped)))) continue;
     stagesByJob.set(job.id, new Set(stages.map((stage) => stage.id)));
