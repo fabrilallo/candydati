@@ -9,6 +9,8 @@ const card = {
   createdAt: '2026-10-10T09:00:00.000Z',
   stageChangedAt: '2026-10-10T09:00:00.000Z',
   closedAt: null,
+  offerAcceptedOn: null,
+  startOn: null,
   noteCount: 0,
   stageRemoved: false,
   hasCv: true,
