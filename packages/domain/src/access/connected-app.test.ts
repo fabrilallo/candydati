@@ -10,7 +10,7 @@ import {
   MCP_OAUTH_SCOPE,
   MCP_OAUTH_SCOPES,
 } from './connected-app.js';
-import { forbiddenPermissions, MACHINE_FORBIDDEN_PERMISSIONS } from './machine-access.js';
+import { forbiddenPermissions, grantablePermissions, MACHINE_FORBIDDEN_PERMISSIONS } from './machine-access.js';
 
 describe('connected app tokens', () => {
   it('tells an access token from an API key by its prefix, never both', () => {
@@ -34,8 +34,10 @@ describe('connected app tokens', () => {
 });
 
 describe('connected app access', () => {
-  it('a connected app can never do what no machine may do', () => {
-    expect(forbiddenPermissions('connected_app')).toEqual(MACHINE_FORBIDDEN_PERMISSIONS);
+  it('a connected app can never do what no machine may do, nor move a candidate (a decision about a person)', () => {
+    expect(forbiddenPermissions('connected_app')).toEqual([...MACHINE_FORBIDDEN_PERMISSIONS, 'candidate:move']);
+    expect(grantablePermissions('owner', 'connected_app')).not.toContain('candidate:move');
+    expect(grantablePermissions('recruiter', 'connected_app')).toContain('job:publish');
   });
 });
 

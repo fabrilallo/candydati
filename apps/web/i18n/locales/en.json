@@ -4880,7 +4880,7 @@
       "twoFactorWarning": "{name} requires two-factor authentication for your role. Turn it on, then start the connection again.",
       "twoFactorLink": "Turn on two-factor authentication",
       "can": "As {role} in {organization}, the app can:",
-      "never": "It has no tools to move candidates between stages, decide on them, write to them or erase them, nor to manage members, keys or settings.",
+      "never": "It can never move candidates between stages, decide on them, write to them or erase them, nor manage members, keys or settings: those stay with a person.",
       "asYou": "It works as you, with your role, and every call ends up in the audit log. You can disconnect it at any time in the security settings.",
       "allow": "Allow",
       "deny": "Deny",

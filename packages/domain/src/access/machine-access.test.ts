@@ -36,10 +36,11 @@ describe('machine access', () => {
     expect(MACHINE_FORBIDDEN_PERMISSIONS).not.toContain('job:read');
   });
 
-  it('keeps candidate:move for keys but not for the agent', () => {
+  it('keeps candidate:move for keys but not for the agent or a connected app', () => {
     expect(AGENT_EXTRA_FORBIDDEN).toEqual(['candidate:move']);
     expect(isForbiddenFor('api_key', 'candidate:move')).toBe(false);
     expect(isForbiddenFor('agent', 'candidate:move')).toBe(true);
+    expect(isForbiddenFor('connected_app', 'candidate:move')).toBe(true);
     expect(isForbiddenFor('agent', 'message:send')).toBe(true);
   });
 

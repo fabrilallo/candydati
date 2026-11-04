@@ -292,7 +292,7 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 - MCP clients authenticate with an API key or, as Claude custom connectors, with OAuth 2.1 (Better Auth's MCP plugin,
   PKCE, dynamic registration with a callback allowlist, opaque tokens bound to the `/mcp` resource). An OAuth
   connection is a `connected_app` actor: it acts for the person in the organization picked on the consent page, with
-  their current role and the machine forbidden list of API keys, checked against the database on every call
+  their current role, the machine forbidden list and no `candidate:move` (like the assistant), checked against the database on every call
   (`authenticateConnectedApp`), so revoking or leaving stops it at once ([MCP-CONNECTOR.md](MCP-CONNECTOR.md)).
 - MCP tools are thin wrappers on the same use cases, authorized by API key scopes or the connected person's role. Each tool call of a JSON-RPC batch
   counts against the key's per-minute limit and a batch holds at most 20 messages. Reads are audited as `mcp.read` with

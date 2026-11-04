@@ -29,9 +29,10 @@ describe('scopeGroups', () => {
     expect(scopeGroups(null)).toEqual([])
   })
 
-  it('lists what a connected app may do with the same machine limits as a key', () => {
+  it('lists what a connected app may do: the machine limits of a key, and never moving a candidate', () => {
     const offered = scopeGroups('owner', 'connected_app').flatMap((group) => group.scopes)
-    expect(offered).toEqual(scopeGroups('owner').flatMap((group) => group.scopes))
+    expect(offered).toEqual(scopeGroups('owner').flatMap((group) => group.scopes).filter((scope) => scope !== 'candidate:move'))
+    expect(offered).not.toContain('candidate:move')
     expect(offered).not.toContain('member:invite')
     expect(scopeGroups('interviewer', 'connected_app').flatMap((group) => group.scopes)).toContain('feedback:read')
   })

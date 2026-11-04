@@ -31,6 +31,7 @@ describe('authenticateConnectedApp', () => {
     expect(can(actor!, 'job:publish')).toBe(true);
     expect(can(actor!, 'message:send')).toBe(false);
     expect(can(actor!, 'candidate:decide')).toBe(false);
+    expect(can(actor!, 'candidate:move')).toBe(false);
   });
 
   it('stores tokens like Better Auth: SHA-256 base64url of the token without its prefix', () => {

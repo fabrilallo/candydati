@@ -84,6 +84,10 @@ describe('consent page', () => {
     expect(permissions.find('[data-scope="job:read"]').exists()).toBe(true)
     expect(permissions.find('[data-scope="message:send"]').exists()).toBe(false)
     expect(permissions.find('[data-scope="candidate:decide"]').exists()).toBe(false)
+    // A recruiter may move candidates, a connector never: moving is a decision about a person.
+    expect(permissions.find('[data-scope="candidate:move"]').exists()).toBe(false)
+    expect(permissions.text()).not.toContain('Spostare i candidati di fase')
+    expect(wrapper.find('[data-testid="consent-never"]').text()).toContain('Non può mai spostare candidati tra le fasi')
     expect(wrapper.find('[data-testid="consent-never"]').text()).toContain('gestire membri, chiavi o impostazioni')
     expect(wrapper.find('[data-testid="consent-as-you"]').text()).toContain('registro delle azioni')
   })

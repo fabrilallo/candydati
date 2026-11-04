@@ -15,7 +15,7 @@ One additive migration (`0047_mcp_oauth`, new tables only).
   picks the organization and approves on a consent page (Italian and English) that lists what the connector may do.
   PKCE S256, opaque access tokens of 15 minutes with rotated refresh tokens, bound to the `/mcp` resource and to the
   person and organization; every call re-checks the grant, the membership, the current role and the 2FA rule. The
-  connection acts as a new `connected_app` actor with the person's role minus what no machine may do. Callbacks are an
+  connection acts as a new `connected_app` actor with the person's role minus what no machine may do, and never moves candidates. Callbacks are an
   allowlist (Claude's, `MCP_OAUTH_REDIRECT_URIS`, loopback with `MCP_OAUTH_ALLOW_LOOPBACK_REDIRECTS`). Settings >
   Security lists connected apps with *Revoke* (owners and admins see all of the organization); `connected_app.granted`
   and `connected_app.revoked` are audited. API keys work as before. Guide: `docs/MCP-CONNECTOR.md`; new variables

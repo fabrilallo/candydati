@@ -29,7 +29,8 @@ account, so each acts with their own role.
 
 Exactly what the MCP tools do (job ads, criteria, pipeline, searches on declared criteria, notes, tasks, reports),
 limited by your role, and never what no machine may do: it cannot move, decide on, message or erase candidates, nor
-manage members, keys or settings. Candidates come with first name and id only. Every call is in the audit log as
+manage members, keys or settings (moving a candidate is a decision about a person, so a connector never holds it even
+when your role does). Candidates come with first name and id only. Every call is in the audit log as
 `mcp.read` (reads) or the action itself, with actor *connected app*; connecting and revoking are logged as
 `connected_app.granted` and `connected_app.revoked`.
 

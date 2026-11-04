@@ -4880,7 +4880,7 @@
       "twoFactorWarning": "{name} chiede la verifica in due passaggi per il tuo ruolo. Attivala, poi avvia di nuovo il collegamento.",
       "twoFactorLink": "Attiva la verifica in due passaggi",
       "can": "Come {role} in {organization}, l'app può:",
-      "never": "Non ha strumenti per spostare candidati tra le fasi, decidere su di loro, scrivere loro o cancellarli, né per gestire membri, chiavi o impostazioni.",
+      "never": "Non può mai spostare candidati tra le fasi, decidere su di loro, scrivere loro o cancellarli, né gestire membri, chiavi o impostazioni: restano a una persona.",
       "asYou": "Lavora come te, con il tuo ruolo, e ogni chiamata finisce nel registro delle azioni. Puoi scollegarla quando vuoi dalle impostazioni di sicurezza.",
       "allow": "Permetti",
       "deny": "Rifiuta",

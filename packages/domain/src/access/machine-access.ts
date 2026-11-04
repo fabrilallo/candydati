@@ -35,14 +35,14 @@ export const MACHINE_FORBIDDEN_PERMISSIONS: readonly Permission[] = PERMISSIONS.
     ].includes(permission),
 );
 
-/** The internal agent also cannot move a candidate: that is a decision about them. */
+/** The internal agent and connected apps (MCP clients over OAuth) also cannot move a candidate: that is a decision about them. */
 export const AGENT_EXTRA_FORBIDDEN: readonly Permission[] = ['candidate:move'];
 
 /** Permissions an actor type can never use, whatever the role. Users and the system have no such list. */
 export function forbiddenPermissions(actorType: ActorType): readonly Permission[] {
-  // A connected app (OAuth, MCP) is a machine acting for a person, exactly like an API key.
-  if (actorType === 'api_key' || actorType === 'connected_app') return MACHINE_FORBIDDEN_PERMISSIONS;
-  if (actorType === 'agent') return [...MACHINE_FORBIDDEN_PERMISSIONS, ...AGENT_EXTRA_FORBIDDEN];
+  if (actorType === 'api_key') return MACHINE_FORBIDDEN_PERMISSIONS;
+  // The agent and a connected app (OAuth, MCP) act for a person but never decide about candidates: no move either.
+  if (actorType === 'agent' || actorType === 'connected_app') return [...MACHINE_FORBIDDEN_PERMISSIONS, ...AGENT_EXTRA_FORBIDDEN];
   return [];
 }
 
