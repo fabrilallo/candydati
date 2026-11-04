@@ -63,7 +63,7 @@ describe('runAutomations: send_template', () => {
     expect(message).toMatchObject({ direction: 'outbound', status: 'queued', sentBy: 'recruiter_1', applicationId: 'app_1', subject: 'Hi Ada', bodyText: 'Hello Ada, about Backend Developer.' });
     expect(deps.queue.jobs()).toEqual([{ name: 'email.send', payload: { organizationId: ORG_A, messageId: message?.id } }]);
     expect(deps.auditLog.events()).toEqual([
-      expect.objectContaining({ action: 'automation.ran', target: { type: 'automation_rule', id: 'rule_send' }, metadata: { applicationId: 'app_1', action: 'send_template', ok: true } }),
+      expect.objectContaining({ action: 'automation.ran', target: { type: 'automation_rule', id: 'rule_send' }, metadata: { applicationId: 'app_1', action: 'send_template', trigger: 'stage_entered', ok: true } }),
     ]);
     expect(await deliverMessage(deps, worker, { organizationId: ORG_A, messageId: message?.id ?? '' })).toBe('sent');
   });

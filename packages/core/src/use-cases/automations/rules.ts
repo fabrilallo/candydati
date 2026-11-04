@@ -55,9 +55,12 @@ export const listAutomations = defineAutomationUseCase({
   },
 });
 
+const ruleMetadata = (_input: unknown, rule: AutomationRule) => ({ jobId: rule.jobId, stageId: rule.stageId, trigger: rule.trigger.type, action: rule.action.type });
+
 /**
- * A rule runs when an application ENTERS the stage. It is configured by a person, so what it sends goes out in that
- * person's name (principle 4: a rule never moves or decides, and the schema has no such action).
+ * A rule runs when its trigger fires for an application of the stage and its conditions hold. It is configured by a
+ * person, so what it sends goes out in that person's name (principle 4: a rule never moves or decides, and the schema
+ * has no such action).
  */
 export const createAutomation = defineAutomationUseCase({
   name: 'createAutomation',
@@ -66,7 +69,7 @@ export const createAutomation = defineAutomationUseCase({
   audit: {
     action: 'automation.saved',
     target: (_input, rule: AutomationRule) => ({ type: 'automation_rule', id: rule.id }),
-    metadata: (_input, rule: AutomationRule) => ({ jobId: rule.jobId, stageId: rule.stageId, action: rule.action.type }),
+    metadata: ruleMetadata,
   },
   handler: async ({ deps, actor, input }): Promise<AutomationRule> => {
     const job = await requireJob(deps, actor.organizationId, input.jobId);
@@ -76,6 +79,8 @@ export const createAutomation = defineAutomationUseCase({
       organizationId: actor.organizationId,
       jobId: job.id,
       stageId: input.stageId,
+      trigger: input.trigger,
+      conditions: input.conditions,
       action: input.action,
       enabled: input.enabled,
       createdBy: toActorUserId(actor),
@@ -84,7 +89,11 @@ export const createAutomation = defineAutomationUseCase({
   },
 });
 
-/** Full replacement of stage, action and switch. `createdBy` stays: the messages are still that person's decision. */
+/**
+ * Full replacement of stage, trigger, conditions, action and switch. `createdBy` stays: the messages are still that
+ * person's decision. What the rule already did stays done: a run is recorded per rule and occurrence, so changing the days
+ * of a stuck rule does not fire it again for the applications it already acted for.
+ */
 export const updateAutomation = defineAutomationUseCase({
   name: 'updateAutomation',
   input: automationRuleInputSchema.extend({ ruleId: z.string().min(1) }),
@@ -92,13 +101,14 @@ export const updateAutomation = defineAutomationUseCase({
   audit: {
     action: 'automation.saved',
     target: (_input, rule: AutomationRule) => ({ type: 'automation_rule', id: rule.id }),
-    metadata: (_input, rule: AutomationRule) => ({ jobId: rule.jobId, stageId: rule.stageId, action: rule.action.type }),
+    metadata: ruleMetadata,
   },
   handler: async ({ deps, actor, input }): Promise<AutomationRule> => {
     const rule = await requireRule(deps, actor.organizationId, input.ruleId);
     const job = await requireJob(deps, actor.organizationId, rule.jobId);
     await validateRule(deps, actor.organizationId, job, input.stageId, input.action);
-    return deps.rules.save({ ...rule, stageId: input.stageId, action: input.action, enabled: input.enabled });
+    const { stageId, trigger, conditions, action, enabled } = input;
+    return deps.rules.save({ ...rule, stageId, trigger, conditions, action, enabled });
   },
 });
 

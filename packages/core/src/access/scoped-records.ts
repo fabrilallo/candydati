@@ -182,7 +182,8 @@ export function scopeAutomationRules(raw: AutomationRuleRepository, ctx: JobScop
       return rule && (await ctx.allowsJob(rule.jobId)) ? rule : null;
     },
     listByJob: async (organizationId, jobId) => ((await ctx.allowsJob(jobId)) ? raw.listByJob(organizationId, jobId) : []),
-    listEnabledByStage: async (organizationId, jobId, stageId) => ((await ctx.allowsJob(jobId)) ? raw.listEnabledByStage(organizationId, jobId, stageId) : []),
+    listEnabledByStage: async (organizationId, jobId, stageId, trigger) =>
+      (await ctx.allowsJob(jobId)) ? raw.listEnabledByStage(organizationId, jobId, stageId, trigger) : [],
     async delete(organizationId, id) {
       const rule = await raw.findById(organizationId, id);
       if (!rule || !(await ctx.allowsJob(rule.jobId))) return false;

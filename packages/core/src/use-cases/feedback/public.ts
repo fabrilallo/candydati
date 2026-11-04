@@ -22,6 +22,7 @@ import type { PublicFeedbackDeps } from '../../feedback-ports.js';
 import { definePublicFeedbackCommand, definePublicFeedbackQuery } from './define.js';
 import { FEEDBACK_PAGE_ACTOR_ID, stageContextOf } from './shared.js';
 import { sequential } from '../../sequential.js';
+import { enqueueAutomations } from '../automations/enqueue.js';
 
 const tokenInput = z.object({ token: z.string().min(16).max(200) });
 const NOT_VALID = 'This link is not valid.';
@@ -170,8 +171,9 @@ export const submitFeedback = definePublicFeedbackCommand({
     const submittedAt = deps.now();
     // Single use: the guarded mark and the unique request id both decide a race between two submissions of the link.
     if (!(await deps.feedbackRequests.markSubmitted(request.organizationId, request.id, submittedAt))) throw new ConflictError('already_submitted');
+    const feedbackId = deps.newId();
     await deps.interviewFeedback.create({
-      id: deps.newId(),
+      id: feedbackId,
       organizationId: request.organizationId,
       applicationId: application.id,
       requestId: request.id,
@@ -191,6 +193,10 @@ export const submitFeedback = definePublicFeedbackCommand({
       target: { type: 'feedback_request', id: request.id },
       metadata: { applicationId: application.id, stageId: request.stageId, recommendation: input.recommendation, observations: seen.observations.length },
     });
+    // Rules of the stage the feedback was asked for may create a task (say, "read the feedback"); never move or decide.
+    if (application.outcome === null) {
+      await enqueueAutomations(deps, request.organizationId, application.id, request.stageId, { trigger: 'feedback_submitted', occurrence: `feedback:${feedbackId}` });
+    }
     return { submittedAt };
   },
 });

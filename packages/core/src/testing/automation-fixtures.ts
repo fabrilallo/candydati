@@ -36,6 +36,8 @@ export const buildAutomationRule = (overrides: Partial<AutomationRule> = {}): Au
   organizationId: 'org_a',
   jobId: 'job_1',
   stageId: 'stage-0',
+  trigger: { type: 'stage_entered' },
+  conditions: {},
   action: { type: 'create_task', title: 'Prepare the interview', assignee: 'job_owner' },
   enabled: true,
   createdBy: 'recruiter_1',

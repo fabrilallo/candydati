@@ -1,7 +1,9 @@
 import type {
   AttentionState,
   AutomationAction,
+  AutomationConditions,
   AutomationRule,
+  AutomationTrigger,
   NotificationKind,
   Task,
 } from '@candydati/domain';
@@ -55,6 +57,8 @@ export interface AutomationRuleDto {
   readonly id: string;
   readonly jobId: string;
   readonly stageId: string;
+  readonly trigger: AutomationTrigger;
+  readonly conditions: AutomationConditions;
   readonly action: AutomationAction;
   readonly enabled: boolean;
   readonly createdBy: string;
@@ -109,6 +113,8 @@ export const toAutomationRuleDto = (rule: AutomationRule): AutomationRuleDto => 
   id: rule.id,
   jobId: rule.jobId,
   stageId: rule.stageId,
+  trigger: rule.trigger,
+  conditions: rule.conditions,
   action: rule.action,
   enabled: rule.enabled,
   createdBy: rule.createdBy,

@@ -108,6 +108,8 @@ export * from './use-cases/automations/rules.js';
 export * from './use-cases/automations/enqueue.js';
 export * from './use-cases/automations/run-automations.js';
 export * from './use-cases/automations/scan-deadlines.js';
+export * from './use-cases/automations/scan-timed.js';
+export * from './use-cases/automations/preview.js';
 export * from './use-cases/digests/digest-email.js';
 export * from './use-cases/digests/send-digests.js';
 export * from './use-cases/digests/run-deadline-scan.js';

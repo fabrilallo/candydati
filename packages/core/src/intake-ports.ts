@@ -1,5 +1,5 @@
 import type { EmailReadiness } from './instance-email-ports.js';
-import type { AttachmentMediaType, CvMediaType } from '@candydati/domain';
+import type { AttachmentMediaType, AutomationTriggerType, CvMediaType } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository, CvExtractionRepository, PrivacyNoticeRepository } from './candidate-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { ReceiptDeps } from './messaging-ports.js';
@@ -37,6 +37,7 @@ export const TASK_NAMES = [
   'automation.run',
   'webhook.deliver',
   'deadlines.scan',
+  'automation.scan',
   'files.delete',
   'retention.run',
   'organization.export',
@@ -59,11 +60,19 @@ export interface EmailSendPayload {
   readonly messageId: string;
 }
 
-/** Run the rules of `stageId` for an application that entered it. Checked again when it runs: the application may have moved on. */
+/**
+ * Run the rules of `stageId` whose trigger fired for an application (absent trigger: it entered the stage). Checked again
+ * when it runs: the application may have moved on. Ids and short keys only.
+ */
 export interface AutomationRunPayload {
   readonly organizationId: string;
   readonly applicationId: string;
   readonly stageId: string;
+  readonly trigger?: AutomationTriggerType | undefined;
+  /** `message:<id>`, `feedback:<id>`, `stuck`, `due:<iso>`: which occurrence of the trigger. */
+  readonly occurrence?: string | undefined;
+  /** Set by the scan of time-based rules: only this rule. */
+  readonly ruleId?: string | undefined;
 }
 
 /** One delivery of one event to one endpoint. */
@@ -104,6 +113,8 @@ export interface TaskPayloads {
   readonly 'webhook.deliver': WebhookDeliverPayload;
   /** Scheduled hourly; no payload. */
   readonly 'deadlines.scan': Readonly<Record<string, never>>;
+  /** Scheduled hourly; no payload. Queues `automation.run` for time-based rules. */
+  readonly 'automation.scan': Readonly<Record<string, never>>;
   readonly 'files.delete': FilesDeletePayload;
   /** Scheduled daily at 03:00; no payload. */
   readonly 'retention.run': Readonly<Record<string, never>>;

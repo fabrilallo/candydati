@@ -1,7 +1,7 @@
 import type { FeedbackRequest, InterviewFeedback, ScorecardCriterion, StageInterviewer } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository } from './candidate-ports.js';
 import type { MemberDirectory } from './automation-ports.js';
-import type { FileStorage } from './intake-ports.js';
+import type { FileStorage, TaskQueue } from './intake-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { EmailSender, MessagingConfig } from './messaging-ports.js';
 import type { CoreDeps } from './ports.js';
@@ -111,4 +111,7 @@ export type FeedbackStageEntryDeps = FeedbackStageEntryParts &
 
 /** The public form: a visitor with a link, no session. */
 export type PublicFeedbackDeps = FeedbackRecords &
-  Pick<FeedbackDeps, 'auditLog' | 'transaction' | 'jobs' | 'candidates' | 'applications' | 'organizations' | 'scorecards' | 'files' | 'newId' | 'hash' | 'now'>;
+  Pick<FeedbackDeps, 'auditLog' | 'transaction' | 'jobs' | 'candidates' | 'applications' | 'organizations' | 'scorecards' | 'files' | 'newId' | 'hash' | 'now'> & {
+    /** A submission queues the `feedback_submitted` automations of its stage. */
+    readonly queue: TaskQueue;
+  };
