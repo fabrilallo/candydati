@@ -27,7 +27,7 @@ export function automationRunDeps(t: TestApp): AutomationRunDeps {
   const uow = createDrizzleUnitOfWork(t.handle.db);
   const r = uow.repositories;
   const { messagingDeps } = createMessagingDeps({ env: testEnv(), uow, queue: t.queue, sender: t.emailSender, identity: createFakeEmailIdentity(), onReceiptError: () => undefined, config: toMessagingConfig(testEnv().platform, testEnv().email) });
-  return { ...messagingDeps, rules: r.rules, executions: r.executions, tasks: r.tasks, notifications: r.notifications, members: r.members, queue: t.queue };
+  return { ...messagingDeps, rules: r.rules, executions: r.executions, tasks: r.tasks, notifications: r.notifications, members: r.members, jobTeams: r.jobTeams, outbox: r.outbox, moveProposals: r.moveProposals, queue: t.queue };
 }
 
 export function scanDeps(t: TestApp): ScanDeps {
@@ -49,7 +49,7 @@ export const scan = (t: TestApp, now: Date) => scanDeadlines(scanDeps(t), { now 
 /** The hourly scan of time-based rules, against the test database and the app's recording queue. */
 export function scanAutomations(t: TestApp, now: Date) {
   const r = createDrizzleUnitOfWork(t.handle.db).repositories;
-  return scanTimedAutomations({ rules: r.rules, applications: r.applications, candidates: r.candidates, jobs: r.jobs, executions: r.executions, queue: t.queue }, { now });
+  return scanTimedAutomations({ rules: r.rules, applications: r.applications, candidates: r.candidates, jobs: r.jobs, executions: r.executions, moveProposals: r.moveProposals, queue: t.queue }, { now });
 }
 
 /** Runs every `automation.run` task the app queued since the last drain, like the worker would. */

@@ -1,4 +1,4 @@
-import { seedHrWorld, createFakeEmailSender, createFakeHostGuard, createFakeHttpPoster, buildApplication, buildAutomationRule, buildJob, buildEmailTemplate, buildOutboxEvent, buildWebhookEndpoint, seedAutomationWorld, ORG_A, createInMemoryTransaction } from '@candydati/core/testing';
+import { seedHrWorld, createFakeEmailSender, createFakeHostGuard, createFakeHttpPoster, buildApplication, buildAutomationRule, buildMoveProposal, buildJob, buildEmailTemplate, buildOutboxEvent, buildWebhookEndpoint, seedAutomationWorld, ORG_A, createInMemoryTransaction } from '@candydati/core/testing';
 import { formatDigestFrom } from '@candydati/core';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
@@ -51,6 +51,13 @@ describe('automation.scan', () => {
     expect(queue.schedule).toEqual({ cron: AUTOMATION_SCAN_CRON, data: {} });
     await queue.handle(job({}));
     expect(deps.queue.jobs()).toEqual([expect.objectContaining({ name: 'automation.run', payload: expect.objectContaining({ ruleId: 'rule_1', trigger: 'stage_stuck' }) })]);
+  });
+
+  it('closes the move proposals past their expiry, and moves nothing', async () => {
+    const deps = seedAutomationWorld({ proposals: [buildMoveProposal({ expiresAt: new Date('2026-05-30T00:00:00Z') })] });
+    await createAutomationScanQueue(deps, () => new Date('2026-06-01T10:00:00Z')).handle(job({}));
+    expect(deps.moveProposals.snapshot().map((p) => p.status)).toEqual(['expired']);
+    expect((await deps.applications.findById(ORG_A, 'app_1'))?.stageId).toBe('received');
   });
 });
 

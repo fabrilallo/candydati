@@ -1,4 +1,4 @@
-import { BULK_MESSAGE_MAX, CONSENT_SCOPES, OUTCOMES, decidedSchema, erasedSchema, hireDatesSchema, sendResultSchema } from '@candydati/domain';
+import { BULK_MESSAGE_MAX, CONSENT_SCOPES, OUTCOMES, applicationCardSchema, decidedSchema, erasedSchema, hireDatesSchema, sendResultSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { confirmNameBody } from './schemas-admin.js';
 import { candidateDetailSchema } from './schemas-work.js';
@@ -13,6 +13,23 @@ export const applicationRoutes: readonly RouteSpec[] = [
     method: 'post', path: '/api/v1/applications/:id/move', tag: 'Pipeline', summary: 'Move an application to another stage', scope: 'candidate:move',
     description: 'Stage ids come from the pipeline of the job. Moving into a stage runs its automations and asks the interviewers of that stage for feedback. A closed application cannot be moved (`409`).',
     body: z.object({ stageId: z.string().min(1) }), response: { schema: 'ApplicationCard' },
+  },
+  {
+    method: 'get', path: '/api/v1/move-proposals', tag: 'Pipeline', summary: 'Moves proposed by automations, waiting for a person', scope: 'candidate:read',
+    description:
+      'Open proposals of `propose_move` rules on the jobs the caller reaches, oldest first: only those still live (the application is open, still in the stage it was proposed from, and the proposal has not expired after 14 days). A proposal is a suggestion: nothing moves until a person confirms it.',
+    query: z.object({ applicationId: z.string().min(1).optional(), limit: z.number().int().min(1).max(100).optional() }),
+    response: { schema: 'MoveProposal', list: true },
+  },
+  {
+    method: 'post', path: '/api/v1/move-proposals/:id/confirm', tag: 'Pipeline', summary: 'Confirm a proposed move', scope: 'candidate:move',
+    description: 'Runs the normal move with the caller’s permission, per-job access and audit (`application.moved`, plus `move_proposal.confirmed`). `409` when the proposal is no longer live or was already acted on.',
+    response: { schema: z.object({ proposalId: z.string(), application: applicationCardSchema }) },
+  },
+  {
+    method: 'post', path: '/api/v1/move-proposals/:id/dismiss', tag: 'Pipeline', summary: 'Dismiss a proposed move', scope: 'candidate:move',
+    description: 'Nothing moves. Audited as `move_proposal.dismissed`. `409` when the proposal is no longer live or was already acted on.',
+    response: { schema: z.object({ proposalId: z.string(), dismissed: z.literal(true) }) },
   },
   {
     method: 'post', path: '/api/v1/applications/:id/decide', tag: 'Pipeline', summary: 'Decide the outcome of an application', scope: 'candidate:decide', sessionOnly: true,

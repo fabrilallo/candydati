@@ -6,6 +6,7 @@ import {
   type AutomationScanDeps,
   type EmailIdentity,
   type EmailSender,
+  type FeedbackStageEntryParts,
   type ScanDeps,
   type TaskQueue,
   type WebhookDeliverDeps,
@@ -24,6 +25,8 @@ export interface AutomationWiring {
   readonly config: MessagingConfig;
   readonly production: boolean;
   readonly allowPrivateWebhooks: boolean;
+  /** What `request_feedback` rules need to ask interviewers (link emails go out from the platform identity). */
+  readonly feedback?: FeedbackStageEntryParts | undefined;
 }
 
 export interface Phase4WorkerDeps {
@@ -64,6 +67,10 @@ export function createPhase4WorkerDeps(wiring: AutomationWiring): Phase4WorkerDe
       tasks: r.tasks,
       notifications: r.notifications,
       members: r.members,
+      jobTeams: r.jobTeams,
+      outbox: r.outbox,
+      moveProposals: r.moveProposals,
+      ...(wiring.feedback ? { feedback: wiring.feedback } : {}),
       ...clock,
     },
     deliver: {
@@ -76,7 +83,7 @@ export function createPhase4WorkerDeps(wiring: AutomationWiring): Phase4WorkerDe
       ...clock,
     },
     publish: { endpoints: r.endpoints, outbox: r.outbox, queue, transaction: uow.transaction, now: clock.now },
-    automationScan: { rules: r.rules, applications: r.applications, candidates: r.candidates, jobs: r.jobs, executions: r.executions, queue },
+    automationScan: { rules: r.rules, applications: r.applications, candidates: r.candidates, jobs: r.jobs, executions: r.executions, moveProposals: r.moveProposals, queue },
     scan: { applications: r.applications, jobs: r.jobs, promises: r.promises, tasks: r.tasks, notifications: r.notifications, members: r.members, jobTeams: r.jobTeams, newId: clock.newId },
   };
 }
