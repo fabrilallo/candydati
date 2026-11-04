@@ -111,12 +111,13 @@ describe('duplicateStage', () => {
     expect((await deps.automationRules.listByJob(ORG, 'job_1')).filter((rule) => rule.stageId === result.stageId)).toEqual([]);
   });
 
-  it('skips the restriction for a recruiter, who does not decide who reads what', async () => {
+  it('always restricts the copy of a restricted stage, even for a recruiter, keeping who restricted the source', async () => {
     const { deps } = await world();
-    const recruiter = user('user_test', 'recruiter');
-    const result = await duplicateStage(deps, recruiter, { jobId: 'job_1', stageId: 'stg-b' });
-    expect(result.skipped).toEqual(['restriction']);
-    expect((await deps.jobTeams.listRestrictedStages(ORG, 'job_1')).map((s) => s.stageId)).toEqual(['stg-b']);
+    const result = await duplicateStage(deps, user('user_test', 'recruiter'), { jobId: 'job_1', stageId: 'stg-b' });
+    expect(result.copied).toContain('restriction');
+    expect(result.skipped).toEqual([]);
+    const copy = (await deps.jobTeams.listRestrictedStages(ORG, 'job_1')).find((s) => s.stageId === result.stageId);
+    expect(copy).toMatchObject({ organizationId: ORG, jobId: 'job_1', restrictedBy: 'hm_1' });
   });
 
   it('audits one job.stage_duplicated event with ids and kinds only', async () => {

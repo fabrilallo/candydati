@@ -20,7 +20,7 @@ export interface StageRestrictionResult extends RestrictedStagesView {
 }
 
 /** Owners and admins, or the person who is the hiring manager on the job's team; always with the permission. */
-export async function managesRestrictions(deps: Pick<JobTeamDeps, 'jobTeams'>, actor: Actor, jobId: string): Promise<boolean> {
+async function managesRestrictions(deps: JobTeamDeps, actor: Actor, jobId: string): Promise<boolean> {
   if (!can(actor, 'restricted_stage:manage')) return false;
   if (readsEveryRestrictedStage(actor.role)) return true;
   const person = actor.type === 'user' ? actor.id : actor.onBehalfOfUserId;

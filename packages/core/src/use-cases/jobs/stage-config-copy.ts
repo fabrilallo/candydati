@@ -5,7 +5,6 @@ import { can } from '../../authorization.js';
 import type { ScorecardRepository, StageInterviewerRepository } from '../../feedback-ports.js';
 import type { JobDeps } from '../../job-ports.js';
 import type { JobTeamRepository } from '../../job-team-ports.js';
-import { managesRestrictions } from './restricted-stages.js';
 
 /** The repositories of what is tied to a stage by its id, besides the job itself. */
 export interface StageConfigDeps extends Pick<JobDeps, 'automationRules' | 'newId' | 'now'> {
@@ -83,14 +82,19 @@ const automationsStep: StepOf = async (deps, actor, { organizationId, jobId, fro
   };
 };
 
-const restrictionStep: StepOf = async (deps, actor, { organizationId, jobId, from, to }) => {
-  const restricted = (await deps.jobTeams.listRestrictedStages(organizationId, jobId)).some((stage) => stage.stageId === from);
+/**
+ * A restricted source always gives a restricted copy, whoever duplicates it: the mark only narrows who reads what is
+ * written there, so it needs no access decision of the actor, and leaving it out would expose notes written in the copy.
+ * The copy keeps who restricted the source: it is still that person's decision.
+ */
+const restrictionStep: StepOf = async (deps, _actor, { organizationId, jobId, from, to }) => {
+  const source = (await deps.jobTeams.listRestrictedStages(organizationId, jobId)).find((stage) => stage.stageId === from);
   return {
     kind: 'restriction',
-    present: restricted,
-    allowed: restricted && (await managesRestrictions(deps, actor, jobId)),
+    present: source !== undefined,
+    allowed: true,
     copy: async () => {
-      await deps.jobTeams.restrictStage({ organizationId, jobId, stageId: to, restrictedBy: toActorUserId(actor), createdAt: deps.now() });
+      if (source) await deps.jobTeams.restrictStage({ ...source, stageId: to, createdAt: deps.now() });
     },
   };
 };
@@ -98,8 +102,8 @@ const restrictionStep: StepOf = async (deps, actor, { organizationId, jobId, fro
 const STEPS: readonly StepOf[] = [interviewersStep, scorecardStep, automationsStep, restrictionStep];
 
 /**
- * Copies to `to` what is tied to `from`, kind by kind, under each kind's own permission rule. What the actor may not
- * manage is skipped, not refused; a kind the source does not have is neither copied nor skipped.
+ * Copies to `to` what is tied to `from`, kind by kind, under each kind's own permission rule (the restriction always
+ * comes along). What the actor may not manage is skipped, not refused; a kind the source does not have is neither copied nor skipped.
  */
 export async function copyStageConfig(deps: StageConfigDeps, actor: Actor, target: StageCopyTarget): Promise<StageConfigOutcome> {
   let outcome: StageConfigOutcome = { copied: [], skipped: [] };
