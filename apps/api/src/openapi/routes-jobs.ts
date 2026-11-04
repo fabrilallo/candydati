@@ -1,5 +1,6 @@
 import { CUSTOM_ROLE_MAX, JOB_ROLES, JOB_STATUSES, SENIORITY_LEVELS, SUPPORTED_LOCALES, jobContentSchema } from '@candydati/domain';
 import { z } from 'zod';
+import { duplicateStageResultSchema } from './schemas-jobs.js';
 import { idResult, page, type RouteSpec } from './spec.js';
 
 const contentBody = z.object({ content: jobContentSchema });
@@ -21,6 +22,12 @@ export const jobRoutes: readonly RouteSpec[] = [
     method: 'put', path: '/api/v1/jobs/:id', tag: 'Jobs', summary: 'Replace the content of a job ad', scope: 'job:update', body: contentBody,
     description: 'Full replacement. A published ad must keep satisfying the publication rules; a closed ad cannot be edited.',
     response: { schema: 'Job' },
+  },
+  {
+    method: 'post', path: '/api/v1/jobs/:id/stages/:stageId/duplicate', tag: 'Jobs', summary: 'Duplicate a stage of a job ad', scope: 'job:update',
+    description:
+      'Inserts a copy of the stage right after it (same type, duration, conductor, title and note, a new id), with the rules of a content update. Then copies what is tied to the source stage, each under its own permission: interviewers and stage criteria (`feedback:manage`), automation rules (`automation:manage`, the caller becomes their author), the restriction (owners, admins, the hiring manager of the job). What the caller may not manage is listed in `skipped`, not refused. All or nothing.',
+    response: { schema: duplicateStageResultSchema },
   },
   {
     method: 'post', path: '/api/v1/jobs/:id/publish', tag: 'Jobs', summary: 'Publish a draft', scope: 'job:publish',

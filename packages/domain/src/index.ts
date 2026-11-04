@@ -14,6 +14,7 @@ export * from './job/content.js';
 export * from './job/employment.js';
 export * from './job/compliance/index.js';
 export * from './job/stage-ids.js';
+export * from './job/stage-duplication.js';
 export * from './job/quality.js';
 export * from './job/job.js';
 export * from './job/job-posting.js';
