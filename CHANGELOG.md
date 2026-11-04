@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Assistant evaluation as a public regression test:** every case runs several times (default 3) and the report shows
+  pass rate and variance per case and overall; 48 cases on the non-negotiable principles (no ranking even when asked
+  sideways, no surname or contact, no search elsewhere, injection in CVs and messages, confirmed criteria, salary and
+  process in job drafts, Italian and English) with deterministic checks next to the judge; a manual and weekly GitHub
+  Actions workflow that skips cleanly without the model secret. See `docs/ASSISTANT-EVAL.md`.
+
 ### Changed
 
 - **License:** the Additional Use Grant now covers recruiting on behalf of clients. Staffing and search agencies,
