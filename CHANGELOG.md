@@ -18,6 +18,20 @@ All notable changes to this project are documented here. The format follows
   process in job drafts, Italian and English) with deterministic checks next to the judge; a manual and weekly GitHub
   Actions workflow that skips cleanly without the model secret. See `docs/ASSISTANT-EVAL.md`.
 
+- **Recruiting for clients:** agencies, headhunters and consultants turn on "We recruit for clients" (Settings,
+  Clients) and keep their clients inside one organization: name, website, logo and the client's hiring contacts. A job
+  can belong to a client and its ad shows the client by name or as a confidential client, always with the agency and
+  its authorization reference; a confidential client is never named on a public page, feed or structured data.
+- **Shortlists for clients:** from a client job a recruiter presents candidates to a client contact through a personal,
+  expiring, revocable link, choosing per candidate whether the CV and which notes go. The client answers "let's meet" or
+  "not for us" with a reason, once per candidate; the answer shows on the timeline and never moves anyone. Reminders go
+  out after 3 and 7 days.
+- **Candidates are told:** each candidate in a shortlist is emailed which client saw their profile (or that it is a
+  confidential client, and that they can ask which one); their data export lists the clients that received their data,
+  and erasure takes them out of every shortlist. The privacy notice template covers sharing with clients.
+- Jobs and reports filter by client. REST and OpenAPI for clients and shortlists; the assistant and MCP read clients
+  (`list_clients`) and filter jobs and reports by client, while managing clients and sending shortlists stay with a person.
+
 ### Fixed
 
 - Docs: the READMEs and the website no longer say the MCP server covers everything in the interface. REST covers the

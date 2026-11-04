@@ -8,7 +8,7 @@ The product is Candydati ([candydati.it](https://candydati.it), [candydati.com](
 
 A source-available, agentic applicant tracking system (ATS) that sits on the candidate's side of the table. Transparency is not an option a company can switch off: it is how the product works.
 
-It is built for small and mid-sized companies, their recruiters and generalist HR people (not only technical users), and for the candidates who apply through the public careers pages. It is designed to be driven equally well by a person in the interface and by an agent through the API.
+It is built for small and mid-sized companies, their recruiters and generalist HR people (not only technical users), for staffing and search agencies, headhunters and consultants who recruit for clients (§3.5), and for the candidates who apply through the public careers pages. It is designed to be driven equally well by a person in the interface and by an agent through the API.
 
 The interface is available in Italian and English. Job ad compliance rules follow Italian law (see §4.2).
 
@@ -67,6 +67,7 @@ The code is open. A complete export in an open, documented format is available a
 | Migration from another ATS | A company's whole recruiting history (jobs, stages, candidates, applications with outcomes and dates, notes, stage history, emails, CVs and attachments) moved in from its previous ATS through one public, versioned migration package, produced by a built-in source connector (beta until verified on a real account) or by an agent skill. Previewed before anything is written, confirmed by an owner or admin who declares their responsibility, undoable as a whole. Scores, ratings and special-category data are never carried over |
 | HR tools | Interview feedback without login (see below), hiring needs intake form, optional approval of budget and salary before publication, flagging of stalled ads |
 | Agent | Internal process assistant, public API, MCP server, webhooks (§5) |
+| Recruiting for clients | For agencies, headhunters and consultants: clients inside the organization, a client on each job, shortlists sent to the client through a personal link, per-client jobs and reports (§3.5) |
 
 HR tools in more detail:
 
@@ -113,6 +114,52 @@ organization in `Settings / Careers page`. The page is a document of ordered sec
   the media files. The page holds no candidate data, so retention and erasure of candidates do not touch it.
 - **Transparency stays:** the positions list keeps salary and the number of stages in evidence and never shows the
   response time or a total process duration.
+
+### 3.5 Recruiting for clients
+
+A staffing or search agency, a headhunter or a consultant uses **one organization**: one team, one talent pool, one set
+of templates and settings. Clients are an entity inside it. The license allows any number of clients (`LICENSE`,
+Additional Use Grant: clients pay for the recruiting work, not for access to the software). Example: "Selezioni Rossi"
+runs a backend developer search for Acme and an accountant search for Beta, with one shared talent pool.
+
+- **Setting.** "We recruit for clients" (`organization_setting.recruits_for_clients`) is off by default and turned on by
+  an owner or admin as a person (never a key or the assistant), with the agency's authorization reference. With it off,
+  no client appears anywhere in the interface; turning it off later hides clients again but does not rewrite what the
+  ads already say (the truth about an ad does not change with a setting).
+- **Clients.** A name (unique in the organization, ignoring case), an optional website and logo (an https address the
+  server never fetches) and the client's hiring contacts (name and email, at most 10). Every member reads clients
+  (`client:read`); owners, admins and recruiters manage them (`client:manage`, never a key or the assistant: it decides
+  who receives candidate data). A client is archived, never deleted: its jobs and history stay, it gets no new job.
+- **The client of a job.** At most one, kept apart from the ad (`job_client`), set by whoever may edit the ad, with a
+  display choice:
+  - *named*: the ad reads "for <client>", the client is `hiringOrganization` in the JSON-LD and the `company` of the
+    feed, its website is linked;
+  - *confidential*: the ad says the search is for a client of the agency that asked to stay confidential. The client's
+    name, website and logo appear in no public page, feed or structured data; the agency stands as the hiring
+    organization.
+
+  The page is the agency's own careers page, so the agency is always named and an ad is never anonymous (D.Lgs.
+  276/2003, art. 9); its authorization reference is printed on every client ad. There is no third option: an ad never
+  presents a company other than the real employer. The publication rules and Italian checks (§4) apply unchanged.
+- **Shortlists.** From a client job a recruiter (`shortlist:send`, a person only: never a key or the assistant) presents
+  candidates to one contact of the client. Only open applications of that job with consent given can be chosen; for each
+  one the recruiter chooses whether the CV goes and which notes (at most 5, about that application or the person, never
+  about another application). The contact gets a personal link (only its hash is stored; 14 days; reminders after 3 and 7
+  days while someone is unanswered, each with a new link; revocable at once). The page shows the agency, the job title,
+  the recruiter's message and, per candidate, the name, the chosen notes and the CV when shared: no email, phone, tags,
+  stages, other jobs or internal ids. Per candidate the client answers "meet at interview" or "not for us" with a required
+  short reason, once. The answer is recorded on the application's timeline and in the audit log; it never moves a stage
+  or decides anything (§2.4): a person at the agency does. Hiring managers see the shortlists of their jobs
+  (`shortlist:read`).
+- **The candidate is told.** Sending a shortlist emails every presented candidate, through their conversation (so it is
+  in their messages and a reply reaches the recruiter): to which client their profile went (or to "a client company of
+  the agency" that asked to stay confidential, with the right to ask which one, GDPR art. 15) and what was shared. It is
+  part of the person's action of sending, stated in the confirmation, with a fixed text: the assistant has no part in it
+  (§5.3). The candidate's data export lists every client that received their data (§6).
+- **Per-client view.** The job list and the reports (time to hire, funnel, sources, responses, the CSV) filter by client,
+  inside the actor's job scope (§6.2).
+- **API and agents.** REST covers everything above. The assistant and MCP read clients (`list_clients`, without contacts)
+  and filter jobs and reports by client; no tool creates clients or sends a shortlist.
 
 ## 4. The job ad standard
 
@@ -201,6 +248,7 @@ Roles. The client company is the data controller. In the hosted offering the ser
 | Language models | Configurable provider, listed as a sub-processor; no data used for training; a local model is possible when self-hosting |
 | Data sent to models | The assistant and the MCP server send first name and id only: surname, contacts and identifiers are removed, in CVs and messages too. Pseudonymized data is still personal data |
 | Automated decisions | None (§2.4) |
+| Sharing with clients | For agencies (§3.5): only what a recruiter chooses for each candidate (name, and the CV and notes when chosen; never contacts, special categories or other applications), through a personal expiring link; the candidate is emailed every time, naming the client or saying it is confidential; erasure removes the person from every shortlist; the export lists the clients that received the data |
 | Documents | Data processing agreement template, sub-processor list, record of processing activities (`docs/legal/`) |
 | Public form | A submission never rewrites an existing person's profile: the typed contact data stays on the application and a recruiter reviews it ("new details from the application"). An existing open application is answered like a success (nothing reveals who applied), receipts have a per-recipient and a per-organization daily cap, and an optional Cloudflare Turnstile check can be switched on |
 | Imported data | Consent marked "to be renewed", with a reconfirmation email; imported candidates stay visible only in the pipeline of their import until they reconfirm, and their data is erased if they do not |

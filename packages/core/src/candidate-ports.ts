@@ -1,3 +1,4 @@
+import type { OrganizationSettingsRepository } from './job-request-ports.js';
 import type { FeedbackStageEntryParts } from './feedback-ports.js';
 import type { FileStorage, TaskQueue } from './intake-ports.js';
 import type { OutboxRepository } from './webhook-ports.js';
@@ -205,6 +206,8 @@ export interface UserDirectory {
 export interface PrivacyDeps extends CoreDeps {
   readonly privacyNotices: PrivacyNoticeRepository;
   readonly organizations: OrganizationDirectory;
+  /** Whether the organization recruits for clients: the notice template then covers presenting profiles to clients. */
+  readonly organizationSettings?: Pick<OrganizationSettingsRepository, 'get'> | undefined;
   readonly newId: () => string;
   readonly now: () => Date;
 }

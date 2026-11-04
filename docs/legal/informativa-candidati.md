@@ -31,6 +31,12 @@ Il curriculum è letto da persone autorizzate di [Nome del titolare]. Per estrar
 
 Dentro [Nome del titolare] solo a persone autorizzate: chi amministra le selezioni e il gruppo di selezione di ciascuna posizione (responsabili dell'assunzione e intervistatori), che accede solo alle candidature delle posizioni di cui fa parte; ogni consultazione del profilo e del curriculum è registrata. All'esterno, solo ai fornitori che trattano dati per nostro conto, nominati responsabili del trattamento: [elenco categorie: hosting, archiviazione file, invio email, modello linguistico]. L'elenco aggiornato è disponibile su richiesta a [indirizzo email di contatto]. Non vendiamo i dati. [Trasferimenti extra UE: indicare se presenti e le garanzie, ad esempio decisione di adeguatezza o clausole contrattuali standard.]
 
+## [Solo per agenzie e head hunter] Selezioni per conto di aziende clienti
+
+[Nome del titolare] svolge ricerca e selezione anche per conto di aziende clienti [indicare gli estremi dell'autorizzazione ministeriale, D.Lgs. 276/2003]. Se ti candidi a una posizione presso un cliente, possiamo presentare il tuo profilo a quell'azienda: nome e cognome e, quando lo riteniamo utile per la selezione, il curriculum e alcune note del recruiter. Non condividiamo mai i tuoi contatti, dati di altre candidature né categorie particolari di dati.
+
+Ogni volta che il tuo profilo viene presentato ti avvisiamo per email indicando l'azienda, o dicendoti che è un cliente che ha chiesto di restare riservato: in quel caso puoi chiederci quale azienda è (art. 15 GDPR). L'azienda cliente riceve i dati come titolare autonomo, solo per quella selezione; la base giuridica è la stessa della selezione (misure precontrattuali, art. 6.1.b GDPR). Le sue risposte sono un'opinione: la decisione su di te resta a una persona di [Nome del titolare]. Se cancelli i tuoi dati, il tuo profilo esce anche da ogni shortlist inviata ai clienti; le copie già scaricate dal cliente restano sotto la sua responsabilità di titolare.
+
 ## Per quanto tempo li conserviamo
 
 - Selezione: [N] mesi dalla conclusione del processo [motivazione].

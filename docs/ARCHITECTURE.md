@@ -238,7 +238,7 @@ deleted.
 | `/app/**` and `/api/v1/**` | session or API key | permissions per role and scope |
 | `/careers/{org}/**`, feed, `llms.txt`, sitemap, `/api/v1/public/**` | none, read-only | server-rendered, JSON-LD `JobPosting`, cacheable |
 | Application form | none | versioned consent, rate limits, daily caps per organization and per job |
-| Feedback and consent links | single-use token in URL | interview feedback without login; consent reconfirmation |
+| Feedback, consent and shortlist links | token in URL | interview feedback without login; consent reconfirmation; client shortlists (`/shortlist/{token}`, [ADR 0011](adr/0011-agency-clients-in-one-organization.md)) |
 | Inbound email webhook | HMAC signature | `INBOUND_WEBHOOK_SECRET` |
 | `/mcp` | API key | same use cases as REST |
 
@@ -247,7 +247,7 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 ## Web security headers and links
 
 - The web app sends, on every response, `X-Content-Type-Options: nosniff`, a `Permissions-Policy` and a `Referrer-Policy`
-  (`no-referrer` on `/consent`, `/feedback` and `/accept-invitation`, whose URLs carry a secret); HSTS when the site URL
+  (`no-referrer` on `/consent`, `/feedback`, `/shortlist` and `/accept-invitation`, whose URLs carry a secret); HSTS when the site URL
   is https. Pages also get a nonce-based CSP (`script-src 'self' 'nonce-...'`, no `unsafe-eval` in production,
   `frame-ancestors 'none'`, `object-src 'none'`). `server/middleware/security-headers.ts` writes the headers and
   `server/plugins/csp-nonce.ts` stamps the nonce on Nuxt's scripts. `/api/**` and `/mcp` keep the api's own headers (the CV
@@ -321,5 +321,6 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 | Privacy | `privacy_notice`, `consent_token`, `data_export`, `retention_run` |
 | Import | `import_batch`, `import_item`, `import_analysis` |
 | HR tools | `feedback_request`, `interview_feedback` |
+| Clients (agencies) | `client` (contacts as validated jsonb), `job_client` (the client of a job and how its ad shows it), `client_shortlist` (hash of the link, expiry, revocation, reminders), `client_shortlist_item` (what is shared per candidate and the client's answer) |
 | Careers page | `careers_page` (draft and published document), `careers_media` (images re-encoded as WebP, videos; the logo is one of its images) |
 | Audit | `audit_log` (append-only, enforced by triggers) |
