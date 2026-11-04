@@ -4,6 +4,7 @@ import {
   type EmailSender,
   type FeedbackStageEntryDeps,
   type MessagingConfig,
+  type ShortlistReminderDeps,
   type StaleScanDeps,
 } from '@candydati/core';
 import { newConversationToken } from '@candydati/providers';
@@ -11,6 +12,7 @@ import { newConversationToken } from '@candydati/providers';
 export interface HrWorkerDeps {
   readonly feedback: FeedbackStageEntryDeps;
   readonly stale: StaleScanDeps;
+  readonly shortlists: ShortlistReminderDeps;
 }
 
 export interface HrWiring {
@@ -20,10 +22,11 @@ export interface HrWiring {
   readonly onMailError: (error: unknown) => void;
 }
 
-/** What the hourly scan needs for feedback reminders and stale ads, on Postgres; the sender is injected. */
+/** What the hourly scan needs for feedback and shortlist reminders and stale ads, on Postgres; the sender is injected. */
 export function createHrWorkerDeps({ uow, sender, config, onMailError }: HrWiring): HrWorkerDeps {
   const r = uow.repositories;
   const clock = { newId: randomUUID, now: () => new Date() };
+  const hash = (secret: string): string => createHash('sha256').update(secret).digest('hex');
   return {
     feedback: {
       auditLog: r.auditLog,
@@ -38,10 +41,11 @@ export function createHrWorkerDeps({ uow, sender, config, onMailError }: HrWirin
       sender,
       config,
       newToken: newConversationToken,
-      hash: (secret) => createHash('sha256').update(secret).digest('hex'),
+      hash,
       onError: onMailError,
       ...clock,
     },
+    shortlists: { auditLog: r.auditLog, shortlists: r.shortlists, jobs: r.jobs, organizations: r.organizations, sender, config, newToken: newConversationToken, hash, onError: onMailError },
     stale: { staleJobs: r.staleJobs, jobs: r.jobs, notifications: r.notifications, members: r.members, jobTeams: r.jobTeams, newId: clock.newId },
   };
 }

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { reportsSchema } from './schemas-reports.js';
 import type { RouteSpec } from './spec.js';
 
-const reportQuery = z.object({ from: z.iso.datetime().describe('Start of the period (ISO 8601).'), to: z.iso.datetime().describe('End of the period, at most 800 days after `from`.'), jobId: z.string().min(1).optional() });
+const reportQuery = z.object({ from: z.iso.datetime().describe('Start of the period (ISO 8601).'), to: z.iso.datetime().describe('End of the period, at most 800 days after `from`.'), jobId: z.string().min(1).optional(), clientId: z.string().min(1).optional().describe('Only the jobs of this client (agencies).') });
 
 const trafficQuery = z.object({ from: z.iso.datetime().describe('Start of the period (ISO 8601).'), to: z.iso.datetime().describe('End of the period, at most 366 days after `from`.') });
 

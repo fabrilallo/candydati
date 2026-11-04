@@ -17,8 +17,8 @@ export function registerJobRoutes(app: FastifyInstance, ctx: AppContext): void {
   const limit = { bodyLimit: AD_BODY_LIMIT };
 
   app.get('/api/v1/jobs', async (request) => {
-    const { items, meta } = await listJobs(deps, await ctx.resolveActor(request), request.query);
-    return ok(items.map((job) => toJobSummaryDto(job, deps)), meta);
+    const { items, meta, clients } = await listJobs(deps, await ctx.resolveActor(request), request.query);
+    return ok(items.map((job) => ({ ...toJobSummaryDto(job, deps), client: clients[job.id] ?? null })), meta);
   });
 
   app.post('/api/v1/jobs', limit, async (request, reply) => {

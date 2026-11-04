@@ -238,3 +238,4 @@ export * from './use-cases/clients/public-clients.js';
 export * from './use-cases/clients/shortlists.js';
 export * from './use-cases/clients/shortlist-public.js';
 export * from './use-cases/clients/shortlist-reminders.js';
+export * from './use-cases/clients/shortlist-export.js';

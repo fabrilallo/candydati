@@ -10,11 +10,12 @@ export const createReportsSummaryTool = (deps: ReportDeps) =>
     description:
       'Aggregates of a period (ISO dates): time to hire (days to the offer accepted date when recorded, else to the day the hire was recorded; the basis counts say how many of each) and time to start, applications entering each stage, outcomes, applications by source, response promises kept or missed. ' +
       'Numbers only, no names: it is not a way to compare people. Rates come with their denominator; say so when the sample is small.',
-    inputSchema: z.object({ from: z.iso.datetime(), to: z.iso.datetime(), jobId: z.string().min(1).max(100).nullish() }),
+    inputSchema: z.object({ from: z.iso.datetime(), to: z.iso.datetime(), jobId: z.string().min(1).max(100).nullish(), clientId: z.string().min(1).max(100).nullish() }),
     execute: async (input, context) =>
       runTool(async () => {
-        const { jobId, ...period } = input;
-        const report = await getReports(deps, readAgentIdentity(context?.requestContext).actor, { ...period, ...(jobId ? { jobId } : {}) });
+        const { jobId, clientId, ...period } = input;
+        const filter = { ...(jobId ? { jobId } : {}), ...(clientId ? { clientId } : {}) };
+        const report = await getReports(deps, readAgentIdentity(context?.requestContext).actor, { ...period, ...filter });
         return {
           period: report.period,
           minSample: report.minSample,

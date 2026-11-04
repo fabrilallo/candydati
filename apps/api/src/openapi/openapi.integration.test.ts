@@ -101,7 +101,7 @@ describe('OpenAPI document', () => {
     expect(publish.parameters).toEqual([{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }]);
     expect(publish['x-required-scope']).toBe('job:publish');
     const list = doc.paths['/api/v1/jobs'].get;
-    expect(list.parameters.map((parameter: Json) => parameter.name)).toEqual(['status', 'page', 'limit']);
+    expect(list.parameters.map((parameter: Json) => parameter.name)).toEqual(['status', 'clientId', 'page', 'limit']);
     const create = doc.paths['/api/v1/jobs'].post.requestBody.content['application/json'].schema;
     expect(Object.keys(create.properties)).toEqual(['content', 'templateId']);
     expect(create.properties.content.properties.title).toBeDefined();

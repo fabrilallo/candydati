@@ -1,3 +1,5 @@
+import type { JobClientRepository } from './client-ports.js';
+import type { ShortlistExportSources } from './use-cases/clients/shortlist-export.js';
 import type { CareersMediaRepository, CareersPageRepository } from './careers-ports.js';
 import type { JobTeamRepository } from './job-team-ports.js';
 import type { ConsentStatus, DataExport, RetentionRun } from '@candydati/domain';
@@ -139,7 +141,7 @@ export interface CandidateRightsDeps extends CoreDeps, ErasureDeps, FeedbackReco
   readonly privacyNotices: PrivacyNoticeRepository;
 }
 
-export interface OrganizationExportDeps extends CoreDeps, FeedbackRecords {
+export interface OrganizationExportDeps extends CoreDeps, FeedbackRecords, ShortlistExportSources {
   readonly dataExports: DataExportRepository;
   readonly organizations: OrganizationDirectory;
   readonly jobs: JobRepository;
@@ -155,6 +157,8 @@ export interface OrganizationExportDeps extends CoreDeps, FeedbackRecords {
   /** The careers page (draft and published) and its media files are part of the organization's data. */
   readonly careersPages: CareersPageRepository;
   readonly careersMedia: CareersMediaRepository;
+  /** Clients of an agency and the client of each job (`clients.json`); absent on an instance wired without clients. */
+  readonly jobClients?: JobClientRepository | undefined;
   readonly newId: () => string;
   readonly now: () => Date;
 }

@@ -8,13 +8,14 @@ import {
   type FileStorage,
   type OrganizationExportDeps,
   type PrivacyOverviewDeps,
+  type ShortlistExportSources,
   type TaskQueue,
   type ZipStreamFactory,
 } from '@candydati/core';
 
 export interface Phase5Deps {
   /** Export, correction, erasure and consent withdrawal of one candidate. */
-  readonly rightsDeps: CandidateDeps & CandidateRightsDeps;
+  readonly rightsDeps: CandidateDeps & CandidateRightsDeps & ShortlistExportSources;
   readonly exportDeps: OrganizationExportDeps;
   readonly overviewDeps: PrivacyOverviewDeps;
 }
@@ -53,6 +54,9 @@ export function createExportDeps({ uow, files, queue, zip, feedbackRecords }: Ex
     zip,
     careersPages: r.careersPages,
     careersMedia: r.careersMedia,
+    clients: r.clients,
+    jobClients: r.jobClients,
+    shortlists: r.shortlists,
     newId: randomUUID,
     now: () => new Date(),
   };
@@ -63,7 +67,7 @@ export function createPhase5Deps({ uow, files, queue, candidateDeps, providers, 
   const r = uow.repositories;
   const core = { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams };
   return {
-    rightsDeps: { ...candidateDeps, ...feedbackRecords, privacyNotices: r.privacyNotices, erasure: r.erasure },
+    rightsDeps: { ...candidateDeps, ...feedbackRecords, privacyNotices: r.privacyNotices, erasure: r.erasure, shortlists: r.shortlists, clients: r.clients },
     exportDeps: createExportDeps({ uow, files, queue, zip, feedbackRecords }),
     overviewDeps: {
       ...core,

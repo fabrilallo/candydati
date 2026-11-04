@@ -40,17 +40,26 @@ const RULE_HINTS: Readonly<Record<PublishRule, string>> = {
   discriminatory_requirement: 'Remove the discriminatory requirement (age, nationality, appearance, family status, religion, opinions).',
 };
 
+const listJobsShape = {
+  status: z.enum(JOB_STATUSES).optional(),
+  clientId: z.string().min(1).optional(),
+  page: z.number().int().min(1).optional(),
+  limit: z.number().int().min(1).max(100).optional(),
+};
+
 export const listJobsTool = {
   name: 'list_jobs',
   title: 'List job ads',
-  description: 'List the organization\'s job ads (drafts, published, closed), newest first, with whether each draft is publishable. Read only.',
-  shape: { status: z.enum(JOB_STATUSES).optional(), page: z.number().int().min(1).optional(), limit: z.number().int().min(1).max(100).optional() },
+  description:
+    'List the organization\'s job ads (drafts, published, closed), newest first, with whether each draft is publishable and, for an agency, the client of each job. ' +
+    'Narrow to one client with clientId (from list_clients). Read only.',
+  shape: listJobsShape,
   readOnly: true,
   run: async ({ app, actor }, input) => {
-    const { items, meta } = await listJobs(app.jobDeps, actor, input);
-    return { items: items.map((job) => toJobSummaryDto(job, app.jobDeps)), meta };
+    const { items, meta, clients } = await listJobs(app.jobDeps, actor, input);
+    return { items: items.map((job) => ({ ...toJobSummaryDto(job, app.jobDeps), client: clients[job.id] ?? null })), meta };
   },
-} satisfies ToolDefinition<{ status: z.ZodOptional<z.ZodEnum<{ draft: 'draft'; published: 'published'; closed: 'closed' }>>; page: z.ZodOptional<z.ZodNumber>; limit: z.ZodOptional<z.ZodNumber> }>;
+} satisfies ToolDefinition<typeof listJobsShape>;
 
 export const getJobTool = {
   name: 'get_job',

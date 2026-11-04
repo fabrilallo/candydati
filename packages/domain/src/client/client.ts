@@ -118,25 +118,3 @@ export function publicJobClientOf(client: Pick<Client, 'name' | 'website' | 'log
   if (display === 'confidential') return { display, name: null, website: null, logo: null, agencyAuthorization };
   return { display, name: client.name, website: client.website, logo: client.logoUrl, agencyAuthorization };
 }
-
-// --- HTTP shapes (dates as ISO strings). ---
-
-export interface ClientDto {
-  readonly id: string;
-  readonly name: string;
-  readonly website: string | null;
-  readonly logoUrl: string | null;
-  readonly contacts: readonly ClientContact[];
-  readonly archived: boolean;
-  /** Jobs of this client, every status. */
-  readonly jobCount: number;
-  readonly createdAt: string;
-  readonly updatedAt: string;
-}
-
-export interface JobClientDto {
-  readonly jobId: string;
-  /** Null when the job has no client. */
-  readonly client: { readonly id: string; readonly name: string; readonly archived: boolean } | null;
-  readonly display: ClientDisplay;
-}
