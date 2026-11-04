@@ -218,3 +218,52 @@ describe('downloadPublicFile in production mode', () => {
     expect(calls).toHaveLength(0);
   });
 });
+
+describe('downloadPublicFile and the rate options (publicFileConcurrency)', () => {
+  const sleeps: number[] = [];
+  const url = (name: string) => `http://${STORAGE}:${port}/f/${name}.pdf`;
+
+  it('leaves the API token bucket alone: signed-URL downloads never wait on it, API reads still do', async () => {
+    sleeps.length = 0;
+    handlers = [file('%PDF')];
+    const r = reader({ sleep: async (ms) => void sleeps.push(ms), now: () => 0, rate: { capacity: 1, refillPerSecond: 1, publicFileConcurrency: 4 } });
+    for (const name of ['a', 'b', 'c']) await r.downloadPublicFile(url(name), keep);
+    expect(sleeps).toEqual([]);
+    handlers = [(_req, res) => void res.writeHead(200, { 'content-type': 'application/json' }).end('{}')];
+    await r.getJson(`http://${API}:${port}/x`, z.unknown());
+    await r.getJson(`http://${API}:${port}/y`, z.unknown());
+    expect(sleeps).toEqual([1000]);
+  });
+
+  it('without the option, downloads share the bucket as before', async () => {
+    sleeps.length = 0;
+    handlers = [file('%PDF')];
+    const r = reader({ sleep: async (ms) => void sleeps.push(ms), now: () => 0, rate: { capacity: 1, refillPerSecond: 1 } });
+    await r.downloadPublicFile(url('a'), keep);
+    await r.downloadPublicFile(url('b'), keep);
+    expect(sleeps).toEqual([1000]);
+  });
+
+  it('never runs more public downloads at once than the limit', async () => {
+    let active = 0;
+    let peak = 0;
+    handlers = [(_req, res) => {
+      active += 1;
+      peak = Math.max(peak, active);
+      setTimeout(() => {
+        active -= 1;
+        res.writeHead(200, { 'content-type': 'application/pdf' }).end('%PDF');
+      }, 20);
+    }];
+    const r = reader({ rate: { capacity: 100, refillPerSecond: 100, publicFileConcurrency: 2 } });
+    const results = await Promise.all(Array.from({ length: 8 }, (_, index) => r.downloadPublicFile(url(String(index)), keep)));
+    expect(results.every((result) => result.bytes === 4)).toBe(true);
+    expect(peak).toBe(2);
+  });
+
+  it('frees the slot when a download fails', async () => {
+    handlers = [status(404)];
+    const r = reader({ rate: { capacity: 100, refillPerSecond: 100, publicFileConcurrency: 1 } });
+    for (let index = 0; index < 3; index += 1) expect((await failure(r.downloadPublicFile(url('x'), keep))).code).toBe('not_found');
+  });
+});

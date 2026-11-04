@@ -135,6 +135,21 @@ describe('getJson', () => {
     expect(events.find((e) => e.kind === 'throttle')).toMatchObject({ waitMs: 1500 });
   });
 
+  it('does not wait on rate-limit headers the source calls static (ignoreHeaders)', async () => {
+    handlers = [json({ data: [] }, 200, { 'x-rate-limit-remaining': '0', 'x-rate-limit-reset': '60' })];
+    const r = reader({ rate: { capacity: 100, refillPerSecond: 100, ignoreHeaders: true } });
+    await r.getJson(`${base()}/a`, page);
+    await r.getJson(`${base()}/b`, page);
+    expect(waits).toEqual([]);
+  });
+
+  it('takes retries, backoff and the longest wait from the rate options, and still honours Retry-After', async () => {
+    handlers = [status(429, { 'retry-after': '90' }), status(503), status(503), json({ data: [] })];
+    const r = reader({ rate: { capacity: 100, refillPerSecond: 100, maxRetries: 5, maxWaitMs: 100_000, backoff: { baseMs: 1000, maxMs: 4000 } }, backoff: undefined });
+    await r.getJson(`${base()}/x`, page);
+    expect(waits).toEqual([90_000, 2000, 4000]);
+  });
+
   it('spaces requests with the token bucket', async () => {
     handlers = [json({ data: [] })];
     const r = reader({ rate: { capacity: 1, refillPerSecond: 2 }, now: () => 0 });

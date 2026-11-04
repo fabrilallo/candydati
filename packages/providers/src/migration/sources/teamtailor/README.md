@@ -60,6 +60,89 @@ static values, so the connector paces itself at 3 requests a second), the attrib
   public https host is accepted for them, without the key; a link that is refused or expired is skipped and counted.
 - That `created-at` of jobs is present (the docs say it needs Admin permission); a stand-in date is used if missing.
 - A candidate without a name gets the email's local part and `-`; a candidate without any name gets `-`.
-- Real rate limits and page timing; large accounts have not been tried.
+- Real rate limits and page timing. The docs give no number, only static headers (see "Large accounts"); the pacing
+  below is ours, not Teamtailor's. Large real accounts have not been tried.
 - Whether `/jobs/{id}/stages` pagination and `sort=row_order` behave as the docs' example link suggests (stages are also
   sorted locally by `row-order`).
+
+## Large accounts
+
+What the connector does at the scale of tens of thousands of profiles, and what the docs do and do not say.
+
+- **Rate limits.** The docs (https://docs.teamtailor.com/, "Rate Limit Headers") name `X-Rate-Limit-Limit`,
+  `X-Rate-Limit-Remaining` and `X-Rate-Limit-Reset`, and say they "contain static values. Please use common sense when
+  making requests to the API until it returns real rate limit values". No request quota is documented. So the connector
+  does not wait on those headers (a static `Remaining: 0` would stall a run forever); it paces itself at 3 requests a
+  second and honours a `429` with its `Retry-After`.
+- **Retries.** A `429`, a `5xx`, a timeout (30 s per page) or a broken connection is retried up to 8 times with
+  exponential backoff and jitter (1 s doubling to 60 s; a `Retry-After` is obeyed up to 120 s). That tolerates about
+  three minutes of throttling per request, then the run fails with `source_rate_limited` or `source_unavailable`. A
+  `401`/`403` fails at once as `credentials_refused` ("the key was refused": wrong key, or not an Admin read key).
+- **Memory.** Pages of 30 are read one at a time and every file streams to storage, never into memory. What is kept is
+  the package itself (one record per person, application and note) and two lookup maps (applications and answers by
+  candidate) until the candidates are read. Measured on a synthetic account of 18,000 profiles, 24,000 applications,
+  18,000 answers, 6,000 notes and 900 files: the whole run including the split into packages takes about 1 to 3 s and
+  stays near 180 MB of heap, test data included (the test server's fixtures are in that number). Before the fix, per-item
+  array and map copies in the package builder made the same run take 93 s and 640 MB; they are gone. A real account
+  has longer texts (cover letters), so expect a few times that: well within the worker's memory.
+- **Packages.** One package holds at most 10,000 files, 50,000 people and 100,000 applications
+  (`MIGRATION_LIMITS`). An account above that is split by job into several linked parts, automatically.
+- **Progress.** Before reading, the connector asks each list for its size (`meta.record-count`, one request of one
+  record per list) and reports records read of the total; if any list does not say, the total stays unknown (an
+  indeterminate bar, never a wrong one). Progress also keeps the batch alive for the reconciler (15 minutes without a
+  sign), and the job may run up to 12 hours.
+- **Resuming.** There is none inside a run, on purpose: credentials are kept only until the fetch ends and a failed fetch
+  is never retried (ADR 0009, decision 5). A crash or an exhausted retry fails the batch; the operator starts a new
+  migration with the key again. Nothing is committed by a fetch, so there is nothing to duplicate, and committing the
+  same account twice is safe: people merge by email and applications already imported are skipped
+  (`skippedAlreadyApplied`).
+- **Files.** A CV or upload on a signed storage URL (a host other than `api.teamtailor.com`) does not use the 3
+  requests a second meant for the API: those downloads run in the background, at most 4 at once, while the next page is
+  read. They keep every guard of the shared reader: public addresses only, no credentials, redirects re-checked, a
+  10 minute timeout, retries before the first byte, a size cap. A file on the API host itself still goes through the
+  API pacing. A file that fails is counted and skipped, and the run waits for every download before it ends.
+- **Time.** The API calls need roughly 2,000 to 3,000 page requests for 18,000 profiles (the application, answer, upload
+  and note lists are of the same order as the candidates): 10 to 17 minutes at 3 a second. Files add the time of the
+  downloads themselves: up to 18,000 if every profile has a CV, 4 at a time, so about 4 to 5 seconds of a file divided
+  by 4. A 300 KB file in 0.5 s makes about 40 minutes for 18,000, a slower storage proportionally more. In all, about
+  1 hour for an account where every profile has a CV, 15 minutes if there are no files. These are estimates from the
+  page size, the pacing and an assumed download time, not measurements on a real account.
+
+## Trial on a real account
+
+Status stays **beta** until a trial like this one is done and recorded in `docs/migration/sources.md`.
+
+**Who runs it.** The account's owner, on their own self-hosted instance. No candidate data passes through us: the key
+is entered in their instance, the data goes from Teamtailor to their server, and only the numbers below come back.
+
+**What they need.**
+1. A self-hosted instance with a worker running (the fetch runs in the worker), with room for the files: CVs of 18,000
+   profiles can be several GB of temporary storage. Disk or object storage at least that large, and a 4 GB server.
+2. A read-only API key with the **Admin** scope (Settings, Integrations, API keys). Create it for the trial and revoke it
+   afterwards. It is never stored by the instance and never leaves the instance and Teamtailor.
+3. The migration wizard: choose Teamtailor, paste the key, wait. Do not stop the worker during the run.
+
+**Expected duration.** Between about 15 minutes (no files) and about 1 hour or a little more (a CV for every profile), see "Time" above. The
+migration screen shows records read of the total, and the number of parts when it ends. Then comes the analysis of each
+part, the preview, and the commit by an owner or admin.
+
+**What to record** (counts only, no names, emails or documents):
+- Per entity, Teamtailor vs imported: candidates, applications, jobs, notes, users, files (CVs and uploads). Teamtailor's
+  numbers are the lists' `meta.record-count`, also visible as totals in its UI; ours are in the preview and, after the
+  commit, in the import summary. Note every difference and what the preview said about it (skipped, merged by email,
+  no email).
+- The run's own report (`onReport`: users, jobs, candidates and skipped, applications and skipped, notes and skipped,
+  files and skipped, answers) and the preview notices.
+- Errors: the failure code shown (`credentials_refused`, `source_rate_limited`, `source_unavailable`,
+  `source_invalid_response`, `part_too_large`, `fetch_interrupted`, `fetch_failed`), at what progress it happened, and
+  whether a second attempt got further.
+- Duration: start, end, number of parts, and how many files failed (expired signed link, refused, too large). Whether
+  `429` appeared at all (worker log: `throttle` and `retry` events, with redacted URLs).
+- Peak memory and disk of the worker, if easy to read.
+- What looks wrong in the data: stages, outcomes (hired, rejected, withdrawn), the CV on the right application, notes
+  authors. Describe, do not paste.
+
+**How to report back.** Open an issue titled "Teamtailor trial: <number of profiles>" on the project's repository with
+the numbers above (a table is ideal) and the error codes; no personal data, no key, no screenshots of candidates. Say
+which points of "Assumed, not verified" held and which did not. When they hold on a real account, the connector can go
+to stable; each one that fails is fixed first.

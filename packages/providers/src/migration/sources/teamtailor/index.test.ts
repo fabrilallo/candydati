@@ -66,7 +66,7 @@ describe('Teamtailor connector: description', () => {
     expect(teamtailorConnector.credentials.safeParse({ ...credentials, extra: 1 }).success).toBe(false);
     expect(teamtailorConnector.credentials.safeParse({ apiKey: 'short' }).success).toBe(false);
     expect(teamtailorConnector.hosts(credentials)).toEqual([{ exact: 'api.teamtailor.com' }]);
-    expect(teamtailorConnector.rate).toBeDefined();
+    expect(teamtailorConnector.rate).toMatchObject({ capacity: 3, refillPerSecond: 3, ignoreHeaders: true, publicFileConcurrency: 4, maxRetries: 8 });
   });
 });
 
@@ -77,6 +77,21 @@ describe('Teamtailor connector: a full run on the docs fixtures', () => {
     expect(parsed.success, JSON.stringify(parsed.error?.issues)).toBe(true);
     expect(progress.length).toBeGreaterThan(1);
     expect(progress.at(-1)?.[0]).toBeGreaterThan(10);
+  });
+
+  it('reports a total from the list sizes, reached by the last progress call', async () => {
+    api.routes.set('/v1/notes', { raw: { ...fx.notesDocShape(fx.notes()), meta: { 'record-count': 3, 'page-count': 1 } } });
+    const { progress } = await run();
+    const total = progress[0]?.[1];
+    expect(total).toBeGreaterThan(10);
+    expect(progress.every(([, t]) => t === total)).toBe(true);
+    expect(progress.at(-1)?.[0]).toBe(total);
+  });
+
+  it('leaves the total unknown when a list does not give its size', async () => {
+    api.routes.set('/v1/notes', (_req, res) => void res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(fx.notesDocShape(fx.notes()))));
+    const { progress } = await run();
+    expect(progress.every(([, t]) => t === null)).toBe(true);
   });
 
   it('maps users, jobs (status, stages in row order) and candidates', async () => {
@@ -120,6 +135,27 @@ describe('Teamtailor connector: a full run on the docs fixtures', () => {
     for (const req of downloads) expect(req.headers).not.toHaveProperty('authorization');
     for (const req of downloads) expect(req.headers.host).toBe(new URL(storage()).host);
     expect(report).toMatchObject({ files: 2, filesSkipped: 3 });
+  });
+
+  it('downloads several files at once but never more than four, and all of them finish before the run ends', async () => {
+    let active = 0;
+    let peak = 0;
+    api.routes.set('/files/resume.pdf', (_req, res) => {
+      active += 1;
+      peak = Math.max(peak, active);
+      setTimeout(() => {
+        active -= 1;
+        res.writeHead(200, { 'content-type': 'application/pdf' }).end(PDF);
+      }, 15);
+    });
+    api.routes.set('/v1/candidates', Array.from({ length: 12 }, (_, index) => ({ id: `x${index}`, type: 'candidates', attributes: { email: `x${index}@example.test`, 'first-name': 'X', 'last-name': 'Y', resume: `${storage()}/files/resume.pdf` } })));
+    api.routes.set('/v1/job-applications', Array.from({ length: 12 }, (_, index) => ({ id: `ap${index}`, type: 'job-applications', attributes: { 'created-at': '2016-01-01T00:00:00Z' }, relationships: { candidate: { data: { id: `x${index}`, type: 'candidates' } }, job: { data: { id: '7199', type: 'jobs' } }, stage: { data: { id: '7199-5', type: 'stages' } } } })));
+    const { report, collected, files } = await run();
+    expect(report.files).toBe(12);
+    expect(collected.files.size).toBe(12);
+    expect(files.keys().length).toBe(12);
+    expect(peak).toBeGreaterThan(1);
+    expect(peak).toBeLessThanOrEqual(4);
   });
 
   it('skips a failing download and counts it, without stopping the run', async () => {

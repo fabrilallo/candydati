@@ -4,6 +4,21 @@ export interface RateOptions {
   /** Requests that may go out at once. */
   readonly capacity: number;
   readonly refillPerSecond: number;
+  /**
+   * The source says its rate-limit headers are not real values (Teamtailor: "static values"): do not wait on them. A 429
+   * and its `Retry-After` are still honoured.
+   */
+  readonly ignoreHeaders?: boolean | undefined;
+  /**
+   * Signed-URL file downloads (`downloadPublicFile`, hosts other than the API's) do not take from this bucket, which
+   * paces the vendor's API: they run at most this many at once instead. Unset: they share the bucket.
+   */
+  readonly publicFileConcurrency?: number | undefined;
+  /** Retries after the first attempt, for a long account whose source throttles in bursts (default: the reader's). */
+  readonly maxRetries?: number | undefined;
+  readonly backoff?: BackoffOptions | undefined;
+  /** Longest single wait accepted before the read fails `source_rate_limited`. */
+  readonly maxWaitMs?: number | undefined;
 }
 
 /**

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { JsonReaderError } from '../../../http/index.js';
+import { createJsonReader, JsonReaderError } from '../../../http/index.js';
 import { jobs } from '../../../testing/fixtures/migration/teamtailor/responses.js';
 import { startTestApi, testReader, type TestApi } from '../../../testing/migration-test-api.js';
 import { createTeamtailorClient, TEAMTAILOR_API_VERSION } from './client.js';
@@ -77,5 +77,46 @@ describe('Teamtailor client', () => {
     expect(await client().download(`${api.origin}/files/cv.pdf`, keep)).toEqual({ bytes: 4, mediaType: 'application/pdf' });
     expect(api.seen.map((req) => req.headers.host)).toEqual([new URL(storage).host, new URL(api.origin).host]);
     for (const req of api.seen) expect(req.headers).not.toHaveProperty('authorization');
+  });
+});
+
+describe('Teamtailor client: throttling and failures', () => {
+  const patient = () => createTeamtailorClient(createJsonReader({ allowedHosts: [{ exact: 'api.teamtailor.com' }], unsafeAllowLoopbackForTests: true, resolve: async () => ['127.0.0.1'], sleep: async () => undefined, maxRetries: 8, backoff: { baseMs: 1, maxMs: 2 } }), 'secret-key-123', `${api.origin}/v1`);
+  const flaky = (statuses: readonly number[], headers: Record<string, string> = {}) => {
+    let calls = 0;
+    api.routes.set('/v1/jobs', (_req, res) => {
+      const status = statuses[calls] ?? 200;
+      calls += 1;
+      if (status === 200) return void res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify({ data: [] }));
+      res.writeHead(status, headers).end();
+    });
+    return () => calls;
+  };
+
+  it('rides out a 429 storm with Retry-After and succeeds', async () => {
+    const calls = flaky([429, 429, 429, 429, 429], { 'retry-after': '1' });
+    expect(await collect(patient().list('/jobs', 'jobs'))).toEqual([]);
+    expect(calls()).toBe(6);
+  });
+
+  it('retries transient 5xx and gives up with source_unavailable when they persist', async () => {
+    flaky([503, 502]);
+    expect(await collect(patient().list('/jobs', 'jobs'))).toEqual([]);
+    flaky(Array.from({ length: 20 }, () => 500));
+    expect((await failure(collect(patient().list('/jobs', 'jobs')))).code).toBe('source_unavailable');
+  });
+
+  it('fails a refused key at once, 403 included, without retrying', async () => {
+    const calls = flaky([403]);
+    expect((await failure(collect(patient().list('/jobs', 'jobs')))).code).toBe('credentials_refused');
+    expect(calls()).toBe(1);
+  });
+
+  it('counts a collection from meta.record-count, or says null when absent', async () => {
+    api.routes.set('/v1/jobs', jobs());
+    expect(await client().count('/jobs', 'jobs')).toBe(2);
+    expect(new URL(api.seen[0]?.url ?? '', 'http://x').searchParams.get('page[size]')).toBe('1');
+    api.routes.set('/v1/jobs', { raw: { data: [] } });
+    expect(await client().count('/jobs', 'jobs')).toBeNull();
   });
 });
