@@ -396,6 +396,7 @@ function createJobDeps(uow: DrizzleUnitOfWork, adQuality: AdQualityAnalyzer, adQ
     jobClients: r.jobClients,
     clients: r.clients,
     publicClients: r.publicClients,
+    shortlists: r.shortlists,
     adQuality,
     adQualityThreshold,
     newId: randomUUID,

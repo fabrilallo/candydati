@@ -37,8 +37,9 @@ describe('clients', () => {
     const created = await createClient(deps, recruiter, { name: 'Beta Test Spa', website: 'https://beta.example', contacts: [{ name: 'Bruno', email: 'Bruno@Beta.Example' }] });
     expect(created).toMatchObject({ name: 'Beta Test Spa', website: 'https://beta.example', logoUrl: null, archived: false, jobCount: 0 });
     expect(created.contacts).toEqual([{ id: expect.any(String), name: 'Bruno', email: 'bruno@beta.example' }]);
-    expect(await listClients(deps, manager, {})).toEqual([created]);
-    expect(await getClient(deps, manager, { clientId: created.id })).toEqual(created);
+    expect(await listClients(deps, recruiter, {})).toEqual([created]);
+    expect(await getClient(deps, recruiter, { clientId: created.id })).toEqual(created);
+    expect(created.contactCount).toBe(1);
     const event = deps.auditLog.events().at(-1);
     expect(event).toMatchObject({ action: 'client.created', target: { type: 'client', id: created.id }, metadata: { contacts: 1 } });
     expect(JSON.stringify(event)).not.toContain('bruno');
@@ -82,6 +83,17 @@ describe('clients', () => {
     expect(await listClients(deps, stranger, {})).toEqual([]);
   });
 
+  it('shows contacts only to who manages clients or sends shortlists; everyone else gets the count', async () => {
+    const deps = await seedClientWorld();
+    const interviewer = userActor({ organizationId: ORG_A, id: 'int_1', role: 'interviewer' });
+    for (const actor of [interviewer, manager, apiKeyActor({ organizationId: ORG_A, role: 'owner' }), agentActor({ organizationId: ORG_A, role: 'owner' })]) {
+      const [listed] = await listClients(deps, actor, {});
+      expect(listed).toMatchObject({ contacts: [], contactCount: 1 });
+      expect(await getClient(deps, actor, { clientId: 'client_1' })).toMatchObject({ contacts: [], contactCount: 1 });
+    }
+    for (const actor of [recruiter, owner]) expect((await listClients(deps, actor, {}))[0]?.contacts).toEqual([{ id: 'contact_1', name: 'Carla Contact', email: 'carla@client.example' }]);
+  });
+
   it('lets keys and the assistant read clients', async () => {
     const deps = await seedClientWorld();
     expect(await listClients(deps, apiKeyActor({ organizationId: ORG_A, role: 'recruiter' }), {})).toHaveLength(1);
@@ -98,6 +110,14 @@ describe('the client of a job', () => {
     expect(deps.auditLog.events().at(-1)).toMatchObject({ action: 'job.client_updated', target: { type: 'job', id: 'job_1' }, metadata: { clientId: 'client_1', display: 'confidential' } });
     expect((await listClients(deps, recruiter, {}))[0]?.jobCount).toBe(1);
     expect(await setJobClient(deps, recruiter, { jobId: 'job_1', clientId: null })).toEqual({ jobId: 'job_1', client: null, display: 'named' });
+  });
+
+  it('is a person who manages clients: never a hiring manager, an API key or the assistant, who could reveal a confidential client', async () => {
+    const deps = await seedClientWorld();
+    const input = { jobId: 'job_1', clientId: 'client_1', display: 'named' };
+    await expect(setJobClient(deps, manager, input)).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(setJobClient(deps, apiKeyActor({ organizationId: ORG_A, role: 'owner' }), input)).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(setJobClient(deps, agentActor({ organizationId: ORG_A, role: 'owner' }), input)).rejects.toBeInstanceOf(ForbiddenError);
   });
 
   it('refuses unknown or archived clients, unknown jobs, other organizations and a switched-off setting', async () => {

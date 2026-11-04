@@ -38,13 +38,14 @@ export const getJobClient = defineClientUseCase({
 });
 
 /**
- * Links a job to a client, choosing how the ad shows it: by name, or as a confidential client of the agency. Editing the
- * ad is enough to do it (`job:update`). `clientId: null` takes the job away from its client.
+ * Links a job to a client, choosing how the ad shows it: by name, or as a confidential client of the agency.
+ * `clientId: null` takes the job away from its client. It needs `client:manage`, which no API key or assistant can hold:
+ * naming a confidential client on a public ad is a person's decision. The job must be reachable (per-job scope).
  */
 export const setJobClient = defineClientUseCase({
   name: 'setJobClient',
   input: jobClientInputSchema.extend({ jobId: z.string().min(1) }),
-  permission: 'job:update',
+  permission: 'client:manage',
   audit: {
     action: 'job.client_updated',
     target: (input) => ({ type: 'job', id: input.jobId }),

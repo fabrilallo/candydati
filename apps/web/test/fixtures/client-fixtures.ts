@@ -9,6 +9,7 @@ export const client = (overrides: Partial<ClientDto> = {}): ClientDto => ({
   website: 'https://acme.example',
   logoUrl: null,
   contacts: [{ id: 'k1', name: 'Rita Verdi', email: 'rita@acme.example' }],
+  contactCount: 1,
   archived: false,
   jobCount: 2,
   createdAt: AT,

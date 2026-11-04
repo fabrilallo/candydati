@@ -20,7 +20,9 @@ export const clientSchema = z.object({
   name: z.string(),
   website: z.string().nullable(),
   logoUrl: z.string().nullable(),
+  /** Empty unless the reader manages clients or sends shortlists; `contactCount` is always there. */
   contacts: z.array(clientContactSchema),
+  contactCount: z.number().int().nonnegative(),
   archived: z.boolean(),
   jobCount: z.number().int().nonnegative(),
   createdAt: isoDate,

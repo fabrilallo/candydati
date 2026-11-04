@@ -41,6 +41,6 @@ export const listClientsTool = {
       website: client.website,
       archived: client.archived,
       jobCount: client.jobCount,
-      contactCount: client.contacts.length,
+      contactCount: client.contactCount,
     })),
 } satisfies ToolDefinition<typeof clientsShape>;

@@ -52,8 +52,9 @@ export const STATEMENTS = {
    */
   restricted_stage: ['manage'],
   /**
-   * Clients of an agency (PRODUCT.md §3.5): `read` lists them and shows the client of a job, `manage` creates, edits and
-   * archives them and links jobs to them.
+   * Clients of an agency (PRODUCT.md §3.5): `read` lists them (contacts only with `manage` or `shortlist:send`) and shows
+   * the client of a job; `manage` creates, edits and archives them, links a job to its client and chooses whether the ad
+   * names it or keeps it confidential. Never grantable to a key or to the agent.
    */
   client: ['read', 'manage'],
   /**

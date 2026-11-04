@@ -1,6 +1,8 @@
 import { clientInputSchema, type Client, type ClientContact, type ClientContactInput } from '@candydati/domain';
 import { z } from 'zod';
 import type { ClientDeps } from '../../client-ports.js';
+import type { Actor } from '../../actor.js';
+import { can } from '../../authorization.js';
 import { NotFoundError } from '../../errors.js';
 import { defineClientUseCase, requireAgency } from './define.js';
 
@@ -10,19 +12,22 @@ export interface ClientView {
   readonly name: string;
   readonly website: string | null;
   readonly logoUrl: string | null;
+  /** Empty unless the actor manages clients or sends shortlists: who the client's people are is not for every reader. */
   readonly contacts: readonly ClientContact[];
+  readonly contactCount: number;
   readonly archived: boolean;
   readonly jobCount: number;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
 
-export const toClientView = (client: Client, jobCount: number): ClientView => ({
+export const toClientView = (client: Client, jobCount: number, withContacts = true): ClientView => ({
   id: client.id,
   name: client.name,
   website: client.website,
   logoUrl: client.logoUrl,
-  contacts: client.contacts,
+  contacts: withContacts ? client.contacts : [],
+  contactCount: client.contacts.length,
   archived: client.archivedAt !== null,
   jobCount,
   createdAt: client.createdAt,
@@ -35,8 +40,11 @@ export async function requireClient(deps: Pick<ClientDeps, 'clients'>, organizat
   return client;
 }
 
-const viewOf = async (deps: ClientDeps, client: Client): Promise<ClientView> =>
-  toClientView(client, (await deps.jobClients.countByClient(client.organizationId))[client.id] ?? 0);
+/** Names and emails of the client's people go only to who works with them: managing clients or sending shortlists. */
+export const seesContacts = (actor: Actor): boolean => can(actor, 'client:manage') || can(actor, 'shortlist:send');
+
+const viewOf = async (deps: ClientDeps, actor: Actor, client: Client): Promise<ClientView> =>
+  toClientView(client, (await deps.jobClients.countByClient(client.organizationId))[client.id] ?? 0, seesContacts(actor));
 
 /** Contact ids are the server's: a known id keeps its contact, anything else is a new contact with a fresh id. */
 const withIds = (deps: Pick<ClientDeps, 'newId'>, known: readonly ClientContact[], contacts: readonly ClientContactInput[]): readonly ClientContact[] =>
@@ -56,8 +64,9 @@ export const listClients = defineClientUseCase({
   permission: 'client:read',
   audit: { skip: 'read-only' },
   handler: async ({ deps, actor, input }): Promise<readonly ClientView[]> => {
-    const [clients, counts] = [await deps.clients.list(actor.organizationId, input), await deps.jobClients.countByClient(actor.organizationId)];
-    return clients.map((client) => toClientView(client, counts[client.id] ?? 0));
+    const clients = await deps.clients.list(actor.organizationId, input);
+    const counts = await deps.jobClients.countByClient(actor.organizationId);
+    return clients.map((client) => toClientView(client, counts[client.id] ?? 0, seesContacts(actor)));
   },
 });
 
@@ -66,7 +75,7 @@ export const getClient = defineClientUseCase({
   input: z.object({ clientId: z.string().min(1) }),
   permission: 'client:read',
   audit: { skip: 'read-only' },
-  handler: async ({ deps, actor, input }): Promise<ClientView> => viewOf(deps, await requireClient(deps, actor.organizationId, input.clientId)),
+  handler: async ({ deps, actor, input }): Promise<ClientView> => viewOf(deps, actor, await requireClient(deps, actor.organizationId, input.clientId)),
 });
 
 export const createClient = defineClientUseCase({
@@ -109,7 +118,7 @@ export const updateClient = defineClientUseCase({
       updatedAt: deps.now(),
     });
     if (!updated) throw new NotFoundError('Client not found.');
-    return viewOf(deps, updated);
+    return viewOf(deps, actor, updated);
   },
 });
 
@@ -124,6 +133,6 @@ export const archiveClient = defineClientUseCase({
     const now = deps.now();
     const updated = await deps.clients.setArchived(actor.organizationId, input.clientId, input.archived ? now : null, now);
     if (!updated) throw new NotFoundError('Client not found.');
-    return viewOf(deps, updated);
+    return viewOf(deps, actor, updated);
   },
 });

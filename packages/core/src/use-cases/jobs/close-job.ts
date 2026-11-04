@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
 import { recordEvent } from '../webhooks/record-event.js';
 import { defineJobUseCase } from './define.js';
+import { toAuditActor } from '../../actor.js';
+import { endJobShortlists } from '../clients/shortlist-lifecycle.js';
 
 /**
  * Only from `published`, and only when no application is still open (PRODUCT.md §2, principle 3): a person decides each one
@@ -24,6 +26,7 @@ export const closeJob = defineJobUseCase({
     const now = deps.now();
     const saved = await deps.jobs.transition(actor.organizationId, job.id, 'published', { status: 'closed', closedAt: now, updatedAt: now });
     await recordEvent(deps, saved.organizationId, 'job.closed', { jobId: saved.id });
+    await endJobShortlists(deps, saved.organizationId, saved.id, toAuditActor(actor), now);
     return saved;
   },
 });

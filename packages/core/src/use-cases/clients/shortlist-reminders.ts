@@ -2,11 +2,12 @@ import { DAY_MS, SHORTLIST_REMINDER_DAYS, type AuditActor, type ClientShortlist,
 import { z } from 'zod';
 import type { ShortlistDeps } from '../../client-ports.js';
 import { defineSystemJob } from '../../use-case.js';
+import { endShortlist, shortlistEndReason } from './shortlist-lifecycle.js';
 import { sendShortlistEmail } from './shortlist-mail.js';
 
 export const SHORTLIST_SCAN_ACTOR: AuditActor = { type: 'system', id: 'shortlist_scan', onBehalfOfUserId: null };
 
-export type ShortlistReminderDeps = Pick<ShortlistDeps, 'auditLog' | 'shortlists' | 'jobs' | 'organizations' | 'sender' | 'config' | 'newToken' | 'hash' | 'onError'>;
+export type ShortlistReminderDeps = Pick<ShortlistDeps, 'auditLog' | 'shortlists' | 'jobs' | 'clients' | 'organizations' | 'sender' | 'config' | 'newToken' | 'hash' | 'onError'>;
 
 export interface ShortlistReminderResult {
   readonly reminded: number;
@@ -55,6 +56,12 @@ export const scanShortlistReminders = defineSystemJob<ShortlistReminderDeps, z.Z
       try {
         const items = await deps.shortlists.listItems(shortlist.organizationId, [shortlist.id]);
         if (!shortlistReminderIsDue(shortlist, items, now)) continue;
+        // A closed job, an archived client or a removed contact ends the shortlist instead of sending a fresh link.
+        const ended = await shortlistEndReason(deps, shortlist);
+        if (ended !== null) {
+          await endShortlist(deps, shortlist, ended, SHORTLIST_SCAN_ACTOR, now);
+          continue;
+        }
         const outcome = await remind(deps, shortlist, items.length, now);
         if (outcome === null) continue;
         if (!outcome) {

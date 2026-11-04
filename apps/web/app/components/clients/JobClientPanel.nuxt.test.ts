@@ -66,6 +66,14 @@ describe('client of a job', () => {
     await vi.waitFor(() => expect(state.puts).toEqual([{ clientId: 'c1', display: 'confidential' }]))
   })
 
+  it('is read-only for who does not manage clients (a hiring manager can edit the ad, not reveal its client)', async () => {
+    useViewer().viewer.value = viewerWith('hiring_manager')
+    const wrapper = await mountPanel()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="job-client-select"]').exists()).toBe(true))
+    expect(wrapper.find('[data-testid="job-client-select"]').attributes('disabled')).toBeDefined()
+    expect(wrapper.find('[data-testid="job-client-save"]').exists()).toBe(false)
+  })
+
   it('keeps an archived current client visible, and is read-only when the ad cannot be edited', async () => {
     state.link = { jobId: 'j1', client: { id: 'c2', name: 'Beta', archived: true }, display: 'named' }
     const wrapper = await mountPanel(true)

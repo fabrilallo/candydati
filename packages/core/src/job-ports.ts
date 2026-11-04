@@ -1,4 +1,4 @@
-import type { ClientRepository, JobClientRepository, PublicJobClientDirectory } from './client-ports.js';
+import type { ClientRepository, JobClientRepository, PublicJobClientDirectory, ShortlistRepository } from './client-ports.js';
 import type { EmailReadiness } from './instance-email-ports.js';
 import type { AdQualityAnalyzer, Job, JobStatus, JobTemplate } from '@candydati/domain';
 import type { PrivacyNoticeRepository } from './candidate-ports.js';
@@ -140,6 +140,8 @@ export interface JobDeps extends CoreDeps {
   readonly clients?: ClientRepository | undefined;
   /** What the public pages say about the client of an agency's ad. Absent: ads show no client. */
   readonly publicClients?: PublicJobClientDirectory | undefined;
+  /** Closing a job ends its open client shortlists. */
+  readonly shortlists?: ShortlistRepository | undefined;
   readonly newId: () => string;
   readonly now: () => Date;
 }
