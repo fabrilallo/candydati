@@ -3,6 +3,7 @@ import { DownloadIcon } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
+import type { ClientDto } from '@candydati/domain'
 import type { ReportJobOption } from '@/lib/report-api'
 import { checkCustomPeriod, isoDay, PERIOD_PRESETS, presetPeriod, type Period, type PeriodPreset } from '@/lib/report-period'
 
@@ -10,9 +11,11 @@ import { checkCustomPeriod, isoDay, PERIOD_PRESETS, presetPeriod, type Period, t
  * Period (presets or a custom range, applied with a button) and job filter of the reports, plus the CSV export of
  * the same figures. State lives in the parent, not in the URL.
  */
-const props = defineProps<{ jobs: readonly ReportJobOption[]; csvUrl: string }>()
+const props = defineProps<{ jobs: readonly ReportJobOption[]; csvUrl: string; clients?: readonly ClientDto[] }>()
 const period = defineModel<Period>('period', { required: true })
 const jobId = defineModel<string | null>('jobId', { required: true })
+/** Only for an agency (the parent passes clients only when the setting is on). */
+const clientId = defineModel<string | null>('clientId', { default: null })
 const { t } = useI18n()
 
 const preset = ref<PeriodPreset>('last90')
@@ -66,6 +69,7 @@ const onJob = (value: string): void => {
           <option v-for="job in props.jobs" :key="job.id" :value="job.id">{{ job.title }}</option>
         </NativeSelect>
       </div>
+      <ClientFilterSelect v-if="props.clients && props.clients.length > 0" id="report-client" v-model="clientId" :clients="props.clients" :label="t('reports.client.label')" test-id="report-client" />
       <Button as-child variant="outline" class="w-full sm:ml-auto sm:w-auto">
         <a :href="props.csvUrl" download data-testid="report-export"><DownloadIcon aria-hidden="true" />{{ t('reports.export') }}</a>
       </Button>

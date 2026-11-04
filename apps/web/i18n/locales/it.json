@@ -53,7 +53,8 @@
     "jobRequests": "Richieste",
     "reports": "Report",
     "security": "Sicurezza",
-    "migrations": "Migrazione"
+    "migrations": "Migrazione",
+    "clients": "Clienti"
   },
   "jobRequests": {
     "title": "Richieste di assunzione",
@@ -476,7 +477,9 @@
       "privacy_notice": "Informativa privacy",
       "application": "Candidatura",
       "candidate": "Candidato",
-      "candidate_note": "Nota"
+      "candidate_note": "Nota",
+      "client": "Cliente",
+      "shortlist": "Shortlist"
     },
     "empty": "Ancora nessuna azione registrata.",
     "loadFailed": "Non siamo riusciti a caricare il registro.",
@@ -497,7 +500,8 @@
         "approval_setting_updated": "Ha cambiato l'obbligo di approvazione degli annunci",
         "security_setting_updated": "Ha cambiato l'obbligo di verifica in due passaggi",
         "access_setting_updated": "Ha cambiato chi vede quali annunci",
-        "logo_changed": "Ha cambiato il logo"
+        "logo_changed": "Ha cambiato il logo",
+        "agency_setting_updated": "Ha cambiato se l'organizzazione seleziona per conto di clienti"
       },
       "invitation": {
         "created": "Ha invitato una persona",
@@ -528,7 +532,8 @@
         "stage_restricted": "Ha reso riservata una fase di un annuncio",
         "stage_unrestricted": "Ha tolto la riserva da una fase di un annuncio",
         "scorecard_updated": "Ha aggiornato i criteri di valutazione di un annuncio",
-        "scorecard_suggested": "Ha preparato con l'assistente i criteri di valutazione a partire dall'annuncio"
+        "scorecard_suggested": "Ha preparato con l'assistente i criteri di valutazione a partire dall'annuncio",
+        "client_updated": "Ha cambiato il cliente di un annuncio"
       },
       "job_template": {
         "created": "Ha salvato un modello di annuncio",
@@ -625,6 +630,20 @@
       },
       "ai_settings": {
         "updated": "Impostazioni AI modificate"
+      },
+      "client": {
+        "created": "Ha aggiunto un cliente",
+        "updated": "Ha modificato un cliente",
+        "archived": "Ha archiviato un cliente",
+        "restored": "Ha ripristinato un cliente"
+      },
+      "shortlist": {
+        "sent": "Ha inviato una shortlist a un cliente",
+        "revoked": "Ha revocato il link di una shortlist",
+        "reminded": "Ha ricordato una shortlist a un cliente",
+        "opened": "Ha aperto una shortlist",
+        "cv_opened": "Ha aperto un CV da una shortlist",
+        "answered": "Ha risposto su un candidato di una shortlist"
       }
     }
   },
@@ -976,7 +995,10 @@
       "forbidden": "Non hai il permesso di vedere gli annunci.",
       "pagination": {
         "status": "Pagina {page} di {pages} · {total} annunci"
-      }
+      },
+      "clientFilter": "Cliente",
+      "forClient": "Per {client}",
+      "forClientConfidential": "Per {client}, riservato"
     },
     "editor": {
       "newTitle": "Nuovo annuncio",
@@ -1468,6 +1490,14 @@
     },
     "job": {
       "stages": "1 fase | {count} fasi"
+    },
+    "client": {
+      "for": "per {client}",
+      "confidential": "Cliente riservato",
+      "website": "Sito web",
+      "publishedBy": "Pubblicato da {agency}, agenzia di selezione",
+      "confidentialBy": "Cliente riservato - selezione curata da {agency}",
+      "authorization": "Autorizzazione: {reference}"
     }
   },
   "promise": {
@@ -1504,7 +1534,8 @@
       "ad": "Annuncio",
       "automations": "Automazioni",
       "distribution": "Distribuzione",
-      "team": "Team"
+      "team": "Team",
+      "shortlists": "Shortlist"
     },
     "received": "Ricevute",
     "receivedHint": "Nuove candidature, ancora da guardare",
@@ -2477,7 +2508,8 @@
       "work": "Attività e automazioni",
       "reports": "Report",
       "organization": "Organizzazione",
-      "other": "Altro"
+      "other": "Altro",
+      "clients": "Clienti e shortlist"
     },
     "scope": {
       "organization": {
@@ -2571,6 +2603,14 @@
       },
       "migration": {
         "manage": "Migrare da un altro ATS"
+      },
+      "client": {
+        "read": "Leggere i clienti",
+        "manage": "Gestire i clienti"
+      },
+      "shortlist": {
+        "read": "Leggere le shortlist inviate ai clienti",
+        "send": "Inviare shortlist ai clienti"
       }
     },
     "withheld": "Alcune cose una chiave non le può fare mai: decisioni sui candidati, messaggi ai candidati e amministrazione restano a una persona.",
@@ -2647,7 +2687,8 @@
       "get_job_stats": "Numeri degli annunci per la panoramica.",
       "get_evaluation_criteria": "Cosa cercano gli intervistatori in un annuncio, per fase, e quali criteri un feedback ha già usato. Nessun peso, nessun punteggio.",
       "set_evaluation_criteria": "Sostituisce i criteri di valutazione di un annuncio dopo il tuo assenso. I criteri già usati restano con le loro parole; niente punteggi né classifiche.",
-      "get_reports": "Numeri aggregati del periodo: tempi, passaggi tra le fasi, provenienza e risposte, senza dati personali."
+      "get_reports": "Numeri aggregati del periodo: tempi, passaggi tra le fasi, provenienza e risposte, senza dati personali.",
+      "list_clients": "Per un'agenzia: i clienti con il numero di posizioni, senza i referenti."
     }
   },
   "apiReference": {
@@ -3746,6 +3787,9 @@
       "scaleMax": "Scala da 0 a {days} giorni",
       "emptyTitle": "Nessuna assunzione nel periodo",
       "emptyBody": "Quando una candidatura si chiude con un'assunzione, qui compaiono i giorni che ci sono voluti."
+    },
+    "client": {
+      "label": "Cliente"
     }
   },
   "security": {
@@ -4368,7 +4412,12 @@
       },
       "feedback": "Feedback del colloquio inviato ({stage})",
       "reconfirmationSent": "Riconferma richiesta",
-      "reconfirmationAnswered": "Riconferma data"
+      "reconfirmationAnswered": "Riconferma data",
+      "shortlistShared": "Profilo presentato a {client}",
+      "clientAnswered": {
+        "meet": "{client}: incontriamolo",
+        "not_for_us": "{client}: non fa per noi"
+      }
     }
   },
   "instanceEmail": {
@@ -4540,5 +4589,223 @@
   },
   "origin": {
     "withCampaign": "{source}, campagna {campaign}"
+  },
+  "clients": {
+    "pageTitle": "Clienti",
+    "pageDescription": "Per agenzie e head hunter: le aziende per cui selezionate, i loro referenti e come i loro annunci le presentano.",
+    "filter": {
+      "all": "Tutti i clienti"
+    },
+    "setting": {
+      "title": "Selezioniamo per conto di clienti",
+      "label": "Selezioniamo per conto di clienti",
+      "explain": "Gli annunci per un cliente mostrano la vostra organizzazione come agenzia e il nome del cliente oppure \"cliente riservato\", mai un altro nome.",
+      "off": "Disattivato: nell'app non compare nulla sui clienti.",
+      "authorization": "Estremi dell'autorizzazione",
+      "authorizationHint": "L'autorizzazione ministeriale dell'agenzia (D.Lgs. 276/2003, art. 9), riportata in piccolo sugli annunci per i clienti.",
+      "authorizationMissing": "Aggiungi gli estremi dell'autorizzazione: gli annunci per i clienti dovrebbero riportarli.",
+      "save": "Salva",
+      "saved": "Impostazione salvata",
+      "readOnly": "Solo proprietari e amministratori cambiano questa impostazione.",
+      "loadFailed": "Impossibile leggere l'impostazione."
+    },
+    "list": {
+      "title": "Clienti",
+      "add": "Nuovo cliente",
+      "empty": "Ancora nessun cliente. Aggiungi il primo per collegarlo ai suoi annunci.",
+      "jobs": "Nessun annuncio | 1 annuncio | {count} annunci",
+      "contacts": "Nessun referente | 1 referente | {count} referenti",
+      "archived": "Archiviato",
+      "showArchived": "Mostra archiviati ({count})",
+      "edit": "Modifica",
+      "archive": "Archivia",
+      "restore": "Ripristina",
+      "archivedToast": "Cliente archiviato",
+      "restoredToast": "Cliente ripristinato",
+      "loadFailed": "Impossibile caricare i clienti."
+    },
+    "form": {
+      "createTitle": "Nuovo cliente",
+      "editTitle": "Modifica cliente",
+      "description": "I referenti ricevono le shortlist che invii. I clienti archiviati mantengono annunci e storico.",
+      "name": "Nome",
+      "website": "Sito web",
+      "logoUrl": "Indirizzo del logo (https)",
+      "logoHint": "Compare sugli annunci che riportano il nome del cliente. Lascia vuoto se non serve.",
+      "contacts": "Referenti",
+      "contactsHint": "Le persone che ricevono le shortlist, fino a {max}.",
+      "contactName": "Nome del referente",
+      "contactEmail": "Email",
+      "contactFallback": "referente {n}",
+      "addContact": "Aggiungi referente",
+      "removeContact": "Rimuovi {name}",
+      "save": "Salva cliente",
+      "cancel": "Annulla",
+      "saved": "Cliente salvato",
+      "errors": {
+        "name": "Scrivi il nome del cliente (fino a 120 caratteri).",
+        "website": "Scrivi un indirizzo completo, che inizi con https://",
+        "logoUrl": "Il logo deve essere un indirizzo https.",
+        "contactName": "Scrivi il nome del referente.",
+        "contactEmail": "Scrivi un indirizzo email valido.",
+        "duplicateContact": "La stessa email compare due volte."
+      }
+    },
+    "errors": {
+      "off": "Attiva prima \"Selezioniamo per conto di clienti\".",
+      "duplicate": "Esiste già un cliente con questo nome."
+    }
+  },
+  "jobClient": {
+    "title": "Cliente",
+    "label": "Cliente di questo annuncio",
+    "none": "Nessun cliente (posizione nostra)",
+    "archivedSuffix": "{name} (archiviato)",
+    "display": {
+      "label": "Sull'annuncio",
+      "named": "Mostra il nome del cliente",
+      "confidential": "Cliente riservato"
+    },
+    "explain": {
+      "named": "I candidati leggono \"per {client}\" accanto alla vostra organizzazione, l'agenzia che seleziona.",
+      "confidential": "I candidati leggono \"cliente riservato\": il nome non compare e non viene mai sostituito da un altro.",
+      "none": "L'annuncio presenta solo la vostra organizzazione."
+    },
+    "save": "Salva cliente",
+    "saved": "Cliente salvato",
+    "noClients": "Ancora nessun cliente.",
+    "manage": "Gestisci i clienti",
+    "loadFailed": "Impossibile leggere il cliente di questo annuncio."
+  },
+  "shortlists": {
+    "title": "Shortlist",
+    "intro": "Presenta candidati a {client} con un link personale che scade in {days} giorni. Il cliente risponde per ogni persona; cosa succede dopo lo decidi tu.",
+    "noClient": "Questo annuncio non ha un cliente. Sceglilo nella scheda Annuncio per inviare shortlist.",
+    "parts": {
+      "name": "nome",
+      "cv": "CV",
+      "notes": "nessuna nota | 1 nota | {count} note"
+    },
+    "status": {
+      "open": "Aperta",
+      "answered": "Con risposta",
+      "expired": "Scaduta",
+      "revoked": "Revocata"
+    },
+    "answer": {
+      "meet": "Incontriamolo al colloquio",
+      "not_for_us": "Non fa per noi"
+    },
+    "item": {
+      "waiting": "In attesa di risposta",
+      "notNotified": "Non è stato possibile avvisare il candidato"
+    },
+    "list": {
+      "title": "Inviate",
+      "empty": "Nessuna shortlist inviata finora.",
+      "to": "A {name} ({email})",
+      "sentOn": "Inviata il {date}",
+      "expiresOn": "Scade il {date}",
+      "opened": "Aperta il {date}",
+      "notOpened": "Non ancora aperta",
+      "revoke": "Revoca il link",
+      "revokeTitle": "Revocare questo link?",
+      "revokeBody": "Il link smette subito di funzionare. Le risposte già date restano.",
+      "revoked": "Link revocato",
+      "loadFailed": "Impossibile caricare le shortlist."
+    },
+    "compose": {
+      "open": "Nuova shortlist",
+      "title": "Nuova shortlist per {client}",
+      "contact": "Invia a",
+      "contactPlaceholder": "Scegli un referente",
+      "noContacts": "{client} non ha ancora referenti.",
+      "candidates": "Candidati",
+      "candidatesHint": "Candidature aperte con consenso dato, fino a {max}.",
+      "notesInternal": "Le note sono interne: al cliente vanno solo quelle che spunti.",
+      "noCandidates": "Nessun candidato può essere presentato: serve una candidatura aperta, con consenso dato.",
+      "shareCv": "Condividi il CV",
+      "noCv": "Nessun CV da condividere",
+      "notes": "Note da condividere (fino a {max})",
+      "noNotes": "Nessuna nota su questa candidatura.",
+      "notesLoading": "Caricamento delle note…",
+      "notesFailed": "Impossibile caricare le note.",
+      "message": "Messaggio al cliente (facoltativo)",
+      "review": "Controlla e invia",
+      "cancel": "Annulla",
+      "errors": {
+        "contact": "Scegli chi riceve la shortlist.",
+        "candidates": "Scegli almeno un candidato.",
+        "message": "Il messaggio è troppo lungo (fino a {max} caratteri)."
+      },
+      "issues": {
+        "not_presentable": "{name}: la candidatura è chiusa o senza consenso.",
+        "no_cv": "{name}: non c'è un CV da condividere.",
+        "unknown_note": "{name}: una delle note scelte non si può condividere.",
+        "unknown_contact": "Il referente non è più tra quelli del cliente.",
+        "other": "Qualcosa nella shortlist è stato rifiutato. Controlla e riprova."
+      }
+    },
+    "confirm": {
+      "title": "Inviare la shortlist?",
+      "to": "{name} di {client} riceve via email ({email}) un link personale, valido {days} giorni.",
+      "whatGoes": "Cosa vede il cliente",
+      "noContact": "Email, telefono e indirizzo dei candidati non vengono condivisi.",
+      "notice": {
+        "named": "Ogni candidato riceve un'email che dice che il suo profilo è stato presentato a {client}. La trovi nei suoi messaggi.",
+        "confidential": "Ogni candidato riceve un'email che dice che il suo profilo è stato presentato a un cliente dell'agenzia che ha chiesto riservatezza, e che può rispondere per sapere quale."
+      },
+      "decides": "Le risposte del cliente sono pareri per te: non spostano né scartano nessuno.",
+      "back": "Indietro",
+      "send": "Invia la shortlist",
+      "sending": "Invio in corso…",
+      "sent": "Shortlist inviata a {name}"
+    },
+    "errors": {
+      "job_without_client": "Questo annuncio non ha più un cliente.",
+      "client_archived": "Il cliente è archiviato: ripristinalo per inviare shortlist.",
+      "job_closed": "L'annuncio è chiuso: non si possono più inviare shortlist.",
+      "clients_off": "Attiva prima \"Selezioniamo per conto di clienti\".",
+      "invalid": "La shortlist è stata rifiutata. Controlla i dati e riprova."
+    }
+  },
+  "shortlist": {
+    "public": {
+      "metaTitle": "Shortlist: {job}",
+      "title": "Candidati per {job}",
+      "hello": "Gentile {name},",
+      "intro": "{agency} ti presenta questi candidati per {job}. Per ognuno, di' all'agenzia se vorresti incontrarlo, con un breve motivo.",
+      "decides": "La tua risposta va a {agency}: una persona la legge e concorda con te il passo successivo. Nulla viene deciso in automatico.",
+      "message": "Messaggio di {agency}",
+      "expires": "Il link funziona fino al {date}.",
+      "progress": "{answered} su {total} con risposta",
+      "notes": "Note dell'agenzia",
+      "openCv": "Apri il CV",
+      "noCv": "CV non condiviso",
+      "question": "Vorresti incontrare {name}?",
+      "answer": {
+        "meet": "Incontriamolo al colloquio",
+        "not_for_us": "Non fa per noi"
+      },
+      "reason": "Perché? Un breve motivo",
+      "reasonHint": "Tra {min} e {max} caratteri.",
+      "submit": "Invia la risposta",
+      "sending": "Invio in corso…",
+      "answeredOn": "Inviata il {date}",
+      "errors": {
+        "choice": "Scegli una delle due risposte.",
+        "reason": "Scrivi un motivo tra {min} e {max} caratteri.",
+        "alreadyAnswered": "Per questo candidato una risposta è già stata inviata.",
+        "unavailable": "Impossibile inviare la risposta. Riprova tra poco."
+      },
+      "invalid": {
+        "title": "Questo link non è valido o è scaduto",
+        "body": "Chiedi un nuovo link all'agenzia che te l'ha inviato."
+      },
+      "unavailable": {
+        "title": "La pagina non è disponibile al momento",
+        "body": "Riprova tra qualche minuto."
+      }
+    }
   }
 }

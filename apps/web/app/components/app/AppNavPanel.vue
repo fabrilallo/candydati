@@ -16,8 +16,11 @@ const route = useRoute()
 const { viewer } = useViewer()
 const role = computed(() => viewer.value?.role ?? null)
 const roleLabel = computed(() => (role.value ? t(`roles.${role.value}`) : ''))
-const sections = computed(() => navSections(role.value))
-const active = computed(() => activeNavId(route.path, visibleNav(role.value)))
+// The clients page shows only when the organization recruits for clients (owners and admins always find it, to turn it on).
+const { recruitsForClients } = role.value ? useAgencySetting() : { recruitsForClients: computed(() => false) }
+const navOptions = computed(() => ({ recruitsForClients: recruitsForClients.value }))
+const sections = computed(() => navSections(role.value, navOptions.value))
+const active = computed(() => activeNavId(route.path, visibleNav(role.value, navOptions.value)))
 const canReadJobs = computed(() => can(role.value, 'job:read'))
 const { stats } = canReadJobs.value ? useJobStats() : { stats: computed(() => null) }
 const canReadCandidates = computed(() => can(role.value, 'candidate:read'))

@@ -7,6 +7,7 @@ describe('robots header middleware', () => {
     expect(wantsRobotsHeader('/')).toBe(true)
     expect(wantsRobotsHeader('/dashboard/career-map')).toBe(true)
     expect(wantsRobotsHeader('/robots.txt')).toBe(true)
+    expect(wantsRobotsHeader('/shortlist/abc')).toBe(true)
   })
 
   it('lets the public careers pages be indexed', () => {

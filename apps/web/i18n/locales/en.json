@@ -53,7 +53,8 @@
     "jobRequests": "Requests",
     "reports": "Reports",
     "security": "Security",
-    "migrations": "Migration"
+    "migrations": "Migration",
+    "clients": "Clients"
   },
   "jobRequests": {
     "title": "Hiring requests",
@@ -476,7 +477,9 @@
       "privacy_notice": "Privacy notice",
       "application": "Application",
       "candidate": "Candidate",
-      "candidate_note": "Note"
+      "candidate_note": "Note",
+      "client": "Client",
+      "shortlist": "Shortlist"
     },
     "empty": "No actions recorded yet.",
     "loadFailed": "We could not load the audit log.",
@@ -497,7 +500,8 @@
         "approval_setting_updated": "Changed whether ads need approval",
         "security_setting_updated": "Changed the two-factor authentication requirement",
         "access_setting_updated": "Changed who sees which ads",
-        "logo_changed": "Changed the logo"
+        "logo_changed": "Changed the logo",
+        "agency_setting_updated": "Changed whether the organization recruits for clients"
       },
       "invitation": {
         "created": "Invited a person",
@@ -528,7 +532,8 @@
         "stage_restricted": "Marked a stage of an ad as restricted",
         "stage_unrestricted": "Removed the restriction from a stage of an ad",
         "scorecard_updated": "Updated the evaluation criteria of an ad",
-        "scorecard_suggested": "Drafted evaluation criteria from the ad with the assistant"
+        "scorecard_suggested": "Drafted evaluation criteria from the ad with the assistant",
+        "client_updated": "Changed the client of a job ad"
       },
       "job_template": {
         "created": "Saved a job ad template",
@@ -625,6 +630,20 @@
       },
       "ai_settings": {
         "updated": "AI settings changed"
+      },
+      "client": {
+        "created": "Added a client",
+        "updated": "Edited a client",
+        "archived": "Archived a client",
+        "restored": "Restored a client"
+      },
+      "shortlist": {
+        "sent": "Sent a shortlist to a client",
+        "revoked": "Revoked the link of a shortlist",
+        "reminded": "Reminded a client about a shortlist",
+        "opened": "Opened a shortlist",
+        "cv_opened": "Opened a CV from a shortlist",
+        "answered": "Answered on a candidate of a shortlist"
       }
     }
   },
@@ -976,7 +995,10 @@
       "forbidden": "You do not have permission to see job ads.",
       "pagination": {
         "status": "Page {page} of {pages} · {total} job ads"
-      }
+      },
+      "clientFilter": "Client",
+      "forClient": "For {client}",
+      "forClientConfidential": "For {client}, confidential"
     },
     "editor": {
       "newTitle": "New job ad",
@@ -1468,6 +1490,14 @@
     },
     "job": {
       "stages": "1 stage | {count} stages"
+    },
+    "client": {
+      "for": "for {client}",
+      "confidential": "Confidential client",
+      "website": "Website",
+      "publishedBy": "Published by {agency}, recruiting agency",
+      "confidentialBy": "Confidential client - selection run by {agency}",
+      "authorization": "Authorization: {reference}"
     }
   },
   "promise": {
@@ -1504,7 +1534,8 @@
       "ad": "Job ad",
       "automations": "Automations",
       "distribution": "Distribution",
-      "team": "Team"
+      "team": "Team",
+      "shortlists": "Shortlists"
     },
     "received": "Received",
     "receivedHint": "New applications, not looked at yet",
@@ -2477,7 +2508,8 @@
       "work": "Tasks and automations",
       "reports": "Reports",
       "organization": "Organization",
-      "other": "Other"
+      "other": "Other",
+      "clients": "Clients and shortlists"
     },
     "scope": {
       "organization": {
@@ -2571,6 +2603,14 @@
       },
       "migration": {
         "manage": "Migrate from another ATS"
+      },
+      "client": {
+        "read": "Read clients",
+        "manage": "Manage clients"
+      },
+      "shortlist": {
+        "read": "Read the shortlists sent to clients",
+        "send": "Send shortlists to clients"
       }
     },
     "withheld": "Some things a key can never do: decisions about candidates, messages to candidates and administration stay with a person.",
@@ -2647,7 +2687,8 @@
       "get_job_stats": "Job ad figures for the overview.",
       "get_evaluation_criteria": "What interviewers look for in a job, per stage, and which criteria a feedback already used. No weights, no scores.",
       "set_evaluation_criteria": "Replaces the evaluation criteria of a job after you agree. Used criteria keep their words; nothing scores or orders candidates.",
-      "get_reports": "Aggregated figures of a period: timing, stage moves, sources and responses, with no personal data."
+      "get_reports": "Aggregated figures of a period: timing, stage moves, sources and responses, with no personal data.",
+      "list_clients": "For an agency: the clients with their number of jobs, without contacts."
     }
   },
   "apiReference": {
@@ -3746,6 +3787,9 @@
       "scaleMax": "Scale from 0 to {days} days",
       "emptyTitle": "No hires in this period",
       "emptyBody": "When an application ends with a hire, the days it took show up here."
+    },
+    "client": {
+      "label": "Client"
     }
   },
   "security": {
@@ -4368,7 +4412,12 @@
       },
       "feedback": "Interview feedback submitted ({stage})",
       "reconfirmationSent": "Reconfirmation requested",
-      "reconfirmationAnswered": "Reconfirmation given"
+      "reconfirmationAnswered": "Reconfirmation given",
+      "shortlistShared": "Presented to {client}",
+      "clientAnswered": {
+        "meet": "{client}: let's meet",
+        "not_for_us": "{client}: not for us"
+      }
     }
   },
   "instanceEmail": {
@@ -4540,5 +4589,223 @@
   },
   "origin": {
     "withCampaign": "{source}, campaign {campaign}"
+  },
+  "clients": {
+    "pageTitle": "Clients",
+    "pageDescription": "For agencies and headhunters: the companies you recruit for, their contacts and how their ads present them.",
+    "filter": {
+      "all": "All clients"
+    },
+    "setting": {
+      "title": "We recruit for clients",
+      "label": "We recruit for clients",
+      "explain": "Ads of a client job show your organization as the agency and either the client's name or \"confidential client\", never another name.",
+      "off": "Off: nothing about clients appears in the app.",
+      "authorization": "Authorization reference",
+      "authorizationHint": "The agency's ministerial authorization (D.Lgs. 276/2003, art. 9), shown in small print on client ads.",
+      "authorizationMissing": "Add the authorization reference: client ads should show it.",
+      "save": "Save",
+      "saved": "Setting saved",
+      "readOnly": "Only owners and admins change this setting.",
+      "loadFailed": "Could not read the setting."
+    },
+    "list": {
+      "title": "Clients",
+      "add": "New client",
+      "empty": "No clients yet. Add the first one to link it to its job ads.",
+      "jobs": "No job ads | 1 job ad | {count} job ads",
+      "contacts": "No contacts | 1 contact | {count} contacts",
+      "archived": "Archived",
+      "showArchived": "Show archived ({count})",
+      "edit": "Edit",
+      "archive": "Archive",
+      "restore": "Restore",
+      "archivedToast": "Client archived",
+      "restoredToast": "Client restored",
+      "loadFailed": "Could not load the clients."
+    },
+    "form": {
+      "createTitle": "New client",
+      "editTitle": "Edit client",
+      "description": "Contacts receive the shortlists you send. Archived clients keep their job ads and history.",
+      "name": "Name",
+      "website": "Website",
+      "logoUrl": "Logo address (https)",
+      "logoHint": "Shown on ads that name the client. Leave it empty if you do not need it.",
+      "contacts": "Contacts",
+      "contactsHint": "The people who receive shortlists, up to {max}.",
+      "contactName": "Contact name",
+      "contactEmail": "Email",
+      "contactFallback": "contact {n}",
+      "addContact": "Add contact",
+      "removeContact": "Remove {name}",
+      "save": "Save client",
+      "cancel": "Cancel",
+      "saved": "Client saved",
+      "errors": {
+        "name": "Write the client's name (up to 120 characters).",
+        "website": "Write a full address, starting with https://",
+        "logoUrl": "The logo must be an https address.",
+        "contactName": "Write the contact's name.",
+        "contactEmail": "Write a valid email address.",
+        "duplicateContact": "The same email appears twice."
+      }
+    },
+    "errors": {
+      "off": "Turn on \"We recruit for clients\" first.",
+      "duplicate": "A client with this name already exists."
+    }
+  },
+  "jobClient": {
+    "title": "Client",
+    "label": "Client of this ad",
+    "none": "No client (our own position)",
+    "archivedSuffix": "{name} (archived)",
+    "display": {
+      "label": "On the ad",
+      "named": "Show the client's name",
+      "confidential": "Confidential client"
+    },
+    "explain": {
+      "named": "Candidates read \"for {client}\" next to your organization, the recruiting agency.",
+      "confidential": "Candidates read \"confidential client\": the name is not shown, and never replaced by another.",
+      "none": "The ad presents only your organization."
+    },
+    "save": "Save client",
+    "saved": "Client saved",
+    "noClients": "No clients yet.",
+    "manage": "Manage clients",
+    "loadFailed": "Could not read the client of this ad."
+  },
+  "shortlists": {
+    "title": "Shortlists",
+    "intro": "Present candidates to {client} with a personal link that expires in {days} days. The client answers for each person; you decide what happens next.",
+    "noClient": "This ad has no client. Choose one in the Job ad tab to send shortlists.",
+    "parts": {
+      "name": "name",
+      "cv": "CV",
+      "notes": "no notes | 1 note | {count} notes"
+    },
+    "status": {
+      "open": "Open",
+      "answered": "Answered",
+      "expired": "Expired",
+      "revoked": "Revoked"
+    },
+    "answer": {
+      "meet": "Let's meet at interview",
+      "not_for_us": "Not for us"
+    },
+    "item": {
+      "waiting": "Waiting for an answer",
+      "notNotified": "The notice to the candidate could not be sent"
+    },
+    "list": {
+      "title": "Sent",
+      "empty": "No shortlist sent yet.",
+      "to": "To {name} ({email})",
+      "sentOn": "Sent on {date}",
+      "expiresOn": "Expires on {date}",
+      "opened": "Opened on {date}",
+      "notOpened": "Not opened yet",
+      "revoke": "Revoke link",
+      "revokeTitle": "Revoke this link?",
+      "revokeBody": "The link stops working at once. Answers already given stay.",
+      "revoked": "Link revoked",
+      "loadFailed": "Could not load the shortlists."
+    },
+    "compose": {
+      "open": "New shortlist",
+      "title": "New shortlist for {client}",
+      "contact": "Send to",
+      "contactPlaceholder": "Choose a contact",
+      "noContacts": "{client} has no contacts yet.",
+      "candidates": "Candidates",
+      "candidatesHint": "Open applications with consent given, up to {max}.",
+      "notesInternal": "Notes are internal: only the ones you tick go to the client.",
+      "noCandidates": "No candidate can be presented: an application must be open, with consent given.",
+      "shareCv": "Share the CV",
+      "noCv": "No CV to share",
+      "notes": "Notes to share (up to {max})",
+      "noNotes": "No notes about this application.",
+      "notesLoading": "Loading notes…",
+      "notesFailed": "Could not load the notes.",
+      "message": "Message to the client (optional)",
+      "review": "Review and send",
+      "cancel": "Cancel",
+      "errors": {
+        "contact": "Choose who receives the shortlist.",
+        "candidates": "Choose at least one candidate.",
+        "message": "The message is too long (up to {max} characters)."
+      },
+      "issues": {
+        "not_presentable": "{name}: the application is closed or has no consent.",
+        "no_cv": "{name}: there is no CV to share.",
+        "unknown_note": "{name}: one of the chosen notes cannot be shared.",
+        "unknown_contact": "The contact is no longer among the client's contacts.",
+        "other": "Something in the shortlist was refused. Check it and try again."
+      }
+    },
+    "confirm": {
+      "title": "Send the shortlist?",
+      "to": "{name} at {client} receives a personal link by email ({email}), valid for {days} days.",
+      "whatGoes": "What the client sees",
+      "noContact": "No email, phone or address of the candidates is shared.",
+      "notice": {
+        "named": "Each candidate gets an email saying their profile was presented to {client}. You find it in their messages.",
+        "confidential": "Each candidate gets an email saying their profile was presented to a client of the agency who asked to stay confidential, and that they can reply to know which one."
+      },
+      "decides": "The client's answers are opinions for you: they never move or reject anyone.",
+      "back": "Back",
+      "send": "Send shortlist",
+      "sending": "Sending…",
+      "sent": "Shortlist sent to {name}"
+    },
+    "errors": {
+      "job_without_client": "This ad has no client anymore.",
+      "client_archived": "The client is archived: restore it to send shortlists.",
+      "job_closed": "The ad is closed: shortlists can no longer be sent.",
+      "clients_off": "Turn on \"We recruit for clients\" first.",
+      "invalid": "The shortlist was refused. Check the details and try again."
+    }
+  },
+  "shortlist": {
+    "public": {
+      "metaTitle": "Shortlist: {job}",
+      "title": "Candidates for {job}",
+      "hello": "Hello {name},",
+      "intro": "{agency} presents these candidates for {job}. For each one, tell the agency whether you would like to meet them, with a short reason.",
+      "decides": "Your answer goes to {agency}: a person there reads it and agrees the next step with you. Nothing is decided automatically.",
+      "message": "Message from {agency}",
+      "expires": "The link works until {date}.",
+      "progress": "{answered} of {total} answered",
+      "notes": "Notes from the agency",
+      "openCv": "Open the CV",
+      "noCv": "CV not shared",
+      "question": "Would you like to meet {name}?",
+      "answer": {
+        "meet": "Let's meet at interview",
+        "not_for_us": "Not for us"
+      },
+      "reason": "Why? A short reason",
+      "reasonHint": "Between {min} and {max} characters.",
+      "submit": "Send answer",
+      "sending": "Sending…",
+      "answeredOn": "Sent on {date}",
+      "errors": {
+        "choice": "Choose one of the two answers.",
+        "reason": "Write a reason of {min} to {max} characters.",
+        "alreadyAnswered": "An answer for this candidate was already sent.",
+        "unavailable": "The answer could not be sent. Try again in a moment."
+      },
+      "invalid": {
+        "title": "This link is not valid or has expired",
+        "body": "Ask the agency that sent it for a new one."
+      },
+      "unavailable": {
+        "title": "The page is not available right now",
+        "body": "Try again in a few minutes."
+      }
+    }
   }
 }

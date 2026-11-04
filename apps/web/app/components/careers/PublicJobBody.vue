@@ -28,6 +28,7 @@ useJobViewBeacon({ org: props.page.organization.slug, job: props.page.job.slug }
       <ArrowLeftIcon class="size-4" aria-hidden="true" />
       {{ x('public.backToJobs') }}
     </NuxtLink>
+    <PublicJobClient v-if="page.job.client" :client="page.job.client" :agency="page.organization.name" :x="x" />
     <JobAdView :content="page.job.content" :organization="page.organization" mode="public" :published-at="page.job.publishedAt">
       <template #cta>
         <div v-if="page.privacyNotice" class="flex flex-wrap items-center gap-x-4 gap-y-2">

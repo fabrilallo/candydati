@@ -171,6 +171,7 @@ const saveTemplate = async (name: string): Promise<void> => {
           <PublishedPanel :path="publicPath" :url="publicUrl" />
           <p class="text-sm text-muted-foreground">{{ t('job.editor.publishedNote') }}</p>
         </template>
+        <JobClientPanel v-if="ed.job.value" :job-id="ed.job.value.id" :read-only="ed.readOnly.value" />
         <form id="job-form" class="@container grid" novalidate @submit.prevent="ed.save()" @focusout="onLeave">
           <fieldset :disabled="ed.readOnly.value" class="contents">
             <JobBasicsSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />

@@ -29,6 +29,10 @@ export const timelineLabel = (item: TimelineItemDto, stages: readonly StageRef[]
       return t('timeline.item.reconfirmationSent')
     case 'reconfirmation_answered':
       return t('timeline.item.reconfirmationAnswered')
+    case 'shortlist_shared':
+      return t('timeline.item.shortlistShared', { client: item.clientName })
+    case 'client_answered':
+      return t(`timeline.item.clientAnswered.${item.answer}`, { client: item.clientName })
   }
 }
 
@@ -44,6 +48,8 @@ export const timelineDetail = (item: TimelineItemDto, stages: readonly StageRef[
       return item.fromStageId ? t('timeline.from', { stage: timelineStageName(item.fromStageId, stages, t) }) : null
     case 'note':
       return item.excerpt
+    case 'client_answered':
+      return item.reason
     case 'message':
       return item.status === 'failed' ? `${item.subject} · ${t('timeline.messageFailed')}` : item.subject
     default:

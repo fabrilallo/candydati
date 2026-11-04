@@ -27,6 +27,14 @@ const page = (overrides: Partial<PublishedJobContent> = {}, logo: string | null 
 })
 
 describe('buildJobSeo', () => {
+  it('passes the client of an agency ad to the JSON-LD: named, it is the hiring organization; confidential, the agency stays', () => {
+    const base = page()
+    const named = build({ ...base, job: { ...base.job, client: { display: 'named', name: 'Beta Spa', website: 'https://beta.example', logo: null, agencyAuthorization: null } } }, 'https://jobs.example')
+    expect(JSON.parse(named.jsonLd).hiringOrganization).toMatchObject({ name: 'Beta Spa', sameAs: 'https://beta.example' })
+    const confidential = build({ ...base, job: { ...base.job, client: { display: 'confidential', name: null, website: null, logo: null, agencyAuthorization: null } } }, 'https://jobs.example')
+    expect(JSON.parse(confidential.jsonLd).hiringOrganization.name).toBe('Acme')
+  })
+
   it('builds canonical, title and a description from the summary', () => {
     const seo = build(page({ summary: 'We build   the\nplatform.' }), 'https://jobs.example.com/')
     expect(seo.canonical).toBe('https://jobs.example.com/careers/acme/backend-1')

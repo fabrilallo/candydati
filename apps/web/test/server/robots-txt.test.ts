@@ -11,6 +11,10 @@ describe('robots.txt', () => {
     expect(rules).toContain('Disallow: /*?')
   })
 
+  it('keeps the pages behind a personal link out', () => {
+    expect(rules).toEqual(expect.arrayContaining(['Disallow: /consent/', 'Disallow: /shortlist/']))
+  })
+
   it('keeps the app and the api out', () => {
     expect(rules).toEqual(expect.arrayContaining(['Disallow: /app/', 'Disallow: /api/', 'Disallow: /__nuxt_island/']))
   })

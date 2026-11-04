@@ -14,13 +14,14 @@ describe('scopeGroups', () => {
     expect(offered).toContain('candidate:read')
     expect(offered).not.toContain('message:send')
     expect(offered).not.toContain('candidate:decide')
-    expect(groups.map((group) => group.area)).toEqual(['jobs', 'candidates', 'communication', 'work', 'reports', 'organization'])
+    expect(groups.map((group) => group.area)).toEqual(['jobs', 'clients', 'candidates', 'communication', 'work', 'reports', 'organization'])
+    expect(groups.find((group) => group.area === 'clients')?.scopes).toEqual(['client:read', 'shortlist:read'])
     expect(groups.every((group) => group.scopes.length > 0)).toBe(true)
   })
 
   it('never offers more than the role holds and drops empty areas', () => {
     const groups = scopeGroups('interviewer')
-    expect(groups.flatMap((group) => group.scopes)).toEqual(['job:read', 'job_team:read', 'candidate:read', 'candidate_note:create', 'feedback:read', 'message:read', 'task:read'])
+    expect(groups.flatMap((group) => group.scopes)).toEqual(['job:read', 'job_team:read', 'client:read', 'candidate:read', 'candidate_note:create', 'feedback:read', 'message:read', 'task:read'])
     expect(groups.map((group) => group.area)).not.toContain('organization')
   })
 
