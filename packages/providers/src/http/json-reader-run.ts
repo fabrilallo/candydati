@@ -23,6 +23,8 @@ export interface RunSettings {
   readonly maxWaitMs: number;
   /** False: the source's rate-limit headers are not acted on (see `RateOptions.ignoreHeaders`). */
   readonly trustRateHeaders: boolean;
+  /** Set: public-file downloads skip `take` and run at most this many at once. */
+  readonly publicFileConcurrency?: number | undefined;
   readonly resolve: Resolve;
   readonly transport: { readonly http: RequestFn; readonly https: RequestFn };
   readonly sleep: (ms: number) => Promise<void>;
@@ -125,6 +127,7 @@ interface Outcome<T> {
  */
 export function createRunner(s: RunSettings) {
   let blockedUntil = 0;
+  const gate = createGate(s.publicFileConcurrency);
 
   const pause = async (waitMs: number, url: string, attempt: number): Promise<void> => {
     if (waitMs <= 0) return;
@@ -153,12 +156,14 @@ export function createRunner(s: RunSettings) {
     }
   };
 
-  return async <T>(request: RunRequest<T>): Promise<T> => {
+  const read = async <T>(request: RunRequest<T>): Promise<T> => {
     const target = request.publicFile ? checkPublicTarget(request.url, s.unsafe) : checkTarget(request.url, s.allowedHosts, s.unsafe);
     const url = redactUrl(request.url);
     for (let attempt = 1; ; attempt += 1) {
-      await pause(s.take(), url, attempt);
-      await pause(blockedUntil - s.now(), url, attempt);
+      if (!ownsPace(request)) {
+        await pause(s.take(), url, attempt);
+        await pause(blockedUntil - s.now(), url, attempt);
+      }
       s.onEvent({ kind: 'request', url, attempt });
       const outcome = await attemptOnce(target, request, attempt);
       if (outcome.result) return outcome.result.value;
@@ -167,6 +172,27 @@ export function createRunner(s: RunSettings) {
       const waitMs = outcome.waitMs ?? 0;
       s.onEvent({ kind: 'retry', url, attempt, waitMs, ...(failure.status === undefined ? {} : { status: failure.status }) });
       await s.sleep(waitMs);
+    }
+  };
+  /** Public files with their own limit are bounded by the gate instead of the API's bucket. */
+  const ownsPace = (request: RunRequest<unknown>): boolean => request.publicFile === true && s.publicFileConcurrency !== undefined;
+  return <T>(request: RunRequest<T>): Promise<T> => (ownsPace(request) ? gate(() => read(request)) : read(request));
+}
+
+/** At most `limit` tasks at once, in arrival order; a failed task frees its slot. No limit: runs at once. */
+function createGate(limit: number | undefined): <T>(task: () => Promise<T>) => Promise<T> {
+  let active = 0;
+  const waiting: Array<() => void> = [];
+  return async (task) => {
+    // A finishing task hands its slot straight to the next waiter, so the count never overshoots.
+    if (limit !== undefined && active >= limit) await new Promise<void>((resolve) => waiting.push(resolve));
+    else active += 1;
+    try {
+      return await task();
+    } finally {
+      const next = waiting.shift();
+      if (next === undefined) active -= 1;
+      else next();
     }
   };
 }

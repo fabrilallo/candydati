@@ -1,5 +1,6 @@
 import { PackageBuilderError, type PackageBuilder } from '../../package-builder.js';
 import type { TeamtailorClient } from './client.js';
+import type { DownloadPool } from './download-pool.js';
 
 /** What was left out and why, counted and never named: the operator-facing summary of a run. */
 export interface TeamtailorReport {
@@ -35,6 +36,8 @@ export interface Run {
   readonly client: TeamtailorClient;
   readonly builder: PackageBuilder;
   readonly report: TeamtailorReport;
+  /** Files on signed URLs download in the background, a few at a time; the run drains it before it ends. */
+  readonly downloads: DownloadPool;
   readonly tick: (count: number) => Promise<void>;
   /** Stand-in date for a record that lacks its own. */
   readonly now: string;

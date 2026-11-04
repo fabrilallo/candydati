@@ -96,10 +96,17 @@ What the connector does at the scale of tens of thousands of profiles, and what 
   migration with the key again. Nothing is committed by a fetch, so there is nothing to duplicate, and committing the
   same account twice is safe: people merge by email and applications already imported are skipped
   (`skippedAlreadyApplied`).
-- **Time.** At 3 requests a second, 18,000 profiles need roughly: 2,000 to 3,000 page requests (10 to 17 minutes, the
-  application, answer, upload and note lists are of the same order as the candidates) plus one request per file (every
-  CV and upload is one download, paced by the same bucket): up to 18,000 more, so 1.5 to 2 hours if every profile has a
-  CV, less if many do not. These are estimates from the page size and the pacing, not measurements on a real account.
+- **Files.** A CV or upload on a signed storage URL (a host other than `api.teamtailor.com`) does not use the 3
+  requests a second meant for the API: those downloads run in the background, at most 4 at once, while the next page is
+  read. They keep every guard of the shared reader: public addresses only, no credentials, redirects re-checked, a
+  10 minute timeout, retries before the first byte, a size cap. A file on the API host itself still goes through the
+  API pacing. A file that fails is counted and skipped, and the run waits for every download before it ends.
+- **Time.** The API calls need roughly 2,000 to 3,000 page requests for 18,000 profiles (the application, answer, upload
+  and note lists are of the same order as the candidates): 10 to 17 minutes at 3 a second. Files add the time of the
+  downloads themselves: up to 18,000 if every profile has a CV, 4 at a time, so about 4 to 5 seconds of a file divided
+  by 4. A 300 KB file in 0.5 s makes about 40 minutes for 18,000, a slower storage proportionally more. In all, about
+  1 hour for an account where every profile has a CV, 15 minutes if there are no files. These are estimates from the
+  page size, the pacing and an assumed download time, not measurements on a real account.
 
 ## Trial on a real account
 
@@ -115,7 +122,7 @@ is entered in their instance, the data goes from Teamtailor to their server, and
    afterwards. It is never stored by the instance and never leaves the instance and Teamtailor.
 3. The migration wizard: choose Teamtailor, paste the key, wait. Do not stop the worker during the run.
 
-**Expected duration.** Between about 15 minutes (no files) and 2 hours (a CV for every profile), see "Time" above. The
+**Expected duration.** Between about 15 minutes (no files) and about 1 hour or a little more (a CV for every profile), see "Time" above. The
 migration screen shows records read of the total, and the number of parts when it ends. Then comes the analysis of each
 part, the preview, and the commit by an owner or admin.
 
