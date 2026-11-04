@@ -149,22 +149,28 @@ export const JOB_RECIPES: readonly Recipe[] = [
     steps: {
       it: [
         'Apri "Annunci", scegli l\'annuncio e vai nella scheda "Automazioni".',
-        'Sotto "Quando una candidatura entra in…" della fase che ti interessa premi "Aggiungi regola".',
+        'Sotto "Regole della fase…" della fase che ti interessa premi "Aggiungi regola".',
+        'In "Quando" scegli cosa la fa scattare: la candidatura entra nella fase, resta ferma per alcuni giorni, il candidato risponde, arriva il feedback del colloquio o si avvicina la risposta promessa.',
+        'In "Solo se" puoi limitarla per origine della candidatura, tag del candidato o consenso dato: devono valere tutte.',
         'In "Cosa succede" scegli "Invia un modello al candidato" (e il modello) oppure "Crea un\'attività" (testo, per chi, entro quanti giorni).',
+        'Con "Mostra chi riguarda" vedi, senza inviare nulla, per quali candidature agirebbe adesso.',
         'Premi "Salva la regola"; con "Regola attiva" la sospendi senza cancellarla.',
         'Le automazioni non spostano candidati e non decidono esiti: lo fa sempre una persona.',
       ],
       en: [
         'Open "Jobs", pick the ad and go to the "Automations" tab.',
-        'Under "When an application enters…" for the stage you want press "Add rule".',
+        'Under "Rules for…" of the stage you want press "Add rule".',
+        'Under "When" choose what starts it: the application enters the stage, stays there for some days, the candidate replies, interview feedback arrives or the promised response is near.',
+        'Under "Only if" you can limit it by source of the application, candidate tags or consent given: all of them must hold.',
         'Under "What happens" choose "Send a template to the candidate" (and the template) or "Create a task" (text, for whom, within how many days).',
+        '"Show who it affects" lists, without sending anything, the applications it would act for now.',
         'Press "Save rule"; "Rule active" pauses it without deleting it.',
         'Automations never move candidates or decide outcomes: a person always does.',
       ],
     },
     keywords: {
-      it: ['regola', 'automatico', 'email automatica', 'promemoria', 'workflow'],
-      en: ['rule', 'automatic', 'auto email', 'reminder', 'workflow', 'trigger'],
+      it: ['regola', 'automatico', 'email automatica', 'promemoria', 'workflow', 'ferma', 'risposta', 'condizione', 'anteprima'],
+      en: ['rule', 'automatic', 'auto email', 'reminder', 'workflow', 'trigger', 'stuck', 'reply', 'condition', 'preview'],
     },
   },
 ];

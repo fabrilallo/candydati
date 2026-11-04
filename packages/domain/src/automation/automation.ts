@@ -1,8 +1,13 @@
 import { z } from 'zod';
 import { TASK_TITLE_MAX } from '../task/task.js';
+import { automationConditionsSchema, type AutomationConditions } from './conditions.js';
+import { automationTriggerSchema, STAGE_ENTERED, type AutomationTrigger } from './trigger.js';
+
+export * from './conditions.js';
+export * from './trigger.js';
 
 /**
- * What a rule may do when an application ENTERS a stage. Deliberately only these two: there is no `move` and no
+ * What a rule may do when its trigger fires (`trigger.ts`). Deliberately only these two: there is no `move` and no
  * `decide` action, because nothing decides about a candidate automatically (PRODUCT.md §2, principle 4).
  */
 export const AUTOMATION_ACTIONS = ['send_template', 'create_task'] as const;
@@ -26,8 +31,17 @@ export const automationActionSchema = z.discriminatedUnion('type', [
 export type AutomationAction = z.output<typeof automationActionSchema>;
 export type AutomationActionInput = z.input<typeof automationActionSchema>;
 
-export const automationRuleInputSchema = z.object({
+/** Who a rule acts for: its stage, its trigger and its conditions. Also the body of a preview. */
+export const automationMatchSchema = z.object({
   stageId: z.string().min(1),
+  /** Absent: `stage_entered`, the only trigger before triggers could be chosen. */
+  trigger: automationTriggerSchema.default(STAGE_ENTERED),
+  conditions: automationConditionsSchema.default({}),
+});
+export type AutomationMatchInput = z.input<typeof automationMatchSchema>;
+export type AutomationMatch = z.output<typeof automationMatchSchema>;
+
+export const automationRuleInputSchema = automationMatchSchema.extend({
   action: automationActionSchema,
   enabled: z.boolean().default(true),
 });
@@ -38,6 +52,9 @@ export interface AutomationRule {
   readonly organizationId: string;
   readonly jobId: string;
   readonly stageId: string;
+  readonly trigger: AutomationTrigger;
+  /** All must hold; empty: every application of the stage. */
+  readonly conditions: AutomationConditions;
   readonly action: AutomationAction;
   readonly enabled: boolean;
   /** The person whose decision the rule is: messages go out in their name. */
