@@ -28,7 +28,9 @@ describe('AppNavPanel', () => {
   it('groups the entries the role may see under headings, with the published count on job ads', async () => {
     useViewer().viewer.value = viewerWith('owner')
     const wrapper = track(await mountSuspended(AppNavPanel))
-    expect(wrapper.findAll('h2').map((heading) => heading.text())).toEqual(['Selezione', 'Organizzazione'])
+    expect(wrapper.findAll('h2').map((heading) => heading.text())).toEqual(['Selezione', 'Annunci e messaggi', 'Integrazioni', 'Organizzazione'])
+    // Only the first settings group draws the rule that sets the settings apart from the daily work.
+    expect(wrapper.findAll('section').map((section) => section.classes().includes('border-t'))).toEqual([false, true, false, false])
     await vi.waitFor(() => expect(wrapper.find('[data-testid="nav-count-jobs"]').text()).toContain('3'))
     expect(wrapper.find('[data-testid="nav-count-jobs"]').text()).toContain('3 pubblicati')
   })
@@ -99,7 +101,7 @@ describe('single sidebar', () => {
     useViewer().viewer.value = viewerWith('owner')
     const wrapper = track(await mountSuspended(AppNavPanel))
     const labels = wrapper.findAll('nav a').map((link) => link.text().replace(/\d+$/, '').trim())
-    expect(labels).toEqual(['Panoramica', 'Da gestire', 'Le mie attività', 'Annunci', 'Richieste', 'Candidati', 'Report', 'Importa candidati', 'Template', 'Membri', 'Sicurezza', 'Privacy', 'Email', 'AI', 'Modelli email', 'Webhook', 'Distribuzione', 'Clienti', 'Pagina carriera', 'API e integrazioni', 'Dati', 'Migrazione', 'Registro delle azioni'])
+    expect(labels).toEqual(['Panoramica', 'Da gestire', 'Le mie attività', 'Annunci', 'Clienti', 'Richieste', 'Candidati', 'Report', 'Template', 'Pagina carriera', 'Distribuzione', 'Modelli email', 'Email', 'AI', 'Webhook', 'API e integrazioni', 'Importa candidati', 'Migrazione', 'Membri', 'Sicurezza', 'Privacy', 'Dati', 'Registro delle azioni'])
     expect(wrapper.find('a[target="_blank"]').text()).toBe('Pagina carriere')
     expect(wrapper.find('[aria-label="Lingua"]').exists()).toBe(false)
   })

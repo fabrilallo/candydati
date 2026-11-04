@@ -33,6 +33,8 @@
     "publishedCount": "{count} published",
     "sections": {
       "work": "Hiring",
+      "hiringSetup": "Jobs and messages",
+      "integrations": "Integrations",
       "organization": "Organization"
     },
     "candidates": "Candidates",
