@@ -1,3 +1,4 @@
+import { agencySettingSchema, clientSchema, jobClientSchema, publicShortlistCandidateSchema, publicShortlistSchema, shortlistSchema } from '@candydati/domain';
 import {
   analyzeResultSchema,
   suggestResultSchema,
@@ -99,5 +100,11 @@ export const COMPONENT_SCHEMAS = {
   CareersMediaAsset: careersMediaAssetSchema,
   OrganizationLogo: organizationLogoSchema,
   PublicCareersPage: publicCareersPageSchema,
+  AgencySetting: agencySettingSchema,
+  Client: clientSchema,
+  JobClient: jobClientSchema,
+  Shortlist: shortlistSchema,
+  PublicShortlist: publicShortlistSchema,
+  PublicShortlistCandidate: publicShortlistCandidateSchema,
 } as const;
 export type ComponentName = keyof typeof COMPONENT_SCHEMAS;

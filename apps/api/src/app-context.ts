@@ -15,7 +15,6 @@ import {
   type TaskDeps,
   type WebhookDeps,
   type CandidateDeps,
-  type TimelineDeps,
   type DistributionChannel,
   type DistributionDeps,
   type TrackedLinkDeps,
@@ -61,6 +60,7 @@ import { createDistributionDeps, createTrackedLinkDeps } from './wiring/distribu
 import { createMigrationDeps, type MigrationRouteDeps } from './wiring/migration-deps.js';
 import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
 import { createCareersDeps, type CareersWiring } from './wiring/careers-deps.js';
+import { createClientDeps, type ClientWiring } from './wiring/client-deps.js';
 import { createHrDeps, type HrWiring } from './wiring/hr-deps.js';
 import { createTeamDeps, type TeamWiring } from './wiring/team-deps.js';
 import { liveMessagingConfig, type AiRuntime, type EmailRuntime, type MigrationConnectorRegistry } from '@candydati/providers';
@@ -90,7 +90,7 @@ export interface RateLimitSettings {
   readonly importMax?: number | undefined;
   /** Requests per minute per client on the public reconfirmation routes. */
   readonly consentMax?: number | undefined;
-  /** Requests per minute per client on the public interview feedback routes. */
+  /** Requests per minute per client on the public interview feedback and client shortlist routes. */
   readonly feedbackMax?: number | undefined;
   /** Careers page media uploads per minute per client. */
   readonly careersMediaMax?: number | undefined;
@@ -109,7 +109,7 @@ export const DEFAULT_AUTH_EMAIL_MAX = 5;
 export const DEFAULT_APPLY_WINDOW_MINUTES = 10;
 export const DEFAULT_RATE_LIMIT: RateLimitSettings = { max: 300, authMax: 20, publicMax: DEFAULT_PUBLIC_MAX, qualityMax: DEFAULT_QUALITY_MAX };
 
-export interface AppContext {
+export interface AppContext extends ClientWiring {
   readonly env: Env;
   readonly auth: Auth;
   readonly auditLog: AuditLogRepository;
@@ -140,8 +140,6 @@ export interface AppContext {
   /** Read-only aggregates of the history kept by core. */
   readonly reportDeps: ReportDeps;
   readonly candidateDeps: CandidateDeps;
-  /** The timeline of an application: the candidate repositories plus the submitted feedback. */
-  readonly timelineDeps: TimelineDeps;
   readonly privacyDeps: PrivacyDeps;
   readonly submitDeps: SubmitApplicationDeps;
   readonly messagingDeps: MessagingDeps;
@@ -250,7 +248,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...createMigrationDeps({ uow, files, queue, authSecret: env.BETTER_AUTH_SECRET, connectors: migrationConnectors }),
     ...instanceContext({ env, db, uow, files, queue, images, phase2, runtime: emailRuntime, log: emailLog, tester: instanceEmailTester, aiRuntime, aiCheck }),
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
-    timelineDeps: { ...phase2.candidateDeps, ...hr.feedbackRecords },
+    ...createClientDeps({ uow, files, queue, sender, config: emailConfig, onMailError: onReceiptError, candidateDeps: phase2.candidateDeps, feedback: hr.feedbackRecords }),
     ...hrContext(hr),
     ...createTeamDeps(uow),
     messagingDeps: messaging.messagingDeps,
@@ -263,11 +261,11 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
     jobDeps,
     ...adWritingHelpers(aiRuntime, responsibilitySuggester, criteriaDrafter),
-    reportDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, jobs: jobDeps.jobs, reports: uow.repositories.reports, now: reportClock ?? (() => new Date()) },
+    reportDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, jobs: jobDeps.jobs, reports: uow.repositories.reports, jobClients: uow.repositories.jobClients, now: reportClock ?? (() => new Date()) },
     distributionDeps: createDistributionDeps({ uow, publicBaseUrl: env.platform.url, channels: distributionChannels }),
     trackedLinkDeps: createTrackedLinkDeps(uow),
     jobViewDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, jobViews: uow.repositories.jobViews, now: () => new Date() },
-    publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
+    publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicClients: jobDeps.publicClients, publicBaseUrl: env.platform.url },
   };
 }
 
@@ -395,6 +393,9 @@ function createJobDeps(uow: DrizzleUnitOfWork, adQuality: AdQualityAnalyzer, adQ
     outbox: r.outbox,
     approvals: r.approvals,
     organizationSettings: r.organizationSettings,
+    jobClients: r.jobClients,
+    clients: r.clients,
+    publicClients: r.publicClients,
     adQuality,
     adQualityThreshold,
     newId: randomUUID,

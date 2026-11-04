@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { jobListClientSchema, publicJobClientSchema } from './client.js';
 import { AD_QUALITY_STATUSES, adQualityReportSchema } from '../job/quality.js';
 import { isPublishedContent, jobContentSchema, type PublishedJobContent } from '../job/content.js';
 import { jobDtoSchema, JOB_STATUSES, type PublicCareersDto, type PublicJobPageDto } from '../job/job.js';
@@ -24,6 +25,8 @@ export const jobSummarySchema = z.object({
   belowThreshold: z.boolean(),
   updatedAt: isoDate,
   publishedAt: isoDate.nullable(),
+  /** The client of the job (agencies, PRODUCT.md §3.5); null without one. */
+  client: jobListClientSchema.nullable().optional(),
 });
 
 export const templateSchema = z.object({ id: z.string(), name: z.string(), content: jobContentSchema, updatedAt: isoDate });
@@ -77,6 +80,8 @@ const publicSummarySchema = z.object({
   responseDays: z.number().int().min(1),
   publishedAt: isoDate,
   updatedAt: isoDate,
+  /** Only on an agency's ad for a client: its name, null when confidential. */
+  client: publicJobClientSchema.pick({ display: true, name: true }).optional(),
 });
 
 export const publicCareersSchema = z.object({ organization: organizationSchema, jobs: z.array(publicSummarySchema) }) as unknown as z.ZodType<PublicCareersDto>;
@@ -85,6 +90,6 @@ export const publicCareersSchema = z.object({ organization: organizationSchema, 
 export type PublicJobPage = PublicJobPageDto & { readonly privacyNotice: PublicPrivacyNoticeDto | null };
 export const publicJobPageSchema = z.object({
   organization: organizationSchema,
-  job: z.object({ slug: z.string(), content: publishedContentSchema, publishedAt: isoDate, updatedAt: isoDate }),
+  job: z.object({ slug: z.string(), content: publishedContentSchema, publishedAt: isoDate, updatedAt: isoDate, client: publicJobClientSchema.optional() }),
   privacyNotice: publicPrivacyNoticeSchema.nullable(),
 }) as unknown as z.ZodType<PublicJobPage>;

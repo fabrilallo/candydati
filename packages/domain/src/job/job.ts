@@ -93,6 +93,8 @@ export interface JobSummaryDto {
   readonly belowThreshold: boolean;
   readonly updatedAt: string;
   readonly publishedAt: string | null;
+  /** The client of the job (agencies, PRODUCT.md §3.5); null without one. Absent in older answers. */
+  readonly client?: { readonly id: string; readonly name: string; readonly display: ClientDisplay } | null | undefined;
 }
 
 export interface JobTemplateDto {

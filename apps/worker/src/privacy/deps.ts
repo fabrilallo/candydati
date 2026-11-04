@@ -56,6 +56,9 @@ export function createPrivacyWorkerDeps({ uow, files, queue }: PrivacyWiring): P
       zip: zipStreamFactory,
       careersPages: r.careersPages,
       careersMedia: r.careersMedia,
+      clients: r.clients,
+      jobClients: r.jobClients,
+      shortlists: r.shortlists,
       ...clock,
     },
   };

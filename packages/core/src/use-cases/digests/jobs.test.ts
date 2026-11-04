@@ -24,6 +24,15 @@ describe('runDeadlineScan', () => {
     expect(again).toMatchObject({ sent: 0 });
     expect(sender.sent()).toHaveLength(1);
   });
+
+  it('reminds clients of their open shortlists in the same scan', async () => {
+    const now = new Date('2026-06-01T10:00:00.000Z');
+    const scan = seedAutomationWorld();
+    const listed = { id: 's1', organizationId: ORG_A, jobId: 'job_1', clientId: 'client_1', recipientContactId: 'c1', recipientName: 'Carla', recipientEmail: 'carla@client.example', tokenHash: 'h', message: null, expiresAt: new Date(now.getTime() + 5 * DAY), revokedAt: null, remindersSent: 0, lastReminderAt: null, firstOpenedAt: null, createdBy: 'u', createdAt: new Date(now.getTime() - 4 * DAY) };
+    const shortlists = { ...scan, shortlists: { listOpenAcrossOrganizations: async () => [listed], listItems: async () => [{ answer: null }], rotateToken: async () => listed }, sender: createFakeEmailSender(), newToken: () => 'secret', hash: (value: string) => value } as never;
+    const result = await runDeadlineScan({ scan, shortlists, digest: digest() }, now);
+    expect(result).toMatchObject({ shortlistsReminded: 1, shortlistsFailed: 0 });
+  });
 });
 
 describe('runRetentionJob', () => {

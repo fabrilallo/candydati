@@ -8,6 +8,8 @@ import {
   WORK_MODES,
   adQualityReportSchema,
   jobContentSchema,
+  jobListClientSchema,
+  publicJobClientSchema,
   jobDtoSchema,
   locationSchema,
   salarySchema,
@@ -38,6 +40,7 @@ export const jobSummarySchema: z.ZodType<JobSummaryDto> = z.object({
   belowThreshold: z.boolean(),
   updatedAt: isoDate,
   publishedAt: isoDate.nullable(),
+  client: jobListClientSchema.nullable().optional().describe('The client of the job (agencies); null without one.'),
 });
 
 export const jobTemplateSchema: z.ZodType<JobTemplateDto> = z.object({
@@ -88,7 +91,13 @@ export const publishedContentSchema = jobContentSchema.extend({
 
 const organizationSchema = z.object({ name: z.string(), slug: z.string(), logo: z.string().nullable() });
 
-const publicJobSchema = z.object({ slug: z.string(), content: publishedContentSchema, publishedAt: isoDate, updatedAt: isoDate });
+const publicJobSchema = z.object({
+  slug: z.string(),
+  content: publishedContentSchema,
+  publishedAt: isoDate,
+  updatedAt: isoDate,
+  client: publicJobClientSchema.optional().describe('Only on the ad of an agency for a client: the client by name, or `confidential` with no name, website or logo.'),
+});
 
 export const publicCareersSchema = z.object({
   organization: organizationSchema,
@@ -107,6 +116,7 @@ export const publicCareersSchema = z.object({
       responseDays: z.number().int(),
       publishedAt: isoDate,
       updatedAt: isoDate,
+      client: publicJobClientSchema.pick({ display: true, name: true }).optional(),
     }),
   ),
 });

@@ -25,12 +25,14 @@ export const createGetJobTool = (deps: JobDeps) =>
 export const createListJobsTool = (deps: JobDeps) =>
   createTool({
     id: 'list_jobs',
-    description: 'Lists the job ads of this organization (id, title, status), newest first. Use it to find a job id.',
-    inputSchema: z.object({ status: z.enum(JOB_STATUSES).optional() }),
+    description:
+      'Lists the job ads of this organization (id, title, status, and the client for an agency), newest first. Use it to find a job id. ' +
+      'An agency can narrow it to the jobs of one client with clientId.',
+    inputSchema: z.object({ status: z.enum(JOB_STATUSES).optional(), clientId: z.string().min(1).max(100).optional() }),
     execute: async (input, context) =>
       runTool(async () => {
         const page = await listJobs(deps, readAgentIdentity(context?.requestContext).actor, { ...input, limit: 50 });
-        return { jobs: page.items.map(jobSummary), total: page.meta.total };
+        return { jobs: page.items.map((job) => ({ ...jobSummary(job), client: page.clients[job.id]?.name ?? null })), total: page.meta.total };
       }),
   });
 

@@ -5,6 +5,7 @@ import type { TransactionPort } from '../../transaction.js';
 import { scanDeadlines } from '../automations/scan-deadlines.js';
 import { scanFeedbackReminders } from '../feedback/scan-reminders.js';
 import { scanStaleJobs } from '../stale/scan-stale-jobs.js';
+import { scanShortlistReminders, type ShortlistReminderDeps } from '../clients/shortlist-reminders.js';
 import { mergeDigests, type DigestMailConfig } from './digest-email.js';
 import { sendDigests, type DigestSendResult } from './send-digests.js';
 
@@ -20,6 +21,8 @@ export interface DeadlineScanJobDeps {
   readonly feedback?: FeedbackStageEntryDeps | undefined;
   /** Published ads idle for 90 days. */
   readonly stale?: StaleScanDeps | undefined;
+  /** Reminders for client shortlists with candidates still unanswered after 3 and 7 days. */
+  readonly shortlists?: ShortlistReminderDeps | undefined;
   readonly digest: DigestJobConfig;
 }
 
@@ -28,22 +31,25 @@ export interface DeadlineScanJobResult extends DigestSendResult {
   readonly missedPromises: number;
   readonly feedbackReminded: number;
   readonly feedbackFailed: number;
+  readonly shortlistsReminded: number;
+  readonly shortlistsFailed: number;
 }
 
 /**
  * The hourly job (`deadlines.scan`): notifies about applications due soon or overdue and tasks due, reminds
- * interviewers who have not left feedback, flags ads idle for 90 days (never closing them), then emails each person
+ * interviewers who have not left feedback and clients who have not answered a shortlist, flags ads idle for 90 days (never closing them), then emails each person
  * one digest, each claimed together with its send so a retried job never emails anyone twice. Counts only.
  */
 export async function runDeadlineScan(deps: DeadlineScanJobDeps, now: Date): Promise<DeadlineScanJobResult> {
-  const { scan, feedback, stale, digest } = deps;
+  const { scan, feedback, stale, shortlists, digest } = deps;
   const deadlines = await scanDeadlines(scan, { now });
   const reminders = feedback ? await scanFeedbackReminders(feedback, { now }) : { reminded: 0, failed: 0 };
+  const shortlistResult = shortlists ? await scanShortlistReminders(shortlists, { now }) : { reminded: 0, failed: 0 };
   const staleResult = stale ? await scanStaleJobs(stale, { now }) : { digests: [] };
   const digests = mergeDigests(deadlines.digests, staleResult.digests);
   const mail = await sendDigests(
     { transaction: digest.transaction, notifications: scan.notifications, staleNotifications: stale?.notifications, mail: digest.mail, now: () => now },
     digests,
   );
-  return { digests: digests.length, missedPromises: deadlines.missedPromises ?? 0, feedbackReminded: reminders.reminded, feedbackFailed: reminders.failed, ...mail };
+  return { digests: digests.length, missedPromises: deadlines.missedPromises ?? 0, feedbackReminded: reminders.reminded, feedbackFailed: reminders.failed, shortlistsReminded: shortlistResult.reminded, shortlistsFailed: shortlistResult.failed, ...mail };
 }
