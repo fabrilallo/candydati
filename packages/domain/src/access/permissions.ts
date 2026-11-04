@@ -25,7 +25,7 @@ export const STATEMENTS = {
   email_settings: ['manage'],
   /** Follow-up tasks for candidates and jobs. */
   task: ['read', 'manage'],
-  /** Per-stage rules. They can send a template or create a task, never move or decide. */
+  /** Per-stage rules. They send a template, create a task, tag, assign, ask for feedback, alert or propose a move; never move or decide. */
   automation: ['manage'],
   webhook: ['manage'],
   /** Export of the whole organization's data (PRODUCT.md §6). */

@@ -18,6 +18,11 @@ export const WEBHOOK_EVENT_TYPES = [
   /** A published ad was edited: what readers see changed. */
   'job.updated',
   'job.closed',
+  /**
+   * A `notify` rule with the webhook channel fired. Ids only: `ruleId`, `applicationId`, `jobId`, `stageId`, `trigger`
+   * (no name, no contact, no text of the candidate).
+   */
+  'automation.notified',
 ] as const;
 export type WebhookEventType = (typeof WEBHOOK_EVENT_TYPES)[number];
 /** `ping` is only ever sent by the "test" action. */

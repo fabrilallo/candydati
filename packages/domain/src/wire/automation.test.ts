@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { automationPreviewSchema, automationRuleSchema } from './automation.js';
+import { automationPreviewSchema, automationRuleSchema, moveProposalSchema, templateAutomationRuleSchema } from './automation.js';
 
 const base = { id: 'r1', jobId: 'j1', stageId: 's1', enabled: true, createdBy: 'u1', createdAt: '2026-05-01T10:00:00.000Z' };
 
@@ -24,5 +24,13 @@ describe('automationRuleSchema', () => {
   it('refuses an action that could move or decide, and an object as creator', () => {
     expect(automationRuleSchema.safeParse({ ...base, action: { type: 'move', stageId: 's2' } }).success).toBe(false);
     expect(automationRuleSchema.safeParse({ ...base, createdBy: { id: 'u1', name: null }, action: { type: 'send_template', templateId: 'e1' } }).success).toBe(false);
+  });
+});
+
+describe('proposals and template rules on the wire', () => {
+  it('reads a template rule and a live proposal', () => {
+    expect(templateAutomationRuleSchema.parse({ ...base, jobId: undefined, templateId: 't1', action: { type: 'add_tag', tag: 'Fast' } }).action).toEqual({ type: 'add_tag', tag: 'fast' });
+    const proposal = { id: 'p1', applicationId: 'a1', ruleId: null, candidate: { id: 'c1', firstName: 'Anna', lastName: 'Rossi' }, job: { id: 'j1', title: 'Dev' }, from: { id: 's0', label: 'HR' }, to: { id: 's1', label: null }, proposedBy: 'u1', createdAt: base.createdAt, expiresAt: base.createdAt };
+    expect(moveProposalSchema.parse(proposal)).toEqual(proposal);
   });
 });
