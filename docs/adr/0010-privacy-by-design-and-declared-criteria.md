@@ -23,7 +23,12 @@ AI system: it conflicts with ADR 0005, GDPR art. 22, and is a high-risk use unde
    languages, minimum experience, location, words in the CV) and confirms them; the assistant may propose them, the
    tools require an explicit confirmation flag. The database applies them deterministically (`cvMatchesCriteria` is the
    reference, Postgres the implementation): every result meets every criterion, there is no score, no partial match,
-   no order by merit, no "top N". A model never reads CVs to decide who fits.
+   no order by merit, no "top N". A model never reads CVs to decide who fits. A skill is compared under its known
+   names, from a curated, data-only dictionary (`packages/domain/src/skills`): "Go" finds "Golang", "k8s" finds
+   "Kubernetes". The dictionary lists synonyms only, never a related skill, so it widens the spelling, not the
+   judgement. It is applied at match time on both sides (stored CVs are not rewritten); a skill it does not know is
+   compared exactly, ignoring case, punctuation and diacritics. Ordinary words ("go", "excel") are never read as a
+   skill in the free text of a CV.
 3. **Only people whose consent covers the job.** The search looks at the job's applicants and at the talent pool,
    never at people who applied to another position only.
 4. **No proxies for protected characteristics.** Criteria naming age, sex, origin, religion, family, disability or
@@ -38,7 +43,7 @@ AI system: it conflicts with ADR 0005, GDPR art. 22, and is a high-risk use unde
 
 Users get a sourcing tool without the product deciding about people, and external agents work on less personal data.
 Pseudonymization lowers the risk but CV content can still single someone out, so the rules of ADR 0005 still apply to
-everything a model sees. Keyword filters are blunt: synonyms and differently worded CVs are missed, which is why the
+everything a model sees. Keyword filters are blunt: skills outside the dictionary and differently worded CVs are missed, which is why the
 result is a starting point for a person and why unchecked CVs are reported. Whether a deterministic filter with
 model-proposed criteria falls under the AI Act high-risk category should be confirmed by each deploying organization's
 legal counsel.

@@ -51,6 +51,7 @@ const seeds = (): readonly Seed[] => [
   // Consent for job B only, not in the talent pool: never part of a search for job A.
   { key: 'cleo', job: () => jobB, cv: { status: 'done', text: 'TypeScript', data: structured }, day: 3 },
   { key: 'dan', job: () => jobA, cv: { status: 'failed', text: null, data: null, source: null }, day: 2 },
+  { key: 'fay', job: () => jobA, cv: { status: 'done', text: 'Ready to go the extra mile. Excel at teamwork.', data: { ...structured, location: 'Torino', yearsOfExperience: 1, skills: ['Golang', 'K8s', 'PostgreSQL', 'Contabilità', 'C#'], languages: [] } }, day: 6 },
   { key: 'eve', job: () => jobA, consent: 'to_renew', cv: { status: 'done', text: 'TypeScript', data: structured }, day: 1 },
 ];
 
@@ -111,6 +112,21 @@ async function run(q: CriteriaSearchQuery): Promise<{ readonly keys: readonly st
 }
 
 describe('createDrizzleCriteriaSearch', () => {
+  it('knows synonyms of a skill, insensitive to case, punctuation and diacritics', async () => {
+    for (const skill of ['Go', 'golang', 'Kubernetes', 'kubernetes', 'contabilita', 'CONTABILITÀ', 'csharp']) {
+      expect((await run(query({ skills: [skill] }))).keys, skill).toEqual(['fay']);
+    }
+    // Bob wrote "Postgres" in his plain-text CV, Fay lists PostgreSQL.
+    expect((await run(query({ skills: ['postgre sql'] }))).keys).toEqual(['fay', 'bob']);
+    expect((await run(query({ skills: ['Go', 'Vue'] }))).keys).toEqual([]);
+    expect((await run(query({ skills: ['C'] }))).keys).toEqual([]);
+    expect((await run(query({ skills: ['C++'] }))).keys).toEqual(['ada']);
+  });
+
+  it('does not read an ordinary word of the text as a skill', async () => {
+    expect((await run(query({ skills: ['Excel'] }))).keys).toEqual([]);
+  });
+
   it('looks at the applicants of the job and the talent pool only, most recently applied first', async () => {
     expect(await run(query({ skills: ['typescript'] }))).toEqual({ keys: ['ada', 'bob'], total: 2, notEvaluable: 1 });
     expect((await run(query({ skills: ['TypeScript'] }, { pool: 'applicants' }))).keys).toEqual(['ada']);
@@ -119,7 +135,7 @@ describe('createDrizzleCriteriaSearch', () => {
 
   it('matches whole words in the text, structured lists, experience and location', async () => {
     expect((await run(query({ skills: ['C++'], keywords: ['node.js'] }))).keys).toEqual(['ada']);
-    expect((await run(query({ skills: ['Postgres'] }))).keys).toEqual(['bob']);
+    expect((await run(query({ skills: ['Postgres'] }))).keys).toEqual(['fay', 'bob']);
     expect((await run(query({ skills: ['Post'] }))).keys).toEqual([]);
     expect((await run(query({ languages: ['inglese'], locations: ['Roma', 'milano'] }))).keys).toEqual(['ada']);
     expect(await run(query({ minYearsOfExperience: 3 }))).toEqual({ keys: ['ada'], total: 1, notEvaluable: 2 });
