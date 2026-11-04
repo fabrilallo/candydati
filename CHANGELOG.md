@@ -15,6 +15,13 @@ All notable changes to this project are documented here. The format follows
   restricted copy, whoever duplicates it, so notes written in the copy are never exposed. One transaction, one
   `job.stage_duplicated` audit event; `POST /api/v1/jobs/:id/stages/:stageId/duplicate` (scope `job:update`). No migration.
 
+### Fixed
+
+- **Pseudonymization gaps** in what reaches a model: phone extensions, postal codes and cities after a street address,
+  US ZIP and UK postcodes, tax codes with omocodia, IBANs without spaces, partite IVA, personal sites without `www`,
+  Skype/Discord ids, and names of other people where the text marks them (references section, titles, a name before
+  a contact) or where they are known. Names in plain prose are still not found: see ADR 0010.
+
 ## [0.2.0] - 2026-11-04
 
 Three additive migrations (`0044_application_hire_dates`, `0045_restricted_stages_scorecards`, `0046_agency_clients`)

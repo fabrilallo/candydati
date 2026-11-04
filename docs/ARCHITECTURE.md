@@ -279,7 +279,8 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 - It never ranks, scores or rejects candidates. Any message to a candidate needs a person's confirmation.
 - CV and email content is data, not instructions. An adversarial eval suite checks this (`pnpm --filter @candydati/api eval:agent`).
 - Privacy by design: the assistant and MCP tools give a model candidates by first name and id only. Surnames, contacts
-  and direct identifiers (email, phone, links, street address, tax code, IBAN, full dates) are replaced by markers such
+  and direct identifiers (email, phone, links, handles, street address, tax code, VAT number, IBAN, full dates, names of
+  references) are replaced by markers such
   as `[surname]` by `pseudonymizeText` (`packages/domain/src/privacy`), in CV text, CV fields, cover letters and
   messages too. Message drafts keep `{{candidate.lastName}}` as a variable that the person's composer fills in. This
   is pseudonymization, not anonymization: CV content can still single someone out, so the rules above still apply.

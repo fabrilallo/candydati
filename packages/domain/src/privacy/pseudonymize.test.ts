@@ -51,10 +51,8 @@ describe('pseudonymizeText', () => {
     );
   });
 
-  it('removes the street address but keeps the city', () => {
-    expect(pseudonymizeText('Residenza: Via Giuseppe Verdi 12, 20121 Milano', { lastName: 'Rossi' })).toBe(
-      `Residenza: ${REDACTED.address}, 20121 Milano`,
-    );
+  it('removes the street address', () => {
+    expect(pseudonymizeText('Residenza: Via Giuseppe Verdi 12, 20121 Milano', { lastName: 'Rossi' })).toBe(`Residenza: ${REDACTED.address}`);
     expect(pseudonymizeText('Lives at 221 Baker Street, London', { lastName: 'Rossi' })).toBe(`Lives at ${REDACTED.address}, London`);
     expect(pseudonymizeText('Corso React 2020 e corso di Python', { lastName: 'Rossi' })).toBe('Corso React 2020 e corso di Python');
   });
@@ -93,12 +91,83 @@ describe('pseudonymizeText', () => {
     expect(pseudonymizeText('contatto: 3331234567', { lastName: 'Rossi', phone: '3331234567' })).toBe(`contatto: ${REDACTED.phone}`);
   });
 
+  it('removes handles with dots and underscores, at the start of a line too', () => {
+    expect(clean('@nome\n@nome.cognome e @nome_cognome.')).toBe(`${REDACTED.handle}\n${REDACTED.handle} e ${REDACTED.handle}.`);
+    expect(clean('ci vediamo @ 10am e @10')).toBe('ci vediamo @ 10am e @10');
+  });
+
+  it('removes messaging ids written after their app name', () => {
+    const rossi = { lastName: 'Rossi' };
+    expect(pseudonymizeText('Skype: live:mario.r92, Discord: mrossi#1234, skype:mario.r92?call', rossi)).toBe(
+      `Skype: ${REDACTED.handle}, Discord: ${REDACTED.handle}, skype:${REDACTED.handle}`,
+    );
+    expect(pseudonymizeText('WhatsApp: +39 333 1234567, telegram.me/mrossi', rossi)).toBe(`WhatsApp: ${REDACTED.phone}, ${REDACTED.link}`);
+    expect(pseudonymizeText('Sviluppo bot Telegram e integrazioni Skype', rossi)).toBe('Sviluppo bot Telegram e integrazioni Skype');
+  });
+
+  it.each(['+1 (555) 123-4567', '+44 20 7946 0958', '+39 02 1234 5678 int. 23', '02 1234567 ext. 12', '+39 333 12 34 567'])(
+    'removes the phone number %s with its extension',
+    (phone) => {
+      expect(pseudonymizeText(`Tel. ${phone}, grazie`, { lastName: 'Rossi' })).toBe(`Tel. ${REDACTED.phone}, grazie`);
+    },
+  );
+
+  it('removes postal codes and cities that follow a street address', () => {
+    const rossi = { lastName: 'Rossi' };
+    expect(pseudonymizeText('Residenza: Viale dei Mille 3/A, 20129 Milano (MI). Disponibile', rossi)).toBe(`Residenza: ${REDACTED.address}. Disponibile`);
+    expect(pseudonymizeText('Indirizzo: Piazza Garibaldi, 7 - 80142 Napoli', rossi)).toBe(`Indirizzo: ${REDACTED.address}`);
+    expect(pseudonymizeText('Flat 2, 221B Baker Street, London NW1 6XE', rossi)).toBe(`Flat 2, ${REDACTED.address}`);
+    expect(pseudonymizeText('500 Market Way, San Francisco, CA 94105', rossi)).toBe(REDACTED.address);
+    expect(pseudonymizeText('Postcode SW1A 1AA', rossi)).toBe(`Postcode ${REDACTED.address}`);
+    expect(pseudonymizeText('Team di 20121 persone? no: 15 persone a Milano', rossi)).toBe('Team di 20121 persone? no: 15 persone a Milano');
+  });
+
+  it('removes tax codes with omocodia, IBANs without spaces and VAT numbers', () => {
+    const rossi = { lastName: 'Rossi' };
+    expect(pseudonymizeText('CF RSSMRA85T10A56RS, IBAN it60x0542811101000000123456', rossi)).toBe(`CF ${REDACTED.taxCode}, IBAN ${REDACTED.iban}`);
+    expect(pseudonymizeText('P.IVA 01234567890, Partita IVA: IT01234567890, VAT IT 01234567890', rossi)).toBe(
+      `P.IVA ${REDACTED.vat}, Partita IVA: ${REDACTED.vat}, VAT ${REDACTED.vat}`,
+    );
+  });
+
+  it('removes personal sites without www, not technology names', () => {
+    const rossi = { lastName: 'Rossi' };
+    expect(pseudonymizeText('Portfolio: mariorossi.it, blog giulia.dev/about e mrossi.me', rossi)).toBe(
+      `Portfolio: ${REDACTED.link}, blog ${REDACTED.link} e ${REDACTED.link}`,
+    );
+    expect(pseudonymizeText('Node.js, Vue.js, ASP.NET, socket.io, D3.js, Next.js', rossi)).toBe('Node.js, Vue.js, ASP.NET, socket.io, D3.js, Next.js');
+  });
+
+  it('removes names in a references section, up to an empty line', () => {
+    const cv = 'Referenze:\nMario Bianchi, Responsabile IT, Acme, tel 02 1234567\nAnna Maria Verdi - anna@acme.it\n\nCompetenze: Java, Spring Boot';
+    expect(pseudonymizeText(cv, { lastName: 'Rossi' })).toBe(
+      `Referenze:\n${REDACTED.name}, Responsabile IT, Acme, tel ${REDACTED.phone}\n${REDACTED.name} - ${REDACTED.email}\n\nCompetenze: Java, Spring Boot`,
+    );
+    expect(pseudonymizeText('References: John Smith (CTO at Acme)', { lastName: 'Rossi' })).toBe(`References: ${REDACTED.name} (CTO at Acme)`);
+  });
+
+  it('removes names after a title or next to a contact', () => {
+    const rossi = { lastName: 'Rossi' };
+    expect(pseudonymizeText('Ho lavorato con il Dott. Luca Neri e con Ing. Paola Gialli', rossi)).toBe(
+      `Ho lavorato con il Dott. ${REDACTED.name} e con Ing. ${REDACTED.name}`,
+    );
+    expect(pseudonymizeText('Contatto: Luca Neri, luca@acme.it', rossi)).toBe(`Contatto: ${REDACTED.name}, ${REDACTED.email}`);
+    expect(pseudonymizeText('Spring Boot, Google Cloud e React Native', rossi)).toBe('Spring Boot, Google Cloud e React Native');
+  });
+
+  it('removes the names of known people, such as the organization members', () => {
+    const person = { lastName: 'Rossi', otherNames: ['Chiara Fontana', 'Bo'] };
+    expect(pseudonymizeText('Nota: sentito da chiara fontana, poi Chiara ha confermato. Bo resta.', person)).toBe(
+      `Nota: sentito da ${REDACTED.name}, poi Chiara ha confermato. Bo resta.`,
+    );
+  });
+
   it('works without a surname and leaves text without identifiers untouched', () => {
     expect(pseudonymizeText('Esperienza in React e Postgres', { lastName: '' })).toBe('Esperienza in React e Postgres');
   });
 
   it('runs in linear time on hostile input', () => {
-    const shapes = ['a'.repeat(1), '1 ', 'a.', 'Via A ', '+3', 'a@', '@a.', 'linkedin ', 'a.github.io', 't.me/', 'x.'];
+    const shapes = ['Referenze: Aa ', 'Dott. Aa ', 'Aa Bb, a@b.it ', 'skype: a', '1 Aa Way, ', 'P.IVA 1', 'a.it/', 'a'.repeat(1), '1 ', 'a.', 'Via A ', '+3', 'a@', '@a.', 'linkedin ', 'a.github.io', 't.me/', 'x.'];
     for (const unit of shapes) {
       expect(growthRatio((size) => pseudonymizeText(unit.repeat(size), giulia), 2000)).toBeLessThan(LINEAR_GROWTH_MAX);
     }
