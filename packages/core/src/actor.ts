@@ -18,8 +18,8 @@ export interface UserActor extends ActorBase {
 }
 
 export interface DelegatedActor extends ActorBase {
-  readonly type: 'agent' | 'api_key';
-  /** Agent name or API key id. */
+  readonly type: 'agent' | 'api_key' | 'connected_app';
+  /** Agent name, API key id or connected app grant id. */
   readonly id: string;
   readonly onBehalfOfUserId: string;
 }
