@@ -95,6 +95,7 @@ const runSettings = (o: JsonReaderOptions): RunSettings => {
     backoff: o.backoff ?? o.rate?.backoff ?? JSON_READER_DEFAULTS.backoff,
     maxWaitMs: o.maxWaitMs ?? o.rate?.maxWaitMs ?? JSON_READER_DEFAULTS.maxWaitMs,
     trustRateHeaders: o.rate?.ignoreHeaders !== true,
+    publicFileConcurrency: o.rate?.publicFileConcurrency,
     resolve: o.resolve ?? resolveAll,
     transport: o.transport ?? { http: httpRequest, https: httpsRequest },
     sleep: o.sleep ?? realSleep,

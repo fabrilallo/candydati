@@ -66,7 +66,7 @@ describe('Teamtailor connector: description', () => {
     expect(teamtailorConnector.credentials.safeParse({ ...credentials, extra: 1 }).success).toBe(false);
     expect(teamtailorConnector.credentials.safeParse({ apiKey: 'short' }).success).toBe(false);
     expect(teamtailorConnector.hosts(credentials)).toEqual([{ exact: 'api.teamtailor.com' }]);
-    expect(teamtailorConnector.rate).toMatchObject({ capacity: 3, refillPerSecond: 3, ignoreHeaders: true, maxRetries: 8 });
+    expect(teamtailorConnector.rate).toMatchObject({ capacity: 3, refillPerSecond: 3, ignoreHeaders: true, publicFileConcurrency: 4, maxRetries: 8 });
   });
 });
 
@@ -135,6 +135,27 @@ describe('Teamtailor connector: a full run on the docs fixtures', () => {
     for (const req of downloads) expect(req.headers).not.toHaveProperty('authorization');
     for (const req of downloads) expect(req.headers.host).toBe(new URL(storage()).host);
     expect(report).toMatchObject({ files: 2, filesSkipped: 3 });
+  });
+
+  it('downloads several files at once but never more than four, and all of them finish before the run ends', async () => {
+    let active = 0;
+    let peak = 0;
+    api.routes.set('/files/resume.pdf', (_req, res) => {
+      active += 1;
+      peak = Math.max(peak, active);
+      setTimeout(() => {
+        active -= 1;
+        res.writeHead(200, { 'content-type': 'application/pdf' }).end(PDF);
+      }, 15);
+    });
+    api.routes.set('/v1/candidates', Array.from({ length: 12 }, (_, index) => ({ id: `x${index}`, type: 'candidates', attributes: { email: `x${index}@example.test`, 'first-name': 'X', 'last-name': 'Y', resume: `${storage()}/files/resume.pdf` } })));
+    api.routes.set('/v1/job-applications', Array.from({ length: 12 }, (_, index) => ({ id: `ap${index}`, type: 'job-applications', attributes: { 'created-at': '2016-01-01T00:00:00Z' }, relationships: { candidate: { data: { id: `x${index}`, type: 'candidates' } }, job: { data: { id: '7199', type: 'jobs' } }, stage: { data: { id: '7199-5', type: 'stages' } } } })));
+    const { report, collected, files } = await run();
+    expect(report.files).toBe(12);
+    expect(collected.files.size).toBe(12);
+    expect(files.keys().length).toBe(12);
+    expect(peak).toBeGreaterThan(1);
+    expect(peak).toBeLessThanOrEqual(4);
   });
 
   it('skips a failing download and counts it, without stopping the run', async () => {

@@ -9,6 +9,11 @@ export interface RateOptions {
    * and its `Retry-After` are still honoured.
    */
   readonly ignoreHeaders?: boolean | undefined;
+  /**
+   * Signed-URL file downloads (`downloadPublicFile`, hosts other than the API's) do not take from this bucket, which
+   * paces the vendor's API: they run at most this many at once instead. Unset: they share the bucket.
+   */
+  readonly publicFileConcurrency?: number | undefined;
   /** Retries after the first attempt, for a long account whose source throttles in bursts (default: the reader's). */
   readonly maxRetries?: number | undefined;
   readonly backoff?: BackoffOptions | undefined;
