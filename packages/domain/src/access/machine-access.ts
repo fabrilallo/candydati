@@ -40,7 +40,8 @@ export const AGENT_EXTRA_FORBIDDEN: readonly Permission[] = ['candidate:move'];
 
 /** Permissions an actor type can never use, whatever the role. Users and the system have no such list. */
 export function forbiddenPermissions(actorType: ActorType): readonly Permission[] {
-  if (actorType === 'api_key') return MACHINE_FORBIDDEN_PERMISSIONS;
+  // A connected app (OAuth, MCP) is a machine acting for a person, exactly like an API key.
+  if (actorType === 'api_key' || actorType === 'connected_app') return MACHINE_FORBIDDEN_PERMISSIONS;
   if (actorType === 'agent') return [...MACHINE_FORBIDDEN_PERMISSIONS, ...AGENT_EXTRA_FORBIDDEN];
   return [];
 }

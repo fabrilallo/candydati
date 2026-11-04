@@ -5,7 +5,7 @@ import { MESSAGE_DIRECTIONS, MESSAGE_STATUSES } from '../messaging/message.js';
 import { isoDate } from './common.js';
 
 /** Where an entry of the timeline comes from. `external` is a name that is not a member (an interviewer by link, a migrated note author). */
-export const TIMELINE_ACTOR_TYPES = ['person', 'agent', 'api_key', 'system', 'candidate', 'external'] as const;
+export const TIMELINE_ACTOR_TYPES = ['person', 'agent', 'api_key', 'connected_app', 'system', 'candidate', 'external'] as const;
 export type TimelineActorType = (typeof TIMELINE_ACTOR_TYPES)[number];
 
 export const timelineActorSchema = z.object({ type: z.enum(TIMELINE_ACTOR_TYPES), name: z.string().nullable() });
