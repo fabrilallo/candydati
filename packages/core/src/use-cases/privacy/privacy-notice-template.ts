@@ -13,10 +13,12 @@ export const privacyNoticeTemplate = definePrivacyUseCase({
   handler: async ({ deps, actor, input }): Promise<{ readonly text: string }> => {
     const organization = await deps.organizations.findById(actor.organizationId);
     if (!organization) throw new NotFoundError('Organization not found.');
+    const recruitsForClients = (await deps.organizationSettings?.get(actor.organizationId))?.recruitsForClients ?? false;
     return {
       text: renderPrivacyTemplate({
         language: input.language,
         organizationName: organization.name,
+        recruitsForClients,
         ...(input.contactEmail === undefined ? {} : { contactEmail: input.contactEmail }),
       }),
     };

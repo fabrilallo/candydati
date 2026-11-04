@@ -14,6 +14,7 @@ import { listPrivacyNotices } from './list-privacy-notices.js';
 import { privacyNoticeTemplate } from './privacy-notice-template.js';
 import { publishPrivacyNotice } from './publish-privacy-notice.js';
 import { renderPrivacyTemplate } from './privacy-template.js';
+import { createInMemoryOrganizationSettings } from '../../testing/in-memory-job-requests.js';
 
 const admin = userActor({ role: 'admin', organizationId: 'org_a', id: 'user_admin' });
 const deps = () =>
@@ -104,6 +105,20 @@ describe('privacyNoticeTemplate', () => {
     expect(it_).toContain('solo alle candidature delle posizioni di cui fanno parte');
     expect(en).toContain('only the applications to the positions whose team they are on');
     expect(en).not.toContain('involved in the selection');
+  });
+
+  it('tells candidates of an agency that their profile may be presented to a client, and that they are told when it is', async () => {
+    const it_ = renderPrivacyTemplate({ language: 'it', organizationName: 'Acme', recruitsForClients: true });
+    const en = renderPrivacyTemplate({ language: 'en', organizationName: 'Acme', recruitsForClients: true });
+    expect(it_).toContain('aziende clienti');
+    expect(it_).toContain('ti avvisiamo per email');
+    expect(en).toContain('client companies');
+    expect(en).toContain('we tell you by email');
+    expect(renderPrivacyTemplate({ language: 'en', organizationName: 'Acme' })).not.toContain('client companies');
+    const settings = createInMemoryOrganizationSettings({ org_a: { recruitsForClients: true } });
+    const { text } = await privacyNoticeTemplate({ ...deps(), organizationSettings: settings }, admin, { language: 'en', contactEmail: 'dpo@acme.example' });
+    expect(text).toContain('client companies');
+    expect(privacyNoticeInputSchema.safeParse(completePrivacyNoticeInput({ language: 'en', text })).success).toBe(true);
   });
 
   it('leaves a visible placeholder without a contact email', async () => {

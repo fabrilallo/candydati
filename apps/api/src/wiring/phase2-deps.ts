@@ -50,7 +50,7 @@ export function createPhase2Deps({ uow, files, queue, receipts, feedback }: Phas
       outbox: r.outbox,
       ...clock,
     },
-    privacyDeps: { ...core, privacyNotices, organizations, ...clock },
+    privacyDeps: { ...core, privacyNotices, organizations, organizationSettings: r.organizationSettings, ...clock },
     submitDeps: {
       organizations,
       jobs,

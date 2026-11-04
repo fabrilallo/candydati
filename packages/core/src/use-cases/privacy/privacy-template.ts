@@ -5,14 +5,24 @@ export interface TemplateParams {
   readonly organizationName: string;
   /** Absent: a visible placeholder is left for the controller to fill. */
   readonly contactEmail?: string;
+  /** An agency (PRODUCT.md §3.5): the notice also covers presenting profiles to client companies. */
+  readonly recruitsForClients?: boolean;
 }
+
+const AGENCY_IT = (org: string): string => `
+
+Selezioni per conto di aziende clienti. ${org} svolge ricerca e selezione anche per conto di aziende clienti. Se ti candidi a una posizione presso un cliente, possiamo presentare il tuo profilo a quell'azienda: nome e cognome e, quando lo riteniamo utile, il curriculum e alcune note del recruiter. Non condividiamo mai i tuoi contatti né i dati di altre candidature. Ogni volta che il tuo profilo viene presentato ti avvisiamo per email indicando l'azienda, o dicendoti che è un cliente che ha chiesto di restare riservato: in quel caso puoi chiederci quale. L'azienda cliente riceve i dati solo per quella selezione, come titolare autonomo del trattamento; la base giuridica è la stessa della selezione (art. 6.1.b GDPR). Le sue risposte sono un'opinione: la decisione resta a una persona di ${org}.`;
+
+const AGENCY_EN = (org: string): string => `
+
+Recruiting for client companies. ${org} also recruits on behalf of client companies. If you apply for a position at a client, we may present your profile to that company: your name and, when useful, your CV and some notes of the recruiter. We never share your contact details or anything about other applications. Every time your profile is presented we tell you by email which company it went to, or that it is a client that asked to stay confidential: you can then ask us which one. The client company receives the data only for that search, as a separate data controller; the legal basis is the same as for the selection (Article 6(1)(b) GDPR). Its answers are an opinion: a person at ${org} decides.`;
 
 const CONTACT_PLACEHOLDER: Readonly<Record<Locale, string>> = {
   it: '[indirizzo email di contatto da inserire]',
   en: '[contact email address to be added]',
 };
 
-const ITALIAN = (org: string, contact: string): string => `Informativa sul trattamento dei dati personali dei candidati (artt. 13 e 14 del Regolamento UE 2016/679, "GDPR")
+const ITALIAN = (org: string, contact: string, agency: boolean): string => `Informativa sul trattamento dei dati personali dei candidati (artt. 13 e 14 del Regolamento UE 2016/679, "GDPR")
 
 Titolare del trattamento. Il titolare è ${org}. Per qualsiasi richiesta sul trattamento dei tuoi dati puoi scrivere a ${contact}.
 
@@ -24,7 +34,7 @@ Database candidati. Solo se lo scegli espressamente, possiamo conservare i tuoi 
 
 Come li trattiamo. Il curriculum viene letto da persone autorizzate di ${org}. Per estrarne in modo ordinato le informazioni principali (esperienze, competenze, lingue) possiamo usare strumenti automatici, compresi modelli linguistici forniti da responsabili del trattamento. Questi strumenti propongono dati da verificare: nessuna decisione sulla tua candidatura è presa in modo automatizzato e nessuna persona viene scartata da un sistema automatico.
 
-Chi può vedere i dati. Dentro ${org} i dati sono accessibili solo a persone autorizzate: chi amministra le selezioni (titolari e amministratori dell'account e, salvo diversa scelta di ${org}, i recruiter) e il gruppo di selezione di ciascuna posizione (responsabili dell'assunzione e intervistatori), che accedono solo alle candidature delle posizioni di cui fanno parte. Ogni consultazione del profilo e del curriculum è registrata.
+Chi può vedere i dati. Dentro ${org} i dati sono accessibili solo a persone autorizzate: chi amministra le selezioni (titolari e amministratori dell'account e, salvo diversa scelta di ${org}, i recruiter) e il gruppo di selezione di ciascuna posizione (responsabili dell'assunzione e intervistatori), che accedono solo alle candidature delle posizioni di cui fanno parte. Ogni consultazione del profilo e del curriculum è registrata.${agency ? AGENCY_IT(org) : ''}
 
 A chi comunichiamo i dati. I dati sono comunicati solo ai fornitori che li trattano per nostro conto (ospitalità dell'infrastruttura, invio di email, strumenti di estrazione), nominati responsabili del trattamento. Non vendiamo i tuoi dati e non li usiamo per addestrare modelli.
 
@@ -36,7 +46,7 @@ Reclamo. Se ritieni che il trattamento violi il GDPR puoi proporre reclamo all'a
 
 Questo testo è un modello di partenza: il titolare deve verificarlo e adattarlo alla propria situazione prima di pubblicarlo.`;
 
-const ENGLISH = (org: string, contact: string): string => `Privacy notice for job applicants (Articles 13 and 14 of Regulation (EU) 2016/679, "GDPR")
+const ENGLISH = (org: string, contact: string, agency: boolean): string => `Privacy notice for job applicants (Articles 13 and 14 of Regulation (EU) 2016/679, "GDPR")
 
 Data controller. The controller is ${org}. For any request about how your personal data is handled you can write to ${contact}.
 
@@ -48,7 +58,7 @@ Candidate database. Only if you explicitly choose so, we may also keep your data
 
 How we process it. Your CV is read by authorised people at ${org}. To pull out the main information in an orderly way (experience, skills, languages) we may use automated tools, including language models provided by data processors. These tools suggest data to be verified: no decision about your application is taken automatically and no one is rejected by an automated system.
 
-Who can see the data. Within ${org} the data is accessible only to authorised people: those who run recruitment (account owners and administrators and, unless ${org} chooses otherwise, recruiters) and the selection team of each position (hiring managers and interviewers), who reach only the applications to the positions whose team they are on. Every view of your profile and CV is logged.
+Who can see the data. Within ${org} the data is accessible only to authorised people: those who run recruitment (account owners and administrators and, unless ${org} chooses otherwise, recruiters) and the selection team of each position (hiring managers and interviewers), who reach only the applications to the positions whose team they are on. Every view of your profile and CV is logged.${agency ? AGENCY_EN(org) : ''}
 
 Who receives the data. The data is disclosed only to providers that process it on our behalf (infrastructure hosting, email delivery, extraction tools), appointed as data processors. We do not sell your data and we do not use it to train models.
 
@@ -63,5 +73,6 @@ This text is a starting template: the controller must review it and adapt it to 
 /** Default privacy text for job applicants. Pure: the same params always give the same text. */
 export function renderPrivacyTemplate(params: TemplateParams): string {
   const contact = params.contactEmail ?? CONTACT_PLACEHOLDER[params.language];
-  return params.language === 'it' ? ITALIAN(params.organizationName, contact) : ENGLISH(params.organizationName, contact);
+  const agency = params.recruitsForClients ?? false;
+  return params.language === 'it' ? ITALIAN(params.organizationName, contact, agency) : ENGLISH(params.organizationName, contact, agency);
 }

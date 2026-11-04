@@ -30,7 +30,7 @@ Versione: [numero] - Ultimo aggiornamento: [gg/mm/aaaa]
 
 ## Categorie di interessati
 
-Candidati e candidate; persone di riferimento eventualmente indicate [se previsto]; utenti interni dell'azienda (recruiter, responsabili di assunzione) per i dati di accesso e il registro delle azioni.
+Candidati e candidate; persone di riferimento eventualmente indicate [se previsto]; utenti interni dell'azienda (recruiter, responsabili di assunzione) per i dati di accesso e il registro delle azioni; [solo per chi seleziona per conto di clienti] referenti delle aziende clienti (nome ed email), destinatari delle shortlist.
 
 ## Categorie di dati
 
@@ -45,6 +45,8 @@ Candidati e candidate; persone di riferimento eventualmente indicate [se previst
 ## Destinatari
 
 Personale autorizzato del titolare, con permessi per ruolo e per annuncio. Responsabili e sub-responsabili: vedi `sub-responsabili.md` (hosting, storage file, email, modello linguistico, monitoraggio). [Altri destinatari: consulenti, società del gruppo, se presenti.]
+
+[Solo per agenzie, head hunter e consulenti che selezionano per conto di clienti.] Aziende clienti, titolari autonomi, per la sola selezione della posizione a cui la persona si è candidata: ricevono tramite shortlist il nome e, se il recruiter lo sceglie, il curriculum e alcune note; mai i contatti, le categorie particolari o i dati di altre candidature. Ogni invio è registrato, il candidato ne riceve notizia via email (con il nome del cliente o l'indicazione che è riservato) e l'export dei suoi dati elenca i clienti che li hanno ricevuti. Il link al cliente è personale, scade dopo 14 giorni ed è revocabile. [Indicare l'accordo con ciascun cliente sull'uso dei dati: solo per quella selezione, nessuna conservazione oltre il necessario, nessuna ulteriore comunicazione.]
 
 ## Trasferimenti verso paesi terzi
 
