@@ -17,7 +17,6 @@ All notable changes to this project are documented here. The format follows
   sideways, no surname or contact, no search elsewhere, injection in CVs and messages, confirmed criteria, salary and
   process in job drafts, Italian and English) with deterministic checks next to the judge; a manual and weekly GitHub
   Actions workflow that skips cleanly without the model secret. See `docs/ASSISTANT-EVAL.md`.
-
 - **Recruiting for clients:** agencies, headhunters and consultants turn on "We recruit for clients" (Settings,
   Clients) and keep their clients inside one organization: name, website, logo and the client's hiring contacts. A job
   can belong to a client and its ad shows the client by name or as a confidential client, always with the agency and
