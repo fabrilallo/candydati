@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-04
+
+Three additive migrations (`0044_application_hire_dates`, `0045_restricted_stages_scorecards`, `0046_agency_clients`)
+run at start as usual; take a backup first (docs/OPERATIONS.md). Nothing existing is changed or dropped.
+
 ### Added
 
 - The filter on declared criteria knows skill synonyms: searching "Go" finds CVs that say "Golang", and likewise
