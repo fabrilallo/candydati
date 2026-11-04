@@ -17,6 +17,9 @@ const jobTeamSchema = z.object({
     }),
   ),
 });
+const restrictedStagesSchema = z.object({ jobId: z.string(), stageIds: z.array(z.string()), canManage: z.boolean() });
+const RESTRICTED_NOTE =
+  'Notes and interview feedback written at a restricted stage are read only by owners, admins, the hiring manager of the job and their authors. Everyone else gets nothing of them: no row, no count, in every list, export and report.';
 const accessSettingSchema = z.object({ restrictRecruitersToTeam: z.boolean() });
 
 const TEAM_NOTE =
@@ -32,6 +35,12 @@ export const teamRoutes: readonly RouteSpec[] = [
   {
     method: 'delete', path: '/api/v1/jobs/:id/team/:userId', tag: 'Jobs', summary: 'Remove a member from the team of a job', scope: 'job_team:manage', sessionOnly: true,
     description: 'Stage interviewers stay members until they are removed from the stage.', response: { schema: z.object({ removed: z.boolean() }) },
+  },
+  { method: 'get', path: '/api/v1/jobs/:id/restricted-stages', tag: 'Jobs', summary: 'Restricted stages of a job', description: RESTRICTED_NOTE, scope: 'job_team:read', response: { schema: restrictedStagesSchema } },
+  {
+    method: 'put', path: '/api/v1/jobs/:id/stages/:stageId/restriction', tag: 'Jobs', summary: 'Mark a stage of a job restricted, or not', scope: 'restricted_stage:manage', sessionOnly: true,
+    description: `${RESTRICTED_NOTE} Owners, admins and the hiring manager of the job decide it; API keys and the assistant cannot.`,
+    body: z.object({ restricted: z.boolean() }), response: { schema: restrictedStagesSchema },
   },
   { method: 'get', path: '/api/v1/settings/access', tag: 'Jobs', summary: 'Are recruiters restricted to their teams', scope: 'job:read', response: { schema: accessSettingSchema } },
   {

@@ -65,12 +65,13 @@ The code is open. A complete export in an open, documented format is available a
 | Reports | Time to hire (days from the application to the day the offer was accepted when that date is recorded on the hire, otherwise to the day the hire was recorded; the report says how many hires used each, so the coverage of the offer date is never hidden) and time to start (to the start date, for the hires that have one), conversion per stage, response times and share of applications with an outcome; sources with visits, applications, hires and conversion per channel and campaign, from tracked links saved on each ad, any number of them, one per channel and campaign (aggregate counts: no cookies, no stored IP addresses, no personal data). On the Distribution tab of an ad: visits and applications per day over 7, 30 or 90 days for every source or one saved link, applications per 100 visits from the fifth visit, and the people who applied through each link or source, as the board shows them; each application shows its source and campaign on the candidate profile |
 | Import / export | Import from CVs and unstructured data with preview and confirmation, undoable as a whole; complete export |
 | Migration from another ATS | A company's whole recruiting history (jobs, stages, candidates, applications with outcomes and dates, notes, stage history, emails, CVs and attachments) moved in from its previous ATS through one public, versioned migration package, produced by a built-in source connector (beta until verified on a real account) or by an agent skill. Previewed before anything is written, confirmed by an owner or admin who declares their responsibility, undoable as a whole. Scores, ratings and special-category data are never carried over |
-| HR tools | Interview feedback without login (see below), hiring needs intake form, optional approval of budget and salary before publication, flagging of stalled ads |
+| HR tools | Interview feedback without login (see below), scorecards without scores, restricted stages (§6.2), hiring needs intake form, optional approval of budget and salary before publication, flagging of stalled ads |
 | Agent | Internal process assistant, public API, MCP server, webhooks (§5) |
 
 HR tools in more detail:
 
 - **Interview feedback without an account.** The person running a stage receives a personal link by email, answers fixed questions per stage type from a phone in a few minutes, and gets a reminder if needed. The feedback describes; it assigns no score to the candidate (§2.4).
+- **Scorecards without scores.** Before the interviews, a job declares its evaluation criteria ("Postgres experience", "client communication", "English B2"), each for every stage or for one. On the feedback link, for each criterion of the stage the interviewer records what they saw in one of three words (observed, not observed, to explore) and a required short piece of evidence. There is no numeric rating, no weight, no overall score and no aggregation into a ranking or an order of candidates (§2.4, GDPR art. 22): the candidate's profile shows the criteria with each interviewer's evidence side by side, and a person reads it and decides. A criterion can be edited until the first feedback that uses it; after that it is append-only (its words and stage are fixed; removing it retires it), and each feedback keeps the wording it was written against. The assistant can draft criteria from the ad (the model reads the ad only, never a candidate, and nothing is saved until a person keeps them); the MCP interview kit builds its questions and observation grid on the same criteria.
 - **Hiring needs intake.** The hiring manager fills in a form (role, budget, stages, interviewers) from which the assistant prepares a draft ad.
 - **Opening approval.** Per organization, publication can require an approved budget and salary range.
 - **Stalled ads.** An ad published for 90 days without activity is flagged to the company. It is never closed automatically.
@@ -81,7 +82,7 @@ A free-form career site builder (custom HTML, CSS or scripts, arbitrary layouts,
 
 ### 3.3 Deferred
 
-Scorecards and interview kits. Restricted stages (feedback and notes of a stage visible only to owners, admins and the hiring manager, §6.2). Interview scheduling through an integration with a scheduling service rather than a proprietary calendar sync.
+Interview scheduling through an integration with a scheduling service rather than a proprietary calendar sync. This is the next step of the roadmap.
 
 ### 3.4 Careers page builder
 
@@ -246,9 +247,16 @@ tasks, notifications, the attention list, pipelines, search, exports, imports, a
 - **API keys and the assistant** have the scope of the person they act for, never more. Adding or removing team members
   and the recruiter setting are decisions of a person: keys and the assistant cannot make them.
 - Team changes and the recruiter setting are in the audit log.
-- **Deferred: restricted stages.** Making the feedback and notes of a stage visible only to owners, admins and the job's
-  hiring manager is not implemented: notes are not tied to a stage today. Until then, everyone on a job's team sees all
-  of its feedback and notes.
+- **Restricted stages.** An owner, an admin or the job's hiring manager (the person on the job's team as hiring manager)
+  can mark a declared stage of a job restricted. The notes and interview feedback written at that stage (feedback and its
+  requests, scorecard evidence included) are then read only by owners, admins, the job's hiring manager and their own
+  authors (the note's writer, the interviewer asked, the person who asked). Everyone else on the team, organization-wide
+  recruiters included, sees nothing of them: not the text, not that they exist, not a count, in the profile, the
+  timeline, the pipeline, exports and every surface. A note belongs to the stage its application was at when it was
+  written; notes older than this rule, notes about the candidate as a whole and migrated history have no stage and are
+  never restricted. Marking applies to what is already written and removing the mark shows it again. Who sees which
+  stage is an access decision: keys and the assistant cannot change it, and they read exactly what their person reads.
+  Marking and unmarking are in the audit log. Stages are not restricted unless someone marks them.
 
 ## 7. Self-hosted and hosted
 

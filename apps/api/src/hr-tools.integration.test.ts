@@ -130,7 +130,7 @@ describe('interview feedback without login', () => {
     expect(form.submission).toBeNull();
     expect(form.recommendations).toEqual(['proceed', 'do_not_proceed', 'discuss']);
     expect(Object.keys(form).toSorted()).toEqual(
-      ['expiresAt', 'hasCv', 'interviewerName', 'jobTitle', 'language', 'organizationName', 'questions', 'recommendations', 'stage', 'submission', 'candidate'].toSorted(),
+      ['expiresAt', 'hasCv', 'interviewerName', 'jobTitle', 'language', 'organizationName', 'questions', 'criteria', 'observations', 'recommendations', 'stage', 'submission', 'candidate'].toSorted(),
     );
 
     const cv = await anonymous('GET', `/api/v1/public/feedback/${token}/cv`);

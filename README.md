@@ -57,6 +57,8 @@ Status: pre-1.0 (see the [changelog](CHANGELOG.md)). Full product definition: [d
 **Collaboration**
 - Organizations, roles and per-job selection teams
 - Interview feedback without login, via personal links
+- Scorecards without scores: per-job criteria, each interviewer's evidence side by side
+- Restricted stages: notes and feedback of a stage read only by owners, admins and the hiring manager
 - Hiring needs intake, optional budget and salary approval, stalled job flags
 - Reports: time to hire, conversion per stage, sources, response times
 
@@ -249,9 +251,7 @@ More in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and the [decision records](
 
 No dates. Deferred from the current scope ([PRODUCT.md §3.3](docs/PRODUCT.md)):
 
-- Scorecards and interview kits
-- Restricted stages: feedback and notes visible only to owners, admins and the hiring manager
-- Interview scheduling through an integration with a scheduling service
+- Next: interview scheduling through an integration with a scheduling service
 - Migration connectors out of beta once a real migration confirms each one; more sources on request
 
 ## Contributing

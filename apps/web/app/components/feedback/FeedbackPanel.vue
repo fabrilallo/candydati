@@ -3,6 +3,7 @@ import type { CandidateApplicationDto } from '@candydati/domain'
 import { MessageSquarePlusIcon } from '@lucide/vue'
 import { feedbackStageName, groupRequests } from '@/lib/feedback-view'
 import { formatDate } from '@/lib/format'
+import { atRestrictedStage } from '@/lib/restricted-stages-api'
 import { stageName } from '@/lib/pipeline-board'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -20,7 +21,14 @@ const stages = computed(() => props.application.stages.map((stage) => ({ id: sta
 const interviewStages = computed(() => stages.value.filter((stage) => props.application.stages.some((ref) => ref.id === stage.id && ref.declared !== null)))
 const nameOf = (id: string, label: string | null): string => feedbackStageName(id, label, stages.value)
 const groups = computed(() => groupRequests(fb.feedback.value?.requests ?? []))
+/** Criteria with each interviewer's evidence; only when someone has written on at least one. */
+const scorecard = computed(() => {
+  const rows = fb.feedback.value?.scorecard ?? []
+  return rows.some((row) => row.entries.length > 0) ? rows : []
+})
 const submitted = computed(() => fb.feedback.value?.feedback ?? [])
+/** Stages whose notes and feedback only a few people read (PRODUCT.md §6.2): a lock marks them. */
+const restricted = (stageId: string): boolean => atRestrictedStage(stageId, fb.feedback.value?.restrictedStageIds)
 const empty = computed(() => (fb.feedback.value?.requests.length ?? 0) === 0 && submitted.value.length === 0)
 const open = computed(() => (['overdue', 'pending'] as const).map((group) => ({ group, items: groups.value[group] })).filter((entry) => entry.items.length > 0))
 const ask = async (input: Parameters<typeof fb.ask>[0]): Promise<void> => {
@@ -49,9 +57,10 @@ const ask = async (input: Parameters<typeof fb.ask>[0]): Promise<void> => {
         <h4 class="text-sm font-semibold" :class="entry.group === 'overdue' && 'text-destructive'">{{ t(`feedback.tab.groups.${entry.group}`) }}</h4>
         <ul class="grid gap-2">
           <li v-for="request in entry.items" :key="request.id" class="grid gap-0.5 rounded-lg border bg-card px-4 py-3" data-testid="feedback-request">
-            <p class="text-[0.9375rem] font-medium">
+            <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.9375rem] font-medium">
               {{ request.interviewerName }}
               <span v-if="request.interviewerKind === 'external'" class="text-xs font-normal text-muted-foreground">({{ t('feedback.tab.request.external') }})</span>
+              <RestrictedStageBadge v-if="restricted(request.stageId)" />
             </p>
             <p class="figure text-sm text-muted-foreground">
               {{ t('feedback.tab.request.stage', { stage: nameOf(request.stageId, request.stageLabel) }) }} · {{ t('feedback.tab.request.asked', { date: formatDate(request.createdAt, locale) }) }}
@@ -61,9 +70,10 @@ const ask = async (input: Parameters<typeof fb.ask>[0]): Promise<void> => {
           </li>
         </ul>
       </section>
+      <ScorecardMatrix v-if="scorecard.length > 0" :rows="scorecard" :stage-name="nameOf" />
       <section v-if="submitted.length > 0" class="grid gap-2" data-testid="feedback-group-submitted">
         <h4 class="text-sm font-semibold">{{ t('feedback.tab.groups.submitted') }}</h4>
-        <FeedbackSubmittedItem v-for="item in submitted" :key="item.id" :item="item" :stage-name="nameOf(item.stageId, item.stageLabel)" />
+        <FeedbackSubmittedItem v-for="item in submitted" :key="item.id" :item="item" :stage-name="nameOf(item.stageId, item.stageLabel)" :restricted="restricted(item.stageId)" />
       </section>
     </template>
 

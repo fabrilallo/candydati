@@ -53,7 +53,10 @@ describe('feedback view', () => {
     expect(buildSubmission(['a', 'b', 'c'], { c: ' tre ', a: ' uno', b: ' ' }, 'proceed')).toEqual({
       answers: { a: 'uno', c: 'tre' },
       recommendation: 'proceed',
+      observations: [],
     })
+    const observations = [{ criterionId: 'k1', observation: 'observed' as const, evidence: 'Query solide' }]
+    expect(buildSubmission(['a'], { a: 'uno' }, 'discuss', observations).observations).toEqual(observations)
   })
 
   it('validates the request dialog', () => {

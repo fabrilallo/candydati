@@ -74,6 +74,7 @@ describe('permissions', () => {
       'feedback:manage',
       'feedback:read',
       'report:read',
+      'restricted_stage:manage',
     ]);
     expect(roleHasPermission('hiring_manager', 'message:send')).toBe(false);
     expect(roleHasPermission('hiring_manager', 'job:publish')).toBe(false);
@@ -100,6 +101,10 @@ describe('permissions', () => {
 
   it('gives careers_page:manage only to owner and admin', () => {
     expect(ROLES.filter((role) => roleHasPermission(role, 'careers_page:manage'))).toEqual(['owner', 'admin']);
+  });
+
+  it('gives restricted_stage:manage to owner, admin and hiring manager, never to recruiters or interviewers', () => {
+    expect(ROLES.filter((role) => roleHasPermission(role, 'restricted_stage:manage'))).toEqual(['owner', 'admin', 'hiring_manager']);
   });
 
   it('gives job:approve only to owner and admin', () => {

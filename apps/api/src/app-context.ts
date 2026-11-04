@@ -35,6 +35,7 @@ import {
 } from '@candydati/core';
 import type { AdQualityAnalyzer } from '@candydati/domain';
 import { createLiveSuggester } from './ai/responsibility-suggester.js';
+import { createLiveCriteriaDrafter } from './ai/criteria-drafter.js';
 import { sql, type Db } from '@candydati/db';
 import { fromNodeHeaders } from 'better-auth/node';
 import type { FastifyRequest } from 'fastify';
@@ -51,7 +52,7 @@ import { configuredProviders } from './wiring/configured-providers.js';
 import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
 import { zipStreamFactory } from '@candydati/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
-import type { Actor, ApiKeyDeps, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
+import type { Actor, ApiKeyDeps, CriteriaDrafter, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
 import { authenticateApiKey, withStorageErrors } from '@candydati/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
@@ -135,6 +136,7 @@ export interface AppContext {
   readonly jobDeps: JobDeps;
   /** The fast model that proposes responsibilities (off while none is configured). */
   readonly responsibilitySuggester: ResponsibilitySuggester;
+  readonly criteriaDrafter: CriteriaDrafter;
   /** Read-only aggregates of the history kept by core. */
   readonly reportDeps: ReportDeps;
   readonly candidateDeps: CandidateDeps;
@@ -189,6 +191,7 @@ export interface AppContextDeps {
   readonly adQuality: AdQualityAnalyzer;
   /** Defaults to the fast model in force; tests pass a fake. */
   readonly responsibilitySuggester?: ResponsibilitySuggester | undefined;
+  readonly criteriaDrafter?: CriteriaDrafter | undefined;
   readonly files: FileStorage;
   /** pg-boss in production (bindable: tasks are sent inside the transaction that queues them); a fake in tests. */
   readonly queue: TaskQueue | BindableTaskQueue;
@@ -216,7 +219,7 @@ export interface AppContextDeps {
 
 const isBindable = (queue: TaskQueue | BindableTaskQueue): queue is BindableTaskQueue => 'bindTo' in queue && typeof queue.bindTo === 'function';
 
-export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, responsibilitySuggester, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, responsibilitySuggester, criteriaDrafter, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
@@ -247,7 +250,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...createMigrationDeps({ uow, files, queue, authSecret: env.BETTER_AUTH_SECRET, connectors: migrationConnectors }),
     ...instanceContext({ env, db, uow, files, queue, images, phase2, runtime: emailRuntime, log: emailLog, tester: instanceEmailTester, aiRuntime, aiCheck }),
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
-    timelineDeps: { ...phase2.candidateDeps, interviewFeedback: hr.feedbackRecords.interviewFeedback },
+    timelineDeps: { ...phase2.candidateDeps, ...hr.feedbackRecords },
     ...hrContext(hr),
     ...createTeamDeps(uow),
     messagingDeps: messaging.messagingDeps,
@@ -259,12 +262,25 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     budget: createDailyBudget(budgetStore ?? createPgBudgetStore(db)),
     rateLimit: rateLimit ?? DEFAULT_RATE_LIMIT,
     jobDeps,
-    responsibilitySuggester: responsibilitySuggester ?? createLiveSuggester(() => aiRuntime.snapshot().fast),
+    ...adWritingHelpers(aiRuntime, responsibilitySuggester, criteriaDrafter),
     reportDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, jobs: jobDeps.jobs, reports: uow.repositories.reports, now: reportClock ?? (() => new Date()) },
     distributionDeps: createDistributionDeps({ uow, publicBaseUrl: env.platform.url, channels: distributionChannels }),
     trackedLinkDeps: createTrackedLinkDeps(uow),
     jobViewDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, jobViews: uow.repositories.jobViews, now: () => new Date() },
     publicSiteDeps: { jobs: jobDeps.jobs, organizations: jobDeps.organizations, privacyNotices: jobDeps.privacyNotices, publicBaseUrl: env.platform.url },
+  };
+}
+
+/** The fast-model helpers that read an ad only (never a candidate): proposed responsibilities and evaluation criteria. */
+function adWritingHelpers(
+  aiRuntime: AppContextDeps['aiRuntime'],
+  responsibilitySuggester: ResponsibilitySuggester | undefined,
+  criteriaDrafter: CriteriaDrafter | undefined,
+): Pick<AppContext, 'responsibilitySuggester' | 'criteriaDrafter'> {
+  const fast = () => aiRuntime.snapshot().fast;
+  return {
+    responsibilitySuggester: responsibilitySuggester ?? createLiveSuggester(fast),
+    criteriaDrafter: criteriaDrafter ?? createLiveCriteriaDrafter(fast),
   };
 }
 

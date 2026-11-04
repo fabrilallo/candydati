@@ -62,9 +62,9 @@ describe('feedback api', () => {
       calls.push({ url, body: call?.body, method: call?.method })
       return ok(url.endsWith('/feedback') ? { requests: [], feedback: [] } : {})
     }
-    await submitPublicFeedback(request, 'a/b', { answers: { q1: 'x' }, recommendation: 'discuss' })
+    await submitPublicFeedback(request, 'a/b', { answers: { q1: 'x' }, recommendation: 'discuss', observations: [] })
     await requestFeedback(request, 'app1', { stageId: 's1' })
-    expect(await listApplicationFeedback(request, 'app1')).toEqual({ requests: [], feedback: [] })
+    expect(await listApplicationFeedback(request, 'app1')).toEqual({ requests: [], feedback: [], restrictedStageIds: [], scorecard: [] })
     expect(calls.map((c) => [c.method ?? 'GET', c.url])).toEqual([
       ['POST', '/api/v1/public/feedback/a%2Fb'],
       ['POST', '/api/v1/applications/app1/feedback/request'],

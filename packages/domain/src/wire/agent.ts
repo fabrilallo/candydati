@@ -34,6 +34,8 @@ export const MCP_TOOL_NAMES = [
   'analyze_job_ad',
   'check_publishable',
   'publish_job',
+  'get_evaluation_criteria',
+  'set_evaluation_criteria',
   'get_pipeline',
   'list_attention',
   'add_candidate_note',

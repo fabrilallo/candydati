@@ -91,6 +91,9 @@ describe('MCP prompts', () => {
     expect(text).toContain('job-abc');
     expect(text).toMatch(/no scores, ratings/i);
     expect(text).toMatch(/protected characteristic/);
+    expect(text).toContain('get_evaluation_criteria');
+    expect(text).toMatch(/observed, not observed or to explore/);
+    expect(text).toMatch(/only after I agree/);
   });
 
   it('refuses missing, empty, oversized or malformed arguments', () => {

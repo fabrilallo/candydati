@@ -51,7 +51,7 @@ export const publicRoutes: readonly RouteSpec[] = [
   },
   {
     method: 'post', path: '/api/v1/public/feedback/:token', tag: 'Public', summary: 'Submit interview feedback', scope: null,
-    description: 'Single use: a second submission is `409`. Only `answers` and `recommendation` are accepted; any other field, such as a score, is refused with `422`. The recommendation is an opinion for the person who decides.',
+    description: 'Single use: a second submission is `409`. Only `answers`, `recommendation` and `observations` (one per criterion of the scorecard asked at the stage, a word and evidence) are accepted; any other field, such as a score, is refused with `422`. The recommendation is an opinion for the person who decides.',
     body: submitFeedbackBody, response: { schema: z.object({ submittedAt: z.iso.datetime() }) },
   },
   {

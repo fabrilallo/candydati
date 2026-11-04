@@ -111,7 +111,7 @@ describe('getCandidate', () => {
     expect(view.applications[0]?.job).toMatchObject({ id: 'job_1', slug: 'backend' });
     expect(view.applications[0]?.extraction?.status).toBe('done');
     expect(view.applications[0]?.messageCount).toBe(0);
-    expect(view.notes).toEqual([{ note: expect.objectContaining({ id: 'note_1' }), authorName: 'Rita Recruiter' }]);
+    expect(view.notes).toEqual([{ note: expect.objectContaining({ id: 'note_1' }), authorName: 'Rita Recruiter', restricted: false }]);
     expect(d.auditLog.events()).toHaveLength(1);
     expect(d.auditLog.events()[0]).toMatchObject({ action: 'candidate.viewed', target: { type: 'candidate', id: 'cand_1' }, metadata: {} });
   });

@@ -1,4 +1,4 @@
-import type { JobTeamMember } from '@candydati/domain';
+import type { JobTeamMember, RestrictedStage } from '@candydati/domain';
 import type { OrganizationSettingsRepository } from '../job-request-ports.js';
 import type { JobTeamRepository } from '../job-team-ports.js';
 import type { CandidateStore } from './in-memory-candidates.js';
@@ -14,6 +14,7 @@ export interface JobTeamSources {
 
 export interface InMemoryJobTeams extends JobTeamRepository {
   snapshot(): readonly JobTeamMember[];
+  restrictedSnapshot(): readonly RestrictedStage[];
   /** The same team rows, read together with other sources (a world built in steps adds them later). */
   withSources(sources: JobTeamSources): InMemoryJobTeams;
 }
@@ -21,7 +22,10 @@ export interface InMemoryJobTeams extends JobTeamRepository {
 const sameRow = (a: JobTeamMember, organizationId: string, jobId: string, userId: string): boolean =>
   a.organizationId === organizationId && a.jobId === jobId && a.userId === userId;
 
-function build(rows: Cell<readonly JobTeamMember[]>, sources: JobTeamSources): InMemoryJobTeams {
+const sameStage = (a: RestrictedStage, organizationId: string, jobId: string, stageId: string): boolean =>
+  a.organizationId === organizationId && a.jobId === jobId && a.stageId === stageId;
+
+function build(rows: Cell<readonly JobTeamMember[]>, restricted: Cell<readonly RestrictedStage[]>, sources: JobTeamSources): InMemoryJobTeams {
   const applications = (organizationId: string) => (sources.store?.read().applications ?? []).filter((a) => a.organizationId === organizationId);
   return {
     async jobIdsOf(organizationId, userId) {
@@ -63,11 +67,25 @@ function build(rows: Cell<readonly JobTeamMember[]>, sources: JobTeamSources): I
       rows.set(before.filter((row) => !sameRow(row, organizationId, jobId, userId)));
       return rows.get().length !== before.length;
     },
+    async listRestrictedStages(organizationId, jobId) {
+      return restricted.get().filter((row) => row.organizationId === organizationId && (jobId === undefined || row.jobId === jobId));
+    },
+    async restrictStage(stage) {
+      if (restricted.get().some((row) => sameStage(row, stage.organizationId, stage.jobId, stage.stageId))) return false;
+      restricted.set([...restricted.get(), stage]);
+      return true;
+    },
+    async unrestrictStage(organizationId, jobId, stageId) {
+      const before = restricted.get();
+      restricted.set(before.filter((row) => !sameStage(row, organizationId, jobId, stageId)));
+      return restricted.get().length !== before.length;
+    },
     snapshot: () => rows.get(),
-    withSources: (more) => build(rows, { ...sources, ...more }),
+    restrictedSnapshot: () => restricted.get(),
+    withSources: (more) => build(rows, restricted, { ...sources, ...more }),
   };
 }
 
 export function createInMemoryJobTeams(initial: readonly JobTeamMember[] = [], sources: JobTeamSources = {}): InMemoryJobTeams {
-  return build(cell<readonly JobTeamMember[]>([...initial]), sources);
+  return build(cell<readonly JobTeamMember[]>([...initial]), cell<readonly RestrictedStage[]>([]), sources);
 }

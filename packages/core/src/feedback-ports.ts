@@ -1,4 +1,4 @@
-import type { FeedbackRequest, InterviewFeedback, StageInterviewer } from '@candydati/domain';
+import type { FeedbackRequest, InterviewFeedback, ScorecardCriterion, StageInterviewer } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository } from './candidate-ports.js';
 import type { MemberDirectory } from './automation-ports.js';
 import type { FileStorage } from './intake-ports.js';
@@ -46,6 +46,31 @@ export interface InterviewFeedbackRepository {
   listByApplication(organizationId: string, applicationId: string): Promise<readonly InterviewFeedback[]>;
 }
 
+export interface ScorecardCriterionPatch {
+  readonly label: string;
+  readonly stageId: string | null;
+  readonly position: number;
+}
+
+/**
+ * The scorecard of each job (PRODUCT.md §3.1). Every method takes the organization. A criterion used by a feedback is
+ * append-only: its label and stage never change and it is never deleted, only retired.
+ */
+export interface ScorecardRepository {
+  /** Every criterion of the job, retired ones included, in the scorecard's order. */
+  listByJob(organizationId: string, jobId: string): Promise<readonly ScorecardCriterion[]>;
+  create(criteria: readonly ScorecardCriterion[]): Promise<void>;
+  /** Label, stage and position of a criterion no feedback used yet. False when one used it meanwhile: nothing is written. */
+  updateUnused(organizationId: string, id: string, patch: ScorecardCriterionPatch): Promise<boolean>;
+  /** Only the place in the list: allowed for every active criterion. */
+  move(organizationId: string, id: string, position: number): Promise<void>;
+  retire(organizationId: string, id: string, at: Date): Promise<void>;
+  /** Deletes a criterion no feedback used yet. False when one used it meanwhile: nothing is deleted. */
+  removeUnused(organizationId: string, id: string): Promise<boolean>;
+  /** Stamps `firstUsedAt` on the criteria that have none (the first feedback written against them). */
+  markUsed(organizationId: string, ids: readonly string[], at: Date): Promise<void>;
+}
+
 /** What candidate export and erasure need to find feedback. */
 export interface FeedbackRecords {
   readonly feedbackRequests: FeedbackRequestRepository;
@@ -72,6 +97,7 @@ export interface FeedbackDeps extends CoreDeps, FeedbackRecords, FeedbackMailPar
   readonly organizations: OrganizationDirectory;
   readonly members: MemberDirectory;
   readonly stageInterviewers: StageInterviewerRepository;
+  readonly scorecards: ScorecardRepository;
   readonly files: FileStorage;
   readonly newId: () => string;
   readonly now: () => Date;
@@ -85,4 +111,4 @@ export type FeedbackStageEntryDeps = FeedbackStageEntryParts &
 
 /** The public form: a visitor with a link, no session. */
 export type PublicFeedbackDeps = FeedbackRecords &
-  Pick<FeedbackDeps, 'auditLog' | 'transaction' | 'jobs' | 'candidates' | 'applications' | 'organizations' | 'files' | 'newId' | 'hash' | 'now'>;
+  Pick<FeedbackDeps, 'auditLog' | 'transaction' | 'jobs' | 'candidates' | 'applications' | 'organizations' | 'scorecards' | 'files' | 'newId' | 'hash' | 'now'>;

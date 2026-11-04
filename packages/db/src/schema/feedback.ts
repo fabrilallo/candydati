@@ -1,4 +1,5 @@
-import type { FeedbackRecommendation, InterviewerKind } from '@candydati/domain';
+import type { CriterionObservation, FeedbackRecommendation, InterviewerKind } from '@candydati/domain';
+import { sql } from 'drizzle-orm';
 import { index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { application } from './candidate.js';
@@ -79,6 +80,8 @@ export const interviewFeedback = pgTable(
     interviewerName: text('interviewer_name').notNull(),
     answers: jsonb('answers').$type<Record<string, string>>().notNull(),
     recommendation: text('recommendation').$type<FeedbackRecommendation>().notNull(),
+    /** One per scorecard criterion asked at the stage, label included as written against: words and evidence, never a number. */
+    observations: jsonb('observations').$type<readonly CriterionObservation[]>().notNull().default(sql`'[]'::jsonb`),
     submittedAt: timestamp('submitted_at', { withTimezone: true }).notNull(),
   },
   (table) => [
@@ -87,6 +90,32 @@ export const interviewFeedback = pgTable(
   ],
 );
 
+/**
+ * The scorecard of a job: what the interviewers look for, declared before the interviews (PRODUCT.md §3.1). There is no
+ * weight or score column on purpose (§2.4). A criterion is editable until `first_used_at`; after that it is only retired,
+ * so past feedback stays consistent (it also keeps the label it was written against).
+ */
+export const jobScorecardCriterion = pgTable(
+  'job_scorecard_criterion',
+  {
+    id: text('id').primaryKey(),
+    organizationId: organizationRef(),
+    jobId: text('job_id')
+      .notNull()
+      .references(() => job.id, { onDelete: 'restrict' }),
+    /** Null: asked at every declared stage. */
+    stageId: text('stage_id'),
+    label: text('label').notNull(),
+    position: integer('position').notNull(),
+    createdBy: text('created_by').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    firstUsedAt: timestamp('first_used_at', { withTimezone: true }),
+    retiredAt: timestamp('retired_at', { withTimezone: true }),
+  },
+  (table) => [index('job_scorecard_criterion_org_job_idx').on(table.organizationId, table.jobId)],
+);
+
+export type JobScorecardCriterionRow = typeof jobScorecardCriterion.$inferSelect;
 export type JobStageInterviewerRow = typeof jobStageInterviewer.$inferSelect;
 export type FeedbackRequestRow = typeof feedbackRequest.$inferSelect;
 export type InterviewFeedbackRow = typeof interviewFeedback.$inferSelect;

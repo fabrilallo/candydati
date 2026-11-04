@@ -45,6 +45,12 @@ export const STATEMENTS = {
    * transfer, so owner and admin only; never grantable to a key or to the agent.
    */
   migration: ['manage'],
+  /**
+   * Marks a stage of a job as restricted (PRODUCT.md §6.2): its notes and feedback are then read only by owners, admins,
+   * the job's hiring manager and their authors. Hiring managers hold it only for the jobs where they are the hiring manager
+   * (checked in core). Never grantable to a key or to the agent: who reads what is an access decision.
+   */
+  restricted_stage: ['manage'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -87,6 +93,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     report: ['read'],
     careers_page: ['manage'],
     migration: ['manage'],
+    restricted_stage: ['manage'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],
@@ -116,6 +123,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     task: ['read', 'manage'],
     feedback: ['manage', 'read'],
     report: ['read'],
+    restricted_stage: ['manage'],
   },
   interviewer: {
     job: ['read'],

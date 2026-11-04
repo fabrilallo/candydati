@@ -126,7 +126,10 @@ async function seedJobB(deps: JobScopeWorld): Promise<void> {
     lastReminderAt: null, requestedBy: 'user_test', createdAt: new Date('2026-05-01T00:00:00Z'), submittedAt: new Date('2026-05-02T00:00:00Z'),
   };
   await deps.feedbackRequests.create(request);
-  await deps.interviewFeedback.create({ id: 'fb_b', organizationId: ORG_A, applicationId: 'app_b', requestId: 'fbr_b', stageId: 'stage-0', interviewerName: 'Bravoleak Panel', answers: { strengths: 'B-ONLY answer' }, recommendation: 'proceed', submittedAt: new Date('2026-05-02T00:00:00Z') });
+  await deps.scorecards.create([
+    { id: 'crit_b', organizationId: ORG_A, jobId: JOB_B, stageId: null, label: 'B-ONLY criterion', position: 0, createdBy: 'user_test', createdAt: new Date('2026-05-01T00:00:00Z'), firstUsedAt: null, retiredAt: null },
+  ]);
+  await deps.interviewFeedback.create({ id: 'fb_b', organizationId: ORG_A, applicationId: 'app_b', requestId: 'fbr_b', stageId: 'stage-0', interviewerName: 'Bravoleak Panel', answers: { strengths: 'B-ONLY answer' }, recommendation: 'proceed', observations: [], submittedAt: new Date('2026-05-02T00:00:00Z') });
 }
 
 /** What one run of a use case did: refused (not found / forbidden), or returned something. */
