@@ -9,8 +9,8 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
- * The rules of a job, one section per stage (same names as the board): "Quando una candidatura entra in …". They send
- * a template or create a task; they never move or decide, and say so.
+ * The rules of a job, one section per stage (same names as the board), each with its trigger, its conditions and what it
+ * does. They send a template or create a task; they never move or decide, and say so.
  */
 const props = defineProps<{ job: JobDto }>()
 const { t } = useI18n()
@@ -72,7 +72,7 @@ const authorOf = (rule: AutomationRuleDto): string | null => team.nameOf(rule.cr
         <div class="flex flex-wrap items-center justify-between gap-2">
           <h2 :id="`automation-stage-${stage.id}`" class="flex items-center gap-2 text-base font-semibold tracking-tight">
             <StageDot :tone="stageTone(stage)" />
-            {{ t('automations.when', { stage: stageName(stage, t) }) }}
+            {{ t('automations.stageRules', { stage: stageName(stage, t) }) }}
           </h2>
           <Button variant="outline" size="sm" :data-testid="`automation-add-${stage.id}`" @click="startEdit(stage.id, null)"><PlusIcon aria-hidden="true" />{{ t('automations.add') }}</Button>
         </div>
@@ -102,6 +102,7 @@ const authorOf = (rule: AutomationRuleDto): string | null => team.nameOf(rule.cr
     </template>
     <RuleDialog
       v-model:open="dialogOpen"
+      :job-id="job.id"
       :stage-label="editingStage ? stageName(editingStage, t) : ''"
       :stage-id="editing?.stageId ?? ''"
       :rule="editing?.rule ?? null"

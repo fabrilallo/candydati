@@ -36,7 +36,9 @@ export const useAutomations = (jobId: string) => {
   }
 
   const setEnabled = async (rule: AutomationRuleDto, enabled: boolean): Promise<void> => {
-    const fresh = await run(rule.id, () => updateRule(request, rule.id, { stageId: rule.stageId, enabled, action: rule.action }), null)
+    // A full replacement: the trigger and the conditions travel as they are, or they would be reset.
+    const input = { stageId: rule.stageId, trigger: rule.trigger, conditions: rule.conditions, enabled, action: rule.action }
+    const fresh = await run(rule.id, () => updateRule(request, rule.id, input), null)
     if (fresh) upsert(fresh)
   }
 
