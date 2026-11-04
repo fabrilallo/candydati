@@ -1,4 +1,4 @@
-import type { ApplicationCardDto, PipelineDto, Outcome  } from '@candydati/domain'
+import type { ApplicationCardDto, HireDatesInput, PipelineDto, Outcome } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { decideApplication, moveApplication } from '@/lib/candidate-api'
@@ -31,8 +31,8 @@ export const usePipeline = (jobId: string) => {
   const move = (id: string, stageId: string): Promise<boolean> =>
     apply(id, (current) => moveCard(current, id, stageId, new Date().toISOString()), () => moveApplication(request, id, stageId), 'pipeline.moveFailed')
 
-  const decide = (id: string, outcome: Outcome): Promise<boolean> =>
-    apply(id, (current) => decideCard(current, id, outcome, new Date().toISOString()), () => decideApplication(request, id, outcome), 'pipeline.decideFailed')
+  const decide = (id: string, outcome: Outcome, hireDates: HireDatesInput = {}): Promise<boolean> =>
+    apply(id, (current) => decideCard(current, id, outcome, new Date().toISOString()), () => decideApplication(request, id, outcome, hireDates), 'pipeline.decideFailed')
 
   /** A change made elsewhere (the candidate sheet) lands on the board without a reload. */
   const accept = (card: ApplicationCardDto): void => board.accept(card)

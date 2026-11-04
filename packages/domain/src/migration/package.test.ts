@@ -150,6 +150,30 @@ describe('parseMigrationPackage', () => {
     expect(refused(withCandidate({ linkedinUrl: 'javascript:alert(1)' }))).toBe(true);
   });
 
+  describe('hire dates', () => {
+    const hired = { outcome: 'hired', closedAt: '2025-02-10T09:00:00Z' };
+
+    it('accepts an offer accepted date and a start date on a hired application, and stays valid without them', () => {
+      expect(refused(withApplication(hired))).toBe(false);
+      expect(refused(withApplication({ ...hired, offerAcceptedOn: '2025-02-05', startOn: '2025-03-03' }))).toBe(false);
+    });
+
+    it.each([
+      ['dates on an application that is not hired', { offerAcceptedOn: '2025-02-05' }, ['applications', 0, 'offerAcceptedOn'], 'hire_dates_require_hired'],
+      ['an offer before the application', { ...hired, offerAcceptedOn: '2025-01-11' }, ['applications', 0, 'offerAcceptedOn'], 'offer_before_application'],
+      ['a start before the offer', { ...hired, offerAcceptedOn: '2025-02-05', startOn: '2025-02-04' }, ['applications', 0, 'startOn'], 'start_before_offer'],
+      ['a start before the application without an offer', { ...hired, startOn: '2025-01-01' }, ['applications', 0, 'startOn'], 'start_before_application'],
+    ])('refuses %s', (_what, patch, path, message) => {
+      const issues = parseMigrationPackage(withApplication(patch)).error?.issues ?? [];
+      expect(issues).toContainEqual(expect.objectContaining({ path, message }));
+    });
+
+    it('refuses a date with a time or out of bounds', () => {
+      expect(refused(withApplication({ ...hired, startOn: '2025-03-03T09:00:00Z' }))).toBe(true);
+      expect(refused(withApplication({ ...hired, startOn: '1900-03-03' }))).toBe(true);
+    });
+  });
+
   it('refuses an application pointing at a stage of another job', () => {
     const result = parseMigrationPackage(withApplication({ stageRef: 'nope' }));
     expect(result.success).toBe(false);

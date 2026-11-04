@@ -68,7 +68,9 @@ describe('getReports on Postgres', () => {
   it('narrows to one job', async () => {
     const { owner, ids } = await seeded();
     const report = await getReports(deps(), owner, { ...query, jobId: ids.backend });
-    expect(report.timeToHire.overall).toEqual({ count: 3, median: 15, p75: 17.5 });
+    expect(report.timeToHire.overall).toEqual({ count: 3, median: 15, p75: 16 });
+    expect(report.timeToHire.basis).toEqual({ offerDate: 2, recordedDate: 1 });
+    expect(report.timeToHire.toStart).toEqual({ count: 1, median: 29, p75: 29 });
     expect(report.funnel.stages).toEqual(expectedJobFunnels().backend);
     expect(report.responses).toMatchObject({ kept: 5, missed: 2, responseHours: { count: 6, median: 48, p75: 48 }, open: 1, overdue: 1 });
     expect(report.outcomeCoverage).toEqual({ count: 4, total: 5, rate: 0.8 });

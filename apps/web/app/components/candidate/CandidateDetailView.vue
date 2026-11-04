@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApplicationCardDto, EmailTemplateKind, Outcome  } from '@candydati/domain'
+import type { ApplicationCardDto, EmailTemplateKind, HireDatesInput, Outcome } from '@candydati/domain'
 import { FileTextIcon, HistoryIcon, ListTodoIcon, MailIcon, MessagesSquareIcon, MessageSquareTextIcon, ShieldCheckIcon, UserRoundIcon } from '@lucide/vue'
 import { applicationStatus, currentApplication, fullName, stageOf } from '@/lib/candidate-view'
 import { renewalDeadline } from '@/lib/import-view'
@@ -66,8 +66,8 @@ const move = async (stageId: string): Promise<void> => {
   const card = current.value ? await c.move(current.value.id, stageId) : null
   if (card) emit('card', card)
 }
-const decide = async (outcome: Outcome): Promise<void> => {
-  const card = current.value ? await c.decide(current.value.id, outcome) : null
+const decide = async (outcome: Outcome, hireDates: HireDatesInput): Promise<void> => {
+  const card = current.value ? await c.decide(current.value.id, outcome, hireDates) : null
   if (!card) return
   emit('card', card)
   const kind = outcomeTemplateKind(outcome)
@@ -75,6 +75,10 @@ const decide = async (outcome: Outcome): Promise<void> => {
     proposal.value = { kind, applicationId: card.id }
     tab.value = 'messages'
   }
+}
+const saveHireDates = async (dates: HireDatesInput): Promise<void> => {
+  const card = current.value ? await c.saveHireDates(current.value.id, dates) : null
+  if (card) emit('card', card)
 }
 const addNote = async (body: string, applicationId: string | null, done: (ok: boolean) => void): Promise<void> => {
   const ok = await c.note(body, applicationId)
@@ -133,10 +137,19 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
           :can-move="can(role, 'candidate:move')"
           :can-decide="can(role, 'candidate:decide')"
           :busy="c.busy.value === 'move' || c.busy.value === 'decide'"
+          :applied-at="current.createdAt"
           @move="move"
           @decide="decide"
         />
       </header>
+
+      <HireDatesPanel
+        v-if="current && current.outcome === 'hired'"
+        :application="current"
+        :can-edit="can(role, 'candidate:decide')"
+        :busy="c.busy.value === 'dates'"
+        @save="saveHireDates"
+      />
 
       <TagEditor :tags="detail.candidate.tags" :editable="can(role, 'candidate:update')" :busy="c.busy.value === 'tags'" @save="c.saveTags" />
 

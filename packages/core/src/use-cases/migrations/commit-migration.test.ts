@@ -52,6 +52,8 @@ describe('commitMigration: what it writes', () => {
       stageId: backend?.content.process[1]?.id,
       outcome: 'hired',
       closedAt: new Date('2025-04-01T09:00:00Z'),
+      offerAcceptedOn: '2025-03-15',
+      startOn: '2025-05-05',
       createdAt: new Date('2025-02-01T09:00:00Z'),
       stageChangedAt: new Date('2025-03-01T09:00:00Z'),
       source: 'import',

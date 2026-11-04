@@ -36,6 +36,15 @@ registerEndpoint('/api/v1/applications/a1/move', {
   },
 })
 
+registerEndpoint('/api/v1/applications/a1/hire-dates', {
+  method: 'PATCH',
+  handler: async (event) => {
+    const body = await readBody<{ startOn?: string | null }>(event)
+    state.calls.push({ what: 'hire-dates', body })
+    return ok(card('a1', 'received', { outcome: 'hired', closedAt: '2026-10-14T10:00:00.000Z', offerAcceptedOn: '2026-10-14', startOn: body.startOn ?? null }))
+  },
+})
+
 registerEndpoint('/api/v1/candidates/c404', () => new Response(JSON.stringify({ success: false, data: null, error: { code: 'not_found', message: 'Candidate not found.' } }), { status: 404, headers: { 'content-type': 'application/json' } }))
 
 const mounted: { unmount: () => void }[] = []
@@ -87,6 +96,27 @@ describe('CandidateDetailView', () => {
     })
     const wrapper = await mountDetail()
     expect(wrapper.find('[data-testid="candidate-stage"]').text()).toContain('Fase: Chiacchierata')
+  })
+
+  it('shows the offer and start dates of a hire and lets whoever can record outcomes edit them', async () => {
+    const base = detail()
+    state.value = detail({
+      applications: base.applications.map((app) => ({ ...app, outcome: 'hired' as const, closedAt: '2026-10-14T10:00:00.000Z', offerAcceptedOn: '2026-10-14', startOn: null })),
+    })
+    const wrapper = await mountDetail()
+    expect(wrapper.find('[data-testid="hire-offer-value"]').text()).toContain('14 ott 2026')
+    expect(wrapper.find('[data-testid="hire-start-value"]').text()).toBe('Non indicata')
+    await wrapper.find('[data-testid="hire-dates-edit"]').trigger('click')
+    await flushPromises()
+    await wrapper.find('[data-testid="hire-start-date"]').setValue('2026-11-02')
+    await wrapper.find('[data-testid="hire-dates-save"]').trigger('click')
+    await vi.waitFor(() => expect(state.calls).toEqual([{ what: 'hire-dates', body: { offerAcceptedOn: '2026-10-14', startOn: '2026-11-02' } }]))
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="hire-start-value"]').text()).toContain('2 nov 2026'))
+  })
+
+  it('has no dates panel on an open application', async () => {
+    const wrapper = await mountDetail()
+    expect(wrapper.find('[data-testid="hire-dates-panel"]').exists()).toBe(false)
   })
 
   it('says "Fase rimossa" for a decided application whose stage no longer exists, without failing', async () => {

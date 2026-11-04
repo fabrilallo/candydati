@@ -4,6 +4,7 @@ import { EXTRACTION_STATUSES, OUTCOMES, cvExtractionSchema } from './application
 import { FEEDBACK_RECOMMENDATIONS } from '../feedback/feedback.js';
 import { MESSAGE_DIRECTIONS, MESSAGE_STATUSES } from '../messaging/message.js';
 import { ATTACHMENT_KINDS } from './attachment.js';
+import { hireDateSchema } from './hire-dates.js';
 
 /** Identifier of the public, versioned schema of the candidate export (PRODUCT.md §6). Bump the version on breaking changes. */
 export const CANDIDATE_EXPORT_SCHEMA_ID = 'candidate-export.v1';
@@ -69,6 +70,9 @@ const exportedApplicationSchema = z.object({
   message: z.string(),
   createdAt: date,
   closedAt: nullableDate,
+  /** Hired only, `YYYY-MM-DD`; absent in exports made before these dates existed. */
+  offerAcceptedOn: hireDateSchema.nullable().optional(),
+  startOn: hireDateSchema.nullable().optional(),
   retentionExpiresAt: date,
   consent: z.object({
     /** `to_renew`: imported data, nothing consented yet (version 0, no scopes). */

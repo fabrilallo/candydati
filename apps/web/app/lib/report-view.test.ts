@@ -1,7 +1,20 @@
 import { rate } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
 import { emptyReportsFixture, reportsFixture } from '~~/test/fixtures/phase10-fixtures'
-import { formatDaysValue, formatRate, campaignRows, funnelRows, hasNoVisits, headlines, isReportEmpty, percentOf, responseTime, sourceRows, stageTypeRows, timeRows } from './report-view'
+import { formatDaysValue, formatRate, campaignRows, funnelRows, hasNoVisits, headlines, hireBasis, isReportEmpty, percentOf, responseTime, sourceRows, stageTypeRows, timeRows } from './report-view'
+
+describe('hireBasis', () => {
+  const base = reportsFixture()
+
+  it('says how many hires were measured to the offer date and how many to the recorded day, with the start figures', () => {
+    expect(hireBasis(base)).toEqual({ offer: 3, recorded: 1, total: 4, start: { count: 2, median: 45 } })
+  })
+
+  it('is null without hires or when the section is invalid', () => {
+    expect(hireBasis({ timeToHire: { ...base.timeToHire!, basis: { offerDate: 0, recordedDate: 0 } } })).toBeNull()
+    expect(hireBasis({ timeToHire: null })).toBeNull()
+  })
+})
 
 describe('percentOf', () => {
   it('rounds to a whole percentage', () => {

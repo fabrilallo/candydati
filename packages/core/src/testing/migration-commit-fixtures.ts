@@ -60,6 +60,8 @@ export const COMMIT_PACKAGE: MigrationPackageInput = {
       createdAt: T('2025-02-01'),
       outcome: 'hired',
       closedAt: T('2025-04-01'),
+      offerAcceptedOn: '2025-03-15',
+      startOn: '2025-05-05',
       origin: 'LinkedIn',
       files: [{ path: 'files/a1/cv.pdf', kind: 'cv', fileName: 'ada-cv.pdf' }],
       stageHistory: [

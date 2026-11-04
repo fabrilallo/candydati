@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Offer accepted and start dates on a hire:** two optional dates (date only), set when recording the hire or edited
+  afterwards (same permission as recording the outcome, audited). The time to hire in the reports is measured to the
+  offer accepted date when it is set, otherwise to the day the hire was recorded; the report says how many hires used
+  each, adds the time to start, and the CSV export carries both. The REST API, the open migration package format
+  (backward compatible optional fields) and the assistant report tool carry them too.
+
 ### Fixed
 
 - Docs: the READMEs and the website no longer say the MCP server covers everything in the interface. REST covers the

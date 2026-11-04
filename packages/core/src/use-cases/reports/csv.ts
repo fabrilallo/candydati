@@ -31,6 +31,8 @@ export function reportsToCsv(report: ReportsDto): string {
       ['all', 'all', timeToHire.overall.count, timeToHire.overall.median, timeToHire.overall.p75],
       ...timeToHire.byJob.map((j) => [j.jobId, j.title, j.count, j.median, j.p75]),
     ]),
+    section('time_to_hire_basis', ['offer_accepted_date', 'hire_recorded_date'], [[timeToHire.basis.offerDate, timeToHire.basis.recordedDate]]),
+    section('time_to_start_days', ['count', 'median', 'p75'], [[timeToHire.toStart.count, timeToHire.toStart.median, timeToHire.toStart.p75]]),
     section('time_to_fill_days', ['job_id', 'job', 'published_at', 'first_hire_at', 'days'], timeToFill.items.map((i) => [i.jobId, i.title, i.publishedAt, i.firstHireAt, i.days])),
     section('funnel', ['position', 'stage_type', 'entered', 'advanced', 'base', 'conversion_rate'], funnel.stages.map(stageRow)),
     section('outcomes', ['job_id', 'job', 'hired', 'not_selected', 'withdrawn'], [

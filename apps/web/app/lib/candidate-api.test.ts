@@ -12,6 +12,7 @@ import {
   listCandidates,
   moveApplication,
   updateCandidateTags,
+  updateHireDates,
 } from './candidate-api'
 import type { JobApiRequest } from './job-api'
 import { getActivePrivacyNotice, getPrivacyTemplate, listPrivacyVersions, publishPrivacyNotice } from './privacy-api'
@@ -34,6 +35,15 @@ describe('pipeline calls', () => {
     const decide = send(ok(card('a1', 'stage-0', { outcome: 'hired', closedAt: '2026-10-14T10:00:00.000Z' })))
     expect((await decideApplication(decide, 'a1', 'hired')).outcome).toBe('hired')
     expect(decide.mock.calls[0]).toEqual(['/api/v1/applications/a1/decide', { method: 'POST', body: { outcome: 'hired' } }])
+  })
+
+  it('sends the hire dates with the decision and edits them afterwards', async () => {
+    const decide = send(ok(card('a1', 'stage-0', { outcome: 'hired', offerAcceptedOn: '2026-10-20', startOn: '2026-11-03' })))
+    expect((await decideApplication(decide, 'a1', 'hired', { offerAcceptedOn: '2026-10-20', startOn: '2026-11-03' })).startOn).toBe('2026-11-03')
+    expect(decide.mock.calls[0]).toEqual(['/api/v1/applications/a1/decide', { method: 'POST', body: { outcome: 'hired', offerAcceptedOn: '2026-10-20', startOn: '2026-11-03' } }])
+    const edit = send(ok(card('a1', 'stage-0', { outcome: 'hired', startOn: null })))
+    await updateHireDates(edit, 'a1', { startOn: null })
+    expect(edit.mock.calls[0]).toEqual(['/api/v1/applications/a1/hire-dates', { method: 'PATCH', body: { startOn: null } }])
   })
 
   it('refuses a card with an unknown outcome', async () => {

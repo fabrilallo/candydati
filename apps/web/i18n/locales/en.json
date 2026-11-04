@@ -536,7 +536,8 @@
       "application": {
         "received": "Received an application",
         "moved": "Moved an application to another stage",
-        "decided": "Recorded the outcome of an application"
+        "decided": "Recorded the outcome of an application",
+        "hire_dates_updated": "Set the offer accepted or start date of a hire"
       },
       "candidate": {
         "viewed": "Opened a candidate profile",
@@ -1546,6 +1547,20 @@
       "title": "Record the outcome?",
       "body": "{name}'s application closes with the outcome: {outcome}. It cannot be moved afterwards. No message is sent automatically.",
       "confirm": "Record outcome"
+    },
+    "hireDates": {
+      "title": "Offer and start",
+      "hint": "Optional, date only. The time to hire in the reports is measured to the day the offer was accepted when you set it.",
+      "offerAcceptedOn": "Offer accepted on",
+      "startOn": "Start date",
+      "notSet": "Not set",
+      "edit": "Edit dates",
+      "save": "Save dates",
+      "saved": "Dates saved",
+      "invalid": "Enter a valid date between 2000 and 2100.",
+      "offerBeforeApplication": "The offer cannot be accepted before the application date.",
+      "startBeforeOffer": "The start date cannot be before the day the offer was accepted.",
+      "startBeforeApplication": "The start date cannot be before the application date."
     },
     "tags": {
       "label": "Tags",
@@ -3630,7 +3645,10 @@
     },
     "times": {
       "title": "Timing per job",
-      "info": "Hire: days from application to hire. Fill: days from publication to the first hire.",
+      "info": "Hire: days from application to the day the offer was accepted when that date is recorded, otherwise to the day the hire was recorded. Fill: days from publication to the first hire.",
+      "hireBasis": "{offer} of {total} hires measured to the offer accepted date, {recorded} to the day the hire was recorded.",
+      "startMedian": "Time to start: {days} median, {count} hires with a start date",
+      "startNone": "No hire in this period has a start date.",
       "fillMedian": "day median time to fill | days median time to fill",
       "fillBasis": "no jobs | 1 job | {count} jobs",
       "job": "Job",

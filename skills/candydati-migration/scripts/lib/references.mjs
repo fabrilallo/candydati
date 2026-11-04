@@ -62,6 +62,22 @@ function checkDates(application, index, issues) {
   if (outcome !== undefined && closedAt === undefined) issues.push({ path: ['applications', index, 'closedAt'], message: 'closedAt is required when there is an outcome' });
   if (outcome === undefined && closedAt !== undefined) issues.push({ path: ['applications', index, 'outcome'], message: 'outcome is required when there is a closedAt' });
   if (closedAt !== undefined && before(closedAt, createdAt)) issues.push({ path: ['applications', index, 'closedAt'], message: 'closedAt is before createdAt' });
+  checkHireDates(application, index, issues);
+}
+
+/** `offerAcceptedOn` and `startOn` (YYYY-MM-DD) belong to a hire and keep the order application day, offer, start. */
+function checkHireDates(application, index, issues) {
+  const { offerAcceptedOn, startOn, outcome, createdAt } = application;
+  if (offerAcceptedOn === undefined && startOn === undefined) return;
+  const at = (field) => ['applications', index, field];
+  if (outcome !== 'hired') {
+    issues.push({ path: at(offerAcceptedOn === undefined ? 'startOn' : 'offerAcceptedOn'), message: 'offerAcceptedOn and startOn are only allowed when the outcome is "hired"' });
+    return;
+  }
+  const appliedOn = new Date(createdAt).toISOString().slice(0, 10);
+  if (offerAcceptedOn !== undefined && offerAcceptedOn < appliedOn) issues.push({ path: at('offerAcceptedOn'), message: 'offerAcceptedOn is before the day of createdAt' });
+  else if (offerAcceptedOn !== undefined && startOn !== undefined && startOn < offerAcceptedOn) issues.push({ path: at('startOn'), message: 'startOn is before offerAcceptedOn' });
+  else if (offerAcceptedOn === undefined && startOn !== undefined && startOn < appliedOn) issues.push({ path: at('startOn'), message: 'startOn is before the day of createdAt' });
 }
 
 function checkApplication(application, index, known, issues) {

@@ -1,5 +1,6 @@
 import {
   DAY_MS,
+  daysBetweenDates,
   durationStat,
   HOUR_MS,
   viewDay,
@@ -77,10 +78,14 @@ export function createInMemoryReports(store: CandidateStore): ReportRepository {
       const promises = state.promises.filter(inScope);
 
       const hired = applications.filter((a) => a.outcome === 'hired' && a.closedAt !== null && within(a.closedAt, query));
-      const days = (a: (typeof hired)[number]) => ((a.closedAt as Date).getTime() - a.createdAt.getTime()) / DAY_MS;
+      const days = (a: (typeof hired)[number]) =>
+        a.offerAcceptedOn ? daysBetweenDates(a.createdAt, a.offerAcceptedOn) : ((a.closedAt as Date).getTime() - a.createdAt.getTime()) / DAY_MS;
+      const startDays = hired.flatMap((a) => (a.startOn ? [daysBetweenDates(a.createdAt, a.startOn)] : []));
       const hireDays = {
         overall: durationStat(hired.map(days)),
         byJob: [...countBy(hired, (a) => a.jobId)].map(([id, rows]) => ({ jobId: id, stat: durationStat(rows.map(days)) })),
+        basis: { offerDate: hired.filter((a) => a.offerAcceptedOn).length, recordedDate: hired.filter((a) => !a.offerAcceptedOn).length },
+        toStart: durationStat(startDays),
       };
 
       const firstHires = [...countBy(applications.filter((a) => a.outcome === 'hired' && a.closedAt !== null), (a) => a.jobId)]

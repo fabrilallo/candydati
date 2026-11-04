@@ -21,7 +21,12 @@ const jobRef = { jobId: z.string(), title: z.string() };
 const sourceRow = z.object({ origin: z.string(), applications: count, hires: count, visits: count, conversion: z.number().nonnegative().nullable() });
 
 const sectionSchemas = {
-  timeToHire: z.object({ overall: durationStat, byJob: z.array(z.object({ ...jobRef, ...durationStat.shape })) }),
+  timeToHire: z.object({
+    overall: durationStat,
+    byJob: z.array(z.object({ ...jobRef, ...durationStat.shape })),
+    basis: z.object({ offerDate: count, recordedDate: count }),
+    toStart: durationStat,
+  }),
   timeToFill: z.object({
     overall: durationStat,
     items: z.array(z.object({ ...jobRef, publishedAt: z.string(), firstHireAt: z.string(), days: z.number().nonnegative() })),

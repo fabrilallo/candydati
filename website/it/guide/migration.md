@@ -22,7 +22,8 @@ Possono migrare solo owner e admin. Il permesso non è disponibile per le chiavi
 
 - Annunci, con stato (bozza, aperto, chiuso), date e fasi del processo.
 - Candidati: nome, email, telefono, indirizzo LinkedIn, etichette, data di creazione.
-- Candidature: fase attuale, esito (assunto, non selezionato, ritirato) e la sua data, provenienza, lettera di
+- Candidature: fase attuale, esito (assunto, non selezionato, ritirato) e la sua data, per un'assunzione le date
+  facoltative di accettazione dell'offerta e di inizio (`offerAcceptedOn`, `startOn`, solo la data), provenienza, lettera di
   presentazione, risposte alle domande della candidatura, storico dei cambi di fase.
 - CV e altri allegati.
 - Note, con autore e data originale, comprese le note libere dei colloqui.
