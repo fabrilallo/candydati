@@ -17,7 +17,7 @@ const { api, state } = vi.hoisted(() => ({
       invitations: [],
     }),
   },
-  state: { posts: [] as unknown[], puts: [] as unknown[], deletes: 0 },
+  state: { posts: [] as unknown[], puts: [] as unknown[], deletes: 0, copies: [] as unknown[] },
 }))
 mockNuxtImport('useAuthApi', () => () => api)
 
@@ -39,6 +39,10 @@ registerEndpoint('/api/v1/jobs/j1/automations', async (event) => {
   const body = await readBody<{ stageId: string; action: never }>(event)
   state.posts.push(body)
   return ok(rule('r9', { stageId: body.stageId, action: body.action, createdBy: 'u1' }))
+})
+registerEndpoint('/api/v1/automations/copy', async (event) => {
+  state.copies.push(await readBody(event))
+  return ok({ to: { kind: 'job', id: 'j1' }, stageId: 'screen', created: ['r7'] })
 })
 registerEndpoint('/api/v1/automations/r1', async (event) => {
   if (event.method === 'DELETE') {
@@ -62,6 +66,7 @@ beforeEach(() => {
   state.posts.length = 0
   state.puts.length = 0
   state.deletes = 0
+  state.copies.length = 0
   clearNuxtData()
   useViewer().viewer.value = viewerWith('recruiter')
 })
@@ -129,5 +134,29 @@ describe('automations per stage', () => {
     await vi.waitFor(() => expect(document.body.querySelector<HTMLSelectElement>('[data-testid="rule-template"]')?.value).toBe('t-update'))
     document.body.querySelector<HTMLFormElement>('#rule-form')?.requestSubmit()
     await vi.waitFor(() => expect(state.puts).toEqual([{ stageId: 'tech', trigger: { type: 'stage_entered' }, conditions: {}, enabled: true, action: { type: 'send_template', templateId: 't-update' } }]))
+  })
+})
+
+describe('copying rules', () => {
+  it('copies a rule to another stage of the same job, as the viewer’s own', async () => {
+    const wrapper = await mountPanel()
+    await wrapper.find('[data-rule-id="r2"] [data-testid="rule-copy"]').trigger('click')
+    await vi.waitFor(() => expect(button('rule-copy-dialog')).not.toBeNull())
+    expect(button('rule-copy-dialog')?.textContent).toContain('diventano regole tue')
+    expect(document.body.querySelector<HTMLButtonElement>('[data-testid="copy-save"]')?.disabled).toBe(true)
+    const stage = document.body.querySelector<HTMLSelectElement>('[data-testid="copy-stage"]')
+    if (!stage) throw new Error('no stage select')
+    expect([...stage.querySelectorAll('option')].map((option) => option.value)).not.toContain('tech')
+    stage.value = 'screen'
+    stage.dispatchEvent(new Event('change'))
+    await flushPromises()
+    document.body.querySelector<HTMLFormElement>('#rule-copy-form')?.requestSubmit()
+    await vi.waitFor(() => expect(state.copies).toEqual([{ from: { jobId: 'j1', ruleIds: ['r2'] }, to: { jobId: 'j1', stageId: 'screen' } }]))
+  })
+
+  it('offers to copy every rule of a stage that has some', async () => {
+    const wrapper = await mountPanel()
+    expect(wrapper.find('[data-testid="automation-copy-screen"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="automation-copy-tech"]').exists()).toBe(true)
   })
 })

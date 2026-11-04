@@ -587,7 +587,8 @@
       "automation": {
         "saved": "Ha salvato un'automazione",
         "deleted": "Ha eliminato un'automazione",
-        "ran": "Un'automazione ha agito"
+        "ran": "Un'automazione ha agito",
+        "copied": "Ha copiato delle regole di automazione"
       },
       "webhook": {
         "saved": "Ha salvato un webhook",
@@ -653,6 +654,10 @@
       "connected_app": {
         "granted": "Ha collegato un'app al proprio account",
         "revoked": "Ha scollegato un'app"
+      },
+      "move_proposal": {
+        "confirmed": "Ha confermato uno spostamento proposto da un'automazione",
+        "dismissed": "Ha scartato uno spostamento proposto da un'automazione"
       }
     }
   },
@@ -1277,7 +1282,13 @@
       "deleteConfirm": "Elimina template",
       "deleted": "Template eliminato",
       "loadFailed": "Non riusciamo a caricare i template.",
-      "forbidden": "Non hai il permesso di vedere i template."
+      "forbidden": "Non hai il permesso di vedere i template.",
+      "rules": {
+        "summary": "Nessuna automazione | 1 automazione | {count} automazioni",
+        "note": "Un annuncio creato da questo modello riceve queste regole, come regole di chi lo crea.",
+        "line": "{stage}: {what}",
+        "delete": "Togli la regola dal modello"
+      }
     },
     "close": {
       "checking": "Controllo le candidature aperte",
@@ -2158,7 +2169,10 @@
       "job_close_blocked": "L'annuncio ha ancora candidature aperte",
       "automation_failed": "Un'automazione non è riuscita",
       "generic": "Nuova notifica",
-      "retention_expiring": "Dati in scadenza"
+      "retention_expiring": "Dati in scadenza",
+      "automation_alert": "Un'automazione ti ha inviato un avviso",
+      "automation_alert_email": "Un'automazione ti ha inviato un avviso",
+      "move_proposed": "Un'automazione ha proposto uno spostamento da confermare"
     },
     "retention": {
       "named": "I dati di {name} scadono tra 1 giorno | I dati di {name} scadono tra {count} giorni",
@@ -2211,7 +2225,7 @@
   },
   "automations": {
     "title": "Automazioni",
-    "note": "Le automazioni non spostano e non decidono mai sui candidati: inviano un modello o creano un'attività. Un messaggio automatico risulta inviato da chi ha creato la regola, come se l'avesse inviato a mano.",
+    "note": "Le automazioni non spostano e non decidono mai sui candidati. Inviano un modello, creano un'attività, aggiungono un tag, assegnano un seguito, chiedono un feedback agli intervistatori della fase, inviano un avviso o propongono uno spostamento che una persona conferma o scarta. Un messaggio automatico risulta inviato da chi ha creato la regola, come se l'avesse inviato a mano.",
     "add": "Aggiungi regola",
     "edit": "Modifica",
     "delete": "Elimina",
@@ -2226,16 +2240,31 @@
       "taskForOwner": "crea l'attività «{title}» per il responsabile dell'annuncio",
       "taskForOwnerDue": "crea l'attività «{title}» per il responsabile dell'annuncio, da fare in giornata | crea l'attività «{title}» per il responsabile dell'annuncio, da fare entro 1 giorno | crea l'attività «{title}» per il responsabile dell'annuncio, da fare entro {count} giorni",
       "taskForMember": "crea l'attività «{title}» per {member}",
-      "taskForMemberDue": "crea l'attività «{title}» per {member}, da fare in giornata | crea l'attività «{title}» per {member}, da fare entro 1 giorno | crea l'attività «{title}» per {member}, da fare entro {count} giorni"
+      "taskForMemberDue": "crea l'attività «{title}» per {member}, da fare in giornata | crea l'attività «{title}» per {member}, da fare entro 1 giorno | crea l'attività «{title}» per {member}, da fare entro {count} giorni",
+      "assignForOwner": "assegna la candidatura al responsabile dell'annuncio",
+      "assignForOwnerDue": "assegna la candidatura al responsabile dell'annuncio, in scadenza in giornata | assegna la candidatura al responsabile dell'annuncio, in scadenza entro 1 giorno | assegna la candidatura al responsabile dell'annuncio, in scadenza entro {count} giorni",
+      "assignForMember": "assegna la candidatura a {member}",
+      "assignForMemberDue": "assegna la candidatura a {member}, in scadenza in giornata | assegna la candidatura a {member}, in scadenza entro 1 giorno | assegna la candidatura a {member}, in scadenza entro {count} giorni",
+      "addTag": "aggiungi il tag «{tag}»",
+      "requestFeedback": "chiedi un feedback agli intervistatori della fase",
+      "notify_in_app": "avvisa {people} nell'app",
+      "notify_email": "avvisa {people} nell'app e via email",
+      "notifyWebhook": "invia un evento webhook",
+      "proposeMove": "proponi di spostarla in {stage}, da confermare a cura di una persona"
     },
     "form": {
       "addTitle": "Nuova regola: {stage}",
       "editTitle": "Modifica la regola: {stage}",
-      "description": "Una regola agisce solo per le candidature di questa fase: invia un modello o crea un'attività, non sposta e non decide mai.",
+      "description": "Una regola agisce solo sulle candidature di questa fase. Non sposta e non decide mai: al massimo propone uno spostamento, che una persona conferma o scarta.",
       "action": "Cosa succede",
       "actions": {
         "send_template": "Invia un modello al candidato",
-        "create_task": "Crea un'attività"
+        "create_task": "Crea un'attività",
+        "add_tag": "Aggiungi un tag al candidato",
+        "assign": "Assegna la candidatura a qualcuno",
+        "request_feedback": "Chiedi un feedback agli intervistatori della fase",
+        "notify": "Invia un avviso",
+        "propose_move": "Proponi uno spostamento (lo conferma una persona)"
       },
       "template": "Modello",
       "templatePlaceholder": "Scegli un modello",
@@ -2269,7 +2298,26 @@
       "sources": "Origine della candidatura (una di queste)",
       "consentScopes": "Consenso dato dal candidato",
       "tags": "Tag del candidato",
-      "tagsHint": "Separati da virgola: il candidato deve averli tutti."
+      "tagsHint": "Separati da virgola: il candidato deve averli tutti.",
+      "assignNote": "Le candidature non hanno un responsabile: la persona riceve un'attività di seguito, al massimo una aperta alla volta.",
+      "tag": "Tag",
+      "tagNote": "Aggiunto al profilo del candidato, in minuscolo. Un tag già presente resta com'è.",
+      "feedbackNote": "Gli intervistatori di questa fase ricevono il link per il feedback via email, con i soliti promemoria. Chi è già stato interpellato, o ha già risposto, non viene richiesto di nuovo.",
+      "channel": "Come",
+      "channels": {
+        "in_app": "Notifica nell'app",
+        "email": "Notifica nell'app e riepilogo email",
+        "webhook": "Evento webhook"
+      },
+      "channelHints": {
+        "in_app": "Una notifica per ogni persona scelta che può aprire l'annuncio.",
+        "email": "Anche nel riepilogo email orario, che nomina l'annuncio, mai il candidato.",
+        "webhook": "Un evento automation.notified agli endpoint iscritti: solo identificativi."
+      },
+      "recipients": "Chi",
+      "toStage": "Proponi di spostare in",
+      "toStagePlaceholder": "Scegli una fase",
+      "proposeNote": "Niente si sposta da solo: la proposta compare sulla candidatura e in Da gestire, e una persona la conferma o la scarta. Confermare è uno spostamento suo, a suo nome."
     },
     "saved": "Regola salvata",
     "deleted": "Regola eliminata",
@@ -2281,7 +2329,10 @@
       "dueInDays": "Un numero intero da 0 a 90",
       "stuckDays": "Un numero intero da 1 a 90",
       "dueSoonDays": "Un numero intero da 1 a 14",
-      "tags": "Al massimo 10 tag, di 40 caratteri ciascuno"
+      "tags": "Al massimo 10 tag, di 40 caratteri ciascuno",
+      "tag": "Un tag da 1 a 40 caratteri",
+      "recipients": "Scegli da 1 a 10 persone",
+      "toStage": "Scegli un'altra fase dell'annuncio"
     },
     "stageRules": "Regole della fase {stage}",
     "trigger": {
@@ -2315,6 +2366,30 @@
       "now": "ora",
       "more": "e altre {count}",
       "namesHidden": "Non hai accesso ai nomi dei candidati: vedi solo i numeri."
+    },
+    "copy": {
+      "rule": "Copia la regola",
+      "stageButton": "Copia",
+      "stageFor": "Copia le regole di {stage}",
+      "ruleTitle": "Copia la regola",
+      "stageTitle": "Copia le regole di {stage}",
+      "description": "Le copie diventano regole tue: i loro messaggi partono a tuo nome.",
+      "where": "Copia in",
+      "kinds": {
+        "this_job": "Un'altra fase di questo annuncio",
+        "other_job": "Un altro annuncio",
+        "template": "Un modello di annuncio"
+      },
+      "holder": {
+        "other_job": "Annuncio",
+        "template": "Modello"
+      },
+      "choose": "Scegli",
+      "stage": "Fase",
+      "note": "Ogni copia viene controllata prima: i modelli devono esistere nella lingua di destinazione, le persone devono essere membri, uno spostamento proposto deve puntare a una sua fase. Se una non va bene, non si copia niente. Un annuncio creato da un modello riceve le sue regole.",
+      "save": "Copia",
+      "copying": "Copia in corso",
+      "done": "Nessuna regola copiata | 1 regola copiata | {count} regole copiate"
     }
   },
   "webhooks": {
@@ -2334,7 +2409,8 @@
       "job_updated": "Annuncio modificato",
       "job_closed": "Annuncio chiuso",
       "ping": "Prova",
-      "candidate_erased": "Dati di un candidato cancellati"
+      "candidate_erased": "Dati di un candidato cancellati",
+      "automation_notified": "Avviso da un'automazione"
     },
     "create": "Crea endpoint",
     "creating": "Creo",
@@ -4951,5 +5027,19 @@
       "noOrganization": "Scegli un'organizzazione prima di permettere l'accesso.",
       "generic": "Qualcosa non ha funzionato. Avvia di nuovo il collegamento dalla tua app."
     }
+  },
+  "proposals": {
+    "title": "Uno spostamento proposto da confermare | Uno spostamento proposto da confermare | {count} spostamenti proposti da confermare",
+    "queueTitle": "Spostamenti proposti da confermare | 1 spostamento proposto da confermare | {count} spostamenti proposti da confermare",
+    "note": "Li ha suggeriti un'automazione. Niente si sposta finché una persona non conferma; confermare è uno spostamento tuo, a tuo nome.",
+    "sentence": "Spostare da {from} a {to}?",
+    "unknownStage": "una fase non più presente nell'annuncio",
+    "confirm": "Conferma lo spostamento",
+    "dismiss": "Scarta",
+    "confirmFor": "Conferma lo spostamento di {name} in {stage}",
+    "dismissFor": "Scarta lo spostamento proposto di {name}",
+    "cannotMove": "Lo confermerà o scarterà chi può spostare i candidati.",
+    "confirmed": "Spostato",
+    "dismissed": "Proposta scartata"
   }
 }

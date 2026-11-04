@@ -66,6 +66,11 @@ const move = async (stageId: string): Promise<void> => {
   const card = current.value ? await c.move(current.value.id, stageId) : null
   if (card) emit('card', card)
 }
+/** A proposed move a person confirmed: the move is theirs, made through the normal move. */
+const proposalMoved = (card: ApplicationCardDto): void => {
+  c.applyCard(card)
+  emit('card', card)
+}
 const decide = async (outcome: Outcome, hireDates: HireDatesInput): Promise<void> => {
   const card = current.value ? await c.decide(current.value.id, outcome, hireDates) : null
   if (!card) return
@@ -142,6 +147,8 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
           @decide="decide"
         />
       </header>
+
+      <MoveProposals v-if="current && open && can(role, 'candidate:read')" :key="`proposals-${current.id}`" :application-id="current.id" :can-move="can(role, 'candidate:move')" @moved="proposalMoved" />
 
       <HireDatesPanel
         v-if="current && current.outcome === 'hired'"

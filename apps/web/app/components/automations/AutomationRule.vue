@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { PencilIcon, Trash2Icon } from '@lucide/vue'
+import { CopyIcon, PencilIcon, Trash2Icon } from '@lucide/vue'
 import type { RuleWords } from '@/lib/automation-view'
 import { conditionParts, describeTrigger, type ConditionPart } from '@/lib/automation-trigger-view'
 import type { AutomationRuleDto } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 
-/** One rule: its trigger, what it does as a sentence, its conditions, its author, a switch to pause it, edit and delete. */
+/** One rule: its trigger, what it does as a sentence, its conditions, its author, a switch to pause it, copy, edit and delete. */
 const props = defineProps<{ rule: AutomationRuleDto; words: RuleWords; author: string | null; busy: boolean }>()
-const emit = defineEmits<{ toggle: [enabled: boolean]; edit: []; delete: [] }>()
+const emit = defineEmits<{ toggle: [enabled: boolean]; edit: []; delete: []; copy: [] }>()
 const { t } = useI18n()
 const sentence = computed(() => t(props.words.key, { ...props.words.params }, typeof props.words.params.count === 'number' ? props.words.params.count : 1))
 const when = computed(() => {
@@ -49,6 +49,7 @@ const onlyIf = computed(() => {
       >
         <span class="size-4 rounded-full bg-card shadow-xs transition-transform duration-150 ease-snap" :class="rule.enabled ? 'translate-x-4.5' : 'translate-x-0.5'" />
       </button>
+      <Button variant="ghost" size="icon-sm" :disabled="busy" :aria-label="t('automations.copy.rule')" data-testid="rule-copy" @click="emit('copy')"><CopyIcon aria-hidden="true" /></Button>
       <Button variant="ghost" size="icon-sm" :disabled="busy" :aria-label="t('automations.edit')" data-testid="rule-edit" @click="emit('edit')"><PencilIcon aria-hidden="true" /></Button>
       <Button variant="ghost" size="icon-sm" :disabled="busy" :aria-label="t('automations.delete')" data-testid="rule-delete" @click="emit('delete')"><Trash2Icon aria-hidden="true" /></Button>
     </div>

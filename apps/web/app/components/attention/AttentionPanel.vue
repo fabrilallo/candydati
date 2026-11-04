@@ -14,8 +14,9 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
- * "Da gestire": applications whose promised answer is late or near. A row leaves the list once someone writes,
- * moves or decides; nothing here acts on a candidate without a person choosing it.
+ * "Da gestire": moves proposed by automations, waiting for a person, then applications whose promised answer is late or
+ * near. A row leaves the list once someone writes, moves or decides; nothing here acts on a candidate without a person
+ * choosing it.
  */
 const { t } = useI18n()
 const request = useJobsApi()
@@ -80,6 +81,7 @@ const closeSheet = async (): Promise<void> => {
 
 <template>
   <div class="grid gap-4">
+    <MoveProposals :application-id="null" :can-move="canMove" @changed="reload" />
     <div v-if="allDone" class="grid justify-items-start gap-2 rounded-xl border border-dashed border-input px-6 py-8" data-testid="attention-all-done">
       <span class="grid size-10 place-items-center rounded-full bg-success-soft text-success"><PartyPopperIcon class="size-5" aria-hidden="true" /></span>
       <p class="text-[0.9375rem] font-medium">{{ t('attention.allDone.title') }}</p>

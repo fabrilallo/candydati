@@ -1,5 +1,5 @@
 import { jobSummary } from './phase8-fixtures'
-import type { AttentionItemDto, AutomationRuleDto, NotificationDto, TaskDto, WebhookEndpointDto } from '@candydati/domain'
+import type { AttentionItemDto, AutomationRuleDto, MoveProposalDto, NotificationDto, TaskDto, WebhookEndpointDto } from '@candydati/domain'
 
 /** Phase 4 DTOs as the api would send them (phase 4 contract). */
 export const P4_NOW = '2026-10-13T10:00:00.000Z'
@@ -73,4 +73,19 @@ export const staleJob = (id: string, daysIdle: number) => ({
   job: { ...jobSummary(id, `Annuncio ${id}`), publishedAt: '2026-06-01T10:00:00.000Z' },
   lastActivityAt: '2026-07-01T10:00:00.000Z',
   daysIdle,
+})
+
+/** A live proposal of a propose_move rule: a suggestion that a person confirms or dismisses. */
+export const moveProposal = (id: string, overrides: Partial<MoveProposalDto> = {}): MoveProposalDto => ({
+  id,
+  applicationId: 'a1',
+  ruleId: 'r1',
+  candidate: { id: 'c1', firstName: 'Giulia', lastName: 'Rossi' },
+  job: { id: 'j1', title: 'Backend developer' },
+  from: { id: 'screen', label: 'Chiamata conoscitiva' },
+  to: { id: 'tech', label: 'Colloquio tecnico' },
+  proposedBy: 'u2',
+  createdAt: P4_NOW,
+  expiresAt: '2026-10-27T10:00:00.000Z',
+  ...overrides,
 })

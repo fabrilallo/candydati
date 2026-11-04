@@ -47,7 +47,7 @@ const type = async (testId: string, value: string) => {
 }
 const mountDialog = async (props: Record<string, unknown> = {}) => {
   const wrapper = await mountSuspended(RuleDialog, {
-    props: { open: true, jobId: 'j1', stageLabel: 'Colloquio tecnico', stageId: 'tech', rule: null, templates: [template('t-update', { name: 'Aggiornamento' })], members: [], busy: false, errorKey: null, ...props },
+    props: { open: true, jobId: 'j1', stageLabel: 'Colloquio tecnico', stageId: 'tech', rule: null, templates: [template('t-update', { name: 'Aggiornamento' })], members: [], stages: [{ id: 'offer', label: 'Offerta' }], busy: false, errorKey: null, ...props },
     attachTo: document.body,
   })
   mounted.push(wrapper)
@@ -107,5 +107,51 @@ describe('rule dialog: trigger, conditions and preview', () => {
     q<HTMLButtonElement>('rule-preview-run')?.click()
     await vi.waitFor(() => expect(q('rule-preview-hidden')).not.toBeNull())
     expect(q('rule-preview-list')).toBeNull()
+  })
+})
+
+describe('rule dialog: the actions of part 2', () => {
+  const submit = async () => {
+    q<HTMLFormElement>('rule-dialog')?.querySelector('form')?.requestSubmit()
+    await flushPromises()
+  }
+
+  it('proposes a move to another stage, and says a person confirms it', async () => {
+    const wrapper = await mountDialog()
+    await select('rule-action', 'propose_move')
+    expect(q('rule-propose-note')?.textContent).toContain('una persona la conferma o la scarta')
+    await submit()
+    expect(wrapper.emitted('save')).toBeUndefined()
+    await select('rule-to-stage', 'offer')
+    await submit()
+    expect(wrapper.emitted('save')?.[0]?.[0]).toMatchObject({ stageId: 'tech', action: { type: 'propose_move', toStageId: 'offer' } })
+  })
+
+  it('alerts the job owner in the app, or sends a webhook event with nobody to choose', async () => {
+    const wrapper = await mountDialog()
+    await select('rule-action', 'notify')
+    await submit()
+    expect(wrapper.emitted('save')?.[0]?.[0]).toMatchObject({ action: { type: 'notify', channel: 'in_app', recipients: ['job_owner'] } })
+    await select('rule-channel', 'webhook')
+    expect(q('rule-recipients')).toBeNull()
+    await submit()
+    expect(wrapper.emitted('save')?.[1]?.[0]).toMatchObject({ action: { type: 'notify', channel: 'webhook', recipients: [] } })
+  })
+
+  it('adds a tag, assigns, and asks for feedback', async () => {
+    const wrapper = await mountDialog()
+    await select('rule-action', 'add_tag')
+    await type('rule-tag', ' Fast-Track ')
+    await submit()
+    await select('rule-action', 'assign')
+    await submit()
+    await select('rule-action', 'request_feedback')
+    expect(q('rule-feedback-note')).not.toBeNull()
+    await submit()
+    expect(wrapper.emitted('save')?.map((event) => (event[0] as { action: unknown }).action)).toEqual([
+      { type: 'add_tag', tag: 'fast-track' },
+      { type: 'assign', assignee: 'job_owner' },
+      { type: 'request_feedback' },
+    ])
   })
 })

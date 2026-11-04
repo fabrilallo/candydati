@@ -587,7 +587,8 @@
       "automation": {
         "saved": "Saved an automation",
         "deleted": "Deleted an automation",
-        "ran": "An automation acted"
+        "ran": "An automation acted",
+        "copied": "Copied automation rules"
       },
       "webhook": {
         "saved": "Saved a webhook",
@@ -653,6 +654,10 @@
       "connected_app": {
         "granted": "Connected an app to their account",
         "revoked": "Disconnected an app"
+      },
+      "move_proposal": {
+        "confirmed": "Confirmed a move proposed by an automation",
+        "dismissed": "Dismissed a move proposed by an automation"
       }
     }
   },
@@ -1277,7 +1282,13 @@
       "deleteConfirm": "Delete template",
       "deleted": "Template deleted",
       "loadFailed": "We could not load the templates.",
-      "forbidden": "You do not have permission to see templates."
+      "forbidden": "You do not have permission to see templates.",
+      "rules": {
+        "summary": "No automation | 1 automation | {count} automations",
+        "note": "A job created from this template gets these rules, as the rules of whoever creates it.",
+        "line": "{stage}: {what}",
+        "delete": "Remove the rule from the template"
+      }
     },
     "close": {
       "checking": "Checking open applications",
@@ -2158,7 +2169,10 @@
       "job_close_blocked": "The job still has open applications",
       "automation_failed": "An automation did not succeed",
       "generic": "New notification",
-      "retention_expiring": "Data about to expire"
+      "retention_expiring": "Data about to expire",
+      "automation_alert": "An automation sent you an alert",
+      "automation_alert_email": "An automation sent you an alert",
+      "move_proposed": "An automation proposed a move to confirm"
     },
     "retention": {
       "named": "{name}'s data expire in 1 day | {name}'s data expire in {count} days",
@@ -2211,7 +2225,7 @@
   },
   "automations": {
     "title": "Automations",
-    "note": "Automations never move candidates or decide about them: they send a template or create a task. An automatic message counts as sent by whoever created the rule, as if they had sent it by hand.",
+    "note": "Automations never move candidates or decide about them. They send a template, create a task, add a tag, assign a follow-up, ask the stage's interviewers for feedback, send an alert, or propose a move that a person confirms or dismisses. An automatic message counts as sent by whoever created the rule, as if they had sent it by hand.",
     "add": "Add rule",
     "edit": "Edit",
     "delete": "Delete",
@@ -2226,16 +2240,31 @@
       "taskForOwner": "create the task «{title}» for the job owner",
       "taskForOwnerDue": "create the task «{title}» for the job owner, due the same day | create the task «{title}» for the job owner, due within 1 day | create the task «{title}» for the job owner, due within {count} days",
       "taskForMember": "create the task «{title}» for {member}",
-      "taskForMemberDue": "create the task «{title}» for {member}, due the same day | create the task «{title}» for {member}, due within 1 day | create the task «{title}» for {member}, due within {count} days"
+      "taskForMemberDue": "create the task «{title}» for {member}, due the same day | create the task «{title}» for {member}, due within 1 day | create the task «{title}» for {member}, due within {count} days",
+      "assignForOwner": "assign the application to the job owner",
+      "assignForOwnerDue": "assign the application to the job owner, due the same day | assign the application to the job owner, due within 1 day | assign the application to the job owner, due within {count} days",
+      "assignForMember": "assign the application to {member}",
+      "assignForMemberDue": "assign the application to {member}, due the same day | assign the application to {member}, due within 1 day | assign the application to {member}, due within {count} days",
+      "addTag": "add the tag «{tag}»",
+      "requestFeedback": "ask the stage's interviewers for feedback",
+      "notify_in_app": "alert {people} in the app",
+      "notify_email": "alert {people} in the app and by email",
+      "notifyWebhook": "send a webhook event",
+      "proposeMove": "propose moving it to {stage}, for a person to confirm"
     },
     "form": {
       "addTitle": "New rule: {stage}",
       "editTitle": "Edit the rule: {stage}",
-      "description": "A rule acts only for the applications of this stage: it sends a template or creates a task, it never moves or decides.",
+      "description": "A rule acts only for the applications of this stage. It never moves or decides: at most it proposes a move, which a person confirms or dismisses.",
       "action": "What happens",
       "actions": {
         "send_template": "Send a template to the candidate",
-        "create_task": "Create a task"
+        "create_task": "Create a task",
+        "add_tag": "Add a tag to the candidate",
+        "assign": "Assign the application to someone",
+        "request_feedback": "Ask the stage's interviewers for feedback",
+        "notify": "Send an alert",
+        "propose_move": "Propose a move (a person confirms)"
       },
       "template": "Template",
       "templatePlaceholder": "Choose a template",
@@ -2269,7 +2298,26 @@
       "sources": "Source of the application (one of these)",
       "consentScopes": "Consent given by the candidate",
       "tags": "Candidate tags",
-      "tagsHint": "Comma separated: the candidate must have all of them."
+      "tagsHint": "Comma separated: the candidate must have all of them.",
+      "assignNote": "Applications have no owner: the person gets a follow-up task on it, at most one open at a time.",
+      "tag": "Tag",
+      "tagNote": "Added to the candidate's profile, in lowercase. A tag already there stays as it is.",
+      "feedbackNote": "The interviewers set for this stage get the feedback link by email, with the usual reminders. Nobody who was already asked, or already answered, is asked again.",
+      "channel": "How",
+      "channels": {
+        "in_app": "In-app notification",
+        "email": "In-app notification and email digest",
+        "webhook": "Webhook event"
+      },
+      "channelHints": {
+        "in_app": "A notification for each person you choose who can open the job.",
+        "email": "Also in the hourly email digest, which names the job, never the candidate.",
+        "webhook": "An automation.notified event to the endpoints that subscribe to it: ids only."
+      },
+      "recipients": "Who",
+      "toStage": "Propose moving to",
+      "toStagePlaceholder": "Choose a stage",
+      "proposeNote": "Nothing moves by itself: the proposal shows on the application and in Needs attention, and a person confirms or dismisses it. Confirming is their move, in their name."
     },
     "saved": "Rule saved",
     "deleted": "Rule deleted",
@@ -2281,7 +2329,10 @@
       "dueInDays": "A whole number from 0 to 90",
       "stuckDays": "A whole number from 1 to 90",
       "dueSoonDays": "A whole number from 1 to 14",
-      "tags": "At most 10 tags, of 40 characters each"
+      "tags": "At most 10 tags, of 40 characters each",
+      "tag": "A tag of 1 to 40 characters",
+      "recipients": "Choose from 1 to 10 people",
+      "toStage": "Choose another stage of the job"
     },
     "stageRules": "Rules for {stage}",
     "trigger": {
@@ -2315,6 +2366,30 @@
       "now": "now",
       "more": "and {count} more",
       "namesHidden": "You have no access to candidate names: you see the numbers only."
+    },
+    "copy": {
+      "rule": "Copy the rule",
+      "stageButton": "Copy",
+      "stageFor": "Copy the rules of {stage}",
+      "ruleTitle": "Copy the rule",
+      "stageTitle": "Copy the rules of {stage}",
+      "description": "The copies become your rules: their messages go out in your name.",
+      "where": "Copy to",
+      "kinds": {
+        "this_job": "Another stage of this job",
+        "other_job": "Another job",
+        "template": "A job template"
+      },
+      "holder": {
+        "other_job": "Job",
+        "template": "Template"
+      },
+      "choose": "Choose",
+      "stage": "Stage",
+      "note": "Each copy is checked first: the templates must exist in the target's language, the people must be members, a proposed move must point at one of its stages. If one does not fit, nothing is copied. A job created from a template gets its rules.",
+      "save": "Copy",
+      "copying": "Copying",
+      "done": "No rule copied | 1 rule copied | {count} rules copied"
     }
   },
   "webhooks": {
@@ -2334,7 +2409,8 @@
       "job_updated": "Job ad edited",
       "job_closed": "Job closed",
       "ping": "Test",
-      "candidate_erased": "A candidate's data erased"
+      "candidate_erased": "A candidate's data erased",
+      "automation_notified": "Alert from an automation"
     },
     "create": "Create endpoint",
     "creating": "Creating",
@@ -4951,5 +5027,19 @@
       "noOrganization": "Pick an organization before allowing access.",
       "generic": "Something went wrong. Start the connection again from your app."
     }
+  },
+  "proposals": {
+    "title": "A proposed move to confirm | A proposed move to confirm | {count} proposed moves to confirm",
+    "queueTitle": "Proposed moves to confirm | 1 proposed move to confirm | {count} proposed moves to confirm",
+    "note": "An automation suggested these. Nothing moves until a person confirms; confirming is your move, in your name.",
+    "sentence": "Move from {from} to {to}?",
+    "unknownStage": "a stage no longer in the job",
+    "confirm": "Confirm move",
+    "dismiss": "Dismiss",
+    "confirmFor": "Confirm moving {name} to {stage}",
+    "dismissFor": "Dismiss the proposed move of {name}",
+    "cannotMove": "Someone who can move candidates will confirm or dismiss it.",
+    "confirmed": "Moved",
+    "dismissed": "Proposal dismissed"
   }
 }

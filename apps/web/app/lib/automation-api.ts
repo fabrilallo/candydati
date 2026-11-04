@@ -1,6 +1,10 @@
 import {
+  applicationCardSchema,
   automationPreviewSchema,
   automationRuleSchema,
+  copyAutomationsResultSchema,
+  moveProposalSchema,
+  templateAutomationRuleSchema,
   webhookCreatedSchema,
   webhookDeliverySchema,
   webhookEndpointSchema,
@@ -8,6 +12,11 @@ import {
   type AutomationPreviewDto,
   type AutomationRuleDto,
   type AutomationRuleInput,
+  type ApplicationCardDto,
+  type CopyAutomationsInput,
+  type CopyAutomationsResultDto,
+  type MoveProposalDto,
+  type TemplateAutomationRuleDto,
   type WebhookCreatedDto,
   type WebhookDeliveryDto,
   type WebhookEndpointDto,
@@ -37,6 +46,29 @@ export const previewRule = async (request: JobApiRequest, jobId: string, input: 
 
 export const deleteRule = async (request: JobApiRequest, ruleId: string): Promise<void> => {
   await callApi(request, `/api/v1/automations/${id(ruleId)}`, z.unknown(), { method: 'DELETE' })
+}
+
+/** Copies rules (some, or every rule of a stage) of a job or template to one stage of a job or template. */
+export const copyRules = async (request: JobApiRequest, input: CopyAutomationsInput): Promise<CopyAutomationsResultDto> =>
+  (await callApi(request, '/api/v1/automations/copy', copyAutomationsResultSchema, { method: 'POST', body: input })).data
+
+export const listTemplateRules = async (request: JobApiRequest, templateId: string): Promise<readonly TemplateAutomationRuleDto[]> =>
+  (await callApi(request, `/api/v1/job-templates/${id(templateId)}/automations`, z.array(templateAutomationRuleSchema))).data
+
+export const deleteTemplateRule = async (request: JobApiRequest, ruleId: string): Promise<void> => {
+  await callApi(request, `/api/v1/job-template-automations/${id(ruleId)}`, z.unknown(), { method: 'DELETE' })
+}
+
+/** Live proposals of `propose_move` rules: of one application, or of every job the person reaches. */
+export const listProposals = async (request: JobApiRequest, applicationId: string | null): Promise<readonly MoveProposalDto[]> =>
+  (await callApi(request, `/api/v1/move-proposals${applicationId === null ? '' : `?applicationId=${id(applicationId)}`}`, z.array(moveProposalSchema))).data
+
+/** The person confirms: the normal move, in their name. Returns the moved application. */
+export const confirmProposal = async (request: JobApiRequest, proposalId: string): Promise<ApplicationCardDto> =>
+  (await callApi(request, `/api/v1/move-proposals/${id(proposalId)}/confirm`, z.object({ application: applicationCardSchema }), { method: 'POST', body: {} })).data.application
+
+export const dismissProposal = async (request: JobApiRequest, proposalId: string): Promise<void> => {
+  await callApi(request, `/api/v1/move-proposals/${id(proposalId)}/dismiss`, z.unknown(), { method: 'POST', body: {} })
 }
 
 export interface WebhookInput {

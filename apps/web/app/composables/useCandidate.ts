@@ -5,7 +5,7 @@ import { loaded } from '@/lib/job-api'
 
 type Busy = 'move' | 'decide' | 'dates' | 'tags' | 'note' | null
 
-/** Applies what the api returned for an application (card shape) to the detail, immutably. */
+/** Applies what the api returned for an application (card shape) to the detail, immutably (also for a move made elsewhere, such as a confirmed proposal). */
 const withCard = (detail: CandidateDetailDto, card: ApplicationCardDto): CandidateDetailDto => ({
   ...detail,
   applications: detail.applications.map((app) =>
@@ -38,7 +38,6 @@ export const useCandidate = (candidateId: MaybeRefOrGetter<string>, viaJobId: Ma
   )
   const detail = useSyncedData<CandidateDetailDto>(data)
   const busy = ref<Busy>(null)
-
   const run = useBusyRunner(busy)
 
   const applyCard = (card: ApplicationCardDto | null): ApplicationCardDto | null => {
@@ -78,10 +77,9 @@ export const useCandidate = (candidateId: MaybeRefOrGetter<string>, viaJobId: Ma
     busy: computed(() => busy.value),
     refresh,
     /** A fresh detail the api returned elsewhere (correction, consent withdrawal). */
-    replace: (fresh: CandidateDetailDto): void => {
-      detail.value = fresh
-    },
+    replace: (fresh: CandidateDetailDto): void => void (detail.value = fresh),
     move,
+    applyCard,
     decide,
     saveHireDates,
     saveTags,
