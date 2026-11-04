@@ -252,7 +252,7 @@ tasks, notifications, the attention list, pipelines, search, exports, imports, a
 
 ## 7. Self-hosted and hosted
 
-- **Self-hosted (BUSL-1.1):** the complete product, free to run for your own organization's hiring. No reserved features. Offering it to third parties as a hosted service needs a commercial license from the licensor. Each version becomes AGPL-3.0 four years after its release.
+- **Self-hosted (BUSL-1.1):** the complete product, free to run for any hiring, your own organization's or your clients' (agencies, headhunters, consultants). No reserved features. Selling it as a product, that is offering it to third parties as a hosted service they run their own hiring on or embedding it in software you sell, needs a commercial license from the licensor. Each version becomes AGPL-3.0 four years after its release.
 - **Optional hosted offering:** the same code, with external data providers (for example salary benchmarks) and distribution channels registered on top.
 - **How the two are kept apart in code:** external data enters only through generic interfaces (such as `SalaryBenchmarkProvider`, `DistributionChannel`, `EmailProvider`). The self-hosted build ships empty or generic implementations. There is no hosted-only branch in the code.
 

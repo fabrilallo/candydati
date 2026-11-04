@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **License:** the Additional Use Grant now covers recruiting on behalf of clients. Staffing and search agencies,
+  headhunters and consultants can run it in production for any number of clients, and clients can review candidates,
+  give feedback and join interviews for the searches run for them. Installation, support and consulting are free for
+  any number of organizations. Selling it as a product (a hosted service third parties run their own hiring on, or
+  embedded in software you sell) still needs a commercial license. The new grant applies to every version already
+  published too.
+
 ## [0.1.18] - 2026-11-04
 
 ### Fixed

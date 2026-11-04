@@ -256,10 +256,16 @@ annunci in questo progetto deriva da FuffAnnuncio.
 
 [Business Source License 1.1](LICENSE) (`BUSL-1.1`), di Fabrizio Lallo.
 
-- **Gratis:** leggerlo, modificarlo e installarlo in proprio, anche in produzione per la selezione della propria
-  organizzazione. Un consulente può installarlo e gestirlo per la selezione di una singola organizzazione.
-- **Serve una licenza commerciale:** offrirlo a terzi come servizio ospitato (un ATS o un SaaS di recruiting) o
-  includerlo in un prodotto che vendi. Scrivi a fabrizio.lallo95@gmail.com.
+Oggi source-available, open source più avanti. In breve: chiunque può usarlo, nessuno può venderlo come prodotto. Questi termini valgono
+per tutte le versioni pubblicate.
+
+- **Gratis:** leggerlo, modificarlo e installarlo in proprio, anche in produzione, per qualsiasi selezione: quella della
+  tua organizzazione o quella dei tuoi clienti se sei un'agenzia per il lavoro, una società di ricerca, un headhunter o
+  un consulente, con qualsiasi numero di clienti. I clienti possono vedere i candidati, dare feedback e partecipare ai
+  colloqui delle ricerche che fai per loro. Installarlo, assisterlo e fare consulenza su di esso per altri è gratis.
+- **Serve una licenza commerciale:** venderlo come prodotto, cioè offrirlo a terzi come servizio ospitato su cui fanno
+  da soli la propria selezione (un ATS o un SaaS di recruiting), o includerlo in un software che vendi. Scrivi a
+  fabrizio.lallo95@gmail.com.
 - **Diventa open source:** ogni versione passa alla [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html)
   (`AGPL-3.0-only`) quattro anni dopo la sua prima pubblicazione.
 
