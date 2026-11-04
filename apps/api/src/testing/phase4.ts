@@ -6,6 +6,7 @@ import {
   publishWebhookEvents,
   runAutomations,
   scanDeadlines,
+  scanTimedAutomations,
   type Actor,
   type AutomationRunDeps,
   type HostGuard,
@@ -44,6 +45,12 @@ export function scanDeps(t: TestApp): ScanDeps {
 }
 
 export const scan = (t: TestApp, now: Date) => scanDeadlines(scanDeps(t), { now });
+
+/** The hourly scan of time-based rules, against the test database and the app's recording queue. */
+export function scanAutomations(t: TestApp, now: Date) {
+  const r = createDrizzleUnitOfWork(t.handle.db).repositories;
+  return scanTimedAutomations({ rules: r.rules, applications: r.applications, candidates: r.candidates, jobs: r.jobs, executions: r.executions, queue: t.queue }, { now });
+}
 
 /** Runs every `automation.run` task the app queued since the last drain, like the worker would. */
 export async function drainAutomations(t: TestApp): Promise<number> {

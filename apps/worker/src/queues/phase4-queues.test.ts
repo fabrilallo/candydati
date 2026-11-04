@@ -3,6 +3,7 @@ import { formatDigestFrom } from '@candydati/core';
 import pino from 'pino';
 import { describe, expect, it } from 'vitest';
 import { createAutomationRunQueue } from './automation-run.js';
+import { AUTOMATION_SCAN_CRON, createAutomationScanQueue } from './automation-scan.js';
 import { createDeadlinesScanQueue, DEADLINES_SCAN_CRON } from './deadlines-scan.js';
 import { createWebhookDeliverQueue } from './webhook-deliver.js';
 import { createWebhookPublishQueue, WEBHOOK_PUBLISH_CRON } from './webhook-publish.js';
@@ -27,6 +28,29 @@ describe('automation.run', () => {
     });
     await createAutomationRunQueue(deps).handle(job({ organizationId: ORG_A, applicationId: 'app_1', stageId: 'stage-0' }));
     expect(deps.messagingStore.read().messages[0]).toMatchObject({ status: 'queued', sentBy: 'recruiter_1' });
+  });
+});
+
+describe('automation.run: triggers', () => {
+  it('accepts a trigger, its occurrence and a rule id, and refuses an unknown trigger', async () => {
+    const deps = seedAutomationWorld({ applications: [buildApplication({ organizationId: ORG_A, stageId: 'stage-0' })], rules: [buildAutomationRule({ trigger: { type: 'candidate_replied' } })] });
+    const queue = createAutomationRunQueue(deps);
+    expect(queue.payload.safeParse({ organizationId: ORG_A, applicationId: 'app_1', stageId: 'stage-0', trigger: 'scored' }).success).toBe(false);
+    await queue.handle(job({ organizationId: ORG_A, applicationId: 'app_1', stageId: 'stage-0', trigger: 'candidate_replied' as const, occurrence: 'message:m1' }));
+    expect(deps.tasks.snapshot()).toHaveLength(1);
+  });
+});
+
+describe('automation.scan', () => {
+  it('is scheduled hourly and queues the due time-based rules', async () => {
+    const deps = seedAutomationWorld({
+      applications: [buildApplication({ organizationId: ORG_A, stageId: 'stage-0', stageChangedAt: new Date('2026-05-01T00:00:00Z') })],
+      rules: [buildAutomationRule({ trigger: { type: 'stage_stuck', days: 3 } })],
+    });
+    const queue = createAutomationScanQueue(deps, () => new Date('2026-06-01T10:00:00Z'));
+    expect(queue.schedule).toEqual({ cron: AUTOMATION_SCAN_CRON, data: {} });
+    await queue.handle(job({}));
+    expect(deps.queue.jobs()).toEqual([expect.objectContaining({ name: 'automation.run', payload: expect.objectContaining({ ruleId: 'rule_1', trigger: 'stage_stuck' }) })]);
   });
 });
 
