@@ -26,7 +26,7 @@ export const jobRoutes: readonly RouteSpec[] = [
   {
     method: 'post', path: '/api/v1/jobs/:id/stages/:stageId/duplicate', tag: 'Jobs', summary: 'Duplicate a stage of a job ad', scope: 'job:update',
     description:
-      'Inserts a copy of the stage right after it (same type, duration, conductor, title and note, a new id), with the rules of a content update. Then copies what is tied to the source stage, each under its own permission: interviewers and stage criteria (`feedback:manage`), automation rules (`automation:manage`, the caller becomes their author), the restriction (owners, admins, the hiring manager of the job). What the caller may not manage is listed in `skipped`, not refused. All or nothing.',
+      'Inserts a copy of the stage right after it (same type, duration, conductor, title and note, a new id), with the rules of a content update. Then copies what is tied to the source stage, each under its own permission: interviewers and stage criteria (`feedback:manage`), automation rules (`automation:manage`, the caller becomes their author). A restricted stage always gives a restricted copy, whoever duplicates it: the mark only narrows who reads notes there. What the caller may not manage is listed in `skipped`, not refused. All or nothing.',
     response: { schema: duplicateStageResultSchema },
   },
   {

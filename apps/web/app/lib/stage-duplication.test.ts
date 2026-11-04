@@ -45,10 +45,10 @@ describe('duplicateBlockOf', () => {
 
 describe('duplicationNotice', () => {
   it('names what came along and what was left out for permissions', () => {
-    expect(duplicationNotice({ copied: ['interviewers', 'scorecard'], skipped: ['restriction'] }, t)).toEqual({
+    expect(duplicationNotice({ copied: ['interviewers', 'scorecard'], skipped: ['automations'] }, t)).toEqual({
       title: 'job.editor.process.duplicated',
       description:
-        'job.editor.process.duplicatedCopied({"list":"job.editor.process.duplicateKinds.interviewers, job.editor.process.duplicateKinds.scorecard"}) job.editor.process.duplicatedSkipped({"list":"job.editor.process.duplicateKinds.restriction"})',
+        'job.editor.process.duplicatedCopied({"list":"job.editor.process.duplicateKinds.interviewers, job.editor.process.duplicateKinds.scorecard"}) job.editor.process.duplicatedSkipped({"list":"job.editor.process.duplicateKinds.automations"})',
     })
     expect(duplicationNotice({ copied: [], skipped: [] }, t)).toEqual({ title: 'job.editor.process.duplicated', description: undefined })
   })
