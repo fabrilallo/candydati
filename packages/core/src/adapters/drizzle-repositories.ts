@@ -1,3 +1,4 @@
+import { createDrizzleClients, createDrizzleJobClients, createDrizzlePublicJobClients, createDrizzleShortlists } from './drizzle-clients.js';
 import type { BindableTaskQueue } from '../intake-ports.js';
 import type { TransactionPort, TransactionScope } from '../transaction.js';
 import type { DbExecutor } from './db-executor.js';
@@ -123,11 +124,20 @@ const operationRepositories = (db: DbExecutor) =>
     stuck: createDrizzleStuckWork(db),
   }) as const;
 
+/** Clients of an agency and their shortlists (PRODUCT.md §3.5). */
+const clientRepositories = (db: DbExecutor) =>
+  ({
+    clients: createDrizzleClients(db),
+    jobClients: createDrizzleJobClients(db),
+    publicClients: createDrizzlePublicJobClients(db),
+    shortlists: createDrizzleShortlists(db),
+  }) as const;
+
 /**
  * Every Postgres repository, built once on one executor and named like the dependency keys of the use cases. On the
  * pool it is the composition root of the api and the worker; on a transaction it is what the unit of work swaps in.
  */
-export const createDrizzleRepositories = (db: DbExecutor) => ({ ...jobRepositories(db), ...candidateRepositories(db), ...operationRepositories(db) });
+export const createDrizzleRepositories = (db: DbExecutor) => ({ ...jobRepositories(db), ...candidateRepositories(db), ...operationRepositories(db), ...clientRepositories(db) });
 
 export type DrizzleRepositories = ReturnType<typeof createDrizzleRepositories>;
 

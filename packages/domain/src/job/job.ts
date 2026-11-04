@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { ClientDisplay, PublicJobClientDto } from '../client/client.js';
 import { trimTrailing } from '../text/trim-trailing.js';
 import { COMPLIANCE_WARNING_RULES } from './compliance/types.js';
 import { jobContentSchema, type JobContent, type PublishIssue, type PublishedJobContent } from './content.js';
@@ -118,6 +119,8 @@ export interface PublicOrganizationDto {
 export interface PublicJobDto {
   readonly slug: string;
   readonly content: PublishedJobContent;
+  /** Only on the ad of an agency for a client (PRODUCT.md §3.5): the client by name, or that it is confidential. */
+  readonly client?: PublicJobClientDto;
   readonly publishedAt: string;
   /** Last edit: feeds and sitemaps use it as `lastmod`. */
   readonly updatedAt: string;
@@ -134,6 +137,8 @@ export interface PublicJobSummaryDto {
   readonly workMode: PublishedJobContent['workMode'];
   readonly location: PublishedJobContent['location'];
   readonly salary: PublishedJobContent['salary'];
+  /** Only on a client ad: the client's name, null when confidential. */
+  readonly client?: { readonly display: ClientDisplay; readonly name: string | null };
   /** Number of selection stages the candidate will go through. */
   readonly stageCount: number;
   /** Days within which the candidate hears back after each stage. */

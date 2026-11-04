@@ -152,6 +152,15 @@ describe('buildJobPostingJsonLd', () => {
       logo: 'https://cdn.example.com/acme.png',
     });
   });
+
+  it('names a client as the hiring organization only when the ad shows it, never for a confidential one', () => {
+    const job = jobOf(publishedOf({}));
+    const base = { organization: ORGANIZATION, url: 'https://jobs.example.com/x', headings: HEADINGS };
+    const named = buildJobPostingJsonLd({ ...base, job: { ...job, client: { display: 'named', name: 'Client Co', website: 'https://client.example', logo: null, agencyAuthorization: null } } });
+    expect(named.hiringOrganization).toEqual({ '@type': 'Organization', name: 'Client Co', sameAs: 'https://client.example' });
+    const hidden = buildJobPostingJsonLd({ ...base, job: { ...job, client: { display: 'confidential', name: null, website: null, logo: null, agencyAuthorization: 'Aut. 1' } } });
+    expect(hidden.hiringOrganization).toEqual({ '@type': 'Organization', name: 'Acme' });
+  });
 });
 
 describe('jobDescriptionHtml', () => {

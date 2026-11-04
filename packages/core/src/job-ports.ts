@@ -1,3 +1,4 @@
+import type { ClientRepository, JobClientRepository, PublicJobClientDirectory } from './client-ports.js';
 import type { EmailReadiness } from './instance-email-ports.js';
 import type { AdQualityAnalyzer, Job, JobStatus, JobTemplate } from '@candydati/domain';
 import type { PrivacyNoticeRepository } from './candidate-ports.js';
@@ -134,8 +135,13 @@ export interface JobDeps extends CoreDeps {
   readonly adQualityThreshold: number;
   /** The instance can send email: absent in unit tests (ready), always set by the api. Until then the action waits. */
   readonly emailReady?: EmailReadiness | undefined;
+  /** Clients of an agency (PRODUCT.md §3.5): the job list shows and filters by them. Absent: no client anywhere. */
+  readonly jobClients?: JobClientRepository | undefined;
+  readonly clients?: ClientRepository | undefined;
+  /** What the public pages say about the client of an agency's ad. Absent: ads show no client. */
+  readonly publicClients?: PublicJobClientDirectory | undefined;
   readonly newId: () => string;
   readonly now: () => Date;
 }
 
-export type PublicJobDeps = Pick<JobDeps, 'jobs' | 'organizations' | 'privacyNotices'>;
+export type PublicJobDeps = Pick<JobDeps, 'jobs' | 'organizations' | 'privacyNotices' | 'publicClients'>;

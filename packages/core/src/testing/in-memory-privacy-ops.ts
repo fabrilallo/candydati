@@ -1,3 +1,4 @@
+import type { ClientStore } from './in-memory-clients.js';
 import { dataExportKey, type DataExport, type RetentionRun } from '@candydati/domain';
 import type { DataExportRepository, ErasureTransaction, RetentionRunRepository, ZipStream, ZipStreamFactory, ZipWriter, ZipWriterFactory } from '../privacy-ports.js';
 import type { AuditLogRepository } from '../ports.js';
@@ -22,6 +23,8 @@ export interface ErasureWorld {
   readonly feedbackStore?: FeedbackStore;
   /** Generated organization exports go on any erasure. */
   readonly dataExports?: InMemoryDataExports;
+  /** Shortlist entries go with their applications. */
+  readonly clientStore?: ClientStore;
 }
 
 /** Same rules as the Postgres store, over the in-memory stores. The candidate store rolls back on failure; the others do not. */
@@ -54,6 +57,7 @@ export function createInMemoryErasure(world: ErasureWorld): ErasureTransaction {
           feedback: world.feedbackStore.read().feedback.filter((f) => !(own(f) && ids.has(f.applicationId))),
           requests: world.feedbackStore.read().requests.filter((r) => !(own(r) && ids.has(r.applicationId))),
         });
+        if (world.clientStore) world.clientStore.set({ ...world.clientStore.get(), items: world.clientStore.get().items.filter((i) => !(own(i) && ids.has(i.applicationId))) });
         world.importStore?.write({ tokens: world.importStore.read().tokens.filter((t) => !(own(t) && ids.has(t.applicationId))) });
         const attachments = store.read().attachments.filter((f) => own(f) && ids.has(f.applicationId));
         store.write({

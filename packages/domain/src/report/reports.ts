@@ -14,6 +14,8 @@ export const reportQuerySchema = z
     from: z.coerce.date(),
     to: z.coerce.date(),
     jobId: z.string().min(1).optional(),
+    /** Only the jobs of this client (PRODUCT.md §3.5); with `jobId` too, that job must be the client's. */
+    clientId: z.string().min(1).optional(),
   })
   .refine((q) => q.from <= q.to, { message: 'from_after_to', path: ['from'] })
   .refine((q) => q.to.getTime() - q.from.getTime() <= REPORT_MAX_DAYS * DAY_MS, { message: 'period_too_long', path: ['to'] });
@@ -59,6 +61,8 @@ export interface ReportsDto {
   readonly generatedAt: string;
   readonly period: { readonly from: string; readonly to: string };
   readonly jobId: string | null;
+  /** The client the figures are narrowed to, null for every job. */
+  readonly clientId: string | null;
   readonly minSample: number;
   /** Applications decided `hired` in the period: days from application to decision. */
   readonly timeToHire: {

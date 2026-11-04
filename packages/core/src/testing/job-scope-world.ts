@@ -12,6 +12,7 @@ import { buildMessage } from './messaging-fixtures.js';
 import { createDistributionRegistry } from '../distribution-registry.js';
 import { createFakeDistributionChannel, createInMemoryDistributionSettings, createInMemoryJobDistributions } from './in-memory-distribution.js';
 import { createInMemoryTrackedLinks, type InMemoryTrackedLinks } from './in-memory-tracked-links.js';
+import { createClientStore, createInMemoryClients, createInMemoryJobClients, createInMemoryShortlists, type ClientStore } from './in-memory-clients.js';
 
 /**
  * Two jobs of one organization: A (`job_1`, the actors' team) and B (`job_b`, nobody's but the owner's). Everything about
@@ -47,7 +48,7 @@ const APPLICATIONS = [
   buildApplication({ id: 'app_s2', candidateId: 'cand_s', jobId: JOB_B, cv: cv('app_s2'), ...org }),
 ];
 
-export type JobScopeWorld = TestImportDeps & TestHrDeps & { readonly trackedLinks: InMemoryTrackedLinks };
+export type JobScopeWorld = TestImportDeps & TestHrDeps & { readonly trackedLinks: InMemoryTrackedLinks; readonly clientStore: ClientStore };
 
 /** Everything about job B the use cases could expose: candidate, CV, notes, messages, tasks, feedback, rules, imports. */
 export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
@@ -100,6 +101,7 @@ export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
     ]),
     registry: createDistributionRegistry([createFakeDistributionChannel()]),
     publicBaseUrl: 'https://jobs.example.org',
+    ...clientRepositories(),
   };
   const deps = { ...hr, feedback: { ...hr, feedbackRequests: hr.feedbackRequests } } as unknown as JobScopeWorld;
   await seedJobB(deps);
@@ -120,6 +122,7 @@ async function seedJobB(deps: JobScopeWorld): Promise<void> {
     await deps.notifications.createIfAbsent(buildNotification({ id: `notif_b_${userId}`, userId, applicationId: 'app_b', jobId: JOB_B, ...org }), `b-${userId}`);
   }
   await deps.organizationSettings.setRestrictRecruitersToTeam(ORG_A, true, new Date());
+  await deps.organizationSettings.setAgency(ORG_A, { recruitsForClients: true, agencyAuthorization: null }, new Date());
   const request = {
     id: 'fbr_b', organizationId: ORG_A, applicationId: 'app_b', jobId: JOB_B, stageId: 'stage-0', interviewerKind: 'external' as const, interviewerUserId: null,
     interviewerEmail: 'b-only@example.org', interviewerName: 'Bravoleak Panel', tokenHash: 'hash_b', expiresAt: new Date('2026-07-01T00:00:00Z'), remindersSent: 0,
@@ -127,6 +130,18 @@ async function seedJobB(deps: JobScopeWorld): Promise<void> {
   };
   await deps.feedbackRequests.create(request);
   await deps.interviewFeedback.create({ id: 'fb_b', organizationId: ORG_A, applicationId: 'app_b', requestId: 'fbr_b', stageId: 'stage-0', interviewerName: 'Bravoleak Panel', answers: { strengths: 'B-ONLY answer' }, recommendation: 'proceed', submittedAt: new Date('2026-05-02T00:00:00Z') });
+}
+
+/** Job B belongs to a client and was presented to it in a shortlist with app_b. */
+function clientRepositories() {
+  const at = new Date('2026-05-01T00:00:00Z');
+  const clientStore = createClientStore({
+    clients: [{ id: 'client_b', organizationId: ORG_A, name: 'Client of the other job', website: null, logoUrl: null, contacts: [{ id: 'contact_b', name: 'Carla', email: 'carla@client.example' }], archivedAt: null, createdBy: 'user_test', createdAt: at, updatedAt: at }],
+    links: [{ organizationId: ORG_A, jobId: JOB_B, clientId: 'client_b', display: 'named', updatedBy: 'user_test', updatedAt: at }],
+    shortlists: [{ id: 'shortlist_b', organizationId: ORG_A, jobId: JOB_B, clientId: 'client_b', recipientContactId: 'contact_b', recipientName: 'Carla', recipientEmail: 'carla@client.example', tokenHash: 'hash_shortlist_b', message: 'B-ONLY shortlist', expiresAt: new Date('2026-07-01T00:00:00Z'), revokedAt: null, remindersSent: 0, lastReminderAt: null, firstOpenedAt: null, createdBy: 'user_test', createdAt: at }],
+    items: [{ id: 'item_b', organizationId: ORG_A, shortlistId: 'shortlist_b', applicationId: 'app_b', position: 0, shareCv: true, sharedNoteIds: ['note_b'], answer: 'meet', answerReason: 'B-ONLY reason', answeredAt: at, candidateNotifiedAt: at }],
+  });
+  return { clientStore, clients: createInMemoryClients(clientStore), jobClients: createInMemoryJobClients(clientStore), shortlists: createInMemoryShortlists(clientStore) };
 }
 
 /** What one run of a use case did: refused (not found / forbidden), or returned something. */

@@ -86,7 +86,7 @@ function buildCoverage(input: ReportInput, jobs: ReadonlyMap<string, Job>): Repo
 }
 
 /** Pure: turns the raw aggregates into the DTO, adding job titles, stage types and rates. */
-export function buildReports(input: ReportInput): ReportsDto {
+export function buildReports(input: ReportInput): Omit<ReportsDto, 'clientId'> {
   const { aggregates, jobId } = input;
   const jobs = new Map(input.jobs.map((job) => [job.id, job]));
   const outcomesByJob = buildOutcomes(input, jobs);

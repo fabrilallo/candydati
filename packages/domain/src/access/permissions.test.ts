@@ -74,6 +74,8 @@ describe('permissions', () => {
       'feedback:manage',
       'feedback:read',
       'report:read',
+      'client:read',
+      'shortlist:read',
     ]);
     expect(roleHasPermission('hiring_manager', 'message:send')).toBe(false);
     expect(roleHasPermission('hiring_manager', 'job:publish')).toBe(false);
@@ -91,6 +93,7 @@ describe('permissions', () => {
       'message:read',
       'task:read',
       'feedback:read',
+      'client:read',
     ]);
   });
 

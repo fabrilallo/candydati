@@ -180,6 +180,7 @@ export function expectedReports(ids: DatasetIds): ReportsDto {
     generatedAt: REPORT_NOW.toISOString(),
     period: { from: REPORT_FROM.toISOString(), to: REPORT_TO.toISOString() },
     jobId: null,
+    clientId: null,
     minSample: 5,
     timeToHire: {
       overall: stat(5, 10, 15),

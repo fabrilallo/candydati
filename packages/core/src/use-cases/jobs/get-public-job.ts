@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { NotFoundError } from '../../errors.js';
 import { toPublicJobDto, toPublicOrganizationDto } from '../../mappers/job-dto.js';
 import { definePublicJobQuery } from './define.js';
+import { publicClientsOf } from '../clients/public-clients.js';
 
 /** The public page plus the notice the candidate must read before applying (null: the form cannot be shown). */
 export interface PublicJobPage extends PublicJobPageDto {
@@ -20,9 +21,10 @@ export const getPublicJob = definePublicJobQuery({
     const job = await deps.jobs.findPublishedBySlug(organization.id, input.jobSlug);
     if (!job) throw new NotFoundError('Job not found.');
     const notice = await deps.privacyNotices.findActive(organization.id);
+    const clients = await publicClientsOf(deps, organization.id, [job]);
     return {
       organization: toPublicOrganizationDto(organization),
-      job: toPublicJobDto(job),
+      job: toPublicJobDto(job, clients[job.id]),
       privacyNotice: notice ? toPublicPrivacyNoticeDto(notice) : null,
     };
   },

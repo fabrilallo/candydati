@@ -31,12 +31,17 @@ export interface OrganizationSettings {
   readonly requireApproval: boolean;
   /** Recruiters see only the jobs whose team they are on (PRODUCT.md §6). Off by default. */
   readonly restrictRecruitersToTeam: boolean;
+  /** The organization recruits for clients (PRODUCT.md §3.5). Off by default. */
+  readonly recruitsForClients: boolean;
+  /** The agency's authorization reference, shown on client ads. */
+  readonly agencyAuthorization: string | null;
 }
 
 export interface OrganizationSettingsRepository {
   get(organizationId: string): Promise<OrganizationSettings>;
   setRequireApproval(organizationId: string, value: boolean, at: Date): Promise<OrganizationSettings>;
   setRestrictRecruitersToTeam(organizationId: string, value: boolean, at: Date): Promise<OrganizationSettings>;
+  setAgency(organizationId: string, value: Pick<OrganizationSettings, 'recruitsForClients' | 'agencyAuthorization'>, at: Date): Promise<OrganizationSettings>;
 }
 
 /**

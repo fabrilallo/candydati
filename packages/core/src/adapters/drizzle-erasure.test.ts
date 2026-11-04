@@ -99,6 +99,11 @@ async function addApplication(org: string, jobId: string, candidateId: string, p
   const requestId = randomUUID();
   await handle.db.insert(schema.feedbackRequest).values({ id: requestId, organizationId: org, applicationId: id, jobId, stageId: 'stage-0', interviewerKind: 'external', interviewerEmail: 'ext@partner.example', interviewerName: 'Eva Interviewer', tokenHash: randomUUID(), expiresAt: NOW, requestedBy: 'user_x', submittedAt: NOW });
   await handle.db.insert(schema.interviewFeedback).values({ id: randomUUID(), organizationId: org, applicationId: id, requestId, stageId: 'stage-0', interviewerName: 'Eva Interviewer', answers: { tech_shown: `${person.firstName} ${person.lastName} was great` }, recommendation: 'proceed', submittedAt: NOW });
+  const clientId = randomUUID();
+  await handle.db.insert(schema.client).values({ id: clientId, organizationId: org, name: `Client ${clientId}`, createdBy: 'user_x' });
+  const shortlistId = randomUUID();
+  await handle.db.insert(schema.clientShortlist).values({ id: shortlistId, organizationId: org, jobId, clientId, recipientContactId: 'c1', recipientName: 'Carla', recipientEmail: 'carla@client.example', tokenHash: randomUUID(), expiresAt: NOW, createdBy: 'user_x' });
+  await handle.db.insert(schema.clientShortlistItem).values({ id: randomUUID(), organizationId: org, shortlistId, applicationId: id, position: 0, answer: 'meet', answerReason: `Meet ${person.firstName}` });
   const endpointId = randomUUID();
   await handle.db.insert(schema.webhookEndpoint).values({ id: endpointId, organizationId: org, url: 'https://hook.example/x', secret: 'whsec_x', events: ['application.received'] });
   const eventId = randomUUID();
@@ -184,7 +189,7 @@ describe('erasure on Postgres', () => {
     const needles = [world.candidateId, ...world.applicationIds, world.person.email, world.person.firstName, world.person.lastName, world.person.phone];
     const before = await leftovers(needles);
     expect(Object.keys(before).length).toBeGreaterThan(8);
-    expect(Object.keys(before)).toEqual(expect.arrayContaining(['feedback_request', 'interview_feedback', 'application_stage_event', 'response_promise']));
+    expect(Object.keys(before)).toEqual(expect.arrayContaining(['feedback_request', 'interview_feedback', 'application_stage_event', 'response_promise', 'client_shortlist_item']));
 
     const deps = depsFor(world);
     const result = await eraseCandidate(deps, recruiter(world.org), { candidateId: world.candidateId, confirmName: fullName(world) });
