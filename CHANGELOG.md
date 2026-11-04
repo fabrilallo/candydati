@@ -12,7 +12,6 @@ All notable changes to this project are documented here. The format follows
   JS/JavaScript, k8s/Kubernetes, Postgres/PostgreSQL, Node/Node.js, C#/csharp, contabilità/accounting. A curated
   dictionary of about 190 skills (`packages/domain/src/skills`, open to contributions) is applied at search time, with
   no migration. Ordinary words like "go" in a CV's text are never read as a skill; it is still a filter, with no score.
-
 - **Offer accepted and start dates on a hire:** two optional dates (date only), set when recording the hire or edited
   afterwards (same permission as recording the outcome, audited). The time to hire in the reports is measured to the
   offer accepted date when it is set, otherwise to the day the hire was recorded; the report says how many hires used
