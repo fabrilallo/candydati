@@ -36,7 +36,7 @@ export function createPhase4Deps({ uow, queue, allowPrivateWebhooks }: Phase4Inp
   return {
     notificationDeps: { ...core, notifications, applications, candidates, jobs, now: clock.now },
     taskDeps: { ...core, tasks: r.tasks, notifications, applications, candidates, jobs, users, ...clock },
-    automationDeps: { ...core, rules: r.rules, jobs, templates: r.templates, users, ...clock },
+    automationDeps: { ...core, rules: r.rules, jobs, templates: r.templates, users, applications, candidates, executions: r.executions, ...clock },
     webhookDeps: {
       ...core,
       endpoints: r.endpoints,

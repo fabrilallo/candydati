@@ -12,6 +12,7 @@ import {
   type OrganizationSettingsRepository,
   type PublicFeedbackDeps,
   type StaleJobDeps,
+  type TaskQueue,
 } from '@candydati/core';
 import { newConversationToken } from '@candydati/providers';
 
@@ -33,12 +34,14 @@ export interface HrInputs {
   readonly sender: EmailSender;
   readonly config: MessagingConfig;
   readonly onFeedbackMailError: (error: unknown) => void;
+  /** A submitted feedback queues the `feedback_submitted` automations of its stage. */
+  readonly queue: TaskQueue;
 }
 
 export const hashSecret = (secret: string): string => createHash('sha256').update(secret).digest('hex');
 
 /** Feedback without login, job requests with approval and stale ads on Postgres; the sender is injected. */
-export function createHrDeps({ uow, files, sender, config, onFeedbackMailError }: HrInputs): HrWiring {
+export function createHrDeps({ uow, files, sender, config, onFeedbackMailError, queue }: HrInputs): HrWiring {
   const r = uow.repositories;
   const core = { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams };
   const { jobs, candidates, applications, organizations, members, stageInterviewers, scorecards, approvals, organizationSettings } = r;
@@ -61,7 +64,7 @@ export function createHrDeps({ uow, files, sender, config, onFeedbackMailError }
     approvals,
     organizationSettings,
     feedbackDeps: { ...core, jobs, candidates, applications, files, scorecards, ...stageEntry, ...clock },
-    publicFeedbackDeps: { ...core, jobs, candidates, applications, organizations, files, scorecards, ...feedbackRecords, hash: hashSecret, ...clock },
+    publicFeedbackDeps: { ...core, jobs, candidates, applications, organizations, files, scorecards, ...feedbackRecords, queue, hash: hashSecret, ...clock },
     jobRequestDeps: { ...core, jobs, approvals, organizationSettings, members, notifications: r.notifications, jobRequests: r.jobRequests, ...clock },
     staleJobDeps: { ...core, staleJobs: r.staleJobs, now: clock.now },
   };

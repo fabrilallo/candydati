@@ -1,10 +1,10 @@
-import { createAutomation, deleteAutomation, listAutomations, toAutomationRuleDto, updateAutomation } from '@candydati/core';
+import { createAutomation, deleteAutomation, listAutomations, previewAutomation, toAutomationRuleDto, updateAutomation } from '@candydati/core';
 import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { bodyOf, paramOf } from './request.js';
 
-/** Per-job, per-stage rules: send a template or create a task when an application enters a stage. Never move or decide. */
+/** Per-job, per-stage rules: send a template or create a task when a trigger fires and the conditions hold. Never move or decide. */
 export function registerAutomationRoutes(app: FastifyInstance, ctx: AppContext): void {
   const deps = ctx.automationDeps;
 
@@ -16,6 +16,11 @@ export function registerAutomationRoutes(app: FastifyInstance, ctx: AppContext):
     const rule = await createAutomation(deps, await ctx.resolveActor(request), { ...bodyOf(request), jobId: paramOf(request, 'id') });
     return reply.status(201).send(ok(toAutomationRuleDto(rule)));
   });
+
+  // A POST because the rule being edited travels in the body; it reads and writes nothing.
+  app.post('/api/v1/jobs/:id/automations/preview', async (request) =>
+    ok(await previewAutomation(deps, await ctx.resolveActor(request), { ...bodyOf(request), jobId: paramOf(request, 'id') })),
+  );
 
   app.put('/api/v1/automations/:id', async (request) =>
     ok(toAutomationRuleDto(await updateAutomation(deps, await ctx.resolveActor(request), { ...bodyOf(request), ruleId: paramOf(request, 'id') }))),
