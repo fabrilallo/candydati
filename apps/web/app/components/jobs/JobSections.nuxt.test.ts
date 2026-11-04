@@ -162,6 +162,40 @@ describe('JobProcessSection', () => {
     expect(wrapper.find('[data-testid="stage-remove-blocked"]').text()).toContain('non si può rimuovere')
   })
 
+  it('duplicates a stage that was never saved in the form, right after it, with its fields only', async () => {
+    const stages = Object.freeze([stage('screening_call', { title: 'Uno' }), stage('offer')])
+    const wrapper = await mountSuspended(JobProcessSection, { props: props({ process: stages }) })
+    await wrapper.find('button[aria-label="Duplica la fase 1"]').trigger('click')
+    const next = (wrapper.emitted('patch')?.[0]?.[0] as { process: { id: string; type: string; title: string }[] }).process
+    expect(next.map((s) => [s.id, s.type, s.title])).toEqual([['', 'screening_call', 'Uno'], ['', 'screening_call', 'Uno'], ['', 'offer', '']])
+    expect(wrapper.emitted('duplicate')).toBeUndefined()
+    expect(stages).toHaveLength(2)
+  })
+
+  it('asks the editor to duplicate a saved stage, and explains why it cannot while the form has unsaved changes', async () => {
+    const process = [stage('screening_call', { id: 'stg-a' }), stage('offer')]
+    const clean = await mountSuspended(JobProcessSection, { props: { ...props({ process }), dirty: false } })
+    await clean.find('button[aria-label="Duplica la fase 1"]').trigger('click')
+    expect(clean.emitted('duplicate')).toEqual([[0]])
+    expect(clean.find('[data-testid="stage-duplicate-blocked"]').exists()).toBe(false)
+
+    const dirty = await mountSuspended(JobProcessSection, { props: { ...props({ process }), dirty: true } })
+    const saved = dirty.find('button[aria-label="Duplica la fase 1"]')
+    expect(saved.attributes('disabled')).toBeDefined()
+    expect(saved.attributes('aria-describedby')).toBe('job-field-process-duplicate-blocked')
+    expect(dirty.find('#job-field-process-duplicate-blocked').text()).toBe('Salva le modifiche per duplicare una fase con le sue regole.')
+    expect(dirty.find('button[aria-label="Duplica la fase 2"]').attributes('disabled')).toBeUndefined()
+  })
+
+  it('disables every duplicate at the maximum number of stages, saying why, and while a copy is in flight', async () => {
+    const full = Array.from({ length: 10 }, () => stage('offer'))
+    const wrapper = await mountSuspended(JobProcessSection, { props: props({ process: full }) })
+    expect(wrapper.findAll('button[aria-label^="Duplica la fase"]').every((b) => b.attributes('disabled') !== undefined)).toBe(true)
+    expect(wrapper.find('[data-testid="stage-duplicate-blocked"]').text()).toContain('Al massimo 10 fasi')
+    const busy = await mountSuspended(JobProcessSection, { props: { ...props({ process: [stage('offer', { id: 'stg-a' })] }), duplicating: true } })
+    expect(busy.find('button[aria-label="Duplica la fase 1"]').attributes('disabled')).toBeDefined()
+  })
+
   it('offers stage durations as presets read like the candidate will read them', async () => {
     const wrapper = await mountSuspended(JobProcessSection, { props: props({ process: [stage('screening_call')] }) })
     const labels = wrapper.findAll('#job-field-process-0-duration option').map((option) => option.text())

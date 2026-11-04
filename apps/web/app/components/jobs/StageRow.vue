@@ -5,8 +5,20 @@ import { durationOptions } from '@/lib/editor-inputs'
 import type { StageForm } from '@/lib/job-form'
 
 /** One stage as a compact row: type, duration (presets), who conducts it, an optional note. Labels show on the first row. */
-const props = defineProps<{ id: string; stage: StageForm; index: number; count: number; disabled: boolean; language: string; openCount?: number; blocked?: boolean }>()
-const emit = defineEmits<{ change: [stage: StageForm]; remove: []; move: [delta: -1 | 1] }>()
+const props = defineProps<{
+  id: string
+  stage: StageForm
+  index: number
+  count: number
+  disabled: boolean
+  language: string
+  openCount?: number
+  blocked?: boolean
+  /** Duplicating is not possible now; `duplicateDescribedBy` names the element that says why. */
+  duplicateDisabled?: boolean
+  duplicateDescribedBy?: string
+}>()
+const emit = defineEmits<{ change: [stage: StageForm]; remove: []; move: [delta: -1 | 1]; duplicate: [] }>()
 const { t } = useI18n()
 const x = useAdText(() => props.language)
 
@@ -88,6 +100,10 @@ const labelClass = computed(() => (props.index > 0 ? 'text-xs text-muted-foregro
           :remove-label="t('job.editor.process.remove', { n })"
           :up-label="t('job.editor.process.moveUp', { n })"
           :down-label="t('job.editor.process.moveDown', { n })"
+          :duplicate-label="t('job.editor.process.duplicate', { n })"
+          :duplicate-disabled="duplicateDisabled"
+          :duplicate-described-by="duplicateDescribedBy"
+          @duplicate="emit('duplicate')"
           @remove="emit('remove')"
           @move="(delta) => emit('move', delta)"
         />

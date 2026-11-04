@@ -533,6 +533,7 @@
         "tracked_link_removed": "Ha rimosso un link tracciato di un annuncio",
         "stage_restricted": "Ha reso riservata una fase di un annuncio",
         "stage_unrestricted": "Ha tolto la riserva da una fase di un annuncio",
+        "stage_duplicated": "Ha duplicato una fase di un annuncio",
         "scorecard_updated": "Ha aggiornato i criteri di valutazione di un annuncio",
         "scorecard_suggested": "Ha preparato con l'assistente i criteri di valutazione a partire dall'annuncio",
         "client_updated": "Ha cambiato il cliente di un annuncio"
@@ -1117,7 +1118,20 @@
         "moveDown": "Sposta giù la fase {n}",
         "titleHint": "Facoltativo. Se vuoto mostriamo il tipo.",
         "openCandidates": "1 candidato in questa fase | {count} candidati in questa fase",
-        "removeBlocked": "Sposta prima il candidato in un'altra fase | Sposta prima i {count} candidati in un'altra fase"
+        "removeBlocked": "Sposta prima il candidato in un'altra fase | Sposta prima i {count} candidati in un'altra fase",
+        "duplicate": "Duplica la fase {n}",
+        "duplicateSaveFirst": "Salva le modifiche per duplicare una fase con le sue regole.",
+        "duplicateMax": "Al massimo {max} fasi: per duplicarne una, toglierne prima un'altra.",
+        "duplicated": "Fase duplicata",
+        "duplicatedCopied": "Copiato anche: {list}.",
+        "duplicatedSkipped": "Non copiato, serve un permesso che non hai: {list}.",
+        "duplicateFailed": "Non è stato possibile duplicare la fase",
+        "duplicateKinds": {
+          "interviewers": "chi fa il colloquio",
+          "scorecard": "criteri di valutazione",
+          "automations": "automazioni",
+          "restriction": "fase riservata"
+        }
       },
       "history": "Storico",
       "openPublic": "Apri la pagina pubblica",

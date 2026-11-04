@@ -53,6 +53,12 @@ const templateOpen = ref(false)
 /** The evaluation criteria (PRODUCT.md §2.4), saved apart from the ad: shown once it exists, editable by who manages feedback. */
 const showScorecard = computed(() => ed.job.value !== null && can(viewer.value?.role ?? null, 'feedback:read'))
 const manageScorecard = computed(() => can(viewer.value?.role ?? null, 'feedback:manage') && !ed.readOnly.value)
+/** After a stage is duplicated with its configuration, the parts of it shown here are read again. */
+const duplicateStage = (index: number): Promise<void> =>
+  ed.duplicateStage(index, () => {
+    void interviewers?.refresh()
+    if (ed.job.value) void refreshNuxtData(`job-scorecard-${ed.job.value.id}`)
+  })
 const savedStages = computed(() => (ed.job.value ? pipelineStagesOf(ed.job.value.content.process) : []))
 
 const orgSlug = computed(() => viewer.value?.organization?.slug ?? '')
@@ -185,7 +191,10 @@ const saveTemplate = async (name: string): Promise<void> => {
               :open-counts="ed.openCounts.value"
               :blocked-stages="ed.blockedStages.value"
               :interviewers="interviewerBinding"
+              :dirty="ed.dirty.value"
+              :duplicating="ed.busy.value === 'duplicate'"
               @patch="ed.patch"
+              @duplicate="duplicateStage"
               @interviewers="(stageId, list) => interviewers?.save(stageId, list)"
             />
             <JobDescriptionSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
