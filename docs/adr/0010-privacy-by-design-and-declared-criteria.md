@@ -15,10 +15,17 @@ AI system: it conflicts with ADR 0005, GDPR art. 22, and is a high-risk use unde
    Surname, contacts and direct identifiers are replaced by markers (`[surname]`, `[email]`, ...) in every text a
    candidate wrote (`pseudonymizeText`, `packages/domain/src/privacy`). Drafts keep `{{candidate.lastName}}` as a
    variable for the person's composer. This is pseudonymization, not anonymization: the data is still personal data.
-   Covered: emails, phones, links and social profiles (any common TLD, `t.me`, `wa.me`, `name.github.io`, "LinkedIn:
-   in/name"), `@handles`, Italian and English street addresses, tax codes, IBANs, full dates. Every pattern is
-   bounded to stay linear on hostile text. Not covered: names of third parties (references, colleagues), address
-   formats of other countries, and anything free text can hide.
+   Covered: emails, phones (international, spaced, with an `int.`/`ext.` extension), links and social profiles (any
+   common TLD, `t.me`, `wa.me`, `name.github.io`, "LinkedIn: in/name", personal sites such as `name.it` or
+   `name.com/about`), `@handles` and messaging ids after their app name (Skype, Discord, Signal, Teams), Italian street
+   addresses with CAP and city, English ones with city and US ZIP or UK postcode, tax codes (with omocodia), partite
+   IVA after their label, IBANs, full dates. Third parties, deterministically and only where the text marks them: full
+   names in a references section (up to an empty line), after a title (Dott., Ing., Mr...), right before a contact, and
+   known names passed as `otherNames` (`[name]`). Every pattern is bounded to stay linear on hostile text.
+   Residual risk, accepted and stated: third-party names in plain prose ("ho lavorato con Mario Bianchi"), single-word
+   or lower-case names, notes naming people, a partita IVA without its label (masked as a phone), bare domains with a
+   common TLD and no path (`mariorossi.com`), address formats of other countries, and anything free text can hide.
+   `otherNames` is not yet filled with the organization members by the tools: the directory has no list of them.
 2. **A filter on declared criteria, never a judgement.** A person declares objective, job-related criteria (skills,
    languages, minimum experience, location, words in the CV) and confirms them; the assistant may propose them, the
    tools require an explicit confirmation flag. The database applies them deterministically (`cvMatchesCriteria` is the

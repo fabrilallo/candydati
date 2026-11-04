@@ -3,6 +3,8 @@
  * with the first name and the ids only. The surname, contacts and direct identifiers are replaced by these markers.
  * It lowers the risk, it does not make data anonymous (GDPR recital 26): CV content can still single someone out.
  */
+import { NAME_MARKER, replaceKnownNames, replaceMarkedNames } from './third-party-names.js';
+
 export const REDACTED = {
   surname: '[surname]',
   email: '[email]',
@@ -13,6 +15,8 @@ export const REDACTED = {
   iban: '[iban]',
   date: '[date]',
   handle: '[handle]',
+  name: NAME_MARKER,
+  vat: '[vat number]',
 } as const;
 
 /** What identifies one person beyond the first name: removed wherever it appears. */
@@ -21,6 +25,8 @@ export interface PersonIdentifiers {
   readonly email?: string | null;
   readonly phone?: string | null;
   readonly linkedinUrl?: string | null;
+  /** Full names of other people known to appear (the organization members, for instance): replaced by `[name]`. */
+  readonly otherNames?: readonly string[] | null;
 }
 
 /** Every quantifier is bounded: the patterns run on text written by strangers and must stay linear. */
@@ -37,16 +43,29 @@ const HOSTED_PAGE = /\b[a-z0-9-]{1,39}\.(?:github|gitlab)\.io(?:\/[^\s<>"'(),]{0
 const LINKEDIN_PATH = /\blinkedin[\s:.-]{1,4}in\/[\w%-]{2,100}/gi;
 /** A leading `@` and 2-30 handle characters, not after a word, a dot or another `@` (so emails and "a@b" stay out). */
 const HANDLE = /(?<![\w@.+-])@[A-Za-z][\w.]{0,28}\w(?![\w@])/g;
+/** A personal site without `www`: a personal TLD, or a common one with a path. Lower case, so `ASP.NET` stays. */
+const PERSONAL_SITE = new RegExp(
+  String.raw`(?<![\w.@/-])[a-z0-9][a-z0-9-]{0,62}\.(?:(?:it|dev|me|page|site|blog|name|eu)(?:${PROFILE_TAIL})?|(?:com|net|org|io)${PROFILE_TAIL})(?![\w-])`,
+  'g',
+);
+/** "Skype: live:name", "Discord: name#1234", "skype:name?call": the id after the app name. */
+const MESSAGING = /\b(skype|discord|signal|teams)((?:\s?id)?\s?:\s{0,3})(?:live:)?@?[\w.#-]{1,63}\w(?:\?\w{1,20})?/gi;
+const VAT = /\b((?:P\.?\s?IVA|Partita\s{1,3}IVA|VAT(?:\s?(?:no|n|number)\.?)?)\s?:?\s{0,3})(?:IT\s?)?\d{11}(?!\d)/gi;
+const UK_POSTCODE = /\b[A-Z]{1,2}\d[A-Z\d]?\s\d[A-Z]{2}\b/g;
 const EMAIL = /(?<![\w.+-])[\w.+-]{1,64}@[\w-]{1,63}(?:\.[\w-]{1,63}){1,8}/g;
-const IBAN = /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,4})?\b/g;
-const TAX_CODE = /\b[A-Z]{6}\d{2}[A-EHLMPRST]\d{2}[A-Z]\d{3}[A-Z]\b/gi;
+const IBAN = /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,4})?\b/gi;
+const IBAN_DIGITS_MIN = 10;
+/** Omocodia replaces digits by the letters L-V. */
+const TAX_CODE = /\b[A-Z]{6}[\dLMNP-V]{2}[A-EHLMPRST][\dLMNP-V]{2}[A-Z][\dLMNP-V]{3}[A-Z]\b/gi;
 const NUMERIC_DATE = /(?<!\d)\d{1,2}[/.-]\d{1,2}[/.-](?:19|20)\d{2}(?!\d)/g;
 const MONTHS = 'gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic|jan|may|jun|jul|aug|sep|oct|dec';
 const WORDED_DATE = new RegExp(`(?<![\\p{L}\\d])\\d{1,2}\\s{1,3}(?:${MONTHS})\\p{L}{0,8}\\.?\\s{1,3}(?:19|20)\\d{2}(?!\\d)`, 'giu');
 const STREET_IT =
-  /\b(?:Via|Viale|Piazza|Piazzale|Corso|Largo|Vicolo|Strada|Contrada|Borgo)(?:\s{1,3}(?:\p{Lu}[\p{L}'.]{0,30}|d[aei]|del|della|dei|degli|delle)){1,5},?\s{1,3}\d{1,3}[a-zA-Z]?(?![\d\p{L}])/gu;
-const STREET_EN = /(?<!\d)\d{1,5}\s{1,3}(?:\p{Lu}\p{L}{0,30}\s{1,3}){1,3}(?:Street|St\.?|Road|Rd\.?|Avenue|Ave\.?|Lane|Drive|Boulevard)(?!\p{L})/gu;
-const PHONE = /(?<![\w+./])(?:(?:\+|00)\d{1,3}[ .-]?)?(?:\(\d{2,4}\)[ .-]?)?\d{2,12}(?:[ .-]\d{2,12}){0,4}(?![\w/])/g;
+  /\b(?:Via|Viale|Piazza|Piazzale|Corso|Largo|Vicolo|Strada|Contrada|Borgo)(?:\s{1,3}(?:\p{Lu}[\p{L}'.]{0,30}|d[aei]|del|della|dei|degli|delle)){1,5},?\s{1,3}\d{1,3}(?:\s?\/\s?[a-zA-Z]|[a-zA-Z])?(?:[\s,-]{1,5}\d{5}\s{1,3}\p{Lu}[\p{L}']{1,30}(?:\s\p{Lu}[\p{L}']{1,30}){0,2}(?:\s{0,3}\([A-Z]{2}\))?)?(?![\d\p{L}])/gu;
+const EN_SUFFIX = String.raw`(?:Street|St\.?|Road|Rd\.?|Avenue|Ave\.?|Lane|Ln\.?|Drive|Dr\.?|Boulevard|Blvd\.?|Way|Court|Ct\.?|Place|Pl\.?|Square|Sq\.?|Terrace|Close|Crescent|Highway|Parkway|Row|Gardens|Grove)`;
+const EN_POSTAL = String.raw`(?:,\s{0,3}\p{Lu}\p{L}{1,30}(?:\s{1,3}\p{Lu}\p{L}{1,30}){0,2},?\s{1,3}(?:[A-Z]{2}\s{1,3}\d{5}(?:-\d{4})?|[A-Z]{1,2}\d[A-Z\d]?\s\d[A-Z]{2}))?`;
+const STREET_EN = new RegExp(String.raw`(?<!\d)\d{1,5}[A-Z]?\s{1,3}(?:\p{Lu}\p{L}{0,30}\s{1,3}){1,3}${EN_SUFFIX}(?!\p{L})${EN_POSTAL}`, 'gu');
+const PHONE = /(?<![\w+./])(?:(?:\+|00)\d{1,3}[ .-]?)?(?:\(\d{2,4}\)[ .-]?)?\d{2,12}(?:[ .-]\d{2,12}){0,4}(?:\s{0,2}(?:int|ext|interno)\.?\s{0,2}\d{1,5})?(?![\w/])/g;
 
 const PHONE_DIGITS_MIN = 9;
 const PHONE_DIGITS_MAX = 15;
@@ -89,29 +108,33 @@ function replaceKnown(text: string, person: PersonIdentifiers): string {
 }
 
 /** Links and emails first: they often carry the surname, and must disappear whole. */
-const PATTERNS: readonly (readonly [RegExp, (match: string) => string])[] = [
+const PATTERNS: readonly (readonly [RegExp, (match: string, ...groups: string[]) => string])[] = [
   [URL, () => REDACTED.link],
   [PROFILE, () => REDACTED.link],
   [SHORT_PROFILE, () => REDACTED.link],
   [HOSTED_PAGE, () => REDACTED.link],
   [LINKEDIN_PATH, () => REDACTED.link],
+  [PERSONAL_SITE, () => REDACTED.link],
   [EMAIL, () => REDACTED.email],
+  [MESSAGING, (_match, app: string, separator: string) => `${app}${separator}${REDACTED.handle}`],
   [HANDLE, () => REDACTED.handle],
-  [IBAN, () => REDACTED.iban],
+  [VAT, (_match, label: string) => `${label}${REDACTED.vat}`],
+  [IBAN, (match) => (match.replace(/\D/g, '').length >= IBAN_DIGITS_MIN ? REDACTED.iban : match)],
   [TAX_CODE, () => REDACTED.taxCode],
   [NUMERIC_DATE, () => REDACTED.date],
   [WORDED_DATE, () => REDACTED.date],
   [STREET_IT, () => REDACTED.address],
   [STREET_EN, () => REDACTED.address],
+  [UK_POSTCODE, () => REDACTED.address],
   [PHONE, replacePhone],
 ];
 
 /** Text as a model may read it: first name kept, surname and identifiers replaced by `REDACTED` markers. */
 export function pseudonymizeText(text: string, person: PersonIdentifiers): string {
-  const known = replaceKnown(text, person);
+  const known = replaceKnownNames(replaceKnown(text, person), person.otherNames);
   const generic = PATTERNS.reduce((current, [pattern, replacement]) => current.replace(pattern, replacement), known);
   const surname = surnamePattern(person.lastName);
-  return surname ? generic.replace(surname, REDACTED.surname) : generic;
+  return replaceMarkedNames(surname ? generic.replace(surname, REDACTED.surname) : generic);
 }
 
 /** Every string of a JSON-like value (CV fields, message lists) through `pseudonymizeText`; returns a new value. */
