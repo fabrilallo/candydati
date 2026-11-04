@@ -35,6 +35,7 @@ export async function closeApplication(
     ...dates,
   });
   await trackDecision(deps, saved, outcome, actorType);
+  await deps.moveProposals?.dropOpenForApplication(saved.organizationId, saved.id, now);
   await recordEvent(deps, saved.organizationId, 'application.decided', { applicationId: saved.id, jobId: saved.jobId, outcome });
   return saved;
 }

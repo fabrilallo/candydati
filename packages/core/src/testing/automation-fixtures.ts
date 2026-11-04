@@ -1,4 +1,4 @@
-import type { AutomationRule, Notification, OutboxEvent, Task, WebhookDelivery, WebhookEndpoint } from '@candydati/domain';
+import type { AutomationRule, MoveProposal, Notification, OutboxEvent, Task, TemplateAutomationRule, WebhookDelivery, WebhookEndpoint } from '@candydati/domain';
 import type { Member } from '../automation-ports.js';
 
 const DATE = new Date('2026-01-01T00:00:00.000Z');
@@ -45,7 +45,38 @@ export const buildAutomationRule = (overrides: Partial<AutomationRule> = {}): Au
   ...overrides,
 });
 
-export const buildWebhookEndpoint = (overrides: Partial<WebhookEndpoint> = {}): WebhookEndpoint => ({
+export const buildMoveProposal = (overrides: Partial<MoveProposal> = {}): MoveProposal => ({
+  id: 'prop_1',
+  organizationId: 'org_a',
+  applicationId: 'app_1',
+  jobId: 'job_1',
+  ruleId: 'rule_1',
+  fromStageId: 'stage-0',
+  toStageId: 'stage-1',
+  proposedBy: 'recruiter_1',
+  status: 'open',
+  createdAt: DATE,
+  expiresAt: new Date('2099-01-01T00:00:00.000Z'),
+  resolvedBy: null,
+  resolvedAt: null,
+  ...overrides,
+});
+
+export const buildTemplateRule = (overrides: Partial<TemplateAutomationRule> = {}): TemplateAutomationRule => ({
+  id: 'trule_1',
+  organizationId: 'org_a',
+  templateId: 'tpl_1',
+  stageId: 'stage-0',
+  trigger: { type: 'stage_entered' },
+  conditions: {},
+  action: { type: 'create_task', title: 'Prepare the interview', assignee: 'job_owner' },
+  enabled: true,
+  createdBy: 'recruiter_1',
+  createdAt: DATE,
+  ...overrides,
+});
+
+export const buildWebhookEndpoint =(overrides: Partial<WebhookEndpoint> = {}): WebhookEndpoint => ({
   id: 'hook_1',
   organizationId: 'org_a',
   url: 'https://hooks.example.com/candydati',

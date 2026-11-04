@@ -82,6 +82,9 @@ describe('runAutomations on Postgres (#9)', () => {
       tasks: r.tasks,
       notifications: r.notifications,
       members: r.members,
+      jobTeams: r.jobTeams,
+      outbox: r.outbox,
+      moveProposals: r.moveProposals,
       newId,
       now: () => new Date(),
     };

@@ -4,9 +4,15 @@ import type {
   AutomationConditions,
   AutomationRule,
   AutomationTrigger,
+  CopyAutomationsResultDto,
+  MoveProposalDto,
   NotificationKind,
   Task,
+  TemplateAutomationRule,
+  TemplateAutomationRuleDto,
 } from '@candydati/domain';
+import type { CopyAutomationsResult } from '../use-cases/automations/copy-rules.js';
+import type { MoveProposalView } from '../use-cases/automations/proposals.js';
 import type { AttentionItemView, AttentionPage } from '../use-cases/candidates/list-attention.js';
 import type { NotificationView } from '../use-cases/notifications/notifications.js';
 import type { TaskView } from '../use-cases/tasks/tasks.js';
@@ -107,6 +113,37 @@ export const toTaskDto = ({ task, assigneeName, candidate, jobTitle }: TaskView)
   assignee: { id: task.assigneeId, name: assigneeName },
   candidate,
   jobTitle,
+});
+
+export const toTemplateAutomationRuleDto = (rule: TemplateAutomationRule): TemplateAutomationRuleDto => ({
+  id: rule.id,
+  templateId: rule.templateId,
+  stageId: rule.stageId,
+  trigger: rule.trigger,
+  conditions: rule.conditions,
+  action: rule.action,
+  enabled: rule.enabled,
+  createdBy: rule.createdBy,
+  createdAt: iso(rule.createdAt),
+});
+
+export const toCopyAutomationsResultDto = (result: CopyAutomationsResult): CopyAutomationsResultDto => ({
+  to: result.to.kind === 'job' ? { kind: 'job', id: result.to.jobId } : { kind: 'template', id: result.to.templateId },
+  stageId: result.stageId,
+  created: [...result.created],
+});
+
+export const toMoveProposalDto = ({ proposal, candidate, job, fromLabel, toLabel }: MoveProposalView): MoveProposalDto => ({
+  id: proposal.id,
+  applicationId: proposal.applicationId,
+  ruleId: proposal.ruleId,
+  candidate,
+  job,
+  from: { id: proposal.fromStageId, label: fromLabel },
+  to: { id: proposal.toStageId, label: toLabel },
+  proposedBy: proposal.proposedBy,
+  createdAt: iso(proposal.createdAt),
+  expiresAt: iso(proposal.expiresAt),
 });
 
 export const toAutomationRuleDto = (rule: AutomationRule): AutomationRuleDto => ({

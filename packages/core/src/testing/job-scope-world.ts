@@ -1,7 +1,7 @@
 import type { Actor } from '../actor.js';
 import { NotFoundError, ForbiddenError } from '../errors.js';
 import { agentActor, apiKeyActor, userActor } from './actors.js';
-import { buildAutomationRule, buildNotification, buildTask } from './automation-fixtures.js';
+import { buildAutomationRule, buildMoveProposal, buildNotification, buildTask } from './automation-fixtures.js';
 import { buildApplication, buildAttachment, buildCandidate, buildExtraction, buildNote, fakePdfBytes } from './candidate-fixtures.js';
 import { ORG_A } from './candidate-seed.js';
 import { testHash, type TestHrDeps } from './hr-deps.js';
@@ -80,7 +80,8 @@ export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
       buildTask({ id: 'task_b2', applicationId: 'app_b', jobId: JOB_B, title: 'B-ONLY task', assigneeId: 'hm_a', ...org }),
       buildTask({ id: 'task_b3', applicationId: 'app_b', jobId: JOB_B, title: 'B-ONLY task', assigneeId: 'rec_a', ...org }),
     ],
-    rules: [buildAutomationRule({ id: 'rule_b', jobId: JOB_B, ...org })],
+    rules: [buildAutomationRule({ id: 'rule_b', jobId: JOB_B, ...org }), buildAutomationRule({ id: 'rule_a', jobId: JOB_A, ...org })],
+    proposals: [buildMoveProposal({ id: 'prop_b', applicationId: 'app_b', jobId: JOB_B, ruleId: 'rule_b', ...org })],
     batches: [
       {
         id: 'batch_b', organizationId: ORG_A, jobId: JOB_B, stageId: 'received', status: 'ready', createdBy: 'user_test',

@@ -56,15 +56,27 @@ async function missingTargets(deps: FeedbackStageEntryDeps, context: RequestCont
  */
 export async function requestFeedbackOnStageEntry(deps: FeedbackStageEntryDeps, entry: StageEntry): Promise<number> {
   try {
-    const context = await loadRequestContext(deps, entry.organizationId, entry.applicationId, entry.stageId);
-    if (!context) return 0;
-    const configured = await deps.stageInterviewers.listByStage(entry.organizationId, context.job.id, entry.stageId);
-    if (configured.length === 0) return 0;
-    const wanted = await missingTargets(deps, context, await resolveTargets(deps, entry.organizationId, configured));
-    for (const target of wanted) await issueRequest(deps, context, target, { requestedBy: entry.requestedBy, actor: entry.actor });
-    return wanted.length;
+    return await requestMissingFeedback(deps, entry, { requireInterviewers: false });
   } catch (error) {
     deps.onError?.(error);
     return 0;
   }
+}
+
+/**
+ * Asks each interviewer configured for the stage who has nothing open or submitted for this application and stage yet
+ * (no duplicates; the reminder scan follows the requests up). Throws on failure. With `requireInterviewers`, a stage
+ * with no interviewer configured is an error (`no_interviewers`), so a rule that asks for feedback reports it.
+ */
+export async function requestMissingFeedback(deps: FeedbackStageEntryDeps, entry: StageEntry, options: { readonly requireInterviewers: boolean }): Promise<number> {
+  const context = await loadRequestContext(deps, entry.organizationId, entry.applicationId, entry.stageId);
+  if (!context) return 0;
+  const configured = await deps.stageInterviewers.listByStage(entry.organizationId, context.job.id, entry.stageId);
+  if (configured.length === 0) {
+    if (options.requireInterviewers) throw new Error('no_interviewers');
+    return 0;
+  }
+  const wanted = await missingTargets(deps, context, await resolveTargets(deps, entry.organizationId, configured));
+  for (const target of wanted) await issueRequest(deps, context, target, { requestedBy: entry.requestedBy, actor: entry.actor });
+  return wanted.length;
 }

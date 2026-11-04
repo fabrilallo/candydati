@@ -80,7 +80,7 @@ async function runRule(deps: AutomationRunDeps, actor: Actor, rule: AutomationRu
     // Skipped, not sent in the name of someone who is gone: admins are told once.
     await notifyCreatorUnauthorized(deps, rule, application.id);
   } else {
-    ok = await inSavepoint(deps, (sp) => executeAction(sp, rule, role, job, application.id)).then(
+    ok = await inSavepoint(deps, (sp) => executeAction(sp, { rule, role, job, application, occurrence })).then(
       () => true,
       () => false,
     );

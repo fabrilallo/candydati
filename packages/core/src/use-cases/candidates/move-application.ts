@@ -61,6 +61,7 @@ export const moveApplication = defineCandidateUseCase({
       respondedAt: null,
     });
     await trackStageEntry(deps, saved, application.stageId, actor.type);
+    await deps.moveProposals?.dropOpenForApplication(saved.organizationId, saved.id, now);
     await recordEvent(deps, saved.organizationId, 'application.moved', {
       applicationId: saved.id,
       jobId: saved.jobId,
