@@ -1,4 +1,4 @@
-import { type Outcome, type PageMeta, applicationCardSchema, candidateDetailSchema, candidateSummarySchema, noteSchema, pipelineSchema, type ApplicationCardDto, type CandidateDetailDto, type CandidateSummaryDto, type NoteDto, type PipelineDto    } from '@candydati/domain';
+import { type HireDatesInput, type Outcome, type PageMeta, applicationCardSchema, candidateDetailSchema, candidateSummarySchema, noteSchema, pipelineSchema, type ApplicationCardDto, type CandidateDetailDto, type CandidateSummaryDto, type NoteDto, type PipelineDto    } from '@candydati/domain';
 import { z } from 'zod'
 import { callApi } from './api-call'
 import { AppError } from './auth-errors'
@@ -14,8 +14,13 @@ export const getPipeline = async (request: JobApiRequest, jobId: string): Promis
 export const moveApplication = async (request: JobApiRequest, applicationId: string, stageId: string): Promise<ApplicationCardDto> =>
   (await callApi(request, `/api/v1/applications/${id(applicationId)}/move`, applicationCardSchema, { method: 'POST', body: { stageId } })).data
 
-export const decideApplication = async (request: JobApiRequest, applicationId: string, outcome: Outcome): Promise<ApplicationCardDto> =>
-  (await callApi(request, `/api/v1/applications/${id(applicationId)}/decide`, applicationCardSchema, { method: 'POST', body: { outcome } })).data
+/** A hire may carry the offer accepted and start dates (`YYYY-MM-DD`); they are sent only when given. */
+export const decideApplication = async (request: JobApiRequest, applicationId: string, outcome: Outcome, hireDates: HireDatesInput = {}): Promise<ApplicationCardDto> =>
+  (await callApi(request, `/api/v1/applications/${id(applicationId)}/decide`, applicationCardSchema, { method: 'POST', body: { outcome, ...hireDates } })).data
+
+/** Sets, changes or clears (null) the offer accepted and start dates of a hired application. */
+export const updateHireDates = async (request: JobApiRequest, applicationId: string, hireDates: HireDatesInput): Promise<ApplicationCardDto> =>
+  (await callApi(request, `/api/v1/applications/${id(applicationId)}/hire-dates`, applicationCardSchema, { method: 'PATCH', body: hireDates })).data
 
 export interface CandidateFilters {
   readonly query: string

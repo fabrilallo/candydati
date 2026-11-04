@@ -1,4 +1,4 @@
-import type { DurationStat, Outcome, ResponsePromise, StageEvent } from '@candydati/domain';
+import type { DurationStat, HireDateBasis, Outcome, ResponsePromise, StageEvent } from '@candydati/domain';
 import type { JobRepository } from './job-ports.js';
 import type { CoreDeps } from './ports.js';
 
@@ -52,8 +52,17 @@ export interface JobCount {
  * stage types and rates. Durations are rounded to 2 decimals.
  */
 export interface ReportAggregates {
-  /** Applications decided `hired` in the period (`closedAt`): days from `createdAt`. */
-  readonly hireDays: { readonly overall: DurationStat; readonly byJob: readonly (JobCount & { readonly stat: DurationStat })[] };
+  /**
+   * Applications decided `hired` in the period (`closedAt`): whole days from the UTC day of `createdAt` to `offerAcceptedOn`
+   * when set, else days from `createdAt` to `closedAt`. `basis` counts how many used each; `toStart` is the days to
+   * `startOn` of those that have one.
+   */
+  readonly hireDays: {
+    readonly overall: DurationStat;
+    readonly byJob: readonly (JobCount & { readonly stat: DurationStat })[];
+    readonly basis: HireDateBasis;
+    readonly toStart: DurationStat;
+  };
   /** Jobs whose FIRST hire (`closedAt`) falls in the period. */
   readonly firstHires: readonly (JobCount & { readonly firstHireAt: Date })[];
   /** Distinct applications that entered each stage in the period. */

@@ -136,6 +136,10 @@ export interface Application {
   readonly updatedAt: Date;
   readonly stageChangedAt: Date;
   readonly closedAt: Date | null;
+  /** Hired only, optional: the day the offer was accepted (`YYYY-MM-DD`). Absent or null: not recorded. */
+  readonly offerAcceptedOn?: string | null;
+  /** Hired only, optional: the day the person starts (`YYYY-MM-DD`). Absent or null: not recorded. */
+  readonly startOn?: string | null;
   /** The promise "we answer within N days": null once answered or decided, and for jobs with no declared response time. */
   readonly responseDueAt: Date | null;
   /** A person answered (message sent, move or decision) after the last stage change. Reset by a move. */

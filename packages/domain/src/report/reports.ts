@@ -51,6 +51,12 @@ export interface SourceRow {
   readonly conversion: number | null;
 }
 
+/** Hires of the period by the date their time to hire was measured to: the offer accepted date, or the day the hire was recorded. */
+export interface HireDateBasis {
+  readonly offerDate: number;
+  readonly recordedDate: number;
+}
+
 /**
  * Numbers of the period. Rates carry their denominator; the interface shows "—" under `minSample`. Time figures are
  * rounded to 2 decimals. Applications erased under GDPR are gone from every aggregate.
@@ -60,10 +66,16 @@ export interface ReportsDto {
   readonly period: { readonly from: string; readonly to: string };
   readonly jobId: string | null;
   readonly minSample: number;
-  /** Applications decided `hired` in the period: days from application to decision. */
+  /**
+   * Applications decided `hired` in the period: days from the application to the day the offer was accepted when that
+   * date was recorded, otherwise to the day the hire was recorded. `basis` says how many hires used each.
+   */
   readonly timeToHire: {
     readonly overall: DurationStat;
     readonly byJob: readonly (JobRef & DurationStat)[];
+    readonly basis: HireDateBasis;
+    /** The same hires that have a start date: days from the application to the start. */
+    readonly toStart: DurationStat;
   };
   /** Jobs whose first hire falls in the period: days from publication to that hire. */
   readonly timeToFill: {

@@ -54,6 +54,9 @@ export interface ApplicationCardDto {
   readonly createdAt: string;
   readonly stageChangedAt: string;
   readonly closedAt: string | null;
+  /** Hired only, `YYYY-MM-DD`. */
+  readonly offerAcceptedOn: string | null;
+  readonly startOn: string | null;
   /** Deadline of the promise to answer; null once answered or decided. */
   readonly responseDueAt: string | null;
   readonly respondedAt: string | null;
@@ -140,6 +143,8 @@ export interface CandidateDetailDto {
     readonly createdAt: string;
     readonly stageChangedAt: string;
     readonly closedAt: string | null;
+    readonly offerAcceptedOn: string | null;
+    readonly startOn: string | null;
     readonly responseDueAt: string | null;
     readonly respondedAt: string | null;
     readonly responseState: ResponseState;
@@ -197,6 +202,8 @@ export const toApplicationCardDto = (view: ApplicationCardView): ApplicationCard
     createdAt: iso(application.createdAt),
     stageChangedAt: iso(application.stageChangedAt),
     closedAt: isoOrNull(application.closedAt),
+    offerAcceptedOn: application.offerAcceptedOn ?? null,
+    startOn: application.startOn ?? null,
     responseDueAt: isoOrNull(application.responseDueAt),
     respondedAt: isoOrNull(application.respondedAt),
     responseState: view.responseState,
@@ -298,6 +305,8 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
     createdAt: iso(application.createdAt),
     stageChangedAt: iso(application.stageChangedAt),
     closedAt: isoOrNull(application.closedAt),
+    offerAcceptedOn: application.offerAcceptedOn ?? null,
+    startOn: application.startOn ?? null,
     responseDueAt: isoOrNull(application.responseDueAt),
     respondedAt: isoOrNull(application.respondedAt),
     responseState,

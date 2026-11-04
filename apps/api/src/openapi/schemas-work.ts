@@ -25,6 +25,7 @@ import type {
 import { z } from 'zod';
 
 const isoDate = z.iso.datetime();
+const hireDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).describe('A date without a time, `YYYY-MM-DD`.');
 const person = z.object({ id: z.string(), firstName: z.string(), lastName: z.string() });
 const consentStatus = z.enum(CONSENT_STATUSES);
 const importBatchId = z.string().nullable();
@@ -42,6 +43,8 @@ export const applicationCardSchema: z.ZodType<ApplicationCardDto> = z.object({
   createdAt: isoDate,
   stageChangedAt: isoDate,
   closedAt: isoDate.nullable(),
+  offerAcceptedOn: hireDate.nullable(),
+  startOn: hireDate.nullable(),
   responseDueAt: isoDate.nullable(),
   respondedAt: isoDate.nullable(),
   responseState: z.enum(RESPONSE_STATES),
@@ -114,6 +117,8 @@ export const candidateDetailSchema: z.ZodType<CandidateDetailDto> = z.object({
       createdAt: isoDate,
       stageChangedAt: isoDate,
       closedAt: isoDate.nullable(),
+      offerAcceptedOn: hireDate.nullable(),
+      startOn: hireDate.nullable(),
       responseDueAt: isoDate.nullable(),
       respondedAt: isoDate.nullable(),
       responseState: z.enum(RESPONSE_STATES),

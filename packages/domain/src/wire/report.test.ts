@@ -7,7 +7,7 @@ const rate = { count: 0, total: 0, rate: null };
 const outcomes = { hired: 0, not_selected: 0, withdrawn: 0 };
 const valid = {
   minSample: 7,
-  timeToHire: { overall: stat, byJob: [] },
+  timeToHire: { overall: stat, byJob: [], basis: { offerDate: 0, recordedDate: 0 }, toStart: stat },
   timeToFill: { overall: stat, items: [] },
   funnel: { stages: [], outcomes, outcomesByJob: [] },
   sources: [],

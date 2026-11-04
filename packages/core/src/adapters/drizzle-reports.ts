@@ -41,14 +41,25 @@ export function createDrizzleReports(db: DbExecutor): ReportRepository {
       const inEvent = scope(query, stageEvent);
       const inPromise = scope(query, promise);
       const hiredInPeriod = and(inApplication, eq(application.outcome, 'hired'), gte(application.closedAt, from), lte(application.closedAt, to));
-      const hireValue = days(sql`${application.createdAt}`, sql`${application.closedAt}`);
+      // Offer accepted (a date) when recorded: whole days from the UTC day of the application; else to the recorded hire.
+      const createdDay = sql`(${application.createdAt} at time zone 'UTC')::date`;
+      const hireValue = sql`case when ${application.offerAcceptedOn} is not null then (${application.offerAcceptedOn} - ${createdDay})::float8 else ${days(sql`${application.createdAt}`, sql`${application.closedAt}`)} end`;
+      const startValue = sql`(${application.startOn} - ${createdDay})::float8`;
       const closureAt = sql`coalesce(${promise.respondedAt}, ${promise.dueAt})`;
       const closedInPeriod = and(inPromise, ne(promise.status, 'open'), sql`${closureAt} >= ${ts(from)}`, sql`${closureAt} <= ${ts(to)}`);
       const createdInPeriod = and(inApplication, gte(application.createdAt, from), lte(application.createdAt, to));
 
-      const [hireOverall, hireByJob, firstHires, stageEntries, stageAdvances, outcomes, sources, visits, promisesClosed, responseHours, promisesWaiting, coverage] = await Promise.all([
+      const [hireOverall, hireByJob, hireBasis, hireStart, firstHires, stageEntries, stageAdvances, outcomes, sources, visits, promisesClosed, responseHours, promisesWaiting, coverage] = await Promise.all([
         db.select(durationColumns(hireValue)).from(application).where(hiredInPeriod),
         db.select({ jobId: application.jobId, ...durationColumns(hireValue) }).from(application).where(hiredInPeriod).groupBy(application.jobId),
+        db
+          .select({
+            offerDate: sql<number>`(count(*) filter (where ${application.offerAcceptedOn} is not null))::int`,
+            recordedDate: sql<number>`(count(*) filter (where ${application.offerAcceptedOn} is null))::int`,
+          })
+          .from(application)
+          .where(hiredInPeriod),
+        db.select(durationColumns(startValue)).from(application).where(and(hiredInPeriod, isNotNull(application.startOn))),
         db
           .select({ jobId: application.jobId, firstHireAt: sql`min(${application.closedAt})`.mapWith(application.closedAt) })
           .from(application)
@@ -102,7 +113,12 @@ export function createDrizzleReports(db: DbExecutor): ReportRepository {
           .groupBy(application.jobId),
       ]);
       return {
-        hireDays: { overall: toStat(hireOverall[0]), byJob: hireByJob.map(({ jobId, ...stat }) => ({ jobId, stat: toStat(stat) })) },
+        hireDays: {
+          overall: toStat(hireOverall[0]),
+          byJob: hireByJob.map(({ jobId, ...stat }) => ({ jobId, stat: toStat(stat) })),
+          basis: { offerDate: hireBasis[0]?.offerDate ?? 0, recordedDate: hireBasis[0]?.recordedDate ?? 0 },
+          toStart: toStat(hireStart[0]),
+        },
         firstHires: firstHires.map((row) => ({ jobId: row.jobId, firstHireAt: row.firstHireAt as Date })),
         stageEntries,
         stageAdvances,
