@@ -91,9 +91,10 @@ const runSettings = (o: JsonReaderOptions): RunSettings => {
   return {
     allowedHosts: o.allowedHosts.map(hostRuleFor),
     unsafe: o.unsafeAllowLoopbackForTests === true,
-    maxRetries: o.maxRetries ?? JSON_READER_DEFAULTS.maxRetries,
-    backoff: o.backoff ?? JSON_READER_DEFAULTS.backoff,
-    maxWaitMs: o.maxWaitMs ?? JSON_READER_DEFAULTS.maxWaitMs,
+    maxRetries: o.maxRetries ?? o.rate?.maxRetries ?? JSON_READER_DEFAULTS.maxRetries,
+    backoff: o.backoff ?? o.rate?.backoff ?? JSON_READER_DEFAULTS.backoff,
+    maxWaitMs: o.maxWaitMs ?? o.rate?.maxWaitMs ?? JSON_READER_DEFAULTS.maxWaitMs,
+    trustRateHeaders: o.rate?.ignoreHeaders !== true,
     resolve: o.resolve ?? resolveAll,
     transport: o.transport ?? { http: httpRequest, https: httpsRequest },
     sleep: o.sleep ?? realSleep,

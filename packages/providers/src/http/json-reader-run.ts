@@ -21,6 +21,8 @@ export interface RunSettings {
   readonly maxRetries: number;
   readonly backoff: BackoffOptions;
   readonly maxWaitMs: number;
+  /** False: the source's rate-limit headers are not acted on (see `RateOptions.ignoreHeaders`). */
+  readonly trustRateHeaders: boolean;
   readonly resolve: Resolve;
   readonly transport: { readonly http: RequestFn; readonly https: RequestFn };
   readonly sleep: (ms: number) => Promise<void>;
@@ -136,7 +138,7 @@ export function createRunner(s: RunSettings) {
     try {
       const exchange = await send(s, target, request);
       // A foreign file host's rate-limit headers say nothing about the vendor's API.
-      const window = request.publicFile ? undefined : exhaustedWindowMs(exchange.headers, s.now());
+      const window = request.publicFile || !s.trustRateHeaders ? undefined : exhaustedWindowMs(exchange.headers, s.now());
       if (window !== undefined) blockedUntil = s.now() + window;
       if (exchange.status >= 200 && exchange.status < 300) return { result: { value: await request.consume(exchange) } };
       exchange.close();

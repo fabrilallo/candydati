@@ -139,13 +139,14 @@ interface FileSlots {
 /** Temporary file slots of one run: reserved before use, written by streaming, freed when a download fails. */
 function fileSlots(options: PackageBuilderOptions): FileSlots {
   const maxFileBytes = options.maxFileBytes ?? DEFAULT_MAX_FILE_BYTES;
-  let entries: readonly FileEntry[] = [];
-  let used: readonly string[] = [];
+  // Private to this closure and appended in place: copying the arrays per file is quadratic (18,000 files = 160M copies).
+  const entries: FileEntry[] = [];
+  const used: string[] = [];
   return {
     async store(applicationRef, file, write) {
       const slot = used.length;
       const key = migrationFetchFileKey(options.filePrefix, slot);
-      used = [...used, key];
+      used.push(key);
       await options.reserveFiles(slot + 1);
       let bytes: number | null = null;
       try {
@@ -160,10 +161,10 @@ function fileSlots(options: PackageBuilderOptions): FileSlots {
       if (bytes === null) throw new PackageBuilderError('file_not_stored', 'file', applicationRef);
       const fileName = packageFileName(file.fileName);
       const path = `files/${slot}/${fileName}`;
-      entries = [...entries, { applicationRef, path, kind: file.kind, fileName, key, bytes }];
+      entries.push({ applicationRef, path, kind: file.kind, fileName, key, bytes });
       return path;
     },
-    entries: () => entries,
+    entries: () => [...entries],
     async discard() {
       for (const key of used) await options.files.delete(key);
     },
@@ -174,14 +175,15 @@ type RefKind = 'user' | 'job' | 'candidate' | 'application';
 
 /** Collects one connector run. Refs stay as the connector gives them (the vendor's ids), unique per kind. */
 export function createPackageBuilder(options: PackageBuilderOptions): CollectingPackageBuilder {
-  let byRef: Readonly<Record<RefKind, ReadonlyMap<string, { ref: string }>>> = { user: new Map(), job: new Map(), candidate: new Map(), application: new Map() };
-  let notes: readonly Output<'note'>[] = [];
-  let messages: readonly Output<'message'>[] = [];
+  // Closure-private collections, appended in place (copying them per item is quadratic); `collected()` hands out copies.
+  const byRef: Record<RefKind, Map<string, { ref: string }>> = { user: new Map(), job: new Map(), candidate: new Map(), application: new Map() };
+  const notes: Output<'note'>[] = [];
+  const messages: Output<'message'>[] = [];
   const slots = fileSlots(options);
   const addRef = (kind: RefKind, value: object): void => {
     const parsed = parseItem(kind, value) as { ref: string };
     if (byRef[kind].has(parsed.ref)) throw new PackageBuilderError('duplicate_ref', kind, parsed.ref);
-    byRef = { ...byRef, [kind]: new Map([...byRef[kind], [parsed.ref, parsed]]) };
+    byRef[kind].set(parsed.ref, parsed);
   };
   const all = <K extends RefKind>(kind: K): Output<K>[] => [...byRef[kind].values()] as Output<K>[];
   return {
@@ -190,23 +192,25 @@ export function createPackageBuilder(options: PackageBuilderOptions): Collecting
     addCandidate: (candidate) => addRef('candidate', candidate),
     addApplication: (application) => addRef('application', { ...application, files: [] }),
     addNote: (note) => {
-      notes = [...notes, parseItem('note', note)];
+      notes.push(parseItem('note', note));
     },
     addMessage: (message) => {
-      messages = [...messages, parseItem('message', message)];
+      messages.push(parseItem('message', message));
     },
     addFile: slots.store,
     collected: () => {
       const files = slots.entries();
-      const filesOf = (ref: string) => files.filter((f) => f.applicationRef === ref).map(({ path, kind, fileName }) => ({ path, kind, fileName }));
+      const byApplication = new Map<string, { path: string; kind: BuilderFile['kind']; fileName: string }[]>();
+      for (const { applicationRef, path, kind, fileName } of files) byApplication.set(applicationRef, [...(byApplication.get(applicationRef) ?? []), { path, kind, fileName }]);
+      const filesOf = (ref: string) => byApplication.get(ref) ?? [];
       return {
         source: options.source,
         users: all('user'),
         jobs: all('job'),
         candidates: all('candidate'),
         applications: all('application').map((application) => ({ ...application, files: filesOf(application.ref) })),
-        notes,
-        messages,
+        notes: [...notes],
+        messages: [...messages],
         files: new Map(files.map((f) => [f.path, { key: f.key, bytes: f.bytes }])),
       };
     },

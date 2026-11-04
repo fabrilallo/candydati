@@ -66,7 +66,7 @@ describe('Teamtailor connector: description', () => {
     expect(teamtailorConnector.credentials.safeParse({ ...credentials, extra: 1 }).success).toBe(false);
     expect(teamtailorConnector.credentials.safeParse({ apiKey: 'short' }).success).toBe(false);
     expect(teamtailorConnector.hosts(credentials)).toEqual([{ exact: 'api.teamtailor.com' }]);
-    expect(teamtailorConnector.rate).toBeDefined();
+    expect(teamtailorConnector.rate).toMatchObject({ capacity: 3, refillPerSecond: 3, ignoreHeaders: true, maxRetries: 8 });
   });
 });
 
@@ -77,6 +77,21 @@ describe('Teamtailor connector: a full run on the docs fixtures', () => {
     expect(parsed.success, JSON.stringify(parsed.error?.issues)).toBe(true);
     expect(progress.length).toBeGreaterThan(1);
     expect(progress.at(-1)?.[0]).toBeGreaterThan(10);
+  });
+
+  it('reports a total from the list sizes, reached by the last progress call', async () => {
+    api.routes.set('/v1/notes', { raw: { ...fx.notesDocShape(fx.notes()), meta: { 'record-count': 3, 'page-count': 1 } } });
+    const { progress } = await run();
+    const total = progress[0]?.[1];
+    expect(total).toBeGreaterThan(10);
+    expect(progress.every(([, t]) => t === total)).toBe(true);
+    expect(progress.at(-1)?.[0]).toBe(total);
+  });
+
+  it('leaves the total unknown when a list does not give its size', async () => {
+    api.routes.set('/v1/notes', (_req, res) => void res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(fx.notesDocShape(fx.notes()))));
+    const { progress } = await run();
+    expect(progress.every(([, t]) => t === null)).toBe(true);
   });
 
   it('maps users, jobs (status, stages in row order) and candidates', async () => {

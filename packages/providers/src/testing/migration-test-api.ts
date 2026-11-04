@@ -33,7 +33,7 @@ export async function startTestApi(): Promise<TestApi> {
       const number = Number(url.searchParams.get('page[number]') ?? '1');
       const next = new URL(url);
       next.searchParams.set('page[number]', String(number + 1));
-      body = { data: items.slice((number - 1) * state.perPage, number * state.perPage), links: number * state.perPage < items.length ? { next: `${state.origin}${next.pathname}${next.search}` } : {} };
+      body = { meta: { 'record-count': items.length, 'page-count': Math.ceil(items.length / state.perPage) }, data: items.slice((number - 1) * state.perPage, number * state.perPage), links: number * state.perPage < items.length ? { next: `${state.origin}${next.pathname}${next.search}` } : {} };
     }
     res.writeHead(200, { 'content-type': 'application/json' }).end(JSON.stringify(body));
   });
