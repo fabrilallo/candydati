@@ -268,5 +268,8 @@ per tutte le versioni pubblicate.
   fabrizio.lallo95@gmail.com.
 - **Diventa open source:** ogni versione passa alla [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html)
   (`AGPL-3.0-only`) quattro anni dopo la sua prima pubblicazione.
+- **Il nome è escluso:** la licenza copre il codice, non il nome e il logo Candydati. Puoi dire che il tuo software
+  si basa su Candydati; un fork o un servizio che offri ad altri porta un nome suo. Vedi
+  [TRADEMARKS.md](TRADEMARKS.md).
 
 Fa fede il testo della licenza, non questo riassunto.
