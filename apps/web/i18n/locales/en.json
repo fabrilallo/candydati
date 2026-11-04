@@ -2211,7 +2211,6 @@
   },
   "automations": {
     "title": "Automations",
-    "when": "When an application enters {stage}",
     "note": "Automations never move candidates or decide about them: they send a template or create a task. An automatic message counts as sent by whoever created the rule, as if they had sent it by hand.",
     "add": "Add rule",
     "edit": "Edit",
@@ -2232,7 +2231,7 @@
     "form": {
       "addTitle": "New rule: {stage}",
       "editTitle": "Edit the rule: {stage}",
-      "description": "It runs every time an application enters this stage.",
+      "description": "A rule acts only for the applications of this stage: it sends a template or creates a task, it never moves or decides.",
       "action": "What happens",
       "actions": {
         "send_template": "Send a template to the candidate",
@@ -2247,16 +2246,75 @@
       "dueInDaysHint": "Empty: no due date. 0: the same day.",
       "sendNote": "The message goes out in your name, as if you had sent it.",
       "save": "Save rule",
-      "saving": "Saving"
+      "saving": "Saving",
+      "trigger": "When",
+      "triggers": {
+        "stage_entered": "An application enters the stage",
+        "stage_stuck": "An application stays in the stage",
+        "candidate_replied": "The candidate replies",
+        "feedback_submitted": "Interview feedback arrives",
+        "response_due_soon": "The promised response is near"
+      },
+      "triggerHints": {
+        "stage_entered": "It runs every time an application enters this stage.",
+        "stage_stuck": "Checked every hour: it runs once per entry into the stage.",
+        "candidate_replied": "It runs on every reply of the candidate while in this stage.",
+        "feedback_submitted": "It runs on every feedback asked for this stage, even if the candidate has moved on.",
+        "response_due_soon": "Checked every hour, against the response days of the job: it runs once per deadline."
+      },
+      "stuckDays": "After how many days",
+      "dueSoonDays": "Days before",
+      "conditions": "Only if (optional)",
+      "conditionsHint": "Every condition you choose must hold. They filter on declared facts: they never order or assess anyone.",
+      "sources": "Source of the application (one of these)",
+      "consentScopes": "Consent given by the candidate",
+      "tags": "Candidate tags",
+      "tagsHint": "Comma separated: the candidate must have all of them."
     },
     "saved": "Rule saved",
     "deleted": "Rule deleted",
     "deleteTitle": "Delete the rule?",
-    "deleteBody": "Applications entering the stage will no longer trigger it. What it already did stays.",
+    "deleteBody": "The rule will not run any more. What it already did stays.",
     "deleteConfirm": "Delete rule",
     "errors": {
       "templateRequired": "Choose a template",
-      "dueInDays": "A whole number from 0 to 90"
+      "dueInDays": "A whole number from 0 to 90",
+      "stuckDays": "A whole number from 1 to 90",
+      "dueSoonDays": "A whole number from 1 to 14",
+      "tags": "At most 10 tags, of 40 characters each"
+    },
+    "stageRules": "Rules for {stage}",
+    "trigger": {
+      "stage_entered": "when an application enters the stage",
+      "stage_stuck": "when an application has been in the stage for 1 day | when an application has been in the stage for {count} days",
+      "candidate_replied": "when the candidate replies to a message",
+      "feedback_submitted": "when interview feedback for this stage arrives",
+      "response_due_soon": "when the promised response is due within 1 day | when the promised response is due within {count} days"
+    },
+    "conditions": {
+      "onlyIf": "Only if {list}",
+      "sources": "source: {list}",
+      "tags": "tags: {list}",
+      "consentScopes": "consent: {list}"
+    },
+    "sources": {
+      "careers_page": "careers page",
+      "manual": "added by hand",
+      "import": "import"
+    },
+    "preview": {
+      "title": "Who it affects now",
+      "run": "Show who it affects",
+      "loading": "Looking",
+      "readOnly": "Only a preview: it sends and creates nothing.",
+      "invalid": "Fix the fields of the rule to see the preview.",
+      "matching": "No open application in this stage meets the conditions. | 1 open application in this stage meets the conditions. | {count} open applications in this stage meet the conditions.",
+      "firing": "At the next check (within an hour) the rule would act for none of them. | At the next check (within an hour) the rule would act for 1 application. | At the next check (within an hour) the rule would act for {count} applications.",
+      "entered": "Applications already in the stage do not trigger it: the rule acts for those entering from now on.",
+      "event": "The rule acts for each of them when the event you chose happens, not now.",
+      "now": "now",
+      "more": "and {count} more",
+      "namesHidden": "You have no access to candidate names: you see the numbers only."
     }
   },
   "webhooks": {

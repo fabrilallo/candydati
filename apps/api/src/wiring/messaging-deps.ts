@@ -55,7 +55,7 @@ export function createMessagingDeps({ env, uow, queue, sender, identity, onRecei
       newToken: newConversationToken,
       ...clock,
     },
-    inboundDeps: { ...core, candidates, applications, conversations, messages, ...clock },
+    inboundDeps: { ...core, candidates, applications, conversations, messages, queue, ...clock },
     receipts: { templates, conversations, messages, config, newToken: newConversationToken, dailyMaxPerOrganization: env.RECEIPTS_DAILY_MAX_PER_ORGANIZATION, onError: onReceiptError },
   };
 }

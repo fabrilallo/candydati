@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import {
   type DrizzleUnitOfWork,
   type AutomationRunDeps,
+  type AutomationScanDeps,
   type EmailIdentity,
   type EmailSender,
   type ScanDeps,
@@ -30,6 +31,8 @@ export interface Phase4WorkerDeps {
   readonly deliver: WebhookDeliverDeps;
   readonly publish: WebhookPublishDeps;
   readonly scan: ScanDeps;
+  /** The hourly scan of time-based rules; it only queues `automation.run`. */
+  readonly automationScan: AutomationScanDeps;
 }
 
 /** Drizzle repositories for the Phase 4 jobs; the queue, the email sender and the identity are injected. */
@@ -73,6 +76,7 @@ export function createPhase4WorkerDeps(wiring: AutomationWiring): Phase4WorkerDe
       ...clock,
     },
     publish: { endpoints: r.endpoints, outbox: r.outbox, queue, transaction: uow.transaction, now: clock.now },
+    automationScan: { rules: r.rules, applications: r.applications, candidates: r.candidates, jobs: r.jobs, executions: r.executions, queue },
     scan: { applications: r.applications, jobs: r.jobs, promises: r.promises, tasks: r.tasks, notifications: r.notifications, members: r.members, jobTeams: r.jobTeams, newId: clock.newId },
   };
 }

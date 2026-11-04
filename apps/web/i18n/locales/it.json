@@ -2211,7 +2211,6 @@
   },
   "automations": {
     "title": "Automazioni",
-    "when": "Quando una candidatura entra in {stage}",
     "note": "Le automazioni non spostano e non decidono mai sui candidati: inviano un modello o creano un'attività. Un messaggio automatico risulta inviato da chi ha creato la regola, come se l'avesse inviato a mano.",
     "add": "Aggiungi regola",
     "edit": "Modifica",
@@ -2232,7 +2231,7 @@
     "form": {
       "addTitle": "Nuova regola: {stage}",
       "editTitle": "Modifica la regola: {stage}",
-      "description": "Scatta ogni volta che una candidatura entra in questa fase.",
+      "description": "Una regola agisce solo per le candidature di questa fase: invia un modello o crea un'attività, non sposta e non decide mai.",
       "action": "Cosa succede",
       "actions": {
         "send_template": "Invia un modello al candidato",
@@ -2247,16 +2246,75 @@
       "dueInDaysHint": "Vuoto: senza scadenza. 0: in giornata.",
       "sendNote": "Il messaggio parte a nome tuo, come se l'avessi inviato tu.",
       "save": "Salva la regola",
-      "saving": "Salvo"
+      "saving": "Salvo",
+      "trigger": "Quando",
+      "triggers": {
+        "stage_entered": "Una candidatura entra nella fase",
+        "stage_stuck": "Una candidatura resta ferma nella fase",
+        "candidate_replied": "Il candidato risponde",
+        "feedback_submitted": "Arriva il feedback del colloquio",
+        "response_due_soon": "Si avvicina la risposta promessa"
+      },
+      "triggerHints": {
+        "stage_entered": "Scatta ogni volta che una candidatura entra in questa fase.",
+        "stage_stuck": "Controllata ogni ora: scatta una volta per ogni ingresso nella fase.",
+        "candidate_replied": "Scatta a ogni risposta del candidato mentre è in questa fase.",
+        "feedback_submitted": "Scatta a ogni feedback chiesto per questa fase, anche se il candidato è già andato avanti.",
+        "response_due_soon": "Controllata ogni ora, sui giorni di risposta dell'annuncio: scatta una volta per scadenza."
+      },
+      "stuckDays": "Dopo quanti giorni",
+      "dueSoonDays": "Giorni prima",
+      "conditions": "Solo se (facoltativo)",
+      "conditionsHint": "Devono valere tutte le condizioni scelte. Sono filtri su fatti dichiarati: non ordinano e non valutano nessuno.",
+      "sources": "Origine della candidatura (una di queste)",
+      "consentScopes": "Consenso dato dal candidato",
+      "tags": "Tag del candidato",
+      "tagsHint": "Separati da virgola: il candidato deve averli tutti."
     },
     "saved": "Regola salvata",
     "deleted": "Regola eliminata",
     "deleteTitle": "Eliminare la regola?",
-    "deleteBody": "Le candidature che entreranno nella fase non la attiveranno più. Quello che ha già fatto resta.",
+    "deleteBody": "La regola non scatterà più. Quello che ha già fatto resta.",
     "deleteConfirm": "Elimina la regola",
     "errors": {
       "templateRequired": "Scegli un modello",
-      "dueInDays": "Un numero intero da 0 a 90"
+      "dueInDays": "Un numero intero da 0 a 90",
+      "stuckDays": "Un numero intero da 1 a 90",
+      "dueSoonDays": "Un numero intero da 1 a 14",
+      "tags": "Al massimo 10 tag, di 40 caratteri ciascuno"
+    },
+    "stageRules": "Regole della fase {stage}",
+    "trigger": {
+      "stage_entered": "quando una candidatura entra nella fase",
+      "stage_stuck": "quando una candidatura resta nella fase da 1 giorno | quando una candidatura resta nella fase da {count} giorni",
+      "candidate_replied": "quando il candidato risponde a un messaggio",
+      "feedback_submitted": "quando arriva un feedback del colloquio di questa fase",
+      "response_due_soon": "quando manca 1 giorno alla risposta promessa | quando mancano {count} giorni alla risposta promessa"
+    },
+    "conditions": {
+      "onlyIf": "Solo se {list}",
+      "sources": "origine: {list}",
+      "tags": "tag: {list}",
+      "consentScopes": "consenso: {list}"
+    },
+    "sources": {
+      "careers_page": "pagina carriere",
+      "manual": "inserita a mano",
+      "import": "importazione"
+    },
+    "preview": {
+      "title": "Chi riguarda adesso",
+      "run": "Mostra chi riguarda",
+      "loading": "Cerco",
+      "readOnly": "Solo un'anteprima: non invia e non crea nulla.",
+      "invalid": "Correggi i campi della regola per vedere l'anteprima.",
+      "matching": "Nessuna candidatura aperta in questa fase rispetta le condizioni. | 1 candidatura aperta in questa fase rispetta le condizioni. | {count} candidature aperte in questa fase rispettano le condizioni.",
+      "firing": "Alla prossima verifica (entro un'ora) la regola non agirebbe per nessuna. | Alla prossima verifica (entro un'ora) la regola agirebbe per 1 candidatura. | Alla prossima verifica (entro un'ora) la regola agirebbe per {count} candidature.",
+      "entered": "Chi è già nella fase non la attiva: la regola agirà per chi entra da adesso.",
+      "event": "La regola agirà per ciascuna quando succede quello che hai scelto, non adesso.",
+      "now": "ora",
+      "more": "e altre {count}",
+      "namesHidden": "Non hai accesso ai nomi dei candidati: vedi solo i numeri."
     }
   },
   "webhooks": {

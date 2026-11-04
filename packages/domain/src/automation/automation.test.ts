@@ -32,4 +32,21 @@ describe('automationRuleInputSchema', () => {
     const parsed = automationRuleInputSchema.parse({ stageId: 'received', action: { type: 'create_task', title: 'T' } });
     expect(parsed.enabled).toBe(true);
   });
+
+  it('defaults to stage_entered without conditions, so existing clients keep working', () => {
+    const parsed = automationRuleInputSchema.parse({ stageId: 'received', action: { type: 'create_task', title: 'T' } });
+    expect(parsed.trigger).toEqual({ type: 'stage_entered' });
+    expect(parsed.conditions).toEqual({});
+  });
+
+  it('takes a trigger with its parameters and conditions', () => {
+    const parsed = automationRuleInputSchema.parse({
+      stageId: 'stage-0',
+      trigger: { type: 'stage_stuck', days: 5 },
+      conditions: { sources: ['careers_page'], tags: ['Senior'] },
+      action: { type: 'send_template', templateId: 'tpl' },
+    });
+    expect(parsed.trigger).toEqual({ type: 'stage_stuck', days: 5 });
+    expect(parsed.conditions).toEqual({ sources: ['careers_page'], tags: ['senior'] });
+  });
 });

@@ -213,6 +213,16 @@ notifications and tasks. pg-boss (in Postgres) drives queues for email sending, 
 and erasure, response deadlines, imports and distribution sync. Scheduled jobs handle retention warnings, daily digests
 and stale-job detection. Jobs are idempotent and keyed so a retry does not repeat a side effect.
 
+**Automations.** A rule belongs to one stage of a job and has a trigger, optional conditions and one action
+(`send_template` or `create_task`; there is no action that moves or decides). Event triggers are queued by the use case
+that records the event, in its transaction: a move or an intake (`stage_entered`), a reply from the candidate's own
+address (`candidate_replied`), a submitted feedback (`feedback_submitted`, for the stage it was asked for). Time-based
+triggers (`stage_stuck`, `response_due_soon`) are found by the hourly `automation.scan`, which only queues
+`automation.run` naming the rule. `runAutomations` checks the application, the trigger and the conditions again, then
+claims the run in `automation_execution`, unique per (rule, application, stage, stage entry, occurrence): `''` for the
+entry, `stuck`, `due:<deadline>`, `message:<id>`, `feedback:<id>`. So every trigger fires once per occurrence, however
+often the scan runs or a task is redelivered.
+
 **Where a job is queued.** With pg-boss, the unit of work sends a job on the connection of the transaction that stores
 the work (`BindableTaskQueue.bindTo`), so the job exists if and only if the transaction committed. Two sends happen
 after the commit and are not atomic with it: `cv.extract` of a public application (it keeps its own intake
@@ -279,7 +289,8 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 - It never ranks, scores or rejects candidates. Any message to a candidate needs a person's confirmation.
 - CV and email content is data, not instructions. An adversarial eval suite checks this (`pnpm --filter @candydati/api eval:agent`).
 - Privacy by design: the assistant and MCP tools give a model candidates by first name and id only. Surnames, contacts
-  and direct identifiers (email, phone, links, street address, tax code, IBAN, full dates) are replaced by markers such
+  and direct identifiers (email, phone, links, handles, street address, tax code, VAT number, IBAN, full dates, names of
+  references) are replaced by markers such
   as `[surname]` by `pseudonymizeText` (`packages/domain/src/privacy`), in CV text, CV fields, cover letters and
   messages too. Message drafts keep `{{candidate.lastName}}` as a variable that the person's composer fills in. This
   is pseudonymization, not anonymization: CV content can still single someone out, so the rules above still apply.

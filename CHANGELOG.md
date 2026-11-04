@@ -6,7 +6,7 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-One additive migration (`0047_mcp_oauth`, new tables only).
+Two additive migrations (`0047_automation_triggers`, `0048_mcp_oauth` with new tables only) run at start as usual.
 
 ### Added
 
@@ -20,12 +20,34 @@ One additive migration (`0047_mcp_oauth`, new tables only).
   Security lists connected apps with *Revoke* (owners and admins see all of the organization); `connected_app.granted`
   and `connected_app.revoked` are audited. API keys work as before. Guide: `docs/MCP-CONNECTOR.md`; new variables
   `MCP_OAUTH_*` (docs/ENVIRONMENT.md).
+- **Demo data for one organization** (`docs/demo.md`): `node dist/demo-seed/cli.js --org <slug> --yes` inside the api
+  container fills it with five Italian job ads in every state, 40 invented candidates with generated CVs across the
+  stages, notes, interview feedback in words, tasks, a hire, email templates and automations, a client with a shortlist
+  and a real careers page. It stores the AI outputs the product keeps (CV extraction, the ad quality report) so they show
+  without a model; never a score about a candidate. Dry run by default, one organization only, idempotent, audited as
+  `system` with `demoSeed: true`. No migration.
 - **Duplicate a stage** of an ad from its row in the editor, for two technical interviews or two recruiters on the same
   job. The copy lands right after the source with a new id and, for a saved stage, brings along what is tied to it that
   the person may manage: who interviews, the stage's evaluation criteria and its automation rules (now in the name of
   who copied them). What they may not manage is left out and the toast says so. A restricted stage always gives a
   restricted copy, whoever duplicates it, so notes written in the copy are never exposed. One transaction, one
   `job.stage_duplicated` audit event; `POST /api/v1/jobs/:id/stages/:stageId/duplicate` (scope `job:update`). No migration.
+- **Automation triggers, conditions and preview.** Besides "an application enters the stage", a rule of a stage can now
+  run when the application has been in the stage for N days, when the candidate replies, when interview feedback for
+  the stage arrives (even after the candidate moved on) or when the job's promised response is N days away. Time-based
+  triggers are checked hourly by the worker (`automation.scan`); every trigger fires once per occurrence (each entry,
+  reply, feedback or deadline). Optional conditions, all of which must hold: where the application came from, the
+  candidate's tags, the consent given. The rule editor previews, read-only, who a rule would act for now
+  (`POST /api/v1/jobs/:id/automations/preview`, names only with `candidate:read`). Actions are still only "send a
+  template" and "create a task": nothing moves, decides, scores or ranks. Migration `0047_automation_triggers`
+  (additive: existing rules read as "enters the stage" with no conditions).
+
+### Fixed
+
+- **Pseudonymization gaps** in what reaches a model: phone extensions, postal codes and cities after a street address,
+  US ZIP and UK postcodes, tax codes with omocodia, IBANs without spaces, partite IVA, personal sites without `www`,
+  Skype/Discord ids, and names of other people where the text marks them (references section, titles, a name before
+  a contact) or where they are known. Names in plain prose are still not found: see ADR 0010.
 
 ## [0.2.0] - 2026-11-04
 

@@ -334,8 +334,15 @@
     {
       "idx": 47,
       "version": "7",
-      "when": 1793827940268,
-      "tag": "0047_mcp_oauth",
+      "when": 1793827616473,
+      "tag": "0047_automation_triggers",
+      "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1793831594764,
+      "tag": "0048_mcp_oauth",
       "breakpoints": true
     }
   ]

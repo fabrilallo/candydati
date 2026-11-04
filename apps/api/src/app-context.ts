@@ -237,7 +237,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
   const messaging = createMessagingDeps({ env, uow, queue, sender, identity, onReceiptError, config: emailConfig });
   const apiKeyDeps = createApiKeyDeps(uow, env.API_KEY_DEFAULT_TTL_DAYS);
   const actors = createActors({ env, limits: rateLimit ?? DEFAULT_RATE_LIMIT, apiKeyDeps, resolveFromHeaders: createSessionResolver(auth, db, uow), authenticateConnectedApp: connected.authenticateConnectedApp });
-  const hr = createHrDeps({ uow, files, sender, config: emailConfig, onFeedbackMailError: onReceiptError });
+  const hr = createHrDeps({ uow, files, sender, config: emailConfig, onFeedbackMailError: onReceiptError, queue });
   const phase2 = createPhase2Deps({ uow, files, queue, receipts: messaging.receipts, feedback: hr.stageEntry });
   const phase5 = createPhase5Deps({ uow, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env, aiRuntime), zip: zipStreamFactory, feedbackRecords: hr.feedbackRecords });
   const jobDeps = { ...createJobDeps(uow, adQuality, env.platform.adQualityThreshold), emailReady: () => emailRuntime.ready() };

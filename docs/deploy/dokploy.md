@@ -136,6 +136,19 @@ Redeploy: **Deploy** pulls the branch, rebuilds the images and recreates changed
 start. Enable **Auto Deploy** with the webhook only for a branch you control; pin a tag for production. Take a backup
 before an upgrade (`backup.sh once`). Never use "fresh volumes"/volume deletion options on this application.
 
+## Demo data
+
+For a demo or trial instance, fill one organization with realistic sample data (jobs, 40 invented candidates, feedback,
+a client with a shortlist, the careers page, and the AI outputs the product stores). In the terminal of the `api`
+container:
+
+```sh
+node dist/demo-seed/cli.js --org <slug>          # prints what it will create
+node dist/demo-seed/cli.js --org <slug> --yes    # writes it; rerunning adds only what is missing
+```
+
+Details, the SSH variant and what it creates: [../demo.md](../demo.md).
+
 ## Set it up with an AI coding agent
 
 Use the [deploy skill](../../skills/candydati-deploy/README.md): give your agent (Claude Code, Codex, Cursor) Dokploy's

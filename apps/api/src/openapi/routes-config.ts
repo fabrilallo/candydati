@@ -1,6 +1,8 @@
 import {
   WEBHOOK_EVENT_TYPES,
   PERMISSIONS,
+  automationMatchSchema,
+  automationPreviewSchema,
   automationRuleInputSchema,
   distributionOverviewSchema,
   emailSettingsInputSchema,
@@ -28,7 +30,16 @@ export const configRoutes: readonly RouteSpec[] = [
   { method: 'get', path: '/api/v1/jobs/:id/automations', tag: 'Automations', summary: 'Rules of a job', scope: 'automation:manage', response: { schema: 'AutomationRule', list: true } },
   {
     method: 'post', path: '/api/v1/jobs/:id/automations', tag: 'Automations', summary: 'Add a rule to a job', scope: 'automation:manage', status: 201,
-    description: 'When an application enters `stageId`, send a template or create a task. Rules never move or decide.', body: automationRuleInputSchema, response: { schema: 'AutomationRule' },
+    description:
+      'When `trigger` fires for an application of `stageId` and every condition holds, send a template or create a task. Triggers: `stage_entered` (default), `stage_stuck` (in the stage for `days`), `candidate_replied`, `feedback_submitted` (for the stage the feedback was asked for), `response_due_soon` (`daysBefore` the response deadline of the job). Time-based triggers are checked hourly. Each fires once per occurrence. Conditions (optional, all must hold): application `sources`, candidate `tags` (all of them), consent `consentScopes` (given through the form). Rules never move, decide, score or rank.',
+    body: automationRuleInputSchema, response: { schema: 'AutomationRule' },
+  },
+  {
+    method: 'post', path: '/api/v1/jobs/:id/automations/preview', tag: 'Automations', summary: 'Who a rule would act for now', scope: 'automation:manage',
+    description:
+      'Read-only, no side effects: the open applications of `stageId` that meet the conditions and, for a time-based trigger, those it would fire for at the next scan (with `ruleId`, leaving out what that rule already did). Names, at most 50, by date of application, only with `candidate:read`; otherwise `items` is null and only the counts are given.',
+    body: automationMatchSchema.extend({ ruleId: z.string().min(1).optional().describe('The rule being edited, if it is saved already.') }),
+    response: { schema: automationPreviewSchema },
   },
   { method: 'put', path: '/api/v1/automations/:id', tag: 'Automations', summary: 'Replace a rule', scope: 'automation:manage', body: automationRuleInputSchema, response: { schema: 'AutomationRule' } },
   { method: 'delete', path: '/api/v1/automations/:id', tag: 'Automations', summary: 'Delete a rule', scope: 'automation:manage', response: { schema: deletedResult } },

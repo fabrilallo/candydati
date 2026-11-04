@@ -99,12 +99,29 @@ describe('automations view', () => {
 
   it('validates the form of each action', () => {
     expect(validateRuleForm(EMPTY_RULE_FORM, 's', true).errors).toEqual({ templateId: 'automations.errors.templateRequired' })
-    expect(validateRuleForm({ ...EMPTY_RULE_FORM, templateId: 't1' }, 's', false).input).toEqual({ stageId: 's', enabled: false, action: { type: 'send_template', templateId: 't1' } })
+    expect(validateRuleForm({ ...EMPTY_RULE_FORM, templateId: 't1' }, 's', false).input).toEqual({ stageId: 's', trigger: { type: 'stage_entered' }, conditions: {}, enabled: false, action: { type: 'send_template', templateId: 't1' } })
     const task = { ...EMPTY_RULE_FORM, type: 'create_task' as const }
     expect(validateRuleForm({ ...task, assignee: '', dueInDays: '91' }, 's', true).errors).toEqual({ title: 'tasks.errors.titleRequired', assignee: 'tasks.errors.assigneeRequired', dueInDays: 'automations.errors.dueInDays' })
     expect(validateRuleForm({ ...task, title: 'x'.repeat(201) }, 's', true).errors).toEqual({ title: 'tasks.errors.titleTooLong' })
-    expect(validateRuleForm({ ...task, title: ' Chiama ', dueInDays: '0' }, 's', true).input).toEqual({ stageId: 's', enabled: true, action: { type: 'create_task', title: 'Chiama', assignee: 'job_owner', dueInDays: 0 } })
-    expect(validateRuleForm({ ...task, title: 'Chiama' }, 's', true).input).toEqual({ stageId: 's', enabled: true, action: { type: 'create_task', title: 'Chiama', assignee: 'job_owner' } })
+    expect(validateRuleForm({ ...task, title: ' Chiama ', dueInDays: '0' }, 's', true).input).toEqual({ stageId: 's', trigger: { type: 'stage_entered' }, conditions: {}, enabled: true, action: { type: 'create_task', title: 'Chiama', assignee: 'job_owner', dueInDays: 0 } })
+    expect(validateRuleForm({ ...task, title: 'Chiama' }, 's', true).input).toEqual({ stageId: 's', trigger: { type: 'stage_entered' }, conditions: {}, enabled: true, action: { type: 'create_task', title: 'Chiama', assignee: 'job_owner' } })
+  })
+
+  it('validates the trigger and the conditions with the action, and sends them with it', () => {
+    const send = { ...EMPTY_RULE_FORM, templateId: 't1' }
+    expect(validateRuleForm({ ...EMPTY_RULE_FORM, trigger: 'stage_stuck', triggerDays: '0' }, 's', true).errors).toEqual({
+      triggerDays: 'automations.errors.stuckDays',
+      templateId: 'automations.errors.templateRequired',
+    })
+    expect(validateRuleForm({ ...send, trigger: 'stage_stuck', triggerDays: '4', tags: 'senior' }, 's', true).input).toEqual({
+      stageId: 's',
+      trigger: { type: 'stage_stuck', days: 4 },
+      conditions: { tags: ['senior'] },
+      enabled: true,
+      action: { type: 'send_template', templateId: 't1' },
+    })
+    const stuck = rule('r5', { trigger: { type: 'stage_stuck', days: 3 }, conditions: { sources: ['manual'] } })
+    expect(ruleToForm(stuck)).toMatchObject({ trigger: 'stage_stuck', triggerDays: '3', sources: ['manual'] })
   })
 
   it('describes a rule in words', () => {

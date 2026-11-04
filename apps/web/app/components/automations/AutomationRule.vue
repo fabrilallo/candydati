@@ -1,20 +1,35 @@
 <script setup lang="ts">
 import { PencilIcon, Trash2Icon } from '@lucide/vue'
 import type { RuleWords } from '@/lib/automation-view'
+import { conditionParts, describeTrigger, type ConditionPart } from '@/lib/automation-trigger-view'
 import type { AutomationRuleDto } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 
-/** One rule as a sentence, its author, a switch to pause it, edit and delete. */
+/** One rule: its trigger, what it does as a sentence, its conditions, its author, a switch to pause it, edit and delete. */
 const props = defineProps<{ rule: AutomationRuleDto; words: RuleWords; author: string | null; busy: boolean }>()
 const emit = defineEmits<{ toggle: [enabled: boolean]; edit: []; delete: [] }>()
 const { t } = useI18n()
 const sentence = computed(() => t(props.words.key, { ...props.words.params }, typeof props.words.params.count === 'number' ? props.words.params.count : 1))
+const when = computed(() => {
+  const words = describeTrigger(props.rule.trigger)
+  return t(words.key, { ...words.params }, words.params.count ?? 1)
+})
+const valueName = (part: ConditionPart, value: string): string =>
+  part.kind === 'sources' ? t(`automations.sources.${value}`) : part.kind === 'consentScopes' ? t(`candidate.scopes.${value}`) : value
+const onlyIf = computed(() => {
+  const parts = conditionParts(props.rule.conditions)
+  if (parts.length === 0) return null
+  const pieces = parts.map((part) => t(`automations.conditions.${part.kind}`, { list: part.values.map((value) => valueName(part, value)).join(', ') }))
+  return t('automations.conditions.onlyIf', { list: pieces.join(' · ') })
+})
 </script>
 
 <template>
   <li class="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3.5 sm:px-6" :class="busy ? 'opacity-60' : ''" data-testid="automation-rule" :data-rule-id="rule.id">
     <div class="grid min-w-0 flex-1 gap-0.5">
+      <p class="text-xs font-medium text-muted-foreground first-letter:uppercase" data-testid="rule-trigger-words">{{ when }}</p>
       <p class="text-sm text-pretty first-letter:uppercase" :class="rule.enabled ? '' : 'text-muted-foreground'" data-testid="rule-sentence">{{ sentence }}</p>
+      <p v-if="onlyIf" class="text-xs text-pretty text-muted-foreground" data-testid="rule-conditions-words">{{ onlyIf }}</p>
       <p class="text-xs text-muted-foreground">
         <span v-if="author">{{ t('automations.author', { name: author }) }}</span>
         <span v-if="!rule.enabled" class="ml-2 rounded-full bg-muted px-2 py-0.5 font-medium">{{ t('automations.paused') }}</span>

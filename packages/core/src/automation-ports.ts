@@ -1,5 +1,5 @@
 import type { JobTeamRepository } from './job-team-ports.js';
-import type { AutomationRule, Notification, NotificationKind, Role, Task } from '@candydati/domain';
+import type { AutomationRule, AutomationTriggerType, Notification, NotificationKind, Role, Task } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository, UserDirectory } from './candidate-ports.js';
 import type { TaskQueue } from './intake-ports.js';
 import type { JobRepository } from './job-ports.js';
@@ -72,8 +72,10 @@ export interface AutomationRuleRepository {
   findById(organizationId: string, id: string): Promise<AutomationRule | null>;
   /** Oldest first. */
   listByJob(organizationId: string, jobId: string): Promise<readonly AutomationRule[]>;
-  /** Enabled rules of one stage, oldest first. */
-  listEnabledByStage(organizationId: string, jobId: string, stageId: string): Promise<readonly AutomationRule[]>;
+  /** Enabled rules of one stage with this trigger, oldest first. */
+  listEnabledByStage(organizationId: string, jobId: string, stageId: string, trigger: AutomationTriggerType): Promise<readonly AutomationRule[]>;
+  /** Enabled rules with a time-based trigger (`TIME_BASED_TRIGGERS`), across organizations. Only for the system scan. */
+  listEnabledTimeBasedAcrossOrganizations(): Promise<readonly AutomationRule[]>;
   /** True when a rule was deleted. */
   delete(organizationId: string, id: string): Promise<boolean>;
   /** Removes the rules of the given stages (a stage was removed from the job). Returns how many. */
@@ -117,8 +119,22 @@ export interface AutomationRuleDeps extends CoreDeps {
   readonly jobs: JobRepository;
   readonly templates: EmailTemplateRepository;
   readonly users: UserDirectory;
+  /** The preview reads the open applications of the stage, their candidates and what a rule already did. */
+  readonly applications: ApplicationRepository;
+  readonly candidates: CandidateRepository;
+  readonly executions: AutomationExecutionRepository;
   readonly newId: () => string;
   readonly now: () => Date;
+}
+
+/** The hourly scan of time-based rules: a system job over every organization, it only queues `automation.run`. */
+export interface AutomationScanDeps {
+  readonly rules: AutomationRuleRepository;
+  readonly applications: ApplicationRepository;
+  readonly candidates: CandidateRepository;
+  readonly jobs: JobRepository;
+  readonly executions: AutomationExecutionRepository;
+  readonly queue: TaskQueue;
 }
 
 /** The scan is a system job over every organization: no actor, so no audit log either. */
@@ -135,7 +151,7 @@ export interface ScanDeps {
   readonly newId: () => string;
 }
 
-/** One run of a rule for one entry of an application into a stage. */
+/** One run of a rule for one occurrence of its trigger, within one entry of an application into a stage. */
 export interface AutomationExecution {
   readonly id: string;
   readonly organizationId: string;
@@ -144,6 +160,8 @@ export interface AutomationExecution {
   readonly stageId: string;
   /** When the application entered the stage (`stageChangedAt`): each entry runs a rule once. */
   readonly stageEnteredAt: Date;
+  /** Which occurrence of the trigger (`occurrenceOf`): `''` for the entry itself. Each occurrence runs a rule once. */
+  readonly occurrence: string;
   readonly createdAt: Date;
 }
 
@@ -153,6 +171,8 @@ export interface AutomationExecutionRepository {
    * transaction of what the rule does, so a failed run leaves no record and is tried again.
    */
   claim(execution: AutomationExecution): Promise<boolean>;
+  /** The runs of one rule for these applications (any entry, any occurrence). Empty list: nothing. */
+  listByRule(organizationId: string, ruleId: string, applicationIds: readonly string[]): Promise<readonly AutomationExecution[]>;
 }
 
 /** `runAutomations`: sends through the normal messaging path, so it needs everything messaging needs. */

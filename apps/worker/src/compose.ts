@@ -5,6 +5,7 @@ import { createDeliverDeps } from './email/deps.js';
 import { createHrWorkerDeps } from './hr/deps.js';
 import { createPhase4WorkerDeps } from './automation/deps.js';
 import { createAutomationRunQueue } from './queues/automation-run.js';
+import { createAutomationScanQueue } from './queues/automation-scan.js';
 import { createDeadlinesScanQueue } from './queues/deadlines-scan.js';
 import { createDistributionWorkerDeps } from './distribution/deps.js';
 import { createDistributionSyncQueue } from './queues/distribution-sync.js';
@@ -108,6 +109,7 @@ function createTaskQueues({ logger, uow, files, aiRuntime, env }: Composition, {
     createCvExtractQueue(cvDeps),
     createEmailSendQueue(createDeliverDeps({ uow, sender, config: messaging })),
     createAutomationRunQueue(phase4.run),
+    createAutomationScanQueue(phase4.automationScan, () => new Date()),
     createWebhookDeliverQueue(phase4.deliver),
     createWebhookPublishQueue(phase4.publish),
     createDistributionSyncQueue(createDistributionWorkerDeps({ uow, platform: env.platform })),
