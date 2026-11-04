@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { OUTCOMES } from '../candidate/application.js';
+import { CLIENT_ANSWERS } from '../client/shortlist.js';
 import { MESSAGE_DIRECTIONS, MESSAGE_STATUSES } from '../messaging/message.js';
 import { isoDate } from './common.js';
 
@@ -31,6 +32,9 @@ export const timelineItemSchema = z.discriminatedUnion('kind', [
   z.object({ ...base, kind: z.literal('message'), direction: z.enum(MESSAGE_DIRECTIONS), status: z.enum(MESSAGE_STATUSES), subject: z.string() }),
   z.object({ ...base, kind: z.literal('feedback_submitted'), stageId: z.string() }),
   z.object({ ...base, kind: z.literal('reconfirmation_sent') }),
+  /** Presented to a client in a shortlist (PRODUCT.md §3.5); the client's answer, an opinion that moves nothing. */
+  z.object({ ...base, kind: z.literal('shortlist_shared'), clientName: z.string() }),
+  z.object({ ...base, kind: z.literal('client_answered'), clientName: z.string(), answer: z.enum(CLIENT_ANSWERS), reason: z.string() }),
   z.object({ ...base, kind: z.literal('reconfirmation_answered') }),
 ]);
 export type TimelineItemDto = z.infer<typeof timelineItemSchema>;

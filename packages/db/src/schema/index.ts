@@ -16,3 +16,4 @@ export * from './job-team.js';
 export * from './report.js';
 export * from './security.js';
 export * from './careers.js';
+export * from './client.js';

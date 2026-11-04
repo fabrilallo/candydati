@@ -50,6 +50,10 @@ export const organizationSetting = pgTable('organization_setting', {
   requireApproval: boolean('require_approval').notNull().default(false),
   /** Recruiters see only the jobs whose team they are on (PRODUCT.md §6). Off by default: they see every job. */
   restrictRecruitersToTeam: boolean('restrict_recruiters_to_team').notNull().default(false),
+  /** The organization recruits for clients (PRODUCT.md §3.5): clients, client jobs and shortlists. Off by default. */
+  recruitsForClients: boolean('recruits_for_clients').notNull().default(false),
+  /** The agency's authorization reference, shown on the ads it publishes for clients (D.Lgs. 276/2003, art. 9). */
+  agencyAuthorization: text('agency_authorization'),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 

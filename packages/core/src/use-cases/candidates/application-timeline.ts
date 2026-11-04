@@ -8,13 +8,15 @@ import { defineUseCase } from '../../use-case.js';
 import { isVisibleApplication, requireApplication } from './shared.js';
 import { chronological, consentItems, feedbackItems, isIntake, messageItems, noteItems, receivedItem, stageItems } from './timeline-items.js';
 import type { ApplicationTimelineView, TimelineItemView } from './views.js';
+import { shortlistTimelineItems, type ShortlistTimelineDeps } from '../clients/shortlist-timeline.js';
 
 /**
  * What the timeline composes: the repositories the sheet already reads, scoped to the actor's jobs and to the stages they
  * may read by the use case runner. The feedback requests say who wrote each feedback (an author reads their own).
  */
 export type TimelineDeps = Pick<CandidateDeps, 'auditLog' | 'transaction' | 'jobTeams' | 'applications' | 'notes' | 'messages' | 'stageEvents' | 'users'> &
-  FeedbackRecords;
+  FeedbackRecords &
+  ShortlistTimelineDeps;
 
 const none: readonly TimelineItemView[] = [];
 
@@ -49,6 +51,7 @@ export const getApplicationTimeline = defineUseCase<TimelineDeps, z.ZodObject<{ 
         ...noteItems(notes, application.id, names),
         ...(messages.length > 0 ? messageItems(messages, names) : none),
         ...feedbackItems(feedback),
+        ...(await shortlistTimelineItems(deps, actor, application.id)),
       ]),
     };
   },

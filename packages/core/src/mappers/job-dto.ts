@@ -7,6 +7,7 @@ import {
   type JobSummaryDto,
   type JobTemplate,
   type JobTemplateDto,
+  type PublicJobClientDto,
   type PublicJobDto,
   type PublicJobSummaryDto,
   type PublicOrganizationDto,
@@ -94,15 +95,17 @@ function publishedParts(job: Job): { readonly content: PublishedJobContent; read
   return { content: job.content, publishedAt: iso(job.publishedAt), updatedAt: iso(job.updatedAt) };
 }
 
-export function toPublicJobDto(job: Job): PublicJobDto {
+/** `client`: what the ad says about its client, on an agency's ad for a client only (PRODUCT.md §3.5). */
+export function toPublicJobDto(job: Job, client?: PublicJobClientDto): PublicJobDto {
   const { content, publishedAt, updatedAt } = publishedParts(job);
-  return { slug: job.slug, content, publishedAt, updatedAt };
+  return { slug: job.slug, content, publishedAt, updatedAt, ...(client ? { client } : {}) };
 }
 
-export function toPublicJobSummaryDto(job: Job): PublicJobSummaryDto {
+export function toPublicJobSummaryDto(job: Job, client?: PublicJobClientDto): PublicJobSummaryDto {
   const { content, publishedAt, updatedAt } = publishedParts(job);
   return {
     slug: job.slug,
+    ...(client ? { client: { display: client.display, name: client.name } } : {}),
     title: content.title,
     role: content.role,
     ...(content.role === CUSTOM_ROLE && content.customRole ? { customRole: content.customRole } : {}),

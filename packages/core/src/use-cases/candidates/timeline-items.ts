@@ -91,7 +91,7 @@ export function consentItems(application: Application): readonly TimelineItemVie
 }
 
 const RANK: Readonly<Record<TimelineItemView['kind'], number>> = {
-  received: 0, reconfirmation_sent: 1, reconfirmation_answered: 2, stage_moved: 3, note: 4, message: 5, feedback_submitted: 6, decided: 7,
+  received: 0, reconfirmation_sent: 1, reconfirmation_answered: 2, stage_moved: 3, note: 4, message: 5, feedback_submitted: 6, shortlist_shared: 7, client_answered: 8, decided: 9,
 };
 
 /** Oldest first; same instant: received first, the outcome last, then by id so the order never flickers. */

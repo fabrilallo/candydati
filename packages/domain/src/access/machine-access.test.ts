@@ -110,3 +110,17 @@ describe('job:approve', () => {
     expect(isForbiddenFor('api_key', 'feedback:read')).toBe(false);
   });
 });
+
+describe('clients and shortlists (PRODUCT.md §3.5)', () => {
+  it('lets every role read clients, recruiters and up manage them, and keeps sending a shortlist with a person', () => {
+    expect(ROLES.filter((role) => roleHasPermission(role, 'client:read'))).toEqual([...ROLES]);
+    expect(ROLES.filter((role) => roleHasPermission(role, 'client:manage'))).toEqual(['owner', 'admin', 'recruiter']);
+    expect(ROLES.filter((role) => roleHasPermission(role, 'shortlist:send'))).toEqual(['owner', 'admin', 'recruiter']);
+    expect(ROLES.filter((role) => roleHasPermission(role, 'shortlist:read'))).toEqual(['owner', 'admin', 'recruiter', 'hiring_manager']);
+    for (const type of ['api_key', 'agent'] as const) {
+      expect(isForbiddenFor(type, 'shortlist:send')).toBe(true);
+      expect(isForbiddenFor(type, 'client:manage')).toBe(true);
+      expect(isForbiddenFor(type, 'client:read')).toBe(false);
+    }
+  });
+});

@@ -3,6 +3,7 @@ import type { JobApproval, JobRequest } from '@candydati/domain';
 import type {
   JobApprovalRepository,
   JobRequestRepository,
+  OrganizationSettings,
   OrganizationSettingsRepository,
   StaleJob,
   StaleJobRepository,
@@ -84,29 +85,34 @@ export function createDrizzleJobRequests(db: DbExecutor): JobRequestRepository {
   };
 }
 
+type SettingRow = typeof schema.organizationSetting.$inferSelect;
+
+const toSettings = (row: SettingRow | undefined): OrganizationSettings => ({
+  requireApproval: row?.requireApproval ?? false,
+  restrictRecruitersToTeam: row?.restrictRecruitersToTeam ?? false,
+  recruitsForClients: row?.recruitsForClients ?? false,
+  agencyAuthorization: row?.agencyAuthorization ?? null,
+});
+
 export function createDrizzleOrganizationSettings(db: DbExecutor): OrganizationSettingsRepository {
   const { organizationSetting: table } = schema;
+  /** One row per organization: insert it with the change, or change only the given columns. */
+  const upsert = async (organizationId: string, set: Partial<Omit<SettingRow, 'organizationId'>>, at: Date): Promise<OrganizationSettings> => {
+    const [row] = await db
+      .insert(table)
+      .values({ organizationId, ...set, updatedAt: at })
+      .onConflictDoUpdate({ target: table.organizationId, set: { ...set, updatedAt: at } })
+      .returning();
+    return toSettings(row);
+  };
   return {
     async get(organizationId) {
       const [row] = await db.select().from(table).where(eq(table.organizationId, organizationId)).limit(1);
-      return { requireApproval: row?.requireApproval ?? false, restrictRecruitersToTeam: row?.restrictRecruitersToTeam ?? false };
+      return toSettings(row);
     },
-    async setRequireApproval(organizationId, value, at) {
-      const [row] = await db
-        .insert(table)
-        .values({ organizationId, requireApproval: value, updatedAt: at })
-        .onConflictDoUpdate({ target: table.organizationId, set: { requireApproval: value, updatedAt: at } })
-        .returning();
-      return { requireApproval: row?.requireApproval ?? value, restrictRecruitersToTeam: row?.restrictRecruitersToTeam ?? false };
-    },
-    async setRestrictRecruitersToTeam(organizationId, value, at) {
-      const [row] = await db
-        .insert(table)
-        .values({ organizationId, restrictRecruitersToTeam: value, updatedAt: at })
-        .onConflictDoUpdate({ target: table.organizationId, set: { restrictRecruitersToTeam: value, updatedAt: at } })
-        .returning();
-      return { requireApproval: row?.requireApproval ?? false, restrictRecruitersToTeam: row?.restrictRecruitersToTeam ?? value };
-    },
+    setRequireApproval: (organizationId, value, at) => upsert(organizationId, { requireApproval: value }, at),
+    setRestrictRecruitersToTeam: (organizationId, value, at) => upsert(organizationId, { restrictRecruitersToTeam: value }, at),
+    setAgency: (organizationId, value, at) => upsert(organizationId, { recruitsForClients: value.recruitsForClients, agencyAuthorization: value.agencyAuthorization }, at),
   };
 }
 

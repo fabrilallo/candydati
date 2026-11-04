@@ -38,7 +38,9 @@ export function scopeJobs(raw: JobRepository, ctx: JobScopeContext): JobReposito
     },
     async list(query) {
       const ids = await ctx.jobIds();
-      return raw.list(ids === null ? query : { ...query, jobIds: ids });
+      if (ids === null) return raw.list(query);
+      // A filter of the caller (the jobs of a client) narrows the scope, never widens it.
+      return raw.list({ ...query, jobIds: query.jobIds === undefined ? ids : query.jobIds.filter((id) => ids.includes(id)) });
     },
     listAfter: async (organizationId, afterId, limit) => keep(await raw.listAfter(organizationId, afterId, limit)),
     listPublished: async (organizationId) => keep(await raw.listPublished(organizationId)),

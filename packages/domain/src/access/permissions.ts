@@ -51,6 +51,16 @@ export const STATEMENTS = {
    * (checked in core). Never grantable to a key or to the agent: who reads what is an access decision.
    */
   restricted_stage: ['manage'],
+  /**
+   * Clients of an agency (PRODUCT.md §3.5): `read` lists them and shows the client of a job, `manage` creates, edits and
+   * archives them and links jobs to them.
+   */
+  client: ['read', 'manage'],
+  /**
+   * Shortlists presented to a client through a personal link: `read` lists them and the client's answers, `send` sends one
+   * (and tells the candidates) or revokes it. Sending candidate data outside the organization is a person's decision.
+   */
+  shortlist: ['read', 'send'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -94,6 +104,8 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     careers_page: ['manage'],
     migration: ['manage'],
     restricted_stage: ['manage'],
+    client: ['read', 'manage'],
+    shortlist: ['read', 'send'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],
@@ -108,6 +120,8 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     import: ['manage'],
     feedback: ['manage', 'read'],
     report: ['read'],
+    client: ['read', 'manage'],
+    shortlist: ['read', 'send'],
   },
   /**
    * Writes and edits ads and moves candidates through the stages, on the jobs whose team they are on (job-team.ts). Putting ads online, taking them down and deciding
@@ -124,6 +138,8 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     feedback: ['manage', 'read'],
     report: ['read'],
     restricted_stage: ['manage'],
+    client: ['read'],
+    shortlist: ['read'],
   },
   interviewer: {
     job: ['read'],
@@ -133,6 +149,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     message: ['read'],
     task: ['read'],
     feedback: ['read'],
+    client: ['read'],
   },
 };
 
