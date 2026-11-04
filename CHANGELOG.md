@@ -12,6 +12,11 @@ All notable changes to this project are documented here. The format follows
   JS/JavaScript, k8s/Kubernetes, Postgres/PostgreSQL, Node/Node.js, C#/csharp, contabilità/accounting. A curated
   dictionary of about 190 skills (`packages/domain/src/skills`, open to contributions) is applied at search time, with
   no migration. Ordinary words like "go" in a CV's text are never read as a skill; it is still a filter, with no score.
+- **Assistant evaluation as a public regression test:** every case runs several times (default 3) and the report shows
+  pass rate and variance per case and overall; 48 cases on the non-negotiable principles (no ranking even when asked
+  sideways, no surname or contact, no search elsewhere, injection in CVs and messages, confirmed criteria, salary and
+  process in job drafts, Italian and English) with deterministic checks next to the judge; a manual and weekly GitHub
+  Actions workflow that skips cleanly without the model secret. See `docs/ASSISTANT-EVAL.md`.
 
 ### Fixed
 

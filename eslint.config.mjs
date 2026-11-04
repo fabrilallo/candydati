@@ -79,7 +79,7 @@ export default tseslint.config(
   // - Drizzle repository factories are flat tables of query methods (one short method per port operation).
   // - The eval case table is data.
   {
-    files: ['packages/core/src/adapters/drizzle-*.ts', 'apps/api/eval/cases.ts'],
+    files: ['packages/core/src/adapters/drizzle-*.ts', 'apps/api/eval/cases-*.ts'],
     rules: { 'max-lines-per-function': 'off' },
   },
   ...importBoundaries,

@@ -1,0 +1,163 @@
+name: Assistant evaluation
+
+# Runs the model-backed regression evaluation of the assistant (apps/api/eval, docs/ASSISTANT-EVAL.md). It costs model
+# calls, so it never runs on pull requests: only by hand and weekly, from the default branch of this repository, where
+# secrets are available. Without the secret the job is skipped cleanly (green), never failed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: Runs per case
+        default: "3"
+        required: false
+      min_pass_rate:
+        description: Minimum pass rate per case, 0 to 1 (1 = every run must pass)
+        default: "1"
+        required: false
+  schedule:
+    - cron: "17 4 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assistant-eval
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    name: assistant evaluation
+    # No pull_request trigger exists, so a PR from a fork can never reach the secrets; a fork that enables the workflow
+    # runs it with its own secrets only.
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: candydati
+          POSTGRES_PASSWORD: candydati
+          POSTGRES_DB: candydati
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U candydati -d candydati"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      mailpit:
+        image: axllent/mailpit:v1.31.5
+        ports:
+          - 1025:1025
+          - 8025:8025
+    env:
+      NODE_ENV: test
+      # Secrets are exposed to the steps that need them only (the check step reads a boolean, never the key).
+      EVAL_RUNS: ${{ inputs.runs }}
+      EVAL_MIN_PASS_RATE: ${{ inputs.min_pass_rate }}
+      EVAL_REPORT_PATH: ${{ github.workspace }}/assistant-eval-report.md
+      DATABASE_URL: postgres://candydati:candydati@localhost:5434/candydati
+      TEST_DATABASE_URL: postgres://candydati:candydati@localhost:5434/candydati_test
+      API_TEST_DATABASE_URL: postgres://candydati:candydati@localhost:5434/candydati_api_test
+      WEB_ORIGIN: http://localhost:3000
+      BETTER_AUTH_URL: http://localhost:3000
+      S3_ENDPOINT: http://localhost:9000
+      S3_REGION: us-east-1
+      S3_BUCKET: candydati-test
+      S3_ACCESS_KEY: candydati-minio
+      S3_SECRET_KEY: candydati-minio-secret
+      S3_FORCE_PATH_STYLE: "true"
+      EMAIL_PROVIDER: smtp
+      SMTP_HOST: localhost
+      SMTP_PORT: "1025"
+      SMTP_SECURE: "false"
+      EMAIL_DOMAIN: localhost
+      EMAIL_INBOUND_DOMAIN: inbound.localhost
+      # CI-only dummy values. Never used outside this workflow.
+      BETTER_AUTH_SECRET: ci-only-dummy-secret-0123456789abcdef
+      INBOUND_WEBHOOK_SECRET: ci-only-dummy-webhook-secret-0123456789abcdef
+    steps:
+      # The model is configured with repository variables and secrets: AGENT_MODEL (variable, e.g. openai/<model>),
+      # optional FAST_MODEL (variable, the judge) and the provider key as a secret (EVAL_MODEL_API_KEY, passed below
+      # as the variable of the provider named in AGENT_MODEL).
+      - name: Check the model configuration
+        id: gate
+        env:
+          AGENT_MODEL: ${{ vars.AGENT_MODEL }}
+          HAS_KEY: ${{ secrets.EVAL_MODEL_API_KEY != '' }}
+        run: |
+          if [ -z "$AGENT_MODEL" ] || [ "$HAS_KEY" != "true" ]; then
+            echo "::notice::Assistant evaluation skipped: set the AGENT_MODEL variable and the EVAL_MODEL_API_KEY secret."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Start MinIO
+        if: steps.gate.outputs.run == 'true'
+        run: |
+          docker run -d --name minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=candydati-minio -e MINIO_ROOT_PASSWORD=candydati-minio-secret \
+            cgr.dev/chainguard/minio:latest@sha256:dc455cdd4db6e390b1b26514f15ff37681a777bf8dab41aac445a0259f751e56 server /data
+          for _ in $(seq 1 30); do
+            curl -fsS http://localhost:9000/minio/health/live && exit 0
+            sleep 2
+          done
+          docker logs minio
+          exit 1
+
+      - name: Set up pnpm
+        if: steps.gate.outputs.run == 'true'
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Set up Node
+        if: steps.gate.outputs.run == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.gate.outputs.run == 'true'
+        run: pnpm install --frozen-lockfile
+
+      # The workspace packages are consumed from their build.
+      - name: Build
+        if: steps.gate.outputs.run == 'true'
+        run: pnpm build --filter=@candydati/api...
+
+      # The provider key reaches only this step. The model name selects which provider variable is read.
+      - name: Run the evaluation
+        if: steps.gate.outputs.run == 'true'
+        env:
+          AGENT_MODEL: ${{ vars.AGENT_MODEL }}
+          FAST_MODEL: ${{ vars.FAST_MODEL }}
+          OPENAI_API_KEY: ${{ secrets.EVAL_MODEL_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.EVAL_MODEL_API_KEY }}
+          GOOGLE_GENERATIVE_AI_API_KEY: ${{ secrets.EVAL_MODEL_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.EVAL_MODEL_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.EVAL_MODEL_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.EVAL_MODEL_API_KEY }}
+          XAI_API_KEY: ${{ secrets.EVAL_MODEL_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.EVAL_MODEL_API_KEY }}
+        run: pnpm --filter @candydati/api eval:agent
+
+      - name: Add the report to the job summary
+        if: always() && steps.gate.outputs.run == 'true' && hashFiles('assistant-eval-report.md') != ''
+        run: cat assistant-eval-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the report
+        if: always() && steps.gate.outputs.run == 'true' && hashFiles('assistant-eval-report.md') != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: assistant-eval-report
+          path: assistant-eval-report.md
+          if-no-files-found: error
+          retention-days: 90
