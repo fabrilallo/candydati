@@ -152,7 +152,8 @@ describe('createDrizzleAutomationRules', () => {
     const { rows } = await handle.pool.query('select action, config from automation_rule where id = $1', [task.id]);
     expect(rows[0]).toEqual({ action: 'create_task', config: { title: 'T', assignee: 'job_owner', dueInDays: 2 } });
     expect((await repo.listByJob(w.org, w.jobId)).map((r) => r.id)).toEqual([task.id, send.id, off.id]);
-    expect((await repo.listEnabledByStage(w.org, w.jobId, 'stage-0')).map((r) => r.id)).toEqual([task.id]);
+    expect((await repo.listEnabledByStage(w.org, w.jobId, 'stage-0', 'stage_entered')).map((r) => r.id)).toEqual([task.id]);
+    expect(await repo.listEnabledByStage(w.org, w.jobId, 'stage-0', 'stage_stuck')).toEqual([]);
     expect(await repo.listByJob(other.org, w.jobId)).toEqual([]);
     const moved = { ...task, stageId: 'stage-1', enabled: false };
     expect(await repo.save(moved)).toEqual(moved);
@@ -178,6 +179,7 @@ describe('createDrizzleAutomationRules', () => {
       applicationId: w.applicationId,
       stageId: 'stage-0',
       stageEnteredAt,
+      occurrence: '',
       createdAt: new Date(),
     });
     const first = D('2026-06-01T00:00:00Z');
@@ -196,6 +198,62 @@ describe('createDrizzleAutomationRules', () => {
       }),
     ).rejects.toThrow('rule failed');
     expect(await repo.claim({ ...again, id: randomUUID() })).toBe(true);
+  });
+
+  it('stores trigger and conditions, and lists enabled time-based rules across organizations', async () => {
+    const w = await insertWorld();
+    const other = await insertWorld();
+    const repo = createDrizzleAutomationRules(handle.db);
+    const stuck = buildAutomationRule({
+      id: randomUUID(),
+      organizationId: w.org,
+      jobId: w.jobId,
+      trigger: { type: 'stage_stuck', days: 5 },
+      conditions: { sources: ['careers_page'], tags: ['senior'] },
+    });
+    const due = buildAutomationRule({ id: randomUUID(), organizationId: other.org, jobId: other.jobId, trigger: { type: 'response_due_soon', daysBefore: 1 } });
+    const paused = buildAutomationRule({ id: randomUUID(), organizationId: w.org, jobId: w.jobId, trigger: { type: 'stage_stuck', days: 1 }, enabled: false });
+    const replied = buildAutomationRule({ id: randomUUID(), organizationId: w.org, jobId: w.jobId, trigger: { type: 'candidate_replied' } });
+    for (const rule of [stuck, due, paused, replied]) expect(await repo.create(rule)).toEqual(rule);
+    const { rows } = await handle.pool.query('select trigger, trigger_config, conditions from automation_rule where id = $1', [stuck.id]);
+    expect(rows[0]).toEqual({ trigger: 'stage_stuck', trigger_config: { days: 5 }, conditions: { sources: ['careers_page'], tags: ['senior'] } });
+    const timed = (await repo.listEnabledTimeBasedAcrossOrganizations()).map((r) => r.id);
+    expect(timed).toEqual(expect.arrayContaining([stuck.id, due.id]));
+    expect(timed).not.toContain(paused.id);
+    expect(timed).not.toContain(replied.id);
+    expect((await repo.listEnabledByStage(w.org, w.jobId, 'stage-0', 'candidate_replied')).map((r) => r.id)).toEqual([replied.id]);
+  });
+
+  it('a rule from before triggers reads as stage_entered without conditions', async () => {
+    const w = await insertWorld();
+    const id = randomUUID();
+    await handle.db.insert(schema.automationRule).values({ id, organizationId: w.org, jobId: w.jobId, stageId: 'received', action: 'create_task', config: { title: 'T' }, createdBy: 'u' });
+    const rule = await createDrizzleAutomationRules(handle.db).findById(w.org, id);
+    expect(rule).toMatchObject({ trigger: { type: 'stage_entered' }, conditions: {} });
+  });
+
+  it('claims once per occurrence and lists the runs of a rule', async () => {
+    const w = await insertWorld();
+    const rule = buildAutomationRule({ id: randomUUID(), organizationId: w.org, jobId: w.jobId, trigger: { type: 'candidate_replied' } });
+    await createDrizzleAutomationRules(handle.db).create(rule);
+    const repo = createDrizzleAutomationExecutions(handle.db);
+    const run = (occurrence: string) => ({
+      id: randomUUID(),
+      organizationId: w.org,
+      ruleId: rule.id,
+      applicationId: w.applicationId,
+      stageId: 'received',
+      stageEnteredAt: D('2026-06-01T00:00:00Z'),
+      occurrence,
+      createdAt: new Date(),
+    });
+    expect(await repo.claim(run('message:m1'))).toBe(true);
+    expect(await repo.claim(run('message:m1'))).toBe(false);
+    expect(await repo.claim(run('message:m2'))).toBe(true);
+    expect((await repo.listByRule(w.org, rule.id, [w.applicationId])).map((e) => e.occurrence).toSorted()).toEqual(['message:m1', 'message:m2']);
+    expect(await repo.listByRule(w.org, rule.id, [])).toEqual([]);
+    const other = await insertWorld();
+    expect(await repo.listByRule(other.org, rule.id, [w.applicationId])).toEqual([]);
   });
 
   it('fails loudly on a corrupted config instead of running it', async () => {

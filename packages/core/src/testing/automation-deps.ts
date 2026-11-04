@@ -16,6 +16,7 @@ import {
   createInMemoryWebhookDeliveries,
   createInMemoryWebhookEndpoints,
   type FakeHttpPoster,
+  type InMemoryAutomationExecutions,
   type InMemoryAutomationRules,
   type InMemoryNotifications,
   type InMemoryTasks,
@@ -41,6 +42,7 @@ export type TestAutomationDeps = TestMessagingDeps &
     readonly notifications: InMemoryNotifications;
     readonly tasks: InMemoryTasks;
     readonly rules: InMemoryAutomationRules;
+    readonly executions: InMemoryAutomationExecutions;
     readonly endpoints: InMemoryWebhookEndpoints;
     readonly deliveries: InMemoryWebhookDeliveries;
     readonly poster: FakeHttpPoster;

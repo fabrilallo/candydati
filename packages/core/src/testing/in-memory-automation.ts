@@ -1,4 +1,4 @@
-import type { AutomationRule, Notification, Task, WebhookDelivery, WebhookEndpoint } from '@candydati/domain';
+import { isTimeBased, type AutomationRule, type Notification, type Task, type WebhookDelivery, type WebhookEndpoint } from '@candydati/domain';
 import type {
   AutomationExecution,
   AutomationExecutionRepository,
@@ -132,12 +132,15 @@ export interface InMemoryAutomationExecutions extends AutomationExecutionReposit
 
 export function createInMemoryAutomationExecutions(): InMemoryAutomationExecutions {
   const rows = cell<readonly AutomationExecution[]>([]);
-  const entryOf = (e: AutomationExecution) => `${e.ruleId}|${e.applicationId}|${e.stageId}|${e.stageEnteredAt.toISOString()}`;
+  const entryOf = (e: AutomationExecution) => `${e.ruleId}|${e.applicationId}|${e.stageId}|${e.stageEnteredAt.toISOString()}|${e.occurrence}`;
   return {
     async claim(execution) {
       if (rows.get().some((row) => entryOf(row) === entryOf(execution))) return false;
       rows.set([...rows.get(), execution]);
       return true;
+    },
+    async listByRule(organizationId, ruleId, applicationIds) {
+      return rows.get().filter((e) => e.organizationId === organizationId && e.ruleId === ruleId && applicationIds.includes(e.applicationId));
     },
     snapshot: () => rows.get(),
   };
@@ -162,8 +165,11 @@ export function createInMemoryAutomationRules(initial: readonly AutomationRule[]
     async listByJob(organizationId, jobId) {
       return oldestFirst(inOrg(organizationId).filter((r) => r.jobId === jobId));
     },
-    async listEnabledByStage(organizationId, jobId, stageId) {
-      return oldestFirst(inOrg(organizationId).filter((r) => r.jobId === jobId && r.stageId === stageId && r.enabled));
+    async listEnabledByStage(organizationId, jobId, stageId, trigger) {
+      return oldestFirst(inOrg(organizationId).filter((r) => r.jobId === jobId && r.stageId === stageId && r.trigger.type === trigger && r.enabled));
+    },
+    async listEnabledTimeBasedAcrossOrganizations() {
+      return oldestFirst(rows.get().filter((r) => r.enabled && isTimeBased(r.trigger.type)));
     },
     async delete(organizationId, id) {
       const exists = inOrg(organizationId).some((r) => r.id === id);

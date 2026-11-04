@@ -10,6 +10,7 @@ import { ConflictError } from '../../errors.js';
 import type { InboundDeps } from '../../messaging-ports.js';
 import { inSavepoint } from '../../transaction.js';
 import { definePublicCommand } from '../../use-case.js';
+import { enqueueAutomations } from '../automations/enqueue.js';
 import type { InboundResult } from './views.js';
 
 export const INBOUND_ACTOR_ID = 'inbound_email';
@@ -93,6 +94,7 @@ function toMessage(deps: InboundDeps, input: z.output<typeof inboundEmailSchema>
  * the conversation; an unknown token is dropped. A sender other than the candidate is stored flagged `unverifiedSender`,
  * never trusted. Dedupe by `Message-ID`. The body is stored as text and never rendered as HTML. The message and
  * `message.received` commit together: if the audit fails nothing is stored, so the provider's retry is not a duplicate.
+ * A reply from the candidate fires the `candidate_replied` automations of the application's stage, with the message.
  */
 const storeInboundEmail = definePublicCommand<InboundDeps, typeof inboundEmailSchema, InboundOutcome>({
   name: 'receiveInboundEmail',
@@ -119,6 +121,11 @@ const storeInboundEmail = definePublicCommand<InboundDeps, typeof inboundEmailSc
     } catch (error) {
       if (error instanceof ConflictError) return { stored: false, reason: 'duplicate' };
       throw error;
+    }
+    // The candidate replied: rules of the current stage may create a task or answer (never move or decide). Only the
+    // candidate's own address counts, and only while the application is open.
+    if (!message.unverifiedSender && application.outcome === null) {
+      await enqueueAutomations(deps, organizationId, application.id, application.stageId, { trigger: 'candidate_replied', occurrence: `message:${message.id}` });
     }
     return { stored: true, message };
   },

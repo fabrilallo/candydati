@@ -240,9 +240,12 @@ describe('messaging flow on Postgres', () => {
     expect(token).toBeDefined();
 
     const reply = { to: [sent?.replyTo ?? ''], from: 'Ada <ada@example.com>', subject: 'Re', text: 'Eccomi', messageId: '<r1>', receivedAt: new Date() };
-    const deps = { auditLog, transaction: createDrizzleTransaction(handle.db), candidates, applications, conversations, messages, newId: randomUUID, now: () => new Date() };
+    const inboundQueue = createInMemoryTaskQueue();
+    const deps = { auditLog, transaction: createDrizzleTransaction(handle.db), candidates, applications, conversations, messages, queue: inboundQueue, newId: randomUUID, now: () => new Date() };
     expect(await receiveInboundEmail(deps, reply)).toEqual({ stored: true });
     expect(await receiveInboundEmail(deps, reply)).toMatchObject({ stored: false, reason: 'duplicate' });
+    // The reply fires the candidate_replied automations of the stage once, after the commit.
+    expect(inboundQueue.jobs().map((job) => [job.name, 'trigger' in job.payload ? job.payload.trigger : null])).toEqual([['automation.run', 'candidate_replied']]);
     const application = (await applications.listByJob(org, job.id))[0];
     const conversation = await messages.listByApplication(org, application?.id ?? '');
     expect(conversation.map((m) => [m.direction, m.status])).toEqual([['outbound', 'sent'], ['inbound', 'received']]);

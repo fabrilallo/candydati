@@ -17,6 +17,29 @@ describe('createAutomation', () => {
     expect(deps.auditLog.events()[0]).toMatchObject({ action: 'automation.saved', target: { type: 'automation_rule', id: rule.id }, metadata: { jobId: 'job_1', stageId: 'stage-0', action: 'create_task' } });
   });
 
+  it('stores the trigger and the conditions; without them the rule runs on entry for everyone', async () => {
+    const deps = world([]);
+    const plain = await createAutomation(deps, recruiter, { jobId: 'job_1', stageId: 'stage-0', action: task });
+    expect(plain).toMatchObject({ trigger: { type: 'stage_entered' }, conditions: {} });
+    const stuck = await createAutomation(deps, recruiter, {
+      jobId: 'job_1',
+      stageId: 'stage-0',
+      trigger: { type: 'stage_stuck', days: 7 },
+      conditions: { sources: ['careers_page'], tags: ['Senior'] },
+      action: task,
+    });
+    expect(stuck).toMatchObject({ trigger: { type: 'stage_stuck', days: 7 }, conditions: { sources: ['careers_page'], tags: ['senior'] } });
+    expect(deps.auditLog.events()[1]?.metadata).toEqual({ jobId: 'job_1', stageId: 'stage-0', trigger: 'stage_stuck', action: 'create_task' });
+  });
+
+  it('refuses unknown triggers, out-of-range days and unknown conditions', async () => {
+    const deps = world([]);
+    for (const extra of [{ trigger: { type: 'scored' } }, { trigger: { type: 'stage_stuck', days: 0 } }, { conditions: { score: 3 } }, { conditions: { sources: ['linkedin'] } }]) {
+      await expect(createAutomation(deps, recruiter, { jobId: 'job_1', stageId: 'stage-0', action: task, ...extra })).rejects.toBeInstanceOf(ValidationError);
+    }
+    expect(deps.rules.snapshot()).toHaveLength(0);
+  });
+
   it('accepts received as a stage, a stored template and a built-in default', async () => {
     const deps = world([]);
     await createAutomation(deps, recruiter, { jobId: 'job_1', stageId: 'received', action: { type: 'send_template', templateId: 'tpl_1' } });
@@ -60,6 +83,21 @@ describe('updateAutomation', () => {
     });
     expect(rule).toMatchObject({ stageId: 'stage-1', enabled: false, createdBy: 'recruiter_1', action: { title: 'Other', dueInDays: 3 } });
     expect(deps.auditLog.events()[0]?.action).toBe('automation.saved');
+  });
+
+  it('replaces trigger and conditions too, and audits the trigger', async () => {
+    const deps = world();
+    const rule = await updateAutomation(deps, recruiter, {
+      ruleId: 'rule_1',
+      stageId: 'stage-0',
+      trigger: { type: 'response_due_soon', daysBefore: 2 },
+      conditions: { consentScopes: ['talent_pool'] },
+      action: task,
+    });
+    expect(rule).toMatchObject({ trigger: { type: 'response_due_soon', daysBefore: 2 }, conditions: { consentScopes: ['talent_pool'] } });
+    expect(deps.auditLog.events()[0]?.metadata).toMatchObject({ trigger: 'response_due_soon' });
+    const reset = await updateAutomation(deps, recruiter, { ruleId: 'rule_1', stageId: 'stage-0', action: task });
+    expect(reset).toMatchObject({ trigger: { type: 'stage_entered' }, conditions: {} });
   });
 
   it('validates like create and is isolated per organization', async () => {

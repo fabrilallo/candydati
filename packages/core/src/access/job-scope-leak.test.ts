@@ -84,6 +84,8 @@ const ROWS: readonly Row[] = [
   read('getRestrictedStages', { jobId: JOB_B }),
   read('listTrackedLinks', { jobId: JOB_B }),
   read('listAutomations', { jobId: JOB_B }),
+  read('previewAutomation', { jobId: JOB_B, stageId: 'stage-0' }),
+  read('previewAutomation', { jobId: 'job_1', stageId: 'stage-0', ruleId: 'rule_b' }, { label: 'a rule of job B' }),
   read('listImports', {}),
   read('getImportBatch', { batchId: 'batch_b' }),
   read('exportCandidate', { candidateId: 'cand_b' }),

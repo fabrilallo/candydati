@@ -174,5 +174,5 @@ export type DeliverDeps = Pick<
 
 export type InboundDeps = Pick<
   MessagingDeps,
-  'auditLog' | 'transaction' | 'candidates' | 'applications' | 'conversations' | 'messages' | 'newId' | 'now'
+  'auditLog' | 'transaction' | 'candidates' | 'applications' | 'conversations' | 'messages' | 'newId' | 'now' | 'queue'
 >;
