@@ -213,15 +213,38 @@ notifications and tasks. pg-boss (in Postgres) drives queues for email sending, 
 and erasure, response deadlines, imports and distribution sync. Scheduled jobs handle retention warnings, daily digests
 and stale-job detection. Jobs are idempotent and keyed so a retry does not repeat a side effect.
 
-**Automations.** A rule belongs to one stage of a job and has a trigger, optional conditions and one action
-(`send_template` or `create_task`; there is no action that moves or decides). Event triggers are queued by the use case
+**Automations.** A rule belongs to one stage of a job and has a trigger, optional conditions and one action:
+`send_template`, `create_task`, `add_tag`, `assign`, `request_feedback`, `notify` or `propose_move` (there is no action
+that moves or decides). Event triggers are queued by the use case
 that records the event, in its transaction: a move or an intake (`stage_entered`), a reply from the candidate's own
 address (`candidate_replied`), a submitted feedback (`feedback_submitted`, for the stage it was asked for). Time-based
 triggers (`stage_stuck`, `response_due_soon`) are found by the hourly `automation.scan`, which only queues
 `automation.run` naming the rule. `runAutomations` checks the application, the trigger and the conditions again, then
 claims the run in `automation_execution`, unique per (rule, application, stage, stage entry, occurrence): `''` for the
 entry, `stuck`, `due:<deadline>`, `message:<id>`, `feedback:<id>`. So every trigger fires once per occurrence, however
-often the scan runs or a task is redelivered.
+often the scan runs or a task is redelivered. A rule acts with its creator's role of today: `runAutomations` checks
+again that the creator is a member, holds the permission the action needs (`ACTION_PERMISSION`: `propose_move` needs
+`candidate:move`) and still reaches the job (per-job access); otherwise the rule is skipped and admins are told once.
+`assign` has no owner field to write: it gives the person a "follow this application" task, one open at a time.
+`request_feedback` asks the stage's interviewers through `requestMissingFeedback` (nobody with a request open or
+answered is asked again; the hourly reminder scan follows up). `notify` creates `automation_alert` notifications for
+the recipients who can open the job, or `automation_alert_email` ones that the hourly digest also carries (job title and
+kind only), or an `automation.notified` webhook event with ids only (`ruleId`, `applicationId`, `jobId`, `stageId`,
+`trigger`).
+
+**Proposed moves.** `propose_move` writes a row in `move_proposal` (at most one open per application, a partial unique
+index) and tells the rule's creator and the job owner; it moves nothing. A person confirms it with
+`confirmMoveProposal`, which runs `moveApplication` with that person's permission, per-job access and audit
+(`application.moved` plus `move_proposal.confirmed`), or dismisses it (`move_proposal.dismissed`). A proposal is live
+only while the application is open, in the stage it was proposed from, and for 14 days: a move or a decision drops it
+(`dropped`, in the same transaction), and the hourly `automation.scan` marks the old ones `expired`.
+
+**Copied rules.** `copyAutomations` copies some rules, or every rule of a stage, to a stage of the same job, another
+job or a job template (`job_template_automation`), and from a template to a job. Every copy is validated against the
+target first (the stage exists, templates resolve in its language, the people named are members, a proposed move points
+at one of its stages) and becomes the copying person's rule (`createdBy`); audited as `automation.copied`. A job created
+from a template gets a copy of each template rule whose stages it has, made by its creator if they may manage
+automations.
 
 **Where a job is queued.** With pg-boss, the unit of work sends a job on the connection of the transaction that stores
 the work (`BindableTaskQueue.bindTo`), so the job exists if and only if the transaction committed. Two sends happen
@@ -341,7 +364,7 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 | Jobs | `job`, `job_team_member`, `job_stage_restriction`, `job_template`, `job_stage_interviewer`, `job_request`, `job_distribution`, `distribution_setting`, `job_tracked_link` |
 | Candidates | `candidate`, `application`, `application_stage_event`, `candidate_note`, `cv_extraction`, `response_promise` |
 | Communication | `conversation`, `message`, `email_template`, `email_settings` |
-| Automation | `automation_rule`, `automation_execution`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |
+| Automation | `automation_rule`, `automation_execution`, `move_proposal`, `job_template_automation`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |
 | Privacy | `privacy_notice`, `consent_token`, `data_export`, `retention_run` |
 | Import | `import_batch`, `import_item`, `import_analysis` |
 | HR tools | `feedback_request`, `interview_feedback` (scorecard observations in `observations`), `job_scorecard_criterion` |

@@ -47,8 +47,9 @@ data can be exported on its own.
 
 ## Does the AI decide who gets hired?
 
-No. Neither the assistant nor any automation ranks, scores, moves or rejects candidates: automations can only send a
-template or create a task when a person moves an application to a stage. The assistant never writes to a candidate
+No. Neither the assistant nor any automation ranks, scores, moves or rejects candidates: automations can send a
+template, create or assign a task, tag, ask for feedback or alert people, and at most propose a move that stays a
+suggestion until a person confirms or dismisses it. The assistant never writes to a candidate
 without a person's confirmation. See [AI assistant](./ai).
 
 ## How do I get help?

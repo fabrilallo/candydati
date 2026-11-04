@@ -34,7 +34,7 @@ Every candidate always receives an outcome. The system supports this structurall
 
 ### 2.4 No automated decisions about candidates
 
-The product does not rank, score, order or reject people, and it has no automation rule that moves or decides. A person may filter candidates on objective criteria they declare; every result meets every criterion and the list is ordered by date of application, never by merit. Skills match under their known names (a curated synonym dictionary: "Go" finds "Golang", "k8s" finds "Kubernetes"), which widens the spelling and never ranks. Quality scores evaluate the ad, never candidates. Interview feedback describes what was seen and carries no score. This is also the GDPR position on automated decision-making (§6).
+The product does not rank, score, order or reject people, and no automation rule moves or decides: the most a rule may do is propose a move (`propose_move`), which stays a suggestion until a person confirms it, through the normal move with their own permissions, or dismisses it. A person may filter candidates on objective criteria they declare; every result meets every criterion and the list is ordered by date of application, never by merit. Skills match under their known names (a curated synonym dictionary: "Go" finds "Golang", "k8s" finds "Kubernetes"), which widens the spelling and never ranks. Quality scores evaluate the ad, never candidates. Interview feedback describes what was seen and carries no score. This is also the GDPR position on automated decision-making (§6).
 
 ### 2.5 Agentic-ready
 
@@ -58,7 +58,7 @@ The code is open. A complete export in an open, documented format is available a
 | Careers page | Open positions list, ad page, application form with no registration, and a section-based page builder (§3.4) |
 | Pipeline | Stages per ad, candidate profile, notes, tags, search across the candidate database. The original CV is always viewable next to the data extracted from it |
 | Communication | Templates, single and bulk sends, inbound email attached to the candidate, outcome messages |
-| Automation | Rules per stage: a trigger (enters the stage, stuck there N days, the candidate replies, interview feedback arrives, the promised response is near), optional conditions on declared facts (source, tags, consent) and an action that only sends a template or creates a task, with a read-only preview of who it would act for. No trigger decides about a candidate |
+| Automation | Rules per stage: a trigger (enters the stage, stuck there N days, the candidate replies, interview feedback arrives, the promised response is near), optional conditions on declared facts (source, tags, consent) and one action: send a template, create a task, add a tag, assign the application (a follow-up task for that person), ask the stage's interviewers for feedback, alert people (in app, in the email digest) or a webhook, or propose a move that a person confirms or dismisses. A read-only preview shows who a rule would act for. Rules copy between stages, jobs and job templates, and a job created from a template gets its rules. No rule moves or decides about a candidate |
 | Distribution | Structured `JobPosting` data, XML feed, public read-only ads API |
 | GDPR | Versioned consents, retention, automatic erasure, candidate rights (§6) |
 | Access | Organizations, roles, per-ad selection team, append-only audit log |
@@ -225,7 +225,7 @@ It writes and corrects the ad, proposes the salary range (with benchmark data wh
 
 ### 5.3 What it may not do, and why
 
-- **It does not rank, score or reject candidates** (§2.4). The product takes no automated decisions.
+- **It does not rank, score or reject candidates** (§2.4). The product takes no automated decisions: an automation may propose a move, never make it.
 - **It never sends a message to a candidate on its own.** A person confirms every message. The only automatic message is the application receipt.
 - **Closing, deciding and administration stay with a person.** Keys and the assistant cannot be granted those capabilities.
 - **Every action is in the audit log, distinguishable from human ones**, so anyone can tell who did what.

@@ -56,6 +56,7 @@ only). Events:
 | `job.updated` | a published ad was edited |
 | `job.closed` | a job was closed |
 | `candidate.erased` | a candidate's data was erased |
+| `automation.notified` | an automation rule with the webhook alert fired (`ruleId`, `applicationId`, `jobId`, `stageId`, `trigger`) |
 
 The payload carries ids only, never names or emails: read the details through the API. Each delivery is a JSON `POST`
 with these headers:
