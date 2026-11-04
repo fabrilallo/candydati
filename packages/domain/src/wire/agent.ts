@@ -41,6 +41,7 @@ export const MCP_TOOL_NAMES = [
   'list_job_templates',
   'get_job_stats',
   'get_reports',
+  'list_clients',
 ] as const;
 export type McpToolName = (typeof MCP_TOOL_NAMES)[number];
 

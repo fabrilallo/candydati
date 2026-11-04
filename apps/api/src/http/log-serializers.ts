@@ -3,10 +3,11 @@ import type { FastifyRequest } from 'fastify';
 const MASK = '***';
 
 /**
- * Links whose only credential is a path segment: public feedback and consent links, Better Auth's password reset
- * (`/api/auth/reset-password/:token`, the emailed link) and the web page that accepts an invitation.
+ * Links whose only credential is a path segment: public feedback, consent and client shortlist links, Better Auth's
+ * password reset (`/api/auth/reset-password/:token`, the emailed link), the web page that accepts an invitation and the
+ * shortlist page of a client.
  */
-const PATH_TOKEN = /(\/(?:public\/(?:feedback|consent)|api\/auth\/reset-password|accept-invitation)\/)[^/?#]+/g;
+const PATH_TOKEN = /(\/(?:public\/(?:feedback|consent|shortlists)|api\/auth\/reset-password|accept-invitation|shortlist)\/)[^/?#]+/g;
 /**
  * Query parameters that carry a secret: Better Auth's `token` (email verification, account deletion, magic link),
  * OAuth `code` and `state`, the OAuth proxy `cookies`, and generic `secret` / `key` / `otp`.

@@ -5,6 +5,7 @@ import { ORG_A, ORG_B } from '../../testing/candidate-seed.js';
 import { buildClient, seedClientWorld } from '../../testing/client-deps.js';
 import { getAgencySetting, setAgencySetting } from './agency-setting.js';
 import { archiveClient, createClient, getClient, listClients, updateClient } from './clients.js';
+import { exportClients } from './client-export.js';
 import { getJobClient, setJobClient } from './job-client.js';
 
 const owner = userActor({ organizationId: ORG_A, id: 'user_test', role: 'owner' });
@@ -107,5 +108,19 @@ describe('the client of a job', () => {
     await expect(setJobClient(deps, stranger, { jobId: 'job_1', clientId: 'client_1' })).rejects.toBeInstanceOf(NotFoundError);
     const off = await seedClientWorld({ agency: false });
     await expect(setJobClient(off, recruiter, { jobId: 'job_1', clientId: 'client_1' })).rejects.toBeInstanceOf(ConflictError);
+  });
+});
+
+describe('exportClients', () => {
+  it('exports every client with contacts and its jobs, and nothing without clients wired', async () => {
+    const deps = await seedClientWorld({ clients: [buildClient(), buildClient({ id: 'client_old', name: 'Old', archivedAt: new Date('2026-02-01T00:00:00Z') })] });
+    await setJobClient(deps, recruiter, { jobId: 'job_1', clientId: 'client_1', display: 'confidential' });
+    const exported = await exportClients(deps, ORG_A);
+    expect(exported.clients.map((c) => [c.id, c.jobs, c.archivedAt])).toEqual([
+      ['client_1', [{ jobId: 'job_1', display: 'confidential' }], null],
+      ['client_old', [], '2026-02-01T00:00:00.000Z'],
+    ]);
+    expect(exported.clients[0]?.contacts).toHaveLength(1);
+    expect(await exportClients({}, ORG_A)).toEqual({ clients: [] });
   });
 });

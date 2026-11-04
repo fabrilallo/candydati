@@ -7,7 +7,7 @@ const contentBody = z.object({ content: jobContentSchema });
 export const jobRoutes: readonly RouteSpec[] = [
   {
     method: 'get', path: '/api/v1/jobs', tag: 'Jobs', summary: 'List job ads', scope: 'job:read',
-    query: z.object({ status: z.enum(JOB_STATUSES).optional(), ...page }),
+    query: z.object({ status: z.enum(JOB_STATUSES).optional(), clientId: z.string().min(1).optional().describe('Only the jobs of this client (agencies).'), ...page }),
     response: { schema: 'JobSummary', list: true, paginated: true },
   },
   {

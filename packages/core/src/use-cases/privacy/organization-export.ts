@@ -5,6 +5,7 @@ import type { OrganizationExportDeps } from '../../privacy-ports.js';
 import { defineSystemJob, defineUseCase, type UseCase, type UseCaseDefinition } from '../../use-case.js';
 import { buildCandidateExport } from './build-candidate-export.js';
 import { writeCareersPage } from './careers-export.js';
+import { exportClients } from '../clients/client-export.js';
 
 const PAGE = 100;
 
@@ -89,6 +90,7 @@ candidates/        one file per candidate, in the candidate-export schema (docs/
 files/             the original CV files and the attachments, referenced by applications[].cv.path and
                    applications[].attachments[].path in the candidate files
 careers/           the careers page (page.json: draft and published document), its media library (media.json) and files
+clients.json       the clients of an agency, their contacts and the client of each job (empty without clients)
 `;
 
 const json = (value: unknown): Uint8Array => new TextEncoder().encode(`${JSON.stringify(value, null, 2)}\n`);
@@ -150,6 +152,7 @@ export const buildOrganizationExport = defineSystemJob<OrganizationExportDeps, z
       await writeJobs(deps, organizationId, (path, bytes) => zip.add(path, bytes));
       await writeCandidates(deps, organizationId, now, (path, bytes) => zip.add(path, bytes));
       await writeCareersPage(deps, organizationId, (path, bytes) => zip.add(path, bytes));
+      await zip.add('clients.json', json(await exportClients(deps, organizationId)));
       await zip.finish();
       const sizeBytes = await upload;
       return await deps.dataExports.save({ ...request, status: 'ready', sizeBytes, completedAt: deps.now() });

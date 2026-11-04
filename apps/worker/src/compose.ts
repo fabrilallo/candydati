@@ -111,7 +111,7 @@ function createTaskQueues({ logger, uow, files, aiRuntime, env }: Composition, {
     createWebhookDeliverQueue(phase4.deliver),
     createWebhookPublishQueue(phase4.publish),
     createDistributionSyncQueue(createDistributionWorkerDeps({ uow, platform: env.platform })),
-    createDeadlinesScanQueue({ scan: phase4.scan, feedback: hr.feedback, stale: hr.stale, digest, now: () => new Date() }),
+    createDeadlinesScanQueue({ scan: phase4.scan, feedback: hr.feedback, stale: hr.stale, shortlists: hr.shortlists, digest, now: () => new Date() }),
     createImportAnalyzeQueue({ deps: imports.analysis, extractor: imports.extractor }),
     createImportCommitQueue(imports.commit),
     createMigrationAnalyzeQueue(migrations.analysis),

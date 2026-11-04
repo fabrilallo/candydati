@@ -5,6 +5,8 @@ describe('maskSecretsInUrl', () => {
   it.each([
     ['/api/v1/public/feedback/abcDEF123_-xyz', '/api/v1/public/feedback/***'],
     ['/api/v1/public/feedback/abcDEF123/cv', '/api/v1/public/feedback/***/cv'],
+    ['/api/v1/public/shortlists/abcDEF123/candidates/i1/cv', '/api/v1/public/shortlists/***/candidates/i1/cv'],
+    ['/shortlist/abcDEF123?lang=en', '/shortlist/***?lang=en'],
     ['/api/v1/public/consent/secret-token?lang=it', '/api/v1/public/consent/***?lang=it'],
     ['/api/v1/anything?token=abc&x=1', '/api/v1/anything?token=***&x=1'],
     ['/api/v1/anything?x=1&secret=abc', '/api/v1/anything?x=1&secret=***'],
