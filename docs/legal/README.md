@@ -41,10 +41,15 @@ In app, la pagina `/app/settings/privacy` mostra il registro compilato con i dat
 | Export completo | Archivio ZIP per candidato e export dell'intera organizzazione, anche a fine contratto | Scheda candidato, esportazioni |
 | Dati importati | Consenso segnato "da rinnovare", con email di riconferma | Import |
 | Dati migrati da un altro ATS | Stesso titolare: date di consenso e conservazione riprese dalla fonte; chi non ha una data di consenso riceve la riconferma dei dati importati; chi ha la conservazione già scaduta resta escluso. Nessun punteggio, valutazione o dato particolare viene trasferito. Prima di confermare, un owner o admin dichiara che l'organizzazione è titolare, che ha una base giuridica per il trasferimento e che l'eventuale agente AI o strumento terzo usato per preparare il pacchetto è un suo sub-responsabile; le dichiarazioni restano nel registro delle azioni | Migrazione |
+| Selezioni per conto di clienti | Solo con l'impostazione "Selezioniamo per conto di clienti". Il recruiter sceglie per ogni candidato cosa condividere (nome, e se vuole curriculum e note; mai contatti né altre candidature) e lo invia a un referente del cliente con un link personale, che scade e si revoca. Ogni candidato presentato riceve un'email che nomina il cliente o dice che è riservato; le risposte del cliente non spostano né decidono nulla; la cancellazione toglie la persona da ogni shortlist; l'export elenca i clienti che hanno ricevuto i dati. Gli annunci indicano sempre l'agenzia e gli estremi dell'autorizzazione, e il cliente per nome o come cliente riservato | Impostazioni, Clienti; posizione, Shortlist |
 | Documenti | Questi modelli e il registro compilato in app | `docs/legal/` |
 
 ## Cosa resta a carico del titolare
 
+- Se seleziona per conto di clienti: avere l'autorizzazione richiesta (D.Lgs. 276/2003) e indicarne gli estremi nelle
+  impostazioni, aggiornare l'informativa (il modello in app la copre con l'impostazione attiva), regolare per iscritto con
+  ogni cliente l'uso dei dati ricevuti (solo per quella selezione, titolare autonomo, nessuna ulteriore comunicazione) e
+  rispondere a chi chiede a quale cliente riservato è stato presentato.
 - Verificare con un legale informativa, registro e accordo.
 - Valutare se serve una valutazione d'impatto (DPIA) e se va nominato un DPO.
 - Scegliere le durate di conservazione e motivarle.
