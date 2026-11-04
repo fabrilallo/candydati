@@ -11,6 +11,12 @@ export const NOTIFICATION_KINDS = [
   'job_stale',
   'job_request_submitted',
   'job_request_decided',
+  /** A `notify` rule, in app only. */
+  'automation_alert',
+  /** A `notify` rule, in app and in the hourly email digest. */
+  'automation_alert_email',
+  /** A `propose_move` rule suggested a move: a person confirms or dismisses it. */
+  'move_proposed',
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 export const notificationKindSchema = z.enum(NOTIFICATION_KINDS);
@@ -37,7 +43,7 @@ export const notificationDedupeKey = (kind: NotificationKind, applicationId: str
   `${kind}:${applicationId}:${stageId}:${responseDueAt === null ? 'none' : responseDueAt.toISOString()}`;
 
 /** The kinds a digest email carries, by the scan that creates them. */
-export const DEADLINE_DIGEST_KINDS = ['response_due_soon', 'response_overdue', 'task_due'] as const satisfies readonly NotificationKind[];
+export const DEADLINE_DIGEST_KINDS = ['response_due_soon', 'response_overdue', 'task_due', 'automation_alert_email'] as const satisfies readonly NotificationKind[];
 export const STALE_DIGEST_KINDS = ['job_stale'] as const satisfies readonly NotificationKind[];
 export const RETENTION_DIGEST_KINDS = ['retention_expiring'] as const satisfies readonly NotificationKind[];
 

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { automationActionSchema } from '../automation/automation.js';
 import { automationConditionsSchema } from '../automation/conditions.js';
 import { AUTOMATION_TRIGGERS, automationTriggerSchema, STAGE_ENTERED } from '../automation/trigger.js';
-import { isoDate } from './common.js';
+import { candidateRefSchema, isoDate } from './common.js';
 
 /** A rule of a job (`GET /jobs/:id/automations`); `createdBy` is a user id. */
 export const automationRuleSchema = z.object({
@@ -45,3 +45,34 @@ export const automationPreviewSchema = z.object({
   items: z.array(automationPreviewItemSchema).nullable(),
 });
 export type AutomationPreviewDto = z.output<typeof automationPreviewSchema>;
+
+/** A rule kept with a job template (`GET /job-templates/:id/automations`): copied to each job created from the template. */
+export const templateAutomationRuleSchema = automationRuleSchema.omit({ jobId: true }).extend({ templateId: z.string() });
+export type TemplateAutomationRuleDto = z.output<typeof templateAutomationRuleSchema>;
+
+/** `POST /automations/copy`: where the copies went and their ids, in the order of the source. */
+export const copyAutomationsResultSchema = z.object({
+  to: z.object({ kind: z.enum(['job', 'template']), id: z.string() }),
+  stageId: z.string(),
+  created: z.array(z.string()),
+});
+export type CopyAutomationsResultDto = z.output<typeof copyAutomationsResultSchema>;
+
+/**
+ * A live proposal of a `propose_move` rule: a suggestion that a person confirms (the normal move, with their permissions)
+ * or dismisses. It never moves anything by itself.
+ */
+export const moveProposalSchema = z.object({
+  id: z.string(),
+  applicationId: z.string(),
+  ruleId: z.string().nullable(),
+  candidate: candidateRefSchema,
+  job: z.object({ id: z.string(), title: z.string() }),
+  from: z.object({ id: z.string(), label: z.string().nullable() }),
+  to: z.object({ id: z.string(), label: z.string().nullable() }),
+  /** The creator of the rule, whose suggestion it is. */
+  proposedBy: z.string(),
+  createdAt: isoDate,
+  expiresAt: isoDate,
+});
+export type MoveProposalDto = z.output<typeof moveProposalSchema>;
