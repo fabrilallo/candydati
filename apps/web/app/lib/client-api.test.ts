@@ -21,7 +21,7 @@ const ok = (data: unknown, status = 200) => ({ status, body: { success: true, da
 const fail = (status: number, code: string, issues: unknown[] = []) => ({ status, body: { success: false, data: null, error: { code, message: 'x', issues } } })
 const stub = (response: unknown) => vi.fn<JobApiRequest>().mockResolvedValue(response as never)
 const AT = '2026-10-13T10:00:00.000Z'
-const client = (overrides = {}) => ({ id: 'c1', name: 'Acme', website: null, logoUrl: null, contacts: [{ id: 'k1', name: 'Rita', email: 'rita@acme.it' }], archived: false, jobCount: 2, createdAt: AT, updatedAt: AT, ...overrides })
+const client = (overrides = {}) => ({ id: 'c1', name: 'Acme', website: null, logoUrl: null, contacts: [{ id: 'k1', name: 'Rita', email: 'rita@acme.it' }], contactCount: 1, archived: false, jobCount: 2, createdAt: AT, updatedAt: AT, ...overrides })
 const shortlist = (overrides = {}) => ({
   id: 's1', jobId: 'j1', clientId: 'c1', clientName: 'Acme', recipientName: 'Rita', recipientEmail: 'rita@acme.it', message: null, status: 'open',
   remindersSent: 0, firstOpenedAt: null, createdAt: AT, expiresAt: AT, revokedAt: null,

@@ -129,9 +129,11 @@ runs a backend developer search for Acme and an accountant search for Beta, with
   ads already say (the truth about an ad does not change with a setting).
 - **Clients.** A name (unique in the organization, ignoring case), an optional website and logo (an https address the
   server never fetches) and the client's hiring contacts (name and email, at most 10). Every member reads clients
-  (`client:read`); owners, admins and recruiters manage them (`client:manage`, never a key or the assistant: it decides
-  who receives candidate data). A client is archived, never deleted: its jobs and history stay, it gets no new job.
-- **The client of a job.** At most one, kept apart from the ad (`job_client`), set by whoever may edit the ad, with a
+  (`client:read`), but the contacts' names and emails only reach people who manage clients or send shortlists (keys,
+  the assistant and the rest of the team see how many there are); owners, admins and recruiters manage them
+  (`client:manage`, never a key or the assistant: it decides who receives candidate data). A client is archived, never deleted: its jobs and history stay, it gets no new job.
+- **The client of a job.** At most one, kept apart from the ad (`job_client`), set by a person who manages clients
+  (`client:manage`: not a hiring manager, a key or the assistant, since naming a confidential client publishes it), with a
   display choice:
   - *named*: the ad reads "for <client>", the client is `hiringOrganization` in the JSON-LD and the `company` of the
     feed, its website is linked;
@@ -147,7 +149,9 @@ runs a backend developer search for Acme and an accountant search for Beta, with
   one the recruiter chooses whether the CV goes and which notes (at most 5, about that application or the person, never
   about another application, never written at a restricted stage, §6.2: not even an owner can share those, and a stage
   restricted after sending hides its notes from the client page). The contact gets a personal link (only its hash is stored; 14 days; reminders after 3 and 7
-  days while someone is unanswered, each with a new link; revocable at once). The page shows the agency, the job title,
+  days while someone is unanswered, each with a new link; revocable at once). A shortlist ends by itself when its job is
+  closed, its client archived or its contact removed (audited, no reminder with a fresh link), and a candidate whose
+  application is decided disappears from the page and can no longer be answered about. The page shows the agency, the job title,
   the recruiter's message and, per candidate, the name, the chosen notes and the CV when shared: no email, phone, tags,
   stages, other jobs or internal ids. Per candidate the client answers "meet at interview" or "not for us" with a required
   short reason, once. The answer is recorded on the application's timeline and in the audit log; it never moves a stage

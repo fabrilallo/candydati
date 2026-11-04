@@ -122,3 +122,43 @@ describe('shortlists without login', () => {
     expect((await anonymous('GET', `/api/v1/public/shortlists/${'a'.repeat(26)}`)).statusCode).toBe(404);
   });
 });
+
+describe('notes on the client page', () => {
+  it('shows a shared application note and a shared person note, never a note of a restricted stage', async () => {
+    const w = await createWorld(t);
+    const { client, contactEmail } = await agency(w);
+    const applied = await applyAs(w);
+    const board = (await w.owner.get<{ stages: { id: string }[] }>(`/api/v1/jobs/${w.job.id}/pipeline`)).body.data!;
+    const note = async (body: string, applicationId?: string) =>
+      (await w.owner.post<{ id: string }>(`/api/v1/candidates/${applied.candidateId}/notes`, { body, ...(applicationId ? { applicationId } : {}) })).body.data!.id;
+    const onApplication = await note('Led a payments migration.', applied.applicationId);
+    const onPerson = await note('Speaks fluent German.');
+    const restrictedStage = board.stages[1]!.id;
+    expect((await w.owner.post(`/api/v1/applications/${applied.applicationId}/move`, { stageId: restrictedStage })).status).toBe(200);
+    const atRestricted = await note('Remark at the restricted stage.', applied.applicationId);
+    expect((await w.owner.put(`/api/v1/jobs/${w.job.id}/stages/${restrictedStage}/restriction`, { restricted: true })).status).toBe(200);
+
+    const refused = await w.owner.post(`/api/v1/jobs/${w.job.id}/shortlists`, { contactId: client.contacts[0]!.id, candidates: [{ applicationId: applied.applicationId, noteIds: [atRestricted] }] });
+    expect(refused.status).toBe(422);
+    const sent = await w.owner.post(`/api/v1/jobs/${w.job.id}/shortlists`, { contactId: client.contacts[0]!.id, candidates: [{ applicationId: applied.applicationId, noteIds: [onApplication, onPerson] }] });
+    expect(sent.status).toBe(201);
+    const page = await anonymous('GET', `/api/v1/public/shortlists/${tokenFor(contactEmail)}`);
+    const notes = (page.json().data as { candidates: { notes: { body: string }[] }[] }).candidates[0]!.notes.map((n) => n.body);
+    expect(notes.toSorted()).toEqual(['Led a payments migration.', 'Speaks fluent German.']);
+    expect(page.body).not.toContain('Remark at the restricted stage');
+  });
+
+  it('shows contacts only to who manages clients, and no key may link a job to a client', async () => {
+    const w = await createWorld(t);
+    const { client } = await agency(w);
+    const interviewer = await w.member('interviewer');
+    expect((await interviewer.get<{ contacts: unknown[]; contactCount: number }[]>('/api/v1/clients')).body.data).toEqual([expect.objectContaining({ contacts: [], contactCount: 1 })]);
+    expect((await w.owner.get<{ contacts: unknown[] }[]>('/api/v1/clients')).body.data![0]!.contacts).toHaveLength(1);
+    const key = await createKey(w.owner, ['client:read', 'job:read', 'job:update']);
+    expect((await withKey<{ contacts: unknown[] }[]>(t.app, key.secret, 'GET', '/api/v1/clients')).body.data![0]!.contacts).toEqual([]);
+    expect((await withKey(t.app, key.secret, 'PUT', `/api/v1/jobs/${w.job.id}/client`, { body: { clientId: client.id, display: 'named' } })).status).toBe(403);
+    const hm = await w.member('hiring_manager');
+    await w.joinTeam(hm, 'hiring_manager');
+    expect((await hm.put(`/api/v1/jobs/${w.job.id}/client`, { clientId: null })).status).toBe(403);
+  });
+});

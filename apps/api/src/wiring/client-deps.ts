@@ -58,11 +58,12 @@ export function createClientDeps({ uow, files, queue, sender, config, onMailErro
     hash: hashSecret,
     onError: onMailError,
   };
-  const { auditLog, transaction, shortlists, clients, jobs, applications, candidates, notes, organizations, hash, now } = shortlistDeps;
+  const { auditLog, transaction, jobTeams, shortlists, clients, jobs, applications, candidates, notes, organizations, hash, now } = shortlistDeps;
   return {
     clientDeps,
     shortlistDeps,
-    publicShortlistDeps: { auditLog, transaction, shortlists, clients, jobs, applications, candidates, notes, organizations, files, hash, now },
+    // jobTeams: which stages are restricted. Without it every note written at a stage would be dropped (fail closed).
+    publicShortlistDeps: { auditLog, transaction, jobTeams, shortlists, clients, jobs, applications, candidates, notes, organizations, files, hash, now },
     timelineDeps: { ...candidateDeps, ...feedback, shortlists, clients },
   };
 }

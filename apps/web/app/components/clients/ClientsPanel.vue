@@ -68,7 +68,7 @@ const toggleArchived = async (client: ClientDto): Promise<void> => {
           </p>
           <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span class="figure">{{ t('clients.list.jobs', { count: client.jobCount }, client.jobCount) }}</span>
-            <span class="figure">{{ t('clients.list.contacts', { count: client.contacts.length }, client.contacts.length) }}</span>
+            <span class="figure">{{ t('clients.list.contacts', { count: client.contactCount }, client.contactCount) }}</span>
             <a v-if="safeExternalUrl(client.website)" :href="safeExternalUrl(client.website) ?? undefined" target="_blank" rel="noopener noreferrer nofollow" class="inline-flex items-center gap-1 text-link underline-offset-4 hover:underline">
               {{ client.website }}<ExternalLinkIcon class="size-3" aria-hidden="true" />
             </a>

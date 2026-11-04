@@ -3,6 +3,7 @@ import { CLIENT_DISPLAYS, type ClientDisplay } from '@candydati/domain'
 import { toast } from 'vue-sonner'
 import { Button } from '@/components/ui/button'
 import { NativeSelect } from '@/components/ui/native-select'
+import { can } from '@/lib/permissions-ui'
 
 /**
  * The client of an ad, for an organization that recruits for clients (nothing renders otherwise): which client, or
@@ -10,6 +11,9 @@ import { NativeSelect } from '@/components/ui/native-select'
  */
 const props = defineProps<{ jobId: string; readOnly: boolean }>()
 const { t } = useI18n()
+const { viewer } = useViewer()
+/** Linking a client, or naming a confidential one, is for who manages clients: editing the ad is not enough. */
+const locked = computed(() => props.readOnly || !can(viewer.value?.role ?? null, 'client:manage'))
 const { recruitsForClients } = useAgencySetting()
 const link = useJobClient(props.jobId, recruitsForClients)
 const store = useClients(recruitsForClients)
@@ -46,7 +50,7 @@ const save = async (): Promise<void> => {
     <FormAlert v-if="link.errorKey.value" message-key="jobClient.loadFailed" />
     <form v-else-if="link.jobClient.value" class="grid gap-4" novalidate @submit.prevent="save">
       <FormField id="job-client-select" :label="t('jobClient.label')">
-        <NativeSelect id="job-client-select" v-model="clientId" :disabled="readOnly || link.saving.value" data-testid="job-client-select">
+        <NativeSelect id="job-client-select" v-model="clientId" :disabled="locked || link.saving.value" data-testid="job-client-select">
           <option value="">{{ t('jobClient.none') }}</option>
           <option v-for="option in options" :key="option.id" :value="option.id">{{ option.label }}</option>
         </NativeSelect>
@@ -57,11 +61,11 @@ const save = async (): Promise<void> => {
       </p>
       <div v-if="clientId !== ''" class="grid gap-1.5">
         <p id="job-client-display-label" class="text-sm font-medium">{{ t('jobClient.display.label') }}</p>
-        <SegmentedControl id="job-client-display" :model-value="display" :options="displayOptions" :label="t('jobClient.display.label')" :disabled="readOnly || link.saving.value" @update:model-value="display = $event as ClientDisplay" />
+        <SegmentedControl id="job-client-display" :model-value="display" :options="displayOptions" :label="t('jobClient.display.label')" :disabled="locked || link.saving.value" @update:model-value="display = $event as ClientDisplay" />
       </div>
       <p class="text-sm text-pretty text-muted-foreground" data-testid="job-client-explain">{{ t(explainKey, { client: selectedName }) }}</p>
       <FormAlert :message-key="link.saveErrorKey.value" />
-      <div v-if="!readOnly"><Button type="submit" variant="outline" :disabled="!dirty || link.saving.value" data-testid="job-client-save">{{ t('jobClient.save') }}</Button></div>
+      <div v-if="!locked"><Button type="submit" variant="outline" :disabled="!dirty || link.saving.value" data-testid="job-client-save">{{ t('jobClient.save') }}</Button></div>
     </form>
   </section>
 </template>

@@ -39,8 +39,8 @@ interface Presented {
 }
 
 /**
- * The candidates still presentable: an application that was erased, or whose consent was withdrawn, disappears from the
- * page. Only what the recruiter chose is loaded: the CV when shared, the selected notes.
+ * The candidates still presentable: an application that was erased, decided, or whose consent was withdrawn, disappears
+ * from the page. Only what the recruiter chose is loaded: the CV when shared, the selected notes.
  */
 async function presented(deps: PublicShortlistDeps, shortlist: ClientShortlist): Promise<readonly Presented[]> {
   const { organizationId } = shortlist;
@@ -49,7 +49,8 @@ async function presented(deps: PublicShortlistDeps, shortlist: ClientShortlist):
   const result: Presented[] = [];
   for (const item of await deps.shortlists.listItems(organizationId, [shortlist.id])) {
     const application = await deps.applications.findById(organizationId, item.applicationId);
-    if (!application || application.consentStatus !== 'given') continue;
+    // Decided (hired, not selected, withdrawn): the person is no longer presented, and nothing can be answered about them.
+    if (!application || application.consentStatus !== 'given' || application.outcome !== null) continue;
     const candidate = await deps.candidates.findById(organizationId, application.candidateId);
     if (!candidate) continue;
     const notes = item.sharedNoteIds.length === 0 ? [] : (await deps.notes.listByCandidate(organizationId, candidate.id)).filter((n) => item.sharedNoteIds.includes(n.id) && !restricted(n.stageId));

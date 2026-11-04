@@ -45,7 +45,7 @@ export function createHrWorkerDeps({ uow, sender, config, onMailError }: HrWirin
       onError: onMailError,
       ...clock,
     },
-    shortlists: { auditLog: r.auditLog, shortlists: r.shortlists, jobs: r.jobs, organizations: r.organizations, sender, config, newToken: newConversationToken, hash, onError: onMailError },
+    shortlists: { auditLog: r.auditLog, shortlists: r.shortlists, jobs: r.jobs, clients: r.clients, organizations: r.organizations, sender, config, newToken: newConversationToken, hash, onError: onMailError },
     stale: { staleJobs: r.staleJobs, jobs: r.jobs, notifications: r.notifications, members: r.members, jobTeams: r.jobTeams, newId: clock.newId },
   };
 }

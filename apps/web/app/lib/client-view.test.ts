@@ -3,7 +3,7 @@ import { ApiFailure } from './api-call'
 import { addContact, checkClientForm, clientErrorKey, clientFormOf, clientIssueErrors, emptyClientForm, patchContact, removeContact } from './client-view'
 
 const AT = '2026-10-13T10:00:00.000Z'
-const client = { id: 'c1', name: 'Acme', website: 'https://acme.it', logoUrl: null, contacts: [{ id: 'k1', name: 'Rita', email: 'rita@acme.it' }], archived: false, jobCount: 1, createdAt: AT, updatedAt: AT }
+const client = { id: 'c1', name: 'Acme', website: 'https://acme.it', logoUrl: null, contacts: [{ id: 'k1', name: 'Rita', email: 'rita@acme.it' }], contactCount: 1, archived: false, jobCount: 1, createdAt: AT, updatedAt: AT }
 const failure = (status: number, code: string | null) => new ApiFailure('x', { status, code, message: null, issues: [] })
 
 describe('client form', () => {

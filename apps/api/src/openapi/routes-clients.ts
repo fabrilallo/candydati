@@ -15,6 +15,7 @@ export const clientRoutes: readonly RouteSpec[] = [
   },
   {
     method: 'get', path: '/api/v1/clients', tag: 'Clients', summary: 'List clients', scope: 'client:read',
+    description: 'Contacts (names and emails) only for people who manage clients or send shortlists; everyone else, API keys included, gets `contactCount`.',
     query: z.object({ includeArchived: z.boolean().optional() }), response: { schema: 'Client', list: true },
   },
   {
@@ -35,7 +36,7 @@ export const clientRoutes: readonly RouteSpec[] = [
   },
   { method: 'get', path: '/api/v1/jobs/:id/client', tag: 'Clients', summary: 'Client of a job', scope: 'job:read', response: { schema: 'JobClient' } },
   {
-    method: 'put', path: '/api/v1/jobs/:id/client', tag: 'Clients', summary: 'Set the client of a job', scope: 'job:update',
+    method: 'put', path: '/api/v1/jobs/:id/client', tag: 'Clients', summary: 'Set the client of a job', scope: 'client:manage', sessionOnly: true,
     description: '`display: named` shows the client on the ad as the employer; `confidential` says the ad is for a client of the agency and never names it. `clientId: null` removes the client.',
     body: jobClientInputSchema, response: { schema: 'JobClient' },
   },
