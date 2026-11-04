@@ -58,6 +58,7 @@ Webhook** (solo https). Eventi:
 | `job.updated` | un annuncio pubblicato è stato modificato |
 | `job.closed` | un annuncio è stato chiuso |
 | `candidate.erased` | i dati di un candidato sono stati cancellati |
+| `automation.notified` | è scattata una regola di automazione con avviso via webhook (`ruleId`, `applicationId`, `jobId`, `stageId`, `trigger`) |
 
 Il contenuto porta solo identificativi, mai nomi o email: i dettagli si leggono tramite l'API. Ogni consegna è un
 `POST` JSON con questi header:

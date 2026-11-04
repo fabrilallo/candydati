@@ -48,7 +48,8 @@ dati di ogni candidato si possono esportare anche singolarmente.
 ## L'AI decide chi viene assunto?
 
 No. Né l'assistente né alcuna automazione ordina, assegna punteggi, sposta o scarta i candidati: le automazioni possono
-solo inviare un modello o creare un'attività quando una persona sposta una candidatura in una fase. L'assistente non
+inviare un modello, creare o assegnare un'attività, aggiungere un tag, chiedere un feedback o avvisare qualcuno, e al
+massimo proporre uno spostamento, che resta una proposta finché una persona non lo conferma o lo scarta. L'assistente non
 scrive mai a un candidato senza la conferma di una persona. Vedi [Assistente AI](./ai).
 
 ## Dove chiedo aiuto?

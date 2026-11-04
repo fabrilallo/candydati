@@ -6,10 +6,23 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-Two additive migrations (`0047_automation_triggers`, `0048_mcp_oauth` with new tables only) run at start as usual.
+Three additive migrations (`0047_automation_triggers`, then `0048_mcp_oauth` and `0049_automation_actions` with new
+tables only) run at start as usual.
 
 ### Added
 
+- **More automation actions, proposed moves and copied rules.** A rule can now also add a tag to the candidate, assign
+  the application (a "follow this application" task for a member or the job owner, one open at a time), ask the stage's
+  interviewers for feedback (nobody asked twice; the usual reminders follow), alert members in app or also in the email
+  digest, or send an `automation.notified` webhook event (ids only). `propose_move` only proposes: the proposal shows on
+  the application and in the attention list, and nothing moves until a person confirms it (the normal move, with their
+  permission and audit) or dismisses it; it is dropped when the application moves or is decided and expires after 14
+  days. The creator of a rule is checked again at run time, per-job access included. Rules copy, one or a whole stage,
+  to another stage, another job or a job template, as the copying person's own and validated against the target; a job
+  created from a template gets its rules. New routes `GET /api/v1/move-proposals`,
+  `POST /api/v1/move-proposals/:id/confirm|dismiss`, `POST /api/v1/automations/copy`,
+  `GET /api/v1/job-templates/:id/automations`, `DELETE /api/v1/job-template-automations/:id`. Migration
+  `0049_automation_actions` (`move_proposal`, `job_template_automation`).
 - **Claude as a custom connector, without an API key.** The MCP server is also an OAuth 2.1 protected resource
   (Better Auth's MCP plugin): Claude discovers it from the `401` challenge, registers itself, and the person signs in,
   picks the organization and approves on a consent page (Italian and English) that lists what the connector may do.
