@@ -20,6 +20,15 @@ All notable changes to this project are documented here. The format follows
   who copied them). What they may not manage is left out and the toast says so. A restricted stage always gives a
   restricted copy, whoever duplicates it, so notes written in the copy are never exposed. One transaction, one
   `job.stage_duplicated` audit event; `POST /api/v1/jobs/:id/stages/:stageId/duplicate` (scope `job:update`). No migration.
+- **Automation triggers, conditions and preview.** Besides "an application enters the stage", a rule of a stage can now
+  run when the application has been in the stage for N days, when the candidate replies, when interview feedback for
+  the stage arrives (even after the candidate moved on) or when the job's promised response is N days away. Time-based
+  triggers are checked hourly by the worker (`automation.scan`); every trigger fires once per occurrence (each entry,
+  reply, feedback or deadline). Optional conditions, all of which must hold: where the application came from, the
+  candidate's tags, the consent given. The rule editor previews, read-only, who a rule would act for now
+  (`POST /api/v1/jobs/:id/automations/preview`, names only with `candidate:read`). Actions are still only "send a
+  template" and "create a task": nothing moves, decides, scores or ranks. Migration `0047_automation_triggers`
+  (additive: existing rules read as "enters the stage" with no conditions).
 
 ### Fixed
 

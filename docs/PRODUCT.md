@@ -58,7 +58,7 @@ The code is open. A complete export in an open, documented format is available a
 | Careers page | Open positions list, ad page, application form with no registration, and a section-based page builder (§3.4) |
 | Pipeline | Stages per ad, candidate profile, notes, tags, search across the candidate database. The original CV is always viewable next to the data extracted from it |
 | Communication | Templates, single and bulk sends, inbound email attached to the candidate, outcome messages |
-| Automation | Triggers per stage, response deadlines, reminders. No trigger decides about a candidate |
+| Automation | Rules per stage: a trigger (enters the stage, stuck there N days, the candidate replies, interview feedback arrives, the promised response is near), optional conditions on declared facts (source, tags, consent) and an action that only sends a template or creates a task, with a read-only preview of who it would act for. No trigger decides about a candidate |
 | Distribution | Structured `JobPosting` data, XML feed, public read-only ads API |
 | GDPR | Versioned consents, retention, automatic erasure, candidate rights (§6) |
 | Access | Organizations, roles, per-ad selection team, append-only audit log |
