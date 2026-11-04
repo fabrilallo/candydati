@@ -1,0 +1,3 @@
+ALTER TABLE "application" ADD COLUMN "offer_accepted_on" date;--> statement-breakpoint
+ALTER TABLE "application" ADD COLUMN "start_on" date;--> statement-breakpoint
+ALTER TABLE "application" ADD CONSTRAINT "application_hire_dates_check" CHECK (("application"."offer_accepted_on" is null and "application"."start_on" is null) or ("application"."outcome" = 'hired' and ("application"."offer_accepted_on" is null or "application"."start_on" is null or "application"."start_on" >= "application"."offer_accepted_on")));

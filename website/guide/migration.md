@@ -23,7 +23,8 @@ Only owners and admins can migrate. The permission is not available to API keys 
 
 - Jobs, with their status (draft, open, closed), dates and the stages of their process.
 - Candidates: name, email, phone, LinkedIn address, tags, the date they were created.
-- Applications: the current stage, the outcome (hired, not selected, withdrawn) and its date, the origin, the cover
+- Applications: the current stage, the outcome (hired, not selected, withdrawn) and its date, for a hire the optional
+  offer accepted and start dates (`offerAcceptedOn`, `startOn`, date only), the origin, the cover
   letter, the answers to the application questions, the history of stage changes.
 - CVs and other attachments.
 - Notes, with their author and original date, including free-text interview notes.

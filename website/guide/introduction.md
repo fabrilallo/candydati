@@ -34,7 +34,7 @@ The full product definition is in [PRODUCT.md](https://github.com/fabrilallo/can
 - A pipeline whose stages are the ones declared in the ad, candidate search, the original CV next to the extracted data.
 - Organizations, roles and per-job selection teams; interview feedback through personal links, without an account.
 - Email templates, single and bulk sends, inbound replies attached to the candidate.
-- Reports: time to hire, conversion per stage, sources, response times.
+- Reports: time to hire (to the offer accepted date when you record it), time to start, conversion per stage, sources, response times.
 - Retention, automatic erasure, data subject rights, an append-only audit log, imports with preview and undo.
 - A REST API with OpenAPI, API keys, signed webhooks, an MCP server and an optional process assistant.
 

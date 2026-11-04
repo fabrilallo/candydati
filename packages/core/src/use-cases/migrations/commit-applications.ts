@@ -64,6 +64,8 @@ function applicationOf(ctx: MigrationCommitContext, entry: PlannedMigrationAppli
     updatedAt: ctx.at,
     stageChangedAt: entry.stageChangedAt,
     closedAt,
+    ...(application.offerAcceptedOn === undefined ? {} : { offerAcceptedOn: application.offerAcceptedOn }),
+    ...(application.startOn === undefined ? {} : { startOn: application.startOn }),
     responseDueAt: null,
     respondedAt: null,
   };

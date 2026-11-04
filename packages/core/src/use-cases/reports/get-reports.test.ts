@@ -34,7 +34,12 @@ describe('getReports on the seeded dataset (in memory)', () => {
     const report = await getReports(deps, owner, { ...query, jobId: ids.backend });
     const b = { jobId: ids.backend, title: 'Backend Developer' };
     expect(report.jobId).toBe(ids.backend);
-    expect(report.timeToHire).toEqual({ overall: { count: 3, median: 15, p75: 17.5 }, byJob: [{ ...b, count: 3, median: 15, p75: 17.5 }] });
+    expect(report.timeToHire).toEqual({
+      overall: { count: 3, median: 15, p75: 16 },
+      byJob: [{ ...b, count: 3, median: 15, p75: 16 }],
+      basis: { offerDate: 2, recordedDate: 1 },
+      toStart: { count: 1, median: 29, p75: 29 },
+    });
     expect(report.timeToFill.items.map((i) => [i.jobId, i.days])).toEqual([[ids.backend, 64.42]]);
     expect(report.funnel.stages).toEqual(expectedJobFunnels().backend);
     expect(report.funnel.outcomes).toEqual({ hired: 3, not_selected: 1, withdrawn: 1 });
@@ -145,8 +150,8 @@ describe('exportReportsCsv', () => {
     const { deps, ids } = await seeded();
     const file = await exportReportsCsv(deps, owner, query);
     expect(file.fileName).toBe('reports-2026-06-01_2026-06-30.csv');
-    expect(file.csv).toContain('# time_to_hire_days\njob_id,job,count,median,p75\nall,all,5,10,15');
-    expect(file.csv).toContain(`${ids.backend},Backend Developer,3,15,17.5`);
+    expect(file.csv).toContain('# time_to_hire_days\njob_id,job,count,median,p75\nall,all,5,8,15');
+    expect(file.csv).toContain(`${ids.backend},Backend Developer,3,15,16`);
     expect(file.csv).toContain('# funnel\nposition,stage_type,entered,advanced,base,conversion_rate\n,received,9,5,9,0.5556');
     expect(file.csv).toContain('# outcome_coverage\nwith_outcome,applications,rate\n6,8,0.75');
     expect(file.csv).toContain('referral,2,0,1,0');
@@ -156,6 +161,13 @@ describe('exportReportsCsv', () => {
   it('is permission checked', async () => {
     const { deps } = await seeded();
     await expect(exportReportsCsv(deps, userActor({ role: 'interviewer', organizationId: ORG_A }), query)).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  it('exports how the time to hire was measured and the time to start', async () => {
+    const { deps } = await seeded();
+    const csv = reportsToCsv(await getReports(deps, owner, query));
+    expect(csv).toContain('# time_to_hire_basis\noffer_accepted_date,hire_recorded_date\n2,3');
+    expect(csv).toContain('# time_to_start_days\ncount,median,p75\n2,24.5,26.75');
   });
 
   it('quotes cells and defuses spreadsheet formulas', async () => {

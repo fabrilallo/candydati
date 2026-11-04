@@ -9,7 +9,7 @@ import type {
   SubmittedContact,
 } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
-import { boolean, check, customType, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { boolean, check, customType, date, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { job } from './job.js';
 import { importBatch } from './import.js';
@@ -118,6 +118,9 @@ export const application = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
     stageChangedAt: timestamp('stage_changed_at', { withTimezone: true }).defaultNow().notNull(),
     closedAt: timestamp('closed_at', { withTimezone: true }),
+    /** Hired only: the day the offer was accepted and the day the person starts (date, no time). Both optional. */
+    offerAcceptedOn: date('offer_accepted_on', { mode: 'string' }),
+    startOn: date('start_on', { mode: 'string' }),
     /** Deadline of the promise to answer; null once answered or decided. */
     responseDueAt: timestamp('response_due_at', { withTimezone: true }),
     respondedAt: timestamp('responded_at', { withTimezone: true }),
@@ -143,6 +146,11 @@ export const application = pgTable(
       .on(table.organizationId, table.responseDueAt)
       .where(sql`${table.outcome} is null and ${table.responseDueAt} is not null`),
     index('application_migration_batch_idx').on(table.migrationBatchId).where(sql`${table.migrationBatchId} is not null`),
+    // Offer and start dates belong to a hired application, and the start never precedes the offer.
+    check(
+      'application_hire_dates_check',
+      sql`(${table.offerAcceptedOn} is null and ${table.startOn} is null) or (${table.outcome} = 'hired' and (${table.offerAcceptedOn} is null or ${table.startOn} is null or ${table.startOn} >= ${table.offerAcceptedOn}))`,
+    ),
     // ANSWERS_MAX_BYTES of @candydati/domain; a test keeps the two equal.
     check(
       'application_answers_check',

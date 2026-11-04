@@ -1,9 +1,9 @@
-import type { ApplicationCardDto, CandidateDetailDto, Outcome } from '@candydati/domain'
+import type { ApplicationCardDto, CandidateDetailDto, HireDatesInput, Outcome } from '@candydati/domain'
 import type { MaybeRefOrGetter } from 'vue'
-import { addNote, decideApplication, getCandidate, moveApplication, updateCandidateTags } from '@/lib/candidate-api'
+import { addNote, decideApplication, getCandidate, moveApplication, updateCandidateTags, updateHireDates } from '@/lib/candidate-api'
 import { loaded } from '@/lib/job-api'
 
-type Busy = 'move' | 'decide' | 'tags' | 'note' | null
+type Busy = 'move' | 'decide' | 'dates' | 'tags' | 'note' | null
 
 /** Applies what the api returned for an application (card shape) to the detail, immutably. */
 const withCard = (detail: CandidateDetailDto, card: ApplicationCardDto): CandidateDetailDto => ({
@@ -16,6 +16,8 @@ const withCard = (detail: CandidateDetailDto, card: ApplicationCardDto): Candida
           outcome: card.outcome,
           stageChangedAt: card.stageChangedAt,
           closedAt: card.closedAt,
+          offerAcceptedOn: card.offerAcceptedOn,
+          startOn: card.startOn,
           responseDueAt: card.responseDueAt,
           respondedAt: card.respondedAt,
           responseState: card.responseState,
@@ -45,7 +47,8 @@ export const useCandidate = (candidateId: MaybeRefOrGetter<string>, viaJobId: Ma
   }
 
   const move = async (applicationId: string, stageId: string) => applyCard(await run('move', () => moveApplication(request, applicationId, stageId), 'candidate.actions.moved'))
-  const decide = async (applicationId: string, outcome: Outcome) => applyCard(await run('decide', () => decideApplication(request, applicationId, outcome), 'candidate.actions.decided'))
+  const decide = async (id: string, outcome: Outcome, dates: HireDatesInput = {}) => applyCard(await run('decide', () => decideApplication(request, id, outcome, dates), 'candidate.actions.decided'))
+  const saveHireDates = async (id: string, dates: HireDatesInput) => applyCard(await run('dates', () => updateHireDates(request, id, dates), 'candidate.hireDates.saved'))
 
   const saveTags = async (tags: readonly string[]): Promise<boolean> => {
     const fresh = await run('tags', () => updateCandidateTags(request, toValue(candidateId), tags), null)
@@ -80,6 +83,7 @@ export const useCandidate = (candidateId: MaybeRefOrGetter<string>, viaJobId: Ma
     },
     move,
     decide,
+    saveHireDates,
     saveTags,
     note,
     messaged,

@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { MESSAGE_DIRECTIONS } from '../messaging/message.js';
 import { CONSENT_SCOPES } from '../candidate/privacy.js';
 import { OUTCOMES, TAG_MAX, TAGS_PER_CANDIDATE_MAX } from '../candidate/application.js';
+import { hireDateSchema } from '../candidate/hire-dates.js';
 import { personNameSchema } from '../candidate/person-name.js';
 import { IMPORT_NOTE_MAX } from '../import/import.js';
 import { JOB_TITLE_MAX, STAGE_TITLE_MAX, jobContentSchema } from '../job/content.js';
@@ -91,6 +92,9 @@ const applicationSchema = z.strictObject({
   createdAt: date,
   outcome: z.enum(OUTCOMES).optional(),
   closedAt: date.optional(),
+  /** Hired only: the day the offer was accepted and the day the person starts, `YYYY-MM-DD`. Optional. */
+  offerAcceptedOn: hireDateSchema.optional(),
+  startOn: hireDateSchema.optional(),
   /** Where the application came from in the source (e.g. `linkedin`). */
   origin: text(ORIGIN_MAX).optional(),
   coverLetter: text(TEXT_MAX).optional(),

@@ -16,6 +16,7 @@ leave it out. Never invent one.
 | `applications[]` | the application / candidacy / job application | `candidateRef`, `jobRef` and `stageRef` (current stage, a stage of that job). `createdAt` is the original application date. |
 | `applications[].stageHistory[]` | stage change events | `stageRef` and `enteredAt`; only real events. |
 | `applications[].outcome` and `closedAt` | hired / rejected / withdrawn and its date | Always together. See below. |
+| `applications[].offerAcceptedOn` and `startOn` | the date the offer was accepted, the start date of a hire | Optional, `YYYY-MM-DD` (no time), only on `hired`; start not before the offer, offer not before `createdAt`. Leave out when the source does not have them. |
 | `applications[].answers[]` | answers to application questions | `question` and `answer` as text. |
 | `applications[].files[]` | CV, cover letter, attachments | Copy to `files/<application-ref>/<name>`; `kind` is `cv`, `cover_letter` or `other`; at most one `cv` per application. |
 | `applications[].origin` | source / channel | For example `linkedin`. |

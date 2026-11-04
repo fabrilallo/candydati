@@ -48,11 +48,11 @@ export interface ApplicationExpectation {
 
 /** The columns a state change may write. */
 export type ApplicationPatch = Partial<
-  Pick<Application, 'stageId' | 'outcome' | 'stageChangedAt' | 'updatedAt' | 'closedAt' | 'responseDueAt' | 'respondedAt'>
+  Pick<Application, 'stageId' | 'outcome' | 'stageChangedAt' | 'updatedAt' | 'closedAt' | 'responseDueAt' | 'respondedAt' | 'offerAcceptedOn' | 'startOn'>
 >;
 
 /** The columns a plain update may write: never stage or outcome. */
-export type ApplicationDataPatch = Partial<Pick<Application, 'consent' | 'consentStatus' | 'retentionExpiresAt' | 'updatedAt' | 'reconfirmationSentAt'>>;
+export type ApplicationDataPatch = Partial<Pick<Application, 'consent' | 'consentStatus' | 'retentionExpiresAt' | 'updatedAt' | 'reconfirmationSentAt' | 'offerAcceptedOn' | 'startOn'>>;
 
 export interface ApplicationRepository {
   /** @throws ConflictError when the candidate already has an OPEN application for the same job. */

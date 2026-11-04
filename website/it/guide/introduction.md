@@ -40,7 +40,7 @@ La definizione completa del prodotto è in
   accanto ai dati estratti.
 - Organizzazioni, ruoli e gruppi di selezione per annuncio; feedback dei colloqui tramite link personali, senza account.
 - Modelli di email, invii singoli e massivi, risposte in arrivo collegate al candidato.
-- Report: tempo di assunzione, conversione per fase, fonti, tempi di risposta.
+- Report: tempo di assunzione (fino alla data di accettazione dell'offerta, se la registri), tempo all'inizio, conversione per fase, fonti, tempi di risposta.
 - Conservazione, cancellazione automatica, diritti dell'interessato, registro delle azioni non modificabile, import con
   anteprima e annullamento.
 - API REST con OpenAPI, chiavi API, webhook firmati, server MCP e un assistente di processo facoltativo.

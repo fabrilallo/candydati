@@ -25,6 +25,14 @@ connector reads an export the operator uploads: a spreadsheet (CSV or XLSX) and,
 names it recognises are **assumed**, because no real export format is public, and the test fixtures are synthetic. See
 [the connector's README](../../packages/providers/src/migration/sources/inrecruiting/README.md).
 
+## Offer accepted and start dates
+
+The package format has two optional fields on a hired application, `offerAcceptedOn` and `startOn` (`YYYY-MM-DD`), that
+feed the time to hire and the time to start in the reports. No built-in connector fills them today: the sources
+expose a hire date (Workable's `hired_at`, the outcome date elsewhere), which stays the outcome date, and the offer
+objects that could carry an acceptance or start date also carry salary and contract terms, which a migration never
+requests. A package built by the agent skill or by hand can set them when the source has the dates.
+
 ## Maturity levels
 
 - **planned**: no code yet.

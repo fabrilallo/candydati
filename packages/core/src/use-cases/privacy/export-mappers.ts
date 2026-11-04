@@ -64,6 +64,8 @@ export function exportApplication({ application, path, job, extraction, messages
     message: application.message,
     createdAt: iso(application.createdAt),
     closedAt: isoOrNull(application.closedAt),
+    offerAcceptedOn: application.offerAcceptedOn ?? null,
+    startOn: application.startOn ?? null,
     retentionExpiresAt: iso(application.retentionExpiresAt),
     consent: {
       status: application.consentStatus,

@@ -136,6 +136,24 @@ export const timeRows = (report: Pick<ReportsView, 'timeToHire' | 'timeToFill'>)
   return { max, rows: base.map((row) => ({ ...row, medianAt: at(row.medianDays, max), p75At: at(row.p75Days, max), fillAt: at(row.fillDays, max) })) }
 }
 
+export interface HireBasisView {
+  /** Hires measured to the offer accepted date, and to the day the hire was recorded. */
+  readonly offer: number
+  readonly recorded: number
+  readonly total: number
+  /** Time to start (days), of the hires that have a start date. */
+  readonly start: { readonly count: number; readonly median: number | null }
+}
+
+/** How the time to hire was measured, so the coverage of the offer date is never hidden. Null when no hire or the section failed. */
+export const hireBasis = (report: Pick<ReportsView, 'timeToHire'>): HireBasisView | null => {
+  const timeToHire = report.timeToHire
+  if (!timeToHire) return null
+  const { offerDate, recordedDate } = timeToHire.basis
+  const total = offerDate + recordedDate
+  return total === 0 ? null : { offer: offerDate, recorded: recordedDate, total, start: { count: timeToHire.toStart.count, median: timeToHire.toStart.median } }
+}
+
 /** Nothing entered, was decided or answered in the period: the page shows one empty state instead of five. An invalid section is not "empty". */
 export const isReportEmpty = (report: ReportsView): boolean =>
   (report.funnel?.stages.every((stage) => stage.entered === 0) ?? false) &&
