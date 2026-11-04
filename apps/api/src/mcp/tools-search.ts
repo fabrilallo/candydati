@@ -6,7 +6,7 @@ import type { ToolDefinition } from './tool-support.js';
 const shape = {
   jobId: z.string().min(1).describe('Id of the job ad, from list_jobs.'),
   criteria: candidateCriteriaSchema.describe(
-    'Objective, job-related criteria: skills, languages, minYearsOfExperience, locations (any of), keywords (words in the CV). At least one. No maximum experience and no protected characteristic.',
+    'Objective, job-related criteria: skills (a skill also matches its usual names: Go = Golang), languages, minYearsOfExperience, locations (any of), keywords (words in the CV). At least one. No maximum experience and no protected characteristic.',
   ),
   pool: z.enum(CRITERIA_POOLS).optional().describe('applicants of the job, talent_pool, or both (default).'),
   page: z.number().int().min(1).optional(),

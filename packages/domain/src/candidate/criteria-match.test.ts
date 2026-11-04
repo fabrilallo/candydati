@@ -19,6 +19,35 @@ describe('cvMatchesCriteria', () => {
     expect(cvMatchesCriteria(textOnly, criteria({ skills: ['Post'] }))).toBe(false);
   });
 
+  it('knows synonyms: a skill matches under any of its names, both ways', () => {
+    const cv = (skills: string[], text: string | null = null): MatchableCv => ({ ...structured, text, data: { ...structured.data!, skills } });
+    expect(cvMatchesCriteria(cv(['Golang']), criteria({ skills: ['Go'] }))).toBe(true);
+    expect(cvMatchesCriteria(cv(['Go']), criteria({ skills: ['golang'] }))).toBe(true);
+    expect(cvMatchesCriteria(cv(['JS']), criteria({ skills: ['JavaScript'] }))).toBe(true);
+    expect(cvMatchesCriteria(cv(['K8s']), criteria({ skills: ['Kubernetes'] }))).toBe(true);
+    expect(cvMatchesCriteria(cv(['PostgreSQL']), criteria({ skills: ['Postgres'] }))).toBe(true);
+    expect(cvMatchesCriteria(cv(['Node']), criteria({ skills: ['Node.js'] }))).toBe(true);
+    expect(cvMatchesCriteria(cv(['csharp']), criteria({ skills: ['C#'] }))).toBe(true);
+    expect(cvMatchesCriteria(cv(['React.js']), criteria({ skills: ['react'] }))).toBe(true);
+    expect(cvMatchesCriteria(cv(['Contabilita']), criteria({ skills: ['Contabilità'] }))).toBe(true);
+  });
+
+  it('keeps C, C++ and C# apart and still matches an unknown skill exactly', () => {
+    const cv = (skills: string[]): MatchableCv => ({ ...structured, text: null, data: { ...structured.data!, skills } });
+    expect(cvMatchesCriteria(cv(['C++']), criteria({ skills: ['C'] }))).toBe(false);
+    expect(cvMatchesCriteria(cv(['C#']), criteria({ skills: ['C++'] }))).toBe(false);
+    expect(cvMatchesCriteria(cv(['Zig']), criteria({ skills: ['zig'] }))).toBe(true);
+    expect(cvMatchesCriteria(cv(['Zigg']), criteria({ skills: ['zig'] }))).toBe(false);
+  });
+
+  it('does not read the English word "go" in free text as the skill Go', () => {
+    const prose: MatchableCv = { status: 'text_only', text: 'Ready to go the extra mile. Excel at teamwork.', data: null };
+    expect(cvMatchesCriteria(prose, criteria({ skills: ['Go'] }))).toBe(false);
+    expect(cvMatchesCriteria(prose, criteria({ skills: ['Excel'] }))).toBe(false);
+    expect(cvMatchesCriteria({ ...prose, text: 'Backend in Golang e Kubernetes.' }, criteria({ skills: ['Go'] }))).toBe(true);
+    expect(cvMatchesCriteria({ ...prose, text: 'Deploy su k8s.' }, criteria({ skills: ['Kubernetes'] }))).toBe(true);
+  });
+
   it('needs every skill, language and keyword, and any one of the locations', () => {
     expect(cvMatchesCriteria(structured, criteria({ skills: ['Vue', 'Go'] }))).toBe(false);
     expect(cvMatchesCriteria(structured, criteria({ languages: ['inglese', 'spagnolo'] }))).toBe(true);

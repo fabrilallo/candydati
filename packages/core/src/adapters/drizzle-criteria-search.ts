@@ -1,5 +1,5 @@
 import { and, schema, sql, type SQL } from '@candydati/db';
-import { needsStructuredCv, termPattern, type CandidateCriteria } from '@candydati/domain';
+import { needsStructuredCv, SKILL_FOLD_FROM, SKILL_FOLD_TO, skillKeys, skillProseTerms, termPattern, type CandidateCriteria } from '@candydati/domain';
 import type { CandidateSearch, CriteriaSearchQuery } from '../candidate-ports.js';
 import { toCandidate } from './drizzle-candidates.js';
 import type { DbExecutor } from './db-executor.js';
@@ -18,13 +18,25 @@ const data = sql`(case when "cv_extraction"."status" = 'done' then "cv_extractio
 const inText = (term: string): SQL => sql`coalesce("cv_extraction"."text", '') ~* ${termPattern(term)}`;
 const inList = (field: string, condition: (element: SQL) => SQL): SQL =>
   sql`exists (select 1 from jsonb_array_elements_text(coalesce(${data} -> ${field}, '[]'::jsonb)) as element(value) where ${condition(sql`element.value`)})`;
+
+/** SQL twin of `normalizeSkill`: lower case, folded diacritics, only letters, digits, `+` and `#` kept. */
+const skillKeyOf = (element: SQL): SQL => sql`regexp_replace(translate(lower(${element}), ${SKILL_FOLD_FROM}, ${SKILL_FOLD_TO}), '[^[:alnum:]+#]', '', 'g')`;
+const isOneOf = (value: SQL, keys: readonly string[]): SQL => sql`${value} in (${sql.join(keys.map((key) => sql`${key}`), sql`, `)})`;
+
+/** A skill under any of its known names among the CV skills, or a non-ordinary-word form in the text (`hasSkill`). */
+function skillMatches(skill: string): SQL {
+  const listed = inList('skills', (element) => isOneOf(skillKeyOf(element), skillKeys(skill)));
+  const prose = skillProseTerms(skill).map(inText);
+  return sql`(${sql.join([listed, ...prose], sql` or `)})`;
+}
+
 const contains = (haystack: SQL, needle: string): SQL => sql`position(lower(${needle}) in lower(${haystack})) > 0`;
 
 /** One CV row (`cv_extraction`) satisfying every criterion: the SQL form of `cvMatchesCriteria`. */
 function cvMatches(criteria: CandidateCriteria): SQL {
   const conditions: SQL[] = [
     needsStructuredCv(criteria) ? sql`"cv_extraction"."status" = 'done' and "cv_extraction"."data" is not null` : sql`"cv_extraction"."status" in ('done', 'text_only')`,
-    ...criteria.skills.map((skill) => sql`(${inList('skills', (element) => sql`lower(${element}) = lower(${skill})`)} or ${inText(skill)})`),
+    ...criteria.skills.map(skillMatches),
     ...criteria.languages.map((language) => sql`(${inList('languages', (element) => contains(element, language))} or ${inText(language)})`),
     ...criteria.keywords.map(inText),
   ];
