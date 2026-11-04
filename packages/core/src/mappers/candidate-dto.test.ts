@@ -49,6 +49,8 @@ describe('candidate DTO mappers', () => {
       createdAt: '2026-01-01T00:00:00.000Z',
       stageChangedAt: '2026-01-01T00:00:00.000Z',
       closedAt: '2026-03-01T00:00:00.000Z',
+      offerAcceptedOn: null,
+      startOn: null,
       responseDueAt: null,
       respondedAt: null,
       responseState: 'closed',

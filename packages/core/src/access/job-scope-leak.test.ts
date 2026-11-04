@@ -88,6 +88,7 @@ const ROWS: readonly Row[] = [
   },
   write('moveApplication', { applicationId: 'app_b', stageId: 'stage-0' }),
   write('decideApplication', { applicationId: 'app_b', outcome: 'not_selected' }),
+  write('updateHireDates', { applicationId: 'app_b', startOn: '2030-01-01' }),
   write('decideApplications', { applicationIds: ['app_b'], outcome: 'not_selected' }, { echoes: ['app_b'] }),
   write('updateCandidateTags', { candidateId: 'cand_b', tags: ['changed'] }),
   write('addCandidateNote', { candidateId: 'cand_b', body: 'A note' }),
