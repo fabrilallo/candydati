@@ -3,6 +3,7 @@ import { jobListClientSchema, publicJobClientSchema } from './client.js';
 import { AD_QUALITY_STATUSES, adQualityReportSchema } from '../job/quality.js';
 import { isPublishedContent, jobContentSchema, type PublishedJobContent } from '../job/content.js';
 import { jobDtoSchema, JOB_STATUSES, type PublicCareersDto, type PublicJobPageDto } from '../job/job.js';
+import { STAGE_CONFIG_KINDS } from '../job/stage-duplication.js';
 import { CONTRACT_TYPES, CUSTOM_ROLE_MAX, JOB_ROLE_CHOICES, SENIORITY_LEVELS, WORK_MODES } from '../job/taxonomy.js';
 import { publicPrivacyNoticeSchema, type PublicPrivacyNoticeDto } from './privacy.js';
 import { isoDate } from './common.js';
@@ -34,6 +35,13 @@ export const assessmentSchema = z.object({ report: adQualityReportSchema, thresh
 export const publishIssueSchema = z.object({ path: z.string(), rule: z.string() });
 /** `quality` is present only when `qualityStatus` is `assessed`. */
 export const publishResultSchema = z.object({ job: jobSchema, quality: assessmentSchema.nullable(), qualityStatus: z.enum(AD_QUALITY_STATUSES) });
+/** `POST /jobs/:id/stages/:stageId/duplicate`: the job with the copy, its id, and which stage configuration came along. */
+export const duplicateStageResultSchema = z.object({
+  job: jobSchema,
+  stageId: z.string(),
+  copied: z.array(z.enum(STAGE_CONFIG_KINDS)),
+  skipped: z.array(z.enum(STAGE_CONFIG_KINDS)),
+});
 /**
  * `POST /jobs/quality`: the analysis of unsaved content and what still blocks publication. Without a language model
  * `status` is `unavailable` and there is no assessment; the publication rules are checked all the same.

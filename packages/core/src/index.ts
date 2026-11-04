@@ -26,6 +26,7 @@ export * from './use-cases/jobs/access-setting.js';
 export * from './adapters/drizzle-job-teams.js';
 export * from './use-cases/jobs/create-job.js';
 export * from './use-cases/jobs/update-job.js';
+export * from './use-cases/jobs/duplicate-stage.js';
 export * from './use-cases/jobs/get-job.js';
 export * from './use-cases/jobs/list-jobs.js';
 export * from './use-cases/jobs/get-job-stats.js';

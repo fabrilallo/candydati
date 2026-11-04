@@ -75,6 +75,7 @@ export const AUDIT_ACTIONS = [
   'job.team_member_removed',
   'job.stage_restricted',
   'job.stage_unrestricted',
+  'job.stage_duplicated',
   'job.scorecard_updated',
   'job.scorecard_suggested',
   'organization.access_setting_updated',

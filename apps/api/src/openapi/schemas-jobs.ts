@@ -15,6 +15,7 @@ import {
   salarySchema,
   suggestResponsibilitiesResultSchema,
   AD_QUALITY_STATUSES,
+  STAGE_CONFIG_KINDS,
   type AdQualityAssessment,
   type JobSummaryDto,
   type JobTemplateDto,
@@ -76,6 +77,14 @@ export const publishResultSchema: z.ZodType<PublishJobResultDto> = z.object({
   job: jobSchema,
   quality: qualityAssessmentSchema.nullable(),
   qualityStatus: z.enum(AD_QUALITY_STATUSES).describe('`assessed` with a score, `unavailable` without an AI model (no score at all), `failed` when the analysis could not run.'),
+});
+
+const stageConfigKinds = z.array(z.enum(STAGE_CONFIG_KINDS));
+export const duplicateStageResultSchema = z.object({
+  job: jobSchema,
+  stageId: z.string().describe('Id of the new stage, right after the source.'),
+  copied: stageConfigKinds.describe('Configuration of the source stage copied to the new one.'),
+  skipped: stageConfigKinds.describe('Configuration the source stage has but the caller may not manage: not copied.'),
 });
 
 /** The content of a published ad: every §5.1 field present. */

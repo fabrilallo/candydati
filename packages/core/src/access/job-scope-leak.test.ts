@@ -126,6 +126,7 @@ const ROWS: readonly Row[] = [
   write('updateAutomation', { ruleId: 'rule_b', stageId: 'stage-0', action: { type: 'create_task', title: 'Changed' } }),
   write('deleteAutomation', { ruleId: 'rule_b' }),
   write('updateJob', { jobId: JOB_B, content: { title: 'Changed' } }),
+  write('duplicateStage', { jobId: JOB_B, stageId: 'stage-0' }),
   write('publishJob', { jobId: JOB_B }),
   write('closeJob', { jobId: JOB_B }),
   write('syncJobDistribution', { jobId: JOB_B }),
