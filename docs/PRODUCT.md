@@ -34,7 +34,7 @@ Every candidate always receives an outcome. The system supports this structurall
 
 ### 2.4 No automated decisions about candidates
 
-The product does not rank, score, order or reject people, and it has no automation rule that moves or decides. A person may filter candidates on objective criteria they declare; every result meets every criterion and the list is ordered by date of application, never by merit. Quality scores evaluate the ad, never candidates. Interview feedback describes what was seen and carries no score. This is also the GDPR position on automated decision-making (§6).
+The product does not rank, score, order or reject people, and it has no automation rule that moves or decides. A person may filter candidates on objective criteria they declare; every result meets every criterion and the list is ordered by date of application, never by merit. Skills match under their known names (a curated synonym dictionary: "Go" finds "Golang", "k8s" finds "Kubernetes"), which widens the spelling and never ranks. Quality scores evaluate the ad, never candidates. Interview feedback describes what was seen and carries no score. This is also the GDPR position on automated decision-making (§6).
 
 ### 2.5 Agentic-ready
 

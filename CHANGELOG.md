@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- The filter on declared criteria knows skill synonyms: searching "Go" finds CVs that say "Golang", and likewise
+  JS/JavaScript, k8s/Kubernetes, Postgres/PostgreSQL, Node/Node.js, C#/csharp, contabilità/accounting. A curated
+  dictionary of about 190 skills (`packages/domain/src/skills`, open to contributions) is applied at search time, with
+  no migration. Ordinary words like "go" in a CV's text are never read as a skill; it is still a filter, with no score.
+
 ### Changed
 
 - **License:** the Additional Use Grant now covers recruiting on behalf of clients. Staffing and search agencies,

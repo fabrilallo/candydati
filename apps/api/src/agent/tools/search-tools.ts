@@ -11,7 +11,7 @@ export const createFindCandidatesTool = (deps: CandidateDeps) =>
     id: 'find_candidates_by_criteria',
     description:
       'Finds the candidates for ONE job whose CV meets objective, job-related criteria: skills, languages, minimum years of experience, location, words in the CV. ' +
-      'Only the job\'s applicants and the talent pool are searched (the people whose consent covers this job). Every result meets every criterion: it is a filter, not a ranking, ' +
+      'Skills match under their usual names (Go = Golang, k8s = Kubernetes), so give one name per skill. Only the job\'s applicants and the talent pool are searched (the people whose consent covers this job). Every result meets every criterion: it is a filter, not a ranking, ' +
       'and the order is the date of application. Before calling, list the criteria to the user and wait for their explicit confirmation; then set confirmedByUser. ' +
       'Never use age, sex, origin, family or other protected characteristics: they are refused. Results carry first name and id only; notEvaluable counts CVs nobody could check, which a person must look at.',
     inputSchema: z.object({
