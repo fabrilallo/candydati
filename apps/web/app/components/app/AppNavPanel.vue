@@ -45,17 +45,25 @@ const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount',
     <OrgSwitcher v-if="viewer?.organization" :organization="viewer.organization" :role-label="roleLabel" />
     <!-- min-h-0 + overflow: with every item (owners) the menu is taller than a short screen; it scrolls, the footer stays. -->
     <nav :aria-label="t('nav.main')" class="-mx-1 grid min-h-0 flex-1 content-start gap-5 overflow-y-auto overscroll-contain px-1">
-      <section v-for="section in sections" :key="section.id" :aria-labelledby="`nav-${section.id}`" class="grid gap-1">
+      <!-- The settings groups sit below a rule and are more compact, so the daily work reads first. -->
+      <section
+        v-for="(section, index) in sections"
+        :key="section.id"
+        :aria-labelledby="`nav-${section.id}`"
+        class="grid gap-1"
+        :class="section.settings && !sections[index - 1]?.settings ? 'border-t pt-4' : undefined"
+        :data-testid="`nav-section-${section.id}`"
+      >
         <h2 :id="`nav-${section.id}`" class="px-2.5 pb-1 text-xs font-medium text-muted-foreground">{{ t(`nav.sections.${section.id}`) }}</h2>
         <ul class="grid gap-0.5">
           <li v-for="item in section.items" :key="item.id">
             <NuxtLink
               :to="item.to"
               :aria-current="active === item.id ? 'page' : undefined"
-              class="flex h-10 items-center gap-3 rounded-md px-3 text-[0.9375rem] transition-colors duration-150"
-              :class="active === item.id ? 'bg-primary font-semibold text-primary-foreground' : 'font-medium text-foreground hover:bg-muted'"
+              class="flex items-center gap-3 rounded-md px-3 transition-colors duration-150"
+              :class="[section.settings ? 'h-9 text-sm' : 'h-10 text-[0.9375rem]', active === item.id ? 'bg-primary font-semibold text-primary-foreground' : 'font-medium text-foreground hover:bg-muted']"
             >
-              <component :is="NAV_ICONS[item.id]" class="size-[1.125rem] shrink-0" aria-hidden="true" />
+              <component :is="NAV_ICONS[item.id]" class="shrink-0" :class="section.settings ? 'size-4' : 'size-[1.125rem]'" aria-hidden="true" />
               <span class="min-w-0 flex-1 truncate">{{ t(`nav.${item.id}`) }}</span>
               <span
                 v-if="counts[item.id] !== undefined"

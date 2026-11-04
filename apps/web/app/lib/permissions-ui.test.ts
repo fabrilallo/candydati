@@ -57,7 +57,7 @@ describe('clients of an agency', () => {
     expect(visibleNav('recruiter').map((item) => item.id)).not.toContain('clients')
     expect(ids('recruiter', true)).toContain('clients')
     expect(ids('interviewer', true)).toContain('clients')
-    expect(navSections('recruiter', { recruitsForClients: true }).find((section) => section.id === 'organization')?.items.map((item) => item.id)).toContain('clients')
+    expect(navSections('recruiter', { recruitsForClients: true }).find((section) => section.id === 'work')?.items.map((item) => item.id)).toContain('clients')
     expect(activeNavId('/app/settings/clients', visibleNav('owner'))).toBe('clients')
   })
 })
@@ -90,8 +90,8 @@ describe('defaultInviteRole', () => {
 
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
-    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates', 'members', 'security', 'emailTemplates', 'distribution'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates', 'members', 'security', 'privacy', 'email', 'ai', 'emailTemplates', 'webhooks', 'distribution', 'clients', 'careersPage', 'api', 'data', 'migrations', 'audit'])
+    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'templates', 'distribution', 'emailTemplates', 'imports', 'members', 'security'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'clients', 'jobRequests', 'candidates', 'reports', 'templates', 'careersPage', 'distribution', 'emailTemplates', 'email', 'ai', 'webhooks', 'api', 'imports', 'migrations', 'members', 'security', 'privacy', 'data', 'audit'])
   })
 
   it('shows webhooks only with webhook:manage and the work queues to everyone who reads candidates', () => {
@@ -138,10 +138,7 @@ describe('visibleNav', () => {
 
 describe('navSections', () => {
   it('groups the visible items and drops nothing the role may see', () => {
-    expect(navSections('owner').map((section) => [section.id, section.items.map((item) => item.id)])).toEqual([
-      ['work', ['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'imports', 'templates']],
-      ['organization', ['members', 'security', 'privacy', 'email', 'ai', 'emailTemplates', 'webhooks', 'distribution', 'clients', 'careersPage', 'api', 'data', 'migrations', 'audit']],
-    ])
+    expect(navSections('owner').flatMap((section) => section.items.map((item) => item.id))).toEqual(visibleNav('owner').map((item) => item.id))
     expect(navSections(null).map((section) => section.id)).toEqual(['work', 'organization'])
   })
 })
@@ -189,5 +186,32 @@ describe('editableRolesFor', () => {
   it('gives nothing to roles that cannot update members', () => {
     expect(editableRolesFor('recruiter', 'r1', { userId: 'a1', role: 'admin' }, team)).toEqual([])
     expect(editableRolesFor(null, 'r1', { userId: 'a1', role: 'admin' }, team)).toEqual([])
+  })
+})
+
+describe('navigation sections', () => {
+  const sectionsOf = (role: 'owner' | 'recruiter' | 'interviewer') =>
+    Object.fromEntries(navSections(role, { recruitsForClients: true }).map((section) => [section.id, section.items.map((item) => item.id)]))
+
+  it('keeps the daily work, an agency\'s clients included, apart from the settings, which come in three groups', () => {
+    expect(sectionsOf('owner')).toEqual({
+      work: ['dashboard', 'attention', 'tasks', 'jobs', 'clients', 'jobRequests', 'candidates', 'reports', 'templates'],
+      hiringSetup: ['careersPage', 'distribution', 'emailTemplates'],
+      integrations: ['email', 'ai', 'webhooks', 'api', 'imports', 'migrations'],
+      organization: ['members', 'security', 'privacy', 'data', 'audit'],
+    })
+  })
+
+  it('marks every section but the daily work as settings', () => {
+    expect(navSections('owner').map((section) => [section.id, section.settings])).toEqual([
+      ['work', false],
+      ['hiringSetup', true],
+      ['integrations', true],
+      ['organization', true],
+    ])
+  })
+
+  it('leaves out the groups a role sees nothing in', () => {
+    expect(Object.keys(sectionsOf('interviewer'))).not.toContain('integrations')
   })
 })

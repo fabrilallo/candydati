@@ -38,7 +38,9 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
 }
 
 export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'ai' | 'emailTemplates' | 'webhooks' | 'distribution' | 'careersPage' | 'api' | 'data' | 'migrations' | 'audit' | 'clients'
-export type NavSectionId = 'work' | 'organization'
+/** Daily work first, then the settings in three groups: what candidates see, what connects outside, the organization itself. */
+export type NavSectionId = 'work' | 'hiringSetup' | 'integrations' | 'organization'
+const NAV_SECTION_ORDER: readonly NavSectionId[] = ['work', 'hiringSetup', 'integrations', 'organization']
 
 export interface NavItem {
   readonly id: NavId
@@ -58,26 +60,27 @@ const NAV: readonly NavItem[] = [
   { id: 'attention', to: '/app/attention', section: 'work', permission: 'candidate:read' },
   { id: 'tasks', to: '/app/tasks', section: 'work', permission: 'task:read' },
   { id: 'jobs', to: '/app/jobs', section: 'work', permission: 'job:read' },
+  // An agency's clients and their shortlists are daily work, not configuration.
+  { id: 'clients', to: '/app/settings/clients', section: 'work', permission: 'client:read', agency: true },
   { id: 'jobRequests', to: '/app/job-requests', section: 'work', permission: 'job:create' },
   { id: 'candidates', to: '/app/candidates', section: 'work', permission: 'candidate:read' },
   { id: 'reports', to: '/app/reports', section: 'work', permission: 'report:read' },
-  { id: 'imports', to: '/app/imports', section: 'work', permission: 'import:manage' },
   { id: 'templates', to: '/app/jobs/templates', section: 'work', permission: 'job_template:read' },
+  { id: 'careersPage', to: '/app/settings/careers', section: 'hiringSetup', permission: 'careers_page:manage' },
+  { id: 'distribution', to: '/app/settings/distribution', section: 'hiringSetup', permission: 'job:publish' },
+  { id: 'emailTemplates', to: '/app/settings/email-templates', section: 'hiringSetup', permission: 'email_template:manage' },
+  { id: 'email', to: '/app/settings/email', section: 'integrations', permission: 'email_settings:manage' },
+  // The instance's language models: whoever manages its email finds them too; the page itself says who may change them.
+  { id: 'ai', to: '/app/settings/ai', section: 'integrations', permission: 'email_settings:manage' },
+  { id: 'webhooks', to: '/app/settings/webhooks', section: 'integrations', permission: 'webhook:manage' },
+  { id: 'api', to: '/app/settings/api', section: 'integrations', permission: 'api_key:manage' },
+  { id: 'imports', to: '/app/imports', section: 'integrations', permission: 'import:manage' },
+  { id: 'migrations', to: '/app/migrations', section: 'integrations', permission: 'migration:manage' },
   { id: 'members', to: '/app/settings/members', section: 'organization' },
   // Everyone: the person's own second factor; owners and admins also find the organization's requirement there.
   { id: 'security', to: '/app/settings/security', section: 'organization' },
   { id: 'privacy', to: '/app/settings/privacy', section: 'organization', permission: 'privacy:manage' },
-  { id: 'email', to: '/app/settings/email', section: 'organization', permission: 'email_settings:manage' },
-  // The instance's language models: whoever manages its email finds them too; the page itself says who may change them.
-  { id: 'ai', to: '/app/settings/ai', section: 'organization', permission: 'email_settings:manage' },
-  { id: 'emailTemplates', to: '/app/settings/email-templates', section: 'organization', permission: 'email_template:manage' },
-  { id: 'webhooks', to: '/app/settings/webhooks', section: 'organization', permission: 'webhook:manage' },
-  { id: 'distribution', to: '/app/settings/distribution', section: 'organization', permission: 'job:publish' },
-  { id: 'clients', to: '/app/settings/clients', section: 'organization', permission: 'client:read', agency: true },
-  { id: 'careersPage', to: '/app/settings/careers', section: 'organization', permission: 'careers_page:manage' },
-  { id: 'api', to: '/app/settings/api', section: 'organization', permission: 'api_key:manage' },
   { id: 'data', to: '/app/settings/data', section: 'organization', permission: 'data:export' },
-  { id: 'migrations', to: '/app/migrations', section: 'organization', permission: 'migration:manage' },
   { id: 'audit', to: '/app/settings/audit-log', section: 'organization', permission: 'audit:read' },
 ]
 
@@ -88,14 +91,15 @@ export const visibleNav = (role: Role | null, options: NavOptions = {}): readonl
 
 export interface NavSection {
   readonly id: NavSectionId
+  /** True for the configuration groups, shown more compact below the daily work. */
+  readonly settings: boolean
   readonly items: readonly NavItem[]
 }
 
 /** The visible items grouped by section, in order; empty sections are left out. */
 export const navSections = (role: Role | null, options: NavOptions = {}): readonly NavSection[] => {
   const items = visibleNav(role, options)
-  return (['work', 'organization'] as const)
-    .map((id) => ({ id, items: items.filter((item) => item.section === id) }))
+  return NAV_SECTION_ORDER.map((id) => ({ id, settings: id !== 'work', items: items.filter((item) => item.section === id) }))
     .filter((section) => section.items.length > 0)
 }
 
