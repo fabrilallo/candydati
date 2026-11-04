@@ -45,11 +45,12 @@ Whatever reaches a model is pseudonymized, in the assistant and in the MCP tools
 any other agent:
 
 - Candidates are identified by **first name and id** only. The surname never reaches the model.
-- In CVs, cover letters and messages, **emails, phone numbers, links, street addresses, tax codes, IBANs and full
-  dates** are replaced by markers such as `[surname]`, `[email]`, `[phone]`.
+- In CVs, cover letters and messages, **emails, phone numbers, links and social profiles, handles such as `@name`,
+  street addresses, tax codes, IBANs and full dates** are replaced by markers such as `[surname]`, `[email]`, `[phone]`.
 - A message draft keeps `{{candidate.lastName}}` as a variable: your composer fills it in when you review and send.
 
-Pseudonymized data is still personal data: what a CV says about someone's career can still identify them, so the rules
+Not covered: names of third parties (references, former colleagues), street addresses outside the Italian and English
+formats, and anything the patterns cannot recognize. Pseudonymized data is still personal data: what a CV says about someone's career can still identify them, so the rules
 below still apply. CV structuring is the one model call that reads the whole document, because it has to extract it.
 
 ## What it never does

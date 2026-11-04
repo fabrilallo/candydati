@@ -59,6 +59,30 @@ describe('pseudonymizeText', () => {
     expect(pseudonymizeText('Corso React 2020 e corso di Python', { lastName: 'Rossi' })).toBe('Corso React 2020 e corso di Python');
   });
 
+  it('removes handles without a domain, not code or times', () => {
+    expect(clean('Instagram @mario.rossi, Telegram @mrossi_92.')).toBe(`Instagram ${REDACTED.handle}, Telegram ${REDACTED.handle}.`);
+    expect(clean('(@mrossi)')).toBe(`(${REDACTED.handle})`);
+    expect(clean('Vediamoci alle 5 @ 10am, poi @ casa; a@b non è un handle')).toBe('Vediamoci alle 5 @ 10am, poi @ casa; a@b non è un handle');
+    expect(clean('scrivi a hr@azienda.it')).toBe(`scrivi a ${REDACTED.email}`);
+    expect(clean('@1 e @_ e @a')).toBe('@1 e @_ e @a');
+  });
+
+  it('removes social profiles on other domains, short forms and hosted pages', () => {
+    const cases = [
+      'linkedin.it/in/mario-rossi',
+      'it.linkedin.com/in/mario-rossi',
+      'LinkedIn: in/mario-rossi',
+      'linkedin.com/in/mario-rossi',
+      'mariorossi.github.io/portfolio',
+      't.me/mrossi',
+      'wa.me/393331234567',
+      'x.com/mrossi',
+      'github.com/mrossi',
+    ];
+    for (const profile of cases) expect(clean(`Profilo ${profile} fine`)).toBe(`Profilo ${REDACTED.link} fine`);
+    expect(clean('in/out e and/or in/ uscita')).toBe('in/out e and/or in/ uscita');
+  });
+
   it('removes Italian tax codes and IBANs', () => {
     expect(pseudonymizeText('CF RSSMRA85T10A562S, IBAN IT60 X054 2811 1010 0000 0123 456', { lastName: 'Rossi' })).toBe(
       `CF ${REDACTED.taxCode}, IBAN ${REDACTED.iban}`,
@@ -74,7 +98,7 @@ describe('pseudonymizeText', () => {
   });
 
   it('runs in linear time on hostile input', () => {
-    const shapes = ['a'.repeat(1), '1 ', 'a.', 'Via A ', '+3', 'a@'];
+    const shapes = ['a'.repeat(1), '1 ', 'a.', 'Via A ', '+3', 'a@', '@a.', 'linkedin ', 'a.github.io', 't.me/', 'x.'];
     for (const unit of shapes) {
       expect(growthRatio((size) => pseudonymizeText(unit.repeat(size), giulia), 2000)).toBeLessThan(LINEAR_GROWTH_MAX);
     }

@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Docs: the READMEs and the website no longer say the MCP server covers everything in the interface. REST covers the
+  interface; MCP reads and drafts job ads, reads the pipeline, filters on declared criteria and handles notes, tasks
+  and reports, and cannot move, decide on, message or erase candidates.
+- Privacy: before text reaches a model, `@handles` without a domain, profiles on other domains (`linkedin.it`,
+  `t.me`, `wa.me`, `name.github.io`) and "LinkedIn: in/name" are replaced by markers. Third-party names and non
+  Italian/English street addresses remain uncovered.
+
 ### Changed
 
 - **License:** the Additional Use Grant now covers recruiting on behalf of clients. Staffing and search agencies,

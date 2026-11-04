@@ -19,8 +19,8 @@ These are not settings. A deployment cannot turn them off.
   counted down. An ad with applications still open cannot be closed: a person decides each one first.
 - **No automated decisions about candidates.** The product does not rank, score, order or reject people. Quality scores
   evaluate the ad, never candidates.
-- **Agentic-ready.** The REST API and the MCP server call the same services as the interface, with the same permissions
-  and the same audit log.
+- **Agentic-ready.** The REST API covers the interface; the MCP server a narrower set (job ads, pipeline, notes, tasks,
+  reports), never decisions about candidates. Both call the same services, with the same permissions and audit log.
 - **GDPR by design.** Consent, retention and erasure exist from the first candidate record stored.
 - **No lock-in.** A complete export in an open, documented format is available at any time.
 

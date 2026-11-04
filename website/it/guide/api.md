@@ -1,6 +1,8 @@
 # API, webhook e MCP
 
-Tutto quello che si fa nell'interfaccia si può fare tramite l'API e tramite MCP. Le tre superfici chiamano gli stessi
+Tutto quello che si fa nell'interfaccia si può fare tramite l'API REST (OpenAPI). Il server MCP è più stretto per scelta:
+legge, scrive e pubblica annunci, legge la pipeline, filtra su criteri dichiarati e aggiunge note, attività e report, ma
+non può spostare, valutare, scrivere o cancellare candidati. Le superfici chiamano gli stessi
 servizi dell'interfaccia, con gli stessi permessi e lo stesso registro delle azioni.
 
 ## Chiavi API
