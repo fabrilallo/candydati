@@ -2,10 +2,13 @@ import type { JobTeamRepository } from './job-team-ports.js';
 import type { AutomationRule, AutomationTriggerType, Notification, NotificationKind, Role, Task } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository, UserDirectory } from './candidate-ports.js';
 import type { TaskQueue } from './intake-ports.js';
-import type { JobRepository } from './job-ports.js';
+import type { FeedbackStageEntryParts } from './feedback-ports.js';
+import type { JobRepository, JobTemplateRepository } from './job-ports.js';
 import type { EmailTemplateRepository, MessagingDeps } from './messaging-ports.js';
 import type { CoreDeps } from './ports.js';
+import type { MoveProposalRepository, TemplateAutomationRepository } from './proposal-ports.js';
 import type { ResponsePromiseRepository } from './report-ports.js';
+import type { OutboxRepository } from './webhook-ports.js';
 
 export interface NotificationListQuery {
   readonly organizationId: string;
@@ -123,6 +126,11 @@ export interface AutomationRuleDeps extends CoreDeps {
   readonly applications: ApplicationRepository;
   readonly candidates: CandidateRepository;
   readonly executions: AutomationExecutionRepository;
+  /** Copying rules to and from job templates; a template's rules are listed and removed through these too. */
+  readonly jobTemplates: JobTemplateRepository;
+  readonly templateAutomations: TemplateAutomationRepository;
+  /** Rule creators, assignees and alert recipients must be members of the organization. */
+  readonly members: MemberDirectory;
   readonly newId: () => string;
   readonly now: () => Date;
 }
@@ -135,6 +143,8 @@ export interface AutomationScanDeps {
   readonly jobs: JobRepository;
   readonly executions: AutomationExecutionRepository;
   readonly queue: TaskQueue;
+  /** Open move proposals past their expiry are closed by the same hourly job. */
+  readonly moveProposals: MoveProposalRepository;
 }
 
 /** The scan is a system job over every organization: no actor, so no audit log either. */
@@ -184,4 +194,10 @@ export type AutomationRunDeps = MessagingDeps & {
   /** The creator of a rule must still be a member, with the permission the action needs, when the rule runs. */
   readonly members: MemberDirectory;
   readonly queue: TaskQueue;
+  /** `notify` with the webhook channel writes an `automation.notified` event. */
+  readonly outbox: OutboxRepository;
+  /** `propose_move` writes a proposal for a person to confirm or dismiss. */
+  readonly moveProposals: MoveProposalRepository;
+  /** `request_feedback` asks the stage's interviewers through the normal feedback flow. Absent: that action fails. */
+  readonly feedback?: FeedbackStageEntryParts | undefined;
 };

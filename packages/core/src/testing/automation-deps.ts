@@ -1,4 +1,4 @@
-import type { AutomationRule, Notification, OutboxEvent, Task, WebhookEndpoint } from '@candydati/domain';
+import type { AutomationRule, MoveProposal, Notification, OutboxEvent, Task, TemplateAutomationRule, WebhookEndpoint } from '@candydati/domain';
 import type { AutomationRuleDeps, AutomationRunDeps, NotificationDeps, ScanDeps, TaskDeps, Member } from '../automation-ports.js';
 import type { JobDeps } from '../job-ports.js';
 import type { WebhookDeliverDeps, WebhookDeps, WebhookPublishDeps } from '../webhook-ports.js';
@@ -28,6 +28,7 @@ import { createInMemoryJobTemplateRepository } from './in-memory-jobs.js';
 import { createInMemoryJobApprovals, createInMemoryOrganizationSettings } from './in-memory-job-requests.js';
 import type { TestMessagingDeps } from './messaging-deps.js';
 import { ORG_A } from './candidate-seed.js';
+import { createInMemoryMoveProposals, createInMemoryTemplateAutomations, type InMemoryMoveProposals, type InMemoryTemplateAutomations } from './in-memory-proposals.js';
 
 export type TestAutomationDeps = TestMessagingDeps &
   AutomationRunDeps &
@@ -43,6 +44,8 @@ export type TestAutomationDeps = TestMessagingDeps &
     readonly tasks: InMemoryTasks;
     readonly rules: InMemoryAutomationRules;
     readonly executions: InMemoryAutomationExecutions;
+    readonly moveProposals: InMemoryMoveProposals;
+    readonly templateAutomations: InMemoryTemplateAutomations;
     readonly endpoints: InMemoryWebhookEndpoints;
     readonly deliveries: InMemoryWebhookDeliveries;
     readonly poster: FakeHttpPoster;
@@ -52,6 +55,8 @@ export interface AutomationSeedOptions extends MessagingSeedOptions {
   readonly notifications?: readonly Notification[];
   readonly tasks?: readonly Task[];
   readonly rules?: readonly AutomationRule[];
+  readonly proposals?: readonly MoveProposal[];
+  readonly templateRules?: readonly TemplateAutomationRule[];
   readonly endpoints?: readonly WebhookEndpoint[];
   readonly outbox?: readonly OutboxEvent[];
   readonly members?: Readonly<Record<string, readonly Member[]>>;
@@ -79,6 +84,8 @@ export function seedAutomationWorld(options: AutomationSeedOptions = {}): TestAu
     rules,
     automationRules: rules,
     executions: createInMemoryAutomationExecutions(),
+    moveProposals: createInMemoryMoveProposals(options.proposals),
+    templateAutomations: createInMemoryTemplateAutomations(options.templateRules),
     members: createInMemoryMemberDirectory(members),
     endpoints: createInMemoryWebhookEndpoints(options.endpoints),
     deliveries: createInMemoryWebhookDeliveries(),

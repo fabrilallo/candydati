@@ -14,6 +14,7 @@ export * from './in-memory-messaging.js';
 export * from './messaging-fixtures.js';
 export * from './messaging-deps.js';
 export * from './in-memory-automation.js';
+export * from './in-memory-proposals.js';
 export * from './automation-fixtures.js';
 export * from './automation-deps.js';
 export * from './in-memory-privacy-ops.js';

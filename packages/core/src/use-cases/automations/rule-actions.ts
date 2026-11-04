@@ -1,30 +1,31 @@
-import { DAY_MS, isRole, JOB_OWNER_ASSIGNEE, roleHasPermission, type AutomationRule, type Job, type Permission, type Role, type Task } from '@candydati/domain';
-import type { SystemActor } from '../../actor.js';
+import type { AutomationActionType, AutomationRule, Permission, Role } from '@candydati/domain';
 import type { AutomationRunDeps } from '../../automation-ports.js';
-import { resolveTemplate } from '../messaging/shared.js';
-import { sendMessage } from '../messaging/send-message.js';
-import { notifyTaskAssigned } from '../tasks/notify.js';
-import { assertMember } from '../tasks/tasks.js';
+import { allowedRole, type ActionContext } from './action-context.js';
+import { notify, proposeMove } from './action-alerts.js';
+import { addTag, assignApplication, createTaskFor, requestFeedback, sendTemplate } from './action-handlers.js';
 
-/** Messages go out in the name of the person who configured the rule: `sentBy = rule.createdBy`, with their CURRENT role. */
-const ruleActor = (rule: AutomationRule, role: Role): SystemActor => ({
-  type: 'system',
-  id: rule.createdBy,
-  onBehalfOfUserId: null,
-  organizationId: rule.organizationId,
-  role,
-});
-
-const NEEDED: Readonly<Record<AutomationRule['action']['type'], Permission>> = { send_template: 'message:send', create_task: 'task:manage' };
+/**
+ * The permission the creator of a rule must hold, at run time, for its action: a rule never acts with more than its
+ * creator has today. `propose_move` needs `candidate:move` although it moves nothing: it suggests what its creator could do.
+ */
+export const ACTION_PERMISSION: Readonly<Record<AutomationActionType, Permission>> = {
+  send_template: 'message:send',
+  create_task: 'task:manage',
+  add_tag: 'candidate:update',
+  assign: 'task:manage',
+  request_feedback: 'feedback:manage',
+  notify: 'automation:manage',
+  propose_move: 'candidate:move',
+};
 const ADMIN_ROLES = ['owner', 'admin'];
 
 /**
- * The role the creator holds NOW that allows the rule's action, or null when they left the organization or lost the
- * permission: a rule never acts with more than its creator has today.
+ * The role the creator holds NOW that allows the rule's action and still reaches the rule's job (per-job access), or
+ * null when they left the organization, lost the permission or left the job's team.
  */
 export async function currentRole(deps: AutomationRunDeps, rule: AutomationRule): Promise<Role | null> {
   const member = (await deps.members.list(rule.organizationId)).find((m) => m.userId === rule.createdBy);
-  return member?.roles.filter(isRole).find((role) => roleHasPermission(role, NEEDED[rule.action.type])) ?? null;
+  return allowedRole(deps, rule.organizationId, member, ACTION_PERMISSION[rule.action.type], rule.jobId);
 }
 
 /** Owners and admins hear once per rule that it stopped running: its creator is gone or no longer allowed. */
@@ -71,46 +72,26 @@ export async function notifyFailure(deps: AutomationRunDeps, rule: AutomationRul
   );
 }
 
-async function sendTemplate(deps: AutomationRunDeps, rule: AutomationRule, role: Role, job: Job, applicationId: string, templateId: string): Promise<void> {
-  const template = await resolveTemplate(deps, rule.organizationId, templateId, job.content.language);
-  if (!template) throw new Error('template_missing');
-  const result = await sendMessage(deps, ruleActor(rule, role), {
-    applicationIds: [applicationId],
-    templateId,
-    subject: template.subject,
-    body: template.body,
-  });
-  if (result.failed > 0) throw new Error('message_not_queued');
-}
-
-async function createTaskFor(
-  deps: AutomationRunDeps,
-  rule: AutomationRule,
-  job: Job,
-  applicationId: string,
-  action: { readonly title: string; readonly assignee: string; readonly dueInDays?: number | undefined },
-): Promise<void> {
-  const assigneeId = action.assignee === JOB_OWNER_ASSIGNEE ? job.createdBy : action.assignee;
-  await assertMember(deps, rule.organizationId, assigneeId);
-  const now = deps.now();
-  const task: Task = await deps.tasks.create({
-    id: deps.newId(),
-    organizationId: rule.organizationId,
-    applicationId,
-    jobId: job.id,
-    title: action.title,
-    assigneeId,
-    dueAt: action.dueInDays === undefined ? null : new Date(now.getTime() + action.dueInDays * DAY_MS),
-    createdBy: rule.createdBy,
-    createdAt: now,
-    completedAt: null,
-  });
-  await notifyTaskAssigned(deps, task);
-}
-
-/** The rule's action, and only these two: there is no action that moves, decides, scores or ranks. */
-export async function executeAction(deps: AutomationRunDeps, rule: AutomationRule, role: Role, job: Job, applicationId: string): Promise<void> {
-  const { action } = rule;
-  if (action.type === 'send_template') await sendTemplate(deps, rule, role, job, applicationId, action.templateId);
-  else await createTaskFor(deps, rule, job, applicationId, action);
+/**
+ * The rule's action. None of them moves, decides, scores or ranks: `propose_move` only writes a proposal that a person
+ * confirms or dismisses (PRODUCT.md §2.4).
+ */
+export async function executeAction(deps: AutomationRunDeps, ctx: ActionContext): Promise<void> {
+  const { action } = ctx.rule;
+  switch (action.type) {
+    case 'send_template':
+      return sendTemplate(deps, ctx, action.templateId);
+    case 'create_task':
+      return createTaskFor(deps, ctx, action);
+    case 'add_tag':
+      return addTag(deps, ctx, action.tag);
+    case 'assign':
+      return assignApplication(deps, ctx, action.assignee, action.dueInDays);
+    case 'request_feedback':
+      return requestFeedback(deps, ctx);
+    case 'notify':
+      return notify(deps, ctx, action.channel, action.recipients);
+    case 'propose_move':
+      return proposeMove(deps, ctx, action.toStageId);
+  }
 }

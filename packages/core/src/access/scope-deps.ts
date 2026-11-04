@@ -7,6 +7,7 @@ import { createStageRestrictionContext, type StageRestrictionContext } from './r
 import { scopeApplications, scopeCandidateSearch, scopeCandidates, scopeExtractions, scopeNotes } from './scoped-candidates.js';
 import { scopeJobClients, scopeShortlists } from './scoped-clients.js';
 import { scopeJobs, scopeStaleJobs } from './scoped-jobs.js';
+import { scopeMoveProposals } from './scoped-proposals.js';
 import {
   scopeAutomationRules,
   scopeConversations,
@@ -52,6 +53,7 @@ const WRAPPERS: Readonly<Record<string, Wrapper>> = {
   promises: scopePromises,
   rules: scopeAutomationRules,
   automationRules: scopeAutomationRules,
+  moveProposals: scopeMoveProposals,
   imports: scopeImports,
   jobClients: scopeJobClients,
   shortlists: scopeShortlists,

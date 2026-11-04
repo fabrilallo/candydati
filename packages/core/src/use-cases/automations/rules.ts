@@ -1,47 +1,16 @@
-import {
-  automationRuleInputSchema,
-  JOB_OWNER_ASSIGNEE,
-  pipelineStagesOf,
-  type AutomationAction,
-  type AutomationRule,
-  type Job,
-} from '@candydati/domain';
+import { automationRuleInputSchema, type AutomationRule } from '@candydati/domain';
 import { z } from 'zod';
 import type { AutomationRuleDeps } from '../../automation-ports.js';
 import { toActorUserId } from '../../actor-user.js';
-import { ConflictError, NotFoundError, ValidationError } from '../../errors.js';
+import { NotFoundError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';
-import { resolveTemplate } from '../messaging/shared.js';
-import { assertMember } from '../tasks/tasks.js';
 import { defineAutomationUseCase } from './define.js';
+import { jobTarget, validateRule } from './rule-validation.js';
 
 async function requireRule(deps: AutomationRuleDeps, organizationId: string, id: string): Promise<AutomationRule> {
   const rule = await deps.rules.findById(organizationId, id);
   if (!rule) throw new NotFoundError('Automation rule not found.');
   return rule;
-}
-
-/** The rule can only point at what exists: a stage of this job, a template of this organization, a member. */
-async function validateRule(
-  deps: AutomationRuleDeps,
-  organizationId: string,
-  job: Job,
-  stageId: string,
-  action: AutomationAction,
-): Promise<void> {
-  if (job.status === 'closed') throw new ConflictError('A closed job cannot get automation rules.');
-  if (!pipelineStagesOf(job.content.process).some((stage) => stage.id === stageId)) {
-    throw new ValidationError([{ path: 'stageId', message: 'unknown_stage' }]);
-  }
-  if (action.type === 'send_template') {
-    if (!(await resolveTemplate(deps, organizationId, action.templateId, job.content.language))) {
-      throw new ValidationError([{ path: 'action.templateId', message: 'unknown_template' }]);
-    }
-  } else if (action.assignee !== JOB_OWNER_ASSIGNEE) {
-    await assertMember(deps, organizationId, action.assignee).catch(() => {
-      throw new ValidationError([{ path: 'action.assignee', message: 'not_a_member' }]);
-    });
-  }
 }
 
 export const listAutomations = defineAutomationUseCase({
@@ -73,7 +42,7 @@ export const createAutomation = defineAutomationUseCase({
   },
   handler: async ({ deps, actor, input }): Promise<AutomationRule> => {
     const job = await requireJob(deps, actor.organizationId, input.jobId);
-    await validateRule(deps, actor.organizationId, job, input.stageId, input.action);
+    await validateRule(deps, actor.organizationId, jobTarget(job), input);
     return deps.rules.create({
       id: deps.newId(),
       organizationId: actor.organizationId,
@@ -106,7 +75,7 @@ export const updateAutomation = defineAutomationUseCase({
   handler: async ({ deps, actor, input }): Promise<AutomationRule> => {
     const rule = await requireRule(deps, actor.organizationId, input.ruleId);
     const job = await requireJob(deps, actor.organizationId, rule.jobId);
-    await validateRule(deps, actor.organizationId, job, input.stageId, input.action);
+    await validateRule(deps, actor.organizationId, jobTarget(job), input);
     const { stageId, trigger, conditions, action, enabled } = input;
     return deps.rules.save({ ...rule, stageId, trigger, conditions, action, enabled });
   },
