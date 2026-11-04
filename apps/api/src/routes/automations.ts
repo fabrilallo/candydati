@@ -1,10 +1,26 @@
-import { createAutomation, deleteAutomation, listAutomations, previewAutomation, toAutomationRuleDto, updateAutomation } from '@candydati/core';
+import {
+  copyAutomations,
+  createAutomation,
+  deleteAutomation,
+  deleteTemplateAutomation,
+  listAutomations,
+  listTemplateAutomations,
+  previewAutomation,
+  toAutomationRuleDto,
+  toCopyAutomationsResultDto,
+  toTemplateAutomationRuleDto,
+  updateAutomation,
+} from '@candydati/core';
 import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
+import { registerMoveProposalRoutes } from './move-proposals.js';
 import { bodyOf, paramOf } from './request.js';
 
-/** Per-job, per-stage rules: send a template or create a task when a trigger fires and the conditions hold. Never move or decide. */
+/**
+ * Per-job, per-stage rules: when a trigger fires and the conditions hold, send a template, create a task, tag, assign,
+ * ask for feedback, alert, or propose a move that a person confirms. Never move or decide.
+ */
 export function registerAutomationRoutes(app: FastifyInstance, ctx: AppContext): void {
   const deps = ctx.automationDeps;
 
@@ -30,4 +46,20 @@ export function registerAutomationRoutes(app: FastifyInstance, ctx: AppContext):
     await deleteAutomation(deps, await ctx.resolveActor(request), { ruleId: paramOf(request, 'id') });
     return ok({ deleted: true });
   });
+
+  app.post('/api/v1/automations/copy', async (request, reply) => {
+    const result = await copyAutomations(deps, await ctx.resolveActor(request), bodyOf(request));
+    return reply.status(201).send(ok(toCopyAutomationsResultDto(result)));
+  });
+
+  app.get('/api/v1/job-templates/:id/automations', async (request) =>
+    ok((await listTemplateAutomations(deps, await ctx.resolveActor(request), { templateId: paramOf(request, 'id') })).map(toTemplateAutomationRuleDto)),
+  );
+
+  app.delete('/api/v1/job-template-automations/:id', async (request) => {
+    await deleteTemplateAutomation(deps, await ctx.resolveActor(request), { ruleId: paramOf(request, 'id') });
+    return ok({ deleted: true });
+  });
+
+  registerMoveProposalRoutes(app, ctx);
 }

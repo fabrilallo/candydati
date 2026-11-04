@@ -55,9 +55,11 @@ function createSharedDeps({ env, logger, uow, files, queue, emailRuntime, aiRunt
   const provider = emailRuntime.provider;
   const sender = toEmailSender(provider);
   const messaging = liveMessagingConfig(env.platform, emailRuntime);
+  const hr = createHrWorkerDeps({ uow, sender, config: messaging, onMailError: (error) => logger.error({ err: error }, 'feedback email not sent') });
   const phase4 = createPhase4WorkerDeps({
     uow,
     queue,
+    feedback: hr.feedback,
     sender,
     identity: toEmailIdentity(provider),
     platform: env.platform,
@@ -74,7 +76,6 @@ function createSharedDeps({ env, logger, uow, files, queue, emailRuntime, aiRunt
     onModelError: (reason) => logger.warn({ reason }, 'cv model failed, keeping the plain text'),
     onMailError: (error) => logger.error({ err: error }, 'reconfirmation email not queued'),
   });
-  const hr = createHrWorkerDeps({ uow, sender, config: messaging, onMailError: (error) => logger.error({ err: error }, 'feedback email not sent') });
   const digest = {
     transaction: uow.transaction,
     mail: {

@@ -15,6 +15,7 @@ import {
   type TaskDeps,
   type WebhookDeps,
   type CandidateDeps,
+  type ProposalDeps,
   type DistributionChannel,
   type DistributionDeps,
   type TrackedLinkDeps,
@@ -148,6 +149,8 @@ export interface AppContext extends ClientWiring {
   /** Read-only aggregates of the history kept by core. */
   readonly reportDeps: ReportDeps;
   readonly candidateDeps: CandidateDeps;
+  /** The candidate deps with the move proposals: listing, confirming and dismissing them. */
+  readonly proposalDeps: ProposalDeps;
   readonly privacyDeps: PrivacyDeps;
   readonly submitDeps: SubmitApplicationDeps;
   readonly messagingDeps: MessagingDeps;
@@ -400,6 +403,7 @@ function createJobDeps(uow: DrizzleUnitOfWork, adQuality: AdQualityAnalyzer, adQ
     organizations: r.organizations,
     privacyNotices: r.privacyNotices,
     automationRules: r.automationRules,
+    templateAutomations: r.templateAutomations,
     outbox: r.outbox,
     approvals: r.approvals,
     organizationSettings: r.organizationSettings,
