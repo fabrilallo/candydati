@@ -145,7 +145,8 @@ runs a backend developer search for Acme and an accountant search for Beta, with
 - **Shortlists.** From a client job a recruiter (`shortlist:send`, a person only: never a key or the assistant) presents
   candidates to one contact of the client. Only open applications of that job with consent given can be chosen; for each
   one the recruiter chooses whether the CV goes and which notes (at most 5, about that application or the person, never
-  about another application). The contact gets a personal link (only its hash is stored; 14 days; reminders after 3 and 7
+  about another application, never written at a restricted stage, §6.2: not even an owner can share those, and a stage
+  restricted after sending hides its notes from the client page). The contact gets a personal link (only its hash is stored; 14 days; reminders after 3 and 7
   days while someone is unanswered, each with a new link; revocable at once). The page shows the agency, the job title,
   the recruiter's message and, per candidate, the name, the chosen notes and the CV when shared: no email, phone, tags,
   stages, other jobs or internal ids. Per candidate the client answers "meet at interview" or "not for us" with a required
