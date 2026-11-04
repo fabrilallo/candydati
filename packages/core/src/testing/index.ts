@@ -44,3 +44,5 @@ export * from './in-memory-migrations.js';
 export * from './migration-deps.js';
 export * from './in-memory-migrated-rows.js';
 export * from './migration-fetch.js';
+export * from './client-deps.js';
+export * from './in-memory-clients.js';

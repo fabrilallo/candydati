@@ -52,6 +52,8 @@ const request = (org: string, jobId: string, applicationId: string, overrides: P
   interviewerName: 'Eva', tokenHash: randomUUID(), expiresAt: new Date(NOW.getTime() + 14 * DAY), remindersSent: 0, lastReminderAt: null, requestedBy: 'u', createdAt: NOW, submittedAt: null, ...overrides,
 });
 
+const AGENCY_OFF = { recruitsForClients: false, agencyAuthorization: null };
+
 describe('stage interviewers on Postgres', () => {
   it('replaces the configuration of a job as a whole, per organization', async () => {
     const org = await insertOrg();
@@ -166,7 +168,7 @@ describe('job requests, settings and approvals on Postgres', () => {
   it('keeps the approval setting per organization, off by default', async () => {
     const org = await insertOrg();
     const repo = createDrizzleOrganizationSettings(handle.db);
-    const off = { restrictRecruitersToTeam: false };
+    const off = { restrictRecruitersToTeam: false, ...AGENCY_OFF };
     expect(await repo.get(org)).toEqual({ requireApproval: false, ...off });
     expect(await repo.setRequireApproval(org, true, NOW)).toEqual({ requireApproval: true, ...off });
     expect(await repo.setRequireApproval(org, true, NOW)).toEqual({ requireApproval: true, ...off });
@@ -174,8 +176,17 @@ describe('job requests, settings and approvals on Postgres', () => {
     expect(await repo.get(await insertOrg())).toEqual({ requireApproval: false, ...off });
     expect(await repo.setRequireApproval(org, false, NOW)).toEqual({ requireApproval: false, ...off });
     // The recruiter restriction is its own column: switching it keeps the approval setting.
-    expect(await repo.setRestrictRecruitersToTeam(org, true, NOW)).toEqual({ requireApproval: false, restrictRecruitersToTeam: true });
-    expect(await repo.get(org)).toEqual({ requireApproval: false, restrictRecruitersToTeam: true });
+    expect(await repo.setRestrictRecruitersToTeam(org, true, NOW)).toEqual({ requireApproval: false, restrictRecruitersToTeam: true, ...AGENCY_OFF });
+    expect(await repo.get(org)).toEqual({ requireApproval: false, restrictRecruitersToTeam: true, ...AGENCY_OFF });
+  });
+
+  it('keeps the agency setting in its own columns, off by default', async () => {
+    const org = await insertOrg();
+    const repo = createDrizzleOrganizationSettings(handle.db);
+    const agency = { recruitsForClients: true, agencyAuthorization: 'Aut. Min. Lav. test' };
+    expect(await repo.setAgency(org, agency, NOW)).toEqual({ requireApproval: false, restrictRecruitersToTeam: false, ...agency });
+    expect(await repo.setRequireApproval(org, true, NOW)).toEqual({ requireApproval: true, restrictRecruitersToTeam: false, ...agency });
+    expect(await repo.setAgency(org, AGENCY_OFF, NOW)).toEqual({ requireApproval: true, restrictRecruitersToTeam: false, ...AGENCY_OFF });
   });
 
   it('stores the approval apart from the job: editing the job neither wipes nor forges it', async () => {

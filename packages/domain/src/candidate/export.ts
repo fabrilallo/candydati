@@ -3,6 +3,7 @@ import { CONSENT_SCOPES, CONSENT_STATUSES } from './privacy.js';
 import { EXTRACTION_STATUSES, OUTCOMES, cvExtractionSchema } from './application.js';
 import { FEEDBACK_RECOMMENDATIONS } from '../feedback/feedback.js';
 import { OBSERVATIONS } from '../feedback/scorecard.js';
+import { CLIENT_ANSWERS } from '../client/shortlist.js';
 import { MESSAGE_DIRECTIONS, MESSAGE_STATUSES } from '../messaging/message.js';
 import { ATTACHMENT_KINDS } from './attachment.js';
 import { hireDateSchema } from './hire-dates.js';
@@ -66,6 +67,20 @@ const exportedFeedbackRequestSchema = z.object({
   submittedAt: nullableDate,
 });
 
+/**
+ * A shortlist this application was presented in (PRODUCT.md §3.5): to which client, what went, and the client's answer.
+ * The candidate has the right to know who received their data.
+ */
+const exportedShortlistSchema = z.object({
+  clientName: z.string(),
+  sharedAt: date,
+  sharedCv: z.boolean(),
+  sharedNotes: z.number().int().min(0),
+  answer: z.enum(CLIENT_ANSWERS).nullable(),
+  answerReason: z.string().nullable(),
+  answeredAt: nullableDate,
+});
+
 const exportedApplicationSchema = z.object({
   id: z.string(),
   jobId: z.string(),
@@ -108,6 +123,8 @@ const exportedApplicationSchema = z.object({
    */
   attachments: z.array(exportedAttachmentSchema).optional(),
   answers: z.array(exportedAnswerSchema).optional(),
+  /** Added within v1 (optional): the shortlists sent to clients of an agency that included this application. */
+  sharedWithClients: z.array(exportedShortlistSchema).optional(),
 });
 
 /**

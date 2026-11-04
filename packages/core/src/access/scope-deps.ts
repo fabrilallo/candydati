@@ -5,6 +5,7 @@ import { createJobScopeContext, type JobScopeContext } from './job-scope.js';
 import { restrictFeedbackRequests, restrictInterviewFeedback, restrictNotes } from './restricted-records.js';
 import { createStageRestrictionContext, type StageRestrictionContext } from './restricted-stages.js';
 import { scopeApplications, scopeCandidateSearch, scopeCandidates, scopeExtractions, scopeNotes } from './scoped-candidates.js';
+import { scopeJobClients, scopeShortlists } from './scoped-clients.js';
 import { scopeJobs, scopeStaleJobs } from './scoped-jobs.js';
 import {
   scopeAutomationRules,
@@ -52,6 +53,8 @@ const WRAPPERS: Readonly<Record<string, Wrapper>> = {
   rules: scopeAutomationRules,
   automationRules: scopeAutomationRules,
   imports: scopeImports,
+  jobClients: scopeJobClients,
+  shortlists: scopeShortlists,
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

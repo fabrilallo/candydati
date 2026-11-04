@@ -81,6 +81,23 @@ const locationFields = (content: PublishedJobContent): Record<string, unknown> =
     : { jobLocation: place(content) };
 
 /**
+ * The employer: a client shown by name on an agency's ad is the hiring organization; a confidential client is never
+ * named, so the agency publishing the ad stands there (PRODUCT.md §3.5).
+ */
+function hiringOrganization(job: PublicJobDto, organization: PublicOrganizationDto): Record<string, unknown> {
+  const client = job.client;
+  if (client?.display === 'named' && client.name !== null) {
+    return {
+      '@type': 'Organization',
+      name: client.name,
+      ...(client.website === null ? {} : { sameAs: client.website }),
+      ...(client.logo === null ? {} : { logo: client.logo }),
+    };
+  }
+  return { '@type': 'Organization', name: organization.name, ...(organization.logo === null ? {} : { logo: organization.logo }) };
+}
+
+/**
  * schema.org JobPosting with the salary range always present (PRODUCT.md §5). Returns a plain object: the caller
  * serializes it into a `<script type="application/ld+json">` tag, escaping `<` as `<`.
  */
@@ -96,11 +113,7 @@ export function buildJobPostingJsonLd({ job, organization, url, headings }: JobP
     url,
     inLanguage: content.language,
     employmentType: EMPLOYMENT_TYPE[content.contractType],
-    hiringOrganization: {
-      '@type': 'Organization',
-      name: organization.name,
-      ...(organization.logo === null ? {} : { logo: organization.logo }),
-    },
+    hiringOrganization: hiringOrganization(job, organization),
     ...locationFields(content),
     baseSalary: {
       '@type': 'MonetaryAmount',

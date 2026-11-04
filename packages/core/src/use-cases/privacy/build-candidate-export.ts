@@ -5,6 +5,7 @@ import type { FileStorage } from '../../intake-ports.js';
 import type { JobRepository } from '../../job-ports.js';
 import type { MessageRepository } from '../../messaging-ports.js';
 import { sequential } from '../../sequential.js';
+import { exportShortlists, type ShortlistExportSources } from '../clients/shortlist-export.js';
 import { attachmentPathOf, cvPathOf, exportApplication, exportCandidate, exportNotes, iso, oldestFirst } from './export-mappers.js';
 
 export interface ExportFile {
@@ -20,7 +21,7 @@ export interface CandidateExportBundle {
   readonly missingFiles: readonly string[];
 }
 
-export interface ExportSources extends FeedbackRecords {
+export interface ExportSources extends FeedbackRecords, ShortlistExportSources {
   readonly applications: ApplicationRepository;
   readonly notes: CandidateNoteRepository;
   readonly extractions: CvExtractionRepository;
@@ -72,7 +73,9 @@ export async function buildCandidateExport(sources: ExportSources, candidate: Ca
       else missingFiles.push(attachmentPathOf(attachment));
     }
     const extraction = extractions.find((e) => e.applicationId === application.id) ?? null;
-    exportedApplications.push(exportApplication({ application, path, job, extraction, messages, feedback, feedbackRequests, attachments: own }));
+    const exported = exportApplication({ application, path, job, extraction, messages, feedback, feedbackRequests, attachments: own });
+    const shared = await exportShortlists(sources, organizationId, application.id);
+    exportedApplications.push(shared === null ? exported : { ...exported, sharedWithClients: shared });
   }
   const json = candidateExportSchema.parse({
     schemaVersion: 1,

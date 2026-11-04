@@ -18,6 +18,15 @@ describe('buildJobsFeedXml', () => {
     expect(jobsOf(root)).toHaveLength(1);
   });
 
+  it('names a shown client as the company, and the agency for a confidential one', () => {
+    const client = { website: null, logo: null, agencyAuthorization: null } as const;
+    const named = { ...publicJob(), client: { ...client, display: 'named', name: 'Client Co' } } as const;
+    const hidden = { ...publicJob(), client: { ...client, display: 'confidential', name: null } } as const;
+    const [first, second] = jobsOf(parseXml(build([named, hidden])));
+    expect(childText(first!, 'company')).toBe('Client Co');
+    expect(childText(second!, 'company')).toBe('Acme');
+  });
+
   it('writes every field of an ad', () => {
     const [job] = jobsOf(parseXml(build()));
     const field = (name: string) => childText(job!, name);

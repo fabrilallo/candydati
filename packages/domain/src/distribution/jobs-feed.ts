@@ -75,7 +75,8 @@ const jobElement = (job: PublicJobDto, input: JobsFeedInput): string => {
     line('date', rfc822(job.publishedAt)),
     line('referencenumber', job.slug),
     line('url', jobUrl(input.baseUrl, input.organization.slug, job.slug)),
-    line('company', input.organization.name),
+    // A client shown on the ad is the company; a confidential one is never named (PRODUCT.md §3.5).
+    line('company', job.client?.display === 'named' && job.client.name !== null ? job.client.name : input.organization.name),
     ...optional('city', content.location.city),
     line('country', content.location.country),
     cdataElement('description', jobDescriptionHtml(content, headings), '      '),

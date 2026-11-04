@@ -29,6 +29,9 @@ export const MACHINE_FORBIDDEN_PERMISSIONS: readonly Permission[] = PERMISSIONS.
       'careers_page:manage',
       // A migration moves a whole history under the operator's responsibility (ADR 0009): a person confirms it.
       'migration:manage',
+      // Who receives candidate data outside the organization, and sending it: a person decides (PRODUCT.md §3.5).
+      'client:manage',
+      'shortlist:send',
     ].includes(permission),
 );
 

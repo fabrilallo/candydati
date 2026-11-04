@@ -4,6 +4,7 @@ import { NotFoundError } from '../../errors.js';
 import type { PublicSiteDeps } from '../../distribution-ports.js';
 import { toPublicJobDto, toPublicOrganizationDto } from '../../mappers/job-dto.js';
 import { definePublicQuery } from '../../use-case.js';
+import { publicClientsOf } from '../clients/public-clients.js';
 
 const input = z.object({ organizationSlug: z.string().min(1) });
 
@@ -28,13 +29,14 @@ export const getPublicOrganizationSummary = definePublicQuery<PublicSiteDeps, ty
 });
 
 /** The full content of every published ad: what the XML feed, `llms.txt` and the sitemap are built from. */
-export const getPublicFeed = definePublicQuery<Pick<PublicSiteDeps, 'jobs' | 'organizations'>, typeof input, PublicFeedDto>({
+export const getPublicFeed = definePublicQuery<Pick<PublicSiteDeps, 'jobs' | 'organizations' | 'publicClients'>, typeof input, PublicFeedDto>({
   name: 'getPublicFeed',
   input,
   handler: async ({ deps, input: { organizationSlug } }) => {
     const organization = await deps.organizations.findBySlug(organizationSlug);
     if (!organization) throw new NotFoundError('Organization not found.');
     const jobs = await deps.jobs.listPublished(organization.id);
-    return { organization: toPublicOrganizationDto(organization), jobs: jobs.map(toPublicJobDto) };
+    const clients = await publicClientsOf(deps, organization.id, jobs);
+    return { organization: toPublicOrganizationDto(organization), jobs: jobs.map((job) => toPublicJobDto(job, clients[job.id])) };
   },
 });

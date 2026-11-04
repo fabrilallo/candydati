@@ -1,3 +1,4 @@
+import type { JobClientRepository } from './client-ports.js';
 import type { DurationStat, HireDateBasis, Outcome, ResponsePromise, StageEvent } from '@candydati/domain';
 import type { JobRepository } from './job-ports.js';
 import type { CoreDeps } from './ports.js';
@@ -115,5 +116,7 @@ export interface ReportRepository {
 export interface ReportDeps extends CoreDeps {
   readonly jobs: JobRepository;
   readonly reports: ReportRepository;
+  /** The client of each job, for the per-client view (PRODUCT.md §3.5). Without it a client filter finds no job. */
+  readonly jobClients?: JobClientRepository | undefined;
   readonly now: () => Date;
 }

@@ -87,6 +87,18 @@ export const AUDIT_ACTIONS = [
   'migration.fetched',
   'migration.committed',
   'migration.undone',
+  'organization.agency_setting_updated',
+  'client.created',
+  'client.updated',
+  'client.archived',
+  'client.restored',
+  'job.client_updated',
+  'shortlist.sent',
+  'shortlist.revoked',
+  'shortlist.reminded',
+  'shortlist.opened',
+  'shortlist.cv_opened',
+  'shortlist.answered',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
