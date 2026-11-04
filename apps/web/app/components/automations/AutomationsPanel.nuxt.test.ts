@@ -71,12 +71,14 @@ describe('automations per stage', () => {
   it('shows one section per stage with the board names and each rule as a sentence', async () => {
     const wrapper = await mountPanel()
     expect(wrapper.findAll('[data-testid="automation-stage"] h2').map((heading) => heading.text())).toEqual([
-      'Quando una candidatura entra in Ricevute',
-      'Quando una candidatura entra in Chiamata conoscitiva',
-      'Quando una candidatura entra in Colloquio tecnico',
+      'Regole della fase Ricevute',
+      'Regole della fase Chiamata conoscitiva',
+      'Regole della fase Colloquio tecnico',
     ])
     await vi.waitFor(() => expect(wrapper.find('[data-rule-id="r1"] [data-testid="rule-sentence"]').text()).toBe('invia il modello «Aggiornamento sulla fase»'))
     expect(wrapper.find('[data-rule-id="r2"] [data-testid="rule-sentence"]').text()).toBe("crea l'attività «Prepara il colloquio» per il responsabile dell'annuncio, da fare entro 2 giorni")
+    expect(wrapper.find('[data-rule-id="r1"] [data-testid="rule-trigger-words"]').text()).toBe('quando una candidatura entra nella fase')
+    expect(wrapper.find('[data-rule-id="r1"] [data-testid="rule-conditions-words"]').exists()).toBe(false)
     expect(wrapper.find('[data-rule-id="r1"]').text()).toContain('Creata da Bruno')
     expect(wrapper.find('[data-testid="automations-note"]').text()).toContain('non spostano e non decidono mai')
   })
@@ -103,14 +105,14 @@ describe('automations per stage', () => {
     assignee.dispatchEvent(new Event('change'))
     await flushPromises()
     document.body.querySelector<HTMLFormElement>('#rule-form')?.requestSubmit()
-    await vi.waitFor(() => expect(state.posts).toEqual([{ stageId: 'screen', enabled: true, action: { type: 'create_task', title: 'Fissare la chiamata', assignee: 'u2' } }]))
+    await vi.waitFor(() => expect(state.posts).toEqual([{ stageId: 'screen', trigger: { type: 'stage_entered' }, conditions: {}, enabled: true, action: { type: 'create_task', title: 'Fissare la chiamata', assignee: 'u2' } }]))
     await vi.waitFor(() => expect(wrapper.find('[data-rule-id="r9"] [data-testid="rule-sentence"]').text()).toBe("crea l'attività «Fissare la chiamata» per Bruno"))
   })
 
   it('pauses a rule and deletes it after confirmation', async () => {
     const wrapper = await mountPanel()
     await wrapper.find('[data-rule-id="r1"] [data-testid="rule-toggle"]').trigger('click')
-    await vi.waitFor(() => expect(state.puts).toEqual([{ stageId: 'tech', enabled: false, action: { type: 'send_template', templateId: 't-update' } }]))
+    await vi.waitFor(() => expect(state.puts).toEqual([{ stageId: 'tech', trigger: { type: 'stage_entered' }, conditions: {}, enabled: false, action: { type: 'send_template', templateId: 't-update' } }]))
     await vi.waitFor(() => expect(wrapper.find('[data-rule-id="r1"] [data-testid="rule-toggle"]').attributes('aria-checked')).toBe('false'))
     expect(wrapper.find('[data-rule-id="r1"]').text()).toContain('In pausa')
     await wrapper.find('[data-rule-id="r1"] [data-testid="rule-delete"]').trigger('click')
@@ -126,6 +128,6 @@ describe('automations per stage', () => {
     await vi.waitFor(() => expect(button('rule-dialog')?.textContent).toContain('Modifica la regola: Colloquio tecnico'))
     await vi.waitFor(() => expect(document.body.querySelector<HTMLSelectElement>('[data-testid="rule-template"]')?.value).toBe('t-update'))
     document.body.querySelector<HTMLFormElement>('#rule-form')?.requestSubmit()
-    await vi.waitFor(() => expect(state.puts).toEqual([{ stageId: 'tech', enabled: true, action: { type: 'send_template', templateId: 't-update' } }]))
+    await vi.waitFor(() => expect(state.puts).toEqual([{ stageId: 'tech', trigger: { type: 'stage_entered' }, conditions: {}, enabled: true, action: { type: 'send_template', templateId: 't-update' } }]))
   })
 })

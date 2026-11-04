@@ -48,6 +48,8 @@ export const rule = (id: string, overrides: Partial<AutomationRuleDto> = {}): Au
   id,
   jobId: 'j1',
   stageId: 'stage-0',
+  trigger: { type: 'stage_entered' },
+  conditions: {},
   enabled: true,
   createdBy: 'u1',
   createdAt: P4_NOW,

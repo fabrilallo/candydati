@@ -1,8 +1,11 @@
 import {
+  automationPreviewSchema,
   automationRuleSchema,
   webhookCreatedSchema,
   webhookDeliverySchema,
   webhookEndpointSchema,
+  type AutomationMatchInput,
+  type AutomationPreviewDto,
   type AutomationRuleDto,
   type AutomationRuleInput,
   type WebhookCreatedDto,
@@ -27,6 +30,10 @@ export const createRule = async (request: JobApiRequest, jobId: string, input: R
 
 export const updateRule = async (request: JobApiRequest, ruleId: string, input: RuleInput): Promise<AutomationRuleDto> =>
   (await callApi(request, `/api/v1/automations/${id(ruleId)}`, automationRuleSchema, { method: 'PUT', body: input })).data
+
+/** Read-only: who the rule being edited would act for now. `ruleId` once it is saved, so what it already did is left out. */
+export const previewRule = async (request: JobApiRequest, jobId: string, input: AutomationMatchInput & { readonly ruleId?: string }): Promise<AutomationPreviewDto> =>
+  (await callApi(request, `/api/v1/jobs/${id(jobId)}/automations/preview`, automationPreviewSchema, { method: 'POST', body: input })).data
 
 export const deleteRule = async (request: JobApiRequest, ruleId: string): Promise<void> => {
   await callApi(request, `/api/v1/automations/${id(ruleId)}`, z.unknown(), { method: 'DELETE' })

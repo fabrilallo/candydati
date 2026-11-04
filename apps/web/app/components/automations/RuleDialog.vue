@@ -3,14 +3,19 @@ import { type AutomationRuleDto, AUTOMATION_ACTIONS, JOB_OWNER_ASSIGNEE, MAX_DUE
 import type { MemberRow } from '@/lib/auth-api'
 import type { RuleInput } from '@/lib/automation-api'
 import { EMPTY_RULE_FORM, ruleToForm, validateRuleForm, type RuleForm, type RuleFormErrors } from '@/lib/automation-view'
+import { validateTriggerForm } from '@/lib/automation-trigger-view'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
 
-/** Add or edit one rule of a stage: send a template, or create a task for the job owner or a member. */
+/**
+ * Add or edit one rule of a stage: when (trigger), only if (conditions), what happens (send a template, or create a task
+ * for the job owner or a member), and a read-only preview of who it would act for now.
+ */
 const props = defineProps<{
   open: boolean
+  jobId: string
   stageLabel: string
   stageId: string
   rule: AutomationRuleDto | null
@@ -35,6 +40,11 @@ watch(
 const patch = (change: Partial<RuleForm>): void => {
   form.value = { ...form.value, ...change }
 }
+/** What the preview asks about: the rule as typed, or null while its trigger or conditions are invalid. */
+const match = computed(() => {
+  const value = validateTriggerForm(form.value).value
+  return value ? { stageId: props.stageId, ...value } : null
+})
 const submit = (): void => {
   const result = validateRuleForm(form.value, props.stageId, props.rule?.enabled ?? true)
   errors.value = result.errors
@@ -44,12 +54,14 @@ const submit = (): void => {
 
 <template>
   <Dialog :open="open" @update:open="emit('update:open', $event)">
-    <DialogContent class="sm:max-w-lg" data-testid="rule-dialog">
+    <DialogContent class="max-h-[90dvh] overflow-y-auto sm:max-w-xl" data-testid="rule-dialog">
       <DialogHeader>
         <DialogTitle>{{ rule ? t('automations.form.editTitle', { stage: stageLabel }) : t('automations.form.addTitle', { stage: stageLabel }) }}</DialogTitle>
         <DialogDescription>{{ t('automations.form.description') }}</DialogDescription>
       </DialogHeader>
       <form id="rule-form" class="grid gap-5" novalidate @submit.prevent="submit">
+        <RuleTriggerFields :form="form" :errors="errors" @patch="patch" />
+        <RuleConditionsFields :form="form" :errors="errors" @patch="patch" />
         <FormField id="rule-action" :label="t('automations.form.action')">
           <NativeSelect id="rule-action" :model-value="form.type" data-testid="rule-action" @update:model-value="patch({ type: $event as RuleForm['type'] })">
             <option v-for="action in AUTOMATION_ACTIONS" :key="action" :value="action">{{ t(`automations.form.actions.${action}`) }}</option>
@@ -86,6 +98,7 @@ const submit = (): void => {
           </div>
           <p class="-mt-2 text-xs text-muted-foreground">{{ t('automations.form.dueInDaysHint') }}</p>
         </template>
+        <RulePreview :job-id="jobId" :rule-id="rule?.id ?? null" :match="match" />
         <FormAlert :message-key="errorKey" />
       </form>
       <DialogFooter>
