@@ -19,6 +19,7 @@ const NOTES = [
   buildNote({ id: 'note_shared', organizationId: ORG_A, applicationId: 'app_1', body: 'Clear communicator, led a migration.' }),
   buildNote({ id: 'note_private', organizationId: ORG_A, applicationId: 'app_1', body: 'Salary expectations are high.' }),
   buildNote({ id: 'note_other', organizationId: ORG_A, candidateId: 'cand_2', applicationId: 'app_2', body: 'Other person.' }),
+  buildNote({ id: 'note_restricted', organizationId: ORG_A, applicationId: 'app_1', stageId: 'stage-1', body: 'Restricted stage remark.' }),
 ];
 
 async function shortlistWorld(display: 'named' | 'confidential' = 'named'): Promise<TestClientDeps> {
@@ -112,6 +113,30 @@ describe('sendShortlist', () => {
     await expect(sendShortlist(deps, userActor({ organizationId: ORG_B, role: 'owner' }), INPUT)).rejects.toBeInstanceOf(ConflictError);
     await deps.organizationSettings.setAgency(ORG_B, { recruitsForClients: true, agencyAuthorization: null }, new Date());
     await expect(sendShortlist(deps, userActor({ organizationId: ORG_B, role: 'owner' }), INPUT)).rejects.toBeInstanceOf(NotFoundError);
+  });
+});
+
+describe('restricted stages (PRODUCT.md §6.2)', () => {
+  const restrict = (deps: TestClientDeps) =>
+    deps.jobTeams.restrictStage({ organizationId: ORG_A, jobId: 'job_1', stageId: 'stage-1', restrictedBy: 'user_test', createdAt: new Date() });
+
+  it('never sends a note of a restricted stage to a client, not even from an owner who reads it', async () => {
+    const deps = await shortlistWorld();
+    await restrict(deps);
+    const owner = userActor({ organizationId: ORG_A, id: 'user_test', role: 'owner' });
+    await expect(sendShortlist(deps, owner, { ...INPUT, candidates: [{ applicationId: 'app_1', noteIds: ['note_restricted'] }] })).rejects.toBeInstanceOf(ValidationError);
+    expect(deps.clientStore.get().shortlists).toEqual([]);
+  });
+
+  it('hides from the client page a shared note whose stage was restricted after sending', async () => {
+    const deps = await shortlistWorld();
+    await sendShortlist(deps, recruiter, { ...INPUT, candidates: [{ applicationId: 'app_1', noteIds: ['note_shared', 'note_restricted'] }] });
+    const token = secretOf(deps);
+    expect((await getClientShortlist(deps, { token })).candidates[0]?.notes.map((n) => n.body)).toHaveLength(2);
+    await restrict(deps);
+    const view = await getClientShortlist(deps, { token });
+    expect(view.candidates[0]?.notes.map((n) => n.body)).toEqual(['Clear communicator, led a migration.']);
+    expect(JSON.stringify(view)).not.toContain('Restricted stage remark');
   });
 });
 
