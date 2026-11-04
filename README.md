@@ -286,3 +286,6 @@ every published version.
   fabrizio.lallo95@gmail.com.
 - **Becomes open source:** each version converts to [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html)
   (`AGPL-3.0-only`) four years after its first public release.
+- **The name is not included:** the license covers the code, not the Candydati name and logo. You can say your
+  software is based on Candydati; a fork or a service you offer to others carries its own name. See
+  [TRADEMARKS.md](TRADEMARKS.md).
