@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Duplicate a stage** of an ad from its row in the editor, for two technical interviews or two recruiters on the same
+  job. The copy lands right after the source with a new id and, for a saved stage, brings along what is tied to it that
+  the person may manage: who interviews, the stage's evaluation criteria, its automation rules (now in the name of who
+  copied them) and the restriction. What they may not manage is left out and the toast says so. One transaction, one
+  `job.stage_duplicated` audit event; `POST /api/v1/jobs/:id/stages/:stageId/duplicate` (scope `job:update`). No migration.
+
 ## [0.2.0] - 2026-11-04
 
 Three additive migrations (`0044_application_hire_dates`, `0045_restricted_stages_scorecards`, `0046_agency_clients`)
