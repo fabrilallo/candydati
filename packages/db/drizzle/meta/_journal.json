@@ -330,6 +330,13 @@
       "when": 1793800050240,
       "tag": "0046_agency_clients",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1793827940268,
+      "tag": "0047_mcp_oauth",
+      "breakpoints": true
     }
   ]
 }

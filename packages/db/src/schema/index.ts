@@ -17,3 +17,4 @@ export * from './report.js';
 export * from './security.js';
 export * from './careers.js';
 export * from './client.js';
+export * from './oauth.js';
