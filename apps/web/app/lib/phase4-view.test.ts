@@ -125,7 +125,7 @@ describe('automations view', () => {
   })
 
   it('describes a rule in words', () => {
-    const names = { template: (id: string) => (id === 't-update' ? 'Aggiornamento' : null), member: (id: string) => (id === 'u2' ? 'Bruno' : null) }
+    const names = { template: (id: string) => (id === 't-update' ? 'Aggiornamento' : null), member: (id: string) => (id === 'u2' ? 'Bruno' : null), stage: () => null, owner: 'owner' }
     expect(describeRule(rule('r1'), names)).toEqual({ key: 'automations.rule.sendTemplate', params: { template: 'Aggiornamento' } })
     expect(describeRule(rule('r1', { action: { type: 'send_template', templateId: 'gone' } }), names)).toEqual({ key: 'automations.rule.sendMissingTemplate', params: {} })
     expect(describeRule(rule('r2', { action: taskAction('T', 'job_owner', 2) }), names)).toEqual({ key: 'automations.rule.taskForOwnerDue', params: { title: 'T', count: 2 } })

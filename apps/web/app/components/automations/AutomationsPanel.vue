@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { InfoIcon, PlusIcon } from '@lucide/vue'
-import { type AutomationRuleDto, pipelineStagesOf, type JobDto    } from '@candydati/domain';
+import { CopyIcon, InfoIcon, PlusIcon } from '@lucide/vue'
+import { toast } from 'vue-sonner'
+import { type AutomationRuleDto, type CopyAutomationsResultDto, pipelineStagesOf, type JobDto } from '@candydati/domain'
 import type { RuleInput } from '@/lib/automation-api'
+import type { CopySource } from '@/lib/automation-copy-view'
 import { describeRule, rulesByStage } from '@/lib/automation-view'
 import { can } from '@/lib/permissions-ui'
 import { stageName, stageTone } from '@/lib/pipeline-board'
@@ -10,7 +12,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 /**
  * The rules of a job, one section per stage (same names as the board), each with its trigger, its conditions and what it
- * does. They send a template or create a task; they never move or decide, and say so.
+ * does. They send, create tasks, tag, assign, ask for feedback, alert or propose a move; they never move or decide, and
+ * say so. Rules copy to another stage, another job or a job template.
  */
 const props = defineProps<{ job: JobDto }>()
 const { t } = useI18n()
@@ -26,7 +29,15 @@ const grouped = computed(() => rulesByStage(automations.rules.value ?? [], stage
 const names = computed(() => ({
   template: (id: string) => templates.templates.value?.find((item) => item.id === id)?.name ?? null,
   member: team.nameOf,
+  stage: (id: string) => {
+    const stage = stages.value.find((item) => item.id === id)
+    return stage ? stageName(stage, t) : null
+  },
+  owner: t('automations.form.jobOwner'),
 }))
+const joinList = (items: readonly string[]): string => items.join(', ')
+/** The other stages of the job: where the rule being edited can propose a move to. */
+const moveTargets = computed(() => stages.value.filter((stage) => stage.id !== editing.value?.stageId).map((stage) => ({ id: stage.id, label: stageName(stage, t) })))
 
 const editing = ref<{ readonly stageId: string; readonly rule: AutomationRuleDto | null } | null>(null)
 const editingStage = computed(() => stages.value.find((stage) => stage.id === editing.value?.stageId) ?? null)
@@ -54,6 +65,21 @@ const confirmDelete = async (): Promise<void> => {
   if (deleting.value && (await automations.remove(deleting.value))) deleting.value = null
 }
 const authorOf = (rule: AutomationRuleDto): string | null => team.nameOf(rule.createdBy)
+
+const copying = ref<CopySource | null>(null)
+const copyOpen = computed({
+  get: () => copying.value !== null,
+  set: (open: boolean) => {
+    if (!open) copying.value = null
+  },
+})
+const copyLabel = computed(() => names.value.stage(copying.value?.stageId ?? '') ?? '')
+/** Copies into this job show up at once; elsewhere they wait in their job or template. */
+const copied = async (result: CopyAutomationsResultDto): Promise<void> => {
+  copying.value = null
+  toast.success(t('automations.copy.done', { count: result.created.length }, result.created.length))
+  if (result.to.kind === 'job' && result.to.id === props.job.id) await automations.refresh()
+}
 </script>
 
 <template>
@@ -74,7 +100,10 @@ const authorOf = (rule: AutomationRuleDto): string | null => team.nameOf(rule.cr
             <StageDot :tone="stageTone(stage)" />
             {{ t('automations.stageRules', { stage: stageName(stage, t) }) }}
           </h2>
-          <Button variant="outline" size="sm" :data-testid="`automation-add-${stage.id}`" @click="startEdit(stage.id, null)"><PlusIcon aria-hidden="true" />{{ t('automations.add') }}</Button>
+          <div class="flex items-center gap-2">
+            <Button v-if="(grouped[stage.id] ?? []).length > 0" variant="ghost" size="sm" :aria-label="t('automations.copy.stageFor', { stage: stageName(stage, t) })" :data-testid="`automation-copy-${stage.id}`" @click="copying = { kind: 'stage', stageId: stage.id }"><CopyIcon aria-hidden="true" />{{ t('automations.copy.stageButton') }}</Button>
+            <Button variant="outline" size="sm" :data-testid="`automation-add-${stage.id}`" @click="startEdit(stage.id, null)"><PlusIcon aria-hidden="true" />{{ t('automations.add') }}</Button>
+          </div>
         </div>
         <StageInterviewers
           v-if="interviewers && interviewStages.has(stage.id)"
@@ -90,12 +119,13 @@ const authorOf = (rule: AutomationRuleDto): string | null => team.nameOf(rule.cr
             v-for="rule in grouped[stage.id]"
             :key="rule.id"
             :rule="rule"
-            :words="describeRule(rule, names)"
+            :words="describeRule(rule, names, joinList)"
             :author="authorOf(rule)"
             :busy="automations.busy.value === rule.id"
             @toggle="(enabled) => automations.setEnabled(rule, enabled)"
             @edit="startEdit(stage.id, rule)"
             @delete="deleting = rule"
+            @copy="copying = { kind: 'rule', ruleId: rule.id, stageId: rule.stageId }"
           />
         </ul>
       </section>
@@ -108,10 +138,12 @@ const authorOf = (rule: AutomationRuleDto): string | null => team.nameOf(rule.cr
       :rule="editing?.rule ?? null"
       :templates="templates.templates.value ?? []"
       :members="team.members.value"
+      :stages="moveTargets"
       :busy="automations.busy.value !== null"
       :error-key="automations.saveErrorKey.value"
       @save="save"
     />
+    <RuleCopyDialog v-model:open="copyOpen" :job-id="job.id" :job-content="job.content" :source="copying" :source-label="copyLabel" @copied="copied" />
     <ConfirmDialog v-model:open="deleteOpen" :title="t('automations.deleteTitle')" :body="t('automations.deleteBody')" :confirm-label="t('automations.deleteConfirm')" :pending="deleting !== null && automations.busy.value === deleting.id" destructive @confirm="confirmDelete" />
   </div>
 </template>

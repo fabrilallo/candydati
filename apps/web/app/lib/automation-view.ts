@@ -1,84 +1,35 @@
-import { type AutomationRuleDto, type WebhookDeliveryDto, checkWebhookUrl, JOB_OWNER_ASSIGNEE, MAX_DUE_IN_DAYS, TASK_TITLE_MAX, WEBHOOK_EVENT_TYPES, type AutomationActionType    } from '@candydati/domain';
+import { type AutomationRuleDto, type WebhookDeliveryDto, checkWebhookUrl, WEBHOOK_EVENT_TYPES } from '@candydati/domain'
 import type { RuleInput } from './automation-api'
+import { actionToForm, describeAction, EMPTY_ACTION_FORM, validateAction, type ActionForm, type ActionFormErrors, type Names, type RuleWords } from './automation-action-view'
 import { EMPTY_TRIGGER_FORM, triggerToForm, validateTriggerForm, type TriggerForm, type TriggerFormErrors } from './automation-trigger-view'
+
+export type { Names, RuleWords } from './automation-action-view'
 
 /** Pure: the rules of each stage, in the order of the stages and then of creation. Rules of unknown stages are left out. */
 export const rulesByStage = (rules: readonly AutomationRuleDto[], stageIds: readonly string[]): Readonly<Record<string, readonly AutomationRuleDto[]>> =>
   Object.fromEntries(stageIds.map((stageId) => [stageId, rules.filter((rule) => rule.stageId === stageId).toSorted((a, b) => a.createdAt.localeCompare(b.createdAt))]))
 
-/** The whole rule form: its trigger and conditions (`TriggerForm`) and its action. */
-export interface RuleForm extends TriggerForm {
-  readonly type: AutomationActionType
-  readonly templateId: string
-  readonly title: string
-  /** `job_owner` or a member's user id. */
-  readonly assignee: string
-  /** Whole days as typed, or empty for no due date. */
-  readonly dueInDays: string
-}
+/** The whole rule form: its trigger and conditions (`TriggerForm`) and its action (`ActionForm`). */
+export type RuleForm = TriggerForm & ActionForm
 
-export const EMPTY_RULE_FORM: RuleForm = { ...EMPTY_TRIGGER_FORM, type: 'send_template', templateId: '', title: '', assignee: JOB_OWNER_ASSIGNEE, dueInDays: '' }
+export const EMPTY_RULE_FORM: RuleForm = { ...EMPTY_TRIGGER_FORM, ...EMPTY_ACTION_FORM }
 
-export const ruleToForm = (rule: AutomationRuleDto): RuleForm => {
-  const base = { ...EMPTY_RULE_FORM, ...triggerToForm(rule) }
-  return rule.action.type === 'send_template'
-    ? { ...base, templateId: rule.action.templateId }
-    : { ...base, type: 'create_task', title: rule.action.title, assignee: rule.action.assignee, dueInDays: rule.action.dueInDays === undefined ? '' : String(rule.action.dueInDays) }
-}
+export const ruleToForm = (rule: AutomationRuleDto): RuleForm => ({ ...EMPTY_RULE_FORM, ...triggerToForm(rule), ...actionToForm(rule.action) })
 
-export type RuleFormErrors = Partial<Record<keyof RuleForm, string>>
-
-type ActionResult = { readonly errors: RuleFormErrors; readonly action: RuleInput['action'] | null }
-
-function validateAction(form: RuleForm): ActionResult {
-  if (form.type === 'send_template') {
-    return form.templateId === '' ? { errors: { templateId: 'automations.errors.templateRequired' }, action: null } : { errors: {}, action: { type: 'send_template', templateId: form.templateId } }
-  }
-  const title = form.title.trim()
-  const days = form.dueInDays.trim() === '' ? null : Number(form.dueInDays)
-  const errors: RuleFormErrors = {
-    ...(title === '' ? { title: 'tasks.errors.titleRequired' } : title.length > TASK_TITLE_MAX ? { title: 'tasks.errors.titleTooLong' } : {}),
-    ...(form.assignee === '' ? { assignee: 'tasks.errors.assigneeRequired' } : {}),
-    ...(days !== null && !(Number.isInteger(days) && days >= 0 && days <= MAX_DUE_IN_DAYS) ? { dueInDays: 'automations.errors.dueInDays' } : {}),
-  }
-  if (Object.keys(errors).length > 0) return { errors, action: null }
-  return { errors, action: { type: 'create_task', title, assignee: form.assignee, ...(days === null ? {} : { dueInDays: days }) } }
-}
+export type RuleFormErrors = TriggerFormErrors & ActionFormErrors
 
 /** Pure: errors as translation keys, or the body to send: trigger, conditions that are set, and the fields of the chosen action. */
 export const validateRuleForm = (form: RuleForm, stageId: string, enabled: boolean): { readonly errors: RuleFormErrors; readonly input: RuleInput | null } => {
   const when = validateTriggerForm(form)
-  const what = validateAction(form)
-  const errors: RuleFormErrors & TriggerFormErrors = { ...when.errors, ...what.errors }
+  const what = validateAction(form, stageId)
+  const errors: RuleFormErrors = { ...when.errors, ...what.errors }
   if (!when.value || !what.action) return { errors, input: null }
   return { errors, input: { stageId, ...when.value, enabled, action: what.action } }
 }
 
-export interface RuleWords {
-  readonly key: string
-  readonly params: Readonly<Record<string, string | number>>
-}
-
-interface Names {
-  readonly template: (id: string) => string | null
-  readonly member: (id: string) => string | null
-}
-
-/** Pure: what a rule does, as a translation key and its values (the sentence after "Quando una candidatura entra in …:"). */
-export const describeRule = (rule: AutomationRuleDto, names: Names): RuleWords => {
-  const action = rule.action
-  if (action.type === 'send_template') {
-    const template = names.template(action.templateId)
-    return template === null ? { key: 'automations.rule.sendMissingTemplate', params: {} } : { key: 'automations.rule.sendTemplate', params: { template } }
-  }
-  const owner = action.assignee === JOB_OWNER_ASSIGNEE
-  const member = owner ? null : names.member(action.assignee)
-  const due = action.dueInDays ?? null
-  return {
-    key: `automations.rule.${owner ? 'taskForOwner' : 'taskForMember'}${due === null ? '' : 'Due'}`,
-    params: { title: action.title, ...(owner ? {} : { member: member ?? '?' }), ...(due === null ? {} : { count: due }) },
-  }
-}
+/** Pure: what a rule does, as a translation key and its values (the sentence after "When …:"). */
+export const describeRule = (rule: Pick<AutomationRuleDto, 'action'>, names: Names, joinList?: (items: readonly string[]) => string): RuleWords =>
+  describeAction(rule.action, names, joinList)
 
 export interface WebhookForm {
   readonly url: string

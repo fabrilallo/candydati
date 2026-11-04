@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import type { Params } from '@/lib/ad-text'
 import { relativeTime } from '@/lib/job-list-view'
 import { templateSummary } from '@/lib/template-summary'
+import { can } from '@/lib/permissions-ui'
 
 const props = defineProps<{ template: JobTemplateDto; now: Date; canCreate: boolean; canDelete: boolean }>()
 defineEmits<{ remove: [template: JobTemplateDto] }>()
@@ -14,6 +15,9 @@ const { t, locale } = useI18n()
 const tr = (key: string, params: Params = {}): string => (typeof params.count === 'number' ? t(key, params, { plural: params.count }) : t(key, params))
 const summary = computed(() => templateSummary(props.template.content, tr))
 const updated = computed(() => relativeTime(props.template.updatedAt, props.now, locale.value))
+const { viewer } = useViewer()
+/** The rules kept with the template, for those who manage automations. */
+const canRules = computed(() => can(viewer.value?.role ?? null, 'automation:manage'))
 </script>
 
 <template>
@@ -24,6 +28,7 @@ const updated = computed(() => relativeTime(props.template.updatedAt, props.now,
         <Badge variant="secondary">{{ roleLabel(template.content.role, template.content.customRole, t) || t('job.list.noRole') }}</Badge>
       </div>
       <p class="text-sm text-muted-foreground" data-testid="template-summary">{{ summary }}</p>
+      <TemplateRules v-if="canRules" :template="template" />
     </div>
     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
       <p class="text-xs text-muted-foreground">

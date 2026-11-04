@@ -1,17 +1,15 @@
 <script setup lang="ts">
-import { type AutomationRuleDto, AUTOMATION_ACTIONS, JOB_OWNER_ASSIGNEE, MAX_DUE_IN_DAYS, TASK_TITLE_MAX, type EmailTemplateDto    } from '@candydati/domain';
+import type { AutomationRuleDto, EmailTemplateDto } from '@candydati/domain'
 import type { MemberRow } from '@/lib/auth-api'
 import type { RuleInput } from '@/lib/automation-api'
 import { EMPTY_RULE_FORM, ruleToForm, validateRuleForm, type RuleForm, type RuleFormErrors } from '@/lib/automation-view'
 import { validateTriggerForm } from '@/lib/automation-trigger-view'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { NativeSelect } from '@/components/ui/native-select'
 
 /**
- * Add or edit one rule of a stage: when (trigger), only if (conditions), what happens (send a template, or create a task
- * for the job owner or a member), and a read-only preview of who it would act for now.
+ * Add or edit one rule of a stage: when (trigger), only if (conditions), what happens (`RuleActionFields`), and a
+ * read-only preview of who it would act for now.
  */
 const props = defineProps<{
   open: boolean
@@ -21,6 +19,8 @@ const props = defineProps<{
   rule: AutomationRuleDto | null
   templates: readonly EmailTemplateDto[]
   members: readonly MemberRow[]
+  /** The other stages of the job, for a proposed move. */
+  stages: readonly { readonly id: string; readonly label: string }[]
   busy: boolean
   errorKey: string | null
 }>()
@@ -62,42 +62,7 @@ const submit = (): void => {
       <form id="rule-form" class="grid gap-5" novalidate @submit.prevent="submit">
         <RuleTriggerFields :form="form" :errors="errors" @patch="patch" />
         <RuleConditionsFields :form="form" :errors="errors" @patch="patch" />
-        <FormField id="rule-action" :label="t('automations.form.action')">
-          <NativeSelect id="rule-action" :model-value="form.type" data-testid="rule-action" @update:model-value="patch({ type: $event as RuleForm['type'] })">
-            <option v-for="action in AUTOMATION_ACTIONS" :key="action" :value="action">{{ t(`automations.form.actions.${action}`) }}</option>
-          </NativeSelect>
-        </FormField>
-        <template v-if="form.type === 'send_template'">
-          <FormField id="rule-template" :label="t('automations.form.template')" :error="errors.templateId" :hint="t('automations.form.sendNote')">
-            <template #default="{ invalid, describedBy }">
-              <NativeSelect id="rule-template" :model-value="form.templateId" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" data-testid="rule-template" @update:model-value="patch({ templateId: $event })">
-                <option value="" disabled>{{ t('automations.form.templatePlaceholder') }}</option>
-                <option v-for="template in templates" :key="template.id" :value="template.id">{{ template.name }}</option>
-              </NativeSelect>
-            </template>
-          </FormField>
-        </template>
-        <template v-else>
-          <FormField id="rule-title" :label="t('automations.form.taskTitle')" :error="errors.title">
-            <template #default="{ invalid, describedBy }">
-              <Input id="rule-title" :model-value="form.title" :maxlength="TASK_TITLE_MAX" :placeholder="t('tasks.fields.titlePlaceholder')" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" data-testid="rule-title" @update:model-value="patch({ title: String($event) })" />
-            </template>
-          </FormField>
-          <div class="grid gap-5 sm:grid-cols-[minmax(0,1fr)_10rem]">
-            <FormField id="rule-assignee" :label="t('automations.form.assignee')" :error="errors.assignee">
-              <NativeSelect id="rule-assignee" :model-value="form.assignee" data-testid="rule-assignee" @update:model-value="patch({ assignee: $event })">
-                <option :value="JOB_OWNER_ASSIGNEE">{{ t('automations.form.jobOwner') }}</option>
-                <option v-for="member in members" :key="member.userId" :value="member.userId">{{ member.name }}</option>
-              </NativeSelect>
-            </FormField>
-            <FormField id="rule-due" :label="t('automations.form.dueInDays')" :error="errors.dueInDays">
-              <template #default="{ invalid, describedBy }">
-                <Input id="rule-due" :model-value="form.dueInDays" type="number" inputmode="numeric" min="0" :max="MAX_DUE_IN_DAYS" :aria-invalid="invalid || undefined" :aria-describedby="describedBy" data-testid="rule-due" @update:model-value="patch({ dueInDays: String($event) })" />
-              </template>
-            </FormField>
-          </div>
-          <p class="-mt-2 text-xs text-muted-foreground">{{ t('automations.form.dueInDaysHint') }}</p>
-        </template>
+        <RuleActionFields :form="form" :errors="errors" :templates="templates" :members="members" :stages="stages" @patch="patch" />
         <RulePreview :job-id="jobId" :rule-id="rule?.id ?? null" :match="match" />
         <FormAlert :message-key="errorKey" />
       </form>
