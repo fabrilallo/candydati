@@ -113,5 +113,5 @@ export interface ShortlistDeps extends ClientDeps, ShortlistMailParts {
 /** The public shortlist page: a visitor with a link, no session. */
 export type PublicShortlistDeps = Pick<
   ShortlistDeps,
-  'auditLog' | 'transaction' | 'shortlists' | 'clients' | 'jobs' | 'applications' | 'candidates' | 'notes' | 'organizations' | 'files' | 'hash' | 'now'
+  'auditLog' | 'transaction' | 'jobTeams' | 'shortlists' | 'clients' | 'jobs' | 'applications' | 'candidates' | 'notes' | 'organizations' | 'files' | 'hash' | 'now'
 >;

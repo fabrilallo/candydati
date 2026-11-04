@@ -10,6 +10,7 @@ import { z } from 'zod';
 import type { PublicShortlistDeps } from '../../client-ports.js';
 import { ConflictError, NotFoundError } from '../../errors.js';
 import { definePublicShortlistCommand } from './define.js';
+import { restrictedStagesOf } from './shortlist-candidates.js';
 
 export const SHORTLIST_PAGE_ACTOR_ID = 'shortlist_page';
 
@@ -43,13 +44,15 @@ interface Presented {
  */
 async function presented(deps: PublicShortlistDeps, shortlist: ClientShortlist): Promise<readonly Presented[]> {
   const { organizationId } = shortlist;
+  // A stage restricted after the shortlist was sent hides its notes from the client from then on.
+  const restricted = await restrictedStagesOf(deps.jobTeams, organizationId, shortlist.jobId);
   const result: Presented[] = [];
   for (const item of await deps.shortlists.listItems(organizationId, [shortlist.id])) {
     const application = await deps.applications.findById(organizationId, item.applicationId);
     if (!application || application.consentStatus !== 'given') continue;
     const candidate = await deps.candidates.findById(organizationId, application.candidateId);
     if (!candidate) continue;
-    const notes = item.sharedNoteIds.length === 0 ? [] : (await deps.notes.listByCandidate(organizationId, candidate.id)).filter((n) => item.sharedNoteIds.includes(n.id));
+    const notes = item.sharedNoteIds.length === 0 ? [] : (await deps.notes.listByCandidate(organizationId, candidate.id)).filter((n) => item.sharedNoteIds.includes(n.id) && !restricted(n.stageId));
     const cv = item.shareCv && application.cv !== null && application.cv.key !== '' ? application.cv : null;
     result.push({ item, firstName: candidate.firstName, lastName: candidate.lastName, hasCv: cv !== null, cv, notes: notes.map((n) => ({ body: n.body, at: n.createdAt })) });
   }
