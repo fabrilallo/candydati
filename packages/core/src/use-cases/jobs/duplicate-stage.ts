@@ -35,7 +35,8 @@ function withCopyAfter(process: readonly SelectionStage[], index: number): reado
 /**
  * Copies a stage of the job right after it (same type, duration, conductor, title and note, a new id), saved through
  * `updateJob` with all its rules, then copies what is tied to the source stage that the actor may manage: interviewers,
- * the stage's criteria, automation rules (as the actor's own decision) and the restriction. One transaction: all or nothing.
+ * the stage's criteria and automation rules (as the actor's own decision); a restricted source always gives a restricted
+ * copy. One transaction: all or nothing.
  */
 export const duplicateStage = defineUseCase<DuplicateStageDeps, typeof inputSchema, DuplicateStageResult>({
   name: 'duplicateStage',
