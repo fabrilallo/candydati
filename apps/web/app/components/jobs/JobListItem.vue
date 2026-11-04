@@ -6,7 +6,7 @@ import { jobFacts, readinessOf, relativeTime } from '@/lib/job-list-view'
 import { salaryRange } from '@/lib/job-view'
 import { formatScore } from '@/lib/quality-view'
 
-const props = withDefaults(defineProps<{ job: JobSummaryDto; now: Date; stale?: boolean; staleDays?: number }>(), { stale: false, staleDays: 0 })
+const props = withDefaults(defineProps<{ job: JobSummaryDto; now: Date; stale?: boolean; staleDays?: number; showClient?: boolean }>(), { stale: false, staleDays: 0, showClient: false })
 const { t, locale } = useI18n()
 const readiness = computed(() => readinessOf(props.job))
 const facts = computed(() => jobFacts(props.job))
@@ -25,6 +25,7 @@ const updated = computed(() => relativeTime(props.job.updatedAt, props.now, loca
       <h3 class="min-w-0 text-[0.9375rem] font-medium leading-snug">
         <NuxtLink :to="`/app/jobs/${job.id}`" class="block truncate outline-none after:absolute after:inset-0" data-testid="job-link">{{ job.title || t('job.list.untitled') }}</NuxtLink>
       </h3>
+      <p v-if="showClient && job.client" class="truncate text-xs font-medium" data-testid="job-client">{{ t(job.client.display === 'confidential' ? 'job.list.forClientConfidential' : 'job.list.forClient', { client: job.client.name }) }}</p>
       <p class="truncate text-xs text-muted-foreground">{{ meta }}</p>
     </div>
 

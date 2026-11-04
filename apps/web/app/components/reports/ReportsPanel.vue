@@ -12,16 +12,20 @@ import { isReportEmpty } from '@/lib/report-view'
 const { t } = useI18n()
 const period = ref<Period>(presetPeriod('last90', new Date()))
 const jobId = ref<string | null>(null)
+const clientId = ref<string | null>(null)
 const jobs = useReportJobs()
-const { report, errorKey, loading, refresh } = useReports(period, jobId)
-const csvUrl = computed(() => reportsCsvUrl(period.value, jobId.value))
+const { recruitsForClients } = useAgencySetting()
+const clientStore = useClients(recruitsForClients)
+const clients = computed(() => (recruitsForClients.value ? clientStore.clients.value : []))
+const { report, errorKey, loading, refresh } = useReports(period, jobId, 'reports', clientId)
+const csvUrl = computed(() => reportsCsvUrl(period.value, jobId.value, clientId.value))
 const empty = computed(() => report.value !== null && isReportEmpty(report.value))
 const SKELETON = ['lg:col-span-7', 'lg:col-span-5', 'lg:col-span-5', 'lg:col-span-7'] as const
 </script>
 
 <template>
   <div class="grid gap-6">
-    <ReportsFilters v-model:period="period" v-model:job-id="jobId" :jobs="jobs" :csv-url="csvUrl" />
+    <ReportsFilters v-model:period="period" v-model:job-id="jobId" v-model:client-id="clientId" :jobs="jobs" :csv-url="csvUrl" :clients="clients" />
     <div v-if="errorKey" class="grid gap-3" data-testid="reports-error">
       <FormAlert :message-key="errorKey" />
       <div><Button variant="outline" @click="() => refresh()">{{ t('common.retry') }}</Button></div>

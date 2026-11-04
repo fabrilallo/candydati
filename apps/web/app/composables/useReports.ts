@@ -7,12 +7,12 @@ import type { Period } from '@/lib/report-period'
 const JOB_FILTER_LIMIT = 100
 
 /**
- * The figures of the reports page for a period and an optional job. Refetches when either changes; the previous
+ * The figures of the reports page for a period and an optional job (and, for an agency, client). Refetches when either changes; the previous
  * figures stay on screen (dimmed) meanwhile.
  */
-export const useReports = (period: Ref<Period>, jobId: Ref<string | null>, key = 'reports') => {
+export const useReports = (period: Ref<Period>, jobId: Ref<string | null>, key = 'reports', clientId: Ref<string | null> = ref(null)) => {
   const request = useJobsApi()
-  const { data, status, refresh } = useFreshAsyncData(key, () => loaded(() => getReports(request, period.value, jobId.value)), { watch: [period, jobId] })
+  const { data, status, refresh } = useFreshAsyncData(key, () => loaded(() => getReports(request, period.value, jobId.value, clientId.value)), { watch: [period, jobId, clientId] })
   return {
     report: computed(() => data.value?.data ?? null),
     errorKey: computed(() => data.value?.errorKey ?? null),

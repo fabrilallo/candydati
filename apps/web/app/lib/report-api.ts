@@ -5,11 +5,11 @@ import { REPORTS_CSV_PATH, REPORTS_PATH } from './api-paths'
 import { reportsQuery, type Period } from './report-period'
 
 /** Aggregates of the period (and job), validated section by section: an invalid section is `null`, never a zero. */
-export const getReports = async (request: JobApiRequest, period: Period, jobId: string | null): Promise<ReportsView> =>
-  (await callApi(request, `${REPORTS_PATH}?${reportsQuery(period, jobId)}`, reportsSchema)).data
+export const getReports = async (request: JobApiRequest, period: Period, jobId: string | null, clientId: string | null = null): Promise<ReportsView> =>
+  (await callApi(request, `${REPORTS_PATH}?${reportsQuery(period, jobId, clientId)}`, reportsSchema)).data
 
 /** Same-origin link to the CSV of the same figures; the session cookie goes with it. */
-export const reportsCsvUrl = (period: Period, jobId: string | null): string => `${REPORTS_CSV_PATH}?${reportsQuery(period, jobId)}`
+export const reportsCsvUrl = (period: Period, jobId: string | null, clientId: string | null = null): string => `${REPORTS_CSV_PATH}?${reportsQuery(period, jobId, clientId)}`
 
 export interface ReportJobOption {
   readonly id: string

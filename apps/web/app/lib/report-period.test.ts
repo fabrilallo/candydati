@@ -42,5 +42,7 @@ describe('reportsQuery', () => {
   it('sends whole days as instants and the job only when chosen', () => {
     expect(reportsQuery({ from: '2026-09-14', to: '2026-10-13' }, null)).toBe('from=2026-09-14T00%3A00%3A00.000Z&to=2026-10-13T23%3A59%3A59.999Z')
     expect(reportsQuery({ from: '2026-09-14', to: '2026-10-13' }, 'job 1')).toContain('&jobId=job+1')
+    expect(reportsQuery({ from: '2026-09-14', to: '2026-10-13' }, null, 'c1')).toContain('&clientId=c1')
+    expect(reportsQuery({ from: '2026-09-14', to: '2026-10-13' }, 'j1', 'c1')).toMatch(/jobId=j1&clientId=c1$/)
   })
 })

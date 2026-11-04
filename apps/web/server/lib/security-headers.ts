@@ -27,7 +27,7 @@ const HSTS = 'max-age=31536000; includeSubDomains'
 const PERMISSIONS = 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()'
 
 /** Pages whose URL carries a single-use secret: the browser must not hand that URL to anything it loads or links to. */
-const NO_REFERRER_PREFIXES = ['/consent', '/feedback', '/accept-invitation']
+const NO_REFERRER_PREFIXES = ['/consent', '/feedback', '/shortlist', '/accept-invitation']
 
 const NO_REFERRER = 'no-referrer'
 const REFERRER = 'strict-origin-when-cross-origin'

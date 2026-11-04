@@ -2,17 +2,25 @@ import type { JobStatus } from '@candydati/domain'
 import { JOB_PAGE_SIZE, listJobs, loaded } from '@/lib/job-api'
 
 /**
- * Paginated job list. Status filter and page are plain component state (never the URL): no crawlable
+ * Paginated job list. Status filter, client filter and page are plain component state (never the URL): no crawlable
  * query-string space. Changing the filter goes back to page 1.
  */
 export const useJobList = () => {
   const status = ref<JobStatus | null>(null)
   const page = ref(1)
+  /** The client filter of an agency (null = every job). */
+  const clientId = ref<string | null>(null)
   const request = useJobsApi()
-  const { data, status: fetchStatus, refresh } = useFreshAsyncData('jobs-list', () => loaded(() => listJobs(request, status.value, page.value, JOB_PAGE_SIZE)), { watch: [status, page] })
+  const { data, status: fetchStatus, refresh } = useFreshAsyncData('jobs-list', () => loaded(() => listJobs(request, status.value, page.value, JOB_PAGE_SIZE, clientId.value)), {
+    watch: [status, page, clientId],
+  })
 
   const setStatus = (next: JobStatus | null): void => {
     status.value = next
+    page.value = 1
+  }
+  const setClient = (next: string | null): void => {
+    clientId.value = next
     page.value = 1
   }
   const goTo = (next: number): void => {
@@ -22,12 +30,14 @@ export const useJobList = () => {
   return {
     status,
     page,
+    clientId,
     jobs: computed(() => data.value?.data?.jobs ?? []),
     meta: computed(() => data.value?.data?.meta ?? null),
     errorKey: computed(() => data.value?.errorKey ?? null),
     loading: computed(() => fetchStatus.value === 'pending'),
     refresh,
     setStatus,
+    setClient,
     goTo,
   }
 }
