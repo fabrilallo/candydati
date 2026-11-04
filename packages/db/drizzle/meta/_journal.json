@@ -330,6 +330,13 @@
       "when": 1793800050240,
       "tag": "0046_agency_clients",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1793827616473,
+      "tag": "0047_automation_triggers",
+      "breakpoints": true
     }
   ]
 }

@@ -1,4 +1,4 @@
-import type { AutomationActionType, DeliveredEventType, NotificationKind, WebhookEventType } from '@candydati/domain';
+import type { AutomationActionType, AutomationTriggerType, DeliveredEventType, NotificationKind, WebhookEventType } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { boolean, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
@@ -63,7 +63,10 @@ export const notification = pgTable(
   ],
 );
 
-/** A rule of a job: when an application enters `stage_id`, do `action`. Only `send_template` and `create_task` exist. */
+/**
+ * A rule of a job: when `trigger` fires for an application of `stage_id` and every condition holds, do `action`. Only
+ * `send_template` and `create_task` exist.
+ */
 export const automationRule = pgTable(
   'automation_rule',
   {
@@ -73,6 +76,12 @@ export const automationRule = pgTable(
       .notNull()
       .references(() => job.id, { onDelete: 'restrict' }),
     stageId: text('stage_id').notNull(),
+    /** Rules from before triggers existed run on stage entry. */
+    trigger: text('trigger').$type<AutomationTriggerType>().notNull().default('stage_entered'),
+    /** The trigger's own fields without `type` (validated with `automationTriggerSchema` when read). */
+    triggerConfig: jsonb('trigger_config').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    /** Optional filters, all must hold (validated with `automationConditionsSchema` when read). */
+    conditions: jsonb('conditions').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
     action: text('action').$type<AutomationActionType>().notNull(),
     /** The action's own fields without `type` (validated with `automationActionSchema` when read). */
     config: jsonb('config').$type<Record<string, unknown>>().notNull(),
@@ -80,7 +89,11 @@ export const automationRule = pgTable(
     createdBy: text('created_by').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index('automation_rule_org_job_stage_idx').on(table.organizationId, table.jobId, table.stageId)],
+  (table) => [
+    index('automation_rule_org_job_stage_idx').on(table.organizationId, table.jobId, table.stageId),
+    // Backs the hourly scan of time-based rules across organizations.
+    index('automation_rule_enabled_trigger_idx').on(table.trigger).where(sql`${table.enabled}`),
+  ],
 );
 
 /**
@@ -102,9 +115,16 @@ export const automationExecution = pgTable(
     stageId: text('stage_id').notNull(),
     /** `stage_changed_at` of the application when it entered the stage: each entry runs the rule once. */
     stageEnteredAt: timestamp('stage_entered_at', { withTimezone: true }).notNull(),
+    /**
+     * Which occurrence of the trigger within that entry (`occurrenceOf` in the domain): `''` for the entry itself,
+     * `stuck`, `due:<deadline>`, `message:<id>`, `feedback:<id>`. Each occurrence runs the rule once.
+     */
+    occurrence: text('occurrence').notNull().default(''),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [uniqueIndex('automation_execution_entry_uq').on(table.ruleId, table.applicationId, table.stageId, table.stageEnteredAt)],
+  (table) => [
+    uniqueIndex('automation_execution_occurrence_uq').on(table.ruleId, table.applicationId, table.stageId, table.stageEnteredAt, table.occurrence),
+  ],
 );
 
 /**
