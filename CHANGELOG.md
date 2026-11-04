@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- **Demo data for one organization** (`docs/demo.md`): `node dist/demo-seed/cli.js --org <slug> --yes` inside the api
+  container fills it with five Italian job ads in every state, 40 invented candidates with generated CVs across the
+  stages, notes, interview feedback in words, tasks, a hire, email templates and automations, a client with a shortlist
+  and a real careers page. It stores the AI outputs the product keeps (CV extraction, the ad quality report) so they show
+  without a model; never a score about a candidate. Dry run by default, one organization only, idempotent, audited as
+  `system` with `demoSeed: true`. No migration.
 - **Duplicate a stage** of an ad from its row in the editor, for two technical interviews or two recruiters on the same
   job. The copy lands right after the source with a new id and, for a saved stage, brings along what is tied to it that
   the person may manage: who interviews, the stage's evaluation criteria and its automation rules (now in the name of
