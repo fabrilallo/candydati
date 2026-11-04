@@ -54,7 +54,7 @@ flowchart LR
   hooks[Webhook consumers]
 
   rec & cand --> web
-  agents -->|API key| web
+  agents -->|API key or OAuth| web
   web -->|"/api/** and /mcp"| api
   rest & auth & mcp & asst --> core
   core --> data & audit & outbox & boss
@@ -102,7 +102,7 @@ sequenceDiagram
 
 ```
 browser -> web (Nuxt, proxies /api/** and /mcp) -> api (Fastify)
-  -> authenticate (session cookie or API key) -> build an Actor (user, organization, role/scopes)
+  -> authenticate (session cookie, API key, or on /mcp an OAuth access token) -> build an Actor (user, organization, role/scopes)
   -> route validates input with Zod -> calls a use case in packages/core
   -> use case: permission check -> handler (inside a transaction) -> audit entry -> outbox event
   -> response in the { ok, data | error } envelope from @candydati/domain
@@ -247,7 +247,7 @@ deleted.
 | Application form | none | versioned consent, rate limits, daily caps per organization and per job |
 | Feedback, consent and shortlist links | token in URL | interview feedback without login; consent reconfirmation; client shortlists (`/shortlist/{token}`, [ADR 0011](adr/0011-agency-clients-in-one-organization.md)) |
 | Inbound email webhook | HMAC signature | `INBOUND_WEBHOOK_SECRET` |
-| `/mcp` | API key | same use cases as REST |
+| `/mcp` | API key or OAuth access token | same use cases as REST; OAuth discovery under `/.well-known/oauth-*` ([MCP-CONNECTOR.md](MCP-CONNECTOR.md)) |
 
 Public pages avoid unbounded query-string URL spaces and set cache headers and `noindex` where needed.
 
@@ -289,7 +289,12 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
   ordered by date of application, unchecked CVs counted, protected characteristics refused, every search audited
   ([ADR 0010](adr/0010-privacy-by-design-and-declared-criteria.md)).
 - The conversation lives in the browser; the server stores nothing of it ([ADR 0007](adr/0007-stateless-assistant.md)).
-- MCP tools are thin wrappers on the same use cases, authorized by API key scopes. Each tool call of a JSON-RPC batch
+- MCP clients authenticate with an API key or, as Claude custom connectors, with OAuth 2.1 (Better Auth's MCP plugin,
+  PKCE, dynamic registration with a callback allowlist, opaque tokens bound to the `/mcp` resource). An OAuth
+  connection is a `connected_app` actor: it acts for the person in the organization picked on the consent page, with
+  their current role and the machine forbidden list of API keys, checked against the database on every call
+  (`authenticateConnectedApp`), so revoking or leaving stops it at once ([MCP-CONNECTOR.md](MCP-CONNECTOR.md)).
+- MCP tools are thin wrappers on the same use cases, authorized by API key scopes or the connected person's role. Each tool call of a JSON-RPC batch
   counts against the key's per-minute limit and a batch holds at most 20 messages. Reads are audited as `mcp.read` with
   the tool name and the ids asked for, never the returned data.
 - MCP prompts (`apps/api/src/mcp/prompts.ts`) are ready-made HR workflows over the same tools. They add no capability,
@@ -320,6 +325,7 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 | Area | Tables |
 |---|---|
 | Auth and tenancy | `user`, `session`, `account`, `verification`, `two_factor`, `organization`, `member`, `invitation`, `api_key`, `organization_setting`, `organization_security_setting` |
+| MCP OAuth (Better Auth) | `oauth_client`, `oauth_resource`, `oauth_client_resource`, `oauth_consent` (a grant: client, person, organization in `reference_id`), `oauth_access_token`, `oauth_refresh_token` (SHA-256 hashes), `oauth_client_assertion` |
 | Abuse limits | `auth_throttle` (failed sign-ins), `usage_counter` (daily model budgets) |
 | Jobs | `job`, `job_team_member`, `job_stage_restriction`, `job_template`, `job_stage_interviewer`, `job_request`, `job_distribution`, `distribution_setting`, `job_tracked_link` |
 | Candidates | `candidate`, `application`, `application_stage_event`, `candidate_note`, `cv_extraction`, `response_promise` |

@@ -39,6 +39,11 @@ Variables without a default are required or optional as described; see `.env.exa
 | `MCP_MODEL_DAILY_BUDGET_PER_KEY` | api |  | MCP calls of model-backed tools (analyze_job_ad, publish_job) per API key per UTC day, while a fast model is on. |
 | `MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION` | api |  | MCP calls of model-backed tools per organization per UTC day, while a fast model is on. |
 | `MCP_MODEL_DAILY_BUDGET_PER_USER` | api |  | MCP calls of model-backed tools per person (across all their keys and organizations) per UTC day, while a fast model is on. |
+| `MCP_OAUTH_ACCESS_TOKEN_TTL_SECONDS` | api | `900` | Seconds an OAuth access token of an MCP client lives (60-3600); the client refreshes it. Revocation applies at once whatever the value. |
+| `MCP_OAUTH_ALLOW_LOOPBACK_REDIRECTS` | api |  | true: native MCP clients (Claude Code, Cursor, MCP Inspector) may use http://localhost or 127.0.0.1 callbacks. Off by default. |
+| `MCP_OAUTH_ENABLED` | api |  | OAuth sign-in for MCP clients, so Claude (claude.ai, desktop) can be added as a custom connector without an API key. Needs an https site (or localhost). off: API keys only. See docs/MCP-CONNECTOR.md. |
+| `MCP_OAUTH_REDIRECT_URIS` | api |  | Extra OAuth callback URLs (comma-separated, exact https URLs) accepted from MCP clients besides Claude's. Anything else is refused at registration. |
+| `MCP_OAUTH_REFRESH_TOKEN_TTL_DAYS` | api | `30` | Days an OAuth refresh token of an MCP client lives (1-90); after that the person connects the app again. |
 | `METRICS_TOKEN` | api, worker |  | Bearer token (at least 16 characters) that opens GET /metrics (Prometheus) on the api and the worker. Unset: the endpoint does not exist. |
 | `MISTRAL_API_KEY` | api, worker |  | API key for mistral/* models. |
 | `NODE_ENV` | api, worker | `development` | development, test or production. |
