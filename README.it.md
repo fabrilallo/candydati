@@ -65,6 +65,9 @@ Stato: pre-1.0 (vedi il [changelog](CHANGELOG.md)). Definizione completa del pro
 
 **Agenti e integrazioni**
 - API REST con OpenAPI, chiavi API, server MCP, assistente di processo (modelli via Mastra, spento di default)
+- Claude come connettore personalizzato: incolla `{tuo sito}/mcp` in Claude (claude.ai, desktop), accedi, scegli
+  l'organizzazione e autorizza; OAuth 2.1 con PKCE, senza chiave API, agisce con il tuo ruolo, revocabile da
+  Impostazioni > Sicurezza ([guida, in inglese](docs/MCP-CONNECTOR.md))
 - Webhook firmati alimentati da una outbox transazionale
 
 **Privacy e dati**

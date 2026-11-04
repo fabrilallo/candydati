@@ -83,6 +83,23 @@ export const isApiPath = (pathWithQuery: string): boolean => /^\/api(?:[/?]|$)/.
 /** The MCP endpoint (`{siteUrl}/mcp`), forwarded as is: the bearer key travels in `Authorization`, untouched. */
 export const isMcpPath = (pathWithQuery: string): boolean => /^\/mcp\/?(?:\?|$)/.test(pathWithQuery)
 
+/** The OAuth discovery documents the api publishes for the MCP server (RFC 9728, RFC 8414). Exact paths only. */
+const OAUTH_DISCOVERY_PATHS: ReadonlySet<string> = new Set([
+  '/.well-known/oauth-protected-resource',
+  '/.well-known/oauth-protected-resource/mcp',
+  '/.well-known/oauth-authorization-server',
+  '/.well-known/oauth-authorization-server/api/auth',
+])
+
+/** One of the discovery documents, query allowed: nothing else under `/.well-known` reaches the api. */
+export const isOAuthDiscoveryPath = (pathWithQuery: string): boolean => {
+  const query = pathWithQuery.indexOf('?')
+  return OAUTH_DISCOVERY_PATHS.has(query === -1 ? pathWithQuery : pathWithQuery.slice(0, query))
+}
+
+/** Discovery documents are read, never written. */
+export const isReadMethod = (method: string): boolean => ['GET', 'HEAD'].includes(method.toUpperCase())
+
 export const apiTarget = (apiOrigin: string, pathWithQuery: string): string => `${apiOrigin.replace(/\/+$/, '')}${pathWithQuery}`
 
 export const upstreamRequestHeaders = (request: Pick<ProxyRequest, 'headers' | 'host' | 'protocol' | 'socketAddress' | 'trustCloudflare' | 'trustedProxy'>): Headers => {

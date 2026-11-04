@@ -6,8 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+Two additive migrations (`0047_automation_triggers`, `0048_mcp_oauth` with new tables only) run at start as usual.
+
 ### Added
 
+- **Claude as a custom connector, without an API key.** The MCP server is also an OAuth 2.1 protected resource
+  (Better Auth's MCP plugin): Claude discovers it from the `401` challenge, registers itself, and the person signs in,
+  picks the organization and approves on a consent page (Italian and English) that lists what the connector may do.
+  PKCE S256, opaque access tokens of 15 minutes with rotated refresh tokens, bound to the `/mcp` resource and to the
+  person and organization; every call re-checks the grant, the membership, the current role and the 2FA rule. The
+  connection acts as a new `connected_app` actor with the person's role minus what no machine may do, and never moves candidates. Callbacks are an
+  allowlist (Claude's, `MCP_OAUTH_REDIRECT_URIS`, loopback with `MCP_OAUTH_ALLOW_LOOPBACK_REDIRECTS`). Settings >
+  Security lists connected apps with *Revoke* (owners and admins see all of the organization); `connected_app.granted`
+  and `connected_app.revoked` are audited. API keys work as before. Guide: `docs/MCP-CONNECTOR.md`; new variables
+  `MCP_OAUTH_*` (docs/ENVIRONMENT.md).
 - **Demo data for one organization** (`docs/demo.md`): `node dist/demo-seed/cli.js --org <slug> --yes` inside the api
   container fills it with five Italian job ads in every state, 40 invented candidates with generated CVs across the
   stages, notes, interview feedback in words, tasks, a hire, email templates and automations, a client with a shortlist

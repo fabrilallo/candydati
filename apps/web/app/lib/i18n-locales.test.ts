@@ -1,4 +1,5 @@
 import {
+  ACTOR_TYPES,
   AGENT_TOOL_NAMES,
   AUDIT_ACTIONS,
   CONTRACT_TYPES,
@@ -13,6 +14,7 @@ import {
   SENIORITY_LEVELS,
   STAGE_CONDUCTORS,
   STAGE_TYPES,
+  TIMELINE_ACTOR_TYPES,
   WORK_MODES,
 } from '@candydati/domain'
 import { describe, expect, it } from 'vitest'
@@ -44,6 +46,8 @@ const labelled: ReadonlyArray<readonly [string, readonly string[]]> = [
   ['quality.categories', QUALITY_CATEGORIES],
   ['apiKeys.scope', PERMISSIONS.map((permission) => permission.replace(':', '.'))],
   ['mcp.tools', MCP_TOOL_NAMES],
+  ['audit.actor', ACTOR_TYPES],
+  ['timeline.actor', TIMELINE_ACTOR_TYPES],
   ['assistant.steps', AGENT_TOOL_NAMES.flatMap((tool) => [`${tool}.running`, `${tool}.done`])],
 ]
 

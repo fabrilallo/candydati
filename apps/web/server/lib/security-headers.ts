@@ -26,8 +26,11 @@ const TURNSTILE = 'https://challenges.cloudflare.com'
 const HSTS = 'max-age=31536000; includeSubDomains'
 const PERMISSIONS = 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()'
 
-/** Pages whose URL carries a single-use secret: the browser must not hand that URL to anything it loads or links to. */
-const NO_REFERRER_PREFIXES = ['/consent', '/feedback', '/shortlist', '/accept-invitation']
+/**
+ * Pages whose URL carries a single-use secret (or, for the OAuth pages, a signed authorization request): the browser
+ * must not hand that URL to anything it loads or links to.
+ */
+const NO_REFERRER_PREFIXES = ['/consent', '/feedback', '/shortlist', '/accept-invitation', '/oauth/authorize', '/oauth/consent']
 
 const NO_REFERRER = 'no-referrer'
 const REFERRER = 'strict-origin-when-cross-origin'

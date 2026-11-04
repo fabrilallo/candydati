@@ -56,6 +56,8 @@ export const AUDIT_ACTIONS = [
   'webhook.deleted',
   'api_key.created',
   'api_key.revoked',
+  'connected_app.granted',
+  'connected_app.revoked',
   'import.created',
   'import.committed',
   'import.undone',
@@ -103,15 +105,15 @@ export const AUDIT_ACTIONS = [
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 
-/** Who did it. Agent and API-key actions stay distinguishable from human ones (PRODUCT.md §5). */
-export const ACTOR_TYPES = ['user', 'agent', 'api_key', 'system'] as const;
+/** Who did it. Agent, API-key and connected-app actions stay distinguishable from human ones (PRODUCT.md §5). */
+export const ACTOR_TYPES = ['user', 'agent', 'api_key', 'connected_app', 'system'] as const;
 export type ActorType = (typeof ACTOR_TYPES)[number];
 
 export const auditActorSchema = z.object({
   type: z.enum(ACTOR_TYPES),
-  /** User id, agent name, API key id; null only for `system`. */
+  /** User id, agent name, API key id, connected app grant id; null only for `system`. */
   id: z.string().min(1).nullable(),
-  /** The user an agent or API key acts for. */
+  /** The user an agent, API key or connected app acts for. */
   onBehalfOfUserId: z.string().min(1).nullable().default(null),
 });
 export type AuditActor = z.infer<typeof auditActorSchema>;

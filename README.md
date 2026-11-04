@@ -68,6 +68,9 @@ Status: pre-1.0 (see the [changelog](CHANGELOG.md)). Full product definition: [d
 
 **Agents and integrations**
 - REST API with OpenAPI, API keys, MCP server, process assistant (models via Mastra, off by default)
+- Claude as a custom connector: paste `{your site}/mcp` in Claude (claude.ai, desktop), sign in, pick the organization
+  and approve; OAuth 2.1 with PKCE, no API key, acts with your role, revocable from Settings > Security
+  ([guide](docs/MCP-CONNECTOR.md))
 - Pseudonymized data for every model: first name and id only, identifiers replaced by markers such as `[surname]`;
   message drafts keep `{{candidate.lastName}}` as a variable that the person's composer fills in
 - MCP prompts for HR workflows (write a job ad, answer the inbox, find candidates on declared criteria, weekly report, interview kit), with no install

@@ -4,6 +4,7 @@ import { fail } from '@candydati/domain';
 import type { Auth } from './create-auth.js';
 import { createInMemoryThrottleStore, createSignInThrottle, type SignInThrottle } from './sign-in-throttle.js';
 import { runWithRequestHeaders } from './request-context.js';
+import { isOAuthMachinePath, isUnroutedOAuthPath } from './oauth-paths.js';
 
 export const AUTH_PREFIX = '/api/auth';
 export const SIGN_IN_PATH = `${AUTH_PREFIX}/sign-in/email`;
@@ -23,13 +24,16 @@ export const isSessionRead = (request: Pick<FastifyRequest, 'method' | 'url'>): 
 export const isEmailSending = (request: Pick<FastifyRequest, 'method' | 'url'>): boolean =>
   request.method === 'POST' && EMAIL_SENDING_PATHS.has(pathOf(request));
 
-const toWebRequest = (request: FastifyRequest): Request => {
+/** OAuth token, revocation and registration requests are form-encoded (RFC 6749): their body is passed on as it came. */
+const FORM_BODY_LIMIT = 64 * 1024;
+
+export const toWebRequest = (request: FastifyRequest): Request => {
   const url = new URL(request.url, `${request.protocol}://${request.headers.host ?? 'localhost'}`);
   const hasBody = request.method !== 'GET' && request.method !== 'HEAD' && request.body !== undefined;
   return new Request(url, {
     method: request.method,
     headers: fromNodeHeaders(request.headers),
-    ...(hasBody ? { body: JSON.stringify(request.body) } : {}),
+    ...(hasBody ? { body: typeof request.body === 'string' ? request.body : JSON.stringify(request.body) } : {}),
   });
 };
 
@@ -75,6 +79,7 @@ async function recordOutcome(options: AuthRouteOptions & { throttle: SignInThrot
 
 const budgetOf = (request: FastifyRequest, options: AuthRouteOptions): { max: number; key: string } => {
   if (isSessionRead(request)) return { max: options.readMax, key: `session-read:${request.ip}` };
+  if (isOAuthMachinePath(request)) return { max: options.readMax, key: `oauth-token:${request.ip}` };
   if (isEmailSending(request)) return { max: options.emailMax, key: `auth-email:${request.ip}` };
   return { max: options.authMax, key: request.ip };
 };
@@ -85,6 +90,13 @@ const budgetOf = (request: FastifyRequest, options: AuthRouteOptions): { max: nu
  * down further attempts (from that address, and softly from everywhere) instead of locking the account.
  */
 export function registerAuthRoutes(app: FastifyInstance, auth: Auth, options: AuthRouteOptions): void {
+  void app.register(async (scope) => {
+    scope.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string', bodyLimit: FORM_BODY_LIMIT }, (_request, body, done) => done(null, body));
+    registerAuthRoute(scope, auth, options);
+  });
+}
+
+function registerAuthRoute(app: FastifyInstance, auth: Auth, options: AuthRouteOptions): void {
   const settings = { ...options, throttle: options.throttle ?? createSignInThrottle(createInMemoryThrottleStore()) };
   app.route({
     method: ['GET', 'POST'],
@@ -97,6 +109,7 @@ export function registerAuthRoutes(app: FastifyInstance, auth: Auth, options: Au
       },
     },
     handler: async (request, reply) => {
+      if (isUnroutedOAuthPath(request.url)) return reply.status(404).send(fail('not_found', 'Not found.'));
       const signInEmail = signInEmailOf(request);
       const waitMs = signInEmail === null ? null : await settings.throttle.waitMs(signInEmail, request.ip);
       if (waitMs !== null) {

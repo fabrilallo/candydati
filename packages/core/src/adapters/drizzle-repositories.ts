@@ -3,6 +3,7 @@ import type { BindableTaskQueue } from '../intake-ports.js';
 import type { TransactionPort, TransactionScope } from '../transaction.js';
 import type { DbExecutor } from './db-executor.js';
 import { createDrizzleApiKeys, createDrizzleMemberRoles } from './drizzle-api-keys.js';
+import { createDrizzleConnectedApps } from './drizzle-connected-apps.js';
 import { createDrizzleTwoFactor } from './drizzle-two-factor.js';
 import { createDrizzleApplicationCounts } from './drizzle-application-counts.js';
 import { createDrizzleApplicationIntake } from './drizzle-application-intake.js';
@@ -74,6 +75,7 @@ const jobRepositories = (db: DbExecutor) => {
     distributionSettings: createDrizzleDistributionSettings(db),
     trackedLinks: createDrizzleTrackedLinks(db),
     apiKeys: createDrizzleApiKeys(db),
+    connectedApps: createDrizzleConnectedApps(db),
     memberRoles: createDrizzleMemberRoles(db),
     twoFactor: createDrizzleTwoFactor(db),
     reports: createDrizzleReports(db),

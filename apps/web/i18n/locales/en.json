@@ -462,7 +462,8 @@
       "api_key": "API key",
       "system": "System",
       "unknown": "Unknown",
-      "onBehalf": "on behalf of a user"
+      "onBehalf": "on behalf of a user",
+      "connected_app": "Connected app"
     },
     "detail": {
       "email": "Email",
@@ -481,7 +482,8 @@
       "candidate": "Candidate",
       "candidate_note": "Note",
       "client": "Client",
-      "shortlist": "Shortlist"
+      "shortlist": "Shortlist",
+      "connected_app": "Connected app"
     },
     "empty": "No actions recorded yet.",
     "loadFailed": "We could not load the audit log.",
@@ -647,6 +649,10 @@
         "opened": "Opened a shortlist",
         "cv_opened": "Opened a CV from a shortlist",
         "answered": "Answered on a candidate of a shortlist"
+      },
+      "connected_app": {
+        "granted": "Connected an app to their account",
+        "revoked": "Disconnected an app"
       }
     }
   },
@@ -2735,9 +2741,9 @@
   },
   "mcp": {
     "title": "How to connect an agent (MCP)",
-    "description": "An agent that speaks MCP (Model Context Protocol) can work on job ads and read the pipeline with an API key. It uses the same services as the interface and the key's permissions.",
+    "description": "An agent that speaks MCP (Model Context Protocol) can work on job ads and read the pipeline. It uses the same services as the interface, with your role's permissions or the key's.",
     "endpoint": "Server address",
-    "endpointHint": "Streamable HTTP. Authentication with an API key only.",
+    "endpointHint": "Streamable HTTP. Sign in with your account (OAuth) or use an API key.",
     "copyEndpoint": "Copy the MCP server address",
     "config": "Client configuration",
     "copyConfig": "Copy the configuration",
@@ -2763,6 +2769,14 @@
       "set_evaluation_criteria": "Replaces the evaluation criteria of a job after you agree. Used criteria keep their words; nothing scores or orders candidates.",
       "get_reports": "Aggregated figures of a period: timing, stage moves, sources and responses, with no personal data.",
       "list_clients": "For an agency: the clients with their number of jobs, without contacts."
+    },
+    "claude": {
+      "title": "Connect Claude (custom connector)",
+      "step1": "In Claude, open Settings, then Connectors, and choose \"Add custom connector\".",
+      "step2": "Paste the server address above. No API key needed.",
+      "step3": "Sign in with your account and pick the organization: the connector works as you, with your role.",
+      "note": "API keys remain for other clients and scripts. Connected apps are listed, and disconnected, in the security settings.",
+      "manageLink": "Connected apps"
     }
   },
   "apiReference": {
@@ -4469,7 +4483,8 @@
       "system": "automatic",
       "candidate": "candidate",
       "external": "external",
-      "person": "person"
+      "person": "person",
+      "connected_app": "connected app"
     },
     "item": {
       "received": "Application received ({source})",
@@ -4880,6 +4895,61 @@
         "title": "The page is not available right now",
         "body": "Try again in a few minutes."
       }
+    }
+  },
+  "connectedApps": {
+    "title": "Connected apps",
+    "description": "Apps, like Claude, that a person allowed to work in {organization} on their behalf, with their role. Every call they make ends up in the audit log.",
+    "empty": "No connected apps.",
+    "emptyHow": "To connect Claude: in Claude open Settings, Connectors, \"Add custom connector\" and paste {url}. Then sign in and pick the organization.",
+    "apiLink": "Guide in API and integrations",
+    "declared": "name declared by the app",
+    "unnamed": "Unnamed app",
+    "connectedOn": "Connected on {date}",
+    "connectedBy": "Connected by {name}",
+    "connectedByFormer": "Connected by a former member",
+    "access": "Access",
+    "scope": {
+      "mcp": "MCP tools",
+      "offline_access": "Stays connected"
+    },
+    "revoke": "Disconnect",
+    "revokeTitle": "Disconnect the app?",
+    "revokeBody": "{name} stops working at once. To use it again, connect it anew from the app.",
+    "revokeConfirm": "Disconnect",
+    "revoked": "App disconnected"
+  },
+  "oauth": {
+    "authorize": {
+      "pageTitle": "Connecting",
+      "working": "Checking your sign-in and going back to the request…"
+    },
+    "failedTitle": "We could not continue",
+    "consent": {
+      "pageTitle": "Allow access",
+      "loading": "Loading the request…",
+      "title": "{name} wants to work with your account",
+      "titleUnnamed": "An app wants to work with your account",
+      "declared": "The name and address are declared by the app itself: go on only if you started this connection.",
+      "returnTo": "After your answer you go back to",
+      "organization": "Organization",
+      "organizationHint": "The app works only in this organization.",
+      "twoFactorOption": "{name} (two-factor authentication required)",
+      "twoFactorWarning": "{name} requires two-factor authentication for your role. Turn it on, then start the connection again.",
+      "twoFactorLink": "Turn on two-factor authentication",
+      "can": "As {role} in {organization}, the app can:",
+      "never": "It can never move candidates between stages, decide on them, write to them or erase them, nor manage members, keys or settings: those stay with a person.",
+      "asYou": "It works as you, with your role, and every call ends up in the audit log. You can disconnect it at any time in the security settings.",
+      "allow": "Allow",
+      "deny": "Deny",
+      "noOrganization": "You are not part of any organization yet. Create one or accept an invitation, then start the connection again from the app."
+    },
+    "errors": {
+      "expired": "The request expired or is no longer valid. Start the connection again from your app.",
+      "twoFactorRequired": "This organization requires two-factor authentication for your role. Turn it on, then try again.",
+      "notAMember": "You are not part of this organization.",
+      "noOrganization": "Pick an organization before allowing access.",
+      "generic": "Something went wrong. Start the connection again from your app."
     }
   }
 }

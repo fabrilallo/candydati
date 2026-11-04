@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { mcpConfigSnippet, mcpEndpoint } from '@/lib/api-keys'
+import { SECURITY_SETTINGS } from '@/lib/auth-paths'
 import { MCP_TOOL_NAMES } from '@candydati/domain'
 
 /** How to connect an external agent: the endpoint, a config block for MCP clients, and what each tool does. */
@@ -24,6 +25,18 @@ const snippet = computed(() => mcpConfigSnippet({ serverName: platform.value.nam
           <CopyButton :text="endpoint" :label="t('mcp.copyEndpoint')" />
         </div>
         <p class="text-xs text-muted-foreground">{{ t('mcp.endpointHint') }}</p>
+      </div>
+      <div class="grid gap-2" data-testid="mcp-claude">
+        <p class="text-sm font-medium">{{ t('mcp.claude.title') }}</p>
+        <ol class="grid list-decimal gap-1 pl-5 text-sm text-muted-foreground marker:font-medium marker:text-foreground">
+          <li>{{ t('mcp.claude.step1') }}</li>
+          <li>{{ t('mcp.claude.step2') }}</li>
+          <li>{{ t('mcp.claude.step3') }}</li>
+        </ol>
+        <p class="text-xs text-muted-foreground">
+          {{ t('mcp.claude.note') }}
+          <NuxtLink :to="SECURITY_SETTINGS" class="font-medium text-link underline-offset-4 hover:underline">{{ t('mcp.claude.manageLink') }}</NuxtLink>
+        </p>
       </div>
       <div class="grid gap-2">
         <div class="flex items-center justify-between gap-3">

@@ -16,6 +16,7 @@ const manages = computed(() => can(viewer.value?.role ?? null, 'organization:upd
     <div class="grid gap-8">
       <PageHeader :title="t('security.pageTitle')" :description="t('security.pageDescription')" :icon="LockKeyholeIcon" />
       <TwoFactorPanel :required="required" />
+      <ConnectedAppsPanel />
       <OrganizationSecurityPanel v-if="manages" />
     </div>
   </AppPage>

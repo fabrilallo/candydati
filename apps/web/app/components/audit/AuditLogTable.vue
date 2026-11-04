@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BotIcon, CpuIcon, KeyRoundIcon } from '@lucide/vue'
+import { BotIcon, CpuIcon, KeyRoundIcon, PlugIcon } from '@lucide/vue'
 import { actionLabelKey, actorKind, auditDetails, targetLabel, type AuditEventView } from '@/lib/audit-view'
 import { formatDateTime } from '@/lib/format'
 import { initials } from '@/lib/initials'
@@ -8,7 +8,7 @@ import { parseMemberRole } from '@/lib/permissions-ui'
 /** The audit log as a readable feed: who, what in plain language, on what, when. */
 defineProps<{ events: readonly AuditEventView[] }>()
 const { t, te, locale } = useI18n()
-const icons = { agent: BotIcon, api_key: KeyRoundIcon, system: CpuIcon } as const
+const icons = { agent: BotIcon, api_key: KeyRoundIcon, connected_app: PlugIcon, system: CpuIcon } as const
 
 const targetType = (type: string): string => (te(`audit.targetTypes.${type}`) ? t(`audit.targetTypes.${type}`) : type)
 const detailValue = (key: string, value: string): string => {

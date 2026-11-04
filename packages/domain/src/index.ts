@@ -45,6 +45,7 @@ export * from './candidate/correction.js';
 export * from './candidate/retention.js';
 export * from './access/machine-access.js';
 export * from './access/api-key.js';
+export * from './access/connected-app.js';
 export * from './distribution/index.js';
 export * from './import/index.js';
 export * from './feedback/index.js';

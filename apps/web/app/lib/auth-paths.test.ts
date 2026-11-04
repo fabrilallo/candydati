@@ -127,3 +127,24 @@ describe('public careers pages', () => {
     expect(resolveGuard('/careers/acme', withoutOrg)).toBeNull()
   })
 })
+
+describe('OAuth pages of the MCP connection', () => {
+  const signed = '/oauth/authorize?client_id=c1&scope=mcp&exp=1&sig=abc%2Bd'
+
+  it('send an anonymous visitor to login and back with the whole signed query', () => {
+    expect(resolveGuard('/oauth/authorize', null, undefined, signed)).toBe(`/login?redirect=${encodeURIComponent(signed)}`)
+    expect(resolveGuard('/oauth/consent', null)).toBe('/login?redirect=%2Foauth%2Fconsent')
+  })
+
+  it('keep dropping the query of other pages', () => {
+    expect(resolveGuard('/app/jobs', null, undefined, '/app/jobs?x=1')).toBe('/login?redirect=%2Fapp%2Fjobs')
+  })
+
+  it('let a signed-in person through, with or without an organization', () => {
+    for (const path of ['/oauth/authorize', '/oauth/consent']) {
+      expect(resolveGuard(path, withOrg, undefined, `${path}?a=1`)).toBeNull()
+      expect(resolveGuard(path, withoutOrg, undefined, `${path}?a=1`)).toBeNull()
+      expect(mayNeedTwoFactor(path, withOrg)).toBe(false)
+    }
+  })
+})

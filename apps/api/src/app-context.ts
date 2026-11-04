@@ -56,6 +56,8 @@ import { authenticateApiKey, withStorageErrors } from '@candydati/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
 import { createApiKeyDeps } from './wiring/api-key-deps.js';
+import { createConnectedAppWiring, type ConnectedAppWiring } from './wiring/connected-app-deps.js';
+import { mcpOAuthSettings } from './auth/mcp-oauth-settings.js';
 import { createDistributionDeps, createTrackedLinkDeps } from './wiring/distribution-deps.js';
 import { createMigrationDeps, type MigrationRouteDeps } from './wiring/migration-deps.js';
 import { createImportDeps, type ImportWiring } from './wiring/import-deps.js';
@@ -120,8 +122,14 @@ export interface AppContext extends ClientWiring {
   readonly resolveActor: (request: FastifyRequest) => Promise<Actor>;
   /** Session only: refuses any request that carries a bearer. */
   readonly resolveSessionActor: (request: FastifyRequest) => Promise<Actor>;
-  /** Bearer API key only (MCP). */
+  /** Bearer API key only. */
   readonly resolveKeyActor: (request: FastifyRequest, cost?: number) => Promise<DelegatedActor>;
+  /** MCP: a bearer API key or an OAuth access token of a connected app. */
+  readonly resolveMcpActor: (request: FastifyRequest, cost?: number) => Promise<DelegatedActor>;
+  /** OAuth for MCP clients: on or off, and the MCP resource URL. */
+  readonly mcpOAuth: ConnectedAppWiring['context']['mcpOAuth'];
+  /** Apps people connected with OAuth (Claude...): listing and revocation. */
+  readonly connectedAppDeps: ConnectedAppWiring['context']['connectedAppDeps'];
   readonly apiKeyDeps: ApiKeyDeps;
   /** Organization security settings (2FA requirement for owners and admins). */
   readonly securityDeps: SecurityDeps;
@@ -223,13 +231,12 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
   const { auditLog } = uow.repositories;
   const core: CoreDeps = { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams };
-  const auth = createAuth({ env, db, core, mailer, requiresTwoFactor: async (organizationId) => (await uow.repositories.securitySettings.get(organizationId)).requireTwoFactor, emailReady: () => emailRuntime.ready() });
+  const connected = createConnectedAppWiring(uow, mcpOAuthSettings(env));
+  const auth = createAuth({ env, db, core, mailer, requiresTwoFactor: async (organizationId) => (await uow.repositories.securitySettings.get(organizationId)).requireTwoFactor, emailReady: () => emailRuntime.ready(), onConnectionGranted: connected.onConnectionGranted });
   const emailConfig = liveMessagingConfig(env.platform, emailRuntime);
   const messaging = createMessagingDeps({ env, uow, queue, sender, identity, onReceiptError, config: emailConfig });
-  const resolveFromHeaders = createSessionResolver(auth, db, uow);
   const apiKeyDeps = createApiKeyDeps(uow, env.API_KEY_DEFAULT_TTL_DAYS);
-  const limits = rateLimit ?? DEFAULT_RATE_LIMIT;
-  const actors = createActors({ env, limits, apiKeyDeps, resolveFromHeaders });
+  const actors = createActors({ env, limits: rateLimit ?? DEFAULT_RATE_LIMIT, apiKeyDeps, resolveFromHeaders: createSessionResolver(auth, db, uow), authenticateConnectedApp: connected.authenticateConnectedApp });
   const hr = createHrDeps({ uow, files, sender, config: emailConfig, onFeedbackMailError: onReceiptError, queue });
   const phase2 = createPhase2Deps({ uow, files, queue, receipts: messaging.receipts, feedback: hr.stageEntry });
   const phase5 = createPhase5Deps({ uow, files, queue, candidateDeps: phase2.candidateDeps, providers: configuredProviders(env, aiRuntime), zip: zipStreamFactory, feedbackRecords: hr.feedbackRecords });
@@ -242,6 +249,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     userNames: createUserNameLookup(uow.repositories.users),
     ...actors,
     apiKeyDeps,
+    ...connected.context,
     ...phase2,
     ...phase5,
     ...createImportDeps({ uow, files, queue }),
@@ -354,15 +362,17 @@ function createSessionResolver(auth: ReturnType<typeof createAuth>, db: AppConte
   });
 }
 
-function createActors({ env, limits, apiKeyDeps, resolveFromHeaders }: {
+function createActors({ env, limits, apiKeyDeps, resolveFromHeaders, authenticateConnectedApp }: {
   env: AppContextDeps['env'];
   limits: RateLimitSettings;
   apiKeyDeps: ReturnType<typeof createApiKeyDeps>;
   resolveFromHeaders: ReturnType<typeof createSessionResolver>;
+  authenticateConnectedApp: ConnectedAppWiring['authenticateConnectedApp'];
 }) {
   return createRequestActors({
     session: async (request) => resolveFromHeaders(fromNodeHeaders(request.headers)),
     authenticate: (secret) => authenticateApiKey(apiKeyDeps, secret),
+    authenticateConnectedApp,
     limiter: createKeyRateLimiter({ max: limits.apiKeyMax ?? env.API_KEY_RATE_LIMIT ?? DEFAULT_API_KEY_MAX, windowMs: 60_000 }),
   });
 }

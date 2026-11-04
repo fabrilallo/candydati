@@ -148,6 +148,9 @@ const ROWS: readonly Row[] = [
 /** Use cases a job-scoped role can run that hold no job or candidate data of their own, with the reason. */
 const EXEMPT: Readonly<Record<string, string>> = {
   createJob: 'creates a new job; its creator joins the team',
+  listConnectedApps: 'OAuth connections (client, person, organization): account settings, no job, no candidate',
+  revokeConnectedApp: 'deletes an OAuth connection and its tokens: no job, no candidate',
+  recordConnectedAppGrant: 'audits an OAuth connection the person just granted: no job, no candidate',
   getInstanceEmailSettings: 'whether and how the instance sends email: no job, no candidate, never a secret',
   getInstanceAiSettings: 'which AI models the instance uses and whether they are on: no job, no candidate, never a key',
   getOrganizationLogo: "the organization's logo, public on its careers page: no job, no candidate",

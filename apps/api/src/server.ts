@@ -24,6 +24,8 @@ import { requestLogSerializer } from './http/log-serializers.js';
 import { registerSecurity, trustedOrigins } from './plugins/security.js';
 import { registerApplicationCvRoute } from './routes/application-cv.js';
 import { registerApiKeyRoutes } from './routes/api-keys.js';
+import { registerConnectedAppRoutes } from './routes/connected-apps.js';
+import { registerOAuthDiscoveryRoutes } from './auth/oauth-discovery-routes.js';
 import { registerMcpRoute } from './mcp/route.js';
 import { registerOpenApiRoute } from './openapi/route.js';
 import { registerDistributionRoutes } from './routes/distribution.js';
@@ -151,6 +153,8 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   registerApiKeyRoutes(app, ctx);
   registerSecuritySettingsRoutes(app, ctx);
   registerMcpRoute(app, ctx);
+  registerConnectedAppRoutes(app, ctx);
+  if (ctx.mcpOAuth.enabled) registerOAuthDiscoveryRoutes(app, ctx.auth);
   registerAccountRoutes(app, ctx, deps, metrics);
   registerRecruitingRoutes(app, ctx);
   await registerCandidateFacingRoutes(app, ctx);
