@@ -536,7 +536,8 @@
       "application": {
         "received": "Ha ricevuto una candidatura",
         "moved": "Ha spostato una candidatura di fase",
-        "decided": "Ha registrato l'esito di una candidatura"
+        "decided": "Ha registrato l'esito di una candidatura",
+        "hire_dates_updated": "Ha indicato la data di accettazione dell'offerta o di inizio di un'assunzione"
       },
       "candidate": {
         "viewed": "Ha aperto la scheda di un candidato",
@@ -1546,6 +1547,20 @@
       "title": "Registrare l'esito?",
       "body": "La candidatura di {name} si chiude con l'esito: {outcome}. Dopo non si potrà più spostare. Nessun messaggio viene inviato in automatico.",
       "confirm": "Registra l'esito"
+    },
+    "hireDates": {
+      "title": "Offerta e inizio",
+      "hint": "Facoltative, solo la data. Il tempo di assunzione nei report è misurato fino al giorno di accettazione dell'offerta, se lo indichi.",
+      "offerAcceptedOn": "Offerta accettata il",
+      "startOn": "Data di inizio",
+      "notSet": "Non indicata",
+      "edit": "Modifica date",
+      "save": "Salva le date",
+      "saved": "Date salvate",
+      "invalid": "Inserisci una data valida tra il 2000 e il 2100.",
+      "offerBeforeApplication": "L'offerta non può essere accettata prima della data della candidatura.",
+      "startBeforeOffer": "La data di inizio non può precedere il giorno di accettazione dell'offerta.",
+      "startBeforeApplication": "La data di inizio non può precedere la data della candidatura."
     },
     "tags": {
       "label": "Tag",
@@ -3630,7 +3645,10 @@
     },
     "times": {
       "title": "Tempi per annuncio",
-      "info": "Assunzione: giorni dalla candidatura all'assunzione. Copertura: giorni dalla pubblicazione alla prima assunzione.",
+      "info": "Assunzione: giorni dalla candidatura al giorno di accettazione dell'offerta, se registrato, altrimenti al giorno in cui l'assunzione è stata registrata. Copertura: giorni dalla pubblicazione alla prima assunzione.",
+      "hireBasis": "{offer} assunzioni su {total} misurate fino alla data di accettazione dell'offerta, {recorded} fino al giorno di registrazione dell'assunzione.",
+      "startMedian": "Tempo all'inizio: mediana di {days}, {count} assunzioni con una data di inizio",
+      "startNone": "Nessuna assunzione di questo periodo ha una data di inizio.",
       "fillMedian": "giorno di copertura mediana | giorni di copertura mediana",
       "fillBasis": "nessun annuncio | 1 annuncio | {count} annunci",
       "job": "Annuncio",

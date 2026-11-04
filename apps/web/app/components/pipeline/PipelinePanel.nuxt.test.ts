@@ -139,6 +139,30 @@ describe('PipelinePanel', () => {
     expect(idsIn(wrapper, 'received')).toEqual([])
   })
 
+  it('asks for the optional offer and start dates on a hire, blocks a wrong order and sends the dates', async () => {
+    const wrapper = await mountPanel()
+    await wrapper.find('[data-card-id="a1"] [data-testid="card-menu"]').trigger('keydown', { key: 'Enter' })
+    await flushPromises()
+    document.body.querySelector<HTMLElement>('[data-testid="card-decide"]')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+    await flushPromises()
+    await vi.waitFor(() => expect(document.body.querySelector('[data-testid="decide-hired"]')).not.toBeNull())
+    document.body.querySelector<HTMLElement>('[data-testid="decide-hired"]')?.click()
+    await vi.waitFor(() => expect(document.body.querySelector('[data-testid="hire-dates-fields"]')).not.toBeNull())
+    const type = async (testId: string, value: string) => {
+      const input = document.body.querySelector<HTMLInputElement>(`[data-testid="${testId}"]`) as HTMLInputElement
+      input.value = value
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+      await flushPromises()
+    }
+    await type('hire-offer-date', '2099-02-01')
+    await type('hire-start-date', '2099-01-01')
+    expect(document.body.querySelector<HTMLButtonElement>('[data-testid="confirm"]')?.disabled).toBe(true)
+    await type('hire-start-date', '2099-03-01')
+    expect(document.body.querySelector<HTMLButtonElement>('[data-testid="confirm"]')?.disabled).toBe(false)
+    document.body.querySelector<HTMLElement>('[data-testid="confirm"]')?.click()
+    await vi.waitFor(() => expect(state.calls).toEqual([{ id: 'a1', action: 'decide', body: { outcome: 'hired', offerAcceptedOn: '2099-02-01', startOn: '2099-03-01' } }]))
+  })
+
   it('keeps decided applications in a collapsible outcomes area', async () => {
     const wrapper = await mountPanel()
     const outcomes = wrapper.find('[data-testid="outcomes"]')

@@ -12,7 +12,12 @@ export const reportsSchema = z.object({
   period: z.object({ from: z.iso.datetime(), to: z.iso.datetime() }),
   jobId: z.string().nullable(),
   minSample: z.number().int(),
-  timeToHire: z.object({ overall: duration, byJob: z.array(duration.extend(jobRef)) }),
+  timeToHire: z.object({
+    overall: duration,
+    byJob: z.array(duration.extend(jobRef)),
+    basis: z.object({ offerDate: z.number().int(), recordedDate: z.number().int() }).describe('Hires of the period measured to the offer accepted date, and hires measured to the day the hire was recorded.'),
+    toStart: duration.describe('Days from the application to the start date, of the hires that have one.'),
+  }),
   timeToFill: z.object({
     overall: duration,
     items: z.array(z.object({ ...jobRef, publishedAt: z.iso.datetime(), firstHireAt: z.iso.datetime(), days: z.number() })),

@@ -28,6 +28,7 @@ export const AUDIT_ACTIONS = [
   'application.received',
   'application.moved',
   'application.decided',
+  'application.hire_dates_updated',
   'candidate.viewed',
   'candidate.updated',
   'candidate.cv_downloaded',

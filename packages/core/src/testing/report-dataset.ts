@@ -41,6 +41,9 @@ interface App {
   /** Stage entries `[stage, time]` (`received` included), then optionally the decision. */
   readonly entries: readonly (readonly [string, string])[];
   readonly decision?: readonly [Outcome, string];
+  /** Hired only: offer accepted and start dates (`YYYY-MM-DD`). */
+  readonly offer?: string;
+  readonly start?: string;
 }
 
 /**
@@ -48,8 +51,8 @@ interface App {
  * applications entering stages and being decided on known dates, 13 response promises. See `expectedReports`.
  */
 const APPS: readonly App[] = [
-  { key: 'a1', campaign: 'autumn', job: 'backend', created: '06-02T10:00', origin: 'linkedin', entries: [['received', '06-02T10:00'], ['stage-0', '06-04T10:00'], ['stage-1', '06-10T10:00']], decision: ['hired', '06-12T10:00'] },
-  { key: 'a2', campaign: 'autumn', job: 'backend', created: '06-03T00:00', origin: 'linkedin', entries: [['received', '06-03T00:00'], ['stage-0', '06-05T00:00']], decision: ['hired', '06-23T00:00'] },
+  { key: 'a1', campaign: 'autumn', job: 'backend', created: '06-02T10:00', origin: 'linkedin', entries: [['received', '06-02T10:00'], ['stage-0', '06-04T10:00'], ['stage-1', '06-10T10:00']], decision: ['hired', '06-12T10:00'], offer: '2026-06-09', start: '2026-07-01' },
+  { key: 'a2', campaign: 'autumn', job: 'backend', created: '06-03T00:00', origin: 'linkedin', entries: [['received', '06-03T00:00'], ['stage-0', '06-05T00:00']], decision: ['hired', '06-23T00:00'], offer: '2026-06-20' },
   { key: 'a3', job: 'backend', created: '06-05T12:00', origin: 'google.com', entries: [['received', '06-05T12:00'], ['stage-0', '06-06T12:00']], decision: ['not_selected', '06-07T12:00'] },
   { key: 'a4', job: 'backend', created: '06-06T12:00', origin: 'direct', entries: [['received', '06-06T12:00']], decision: ['withdrawn', '06-08T12:00'] },
   { key: 'a5', job: 'backend', created: '05-20T10:00', origin: 'referral', entries: [['received', '05-20T10:00'], ['stage-0', '06-02T10:00'], ['stage-1', '06-03T10:00']], decision: ['hired', '06-04T10:00'] },
@@ -61,7 +64,7 @@ const APPS: readonly App[] = [
   { key: 'c1', job: 'closed', created: '06-02T10:00', origin: 'direct', entries: [['received', '06-02T10:00'], ['stage-0', '06-03T10:00']], decision: ['not_selected', '06-09T10:00'] },
   { key: 'c2', job: 'closed', created: '05-25T10:00', origin: 'direct', entries: [['received', '05-25T10:00']], decision: ['withdrawn', '06-01T10:00'] },
   { key: 'c3', job: 'closed', created: '06-20T10:00', origin: 'direct', entries: [['received', '06-20T10:00']] },
-  { key: 'c4', job: 'closed', created: '06-10T10:00', origin: 'direct', entries: [['received', '06-10T10:00']], decision: ['hired', '06-18T10:00'] },
+  { key: 'c4', job: 'closed', created: '06-10T10:00', origin: 'direct', entries: [['received', '06-10T10:00']], decision: ['hired', '06-18T10:00'], start: '2026-06-30' },
 ];
 
 type Pr = readonly [app: string, stage: string, started: string, due: string, responded: string | null, status: ResponsePromise['status']];
@@ -125,6 +128,8 @@ export async function seedReportDataset(repos: DatasetRepositories, organization
         id, organizationId, jobId: ids[app.job], candidateId, stageId: last[0], outcome, origin: app.origin,
         ...(app.campaign ? { originCampaign: app.campaign } : {}),
         createdAt: at(app.created), updatedAt: at(app.created), stageChangedAt: at(last[1]), closedAt: closedAt === null ? null : at(closedAt),
+        ...(app.offer ? { offerAcceptedOn: app.offer } : {}),
+        ...(app.start ? { startOn: app.start } : {}),
       }),
     );
     let previous: string | null = null;
@@ -182,8 +187,10 @@ export function expectedReports(ids: DatasetIds): ReportsDto {
     jobId: null,
     minSample: 5,
     timeToHire: {
-      overall: stat(5, 10, 15),
-      byJob: [{ ...b, ...stat(3, 15, 17.5) }, { ...c, ...stat(1, 8, 8) }, { ...f, ...stat(1, 3, 3) }],
+      overall: stat(5, 8, 15),
+      byJob: [{ ...b, ...stat(3, 15, 16) }, { ...c, ...stat(1, 8, 8) }, { ...f, ...stat(1, 3, 3) }],
+      basis: { offerDate: 2, recordedDate: 3 },
+      toStart: stat(2, 24.5, 26.75),
     },
     timeToFill: {
       overall: stat(2, 34.42, 49.42),

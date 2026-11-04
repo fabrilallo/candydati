@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ReportsView } from '@candydati/domain'
-import { formatDaysValue, NO_VALUE, timeRows } from '@/lib/report-view'
+import { formatDaysValue, hireBasis, NO_VALUE, timeRows } from '@/lib/report-view'
 
 /**
  * Time to hire (median and 75th percentile) and time to fill per job. A table, readable as is, with a dot plot on a
@@ -11,6 +11,7 @@ const { t, locale } = useI18n()
 const view = computed(() => timeRows(props.report))
 const days = (value: number | null): string => (value === null ? NO_VALUE : formatDaysValue(value, locale.value))
 const fill = computed(() => props.report.timeToFill?.overall ?? null)
+const basis = computed(() => hireBasis(props.report))
 const failed = computed(() => props.report.timeToHire === null || props.report.timeToFill === null)
 </script>
 
@@ -56,6 +57,11 @@ const failed = computed(() => props.report.timeToHire === null || props.report.t
       </table>
     </div>
     <ChartEmpty v-else :title="t('reports.times.emptyTitle')" :body="t('reports.times.emptyBody')" />
+    <div v-if="basis" class="mt-4 grid gap-1 text-xs text-muted-foreground" data-testid="hire-basis">
+      <p>{{ t('reports.times.hireBasis', { offer: basis.offer, total: basis.total, recorded: basis.recorded }) }}</p>
+      <p v-if="basis.start.count > 0 && basis.start.median !== null" data-testid="time-to-start">{{ t('reports.times.startMedian', { days: days(basis.start.median), count: basis.start.count }) }}</p>
+      <p v-else>{{ t('reports.times.startNone') }}</p>
+    </div>
     <template v-if="view.rows.length > 0" #footer>
       <ul class="hidden flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground sm:flex" aria-hidden="true">
         <li class="flex items-center gap-1.5"><span class="size-2.5 rounded-full bg-primary" />{{ t('reports.times.median') }}</li>

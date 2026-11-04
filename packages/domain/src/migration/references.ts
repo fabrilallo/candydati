@@ -1,3 +1,4 @@
+import { checkHireDates } from '../candidate/hire-dates.js';
 import { MIGRATION_LIMITS, isMigrationFilePath } from './constants.js';
 import type { MigrationApplication, MigrationPackage } from './package.js';
 
@@ -66,6 +67,20 @@ function checkApplicationDates(application: MigrationApplication, index: number,
   if (closedAt !== undefined && before(closedAt, createdAt)) {
     issues.push({ path: ['applications', index, 'closedAt'], message: 'closed_before_created' });
   }
+  checkHireDatesOf(application, index, issues);
+}
+
+/** The offer and start dates belong to a hire and keep the order application, offer, start. */
+function checkHireDatesOf(application: MigrationApplication, index: number, issues: Issues): void {
+  const { offerAcceptedOn, startOn } = application;
+  if (offerAcceptedOn === undefined && startOn === undefined) return;
+  const at = (field: string): (string | number)[] => ['applications', index, field];
+  if (application.outcome !== 'hired') {
+    issues.push({ path: at(offerAcceptedOn === undefined ? 'startOn' : 'offerAcceptedOn'), message: 'hire_dates_require_hired' });
+    return;
+  }
+  const issue = checkHireDates(new Date(application.createdAt), { offerAcceptedOn: offerAcceptedOn ?? null, startOn: startOn ?? null });
+  if (issue !== null) issues.push({ path: at(issue === 'offer_before_application' ? 'offerAcceptedOn' : 'startOn'), message: issue });
 }
 
 interface Known {

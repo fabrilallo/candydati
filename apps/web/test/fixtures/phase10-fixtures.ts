@@ -21,6 +21,8 @@ export const reportsFixture = (overrides: Partial<ReportsDto> = {}): ReportsFixt
       { jobId: 'j1', title: 'Data Engineer', count: 3, median: 20, p75: 30 },
       { jobId: 'j2', title: 'Backend <Developer>', count: 1, median: 36, p75: 36 },
     ],
+    basis: { offerDate: 3, recordedDate: 1 },
+    toStart: { count: 2, median: 45, p75: 50 },
   },
   timeToFill: {
     overall: { count: 3, median: 36, p75: 40 },
@@ -75,7 +77,7 @@ export const reportsFixture = (overrides: Partial<ReportsDto> = {}): ReportsFixt
 /** Nothing happened in the period. */
 export const emptyReportsFixture = (): ReportsFixture =>
   reportsFixture({
-    timeToHire: { overall: { count: 0, median: null, p75: null }, byJob: [] },
+    timeToHire: { overall: { count: 0, median: null, p75: null }, byJob: [], basis: { offerDate: 0, recordedDate: 0 }, toStart: { count: 0, median: null, p75: null } },
     timeToFill: { overall: { count: 0, median: null, p75: null }, items: [] },
     funnel: { stages: [], outcomes: NO_OUTCOMES, outcomesByJob: [] },
     sources: [],

@@ -98,6 +98,7 @@ export * from './mappers/automation-dto.js';
 export * from './mappers/webhook-dto.js';
 export * from './use-cases/refs.js';
 export * from './use-cases/candidates/decide-applications.js';
+export * from './use-cases/candidates/update-hire-dates.js';
 export * from './use-cases/candidates/list-attention.js';
 export * from './use-cases/notifications/notifications.js';
 export * from './use-cases/tasks/tasks.js';

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { cvExtractionSchema, EXTRACTION_STATUSES, OUTCOMES } from '../candidate/application.js';
 import { ATTACHMENT_KINDS } from '../candidate/attachment.js';
+import { hireDateSchema } from '../candidate/hire-dates.js';
 import { selectionStageSchema } from '../job/content.js';
 import { JOB_STATUSES } from '../job/job.js';
 import { RESPONSE_STATES } from '../response/response-state.js';
@@ -28,6 +29,9 @@ export const applicationCardSchema = z.object({
   createdAt: isoDate,
   stageChangedAt: isoDate,
   closedAt: isoDate.nullable(),
+  /** Hired only (`YYYY-MM-DD`): the day the offer was accepted and the day the person starts. null: not recorded. */
+  offerAcceptedOn: hireDateSchema.nullable(),
+  startOn: hireDateSchema.nullable(),
   noteCount: count,
   /** The stage was removed from the job's process: shown as "stage removed". */
   stageRemoved: z.boolean(),
@@ -108,6 +112,9 @@ export const candidateApplicationSchema = z.object({
   createdAt: isoDate,
   stageChangedAt: isoDate,
   closedAt: isoDate.nullable(),
+  /** Hired only (`YYYY-MM-DD`): the day the offer was accepted and the day the person starts. null: not recorded. */
+  offerAcceptedOn: hireDateSchema.nullable(),
+  startOn: hireDateSchema.nullable(),
   ...responseFields,
   ...originFields,
   /** Whether consent was given or is still to renew lives in `consent.status`. */

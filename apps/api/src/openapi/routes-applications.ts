@@ -1,4 +1,4 @@
-import { BULK_MESSAGE_MAX, CONSENT_SCOPES, OUTCOMES, decidedSchema, erasedSchema, sendResultSchema } from '@candydati/domain';
+import { BULK_MESSAGE_MAX, CONSENT_SCOPES, OUTCOMES, decidedSchema, erasedSchema, hireDatesSchema, sendResultSchema } from '@candydati/domain';
 import { z } from 'zod';
 import { confirmNameBody } from './schemas-admin.js';
 import { candidateDetailSchema } from './schemas-work.js';
@@ -17,7 +17,12 @@ export const applicationRoutes: readonly RouteSpec[] = [
   {
     method: 'post', path: '/api/v1/applications/:id/decide', tag: 'Pipeline', summary: 'Decide the outcome of an application', scope: 'candidate:decide', sessionOnly: true,
     description: 'Every application ends with an outcome. A decision is a person\'s: never allowed to an API key or the assistant.',
-    body: z.object({ outcome }), response: { schema: 'ApplicationCard' },
+    body: z.object({ outcome, ...hireDatesSchema.shape }), response: { schema: 'ApplicationCard' },
+  },
+  {
+    method: 'patch', path: '/api/v1/applications/:id/hire-dates', tag: 'Pipeline', summary: 'Set the offer accepted and start dates of a hire', scope: 'candidate:decide', sessionOnly: true,
+    description: 'Only for an application decided `hired` (`409` otherwise). Dates are `YYYY-MM-DD`, no time. `offerAcceptedOn` is not before the application day and `startOn` is not before `offerAcceptedOn` (`422`). A key left out is kept, `null` clears it. Recorded in the audit log. With an offer date, the time to hire in the reports is measured to it.',
+    body: hireDatesSchema, response: { schema: 'ApplicationCard' },
   },
   {
     method: 'post', path: '/api/v1/applications/decide', tag: 'Pipeline', summary: 'Decide many applications at once', scope: 'candidate:decide', sessionOnly: true,

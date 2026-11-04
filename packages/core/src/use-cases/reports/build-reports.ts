@@ -102,6 +102,8 @@ export function buildReports(input: ReportInput): ReportsDto {
     timeToHire: {
       overall: aggregates.hireDays.overall,
       byJob: aggregates.hireDays.byJob.map((row) => ({ ...refOf(jobs, row.jobId), ...row.stat })).toSorted(byTitle),
+      basis: aggregates.hireDays.basis,
+      toStart: aggregates.hireDays.toStart,
     },
     timeToFill: buildTimeToFill(input, jobs),
     funnel: { stages: buildFunnel(input.jobs, aggregates.stageEntries, aggregates.stageAdvances, jobId !== null), outcomes, outcomesByJob },

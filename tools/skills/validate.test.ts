@@ -188,6 +188,20 @@ describe('validate.mjs', () => {
     expect(result.err).toContain('applications[0].closedAt: closedAt is required when there is an outcome');
   });
 
+  it('accepts hire dates on a hired application and refuses them in the wrong order or on another outcome', () => {
+    const hired = validManifest();
+    Object.assign(row(hired, 'applications'), { outcome: 'hired', offerAcceptedOn: '2025-02-01', startOn: '2025-03-03' });
+    expect(run(makeFolder(hired)).code).toBe(0);
+
+    const wrongOrder = validManifest();
+    Object.assign(row(wrongOrder, 'applications'), { outcome: 'hired', offerAcceptedOn: '2025-02-10', startOn: '2025-02-09' });
+    expect(run(makeFolder(wrongOrder)).err).toContain('applications[0].startOn: startOn is before offerAcceptedOn');
+
+    const notHired = validManifest();
+    Object.assign(row(notHired, 'applications'), { startOn: '2025-03-03' });
+    expect(run(makeFolder(notHired)).err).toContain('applications[0].startOn: offerAcceptedOn and startOn are only allowed when the outcome is "hired"');
+  });
+
   it.each(['../secret.pdf', 'files/../secret.pdf', 'docs/cv.pdf', '/etc/passwd', 'files\\cv.pdf'])('refuses the file path %s', (path) => {
     const manifest = validManifest();
     (row(manifest, 'applications')['files'] as Row[])[0]!['path'] = path;

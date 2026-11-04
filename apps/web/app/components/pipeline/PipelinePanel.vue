@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import type { ApplicationCardDto, EmailTemplateKind, Outcome  } from '@candydati/domain'
+import type { ApplicationCardDto, EmailTemplateKind, Outcome } from '@candydati/domain'
 import { ListChecksIcon, SearchIcon } from '@lucide/vue'
 import { fullName } from '@/lib/candidate-view'
+import { EMPTY_HIRE_DRAFT, hireDatesBody, hireDatesProblemKey, type HireDraft } from '@/lib/hire-dates'
 import { outcomeTemplateKind } from '@/lib/message-view'
 import { can } from '@/lib/permissions-ui'
 import { boardOf } from '@/lib/pipeline-board'
@@ -27,6 +28,13 @@ const empty = computed(() => (pl.pipeline.value?.applications.length ?? 0) === 0
 
 const composing = ref<{ readonly cards: readonly ApplicationCardDto[]; readonly kind: EmailTemplateKind | null; readonly fromSelection: boolean } | null>(null)
 const deciding = ref<{ readonly card: ApplicationCardDto; readonly outcome: Outcome } | null>(null)
+const hireDraft = ref<HireDraft>(EMPTY_HIRE_DRAFT)
+const askHireDates = computed(() => deciding.value?.outcome === 'hired')
+const hireProblem = computed(() => (deciding.value && askHireDates.value ? hireDatesProblemKey(deciding.value.card.createdAt, hireDraft.value) : null))
+const startDeciding = (card: ApplicationCardDto, outcome: Outcome): void => {
+  hireDraft.value = EMPTY_HIRE_DRAFT
+  deciding.value = { card, outcome }
+}
 const decideOpen = computed({
   get: () => deciding.value !== null,
   set: (open: boolean) => {
@@ -36,7 +44,7 @@ const decideOpen = computed({
 const confirmDecide = async (): Promise<void> => {
   const chosen = deciding.value
   deciding.value = null
-  if (!chosen || !(await pl.decide(chosen.card.id, chosen.outcome))) return
+  if (!chosen || !(await pl.decide(chosen.card.id, chosen.outcome, chosen.outcome === 'hired' ? hireDatesBody(hireDraft.value) : {}))) return
   const kind = outcomeTemplateKind(chosen.outcome)
   const fresh = pl.pipeline.value?.applications.find((card) => card.id === chosen.card.id)
   if (kind && fresh && canSend.value) composing.value = { cards: [fresh], kind, fromSelection: false }
@@ -127,7 +135,7 @@ const openCard = (card: ApplicationCardDto): void => {
         @select-column="selectColumn"
         @open="openCard"
         @move="pl.move"
-        @decide="(card, outcome) => (deciding = { card, outcome })"
+        @decide="startDeciding"
       />
       <OutcomesArea
         :groups="board.outcomes"
@@ -147,8 +155,11 @@ const openCard = (card: ApplicationCardDto): void => {
       :title="t('candidate.decide.title')"
       :body="deciding ? t('candidate.decide.body', { name: fullName(deciding.card.candidate), outcome: t(`candidate.outcomes.${deciding.outcome}`) }) : ''"
       :confirm-label="t('candidate.decide.confirm')"
+      :confirm-disabled="hireProblem !== null"
       @confirm="confirmDecide"
-    />
+    >
+      <HireDatesFields v-if="deciding && askHireDates" v-model="hireDraft" :applied-at="deciding.card.createdAt" id-prefix="pipeline-hire" />
+    </ConfirmDialog>
     <BulkComposerSheet :cards="composing?.cards ?? []" :kind="composing?.kind ?? null" @close="composing = null" @sent="sent" />
     <CandidateSheet :candidate-id="opened?.candidateId ?? null" :application-id="opened?.applicationId ?? null" :via-job-id="jobId" @close="opened = null" @card="pl.accept" @noted="(id) => id && pl.noted(id)" @erased="erasedFromSheet" />
   </div>

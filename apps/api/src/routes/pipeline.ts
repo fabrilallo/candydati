@@ -1,4 +1,4 @@
-import { decideApplication, getPipeline, moveApplication, toApplicationCardDto, toPipelineDto } from '@candydati/core';
+import { decideApplication, getPipeline, moveApplication, toApplicationCardDto, toPipelineDto, updateHireDates } from '@candydati/core';
 import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
@@ -20,5 +20,10 @@ export function registerPipelineRoutes(app: FastifyInstance, ctx: AppContext): v
   app.post('/api/v1/applications/:id/decide', async (request) => {
     const input = { ...bodyOf(request), applicationId: paramOf(request, 'id') };
     return ok(toApplicationCardDto(await decideApplication(deps, await ctx.resolveActor(request), input)));
+  });
+
+  app.patch('/api/v1/applications/:id/hire-dates', async (request) => {
+    const input = { ...bodyOf(request), applicationId: paramOf(request, 'id') };
+    return ok(toApplicationCardDto(await updateHireDates(deps, await ctx.resolveActor(request), input)));
   });
 }
