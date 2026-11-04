@@ -31,6 +31,7 @@ const quiet = computed(() =>
           <NuxtLink :to="publicJobPath(orgSlug, job.slug)" class="outline-none transition-colors duration-150 after:absolute after:inset-0 group-hover:text-primary" data-testid="careers-job-link">{{ job.title }}</NuxtLink>
           <ArrowRightIcon class="ml-1.5 inline size-4 -translate-x-1 align-[-0.1em] text-primary opacity-0 transition-[opacity,transform] duration-150 ease-snap group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:transition-none" aria-hidden="true" />
         </h4>
+        <p v-if="job.client" class="text-sm font-medium" data-testid="careers-job-client">{{ job.client.display === 'named' && job.client.name ? t('careers.client.for', { client: job.client.name }) : t('careers.client.confidential') }}</p>
         <p class="text-sm text-muted-foreground">{{ quiet }}</p>
       </div>
       <div class="grid gap-2 @2xl:justify-items-end @2xl:text-right">

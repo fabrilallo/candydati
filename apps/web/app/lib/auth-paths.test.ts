@@ -114,6 +114,8 @@ describe('public careers pages', () => {
     expect(isPublicPath('/consent')).toBe(false)
     expect(isPublicPath('/feedback/tok123')).toBe(true)
     expect(isPublicPath('/feedback')).toBe(false)
+    expect(isPublicPath('/shortlist/tok123')).toBe(true)
+    expect(isPublicPath('/shortlist')).toBe(false)
   })
 
   it('lets anonymous visitors through', () => {

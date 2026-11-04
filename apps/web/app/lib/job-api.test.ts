@@ -39,6 +39,7 @@ describe('listJobs', () => {
     expect(page.jobs).toHaveLength(1)
     expect(page.meta).toEqual({ total: 1, page: 2, limit: 20 })
     expect(jobsUrl(null, 1, 5)).toBe('/api/v1/jobs?page=1&limit=5')
+    expect(jobsUrl('published', 1, 5, 'c 1')).toBe('/api/v1/jobs?status=published&clientId=c%201&page=1&limit=5')
   })
 
   it('rejects a list without meta', async () => {

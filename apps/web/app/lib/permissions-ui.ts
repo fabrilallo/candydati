@@ -37,7 +37,7 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   return allowed[0] ?? null
 }
 
-export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'ai' | 'emailTemplates' | 'webhooks' | 'distribution' | 'careersPage' | 'api' | 'data' | 'migrations' | 'audit'
+export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'ai' | 'emailTemplates' | 'webhooks' | 'distribution' | 'careersPage' | 'api' | 'data' | 'migrations' | 'audit' | 'clients'
 export type NavSectionId = 'work' | 'organization'
 
 export interface NavItem {
@@ -45,6 +45,12 @@ export interface NavItem {
   readonly to: string
   readonly section: NavSectionId
   readonly permission?: Permission
+  /** Shown only when the organization recruits for clients, except to who can turn that on (owners and admins). */
+  readonly agency?: true
+}
+
+export interface NavOptions {
+  readonly recruitsForClients?: boolean
 }
 
 const NAV: readonly NavItem[] = [
@@ -67,6 +73,7 @@ const NAV: readonly NavItem[] = [
   { id: 'emailTemplates', to: '/app/settings/email-templates', section: 'organization', permission: 'email_template:manage' },
   { id: 'webhooks', to: '/app/settings/webhooks', section: 'organization', permission: 'webhook:manage' },
   { id: 'distribution', to: '/app/settings/distribution', section: 'organization', permission: 'job:publish' },
+  { id: 'clients', to: '/app/settings/clients', section: 'organization', permission: 'client:read', agency: true },
   { id: 'careersPage', to: '/app/settings/careers', section: 'organization', permission: 'careers_page:manage' },
   { id: 'api', to: '/app/settings/api', section: 'organization', permission: 'api_key:manage' },
   { id: 'data', to: '/app/settings/data', section: 'organization', permission: 'data:export' },
@@ -74,7 +81,10 @@ const NAV: readonly NavItem[] = [
   { id: 'audit', to: '/app/settings/audit-log', section: 'organization', permission: 'audit:read' },
 ]
 
-export const visibleNav = (role: Role | null): readonly NavItem[] => NAV.filter((item) => item.permission === undefined || can(role, item.permission))
+const agencyAllows = (item: NavItem, role: Role | null, options: NavOptions): boolean => !item.agency || options.recruitsForClients === true || can(role, 'organization:update')
+
+export const visibleNav = (role: Role | null, options: NavOptions = {}): readonly NavItem[] =>
+  NAV.filter((item) => (item.permission === undefined || can(role, item.permission)) && agencyAllows(item, role, options))
 
 export interface NavSection {
   readonly id: NavSectionId
@@ -82,8 +92,8 @@ export interface NavSection {
 }
 
 /** The visible items grouped by section, in order; empty sections are left out. */
-export const navSections = (role: Role | null): readonly NavSection[] => {
-  const items = visibleNav(role)
+export const navSections = (role: Role | null, options: NavOptions = {}): readonly NavSection[] => {
+  const items = visibleNav(role, options)
   return (['work', 'organization'] as const)
     .map((id) => ({ id, items: items.filter((item) => item.section === id) }))
     .filter((section) => section.items.length > 0)

@@ -14,6 +14,7 @@ export const reportsFixture = (overrides: Partial<ReportsDto> = {}): ReportsFixt
   generatedAt: '2026-10-13T10:00:00.000Z',
   period: { from: '2026-09-14T00:00:00.000Z', to: '2026-10-13T23:59:59.999Z' },
   jobId: null,
+  clientId: null,
   minSample: 5,
   timeToHire: {
     overall: { count: 4, median: 24, p75: 31 },

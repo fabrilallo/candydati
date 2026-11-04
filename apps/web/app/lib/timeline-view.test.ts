@@ -27,6 +27,9 @@ describe('timeline view', () => {
       [{ kind: 'feedback_submitted', stageId: 's1' }, 'timeline.item.feedback:{"stage":"Primo colloquio"}'],
       [{ kind: 'reconfirmation_sent' }, 'timeline.item.reconfirmationSent'],
       [{ kind: 'reconfirmation_answered' }, 'timeline.item.reconfirmationAnswered'],
+      [{ kind: 'shortlist_shared', clientName: 'Acme' }, 'timeline.item.shortlistShared:{"client":"Acme"}'],
+      [{ kind: 'client_answered', clientName: 'Acme', answer: 'meet', reason: 'Bel profilo' }, 'timeline.item.clientAnswered.meet:{"client":"Acme"}'],
+      [{ kind: 'client_answered', clientName: 'Acme', answer: 'not_for_us', reason: 'Troppo junior' }, 'timeline.item.clientAnswered.not_for_us:{"client":"Acme"}'],
     ]
     for (const [extra, label] of cases) expect(timelineLabel(item(extra), stages, t)).toBe(label)
   })
@@ -40,6 +43,8 @@ describe('timeline view', () => {
     expect(timelineDetail(item({ kind: 'message', direction: 'outbound', status: 'failed', subject: 'Ciao' }), stages, t)).toBe('Ciao · timeline.messageFailed')
     expect(timelineDetail(item({ kind: 'message', direction: 'outbound', status: 'sent', subject: 'Ciao' }), stages, t)).toBe('Ciao')
     expect(timelineDetail(item({ kind: 'decided', outcome: 'hired' }), stages, t)).toBeNull()
+    expect(timelineDetail(item({ kind: 'client_answered', clientName: 'Acme', answer: 'meet', reason: 'Bel profilo' }), stages, t)).toBe('Bel profilo')
+    expect(timelineDetail(item({ kind: 'shortlist_shared', clientName: 'Acme' }), stages, t)).toBeNull()
   })
 
   it('shows a name, or the kind of machine or party, or nothing for an unnamed person', () => {

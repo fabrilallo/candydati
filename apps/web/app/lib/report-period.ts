@@ -40,8 +40,9 @@ export const checkCustomPeriod = (from: string, to: string, today: Date): Custom
 }
 
 /** Query string of `GET /api/v1/reports` and of the CSV export. */
-export const reportsQuery = (period: Period, jobId: string | null): string => {
+export const reportsQuery = (period: Period, jobId: string | null, clientId: string | null = null): string => {
   const params = new URLSearchParams({ from: `${period.from}T00:00:00.000Z`, to: `${period.to}T23:59:59.999Z` })
   if (jobId) params.set('jobId', jobId)
+  if (clientId) params.set('clientId', clientId)
   return params.toString()
 }

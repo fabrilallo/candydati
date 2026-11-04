@@ -36,6 +36,7 @@ describe('getReports', () => {
 describe('reportsCsvUrl', () => {
   it('is the export of the same period and job', () => {
     expect(reportsCsvUrl(period, null)).toBe('/api/v1/reports/export.csv?from=2026-09-14T00%3A00%3A00.000Z&to=2026-10-13T23%3A59%3A59.999Z')
+    expect(reportsCsvUrl(period, null, 'c1')).toMatch(/&clientId=c1$/)
   })
 })
 

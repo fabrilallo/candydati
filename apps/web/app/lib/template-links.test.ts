@@ -29,6 +29,8 @@ const SAFE_BY_CONSTRUCTION = [
   /^cvUrl\(/,
   // Same-origin download path of an attachment, ids encoded (`lib/candidate-api.ts`).
   /^attachmentUrl\(/,
+  // Same-origin path of a CV shared in a shortlist: token and item id encoded by the builder (`lib/api-paths.ts`).
+  /^publicShortlistCvPath\(/,
   /^candidateExportUrl\(/,
   /^dataExportUrl\(/,
   /^publicPath$/,

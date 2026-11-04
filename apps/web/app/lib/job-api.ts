@@ -118,11 +118,11 @@ export interface JobListPage {
   readonly meta: PageMeta
 }
 
-export const jobsUrl = (status: JobStatus | null, page: number, limit: number): string =>
-  `/api/v1/jobs?${status ? `status=${status}&` : ''}page=${page}&limit=${limit}`
+export const jobsUrl = (status: JobStatus | null, page: number, limit: number, clientId: string | null = null): string =>
+  `/api/v1/jobs?${status ? `status=${status}&` : ''}${clientId ? `clientId=${encodeURIComponent(clientId)}&` : ''}page=${page}&limit=${limit}`
 
-export const listJobs = async (request: JobApiRequest, status: JobStatus | null, page: number, limit: number = JOB_PAGE_SIZE): Promise<JobListPage> => {
-  const { data, meta } = await call(request, jobsUrl(status, page, limit), z.array(jobSummarySchema))
+export const listJobs = async (request: JobApiRequest, status: JobStatus | null, page: number, limit: number = JOB_PAGE_SIZE, clientId: string | null = null): Promise<JobListPage> => {
+  const { data, meta } = await call(request, jobsUrl(status, page, limit, clientId), z.array(jobSummarySchema))
   if (!meta) throw new AppError('errors.generic', 'invalid_response')
   return { jobs: data as readonly JobSummaryDto[], meta }
 }

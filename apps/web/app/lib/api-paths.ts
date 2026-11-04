@@ -63,3 +63,15 @@ export const migrationChoicesPath = (id: string): string => `${migrationPath(id)
 export const migrationCommitPath = (id: string): string => `${migrationPath(id)}/commit`
 export const migrationUndoPath = (id: string): string => `${migrationPath(id)}/undo`
 export const publicConsentPath = (token: string): string => `/api/v1/public/consent/${enc(token)}`
+
+// Clients of an agency and shortlists
+export const AGENCY_SETTINGS_PATH = '/api/v1/settings/agency'
+export const CLIENTS_PATH = '/api/v1/clients'
+export const clientPath = (id: string): string => `${CLIENTS_PATH}/${enc(id)}`
+export const clientArchivedPath = (id: string): string => `${clientPath(id)}/archived`
+export const jobClientPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/client`
+export const jobShortlistsPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/shortlists`
+export const revokeShortlistPath = (id: string): string => `/api/v1/shortlists/${enc(id)}/revoke`
+export const publicShortlistPath = (token: string): string => `/api/v1/public/shortlists/${enc(token)}`
+export const publicShortlistAnswersPath = (token: string): string => `${publicShortlistPath(token)}/answers`
+export const publicShortlistCvPath = (token: string, itemId: string): string => `${publicShortlistPath(token)}/candidates/${enc(itemId)}/cv`
