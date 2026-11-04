@@ -10,8 +10,9 @@ All notable changes to this project are documented here. The format follows
 
 - **Duplicate a stage** of an ad from its row in the editor, for two technical interviews or two recruiters on the same
   job. The copy lands right after the source with a new id and, for a saved stage, brings along what is tied to it that
-  the person may manage: who interviews, the stage's evaluation criteria, its automation rules (now in the name of who
-  copied them) and the restriction. What they may not manage is left out and the toast says so. One transaction, one
+  the person may manage: who interviews, the stage's evaluation criteria and its automation rules (now in the name of
+  who copied them). What they may not manage is left out and the toast says so. A restricted stage always gives a
+  restricted copy, whoever duplicates it, so notes written in the copy are never exposed. One transaction, one
   `job.stage_duplicated` audit event; `POST /api/v1/jobs/:id/stages/:stageId/duplicate` (scope `job:update`). No migration.
 
 ## [0.2.0] - 2026-11-04
