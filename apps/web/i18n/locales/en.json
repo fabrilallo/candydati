@@ -533,6 +533,7 @@
         "tracked_link_removed": "Removed a tracked link of an ad",
         "stage_restricted": "Marked a stage of an ad as restricted",
         "stage_unrestricted": "Removed the restriction from a stage of an ad",
+        "stage_duplicated": "Duplicated a stage of an ad",
         "scorecard_updated": "Updated the evaluation criteria of an ad",
         "scorecard_suggested": "Drafted evaluation criteria from the ad with the assistant",
         "client_updated": "Changed the client of a job ad"
@@ -1117,7 +1118,20 @@
         "moveDown": "Move stage {n} down",
         "titleHint": "Optional. If empty we show the type.",
         "openCandidates": "1 candidate in this stage | {count} candidates in this stage",
-        "removeBlocked": "Move the candidate to another stage first | Move the {count} candidates to another stage first"
+        "removeBlocked": "Move the candidate to another stage first | Move the {count} candidates to another stage first",
+        "duplicate": "Duplicate stage {n}",
+        "duplicateSaveFirst": "Save your changes to duplicate a stage with its rules.",
+        "duplicateMax": "{max} stages at most: remove one before duplicating another.",
+        "duplicated": "Stage duplicated",
+        "duplicatedCopied": "Also copied: {list}.",
+        "duplicatedSkipped": "Not copied, it needs a permission you do not have: {list}.",
+        "duplicateFailed": "The stage could not be duplicated",
+        "duplicateKinds": {
+          "interviewers": "who interviews",
+          "scorecard": "evaluation criteria",
+          "automations": "automations",
+          "restriction": "restricted stage"
+        }
       },
       "history": "History",
       "openPublic": "Open the public page",

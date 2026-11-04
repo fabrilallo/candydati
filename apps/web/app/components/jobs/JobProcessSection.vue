@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { PlusIcon } from '@lucide/vue'
+import { MAX_STAGES } from '@candydati/domain'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { fieldIdOf } from '@/lib/job-issues'
 import type { InterviewersBinding } from '@/lib/interviewers'
+import { duplicateBlockOf, duplicateStageLocally } from '@/lib/stage-duplication'
 import { appendItem, emptyStage, moveItem, removeItem, replaceItem, type FieldErrors, type JobForm, type StageForm } from '@/lib/job-form'
 import type { InterviewerDto } from '@candydati/domain'
 
@@ -14,8 +16,12 @@ const props = defineProps<{
   openCounts?: Readonly<Record<string, number>>
   blockedStages?: ReadonlySet<string>
   interviewers?: InterviewersBinding | null
+  /** The form differs from the saved ad: a saved stage is duplicated by the api, which copies the saved version. */
+  dirty?: boolean
+  /** A duplicate is on its way to the api. */
+  duplicating?: boolean
 }>()
-const emit = defineEmits<{ patch: [changes: Partial<JobForm>]; interviewers: [stageId: string, list: readonly InterviewerDto[]] }>()
+const emit = defineEmits<{ patch: [changes: Partial<JobForm>]; interviewers: [stageId: string, list: readonly InterviewerDto[]]; duplicate: [index: number] }>()
 const { t } = useI18n()
 
 const processId = fieldIdOf('process')
@@ -24,6 +30,24 @@ const add = async (): Promise<void> => {
   setProcess(appendItem(props.form.process, emptyStage()))
   await nextTick()
   document.getElementById(`${processId}-${props.form.process.length - 1}-type`)?.focus()
+}
+const duplicateBlockedId = `${processId}-duplicate-blocked`
+const blockOf = (stage: StageForm) => duplicateBlockOf({ count: props.form.process.length, dirty: stage.id !== '' && props.dirty === true })
+/** One line under the list says why some copy buttons are off, and every such button points at it. */
+const duplicateNote = computed(() => {
+  const blocks = props.form.process.map(blockOf)
+  if (blocks.includes('max')) return t('job.editor.process.duplicateMax', { max: MAX_STAGES })
+  return blocks.includes('saveFirst') ? t('job.editor.process.duplicateSaveFirst') : null
+})
+/** A stage never saved is copied in the form; a saved one by the api, with what is tied to it (the editor does it). */
+const duplicate = async (index: number): Promise<void> => {
+  if (props.form.process[index]?.id !== '') {
+    emit('duplicate', index)
+    return
+  }
+  setProcess(duplicateStageLocally(props.form.process, index))
+  await nextTick()
+  document.getElementById(`${processId}-${index + 1}-title`)?.focus()
 }
 /** Reordering keeps keyboard focus on the moved stage: same arrow when it can move again, else its first field. */
 const move = async (index: number, delta: -1 | 1): Promise<void> => {
@@ -54,6 +78,9 @@ const move = async (index: number, delta: -1 | 1): Promise<void> => {
           :language="form.language"
           :open-count="stage.id === '' ? 0 : (openCounts?.[stage.id] ?? 0)"
           :blocked="stage.id !== '' && Boolean(blockedStages?.has(stage.id))"
+          :duplicate-disabled="duplicating === true || blockOf(stage) !== null"
+          :duplicate-described-by="blockOf(stage) === null ? undefined : duplicateBlockedId"
+          @duplicate="duplicate(index)"
           @change="(next) => setProcess(replaceItem(form.process, index, next))"
           @remove="setProcess(removeItem(form.process, index))"
           @move="(delta) => move(index, delta)"
@@ -72,6 +99,7 @@ const move = async (index: number, delta: -1 | 1): Promise<void> => {
         </StageRow>
       </ol>
       <p v-else class="rounded-lg border border-dashed px-4 py-5 text-sm text-muted-foreground">{{ t('job.editor.process.empty') }}</p>
+      <p v-if="duplicateNote && !disabled" :id="duplicateBlockedId" class="text-xs text-muted-foreground" data-testid="stage-duplicate-blocked">{{ duplicateNote }}</p>
       <div v-if="!disabled">
         <Button type="button" variant="outline" size="sm" @click="add">
           <PlusIcon aria-hidden="true" />

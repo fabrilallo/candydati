@@ -35,6 +35,10 @@ export const useJobScorecard = (jobId: string) => {
   /** The last list the api answered with, then the person's edits on top of it. */
   const saved = ref<readonly CriterionDraft[] | null>(null)
   const edited = ref<readonly CriterionDraft[] | null>(null)
+  // A reload (after a stage was duplicated, say) is newer than what this screen last saved; unsaved edits stay.
+  watch(data, () => {
+    saved.value = null
+  })
   const base = computed<readonly CriterionDraft[]>(() => saved.value ?? (data.value?.data ? criteriaDrafts(data.value.data) : []))
   const drafts = computed<readonly CriterionDraft[]>(() => edited.value ?? base.value)
   const check = ref<CriteriaCheck>({ ok: true, errors: {} })

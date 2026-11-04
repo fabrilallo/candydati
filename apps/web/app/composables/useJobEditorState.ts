@@ -9,7 +9,7 @@ export interface EditorInit {
   readonly template: JobTemplateDto | null
 }
 
-export type EditorBusy = 'save' | 'publish' | 'close' | 'template' | null
+export type EditorBusy = 'save' | 'publish' | 'close' | 'template' | 'duplicate' | null
 
 const startingForm = (init: EditorInit, language: string) =>
   init.job ? contentToForm(init.job.content) : init.template ? contentToForm(init.template.content) : emptyForm(language)

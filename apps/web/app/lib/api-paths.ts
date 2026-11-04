@@ -40,6 +40,7 @@ export const jobTeamPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)
 export const jobTeamMemberPath = (jobId: string, userId: string): string => `${jobTeamPath(jobId)}/${enc(userId)}`
 export const restrictedStagesPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/restricted-stages`
 export const stageRestrictionPath = (jobId: string, stageId: string): string => `/api/v1/jobs/${enc(jobId)}/stages/${enc(stageId)}/restriction`
+export const stageDuplicatePath = (jobId: string, stageId: string): string => `/api/v1/jobs/${enc(jobId)}/stages/${enc(stageId)}/duplicate`
 export const jobApprovalPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/approval`
 export const jobApprovalRequestPath = (jobId: string): string => `/api/v1/jobs/${enc(jobId)}/approval-request`
 export const STALE_JOBS_PATH = '/api/v1/jobs/stale'

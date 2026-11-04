@@ -16,6 +16,10 @@ export const useJobInterviewers = (jobId: string) => {
   const local = ref<InterviewersByStage | null>(null)
   const byStage = computed<InterviewersByStage>(() => local.value ?? data.value?.data ?? {})
   const saving = ref<string | null>(null)
+  // A reload (after a stage was duplicated, say) is newer than what this screen last saved.
+  watch(data, () => {
+    local.value = null
+  })
   const members = computed<readonly MemberOption[]>(() => team.members.value.map((member) => ({ userId: member.userId, name: member.name, email: member.email })))
 
   const save = async (stageId: string, list: readonly InterviewerDto[]): Promise<void> => {
