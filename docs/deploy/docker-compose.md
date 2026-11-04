@@ -114,4 +114,6 @@ Migrations run at api start. Rollback notes: OPERATIONS.md, "Upgrades and rollba
 docker compose -f docker-compose.prod.yml logs -f api worker      # JSON logs; filter by "reqId"
 docker compose -f docker-compose.prod.yml exec postgres psql -U candydati candydati
 docker compose -f docker-compose.prod.yml down                    # stops, keeps volumes (never add -v)
+# Demo data in ONE organization (prints the plan; add --yes to write it). See ../demo.md
+docker compose -f docker-compose.prod.yml exec api node dist/demo-seed/cli.js --org <slug>
 ```
