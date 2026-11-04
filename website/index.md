@@ -26,7 +26,7 @@ features:
   - title: No automated decisions
     details: The assistant works on the process. It never ranks, scores or rejects people.
   - title: Agentic-ready
-    details: Everything in the UI is available through a REST API (OpenAPI) and an MCP server, with the same permissions.
+    details: Everything in the UI is available through a REST API (OpenAPI), with the same permissions. The MCP server covers job ads, the pipeline, searches on declared criteria, notes, tasks and reports, never decisions about candidates.
   - title: GDPR by design
     details: Versioned consent, retention and automatic erasure, data subject rights, full export in open formats.
 ---

@@ -37,7 +37,7 @@ strutturale, non opzionale: un'installazione non può disattivare questi princip
 - **Nessuna decisione automatica.** L'assistente lavora sul processo. Non ordina, non assegna punteggi e non scarta persone.
   L'unico punteggio del prodotto valuta l'annuncio, non chi si candida; la lettura del CV estrae fatti (ruoli, competenze,
   lingue) mostrati accanto all'originale, senza giudicarli.
-- **Pronto per gli agenti.** Tutto ciò che è nell'interfaccia è disponibile tramite API REST (OpenAPI) e server MCP, con gli stessi permessi.
+- **Pronto per gli agenti.** Tutto ciò che è nell'interfaccia è disponibile tramite API REST (OpenAPI), con gli stessi permessi. Il server MCP copre annunci (lettura, bozze, pubblicazione), pipeline, ricerche su criteri dichiarati, note, attività e report; non può spostare, valutare, scrivere o cancellare candidati: resta a una persona.
 - **GDPR by design.** Consenso versionato, conservazione e cancellazione automatica, diritti dell'interessato, export completo in formati aperti.
 
 Stato: pre-1.0 (vedi il [changelog](CHANGELOG.md)). Definizione completa del prodotto: [docs/PRODUCT.md](docs/PRODUCT.md).

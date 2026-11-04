@@ -15,6 +15,10 @@ AI system: it conflicts with ADR 0005, GDPR art. 22, and is a high-risk use unde
    Surname, contacts and direct identifiers are replaced by markers (`[surname]`, `[email]`, ...) in every text a
    candidate wrote (`pseudonymizeText`, `packages/domain/src/privacy`). Drafts keep `{{candidate.lastName}}` as a
    variable for the person's composer. This is pseudonymization, not anonymization: the data is still personal data.
+   Covered: emails, phones, links and social profiles (any common TLD, `t.me`, `wa.me`, `name.github.io`, "LinkedIn:
+   in/name"), `@handles`, Italian and English street addresses, tax codes, IBANs, full dates. Every pattern is
+   bounded to stay linear on hostile text. Not covered: names of third parties (references, colleagues), address
+   formats of other countries, and anything free text can hide.
 2. **A filter on declared criteria, never a judgement.** A person declares objective, job-related criteria (skills,
    languages, minimum experience, location, words in the CV) and confirms them; the assistant may propose them, the
    tools require an explicit confirmation flag. The database applies them deterministically (`cvMatchesCriteria` is the

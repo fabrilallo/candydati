@@ -38,7 +38,7 @@ The product does not rank, score, order or reject people, and it has no automati
 
 ### 2.5 Agentic-ready
 
-Everything that can be done in the interface can be done through the API and through MCP, with the same use cases and the same permissions (see §5).
+Everything that can be done in the interface can be done through the REST API, with the same use cases and the same permissions (see §5). The MCP server is deliberately narrower: read and draft job ads, read the pipeline, filter on declared criteria, notes, tasks and reports. It cannot move, decide on, message or erase candidates.
 
 ### 2.6 GDPR by design
 
@@ -163,7 +163,7 @@ The schemas of the job ad and of the application are public and versioned (`docs
 |---|---|
 | Internal assistant | An assistant in the interface whose tools call the same application services as everything else |
 | Public API | REST documented with OpenAPI, keys with permission scopes per organization |
-| MCP server | The same use cases exposed as tools for a company's own agents |
+| MCP server | A subset of the use cases (job ads, pipeline, declared-criteria search, notes, tasks, reports) as tools and prompts for a company's own agents; no decisions about candidates |
 | Webhooks | Signed events: application received, stage change, outcome, ad published |
 
 ### 5.2 What the assistant may do

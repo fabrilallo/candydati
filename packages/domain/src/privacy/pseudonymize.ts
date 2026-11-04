@@ -12,6 +12,7 @@ export const REDACTED = {
   taxCode: '[tax code]',
   iban: '[iban]',
   date: '[date]',
+  handle: '[handle]',
 } as const;
 
 /** What identifies one person beyond the first name: removed wherever it appears. */
@@ -24,7 +25,18 @@ export interface PersonIdentifiers {
 
 /** Every quantifier is bounded: the patterns run on text written by strangers and must stay linear. */
 const URL = /(?:\bhttps?:\/\/|\bwww\.)[^\s<>"'(),]{0,2000}[^\s<>"'(),.;:!?]/gi;
-const PROFILE = /\b(?:linkedin|github|gitlab|twitter|x|facebook|instagram|behance|dribbble|medium|stackoverflow)\.com\/[^\s<>"'(),]{0,500}[^\s<>"'(),.;:!?]/gi;
+const PROFILE_TAIL = String.raw`\/[^\s<>"'(),]{0,500}[^\s<>"'(),.;:!?]`;
+const PROFILE = new RegExp(
+  String.raw`\b(?:[a-z]{2,3}\.)?(?:linkedin|github|gitlab|twitter|x|facebook|instagram|behance|dribbble|medium|stackoverflow)\.(?:com|it|org|net)` + PROFILE_TAIL,
+  'gi',
+);
+/** Short forms and hosted pages: `t.me/x`, `wa.me/39...`, `name.github.io/page`. */
+const SHORT_PROFILE = new RegExp(String.raw`\b(?:t\.me|wa\.me|telegram\.me|lnkd\.in)` + PROFILE_TAIL, 'gi');
+const HOSTED_PAGE = /\b[a-z0-9-]{1,39}\.(?:github|gitlab)\.io(?:\/[^\s<>"'(),]{0,500}[^\s<>"'(),.;:!?])?/gi;
+/** "LinkedIn: in/mario-rossi": the path of a profile named in words. */
+const LINKEDIN_PATH = /\blinkedin[\s:.-]{1,4}in\/[\w%-]{2,100}/gi;
+/** A leading `@` and 2-30 handle characters, not after a word, a dot or another `@` (so emails and "a@b" stay out). */
+const HANDLE = /(?<![\w@.+-])@[A-Za-z][\w.]{0,28}\w(?![\w@])/g;
 const EMAIL = /(?<![\w.+-])[\w.+-]{1,64}@[\w-]{1,63}(?:\.[\w-]{1,63}){1,8}/g;
 const IBAN = /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,4})?\b/g;
 const TAX_CODE = /\b[A-Z]{6}\d{2}[A-EHLMPRST]\d{2}[A-Z]\d{3}[A-Z]\b/gi;
@@ -80,7 +92,11 @@ function replaceKnown(text: string, person: PersonIdentifiers): string {
 const PATTERNS: readonly (readonly [RegExp, (match: string) => string])[] = [
   [URL, () => REDACTED.link],
   [PROFILE, () => REDACTED.link],
+  [SHORT_PROFILE, () => REDACTED.link],
+  [HOSTED_PAGE, () => REDACTED.link],
+  [LINKEDIN_PATH, () => REDACTED.link],
   [EMAIL, () => REDACTED.email],
+  [HANDLE, () => REDACTED.handle],
   [IBAN, () => REDACTED.iban],
   [TAX_CODE, () => REDACTED.taxCode],
   [NUMERIC_DATE, () => REDACTED.date],

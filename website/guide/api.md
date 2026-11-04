@@ -1,7 +1,9 @@
 # API, webhooks and MCP
 
-Everything that can be done in the interface can be done through the API and through MCP. All three surfaces call the
-same services as the interface, with the same permissions and the same audit log.
+Everything that can be done in the interface can be done through the REST API (OpenAPI). The MCP server is narrower by
+design: it reads, drafts and publishes job ads, reads the pipeline, filters on declared criteria and adds notes, tasks
+and reports, but cannot move, decide on, message or erase candidates. All surfaces call the same services as the
+interface, with the same permissions and the same audit log.
 
 ## API keys
 

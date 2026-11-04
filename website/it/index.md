@@ -26,7 +26,7 @@ features:
   - title: Nessuna decisione automatica
     details: L'assistente lavora sul processo. Non ordina, non assegna punteggi e non scarta persone.
   - title: Pronto per gli agenti
-    details: Tutto ciò che è nell'interfaccia è disponibile tramite API REST (OpenAPI) e server MCP, con gli stessi permessi.
+    details: Tutto ciò che è nell'interfaccia è disponibile tramite API REST (OpenAPI), con gli stessi permessi. Il server MCP copre annunci, pipeline, ricerche su criteri dichiarati, note, attività e report, mai decisioni sui candidati.
   - title: GDPR by design
     details: Consenso versionato, conservazione e cancellazione automatica, diritti dell'interessato, export completo in formati aperti.
 ---
