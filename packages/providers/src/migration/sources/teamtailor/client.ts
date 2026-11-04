@@ -16,6 +16,8 @@ export type QueryParams = Readonly<Record<string, string>>;
 export interface TeamtailorClient {
   /** Every record of a list endpoint, following `links.next`; `onPage` is told how many each page carried. */
   list<K extends TeamtailorPageName>(path: string, page: K, params?: QueryParams, onPage?: (count: number) => Promise<void>): AsyncGenerator<TeamtailorResource<K>>;
+  /** The collection's size from `meta.record-count` (one request for one record), or null when the API does not say. */
+  count(path: string, page: TeamtailorPageName, params?: QueryParams): Promise<number | null>;
   /**
    * A signed file URL: no API credentials are ever sent to it. On the API host it goes through the allowlisted download;
    * anywhere else (the signed storage URLs of the docs) it is fetched as a public file, from public addresses only.
@@ -54,6 +56,12 @@ export function createTeamtailorClient(reader: JsonReader, apiKey: string, baseU
         if (!sameOrigin(next, baseUrl)) throw new JsonReaderError('source_invalid_response');
         url = next;
       }
+    },
+    async count(path, page, params = {}) {
+      const url = new URL(firstUrl(baseUrl, path, params));
+      url.searchParams.set('page[size]', '1');
+      const response: JsonPage<unknown> = await reader.getJson(url.toString(), teamtailorPages[page], { headers });
+      return (response.data as { readonly meta?: { readonly 'record-count'?: number | null } | null }).meta?.['record-count'] ?? null;
     },
     download: (url, store) => downloadSourceFile(reader, url, store, baseUrl),
   };

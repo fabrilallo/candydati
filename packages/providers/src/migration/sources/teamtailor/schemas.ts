@@ -15,7 +15,10 @@ const relationships = z.record(z.string(), z.object({ data: z.unknown().optional
 const links = z.object({ next: z.string().nullish() }).optional();
 
 const resource = <A extends z.ZodType>(attributes: A) => z.object({ id, attributes, relationships });
-const listOf = <A extends z.ZodType>(attributes: A) => z.object({ data: z.array(resource(attributes)), links });
+/** https://docs.teamtailor.com/ (Pagination): `meta.record-count` is the size of the whole collection. */
+const meta = z.object({ 'record-count': z.number().int().nonnegative().nullish() }).nullish().catch(null);
+
+const listOf = <A extends z.ZodType>(attributes: A) => z.object({ data: z.array(resource(attributes)), links, meta });
 
 const userAttributes = z.object({ name: text, email: text });
 const jobAttributes = z.object({ title: text, status: text, 'created-at': text });
@@ -50,8 +53,8 @@ const noteAttributes = z.object({ note: text, 'user-id': id.nullish(), 'candidat
  * `{ "data": [...] }` are accepted and normalised to the usual one.
  */
 const notesPage = z
-  .union([listOf(noteAttributes), z.object({ notes: z.array(z.object({ data: resource(noteAttributes) })), links })])
-  .transform((page) => ('notes' in page ? { data: page.notes.map((entry) => entry.data), links: page.links } : page));
+  .union([listOf(noteAttributes), z.object({ notes: z.array(z.object({ data: resource(noteAttributes) })), links, meta })])
+  .transform((page) => ('notes' in page ? { data: page.notes.map((entry) => entry.data), links: page.links, meta: page.meta } : page));
 
 export const teamtailorPages = {
   users: listOf(userAttributes),

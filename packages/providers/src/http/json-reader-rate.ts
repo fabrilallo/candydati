@@ -4,6 +4,16 @@ export interface RateOptions {
   /** Requests that may go out at once. */
   readonly capacity: number;
   readonly refillPerSecond: number;
+  /**
+   * The source says its rate-limit headers are not real values (Teamtailor: "static values"): do not wait on them. A 429
+   * and its `Retry-After` are still honoured.
+   */
+  readonly ignoreHeaders?: boolean | undefined;
+  /** Retries after the first attempt, for a long account whose source throttles in bursts (default: the reader's). */
+  readonly maxRetries?: number | undefined;
+  readonly backoff?: BackoffOptions | undefined;
+  /** Longest single wait accepted before the read fails `source_rate_limited`. */
+  readonly maxWaitMs?: number | undefined;
 }
 
 /**

@@ -14,6 +14,10 @@ All notable changes to this project are documented here. The format follows
 - Privacy: before text reaches a model, `@handles` without a domain, profiles on other domains (`linkedin.it`,
   `t.me`, `wa.me`, `name.github.io`) and "LinkedIn: in/name" are replaced by markers. Third-party names and non
   Italian/English street addresses remain uncovered.
+- **Teamtailor migration on large accounts:** the package builder copied its collections for every item it added (93 s
+  and 640 MB for 18,000 profiles, now about 2 s); the connector rides out bursts of 429 and 5xx with bounded backoff,
+  no longer trusts the documented static rate-limit headers, and reports records read of the total. The README has the
+  trial protocol for a real account.
 
 ### Changed
 
