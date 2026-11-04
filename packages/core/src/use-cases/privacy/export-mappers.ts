@@ -83,6 +83,7 @@ export function exportApplication({ application, path, job, extraction, messages
       answers: { ...f.answers },
       recommendation: f.recommendation,
       submittedAt: iso(f.submittedAt),
+      observations: f.observations.map(({ criterionId, label, observation, evidence }) => ({ criterionId, label, observation, evidence })),
     })),
     feedbackRequests: feedbackRequests.map((r) => ({
       id: r.id,

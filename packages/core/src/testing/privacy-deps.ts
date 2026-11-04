@@ -1,11 +1,12 @@
 import type { DataExport, RetentionRun } from '@candydati/domain';
 import type { ConfiguredProviders, CandidateRightsDeps, OrganizationExportDeps, PrivacyOverviewDeps, RetentionDeps } from '../privacy-ports.js';
-import type { FeedbackRecords, StageInterviewerRepository } from '../feedback-ports.js';
+import type { FeedbackRecords, ScorecardRepository, StageInterviewerRepository } from '../feedback-ports.js';
 import { seedAutomationWorld, type AutomationSeedOptions, type TestAutomationDeps } from './automation-deps.js';
 import {
   createFeedbackStore,
   createInMemoryFeedbackRequests,
   createInMemoryInterviewFeedback,
+  createInMemoryScorecards,
   createInMemoryStageInterviewers,
   type FeedbackStore,
 } from './in-memory-feedback.js';
@@ -29,6 +30,7 @@ export type TestPrivacyDeps = TestAutomationDeps &
   FeedbackRecords & {
     readonly feedbackStore: FeedbackStore;
     readonly stageInterviewers: StageInterviewerRepository;
+    readonly scorecards: ScorecardRepository;
     readonly retentionRuns: InMemoryRetentionRuns;
     readonly dataExports: InMemoryDataExports;
     readonly zip: ReturnType<typeof createFakeZipFactory>;
@@ -54,6 +56,7 @@ export function seedPrivacyWorld(options: PrivacySeedOptions = {}): TestPrivacyD
     stageInterviewers: createInMemoryStageInterviewers(feedbackStore),
     feedbackRequests: createInMemoryFeedbackRequests(feedbackStore),
     interviewFeedback: createInMemoryInterviewFeedback(feedbackStore),
+    scorecards: createInMemoryScorecards(feedbackStore),
     erasure: createInMemoryErasure({ ...world, feedbackStore, dataExports }),
     retentionRuns: createInMemoryRetentionRuns(options.retentionRuns),
     dataExports,

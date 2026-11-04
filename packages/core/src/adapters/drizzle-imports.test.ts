@@ -120,7 +120,7 @@ describe('import on Postgres', () => {
     const earlierCvKey = `organizations/${world.org}/applications/earlier/cv`;
     const earlier = buildApplication({ id: randomUUID(), organizationId: world.org, jobId: world.otherJobId, candidateId: existing.id, cv: { key: earlierCvKey, fileName: 'old.pdf', mediaType: 'application/pdf', sizeBytes: 64 } });
     await createDrizzleApplications(handle.db).create(earlier);
-    await createDrizzleCandidateNotes(handle.db).create({ id: randomUUID(), organizationId: world.org, candidateId: existing.id, applicationId: earlier.id, authorId: 'u', authorName: null, body: 'earlier note', createdAt: NOW });
+    await createDrizzleCandidateNotes(handle.db).create({ id: randomUUID(), organizationId: world.org, candidateId: existing.id, applicationId: earlier.id, stageId: null, authorId: 'u', authorName: null, body: 'earlier note', createdAt: NOW });
     await createDrizzleCvExtractions(handle.db).upsert({ applicationId: earlier.id, organizationId: world.org, status: 'done', text: 't', data: null, source: 'text', updatedAt: NOW });
     await world.files.put(earlierCvKey, fakePdfBytes(), 'application/pdf');
 

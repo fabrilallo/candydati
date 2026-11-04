@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { BriefcaseBusinessIcon, ExternalLinkIcon, EyeIcon, HistoryIcon, LockIcon, PencilLineIcon } from '@lucide/vue'
-import type { JobDto, JobTemplateDto } from '@candydati/domain'
+import { pipelineStagesOf, type JobDto, type JobTemplateDto } from '@candydati/domain'
 import { gapList } from '@/lib/ad-gaps'
 import { roleLabel as labelOfRole } from '@/lib/role-label'
 import { APPROVAL_ERROR_KEYS, approvalState } from '@/lib/approval-view'
@@ -50,6 +50,10 @@ const interviewerBinding = computed(() =>
   interviewers && !ed.readOnly.value ? { byStage: interviewers.byStage.value, members: interviewers.members.value, saving: interviewers.saving.value } : null,
 )
 const templateOpen = ref(false)
+/** The evaluation criteria (PRODUCT.md §2.4), saved apart from the ad: shown once it exists, editable by who manages feedback. */
+const showScorecard = computed(() => ed.job.value !== null && can(viewer.value?.role ?? null, 'feedback:read'))
+const manageScorecard = computed(() => can(viewer.value?.role ?? null, 'feedback:manage') && !ed.readOnly.value)
+const savedStages = computed(() => (ed.job.value ? pipelineStagesOf(ed.job.value.content.process) : []))
 
 const orgSlug = computed(() => viewer.value?.organization?.slug ?? '')
 const logo = useOrganizationLogo()
@@ -187,6 +191,7 @@ const saveTemplate = async (name: string): Promise<void> => {
             <JobExtrasSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
           </fieldset>
         </form>
+        <ScorecardEditor v-if="showScorecard && ed.job.value" :job-id="ed.job.value.id" :stages="savedStages" :can-manage="manageScorecard" />
         <EditorFinish
           v-if="ed.permissions.value.publish && ed.status.value === 'draft' && !ed.readOnly.value"
           :gaps="gaps"

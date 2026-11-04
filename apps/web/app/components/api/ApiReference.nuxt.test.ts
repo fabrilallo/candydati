@@ -1,3 +1,4 @@
+import { MCP_TOOL_NAMES } from '@candydati/domain'
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { viewerWith } from '~~/test/fixtures/job-fixtures'
@@ -51,7 +52,7 @@ describe('mcp guide', () => {
     const server = Object.values(config.mcpServers)[0]
     expect(server?.url).toBe('http://localhost:3000/mcp')
     expect(server?.headers.Authorization).toBe('Bearer candydati_LA_TUA_CHIAVE')
-    expect(wrapper.findAll('[data-testid="mcp-tools"] dt').length).toBe(14)
+    expect(wrapper.findAll('[data-testid="mcp-tools"] dt').length).toBe(MCP_TOOL_NAMES.length)
     expect(wrapper.text()).toContain('Non ci sono strumenti per spostare')
   })
 })

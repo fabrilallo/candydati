@@ -316,6 +316,13 @@
       "when": 1793790230846,
       "tag": "0044_application_hire_dates",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1793794972676,
+      "tag": "0045_restricted_stages_scorecards",
+      "breakpoints": true
     }
   ]
 }

@@ -149,7 +149,7 @@ export async function writeItem(ctx: CommitContext, repos: ImportCommitRepositor
     updatedAt: ctx.importedAt,
   });
   if (person.note !== null && person.note.trim() !== '') {
-    await repos.notes.create({ id: deps.newId(), organizationId, candidateId: candidate.id, applicationId: application.id, authorId: batch.createdBy, authorName: null, body: person.note.slice(0, IMPORT_NOTE_MAX), createdAt: ctx.importedAt });
+    await repos.notes.create({ id: deps.newId(), organizationId, candidateId: candidate.id, applicationId: application.id, stageId: application.stageId, authorId: batch.createdBy, authorName: null, body: person.note.slice(0, IMPORT_NOTE_MAX), createdAt: ctx.importedAt });
   }
   const messageId = person.email === null ? null : await queueReconfirmation(ctx, repos, application, { id: candidate.id, firstName: person.firstName });
   await repos.importItems.setStatus(organizationId, prepared.item.id, 'imported', null);

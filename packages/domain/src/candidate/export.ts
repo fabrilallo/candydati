@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { CONSENT_SCOPES, CONSENT_STATUSES } from './privacy.js';
 import { EXTRACTION_STATUSES, OUTCOMES, cvExtractionSchema } from './application.js';
 import { FEEDBACK_RECOMMENDATIONS } from '../feedback/feedback.js';
+import { OBSERVATIONS } from '../feedback/scorecard.js';
 import { MESSAGE_DIRECTIONS, MESSAGE_STATUSES } from '../messaging/message.js';
 import { ATTACHMENT_KINDS } from './attachment.js';
 import { hireDateSchema } from './hire-dates.js';
@@ -46,6 +47,13 @@ const exportedFeedbackSchema = z.object({
   answers: z.record(z.string(), z.string()),
   recommendation: z.enum(FEEDBACK_RECOMMENDATIONS),
   submittedAt: date,
+  /**
+   * Added within v1 (optional, so files produced before stay valid): what the interviewer saw for each criterion of the
+   * job's scorecard, in words and with evidence. Never a score.
+   */
+  observations: z
+    .array(z.object({ criterionId: z.string(), label: z.string(), observation: z.enum(OBSERVATIONS), evidence: z.string() }))
+    .optional(),
 });
 
 /** A request for feedback sent to an interviewer: the interviewer's address is the interviewer's own data, not the candidate's. */

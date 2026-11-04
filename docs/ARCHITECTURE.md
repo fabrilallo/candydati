@@ -198,6 +198,13 @@ handler cannot reach data outside the scope, and a job-scoped actor without the 
 `access/job-scope-leak.test.ts` runs every use case a scoped role can run as the people of job A against the data of job
 B; a new use case must be added to it.
 
+Restricted stages ([`PRODUCT.md`](PRODUCT.md) §6.2) are applied in the same place, after the job scope: for every actor
+who is not an owner, an admin or the system (organization-wide recruiters included), `notes`, `feedbackRequests` and
+`interviewFeedback` are wrapped so that what was written at a restricted stage (`job_stage_restriction`) of a job where
+the person is not the hiring manager is gone, unless they wrote it (`access/restricted-stages.ts`,
+`access/restricted-records.ts`). Counts are computed from the filtered rows, so nothing reveals that a hidden note
+exists. `access/restricted-stages.test.ts` runs every reading surface as every role, key and assistant.
+
 ## Outbox and workers
 
 Use cases record domain events in `outbox_event` in the same transaction as the change. The worker publishes them:
@@ -314,12 +321,12 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 |---|---|
 | Auth and tenancy | `user`, `session`, `account`, `verification`, `two_factor`, `organization`, `member`, `invitation`, `api_key`, `organization_setting`, `organization_security_setting` |
 | Abuse limits | `auth_throttle` (failed sign-ins), `usage_counter` (daily model budgets) |
-| Jobs | `job`, `job_team_member`, `job_template`, `job_stage_interviewer`, `job_request`, `job_distribution`, `distribution_setting`, `job_tracked_link` |
+| Jobs | `job`, `job_team_member`, `job_stage_restriction`, `job_template`, `job_stage_interviewer`, `job_request`, `job_distribution`, `distribution_setting`, `job_tracked_link` |
 | Candidates | `candidate`, `application`, `application_stage_event`, `candidate_note`, `cv_extraction`, `response_promise` |
 | Communication | `conversation`, `message`, `email_template`, `email_settings` |
 | Automation | `automation_rule`, `automation_execution`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |
 | Privacy | `privacy_notice`, `consent_token`, `data_export`, `retention_run` |
 | Import | `import_batch`, `import_item`, `import_analysis` |
-| HR tools | `feedback_request`, `interview_feedback` |
+| HR tools | `feedback_request`, `interview_feedback` (scorecard observations in `observations`), `job_scorecard_criterion` |
 | Careers page | `careers_page` (draft and published document), `careers_media` (images re-encoded as WebP, videos; the logo is one of its images) |
 | Audit | `audit_log` (append-only, enforced by triggers) |

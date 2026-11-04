@@ -1,12 +1,13 @@
-import type { FeedbackRequest, InterviewFeedback, StageInterviewer } from '@candydati/domain';
+import type { FeedbackRequest, InterviewFeedback, ScorecardCriterion, StageInterviewer } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
-import type { FeedbackRequestRepository, InterviewFeedbackRepository, StageInterviewerRepository } from '../feedback-ports.js';
+import type { FeedbackRequestRepository, InterviewFeedbackRepository, ScorecardRepository, StageInterviewerRepository } from '../feedback-ports.js';
 import { cell } from './in-memory-transaction.js';
 
 export interface FeedbackStoreState {
   readonly interviewers: readonly StageInterviewer[];
   readonly requests: readonly FeedbackRequest[];
   readonly feedback: readonly InterviewFeedback[];
+  readonly criteria: readonly ScorecardCriterion[];
 }
 
 /** The three feedback tables, replaced wholesale so a snapshot is just a reference. */
@@ -16,7 +17,7 @@ export interface FeedbackStore {
 }
 
 export const createFeedbackStore = (initial: Partial<FeedbackStoreState> = {}): FeedbackStore => {
-  const state = cell<FeedbackStoreState>({ interviewers: [], requests: [], feedback: [], ...initial });
+  const state = cell<FeedbackStoreState>({ interviewers: [], requests: [], feedback: [], criteria: [], ...initial });
   return {
     read: () => state.get(),
     write: (next) => {
@@ -99,6 +100,40 @@ export function createInMemoryInterviewFeedback(store: FeedbackStore): Interview
       return inOrg(organizationId)
         .filter((f) => f.applicationId === applicationId)
         .toSorted((a, b) => a.submittedAt.getTime() - b.submittedAt.getTime());
+    },
+  };
+}
+
+export function createInMemoryScorecards(store: FeedbackStore): ScorecardRepository {
+  const same = (organizationId: string, id: string) => (c: ScorecardCriterion) => c.organizationId === organizationId && c.id === id;
+  const change = (organizationId: string, id: string, patch: (c: ScorecardCriterion) => ScorecardCriterion) =>
+    store.write({ criteria: store.read().criteria.map((c) => (same(organizationId, id)(c) ? patch(c) : c)) });
+  const unused = (organizationId: string, id: string) => store.read().criteria.some((c) => same(organizationId, id)(c) && c.firstUsedAt === null);
+  return {
+    async listByJob(organizationId, jobId) {
+      return store.read().criteria.filter((c) => c.organizationId === organizationId && c.jobId === jobId).toSorted((a, b) => a.position - b.position);
+    },
+    async create(criteria) {
+      store.write({ criteria: [...store.read().criteria, ...criteria] });
+    },
+    async updateUnused(organizationId, id, patch) {
+      if (!unused(organizationId, id)) return false;
+      change(organizationId, id, (c) => ({ ...c, ...patch }));
+      return true;
+    },
+    async move(organizationId, id, position) {
+      change(organizationId, id, (c) => ({ ...c, position }));
+    },
+    async retire(organizationId, id, at) {
+      change(organizationId, id, (c) => ({ ...c, retiredAt: c.retiredAt ?? at }));
+    },
+    async removeUnused(organizationId, id) {
+      if (!unused(organizationId, id)) return false;
+      store.write({ criteria: store.read().criteria.filter((c) => !same(organizationId, id)(c)) });
+      return true;
+    },
+    async markUsed(organizationId, ids, at) {
+      for (const id of ids) change(organizationId, id, (c) => ({ ...c, firstUsedAt: c.firstUsedAt ?? at }));
     },
   };
 }

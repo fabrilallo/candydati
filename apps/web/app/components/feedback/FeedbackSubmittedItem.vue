@@ -4,14 +4,17 @@ import { recommendationKey } from '@/lib/feedback-view'
 import type { InterviewFeedbackDto } from '@candydati/domain'
 
 /** One submitted feedback: the questions with the answers, then the interviewer's opinion, clearly labelled as such. */
-defineProps<{ item: InterviewFeedbackDto; stageName: string }>()
+defineProps<{ item: InterviewFeedbackDto; stageName: string; restricted?: boolean }>()
 const { t, locale } = useI18n()
 </script>
 
 <template>
   <article class="grid gap-3 rounded-xl panel p-4" data-testid="feedback-item">
     <header class="grid gap-0.5">
-      <h4 class="text-[0.9375rem] font-semibold">{{ t('feedback.tab.feedbackBy', { name: item.interviewerName, stage: stageName }) }}</h4>
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <h4 class="text-[0.9375rem] font-semibold">{{ t('feedback.tab.feedbackBy', { name: item.interviewerName, stage: stageName }) }}</h4>
+        <RestrictedStageBadge v-if="restricted" />
+      </div>
       <p class="figure text-xs text-muted-foreground">{{ t('feedback.tab.request.submittedAt', { date: formatDate(item.submittedAt, locale) }) }}</p>
     </header>
     <dl v-if="item.answers.length > 0" class="grid gap-3">
@@ -21,6 +24,7 @@ const { t, locale } = useI18n()
       </div>
     </dl>
     <p v-else class="text-sm text-muted-foreground">{{ t('feedback.tab.noAnswers') }}</p>
+    <ObservationList v-if="item.observations.length > 0" class="border-t pt-3" :observations="item.observations" />
     <div class="grid gap-0.5 border-t pt-3" data-testid="feedback-opinion">
       <p class="text-sm font-medium">{{ t('feedback.tab.opinion', { value: t(recommendationKey(item.recommendation)).toLocaleLowerCase(locale) }) }}</p>
       <p class="text-xs text-muted-foreground">{{ t('feedback.tab.opinionNote') }}</p>

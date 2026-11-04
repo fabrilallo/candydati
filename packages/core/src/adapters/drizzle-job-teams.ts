@@ -23,7 +23,7 @@ const toMember = (row: Row): JobTeamMember => ({
 
 /** Postgres implementation. Every statement filters by `organization_id`. */
 export function createDrizzleJobTeams(db: DbExecutor): JobTeamRepository {
-  const { jobTeamMember: team, jobStageInterviewer: interviewer, application, organizationSetting: setting } = schema;
+  const { jobTeamMember: team, jobStageInterviewer: interviewer, application, organizationSetting: setting, jobStageRestriction: restriction } = schema;
   const key = (organizationId: string, jobId: string, userId: string) =>
     and(eq(team.organizationId, organizationId), eq(team.jobId, jobId), eq(team.userId, userId));
   return {
@@ -79,6 +79,21 @@ export function createDrizzleJobTeams(db: DbExecutor): JobTeamRepository {
     },
     async remove(organizationId, jobId, userId) {
       const rows = await db.delete(team).where(key(organizationId, jobId, userId)).returning({ userId: team.userId });
+      return rows.length > 0;
+    },
+    async listRestrictedStages(organizationId, jobId) {
+      const scope = jobId === undefined ? eq(restriction.organizationId, organizationId) : and(eq(restriction.organizationId, organizationId), eq(restriction.jobId, jobId));
+      return db.select().from(restriction).where(scope).orderBy(asc(restriction.jobId), asc(restriction.stageId));
+    },
+    async restrictStage(stage) {
+      const rows = await db.insert(restriction).values(stage).onConflictDoNothing().returning({ stageId: restriction.stageId });
+      return rows.length > 0;
+    },
+    async unrestrictStage(organizationId, jobId, stageId) {
+      const rows = await db
+        .delete(restriction)
+        .where(and(eq(restriction.organizationId, organizationId), eq(restriction.jobId, jobId), eq(restriction.stageId, stageId)))
+        .returning({ stageId: restriction.stageId });
       return rows.length > 0;
     },
   };

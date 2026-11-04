@@ -1,5 +1,6 @@
 import { JOB_REQUEST_STATUSES, interviewerInputSchema, jobRequestInputSchema } from '@candydati/domain';
 import { z } from 'zod';
+import { jobScorecardSchema, scorecardBody, suggestScorecardResultSchema } from './schemas-hr.js';
 import { page, type RouteSpec } from './spec.js';
 
 export const hrRoutes: readonly RouteSpec[] = [
@@ -11,6 +12,21 @@ export const hrRoutes: readonly RouteSpec[] = [
     description: 'The list replaces the whole configuration. When an application enters a stage, each interviewer of the stage receives a personal link to leave feedback without an account.',
     body: z.object({ stages: z.array(z.object({ stageId: z.string().min(1), interviewers: z.array(interviewerInputSchema).max(5) })).max(20) }),
     response: { schema: 'StageInterviewers', list: true },
+  },
+  {
+    method: 'get', path: '/api/v1/jobs/:id/scorecard', tag: 'Feedback', summary: 'Evaluation criteria of a job', scope: 'feedback:read',
+    description: 'What interviewers look for, declared before the interviews, for every stage (`stageId` null) or one. No weight and no score: for each criterion an interviewer records `observed`, `not_observed` or `to_explore` with evidence.',
+    response: { schema: jobScorecardSchema },
+  },
+  {
+    method: 'put', path: '/api/v1/jobs/:id/scorecard', tag: 'Feedback', summary: 'Set the evaluation criteria of a job', scope: 'feedback:manage',
+    description: 'The list replaces the active criteria, in order. A criterion is editable until a feedback uses it (`locked`); after that its words and stage are fixed (`422 criterion_in_use`) and leaving it out retires it, so past feedback reads as written.',
+    body: scorecardBody, response: { schema: jobScorecardSchema },
+  },
+  {
+    method: 'post', path: '/api/v1/jobs/:id/scorecard/suggest', tag: 'Feedback', summary: 'Draft evaluation criteria from the ad', scope: 'feedback:manage',
+    description: 'The fast model reads the ad only (never a candidate) and proposes short labels. Nothing is saved: the person keeps the ones they want. `unavailable` without a model, `failed` when the answer was unusable.',
+    response: { schema: suggestScorecardResultSchema },
   },
   {
     method: 'get', path: '/api/v1/applications/:id/feedback', tag: 'Feedback', summary: 'Feedback of an application', scope: 'feedback:read',

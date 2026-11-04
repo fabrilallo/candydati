@@ -30,10 +30,13 @@ useHead({ htmlAttrs: feedback ? { lang: feedback.language } : {}, meta: [{ name:
 </script>
 
 <template>
-  <div v-if="failure" class="grid max-w-xl gap-3" role="alert" data-testid="feedback-failure" :data-failure="failure">
-    <span class="grid size-11 place-items-center rounded-full bg-muted text-muted-foreground" aria-hidden="true"><CircleAlertIcon class="size-5" /></span>
-    <h1 class="text-[1.75rem] font-semibold tracking-tight sm:text-3xl">{{ visitor(`feedback.public.${failure}.title`) }}</h1>
-    <p class="text-[0.9375rem] text-pretty text-muted-foreground">{{ visitor(`feedback.public.${failure}.body`) }}</p>
+  <div v-if="failure" class="grid max-w-2xl gap-8">
+    <div class="grid max-w-xl gap-3" role="alert" data-testid="feedback-failure" :data-failure="failure">
+      <span class="grid size-11 place-items-center rounded-full bg-muted text-muted-foreground" aria-hidden="true"><CircleAlertIcon class="size-5" /></span>
+      <h1 class="text-[1.75rem] font-semibold tracking-tight sm:text-3xl">{{ visitor(`feedback.public.${failure}.title`) }}</h1>
+      <p class="text-[0.9375rem] text-pretty text-muted-foreground">{{ visitor(`feedback.public.${failure}.body`) }}</p>
+    </div>
+    <FeedbackSubmissionView v-if="failure === 'used' && feedback?.submission" :feedback="feedback" :x="x" />
   </div>
   <article v-else-if="feedback" class="grid max-w-2xl gap-8" data-testid="feedback-page">
     <header class="grid gap-4">

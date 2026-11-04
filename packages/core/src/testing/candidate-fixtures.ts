@@ -90,6 +90,7 @@ export const buildNote = (overrides: Partial<CandidateNote> = {}): CandidateNote
   organizationId: 'org_test',
   candidateId: 'cand_1',
   applicationId: null,
+  stageId: null,
   authorId: 'user_test',
   authorName: null,
   body: 'Strong profile.',

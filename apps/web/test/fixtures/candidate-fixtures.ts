@@ -59,6 +59,8 @@ export const pipeline = (applications: readonly ApplicationCardDto[] = [card('a1
 export const note = (id: string, overrides: Partial<NoteDto> = {}): NoteDto => ({
   id,
   applicationId: 'a1',
+  stageId: 'stage-0',
+  restricted: false,
   author: { id: 'u1', name: 'Ada Lovelace', external: false },
   body: 'Ottima chiamata, molto chiara sulle aspettative.',
   createdAt: T0,
@@ -87,6 +89,7 @@ export const detail = (overrides: Partial<CandidateDetailDto> = {}): CandidateDe
       stageId: 'stage-0',
       stageRemoved: false,
       stages: pipeline().stages.map(({ id, declared }) => ({ id, declared })),
+      restrictedStageIds: [],
       outcome: null,
       message: 'Mi piacerebbe lavorare con voi.',
       createdAt: T0,

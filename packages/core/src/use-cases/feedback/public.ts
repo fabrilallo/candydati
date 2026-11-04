@@ -1,5 +1,10 @@
 import {
   checkAnswers,
+  checkObservations,
+  criteriaForStage,
+  OBSERVATIONS,
+  type CriterionObservation,
+  type Observation,
   feedbackQuestionsFor,
   feedbackSubmissionSchema,
   FEEDBACK_RECOMMENDATIONS,
@@ -49,6 +54,9 @@ export interface PublicFeedbackView {
   readonly jobTitle: string;
   readonly stage: { readonly label: string; readonly note: string | null };
   readonly questions: readonly LocalizedQuestion[];
+  /** The job's evaluation criteria asked at this stage: one observation with evidence each, never a score. */
+  readonly criteria: readonly { readonly id: string; readonly label: string }[];
+  readonly observations: readonly Observation[];
   readonly recommendations: readonly FeedbackRecommendation[];
   readonly hasCv: boolean;
   readonly expiresAt: Date;
@@ -56,6 +64,7 @@ export interface PublicFeedbackView {
   readonly submission: {
     readonly answers: Readonly<Record<string, string>>;
     readonly recommendation: FeedbackRecommendation;
+    readonly observations: readonly CriterionObservation[];
     readonly submittedAt: Date;
   } | null;
 }
@@ -65,10 +74,11 @@ export const getFeedbackRequest = definePublicFeedbackQuery({
   input: tokenInput,
   handler: async ({ deps, input }): Promise<PublicFeedbackView> => {
     const { request, application, job } = await resolve(deps, input.token);
-    const [candidate, organization, feedback] = await sequential(
+    const [candidate, organization, feedback, criteria] = await sequential(
       () => deps.candidates.findById(request.organizationId, application.candidateId),
       () => deps.organizations.findById(request.organizationId),
       async () => (request.submittedAt === null ? null : await deps.interviewFeedback.findByRequest(request.organizationId, request.id)),
+      () => deps.scorecards.listByJob(request.organizationId, job.id),
     );
     if (!candidate || !organization) throw new NotFoundError(NOT_VALID);
     const stage = stageContextOf(job, request.stageId);
@@ -80,10 +90,14 @@ export const getFeedbackRequest = definePublicFeedbackQuery({
       jobTitle: job.content.title,
       stage: { label: stage.label, note: stage.declared?.note ?? null },
       questions: localizeQuestions(feedbackQuestionsFor(stage.declared?.type ?? null), job.content.language),
+      criteria: criteriaForStage(criteria, request.stageId).map(({ id, label }) => ({ id, label })),
+      observations: OBSERVATIONS,
       recommendations: FEEDBACK_RECOMMENDATIONS,
       hasCv: application.cv !== null && application.cv.key !== '',
       expiresAt: request.expiresAt,
-      submission: feedback ? { answers: feedback.answers, recommendation: feedback.recommendation, submittedAt: feedback.submittedAt } : null,
+      submission: feedback
+        ? { answers: feedback.answers, recommendation: feedback.recommendation, observations: feedback.observations, submittedAt: feedback.submittedAt }
+        : null,
     };
   },
 });
@@ -123,7 +137,12 @@ export const openFeedbackCv = definePublicFeedbackCommand({
   },
 });
 
-const submitInput = z.strictObject({ token: tokenInput.shape.token, answers: feedbackSubmissionSchema.shape.answers, recommendation: feedbackSubmissionSchema.shape.recommendation });
+const submitInput = z.strictObject({
+  token: tokenInput.shape.token,
+  answers: feedbackSubmissionSchema.shape.answers,
+  recommendation: feedbackSubmissionSchema.shape.recommendation,
+  observations: feedbackSubmissionSchema.shape.observations,
+});
 
 export interface SubmitFeedbackResult {
   readonly submittedAt: Date;
@@ -131,7 +150,8 @@ export interface SubmitFeedbackResult {
 
 /**
  * Single use: one submission per link, then the link is read-only. Answers must belong to the stage's questions and the
- * required ones must be filled. There is no score and nothing else is accepted (the input is strict).
+ * required ones must be filled; every criterion of the scorecard asked at the stage gets one observation with evidence.
+ * There is no score and nothing else is accepted (the input is strict).
  */
 export const submitFeedback = definePublicFeedbackCommand({
   name: 'submitFeedback',
@@ -143,7 +163,10 @@ export const submitFeedback = definePublicFeedbackCommand({
     if (request.submittedAt !== null) throw new ConflictError('already_submitted');
     const stage = stageContextOf(job, request.stageId);
     const checked = checkAnswers(stage.declared?.type ?? null, input.answers);
-    if (checked.issues.length > 0) throw new ValidationError(checked.issues.map((issue) => ({ path: issue.path, message: issue.message })));
+    const applicable = criteriaForStage(await deps.scorecards.listByJob(request.organizationId, job.id), request.stageId);
+    const seen = checkObservations(applicable, input.observations);
+    const issues = [...checked.issues, ...seen.issues];
+    if (issues.length > 0) throw new ValidationError(issues.map((issue) => ({ path: issue.path, message: issue.message })));
     const submittedAt = deps.now();
     // Single use: the guarded mark and the unique request id both decide a race between two submissions of the link.
     if (!(await deps.feedbackRequests.markSubmitted(request.organizationId, request.id, submittedAt))) throw new ConflictError('already_submitted');
@@ -156,14 +179,17 @@ export const submitFeedback = definePublicFeedbackCommand({
       interviewerName: request.interviewerName,
       answers: checked.answers,
       recommendation: input.recommendation,
+      observations: seen.observations,
       submittedAt,
     });
+    // From now on these criteria keep their words: past feedback reads as it was written.
+    await deps.scorecards.markUsed(request.organizationId, seen.observations.map((item) => item.criterionId), submittedAt);
     await deps.auditLog.append({
       organizationId: request.organizationId,
       actor,
       action: 'feedback.submitted',
       target: { type: 'feedback_request', id: request.id },
-      metadata: { applicationId: application.id, stageId: request.stageId, recommendation: input.recommendation },
+      metadata: { applicationId: application.id, stageId: request.stageId, recommendation: input.recommendation, observations: seen.observations.length },
     });
     return { submittedAt };
   },

@@ -86,6 +86,8 @@ export const candidateSummarySchema: z.ZodType<CandidateSummaryDto> = z.object({
 export const noteSchema: z.ZodType<NoteDto> = z.object({
   id: z.string(),
   applicationId: z.string().nullable(),
+  stageId: z.string().nullable().describe('The stage of the application when the note was written; null without an application and for older notes.'),
+  restricted: z.boolean().describe('Written at a restricted stage: read only by owners, admins, the hiring manager of the job and the author.'),
   author: z
     .object({ id: z.string().nullable(), name: z.string(), external: z.boolean() })
     .describe('`external`: a migrated note by someone who is not a member (`id` null, `name` as stored).'),
@@ -136,6 +138,7 @@ export const candidateDetailSchema: z.ZodType<CandidateDetailDto> = z.object({
         source: z.enum(['model', 'text']).nullable(),
       }),
       messageCount: z.number().int(),
+      restrictedStageIds: z.array(z.string()).describe('Stages of the job marked restricted: notes and feedback written there are not shown to everyone on the team.'),
       attachments: z
         .array(
           z.object({

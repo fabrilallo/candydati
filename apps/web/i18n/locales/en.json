@@ -524,7 +524,11 @@
         "team_member_added": "Added a person to an ad's team",
         "team_member_removed": "Removed a person from an ad's team",
         "tracked_link_created": "Saved a tracked link of an ad",
-        "tracked_link_removed": "Removed a tracked link of an ad"
+        "tracked_link_removed": "Removed a tracked link of an ad",
+        "stage_restricted": "Marked a stage of an ad as restricted",
+        "stage_unrestricted": "Removed the restriction from a stage of an ad",
+        "scorecard_updated": "Updated the evaluation criteria of an ad",
+        "scorecard_suggested": "Drafted evaluation criteria from the ad with the assistant"
       },
       "job_template": {
         "created": "Saved a job ad template",
@@ -1338,6 +1342,49 @@
       "reasonRequired": "Write the reason",
       "send": "Send the request",
       "sending": "Sending…"
+    },
+    "scorecard": {
+      "title": "What the interviewers look for",
+      "explain": "The evaluation criteria of this ad, decided before the interviews. For each one the interviewer picks one of three words and writes what makes them say so. No score, no total: whoever decides reads the evidence.",
+      "labelOf": "Criterion {n}",
+      "placeholder": "For example: experience with Postgres",
+      "stageOf": "Stage of criterion {n}",
+      "everyStage": "Every stage",
+      "moveUp": "Move criterion {n} up",
+      "moveDown": "Move criterion {n} down",
+      "remove": "Remove criterion {n}",
+      "retire": "Retire criterion {n}",
+      "locked": "A feedback already used it, so its words and stage are fixed. Removing it retires it: past feedback keeps it.",
+      "lockedShort": "Used by a feedback",
+      "empty": "No criteria yet. Add what the interviewers should look for, or draft them from the ad.",
+      "emptyReadOnly": "This ad has no evaluation criteria.",
+      "add": "Add a criterion",
+      "full": "At most {max} criteria.",
+      "save": "Save the criteria",
+      "saving": "Saving…",
+      "saved": "Criteria saved",
+      "unsaved": "Changes not saved yet.",
+      "errors": {
+        "label_required": "Write the criterion.",
+        "label_too_long": "At most {max} characters.",
+        "duplicate": "This criterion is already in the list for the same stage.",
+        "criterion_in_use": "A criterion was used by a feedback meanwhile: its words can no longer change. Reload the page.",
+        "duplicate_criterion": "Two criteria are the same. Remove one.",
+        "unknown_stage": "A stage of the ad no longer exists. Choose another one.",
+        "unknown_criterion": "A criterion no longer exists. Reload the page."
+      },
+      "suggest": {
+        "button": "Draft from the ad",
+        "loading": "Preparing proposals",
+        "title": "Proposed criteria",
+        "note": "Only proposals: add the ones you need, then save.",
+        "dismiss": "Close the proposals",
+        "addItem": "Add: {text}",
+        "failed": "We could not prepare the proposals. Try again shortly.",
+        "unavailable": "Proposals are not available: AI is not configured on this installation.",
+        "settings": "Turn it on in Settings, AI",
+        "empty": "No new proposals. Write the criteria by hand."
+      }
     }
   },
   "public": {
@@ -1641,7 +1688,10 @@
       "empty": "No notes yet.",
       "on": "On: {job}",
       "imported": "Imported",
-      "importedHint": "Written in the previous system by someone who is not a member of the organization here."
+      "importedHint": "Written in the previous system by someone who is not a member of the organization here.",
+      "restricted": "Restricted stage",
+      "restrictedHint": "Read only by owners, admins, the hiring manager and whoever wrote it.",
+      "restrictedComposer": "This note is written at a restricted stage: only owners, admins, the hiring manager and you will read it."
     },
     "sheet": {
       "title": "Candidate profile",
@@ -2458,6 +2508,9 @@
         "read": "See an ad's team",
         "manage": "Change an ad's team"
       },
+      "restricted_stage": {
+        "manage": "Restricted stages"
+      },
       "job_template": {
         "read": "Read templates",
         "create": "Create templates",
@@ -2592,6 +2645,8 @@
       "create_task": "Creates a task on a candidate or a job ad.",
       "list_job_templates": "Lists job ad templates.",
       "get_job_stats": "Job ad figures for the overview.",
+      "get_evaluation_criteria": "What interviewers look for in a job, per stage, and which criteria a feedback already used. No weights, no scores.",
+      "set_evaluation_criteria": "Replaces the evaluation criteria of a job after you agree. Used criteria keep their words; nothing scores or orders candidates.",
       "get_reports": "Aggregated figures of a period: timing, stage moves, sources and responses, with no personal data."
     }
   },
@@ -3417,7 +3472,15 @@
       "answered": "Answers",
       "noAnswers": "No written answers.",
       "opinion": "Recommendation: {value}",
-      "opinionNote": "This is the opinion of whoever ran the interview, not a decision and not a score."
+      "opinionNote": "This is the opinion of whoever ran the interview, not a decision and not a score.",
+      "restricted": "Restricted stage",
+      "restrictedHint": "Read only by owners, admins, the hiring manager and whoever wrote it.",
+      "scorecard": {
+        "title": "Criteria",
+        "note": "What each interviewer saw, side by side. No score and no total: read the evidence.",
+        "none": "Nobody has written on this yet.",
+        "at": "{stage}, {date}"
+      }
     },
     "recommendation": {
       "proceed": "Move forward",
@@ -3471,7 +3534,8 @@
       "errors": {
         "recommendation_required": "Choose a recommendation for the next stage.",
         "answers_required": "Answer the required questions.",
-        "answer_too_long": "An answer is too long: {max} characters at most."
+        "answer_too_long": "An answer is too long: {max} characters at most.",
+        "criteria_required": "Complete every criterion: a word and what makes you say so."
       },
       "done": {
         "title": "Thank you, feedback sent",
@@ -3496,7 +3560,29 @@
       "unavailable": {
         "title": "Page not available",
         "body": "We cannot load the form right now. Please try again later."
+      },
+      "criteria": {
+        "title": "The criteria of this position",
+        "note": "For each one, pick a word and write what makes you say so. You are not scoring the candidate."
+      },
+      "evidence": {
+        "label": "What makes you say so",
+        "placeholder": "What you saw or heard",
+        "errors": {
+          "observation_required": "Choose one of the three words.",
+          "evidence_required": "Write what makes you say so.",
+          "evidence_too_long": "At most {max} characters."
+        }
+      },
+      "sent": {
+        "title": "What you sent",
+        "at": "Sent on {date}"
       }
+    },
+    "observation": {
+      "observed": "Observed",
+      "not_observed": "Not observed",
+      "to_explore": "To explore"
     }
   },
   "reconfirm": {
@@ -3714,6 +3800,15 @@
     "saved": "Team updated",
     "removed": "Removed from the team",
     "saveFailed": "We could not change the team.",
+    "restricted": {
+      "title": "Restricted stages",
+      "explain": "Notes and feedback written at a restricted stage are read only by owners, admins, the hiring manager of this ad and whoever wrote them. The rest of the team does not see them, not even that they exist.",
+      "toggle": "Restrict the stage {stage}",
+      "badge": "Restricted",
+      "marked": "Stage restricted",
+      "cleared": "Stage no longer restricted",
+      "saveFailed": "We could not change the restricted stages."
+    },
     "roles": {
       "hiring_manager": "Hiring manager",
       "interviewer": "Interviewer",

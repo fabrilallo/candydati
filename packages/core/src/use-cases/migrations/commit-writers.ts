@@ -104,6 +104,8 @@ async function writeNotes(ctx: MigrationCommitContext, tx: MigrationCommitDeps, 
       organizationId: ctx.batch.organizationId,
       candidateId: people.get(personKey) ?? '',
       applicationId: applicationRef === null ? null : ctx.rowId('application', applicationRef),
+      // History from another ATS: never tied to a stage here, so never restricted until someone moves it.
+      stageId: null,
       authorId: author?.authorId ?? null,
       authorName: author?.authorId ? null : (author?.authorName ?? note.authorName ?? ctx.sourceSystem),
       body: note.body,

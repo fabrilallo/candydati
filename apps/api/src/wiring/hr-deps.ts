@@ -41,7 +41,7 @@ export const hashSecret = (secret: string): string => createHash('sha256').updat
 export function createHrDeps({ uow, files, sender, config, onFeedbackMailError }: HrInputs): HrWiring {
   const r = uow.repositories;
   const core = { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams };
-  const { jobs, candidates, applications, organizations, members, stageInterviewers, approvals, organizationSettings } = r;
+  const { jobs, candidates, applications, organizations, members, stageInterviewers, scorecards, approvals, organizationSettings } = r;
   const feedbackRecords: FeedbackRecords = { feedbackRequests: r.feedbackRequests, interviewFeedback: r.interviewFeedback };
   const clock = { newId: randomUUID, now: () => new Date() };
   const stageEntry: FeedbackStageEntryParts = {
@@ -60,8 +60,8 @@ export function createHrDeps({ uow, files, sender, config, onFeedbackMailError }
     feedbackRecords,
     approvals,
     organizationSettings,
-    feedbackDeps: { ...core, jobs, candidates, applications, files, ...stageEntry, ...clock },
-    publicFeedbackDeps: { ...core, jobs, candidates, applications, organizations, files, ...feedbackRecords, hash: hashSecret, ...clock },
+    feedbackDeps: { ...core, jobs, candidates, applications, files, scorecards, ...stageEntry, ...clock },
+    publicFeedbackDeps: { ...core, jobs, candidates, applications, organizations, files, scorecards, ...feedbackRecords, hash: hashSecret, ...clock },
     jobRequestDeps: { ...core, jobs, approvals, organizationSettings, members, notifications: r.notifications, jobRequests: r.jobRequests, ...clock },
     staleJobDeps: { ...core, staleJobs: r.staleJobs, now: clock.now },
   };

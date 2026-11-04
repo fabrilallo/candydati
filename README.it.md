@@ -54,6 +54,8 @@ Stato: pre-1.0 (vedi il [changelog](CHANGELOG.md)). Definizione completa del pro
 **Collaborazione**
 - Organizzazioni, ruoli e team di selezione per annuncio
 - Feedback dei colloqui senza login, tramite link personali
+- Scorecard senza punteggi: criteri per annuncio, le evidenze di ogni intervistatore affiancate
+- Fasi riservate: note e feedback di una fase letti solo da owner, admin e hiring manager
 - Raccolta del fabbisogno, approvazione facoltativa di budget e retribuzione, segnalazione degli annunci fermi
 - Report: tempo di assunzione, conversione per fase, fonti, tempi di risposta
 
@@ -231,9 +233,7 @@ Approfondimenti in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) e nelle [decisio
 
 Senza date. Rinviati rispetto al perimetro attuale ([PRODUCT.md §3.3](docs/PRODUCT.md)):
 
-- Scorecard e kit per i colloqui
-- Fasi riservate: feedback e note visibili solo a owner, admin e hiring manager
-- Pianificazione dei colloqui tramite integrazione con un servizio di calendario
+- Prossimo passo: pianificazione dei colloqui tramite integrazione con un servizio di calendario
 - Connettori di migrazione fuori dalla beta quando una migrazione reale conferma ciascuno; altre fonti su richiesta
 
 ## Contribuire

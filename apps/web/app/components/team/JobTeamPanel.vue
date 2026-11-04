@@ -82,6 +82,7 @@ const add = async (): Promise<void> => {
         </label>
         <Button type="submit" :disabled="!chosen || team.busy.value !== null" data-testid="team-add-submit">{{ t('jobTeam.add') }}</Button>
       </form>
+      <JobRestrictedStages :job-id="job.id" :stages="stages" />
     </template>
     <div v-else class="h-32 animate-pulse rounded-xl bg-muted" aria-busy="true" />
   </div>

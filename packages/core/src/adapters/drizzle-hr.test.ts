@@ -117,7 +117,7 @@ describe('feedback requests and feedback on Postgres', () => {
     const requests = createDrizzleFeedbackRequests(handle.db);
     const feedback = createDrizzleInterviewFeedback(handle.db);
     const req = await requests.create(request(org, jobId, applicationId));
-    const value: InterviewFeedback = { id: randomUUID(), organizationId: org, applicationId, requestId: req.id, stageId: 'stage-1', interviewerName: 'Eva', answers: { tech_shown: 'ok' }, recommendation: 'discuss', submittedAt: NOW };
+    const value: InterviewFeedback = { id: randomUUID(), organizationId: org, applicationId, requestId: req.id, stageId: 'stage-1', interviewerName: 'Eva', answers: { tech_shown: 'ok' }, recommendation: 'discuss', observations: [{ criterionId: 'crit_1', label: 'Postgres experience', observation: 'to_explore', evidence: 'Only talked about MySQL' }], submittedAt: NOW };
     expect(await feedback.create(value)).toEqual(value);
     await expect(feedback.create({ ...value, id: randomUUID() })).rejects.toBeInstanceOf(ConflictError);
     expect(await feedback.findByRequest(org, req.id)).toEqual(value);

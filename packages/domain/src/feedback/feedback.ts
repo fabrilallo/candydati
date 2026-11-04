@@ -2,6 +2,7 @@ import { z } from 'zod';
 import type { Locale } from '../platform/config.js';
 import { feedbackQuestionsFor } from './templates.js';
 import type { StageType } from '../job/taxonomy.js';
+import { observationsInputSchema, type CriterionObservation } from './scorecard.js';
 
 export const FEEDBACK_ANSWER_MAX = 2000;
 export const FEEDBACK_TOKEN_TTL_DAYS = 14;
@@ -77,6 +78,8 @@ export interface InterviewFeedback {
   /** Answers by question id. */
   readonly answers: Readonly<Record<string, string>>;
   readonly recommendation: FeedbackRecommendation;
+  /** One per criterion of the job's scorecard asked at this stage (none for feedback older than scorecards). */
+  readonly observations: readonly CriterionObservation[];
   readonly submittedAt: Date;
 }
 
@@ -92,6 +95,8 @@ export const feedbackRequestStatus = (request: Pick<FeedbackRequest, 'submittedA
 export const feedbackSubmissionSchema = z.strictObject({
   answers: z.record(z.string().min(1).max(60), z.string().max(FEEDBACK_ANSWER_MAX)),
   recommendation: z.enum(FEEDBACK_RECOMMENDATIONS),
+  /** What was seen for each criterion of the scorecard, with evidence: three words, never a number. */
+  observations: observationsInputSchema.default([]),
 });
 export type FeedbackSubmission = z.infer<typeof feedbackSubmissionSchema>;
 

@@ -524,7 +524,11 @@
         "team_member_added": "Ha aggiunto una persona al team di un annuncio",
         "team_member_removed": "Ha tolto una persona dal team di un annuncio",
         "tracked_link_created": "Ha salvato un link tracciato di un annuncio",
-        "tracked_link_removed": "Ha rimosso un link tracciato di un annuncio"
+        "tracked_link_removed": "Ha rimosso un link tracciato di un annuncio",
+        "stage_restricted": "Ha reso riservata una fase di un annuncio",
+        "stage_unrestricted": "Ha tolto la riserva da una fase di un annuncio",
+        "scorecard_updated": "Ha aggiornato i criteri di valutazione di un annuncio",
+        "scorecard_suggested": "Ha preparato con l'assistente i criteri di valutazione a partire dall'annuncio"
       },
       "job_template": {
         "created": "Ha salvato un modello di annuncio",
@@ -1338,6 +1342,49 @@
       "reasonRequired": "Scrivi la motivazione",
       "send": "Invia la richiesta",
       "sending": "Invio in corso…"
+    },
+    "scorecard": {
+      "title": "Cosa guardano gli intervistatori",
+      "explain": "I criteri di valutazione di questo annuncio, decisi prima dei colloqui. Per ognuno chi fa il colloquio sceglie una di tre parole e scrive cosa glielo fa dire. Nessun punteggio e nessun totale: chi decide legge le evidenze.",
+      "labelOf": "Criterio {n}",
+      "placeholder": "Per esempio: esperienza con Postgres",
+      "stageOf": "Fase del criterio {n}",
+      "everyStage": "Tutte le fasi",
+      "moveUp": "Sposta su il criterio {n}",
+      "moveDown": "Sposta giù il criterio {n}",
+      "remove": "Togli il criterio {n}",
+      "retire": "Ritira il criterio {n}",
+      "locked": "Un feedback lo ha già usato, quindi parole e fase restano fisse. Se lo togli viene ritirato: i feedback passati lo conservano.",
+      "lockedShort": "Usato da un feedback",
+      "empty": "Ancora nessun criterio. Aggiungi cosa devono guardare gli intervistatori, oppure preparali dall'annuncio.",
+      "emptyReadOnly": "Questo annuncio non ha criteri di valutazione.",
+      "add": "Aggiungi un criterio",
+      "full": "Al massimo {max} criteri.",
+      "save": "Salva i criteri",
+      "saving": "Salvataggio…",
+      "saved": "Criteri salvati",
+      "unsaved": "Modifiche non ancora salvate.",
+      "errors": {
+        "label_required": "Scrivi il criterio.",
+        "label_too_long": "Al massimo {max} caratteri.",
+        "duplicate": "Questo criterio è già in elenco per la stessa fase.",
+        "criterion_in_use": "Nel frattempo un feedback ha usato un criterio: le sue parole non possono più cambiare. Ricarica la pagina.",
+        "duplicate_criterion": "Due criteri sono uguali. Togline uno.",
+        "unknown_stage": "Una fase dell'annuncio non esiste più. Scegline un'altra.",
+        "unknown_criterion": "Un criterio non esiste più. Ricarica la pagina."
+      },
+      "suggest": {
+        "button": "Prepara dall'annuncio",
+        "loading": "Sto preparando le proposte",
+        "title": "Criteri proposti",
+        "note": "Sono solo proposte: aggiungi quelle che ti servono, poi salva.",
+        "dismiss": "Chiudi le proposte",
+        "addItem": "Aggiungi: {text}",
+        "failed": "Non siamo riusciti a preparare le proposte. Riprova tra poco.",
+        "unavailable": "Le proposte non sono disponibili: l'IA non è configurata su questa installazione.",
+        "settings": "Attivala in Impostazioni, AI",
+        "empty": "Nessuna proposta nuova. Scrivi i criteri a mano."
+      }
     }
   },
   "public": {
@@ -1641,7 +1688,10 @@
       "empty": "Ancora nessuna nota.",
       "on": "Su: {job}",
       "imported": "Importata",
-      "importedHint": "Scritta nel sistema precedente da una persona che qui non è un membro dell'organizzazione."
+      "importedHint": "Scritta nel sistema precedente da una persona che qui non è un membro dell'organizzazione.",
+      "restricted": "Fase riservata",
+      "restrictedHint": "La leggono solo owner, admin, l'hiring manager e chi l'ha scritta.",
+      "restrictedComposer": "Questa nota è scritta in una fase riservata: la leggeranno solo owner, admin, l'hiring manager e tu."
     },
     "sheet": {
       "title": "Scheda candidato",
@@ -2458,6 +2508,9 @@
         "read": "Vedere il team degli annunci",
         "manage": "Cambiare il team degli annunci"
       },
+      "restricted_stage": {
+        "manage": "Fasi riservate"
+      },
       "job_template": {
         "read": "Leggere i template",
         "create": "Creare template",
@@ -2592,6 +2645,8 @@
       "create_task": "Crea un'attività su un candidato o un annuncio.",
       "list_job_templates": "Elenca i template degli annunci.",
       "get_job_stats": "Numeri degli annunci per la panoramica.",
+      "get_evaluation_criteria": "Cosa cercano gli intervistatori in un annuncio, per fase, e quali criteri un feedback ha già usato. Nessun peso, nessun punteggio.",
+      "set_evaluation_criteria": "Sostituisce i criteri di valutazione di un annuncio dopo il tuo assenso. I criteri già usati restano con le loro parole; niente punteggi né classifiche.",
       "get_reports": "Numeri aggregati del periodo: tempi, passaggi tra le fasi, provenienza e risposte, senza dati personali."
     }
   },
@@ -3417,7 +3472,15 @@
       "answered": "Risposte",
       "noAnswers": "Nessuna risposta scritta.",
       "opinion": "Indicazione: {value}",
-      "opinionNote": "È l'opinione di chi ha fatto il colloquio, non una decisione e non un voto."
+      "opinionNote": "È l'opinione di chi ha fatto il colloquio, non una decisione e non un voto.",
+      "restricted": "Fase riservata",
+      "restrictedHint": "Lo leggono solo owner, admin, l'hiring manager e chi l'ha scritto.",
+      "scorecard": {
+        "title": "Criteri",
+        "note": "Cosa ha visto ogni intervistatore, uno accanto all'altro. Nessun punteggio e nessun totale: leggi le evidenze.",
+        "none": "Ancora nessuno ha scritto su questo.",
+        "at": "{stage}, {date}"
+      }
     },
     "recommendation": {
       "proceed": "Proseguire",
@@ -3471,7 +3534,8 @@
       "errors": {
         "recommendation_required": "Scegli un'indicazione per la prossima fase.",
         "answers_required": "Rispondi alle domande obbligatorie.",
-        "answer_too_long": "Una risposta è troppo lunga: al massimo {max} caratteri."
+        "answer_too_long": "Una risposta è troppo lunga: al massimo {max} caratteri.",
+        "criteria_required": "Completa ogni criterio: una parola e cosa te la fa dire."
       },
       "done": {
         "title": "Grazie, feedback inviato",
@@ -3496,7 +3560,29 @@
       "unavailable": {
         "title": "Pagina non disponibile",
         "body": "Non riusciamo a caricare il modulo in questo momento. Riprova più tardi."
+      },
+      "criteria": {
+        "title": "I criteri di questa posizione",
+        "note": "Per ognuno scegli una parola e scrivi cosa te la fa dire. Non stai dando un voto al candidato."
+      },
+      "evidence": {
+        "label": "Cosa te lo fa dire",
+        "placeholder": "Cosa hai visto o sentito",
+        "errors": {
+          "observation_required": "Scegli una delle tre parole.",
+          "evidence_required": "Scrivi cosa te lo fa dire.",
+          "evidence_too_long": "Al massimo {max} caratteri."
+        }
+      },
+      "sent": {
+        "title": "Cosa hai inviato",
+        "at": "Inviato il {date}"
       }
+    },
+    "observation": {
+      "observed": "Osservato",
+      "not_observed": "Non osservato",
+      "to_explore": "Da approfondire"
     }
   },
   "reconfirm": {
@@ -3714,6 +3800,15 @@
     "saved": "Team aggiornato",
     "removed": "Tolto dal team",
     "saveFailed": "Non siamo riusciti a cambiare il team.",
+    "restricted": {
+      "title": "Fasi riservate",
+      "explain": "Note e feedback scritti in una fase riservata li leggono solo owner, admin, l'hiring manager di questo annuncio e chi li ha scritti. Il resto del team non li vede, nemmeno sa che esistono.",
+      "toggle": "Rendi riservata la fase {stage}",
+      "badge": "Riservata",
+      "marked": "Fase resa riservata",
+      "cleared": "La fase non è più riservata",
+      "saveFailed": "Non siamo riusciti a cambiare le fasi riservate."
+    },
     "roles": {
       "hiring_manager": "Hiring manager",
       "interviewer": "Intervistatore",

@@ -2,8 +2,15 @@ import {
   FEEDBACK_RECOMMENDATIONS,
   INTERVIEWER_KINDS,
   JOB_REQUEST_STATUSES,
+  OBSERVATIONS,
   SUPPORTED_LOCALES,
+  criterionObservationWireSchema,
   jobRequestInputSchema,
+  jobScorecardSchema,
+  observationsInputSchema,
+  scorecardCriteriaInputSchema,
+  scorecardRowSchema,
+  suggestScorecardResultSchema,
 } from '@candydati/domain';
 import { z } from 'zod';
 import { jobSummarySchema } from './schemas-jobs.js';
@@ -50,9 +57,16 @@ export const applicationFeedbackSchema = z.object({
       interviewerName: z.string(),
       answers: z.array(z.object({ questionId: z.string(), question: z.string(), answer: z.string() })),
       recommendation: z.enum(FEEDBACK_RECOMMENDATIONS).describe('An opinion for the person who decides, never a score of the candidate.'),
+      observations: z.array(criterionObservationWireSchema).describe('One per criterion of the scorecard asked at the stage: a word and the evidence, never a number.'),
       submittedAt: isoDate,
     }),
   ),
+  restrictedStageIds: z
+    .array(z.string())
+    .describe('Restricted stages of the job. Feedback from them is listed only for owners, admins, the hiring manager of the job and its author; others get nothing of it.'),
+  scorecard: z
+    .array(scorecardRowSchema)
+    .describe('The criteria of the scorecard with each interviewer\'s evidence side by side. Nothing is counted, totalled or ranked.'),
 });
 
 export const publicFeedbackSchema = z.object({
@@ -63,16 +77,24 @@ export const publicFeedbackSchema = z.object({
   jobTitle: z.string(),
   stage: z.object({ label: z.string(), note: z.string().nullable() }),
   questions: z.array(z.object({ id: z.string(), label: z.string(), required: z.boolean().optional() }).loose()),
+  criteria: z.array(z.object({ id: z.string(), label: z.string() })).describe('The evaluation criteria of the job asked at this stage.'),
+  observations: z.array(z.enum(OBSERVATIONS)),
   recommendations: z.array(z.enum(FEEDBACK_RECOMMENDATIONS)),
   hasCv: z.boolean(),
   expiresAt: isoDate,
-  submission: z.object({ answers: z.record(z.string(), z.string()), recommendation: z.enum(FEEDBACK_RECOMMENDATIONS), submittedAt: isoDate }).nullable(),
+  submission: z
+    .object({ answers: z.record(z.string(), z.string()), recommendation: z.enum(FEEDBACK_RECOMMENDATIONS), observations: z.array(criterionObservationWireSchema), submittedAt: isoDate })
+    .nullable(),
 });
 
 export const submitFeedbackBody = z.strictObject({
   answers: z.record(z.string(), z.string().max(2000)),
   recommendation: z.enum(FEEDBACK_RECOMMENDATIONS),
+  observations: observationsInputSchema.optional().describe('Required for every criterion of the scorecard asked at the stage: `observed`, `not_observed` or `to_explore`, with evidence.'),
 });
+
+export { jobScorecardSchema, suggestScorecardResultSchema };
+export const scorecardBody = z.strictObject({ criteria: scorecardCriteriaInputSchema });
 
 export const jobRequestSchema = z.object({
   ...jobRequestInputSchema.shape,
