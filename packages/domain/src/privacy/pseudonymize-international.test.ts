@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX, LINEAR_TIME_TEST_TIMEOUT_MS } from '../testing/linear-time.js';
+import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
 import { pseudonymizeText, REDACTED } from './pseudonymize.js';
 
 const rossi = { lastName: 'Rossi' };
@@ -106,5 +106,5 @@ describe('pseudonymizeText outside Italy', () => {
     for (const unit of shapes) {
       expect(growthRatio((size) => pseudonymizeText(unit.repeat(size), rossi), 2000)).toBeLessThan(LINEAR_GROWTH_MAX);
     }
-  }, LINEAR_TIME_TEST_TIMEOUT_MS);
+  });
 });
