@@ -52,6 +52,30 @@ proprietari e amministratori possono renderla obbligatoria nella loro organizzaz
 | `APPLICATIONS_DAILY_MAX_PER_JOB` | `200` | lo stesso, per annuncio |
 | `RECEIPTS_DAILY_MAX_PER_ORGANIZATION` | `300` | email di ricevuta della candidatura per organizzazione al giorno |
 | `NUXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | | controllo Cloudflare Turnstile facoltativo sul modulo. Spento se vuoto: Cloudflare non è mai obbligatorio |
+| `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET` | | pulsante facoltativo "Compila con LinkedIn" sul modulo (tutti e due o nessuno). Spento se vuoto: vedi sotto |
+
+#### Compila con LinkedIn
+
+I candidati possono compilare nome, cognome ed email da LinkedIn, poi controllano il modulo e lo inviano come sempre.
+Non hanno un account: LinkedIn compila soltanto il modulo. "Sign In with LinkedIn using OpenID Connect" condivide nome,
+email, foto e lingua; foto, lingua e identificativo LinkedIn vengono scartati, e l'email si usa solo se LinkedIn la
+indica come verificata. Sul server non si conserva nulla: i dati aspettano al massimo 10 minuti in un cookie cifrato
+del browser del candidato e passano al modulo una volta sola. Il profilo completo non è disponibile con questo
+prodotto, quindi accanto al CV il modulo spiega come salvare il profilo LinkedIn in PDF e caricarlo come CV.
+
+Per attivarlo:
+
+1. Su [LinkedIn Developers](https://www.linkedin.com/developers/apps) crea un'app (va associata a una pagina
+   aziendale LinkedIn).
+2. In **Products** aggiungi **Sign In with LinkedIn using OpenID Connect**. Gli scope che concede, `openid`, `profile`
+   ed `email`, sono gli unici richiesti.
+3. In **Auth**, sotto **Authorized redirect URLs**, aggiungi esattamente
+   `{PLATFORM_URL}/api/v1/public/linkedin/callback`, per esempio `https://lavora.example.it/api/v1/public/linkedin/callback`.
+4. Copia **Client ID** e **Primary Client Secret** in `LINKEDIN_CLIENT_ID` e `LINKEDIN_CLIENT_SECRET` dell'api e
+   riavviala. Il pulsante compare su tutti i moduli di candidatura dell'istanza.
+
+Custodisci il secret come ogni altro segreto (mai nel repository). Indica nell'informativa privacy che i candidati
+possono usare LinkedIn per compilare il modulo: l'informativa predefinita lo dice già.
 
 ### Annunci
 

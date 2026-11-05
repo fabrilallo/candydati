@@ -116,6 +116,8 @@ Every `/api/v1` route answers with the `ok` / `fail` envelope, except:
   and a plain provider-facing status code, never the envelope.
 - **Better Auth** (`/api/auth/**`): sign-in, sessions and organization management are served by Better Auth, which
   returns its own JSON errors (`{ code, message }`) untouched.
+- **Fill in with LinkedIn** (`/api/v1/public/linkedin/start` and `/callback`): browser navigations that answer a
+  redirect (to LinkedIn, then back to the job page). `status` and `prefill` use the envelope.
 - **Files** (CV, candidate export, organization export, CSV report) and **`/api/v1/openapi.json`**: the body is the file
   or the document; errors still use the envelope.
 
@@ -278,6 +280,7 @@ deleted.
 | `/app/**` and `/api/v1/**` | session or API key | permissions per role and scope |
 | `/careers/{org}/**`, feed, `llms.txt`, sitemap, `/api/v1/public/**` | none, read-only | server-rendered, JSON-LD `JobPosting`, cacheable |
 | Application form | none | versioned consent, rate limits, daily caps per organization and per job |
+| Fill in with LinkedIn (`/api/v1/public/linkedin/**`) | none | optional; state and nonce in an encrypted HttpOnly cookie (key derived with HKDF from `BETTER_AUTH_SECRET`), return only to a job page, code exchanged server side, prefill in a second encrypted cookie read once; nothing stored, no personal data in URLs or logs |
 | Feedback, consent and shortlist links | token in URL | interview feedback without login; consent reconfirmation; client shortlists (`/shortlist/{token}`, [ADR 0011](adr/0011-agency-clients-in-one-organization.md)) |
 | Inbound email webhook | HMAC signature | `INBOUND_WEBHOOK_SECRET` |
 | `/mcp` | API key or OAuth access token | same use cases as REST; OAuth discovery under `/.well-known/oauth-*` ([MCP-CONNECTOR.md](MCP-CONNECTOR.md)) |
