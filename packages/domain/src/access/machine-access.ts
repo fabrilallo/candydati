@@ -32,6 +32,8 @@ export const MACHINE_FORBIDDEN_PERMISSIONS: readonly Permission[] = PERMISSIONS.
       // Who receives candidate data outside the organization, and sending it: a person decides (PRODUCT.md §3.5).
       'client:manage',
       'shortlist:send',
+      // Which spellings count as one skill in a search is the organization's decision, made by a person.
+      'skill_alias:manage',
     ].includes(permission),
 );
 

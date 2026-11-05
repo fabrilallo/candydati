@@ -19,6 +19,8 @@ import {
   apiKeyCreatedSchema,
   webhookCreatedSchema,
   AUDIT_ACTIONS,
+  addSkillAliasInputSchema,
+  builtInSkillAliasInputSchema,
 } from '@candydati/domain';
 import { z } from 'zod';
 import { deletedResult } from './schemas-admin.js';
@@ -138,4 +140,24 @@ export const configRoutes: readonly RouteSpec[] = [
     response: { schema: z.object({ eventId: z.string() }) },
   },
   { method: 'get', path: '/api/v1/webhooks/:id/deliveries', tag: 'Webhooks', summary: 'Recent deliveries of an endpoint', scope: 'webhook:manage', sessionOnly: true, response: { schema: 'WebhookDelivery', list: true } },
+  {
+    method: 'get', path: '/api/v1/skill-aliases', tag: 'Skill aliases', summary: 'The built-in skill aliases and the organization’s own', scope: 'skill_alias:manage', sessionOnly: true,
+    description: 'Every built-in skill with its aliases and whether each is on for the organization (`builtIn`), the aliases the organization added (`own`) and the most it may add (`limit`).',
+    response: { schema: 'SkillAliasOverview' },
+  },
+  {
+    method: 'post', path: '/api/v1/skill-aliases', tag: 'Skill aliases', summary: 'Add an alias to a skill', scope: 'skill_alias:manage', sessionOnly: true, status: 201,
+    description: '`alias` becomes another way of writing `skill` in the filter on declared criteria. `skill` is a built-in skill (under any of its names) or a new skill of the organization. An alias belongs to one skill, ignoring case, punctuation and diacritics: `409 alias_taken` when another skill has it, `409 alias_redundant` when this skill has it already, `409 alias_limit` at the cap.',
+    body: addSkillAliasInputSchema, response: { schema: 'SkillAlias' },
+  },
+  { method: 'delete', path: '/api/v1/skill-aliases/:id', tag: 'Skill aliases', summary: 'Remove an alias the organization added', scope: 'skill_alias:manage', sessionOnly: true, response: { schema: deletedResult } },
+  {
+    method: 'post', path: '/api/v1/skill-aliases/built-in/disable', tag: 'Skill aliases', summary: 'Switch a built-in alias off', scope: 'skill_alias:manage', sessionOnly: true,
+    description: 'The filter no longer treats this built-in alias as the same skill, for this organization only. Repeating it changes nothing.',
+    body: builtInSkillAliasInputSchema, response: { schema: z.object({ alias: z.string(), enabled: z.literal(false) }) },
+  },
+  {
+    method: 'post', path: '/api/v1/skill-aliases/built-in/enable', tag: 'Skill aliases', summary: 'Switch a built-in alias on again', scope: 'skill_alias:manage', sessionOnly: true,
+    body: builtInSkillAliasInputSchema, response: { schema: z.object({ alias: z.string(), enabled: z.literal(true) }) },
+  },
 ];

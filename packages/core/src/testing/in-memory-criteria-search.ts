@@ -1,4 +1,4 @@
-import { cvMatchesCriteria, needsStructuredCv, type Application, type Candidate, type CvExtractionRecord } from '@candydati/domain';
+import { cvMatchesCriteria, needsStructuredCv, skillMatchesOf, type Application, type Candidate, type CvExtractionRecord } from '@candydati/domain';
 import type { CriteriaMatch, CriteriaSearchQuery, CriteriaSearchResult } from '../candidate-ports.js';
 import type { CandidateStoreState } from './in-memory-candidates.js';
 
@@ -23,12 +23,18 @@ export function findByCriteriaInMemory(state: CandidateStoreState, query: Criter
     .filter(({ candidate, given }) => inPool(query, candidate, given))
     .map(({ candidate, given }) => ({ candidate, given, cvs: state.extractions.filter((e) => given.some((a) => a.id === e.applicationId)) }));
   const matches: CriteriaMatch[] = pool
-    .filter(({ cvs }) => cvs.some((cv) => cvMatchesCriteria(cv, query.criteria)))
-    .map(({ candidate, given }) => ({
-      candidate,
-      applicationId: given.find((a) => a.jobId === query.jobId)?.id ?? null,
-      lastAppliedAt: given.length === 0 ? null : new Date(Math.max(...given.map((a) => a.createdAt.getTime()))),
-    }))
+    .flatMap(({ candidate, given, cvs }) => {
+      const cv = cvs.find((own) => cvMatchesCriteria(own, query.criteria, query.skills));
+      if (cv === undefined) return [];
+      return [
+        {
+          candidate,
+          applicationId: given.find((a) => a.jobId === query.jobId)?.id ?? null,
+          lastAppliedAt: given.length === 0 ? null : new Date(Math.max(...given.map((a) => a.createdAt.getTime()))),
+          skillMatches: skillMatchesOf(cv, query.criteria, query.skills),
+        },
+      ];
+    })
     .toSorted((a, b) => (b.lastAppliedAt?.getTime() ?? 0) - (a.lastAppliedAt?.getTime() ?? 0) || a.candidate.id.localeCompare(b.candidate.id));
   const start = (query.page - 1) * query.limit;
   return {

@@ -34,7 +34,7 @@ and guides imports.
 It also finds candidates for a job on objective criteria: ask, for example, "candidates for this ad with TypeScript and
 at least 3 years of experience". The assistant lists the criteria and waits for you to confirm them; then the database
 filters the job's applicants and the talent pool (people who applied to other positions only are never included). Every
-result meets every criterion (a skill also matches its usual names: "Go" finds "Golang", "k8s" finds "Kubernetes"), there is no score and the list is in order of application. CVs that could not be checked
+result meets every criterion (a skill also matches its usual names: "Go" finds "Golang", "k8s" finds "Kubernetes"; owners and admins add their own names or switch off built-in ones under **Settings, Skills**, and each result says which name the CV used), there is no score and the list is in order of application. CVs that could not be checked
 are counted, so a person can look at them. Criteria on age, sex, origin, family or other protected characteristics are
 refused, and every search is recorded in the audit log. The same search is available to your own agents over MCP
 (`find_candidates_by_criteria`).

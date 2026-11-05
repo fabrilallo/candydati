@@ -56,7 +56,8 @@
     "reports": "Report",
     "security": "Sicurezza",
     "migrations": "Migrazione",
-    "clients": "Clienti"
+    "clients": "Clienti",
+    "skills": "Competenze"
   },
   "jobRequests": {
     "title": "Richieste di assunzione",
@@ -650,6 +651,12 @@
         "opened": "Ha aperto una shortlist",
         "cv_opened": "Ha aperto un CV da una shortlist",
         "answered": "Ha risposto su un candidato di una shortlist"
+      },
+      "skill_alias": {
+        "added": "Ha aggiunto un alias di competenza",
+        "removed": "Ha rimosso un alias di competenza",
+        "disabled": "Ha disattivato un alias di competenza predefinito",
+        "enabled": "Ha riattivato un alias di competenza predefinito"
       },
       "connected_app": {
         "granted": "Ha collegato un'app al proprio account",
@@ -2400,6 +2407,41 @@
       "done": "Nessuna regola copiata | 1 regola copiata | {count} regole copiate"
     }
   },
+  "skills": {
+    "title": "Competenze",
+    "description": "Il filtro sui criteri dichiarati tratta come una sola competenza le sue diverse grafie: \"Go\" trova \"Golang\". Aggiungi i nomi che usano i vostri CV e disattiva quelli predefiniti che non volete.",
+    "own": {
+      "title": "I vostri alias",
+      "body": "Un alias è un altro modo di scrivere una competenza. Vale per ogni ricerca di questa organizzazione, da entrambe le parti: il criterio e il CV. Per creare una competenza nuova basta un alias.",
+      "skill": "Competenza",
+      "skillHint": "Una competenza nota (Go) o una nuova.",
+      "alias": "Si scrive anche",
+      "aliasHint": "Ad esempio Go developer.",
+      "add": "Aggiungi alias",
+      "adding": "Aggiungo",
+      "empty": "Ancora nessun alias vostro. Quelli predefiniti qui sotto coprono già le grafie più comuni.",
+      "countsAs": "vale come",
+      "remove": "Rimuovi l'alias {alias}",
+      "count": "{count} alias su {limit}"
+    },
+    "builtIn": {
+      "title": "Alias predefiniti",
+      "body": "Il dizionario condiviso, uguale per tutte le organizzazioni. Disattiva un alias se per voi non deve valere come la stessa competenza.",
+      "search": "Cerca una competenza o un alias",
+      "none": "Nessun risultato per la ricerca.",
+      "toggle": "{alias} vale come {skill}",
+      "off": "{count} disattivati per questa organizzazione."
+    },
+    "removed": "Alias rimosso.",
+    "errors": {
+      "required": "Scrivi una competenza, con almeno una lettera o una cifra.",
+      "tooLong": "Massimo 60 caratteri.",
+      "invalid": "Questo testo non può essere usato come nome di competenza.",
+      "aliasTaken": "Questo nome appartiene già a un'altra competenza.",
+      "aliasRedundant": "Questa competenza è già nota con quel nome.",
+      "aliasLimit": "Avete raggiunto il limite di alias per questa organizzazione."
+    }
+  },
   "webhooks": {
     "title": "Webhook",
     "description": "Avvisano i tuoi sistemi quando succede qualcosa nella selezione. Il contenuto porta solo identificativi, mai nomi o email: i dettagli si leggono dall'API.",
@@ -2775,6 +2817,9 @@
       "shortlist": {
         "read": "Leggere le shortlist inviate ai clienti",
         "send": "Inviare shortlist ai clienti"
+      },
+      "skill_alias": {
+        "manage": "Gestire gli alias delle competenze"
       }
     },
     "withheld": "Alcune cose una chiave non le può fare mai: decisioni sui candidati, messaggi ai candidati e amministrazione restano a una persona.",

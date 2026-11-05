@@ -323,8 +323,9 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
   CV structuring is the one model call that reads the whole document, because it has to extract it.
 - `find_candidates_by_criteria` (assistant and MCP) filters a job's applicants and the talent pool on criteria a person
   confirmed, in Postgres (`drizzle-criteria-search.ts`, checked against the reference `cvMatchesCriteria`): no score,
-  ordered by date of application, unchecked CVs counted, protected characteristics refused, every search audited
-  ([ADR 0010](adr/0010-privacy-by-design-and-declared-criteria.md)).
+  ordered by date of application, unchecked CVs counted, protected characteristics refused, every search audited;
+  skills match through the built-in dictionary plus the organization's own aliases (`skill_alias`, loaded per search by
+  `loadSkillBook`), and each result says which spelling met a skill ([ADR 0010](adr/0010-privacy-by-design-and-declared-criteria.md)).
 - The conversation lives in the browser; the server stores nothing of it ([ADR 0007](adr/0007-stateless-assistant.md)).
 - MCP clients authenticate with an API key or, as Claude custom connectors, with OAuth 2.1 (Better Auth's MCP plugin,
   PKCE, dynamic registration with a callback allowlist, opaque tokens bound to the `/mcp` resource). An OAuth
@@ -372,5 +373,6 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 | Import | `import_batch`, `import_item`, `import_analysis` |
 | HR tools | `feedback_request`, `interview_feedback` (scorecard observations in `observations`), `job_scorecard_criterion` |
 | Clients (agencies) | `client` (contacts as validated jsonb), `job_client` (the client of a job and how its ad shows it), `client_shortlist` (hash of the link, expiry, revocation, reminders), `client_shortlist_item` (what is shared per candidate and the client's answer) |
+| Skills | `skill_alias` (an organization's own aliases, unique per organization on the normalized alias), `skill_alias_disabled` (built-in aliases it switched off) |
 | Careers page | `careers_page` (draft and published document), `careers_media` (images re-encoded as WebP, videos; the logo is one of its images) |
 | Audit | `audit_log` (append-only, enforced by triggers) |

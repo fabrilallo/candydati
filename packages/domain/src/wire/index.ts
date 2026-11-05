@@ -21,3 +21,4 @@ export * from './instance-email.js';
 export * from './setup-progress.js';
 export * from './instance-ai.js';
 export * from './client.js';
+export * from './skill-alias.js';

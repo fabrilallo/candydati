@@ -21,7 +21,7 @@ const PROTECTED =
   /\b(?:eta|age|aged|sesso|sex|gender|genere|donn[ae]|uomo|uomini|maschi[oe]?|femmin[ae]|male|female|men|women|nazionalita|nationality|etnia|ethnic\w*|razza|religion\w*|religios\w*|incinta|gravidanza|pregnan\w*|maternita|maternity|sposat[oaie]|married|celibe|nubile|figli|children|disabil\w*|disabled|orientamento|sexual\w*|bella\s+presenza|giovan[ei]|young|nat[oaie]|born|nascita|birth\w*)\b/;
 
 /** The same scan the job ads go through, as if every term were a must-have requirement, in both languages. */
-function isDiscriminatory(term: string): boolean {
+export function isDiscriminatory(term: string): boolean {
   if (PROTECTED.test(fold(term))) return true;
   const fragments = [fragment('requirements.mustHave.0', term)];
   return scanPatterns(fragments, 'it').length > 0 || scanPatterns(fragments, 'en').length > 0;

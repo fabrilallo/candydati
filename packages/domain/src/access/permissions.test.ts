@@ -106,6 +106,11 @@ describe('permissions', () => {
     expect(ROLES.filter((role) => roleHasPermission(role, 'careers_page:manage'))).toEqual(['owner', 'admin']);
   });
 
+  it('gives skill_alias:manage only to owner and admin, like the other organization settings', () => {
+    expect(ROLES.filter((role) => roleHasPermission(role, 'skill_alias:manage'))).toEqual(['owner', 'admin']);
+    expect(ROLES.filter((role) => roleHasPermission(role, 'skill_alias:manage'))).toEqual(ROLES.filter((role) => roleHasPermission(role, 'email_settings:manage')));
+  });
+
   it('gives restricted_stage:manage to owner, admin and hiring manager, never to recruiters or interviewers', () => {
     expect(ROLES.filter((role) => roleHasPermission(role, 'restricted_stage:manage'))).toEqual(['owner', 'admin', 'hiring_manager']);
   });

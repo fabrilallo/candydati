@@ -41,6 +41,7 @@ export function createPhase2Deps({ uow, files, queue, receipts, feedback }: Phas
     notes: r.notes,
     extractions: r.extractions,
     candidateSearch: r.candidateSearch,
+    skillAliases: r.skillAliases,
     users: r.users,
     files,
     messages: r.messages,

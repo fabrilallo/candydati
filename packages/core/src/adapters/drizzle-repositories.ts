@@ -41,6 +41,7 @@ import { createDrizzlePrivacyNotices } from './drizzle-privacy-notices.js';
 import { createDrizzleResponsePromises, createDrizzleStageEvents } from './drizzle-report-history.js';
 import { createDrizzleJobViews } from './drizzle-job-views.js';
 import { createDrizzleReports } from './drizzle-reports.js';
+import { createDrizzleSkillAliases } from './drizzle-skill-aliases.js';
 import { createDrizzleTasks } from './drizzle-tasks.js';
 import { createDrizzleTrackedLinks } from './drizzle-tracked-links.js';
 import { createDrizzleUserDirectory } from './drizzle-user-directory.js';
@@ -58,6 +59,7 @@ const jobRepositories = (db: DbExecutor) => {
     jobs: createDrizzleJobs(db),
     jobTeams: createDrizzleJobTeams(db),
     jobTemplates: createDrizzleJobTemplates(db),
+    skillAliases: createDrizzleSkillAliases(db),
     applicationCounts: createDrizzleApplicationCounts(db),
     organizations: createDrizzleOrganizationDirectory(db),
     privacyNotices: createDrizzlePrivacyNotices(db),

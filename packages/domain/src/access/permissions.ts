@@ -62,6 +62,11 @@ export const STATEMENTS = {
    * (and tells the candidates) or revokes it. Sending candidate data outside the organization is a person's decision.
    */
   shortlist: ['read', 'send'],
+  /**
+   * The organization's own skill aliases on top of the built-in dictionary (ADR 0010): they change which spellings the
+   * filter on declared criteria treats as one skill. Never grantable to a key or to the agent.
+   */
+  skill_alias: ['manage'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -107,6 +112,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     restricted_stage: ['manage'],
     client: ['read', 'manage'],
     shortlist: ['read', 'send'],
+    skill_alias: ['manage'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],

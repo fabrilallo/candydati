@@ -33,6 +33,7 @@ import { registerAttentionRoutes } from './routes/attention.js';
 import { registerAutomationRoutes } from './routes/automations.js';
 import { registerNotificationRoutes } from './routes/notifications.js';
 import { registerTaskRoutes } from './routes/tasks.js';
+import { registerSkillAliasRoutes } from './routes/skill-aliases.js';
 import { registerWebhookRoutes } from './routes/webhooks.js';
 import { registerAuditLogRoutes } from './routes/audit-log.js';
 import { registerEmailSettingsRoutes } from './routes/email-settings.js';
@@ -266,6 +267,7 @@ function registerRecruitingRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerTaskRoutes(app, ctx);
   registerAutomationRoutes(app, ctx);
   registerWebhookRoutes(app, ctx);
+  registerSkillAliasRoutes(app, ctx);
 }
 
 async function registerCandidateFacingRoutes(app: FastifyInstance, ctx: AppContext): Promise<void> {

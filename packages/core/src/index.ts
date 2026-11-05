@@ -255,3 +255,7 @@ export * from './use-cases/clients/shortlist-export.js';
 export * from './use-cases/connected-apps/preview-consent.js';
 export * from './linkedin-prefill-ports.js';
 export * from './use-cases/linkedin/prefill-flow.js';
+export * from './skill-alias-ports.js';
+export * from './adapters/drizzle-skill-aliases.js';
+export * from './use-cases/skills/skill-aliases.js';
+export * from './mappers/skill-alias-dto.js';

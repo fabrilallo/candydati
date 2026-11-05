@@ -351,6 +351,13 @@
       "when": 1793833085191,
       "tag": "0049_automation_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1793889937168,
+      "tag": "0050_skill_aliases",
+      "breakpoints": true
     }
   ]
 }
