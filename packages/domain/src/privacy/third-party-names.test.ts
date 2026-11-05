@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX, LINEAR_TIME_TEST_TIMEOUT_MS } from '../testing/linear-time.js';
+import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
 import { NAME_MARKER, replaceMarkedNames } from './third-party-names.js';
 
 const N = NAME_MARKER;
@@ -61,5 +61,5 @@ describe('replaceMarkedNames', () => {
     for (const unit of shapes) {
       expect(growthRatio((size) => replaceMarkedNames(unit.repeat(size)), 2000)).toBeLessThan(LINEAR_GROWTH_MAX);
     }
-  }, LINEAR_TIME_TEST_TIMEOUT_MS);
+  });
 });
