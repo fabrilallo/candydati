@@ -15,17 +15,58 @@ AI system: it conflicts with ADR 0005, GDPR art. 22, and is a high-risk use unde
    Surname, contacts and direct identifiers are replaced by markers (`[surname]`, `[email]`, ...) in every text a
    candidate wrote (`pseudonymizeText`, `packages/domain/src/privacy`). Drafts keep `{{candidate.lastName}}` as a
    variable for the person's composer. This is pseudonymization, not anonymization: the data is still personal data.
-   Covered: emails, phones (international, spaced, with an `int.`/`ext.` extension), links and social profiles (any
-   common TLD, `t.me`, `wa.me`, `name.github.io`, "LinkedIn: in/name", personal sites such as `name.it` or
-   `name.com/about`), `@handles` and messaging ids after their app name (Skype, Discord, Signal, Teams), Italian street
-   addresses with CAP and city, English ones with city and US ZIP or UK postcode, tax codes (with omocodia), partite
-   IVA after their label, IBANs, full dates. Third parties, deterministically and only where the text marks them: full
-   names in a references section (up to an empty line), after a title (Dott., Ing., Mr...), right before a contact, and
-   known names passed as `otherNames` (`[name]`). Every pattern is bounded to stay linear on hostile text.
+   Covered: emails, phones (international, spaced, with a `(0)` trunk prefix or a one-digit area, with an
+   `int.`/`ext.` extension), links and social profiles (any common TLD, xing, viadeo, malt, `t.me`, `wa.me`,
+   `name.github.io`, "LinkedIn: in/name", "GitHub: name", personal sites such as `name.it`, `name.fr`, `name.co.uk` or
+   `name.com/about`), `@handles` and messaging ids after their app name (Skype, Discord, Signal, Teams), street
+   addresses of Italy, France, Belgium, Switzerland, Germany, Austria, Spain, Latin America, the UK, the US, Canada and
+   Australia with the postal code and city that follow them on the line, tax codes (with omocodia), Spanish DNI/NIE
+   (check letter verified), ids after their label (DNI, RFC, CURP, CUIL, SSN, Steuer-ID, ...), partite IVA after their
+   label, IBANs, full dates in five languages (numeric, ISO, "4 avril 1992", "7. Juli 1988", "15 de marzo de 1992",
+   "March 4, 1991"). The surname is removed in any case, without accents ("Garcia"), transliterated ("Mueller") and
+   inside a site or handle glued to it (`emilyjohnson.io`, `ejohnson_92`). Third parties, deterministically and only
+   where the text marks them: full names in a references section (Referenze, References, Références, Referenzen,
+   Referencias; up to an empty line), after a title (Dott., Ing., Mr, Mme, M., Frau, Herrn, Mag., Dña., Lic., ...),
+   after a phrase that always introduces a person ("reporting to", "il mio responsabile", "sous la direction de",
+   "meine Kollegin", "mi jefa"), right before a contact, and known names passed as `otherNames` (`[name]`); a full name
+   found in one of those places is removed wherever else the text repeats it. Every pattern is bounded to stay linear
+   on hostile text.
    Residual risk, accepted and stated: third-party names in plain prose ("ho lavorato con Mario Bianchi"), single-word
    or lower-case names, notes naming people, a partita IVA without its label (masked as a phone), bare domains with a
-   common TLD and no path (`mariorossi.com`), address formats of other countries, and anything free text can hide.
-   `otherNames` is not yet filled with the organization members by the tools: the directory has no list of them.
+   common TLD and no path that do not contain the surname (`studio-rossi.com`), streets without a type word, a second
+   surname missing from the stored last name, and anything free text can hide. `otherNames` is not yet filled with the
+   organization members by the tools: the directory has no list of them.
+
+   **Measured residual risk.** A corpus of 20 synthetic CVs, four per language (`packages/domain/src/testing/
+   pseudonymization-corpus`, checked by `pseudonymize-corpus.test.ts`), lists for each CV the distinct strings that must
+   disappear (candidate identifiers and contacts, and the surname of every third party) and the strings that must stay
+   (first name, employers, places of work, schools, skills such as Java and Go, periods). The suite fails if a number
+   below moves without this table being updated, and if any string that must stay is lost (none is, before or after).
+
+   | Language | CVs | Must disappear | Removed before (commit c3b86a3) | Removed now | Known gaps | Third-party surnames removed now |
+   |---|---|---|---|---|---|---|
+   | Italian | 4 | 53 | 44 | 47 | 6 | 7 of 13 |
+   | English (UK, US, CA, AU) | 4 | 53 | 35 | 49 | 4 | 10 of 14 |
+   | French (FR, CH, BE) | 4 | 51 | 27 | 47 | 4 | 7 of 11 |
+   | German (DE, AT) | 4 | 43 | 24 | 38 | 5 | 5 of 8 |
+   | Spanish (ES, MX, AR) | 4 | 47 | 22 | 44 | 3 | 8 of 10 |
+   | **Total** | **20** | **247** | **152 (61.5%)** | **225 (91.1%)** | **22** | **37 of 56** |
+
+   Candidate identifiers and contacts: 188 of 191 removed (137 before). Known gaps, asserted as they are so the suite
+   notices when one closes:
+   - 19 third-party names in plain prose, with nothing in the text marking them as a person: "insieme a Luca Moretti e
+     Sara Galli", "Ho collaborato con Francesca Rinaldi", "Worked closely with Priya Patel", "with PM Michael Chen",
+     "Je travaille avec Mathieu Favre et Chloé Bonvin", "J'ai remplacé Kevin Janssens", "Zusammen mit Jonas Weber",
+     "Mein Meister Klaus Richter", "Trabajé con Jordi Puig", "con Sofía Gómez". "with/con/avec/mit" followed by two
+     capitalized words is just as often "with Google Cloud" or "con Spring Boot": only a named-entity recognizer tells
+     them apart. They are 19 of the 22 gaps and 34% of the third-party surnames in the corpus.
+   - A German street with no type word ("Am Sandtorkai 5") and its postal code ("20457 Hamburg"): "Am/Im + word +
+     number" also matches "Im Team 5".
+   - A second surname missing from the stored last name ("Andrea Hernández Ortega", last name "Hernández").
+
+   The corpus is written to be realistic, not adversarial: it measures the patterns on ordinary CVs, not their limits.
+   A references section also masks the capitalized role and company words on its lines ("Engineering Manager"), and a
+   capitalized role right before a contact is masked as a name: over-masking, never a leak.
 2. **A filter on declared criteria, never a judgement.** A person declares objective, job-related criteria (skills,
    languages, minimum experience, location, words in the CV) and confirms them; the assistant may propose them, the
    tools require an explicit confirmation flag. The database applies them deterministically (`cvMatchesCriteria` is the
