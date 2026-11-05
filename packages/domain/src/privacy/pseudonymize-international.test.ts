@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { expectLinearOnHostileInput, hostileText } from '../testing/linear-time.js';
 import { pseudonymizeText, REDACTED } from './pseudonymize.js';
 
 const rossi = { lastName: 'Rossi' };
@@ -104,7 +104,7 @@ describe('pseudonymizeText outside Italy', () => {
   it('runs in linear time on hostile input', () => {
     const shapes = ['12 rue A ', 'Rue A ', 'Aastraße 1 ', 'C/ A ', '[address] 1 ', '1 de mar ', 'March 1 ', 'DNI 1', 'GitHub: a', 'x.co.', 'aa_rossi'];
     for (const unit of shapes) {
-      expect(growthRatio((size) => pseudonymizeText(unit.repeat(size), rossi), 2000)).toBeLessThan(LINEAR_GROWTH_MAX);
+      expectLinearOnHostileInput((length) => { pseudonymizeText(hostileText(unit, length), rossi); });
     }
-  });
+  }, 20_000);
 });
