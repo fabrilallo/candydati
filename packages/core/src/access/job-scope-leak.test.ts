@@ -135,6 +135,7 @@ const ROWS: readonly Row[] = [
   write('copyAutomations', { from: { jobId: 'job_1', stageId: 'stage-0' }, to: { jobId: JOB_B, stageId: 'stage-1' } }, { label: 'to job B' }),
   write('confirmMoveProposal', { proposalId: 'prop_b' }),
   write('dismissMoveProposal', { proposalId: 'prop_b' }),
+  write('proposeApplicationMove', { applicationId: 'app_b', toStageId: 'received', reason: 'Strong answers' }),
   write('updateJob', { jobId: JOB_B, content: { title: 'Changed' } }),
   write('duplicateStage', { jobId: JOB_B, stageId: 'stage-0' }),
   write('publishJob', { jobId: JOB_B }),

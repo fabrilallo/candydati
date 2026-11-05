@@ -85,6 +85,8 @@ export async function proposeMove(deps: AutomationRunDeps, ctx: ActionContext, t
     fromStageId: application.stageId,
     toStageId,
     proposedBy: rule.createdBy,
+    source: 'rule',
+    reason: null,
     status: 'open',
     createdAt: now,
     expiresAt: proposalExpiresAt(now),

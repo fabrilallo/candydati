@@ -26,12 +26,20 @@ function world(overrides: Partial<StoredConnectedAppToken> = {}) {
 describe('authenticateConnectedApp', () => {
   it('turns a live token into an actor acting for the person, with their role, in the organization they picked', async () => {
     const actor = await authenticateConnectedApp(world().deps, TOKEN);
-    expect(actor).toEqual({ type: 'connected_app', id: 'grant_1', organizationId: 'org_a', role: 'recruiter', onBehalfOfUserId: 'user_rec', scopes: null });
+    expect(actor).toMatchObject({ type: 'connected_app', id: 'grant_1', organizationId: 'org_a', role: 'recruiter', onBehalfOfUserId: 'user_rec' });
     // The role's permissions, minus what no machine may do.
     expect(can(actor!, 'job:publish')).toBe(true);
     expect(can(actor!, 'message:send')).toBe(false);
     expect(can(actor!, 'candidate:decide')).toBe(false);
     expect(can(actor!, 'candidate:move')).toBe(false);
+    expect(can(actor!, 'candidate:propose_move')).toBe(false);
+  });
+
+  it('may propose moves only when the person granted that scope on the consent page', async () => {
+    const actor = await authenticateConnectedApp(world({ scopes: ['mcp', 'candidate:propose_move', 'offline_access'] }).deps, TOKEN);
+    expect(can(actor!, 'candidate:propose_move')).toBe(true);
+    expect(can(actor!, 'candidate:move')).toBe(false);
+    expect(can(actor!, 'job:publish')).toBe(true);
   });
 
   it('stores tokens like Better Auth: SHA-256 base64url of the token without its prefix', () => {

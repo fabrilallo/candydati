@@ -3,6 +3,7 @@ import {
   automationActionSchema,
   automationConditionsSchema,
   automationTriggerSchema,
+  MOVE_PROPOSAL_SOURCES,
   MOVE_PROPOSAL_STATUSES,
   type MoveProposal,
   type TemplateAutomationRule,
@@ -15,8 +16,9 @@ type ProposalRow = typeof schema.moveProposal.$inferSelect;
 type TemplateRuleRow = typeof schema.jobTemplateAutomation.$inferSelect;
 
 const statusSchema = z.enum(MOVE_PROPOSAL_STATUSES);
+const sourceSchema = z.enum(MOVE_PROPOSAL_SOURCES);
 
-const toProposal = (row: ProposalRow): MoveProposal => ({ ...row, status: statusSchema.parse(row.status) });
+const toProposal = (row: ProposalRow): MoveProposal => ({ ...row, status: statusSchema.parse(row.status), source: sourceSchema.parse(row.source) });
 
 /** Postgres implementation. Every statement filters by `organization_id`, except the system expiry. */
 export function createDrizzleMoveProposals(db: DbExecutor): MoveProposalRepository {
