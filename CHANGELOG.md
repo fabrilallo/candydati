@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-05
+
+No migrations.
+
 ### Added
 
 - **Skill names on the candidate profile.** The skills read from a CV now show the organization's name for them with
