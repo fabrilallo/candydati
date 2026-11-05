@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-05
+
+No migrations.
+
 ### Fixed
 
 - AI settings: the test call before saving refused OpenAI models ("max_output_tokens ... >= 16") and could find a
