@@ -64,6 +64,7 @@ import { registerPublicCareersRoutes } from './routes/public-careers.js';
 import { registerImportRoutes } from './routes/imports.js';
 import { registerMigrationRoutes } from './routes/migrations.js';
 import { registerPublicConsentRoutes } from './routes/public-consent.js';
+import { registerPublicLinkedInRoutes } from './routes/public-linkedin.js';
 import { registerReportRoutes } from './routes/reports.js';
 import { registerStatsRoutes } from './routes/stats.js';
 import { registerFeedbackRoutes } from './routes/feedback.js';
@@ -275,6 +276,7 @@ async function registerCandidateFacingRoutes(app: FastifyInstance, ctx: AppConte
   registerPrivacyOverviewRoutes(app, ctx);
   registerExportRoutes(app, ctx);
   await registerPublicApplicationRoute(app, ctx);
+  registerPublicLinkedInRoutes(app, ctx);
   registerPublicConsentRoutes(app, ctx);
   await registerImportRoutes(app, ctx);
   await registerMigrationRoutes(app, ctx);

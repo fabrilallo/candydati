@@ -99,6 +99,8 @@ export interface RateLimitSettings {
   readonly careersMediaMax?: number | undefined;
   /** Requests per minute per client on the public careers media files (a page loads many). */
   readonly publicMediaMax?: number | undefined;
+  /** Requests per minute per client on the "Fill in with LinkedIn" routes of the application form. */
+  readonly linkedInMax?: number | undefined;
   /** Requests per minute per API key (on top of the per-client limit). */
   readonly apiKeyMax?: number | undefined;
 }

@@ -46,6 +46,20 @@ describe('parseEnv TRUST_PROXY and daily caps', () => {
   });
 });
 
+describe('parseEnv LinkedIn prefill', () => {
+  it('is off by default and needs both the client id and the secret', () => {
+    expect(parseEnv(valid).linkedIn).toBeNull();
+    expect(parseEnv({ ...valid, LINKEDIN_CLIENT_ID: '', LINKEDIN_CLIENT_SECRET: '' }).linkedIn).toBeNull();
+    expect(parseEnv({ ...valid, LINKEDIN_CLIENT_ID: 'id-1', LINKEDIN_CLIENT_SECRET: 'not-a-real-secret' }).linkedIn).toEqual({ clientId: 'id-1', clientSecret: 'not-a-real-secret' });
+    expect(() => parseEnv({ ...valid, LINKEDIN_CLIENT_ID: 'id-1' })).toThrow(/LINKEDIN_CLIENT_SECRET/);
+    expect(() => parseEnv({ ...valid, LINKEDIN_CLIENT_SECRET: 'not-a-real-secret' })).toThrow(/LINKEDIN_CLIENT_ID/);
+  });
+
+  it('never puts the secret in the error message', () => {
+    expect(() => parseEnv({ ...valid, LINKEDIN_CLIENT_SECRET: 'super-secret-value' })).toThrow(/^(?!.*super-secret-value).*$/s);
+  });
+});
+
 describe('parseEnv', () => {
   it('applies defaults', () => {
     const env = parseEnv(valid);

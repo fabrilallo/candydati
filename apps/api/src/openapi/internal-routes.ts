@@ -27,4 +27,8 @@ export const INTERNAL_ROUTES: readonly InternalRoute[] = [
   { method: 'get', path: '/api/v1/setup-progress', reason: 'Backs the setup checklist of the dashboard (yes or no per step): a UI contract, no data an integration needs.' },
   { method: 'post', path: '/api/v1/inbound/email/raw', reason: 'Inbound email webhook called by the mail provider, authenticated by a shared secret, answers `{ received: true }`.' },
   { method: 'post', path: '/api/v1/inbound/email/resend', reason: 'Inbound email webhook of the Resend provider, authenticated by its signature, answers `{ received: true }`.' },
+  { method: 'get', path: '/api/v1/public/linkedin/status', reason: 'Whether the application form shows "Fill in with LinkedIn": a UI contract of the public form.' },
+  { method: 'get', path: '/api/v1/public/linkedin/start', reason: 'Browser navigation of "Fill in with LinkedIn": answers a redirect to LinkedIn, not the envelope.' },
+  { method: 'get', path: '/api/v1/public/linkedin/callback', reason: 'OAuth redirect URL registered in the LinkedIn app: answers a redirect back to the job page, not the envelope.' },
+  { method: 'post', path: '/api/v1/public/linkedin/prefill', reason: 'Hands the application form, once, what LinkedIn filled in (read from an encrypted cookie of the same browser).' },
 ];
