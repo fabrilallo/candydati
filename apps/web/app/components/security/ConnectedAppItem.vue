@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { PlugIcon } from '@lucide/vue'
 import { formatDate } from '@/lib/format'
-import type { ConnectedApp } from '@candydati/domain'
+import { isPermission, type ConnectedApp } from '@candydati/domain'
+import { scopeLabelKey } from '@/lib/api-keys'
 import { Button } from '@/components/ui/button'
 
 /** One connected app: its self-declared name (marked as such), who connected it when not me, when, its access, revoke. */
 const props = defineProps<{ app: ConnectedApp; mine: boolean; busy: boolean }>()
 defineEmits<{ revoke: [] }>()
 const { t, te, locale } = useI18n()
-const scopeLabel = (scope: string): string => (te(`connectedApps.scope.${scope}`) ? t(`connectedApps.scope.${scope}`) : scope)
+/** OAuth scopes have their own label; an opt-in permission granted as a scope (proposing moves) is named like on a key. */
+const scopeLabel = (scope: string): string => {
+  if (isPermission(scope)) return t(scopeLabelKey(scope))
+  return te(`connectedApps.scope.${scope}`) ? t(`connectedApps.scope.${scope}`) : scope
+}
 const meta = computed(() => {
   const by = props.mine ? [] : [props.app.userName ? t('connectedApps.connectedBy', { name: props.app.userName }) : t('connectedApps.connectedByFormer')]
   return [...by, t('connectedApps.connectedOn', { date: formatDate(props.app.connectedAt, locale.value) })]

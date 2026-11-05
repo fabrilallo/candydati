@@ -100,6 +100,31 @@ describe('consent page', () => {
     expect(bodiesOf('consent')).toEqual([{ accept: true, oauth_query: SIGNED_QUERY }])
   })
 
+  it('offers proposing moves as an unchecked opt-in, and grants it only when ticked', async () => {
+    state.preview = consentPreview({ scopes: ['mcp', 'candidate:propose_move', 'offline_access'] })
+    const unticked = await mountConsent()
+    const optIn = unticked.find('[data-testid="consent-propose-move"]')
+    expect(optIn.text()).toContain('Proporre di spostare candidati tra le fasi')
+    expect(optIn.find<HTMLInputElement>('input').element.checked).toBe(false)
+    expect(unticked.find('[data-testid="consent-permissions"] [data-scope="candidate:propose_move"]').exists()).toBe(false)
+    await unticked.find('[data-testid="consent-allow"]').trigger('click')
+    await vi.waitFor(() => expect(mocks.navigateTo).toHaveBeenCalled())
+    expect(bodiesOf('consent')).toEqual([{ accept: true, oauth_query: SIGNED_QUERY, scope: 'mcp offline_access' }])
+
+    state.calls = []
+    const ticked = await mountConsent()
+    await ticked.find('[data-testid="consent-propose-move-input"]').setValue(true)
+    await ticked.find('[data-testid="consent-allow"]').trigger('click')
+    await vi.waitFor(() => expect(bodiesOf('consent')).toHaveLength(1))
+    expect(bodiesOf('consent')).toEqual([{ accept: true, oauth_query: SIGNED_QUERY }])
+  })
+
+  it('does not offer the opt-in to a role that may not move', async () => {
+    state.preview = consentPreview({ scopes: ['mcp', 'candidate:propose_move'], organizations: [consentOrganization('o2', { role: 'interviewer', active: true })] })
+    const wrapper = await mountConsent()
+    expect(wrapper.find('[data-testid="consent-propose-move"]').exists()).toBe(false)
+  })
+
   it('switches the active organization first when another one is picked', async () => {
     const wrapper = await mountConsent()
     await wrapper.find('select[data-testid="consent-organization"]').setValue('o2')

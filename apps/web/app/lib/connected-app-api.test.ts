@@ -53,6 +53,10 @@ describe('authorization steps', () => {
     const answer = send({ status: 200, body: { redirect: true, url: 'https://claude.ai/api/mcp/auth_callback?code=c&state=s' } })
     expect(await answerConsent(answer, SIGNED_QUERY, true)).toBe('https://claude.ai/api/mcp/auth_callback?code=c&state=s')
     expect(answer.mock.calls[0]).toEqual(['/api/auth/oauth2/consent', { method: 'POST', body: { accept: true, oauth_query: SIGNED_QUERY } }])
+    await answerConsent(answer, SIGNED_QUERY, true, 'mcp offline_access')
+    expect(answer.mock.calls[1]).toEqual(['/api/auth/oauth2/consent', { method: 'POST', body: { accept: true, oauth_query: SIGNED_QUERY, scope: 'mcp offline_access' } }])
+    await answerConsent(answer, SIGNED_QUERY, false, 'mcp')
+    expect(answer.mock.calls[2]).toEqual(['/api/auth/oauth2/consent', { method: 'POST', body: { accept: false, oauth_query: SIGNED_QUERY } }])
   })
 
   it('maps the refusal codes of Better Auth and of OAuth', async () => {

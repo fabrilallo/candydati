@@ -656,8 +656,9 @@
         "revoked": "Disconnected an app"
       },
       "move_proposal": {
-        "confirmed": "Confirmed a move proposed by an automation",
-        "dismissed": "Dismissed a move proposed by an automation"
+        "proposed": "Proposed moving an application to another stage",
+        "confirmed": "Confirmed a proposed move",
+        "dismissed": "Dismissed a proposed move"
       }
     }
   },
@@ -2716,6 +2717,7 @@
         "read": "Read candidates and CVs",
         "update": "Edit candidate details",
         "move": "Move candidates between stages",
+        "propose_move": "Propose moving candidates (a person confirms)",
         "decide": "Record the outcome",
         "export": "Export a candidate's data",
         "erase": "Erase a candidate's data"
@@ -2834,7 +2836,7 @@
     "configHint": "Replace the placeholder with your key. Never share the file with the key in it.",
     "tokenPlaceholder": "candydati_YOUR_KEY",
     "toolsTitle": "Available tools",
-    "toolsNote": "There are no tools to move, assess, reject or write to candidates: those stay a person's decision.",
+    "toolsNote": "There are no tools to move, assess, reject or write to candidates: those stay a person's decision. propose_stage_move only proposes; nothing moves until a person confirms.",
     "tools": {
       "list_jobs": "Lists job ads, filterable by status.",
       "get_job": "Reads a job ad with its content and status.",
@@ -2847,6 +2849,7 @@
       "list_attention": "Applications waiting for a reply or close to their deadline.",
       "add_candidate_note": "Adds an internal note to a candidate.",
       "create_task": "Creates a task on a candidate or a job ad.",
+      "propose_stage_move": "Proposes moving an application to another stage of its job, with a short reason. Only a proposal: a person confirms or dismisses it in Needs attention. Needs the opt-in scope to propose moves.",
       "list_job_templates": "Lists job ad templates.",
       "get_job_stats": "Job ad figures for the overview.",
       "get_evaluation_criteria": "What interviewers look for in a job, per stage, and which criteria a feedback already used. No weights, no scores.",
@@ -5026,7 +5029,9 @@
       "asYou": "It works as you, with your role, and every call ends up in the audit log. You can disconnect it at any time in the security settings.",
       "allow": "Allow",
       "deny": "Deny",
-      "noOrganization": "You are not part of any organization yet. Create one or accept an invitation, then start the connection again from the app."
+      "noOrganization": "You are not part of any organization yet. Create one or accept an invitation, then start the connection again from the app.",
+      "proposeMove": "Propose moving candidates between stages",
+      "proposeMoveHint": "Only a proposal with a short reason: it shows in Needs attention and nothing moves until someone on the team confirms it. Leave unticked if you do not want it."
     },
     "errors": {
       "expired": "The request expired or is no longer valid. Start the connection again from your app.",
@@ -5039,7 +5044,7 @@
   "proposals": {
     "title": "A proposed move to confirm | A proposed move to confirm | {count} proposed moves to confirm",
     "queueTitle": "Proposed moves to confirm | 1 proposed move to confirm | {count} proposed moves to confirm",
-    "note": "An automation suggested these. Nothing moves until a person confirms; confirming is your move, in your name.",
+    "note": "An automation or a connected assistant suggested these. Nothing moves until a person confirms; confirming is your move, in your name.",
     "sentence": "Move from {from} to {to}?",
     "unknownStage": "a stage no longer in the job",
     "confirm": "Confirm move",
@@ -5048,6 +5053,14 @@
     "dismissFor": "Dismiss the proposed move of {name}",
     "cannotMove": "Someone who can move candidates will confirm or dismiss it.",
     "confirmed": "Moved",
-    "dismissed": "Proposal dismissed"
+    "dismissed": "Proposal dismissed",
+    "source": {
+      "rule": "Proposed by an automation",
+      "user": "Proposed by a team member",
+      "agent": "Proposed by the assistant",
+      "api_key": "Proposed through an API key",
+      "connected_app": "Proposed by a connected app (MCP)"
+    },
+    "reason": "Reason given"
   }
 }

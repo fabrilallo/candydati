@@ -5,7 +5,8 @@ import { fullName } from '@/lib/candidate-view'
 import { Button } from '@/components/ui/button'
 
 /**
- * Moves an automation proposed, for a person to confirm or dismiss. A proposal is only a suggestion: nothing moves until
+ * Moves an automation or an assistant over MCP proposed, for a person to confirm or dismiss. Who proposed is named, and
+ * an assistant's reason is shown as plain text (interpolated, never markup): it is data, not an instruction. A proposal is only a suggestion: nothing moves until
  * someone confirms it, and then it is their move (their permission, their name in the history). Shows nothing when
  * there is nothing to decide. With `applicationId` null: every proposal of the jobs the viewer reaches (the work queue).
  */
@@ -53,6 +54,10 @@ const sentence = (proposal: MoveProposalDto): string =>
             <span class="font-normal text-muted-foreground"> · {{ proposal.job.title }}</span>
           </p>
           <p class="text-sm text-pretty" data-testid="proposal-sentence">{{ sentence(proposal) }}</p>
+          <p v-if="proposal.source !== 'rule'" class="text-xs text-muted-foreground" data-testid="proposal-source">{{ t(`proposals.source.${proposal.source}`) }}</p>
+          <p v-if="proposal.reason" class="text-sm text-pretty break-words whitespace-pre-line text-muted-foreground" data-testid="proposal-reason">
+            <span class="font-medium text-foreground">{{ t('proposals.reason') }}:</span> {{ proposal.reason }}
+          </p>
         </div>
         <div v-if="canMove" class="flex items-center gap-2">
           <Button variant="outline" size="sm" :disabled="list.busy.value !== null" :aria-label="t('proposals.dismissFor', { name: fullName(proposal.candidate) })" data-testid="proposal-dismiss" @click="dismiss(proposal)">{{ t('proposals.dismiss') }}</Button>

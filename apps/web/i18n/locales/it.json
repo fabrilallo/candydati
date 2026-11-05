@@ -656,8 +656,9 @@
         "revoked": "Ha scollegato un'app"
       },
       "move_proposal": {
-        "confirmed": "Ha confermato uno spostamento proposto da un'automazione",
-        "dismissed": "Ha scartato uno spostamento proposto da un'automazione"
+        "proposed": "Ha proposto di spostare una candidatura in un'altra fase",
+        "confirmed": "Ha confermato uno spostamento proposto",
+        "dismissed": "Ha scartato uno spostamento proposto"
       }
     }
   },
@@ -2716,6 +2717,7 @@
         "read": "Leggere candidati e CV",
         "update": "Modificare i dati dei candidati",
         "move": "Spostare i candidati di fase",
+        "propose_move": "Proporre spostamenti di fase (conferma una persona)",
         "decide": "Registrare l'esito",
         "export": "Esportare i dati di un candidato",
         "erase": "Cancellare i dati di un candidato"
@@ -2834,7 +2836,7 @@
     "configHint": "Sostituisci il segnaposto con la tua chiave. Non condividere mai il file con la chiave dentro.",
     "tokenPlaceholder": "candydati_LA_TUA_CHIAVE",
     "toolsTitle": "Strumenti disponibili",
-    "toolsNote": "Non ci sono strumenti per spostare, valutare, scartare o scrivere ai candidati: restano decisioni di una persona.",
+    "toolsNote": "Non ci sono strumenti per spostare, valutare, scartare o scrivere ai candidati: restano decisioni di una persona. propose_stage_move propone soltanto; niente si sposta finché una persona non conferma.",
     "tools": {
       "list_jobs": "Elenca gli annunci, filtrabili per stato.",
       "get_job": "Legge un annuncio con il suo contenuto e lo stato.",
@@ -2847,6 +2849,7 @@
       "list_attention": "Candidature in attesa di risposta o vicine alla scadenza.",
       "add_candidate_note": "Aggiunge una nota interna a un candidato.",
       "create_task": "Crea un'attività su un candidato o un annuncio.",
+      "propose_stage_move": "Propone di spostare una candidatura in un'altra fase del suo annuncio, con un breve motivo. Solo una proposta: una persona la conferma o la scarta in Da gestire. Serve lo scope opzionale per proporre spostamenti.",
       "list_job_templates": "Elenca i template degli annunci.",
       "get_job_stats": "Numeri degli annunci per la panoramica.",
       "get_evaluation_criteria": "Cosa cercano gli intervistatori in un annuncio, per fase, e quali criteri un feedback ha già usato. Nessun peso, nessun punteggio.",
@@ -5026,7 +5029,9 @@
       "asYou": "Lavora come te, con il tuo ruolo, e ogni chiamata finisce nel registro delle azioni. Puoi scollegarla quando vuoi dalle impostazioni di sicurezza.",
       "allow": "Permetti",
       "deny": "Rifiuta",
-      "noOrganization": "Non fai ancora parte di nessuna organizzazione. Creane una o accetta un invito, poi avvia di nuovo il collegamento dall'app."
+      "noOrganization": "Non fai ancora parte di nessuna organizzazione. Creane una o accetta un invito, poi avvia di nuovo il collegamento dall'app.",
+      "proposeMove": "Proporre di spostare candidati tra le fasi",
+      "proposeMoveHint": "Solo una proposta con un breve motivo: compare in Da gestire e niente si sposta finché qualcuno del team non la conferma. Lascia la casella vuota se non lo vuoi."
     },
     "errors": {
       "expired": "La richiesta è scaduta o non è più valida. Avvia di nuovo il collegamento dalla tua app.",
@@ -5039,7 +5044,7 @@
   "proposals": {
     "title": "Uno spostamento proposto da confermare | Uno spostamento proposto da confermare | {count} spostamenti proposti da confermare",
     "queueTitle": "Spostamenti proposti da confermare | 1 spostamento proposto da confermare | {count} spostamenti proposti da confermare",
-    "note": "Li ha suggeriti un'automazione. Niente si sposta finché una persona non conferma; confermare è uno spostamento tuo, a tuo nome.",
+    "note": "Li ha suggeriti un'automazione o un assistente collegato. Niente si sposta finché una persona non conferma; confermare è uno spostamento tuo, a tuo nome.",
     "sentence": "Spostare da {from} a {to}?",
     "unknownStage": "una fase non più presente nell'annuncio",
     "confirm": "Conferma lo spostamento",
@@ -5048,6 +5053,14 @@
     "dismissFor": "Scarta lo spostamento proposto di {name}",
     "cannotMove": "Lo confermerà o scarterà chi può spostare i candidati.",
     "confirmed": "Spostato",
-    "dismissed": "Proposta scartata"
+    "dismissed": "Proposta scartata",
+    "source": {
+      "rule": "Proposto da un'automazione",
+      "user": "Proposto da una persona del team",
+      "agent": "Proposto dall'assistente",
+      "api_key": "Proposto tramite una chiave API",
+      "connected_app": "Proposto da un'app collegata (MCP)"
+    },
+    "reason": "Motivo indicato"
   }
 }

@@ -1,7 +1,7 @@
-import type { ConsentPreview } from '@candydati/domain'
+import type { ConsentPreview, Role } from '@candydati/domain'
 import { errorKeyOf } from '@/lib/auth-errors'
 import { answerConsent, previewConsent, setActiveOrganization } from '@/lib/connected-app-api'
-import { defaultOrganizationId } from '@/lib/oauth-flow'
+import { defaultOrganizationId, grantedScope, offersProposeMove } from '@/lib/oauth-flow'
 
 type Answer = 'allow' | 'deny'
 
@@ -17,6 +17,8 @@ export const useOAuthConsent = (oauthQuery: string | null) => {
   const errorKey = ref<string | null>(null)
   const selectedId = ref<string | null>(null)
   const pending = ref<Answer | null>(null)
+  /** The opt-in to propose moves: unchecked unless the person ticks it. */
+  const proposeMove = ref(false)
 
   const load = async (): Promise<void> => {
     if (!oauthQuery) return
@@ -29,6 +31,7 @@ export const useOAuthConsent = (oauthQuery: string | null) => {
   }
 
   const selected = computed(() => preview.value?.organizations.find((organization) => organization.id === selectedId.value) ?? null)
+  const offersPropose = computed(() => (preview.value && selected.value ? offersProposeMove(preview.value.scopes, selected.value.role) : false))
   const canAllow = computed(() => selected.value !== null && !selected.value.twoFactorRequired && pending.value === null)
 
   /** The picked organization is now the session's active one: remembered, so a retry does not switch again. */
@@ -36,6 +39,13 @@ export const useOAuthConsent = (oauthQuery: string | null) => {
     if (!preview.value) return
     const organizations = preview.value.organizations.map((organization) => ({ ...organization, active: organization.id === id }))
     preview.value = { ...preview.value, organizations }
+  }
+
+  /** Sent only when it grants less than the app asked for: otherwise the request's own scopes stand. */
+  const narrowedScope = (organization: { readonly role: Role } | null): string | undefined => {
+    if (!preview.value || !organization) return undefined
+    const scope = grantedScope(preview.value.scopes, organization.role, proposeMove.value)
+    return scope === preview.value.scopes.join(' ') ? undefined : scope
   }
 
   const answer = async (choice: Answer): Promise<void> => {
@@ -49,7 +59,7 @@ export const useOAuthConsent = (oauthQuery: string | null) => {
         await setActiveOrganization(request, organization.id)
         markActive(organization.id)
       }
-      const url = await answerConsent(request, oauthQuery, choice === 'allow')
+      const url = await answerConsent(request, oauthQuery, choice === 'allow', narrowedScope(organization))
       await navigateTo(url, { external: true })
     } catch (error) {
       errorKey.value = errorKeyOf(error)
@@ -57,5 +67,5 @@ export const useOAuthConsent = (oauthQuery: string | null) => {
     }
   }
 
-  return { preview, loadErrorKey, errorKey, selectedId, selected, canAllow, pending, load, answer }
+  return { preview, loadErrorKey, errorKey, selectedId, selected, canAllow, pending, proposeMove, offersPropose, load, answer }
 }
