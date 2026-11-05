@@ -1,4 +1,4 @@
-import type { ConsentPreview } from '@candydati/domain'
+import { grantablePermissions, MCP_OAUTH_PROPOSE_MOVE_SCOPE, type ConsentPreview, type Role } from '@candydati/domain'
 import { defaultFailureKey, type FailureInfo } from './api-call'
 import { safeRedirect } from './auth-paths'
 
@@ -55,6 +55,17 @@ export const defaultOrganizationId = (organizations: readonly ConsentOrganizatio
   const pool = usable.length > 0 ? usable : organizations
   return (pool.find((organization) => organization.active) ?? pool[0])?.id ?? null
 }
+
+/** The app asked to propose moves and the person's role may: the consent page offers the opt-in (unchecked). */
+export const offersProposeMove = (requested: readonly string[], role: Role): boolean =>
+  requested.includes(MCP_OAUTH_PROPOSE_MOVE_SCOPE) && grantablePermissions(role, 'connected_app').includes(MCP_OAUTH_PROPOSE_MOVE_SCOPE)
+
+/**
+ * The scopes granted on "Allow", space separated as OAuth wants them: what the app asked for, without the opt-in to propose
+ * moves unless the person ticked it (and their role may). Never more than was asked.
+ */
+export const grantedScope = (requested: readonly string[], role: Role, proposeMove: boolean): string =>
+  requested.filter((scope) => scope !== MCP_OAUTH_PROPOSE_MOVE_SCOPE || (proposeMove && offersProposeMove(requested, role))).join(' ')
 
 const CODE_KEYS: Readonly<Record<string, string>> = {
   TWO_FACTOR_REQUIRED: 'oauth.errors.twoFactorRequired',

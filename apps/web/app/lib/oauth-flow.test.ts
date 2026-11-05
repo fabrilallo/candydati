@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { defaultOrganizationId, oauthFailureKey, oauthQueryOf, redirectHost, safeNextUrl } from './oauth-flow'
+import { defaultOrganizationId, grantedScope, oauthFailureKey, oauthQueryOf, offersProposeMove, redirectHost, safeNextUrl } from './oauth-flow'
 
 const org = (id: string, overrides: Partial<{ active: boolean; twoFactorRequired: boolean }> = {}) => ({
   id,
@@ -80,5 +80,22 @@ describe('oauthFailureKey', () => {
     expect(oauthFailureKey({ status: 0, code: null, message: null, issues: [] })).toBe('errors.unreachable')
     expect(oauthFailureKey({ status: 500, code: null, message: null, issues: [] })).toBe('errors.unreachable')
     expect(oauthFailureKey({ status: 429, code: null, message: null, issues: [] })).toBe('errors.tooManyRequests')
+  })
+})
+
+describe('the opt-in to propose moves', () => {
+  const asked = ['mcp', 'candidate:propose_move', 'offline_access']
+
+  it('is offered only when the app asked for it and the role may move', () => {
+    expect(offersProposeMove(asked, 'recruiter')).toBe(true)
+    expect(offersProposeMove(asked, 'interviewer')).toBe(false)
+    expect(offersProposeMove(['mcp', 'offline_access'], 'owner')).toBe(false)
+  })
+
+  it('is left out of the grant unless the person ticked it, and nothing is added that was not asked', () => {
+    expect(grantedScope(asked, 'recruiter', false)).toBe('mcp offline_access')
+    expect(grantedScope(asked, 'recruiter', true)).toBe('mcp candidate:propose_move offline_access')
+    expect(grantedScope(asked, 'interviewer', true)).toBe('mcp offline_access')
+    expect(grantedScope(['mcp'], 'owner', true)).toBe('mcp')
   })
 })

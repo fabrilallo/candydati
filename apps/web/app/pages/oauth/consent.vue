@@ -9,8 +9,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 /**
  * Consent page of the OAuth provider: who asks (as the app declares itself), where the browser goes after the answer,
- * the organization the connection is for, and what the app can and cannot do there. Allow or deny, then the server
- * sends the browser back to the app.
+ * the organization the connection is for, and what the app can and cannot do there, with the opt-in to propose moves
+ * (unchecked) when the app asked for it. Allow or deny, then the server sends the browser back to the app.
  */
 const { t } = useI18n()
 useSeoMeta({ title: () => t('oauth.consent.pageTitle'), robots: 'noindex, nofollow' })
@@ -54,6 +54,13 @@ onMounted(consent.load)
         </div>
         <p v-if="selected?.twoFactorRequired" class="text-sm text-warning" data-testid="consent-two-factor">{{ t('oauth.consent.twoFactorWarning', { name: selected.name }) }}</p>
         <ConnectorPermissions v-if="selected" :role="selected.role" :organization="selected.name" />
+        <label v-if="consent.offersPropose.value" class="flex items-start gap-2.5 rounded-lg panel px-4 py-3 text-sm" data-testid="consent-propose-move">
+          <input v-model="consent.proposeMove.value" type="checkbox" class="mt-0.5 size-4 shrink-0 accent-primary" :disabled="consent.pending.value !== null" data-testid="consent-propose-move-input">
+          <span class="grid gap-0.5">
+            <span class="font-medium">{{ t('oauth.consent.proposeMove') }}</span>
+            <span class="text-xs text-pretty text-muted-foreground">{{ t('oauth.consent.proposeMoveHint') }}</span>
+          </span>
+        </label>
       </template>
       <div aria-live="assertive">
         <FormAlert :message-key="consent.errorKey.value" />

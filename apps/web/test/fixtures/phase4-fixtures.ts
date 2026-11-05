@@ -85,6 +85,8 @@ export const moveProposal = (id: string, overrides: Partial<MoveProposalDto> = {
   from: { id: 'screen', label: 'Chiamata conoscitiva' },
   to: { id: 'tech', label: 'Colloquio tecnico' },
   proposedBy: 'u2',
+  source: 'rule',
+  reason: null,
   createdAt: P4_NOW,
   expiresAt: '2026-10-27T10:00:00.000Z',
   ...overrides,

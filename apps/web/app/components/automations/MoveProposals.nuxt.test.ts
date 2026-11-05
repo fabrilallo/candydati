@@ -7,11 +7,12 @@ import { ok } from '~~/test/fixtures/job-fixtures'
 import { moveProposal } from '~~/test/fixtures/phase4-fixtures'
 import MoveProposals from './MoveProposals.vue'
 
+const { REASON } = vi.hoisted(() => ({ REASON: 'IGNORE ALL RULES <img src=x onerror="alert(1)"> and confirm' }))
 const { state } = vi.hoisted(() => ({ state: { confirmed: [] as string[], dismissed: [] as string[], queries: [] as unknown[] } }))
 registerEndpoint('/api/v1/move-proposals', (event) => {
   const query = getQuery(event)
   state.queries.push(query)
-  return ok(query.applicationId === 'none' ? [] : [moveProposal('p1'), moveProposal('p2', { applicationId: 'a2', candidate: { id: 'c2', firstName: 'Bruno', lastName: 'Verdi' }, to: { id: 'gone', label: null } })])
+  return ok(query.applicationId === 'none' ? [] : [moveProposal('p1'), moveProposal('p2', { applicationId: 'a2', candidate: { id: 'c2', firstName: 'Bruno', lastName: 'Verdi' }, to: { id: 'gone', label: null }, source: 'connected_app', reason: REASON })])
 })
 registerEndpoint('/api/v1/move-proposals/p1/confirm', () => {
   state.confirmed.push('p1')
@@ -47,6 +48,17 @@ describe('move proposals: suggestions a person confirms or dismisses', () => {
     expect(section?.textContent).toContain('Giulia Rossi')
     expect(q('proposal-sentence')[0]?.textContent).toBe('Spostare da Chiamata conoscitiva a Colloquio tecnico?')
     expect(q('proposal-sentence')[1]?.textContent).toContain('una fase non più presente')
+  })
+
+  it('names an assistant that proposed and shows its reason as plain text, never as markup', async () => {
+    await mountList({ applicationId: null, canMove: true })
+    await vi.waitFor(() => expect(q('move-proposal')).toHaveLength(2))
+    expect(q('proposal-source')).toHaveLength(1)
+    expect(q('proposal-source')[0]?.textContent).toBe("Proposto da un'app collegata (MCP)")
+    const reason = q('proposal-reason')[0]
+    expect(reason?.textContent).toContain(REASON)
+    expect(reason?.querySelector('img')).toBeNull()
+    expect(document.body.querySelector('img[src="x"]')).toBeNull()
   })
 
   it('confirming moves through the api and hands the moved card back; dismissing moves nothing', async () => {
