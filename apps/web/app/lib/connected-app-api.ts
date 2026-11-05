@@ -58,9 +58,12 @@ const nextUrlOf = (path: string, body: unknown): string => {
 export const continueAuthorization = async (request: JobApiRequest, oauthQuery: string): Promise<string> =>
   nextUrlOf(OAUTH_CONTINUE_PATH, await callAuth(request, OAUTH_CONTINUE_PATH, { postLogin: true, oauth_query: oauthQuery }))
 
-/** Allow or deny: the answer is the app's redirect address, with the code or the error. */
-export const answerConsent = async (request: JobApiRequest, oauthQuery: string, accept: boolean): Promise<string> =>
-  nextUrlOf(OAUTH_CONSENT_PATH, await callAuth(request, OAUTH_CONSENT_PATH, { accept, oauth_query: oauthQuery }))
+/**
+ * Allow or deny: the answer is the app's redirect address, with the code or the error. `scope`, on allow, narrows what the
+ * app asked for (an opt-in left unchecked); absent, everything asked for is granted.
+ */
+export const answerConsent = async (request: JobApiRequest, oauthQuery: string, accept: boolean, scope?: string): Promise<string> =>
+  nextUrlOf(OAUTH_CONSENT_PATH, await callAuth(request, OAUTH_CONSENT_PATH, { accept, oauth_query: oauthQuery, ...(accept && scope !== undefined ? { scope } : {}) }))
 
 /** The grant is for the session's active organization: switch first when the person picked another one. */
 export const setActiveOrganization = async (request: JobApiRequest, organizationId: string): Promise<void> => {

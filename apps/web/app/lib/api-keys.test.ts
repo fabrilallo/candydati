@@ -31,10 +31,15 @@ describe('scopeGroups', () => {
 
   it('lists what a connected app may do: the machine limits of a key, and never moving a candidate', () => {
     const offered = scopeGroups('owner', 'connected_app').flatMap((group) => group.scopes)
-    expect(offered).toEqual(scopeGroups('owner').flatMap((group) => group.scopes).filter((scope) => scope !== 'candidate:move'))
+    expect(offered).toEqual(scopeGroups('owner').flatMap((group) => group.scopes).filter((scope) => scope !== 'candidate:move' && scope !== 'candidate:propose_move'))
     expect(offered).not.toContain('candidate:move')
     expect(offered).not.toContain('member:invite')
     expect(scopeGroups('interviewer', 'connected_app').flatMap((group) => group.scopes)).toContain('feedback:read')
+  })
+
+  it('offers proposing a move to a key as an opt-in scope, to the roles that may move', () => {
+    expect(scopeGroups('recruiter').find((group) => group.area === 'candidates')?.scopes).toContain('candidate:propose_move')
+    expect(scopeGroups('interviewer').flatMap((group) => group.scopes)).not.toContain('candidate:propose_move')
   })
 })
 
