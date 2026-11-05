@@ -6,6 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- AI settings: the test call before saving refused OpenAI models ("max_output_tokens ... >= 16") and could find a
+  reasoning model silent; it now leaves the model room to answer.
+
 ## [0.3.0] - 2026-11-05
 
 Three additive migrations (`0047_automation_triggers`, then `0048_mcp_oauth` and `0049_automation_actions` with new
