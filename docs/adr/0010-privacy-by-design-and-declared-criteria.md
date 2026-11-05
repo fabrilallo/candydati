@@ -35,7 +35,14 @@ AI system: it conflicts with ADR 0005, GDPR art. 22, and is a high-risk use unde
    "Kubernetes". The dictionary lists synonyms only, never a related skill, so it widens the spelling, not the
    judgement. It is applied at match time on both sides (stored CVs are not rewritten); a skill it does not know is
    compared exactly, ignoring case, punctuation and diacritics. Ordinary words ("go", "excel") are never read as a
-   skill in the free text of a CV.
+   skill in the free text of a CV. Each organization manages its own aliases on top of that shared base (tables
+   `skill_alias` and `skill_alias_disabled`, permission `skill_alias:manage` for owners and admins, never a key or the
+   agent): it may add an alias to a built-in skill or define a skill of its own, and switch off a built-in alias. An
+   alias belongs to one skill per organization (a word the dictionary or another alias already owns is refused), so the
+   book of an organization is still a plain table of spellings: it widens or narrows the spelling and weighs nothing.
+   A result names the spelling a CV used for each skill criterion ("Golang" met "Go"), so a person sees why it is
+   there; the order stays the date of application. CV extraction does not normalize skills (it stores them as written),
+   so the matching at search time is the only place the aliases apply.
 3. **Only people whose consent covers the job.** The search looks at the job's applicants and at the talent pool,
    never at people who applied to another position only.
 4. **No proxies for protected characteristics.** Criteria naming age, sex, origin, religion, family, disability or

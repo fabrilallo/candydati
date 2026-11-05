@@ -3,6 +3,7 @@ import {
   type DrizzleUnitOfWork,
   type AutomationRuleDeps,
   type NotificationDeps,
+  type SkillAliasDeps,
   type TaskDeps,
   type TaskQueue,
   type WebhookDeps,
@@ -14,6 +15,7 @@ export interface Phase4Deps {
   readonly taskDeps: TaskDeps;
   readonly automationDeps: AutomationRuleDeps;
   readonly webhookDeps: WebhookDeps;
+  readonly skillAliasDeps: SkillAliasDeps;
 }
 
 export interface Phase4Inputs {
@@ -50,6 +52,7 @@ export function createPhase4Deps({ uow, queue, allowPrivateWebhooks }: Phase4Inp
       members: r.members,
       ...clock,
     },
+    skillAliasDeps: { ...core, skillAliases: r.skillAliases, ...clock },
     webhookDeps: {
       ...core,
       endpoints: r.endpoints,

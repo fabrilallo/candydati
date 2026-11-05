@@ -16,3 +16,9 @@ same skill.
    matches a skill the CV lists, but is never searched as a word in the free text of a CV.
 5. Run `pnpm --filter @candydati/domain test`: it fails on a duplicate id, a form owned by two skills, a redundant
    alias or a `proseUnsafe` entry the skill does not have.
+
+## Organization aliases
+
+This dictionary is the shared base. Each organization adds its own aliases (or whole skills) and switches off built-in
+aliases from Settings, Skills; `buildSkillBook` (`book.ts`) merges them into the book a search uses, and a built-in word
+always wins over an alias an organization wrote for the same word. Only aliases (not skill names) can be switched off.

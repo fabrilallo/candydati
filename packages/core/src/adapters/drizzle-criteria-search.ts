@@ -1,5 +1,5 @@
-import { and, schema, sql, type SQL } from '@candydati/db';
-import { needsStructuredCv, SKILL_FOLD_FROM, SKILL_FOLD_TO, skillKeys, skillProseTerms, termPattern, type CandidateCriteria } from '@candydati/domain';
+import { and, eq, inArray, schema, sql, type SQL } from '@candydati/db';
+import { cvExtractionSchema, cvMatchesCriteria, needsStructuredCv, SKILL_FOLD_FROM, SKILL_FOLD_TO, skillMatchesOf, termPattern, type CandidateCriteria, type SkillBook, type SkillMatch } from '@candydati/domain';
 import type { CandidateSearch, CriteriaSearchQuery } from '../candidate-ports.js';
 import { toCandidate } from './drizzle-candidates.js';
 import type { DbExecutor } from './db-executor.js';
@@ -24,19 +24,19 @@ const skillKeyOf = (element: SQL): SQL => sql`regexp_replace(translate(lower(${e
 const isOneOf = (value: SQL, keys: readonly string[]): SQL => sql`${value} in (${sql.join(keys.map((key) => sql`${key}`), sql`, `)})`;
 
 /** A skill under any of its known names among the CV skills, or a non-ordinary-word form in the text (`hasSkill`). */
-function skillMatches(skill: string): SQL {
-  const listed = inList('skills', (element) => isOneOf(skillKeyOf(element), skillKeys(skill)));
-  const prose = skillProseTerms(skill).map(inText);
+function skillMatches(skill: string, book: SkillBook): SQL {
+  const listed = inList('skills', (element) => isOneOf(skillKeyOf(element), book.keys(skill)));
+  const prose = book.proseTerms(skill).map(inText);
   return sql`(${sql.join([listed, ...prose], sql` or `)})`;
 }
 
 const contains = (haystack: SQL, needle: string): SQL => sql`position(lower(${needle}) in lower(${haystack})) > 0`;
 
 /** One CV row (`cv_extraction`) satisfying every criterion: the SQL form of `cvMatchesCriteria`. */
-function cvMatches(criteria: CandidateCriteria): SQL {
+function cvMatches(criteria: CandidateCriteria, book: SkillBook): SQL {
   const conditions: SQL[] = [
     needsStructuredCv(criteria) ? sql`"cv_extraction"."status" = 'done' and "cv_extraction"."data" is not null` : sql`"cv_extraction"."status" in ('done', 'text_only')`,
-    ...criteria.skills.map(skillMatches),
+    ...criteria.skills.map((skill) => skillMatches(skill, book)),
     ...criteria.languages.map((language) => sql`(${inList('languages', (element) => contains(element, language))} or ${inText(language)})`),
     ...criteria.keywords.map(inText),
   ];
@@ -74,6 +74,28 @@ function poolOf(query: CriteriaSearchQuery): SQL | undefined {
   );
 }
 
+/**
+ * For the candidates of one page, the skill criteria their CV met under another name. The SQL above decided who
+ * matches; this reads their few CVs again and asks the reference semantics (`skillMatchesOf`) which spelling it was.
+ */
+async function skillMatchNotes(db: DbExecutor, query: CriteriaSearchQuery, candidateIds: readonly string[]): Promise<ReadonlyMap<string, readonly SkillMatch[]>> {
+  if (query.criteria.skills.length === 0 || candidateIds.length === 0) return new Map();
+  const { application, cvExtraction } = schema;
+  const rows = await db
+    .select({ candidateId: application.candidateId, status: cvExtraction.status, text: cvExtraction.text, data: cvExtraction.data })
+    .from(application)
+    .innerJoin(cvExtraction, and(eq(cvExtraction.applicationId, application.id), eq(cvExtraction.organizationId, application.organizationId)))
+    .where(and(eq(application.organizationId, query.organizationId), eq(application.consentStatus, 'given'), inArray(application.candidateId, [...candidateIds])));
+  const notes = new Map<string, readonly SkillMatch[]>();
+  for (const row of rows) {
+    if (notes.has(row.candidateId)) continue;
+    const parsed = row.data === null ? null : cvExtractionSchema.safeParse(row.data);
+    const cv = { status: row.status, text: row.text, data: parsed?.success ? parsed.data : null };
+    if (cvMatchesCriteria(cv, query.criteria, query.skills)) notes.set(row.candidateId, skillMatchesOf(cv, query.criteria, query.skills));
+  }
+  return notes;
+}
+
 /** Deepest row a page may start at, as for the candidate search. */
 const MAX_CRITERIA_OFFSET = 10_000;
 
@@ -84,7 +106,7 @@ export function createDrizzleCriteriaSearch(db: DbExecutor): CandidateSearch['fi
     const evaluable = needsStructuredCv(query.criteria) ? sql`"cv_extraction"."status" = 'done'` : sql`"cv_extraction"."status" in ('done', 'text_only')`;
     const [counts] = await db
       .select({
-        total: sql<number>`count(*) filter (where ${cvExists(cvMatches(query.criteria))})::int`,
+        total: sql<number>`count(*) filter (where ${cvExists(cvMatches(query.criteria, query.skills))})::int`,
         notEvaluable: sql<number>`count(*) filter (where not ${cvExists(evaluable)})::int`,
       })
       .from(candidate)
@@ -99,15 +121,17 @@ export function createDrizzleCriteriaSearch(db: DbExecutor): CandidateSearch['fi
         lastAppliedAt,
       })
       .from(candidate)
-      .where(and(pool, cvExists(cvMatches(query.criteria))))
+      .where(and(pool, cvExists(cvMatches(query.criteria, query.skills))))
       .orderBy(sql`${lastAppliedAt} desc nulls last`, candidate.id)
       .limit(query.limit)
       .offset(offset);
+    const notes = await skillMatchNotes(db, query, rows.map((row) => row.candidate.id));
     return {
       items: rows.map((row) => ({
         candidate: toCandidate(row.candidate),
         applicationId: row.applicationId,
         lastAppliedAt: row.lastAppliedAt === null ? null : new Date(row.lastAppliedAt),
+        skillMatches: notes.get(row.candidate.id) ?? [],
       })),
       total: counts?.total ?? 0,
       notEvaluable: counts?.notEvaluable ?? 0,

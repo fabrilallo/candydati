@@ -20,7 +20,7 @@ export const findCandidatesTool = {
   description:
     'Candidates for ONE job whose CV meets every criterion the person confirmed (skills, languages, minimum experience, location, words in the CV). ' +
     'Searches the job\'s applicants and the talent pool only, the people whose consent covers this job. A filter, not a ranking: no score, ordered by date of application. ' +
-    'Results carry first name and id only. notEvaluable counts CVs that could not be checked: a person must look at them. Protected characteristics are refused. Read only, audited.',
+    'Results carry first name and id only, and skillMatches names the spelling a CV used for a skill criterion ("Go" met by "Golang"), the organization\'s own aliases included. notEvaluable counts CVs that could not be checked: a person must look at them. Protected characteristics are refused. Read only, audited.',
   shape,
   readOnly: true,
   run: async ({ app, actor }, input) => {
@@ -30,7 +30,7 @@ export const findCandidatesTool = {
       job: result.job,
       criteria: result.criteria,
       pool: result.pool,
-      items: result.items.map((item) => ({ candidateId: item.candidate.id, firstName: item.candidate.firstName, applicationId: item.applicationId, inTalentPool: item.candidate.talentPool })),
+      items: result.items.map((item) => ({ candidateId: item.candidate.id, firstName: item.candidate.firstName, applicationId: item.applicationId, inTalentPool: item.candidate.talentPool, skillMatches: item.skillMatches })),
       notEvaluable: result.notEvaluable,
       order: 'most recent application first; not a ranking',
       meta: { total: result.total, page: result.page, limit: result.limit },

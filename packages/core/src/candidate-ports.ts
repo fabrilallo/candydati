@@ -10,7 +10,10 @@ import type {
   CandidateNote,
   CvExtractionRecord,
   PrivacyNotice,
+  SkillBook,
+  SkillMatch,
 } from '@candydati/domain';
+import type { SkillAliasRepository } from './skill-alias-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { MessageRepository } from './messaging-ports.js';
 import type { CoreDeps } from './ports.js';
@@ -175,6 +178,8 @@ export interface CriteriaSearchQuery {
   readonly jobId: string;
   readonly pool: CriteriaPool;
   readonly criteria: CandidateCriteria;
+  /** The skill dictionary of the organization (built-in plus its own aliases): what a skill criterion means. */
+  readonly skills: SkillBook;
   /** Only candidates with an application in these jobs (per-job access). Absent: no job filter. */
   readonly jobIds?: readonly string[] | undefined;
   /** 1-based. */
@@ -187,6 +192,8 @@ export interface CriteriaMatch {
   /** The candidate's application to the job searched for, if any. */
   readonly applicationId: string | null;
   readonly lastAppliedAt: Date | null;
+  /** Skill criteria the CV met under another name ("Go" met by "Golang"). Informative: never an order or a weight. */
+  readonly skillMatches: readonly SkillMatch[];
 }
 
 export interface CriteriaSearchResult {
@@ -224,6 +231,8 @@ export interface CandidateDeps extends CoreDeps {
   readonly extractions: CvExtractionRepository;
   readonly messages: MessageRepository;
   readonly candidateSearch: CandidateSearch;
+  /** The organization's own skill aliases: read to know what a skill criterion means. */
+  readonly skillAliases: Pick<SkillAliasRepository, 'load'>;
   readonly users: UserDirectory;
   readonly files: FileStorage;
   /** `automation.run` is enqueued after a move. A failure to enqueue never undoes the move. */

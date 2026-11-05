@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { createDb, schema, type DbHandle } from '@candydati/db';
-import { candidateCriteriaSchema, type Application, type Candidate, type CvExtractionRecord } from '@candydati/domain';
+import { candidateCriteriaSchema, DEFAULT_SKILL_BOOK, skillBookOf, type Application, type Candidate, type CvExtractionRecord } from '@candydati/domain';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { CandidateSearch, CriteriaSearchQuery } from '../candidate-ports.js';
 import { buildApplication, buildCandidate, buildExtraction, buildJob } from '../testing/index.js';
@@ -92,10 +92,15 @@ const query = (criteria: unknown, extra: Partial<CriteriaSearchQuery> = {}): Cri
   jobId: jobA,
   pool: 'both',
   criteria: candidateCriteriaSchema.parse(criteria),
+  skills: DEFAULT_SKILL_BOOK,
   page: 1,
   limit: 25,
   ...extra,
 });
+
+let lastNotes: Readonly<Record<string, readonly { readonly criterion: string; readonly matchedAs: string }[]>> = {};
+/** The skill notes of the last `run`, by candidate key. */
+const notesOf = async (q: CriteriaSearchQuery) => (await run(q), lastNotes);
 
 /** Postgres and the in-memory twin give the same answer: the twin is what the use case tests rely on. */
 async function run(q: CriteriaSearchQuery): Promise<{ readonly keys: readonly string[]; readonly total: number; readonly notEvaluable: number }> {
@@ -103,11 +108,14 @@ async function run(q: CriteriaSearchQuery): Promise<{ readonly keys: readonly st
   const twin = findByCriteriaInMemory(createCandidateStore({ candidates, applications, extractions }).read(), q);
   const keyOf = (id: string): string => Object.keys(ids).find((key) => ids[key] === id) ?? id;
   const keys = result.items.map((item) => keyOf(item.candidate.id));
-  expect({ keys, total: result.total, notEvaluable: result.notEvaluable }).toEqual({
+  const notes = Object.fromEntries(result.items.map((item) => [keyOf(item.candidate.id), item.skillMatches]));
+  expect({ keys, total: result.total, notEvaluable: result.notEvaluable, notes }).toEqual({
     keys: twin.items.map((item) => keyOf(item.candidate.id)),
     total: twin.total,
     notEvaluable: twin.notEvaluable,
+    notes: Object.fromEntries(twin.items.map((item) => [keyOf(item.candidate.id), item.skillMatches])),
   });
+  lastNotes = notes;
   return { keys, total: result.total, notEvaluable: result.notEvaluable };
 }
 
@@ -121,6 +129,22 @@ describe('createDrizzleCriteriaSearch', () => {
     expect((await run(query({ skills: ['Go', 'Vue'] }))).keys).toEqual([]);
     expect((await run(query({ skills: ['C'] }))).keys).toEqual([]);
     expect((await run(query({ skills: ['C++'] }))).keys).toEqual(['ada']);
+  });
+
+  it('says which spelling met a skill, for the people on the page', async () => {
+    const notes = await notesOf(query({ skills: ['Go', 'Kubernetes'] }));
+    expect(notes).toEqual({ fay: [{ criterion: 'Go', matchedAs: 'Golang' }, { criterion: 'Kubernetes', matchedAs: 'K8s' }] });
+    expect(await notesOf(query({ skills: ['TypeScript'] }))).toEqual({ ada: [], bob: [] });
+  });
+
+  it('uses the aliases of the organization and the built-in ones it switched off', async () => {
+    const book = skillBookOf({ aliases: [{ skill: 'Vue', alias: 'Evan You Framework' }, { skill: 'Torino Skill', alias: 'Golang' }], disabled: ['k8s', 'golang'] });
+    const own = (criteria: unknown) => run(query(criteria, { skills: book }));
+    const ownNotes = (criteria: unknown) => notesOf(query(criteria, { skills: book }));
+    expect((await own({ skills: ['Kubernetes'] })).keys).toEqual([]);
+    expect((await own({ skills: ['Go'] })).keys).toEqual([]);
+    expect(await ownNotes({ skills: ['Torino Skill'] })).toEqual({ fay: [{ criterion: 'Torino Skill', matchedAs: 'Golang' }] });
+    expect(await ownNotes({ skills: ['evan you framework'] })).toEqual({ ada: [{ criterion: 'evan you framework', matchedAs: 'Vue' }] });
   });
 
   it('does not read an ordinary word of the text as a skill', async () => {

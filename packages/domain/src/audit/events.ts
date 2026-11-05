@@ -106,6 +106,10 @@ export const AUDIT_ACTIONS = [
   'shortlist.opened',
   'shortlist.cv_opened',
   'shortlist.answered',
+  'skill_alias.added',
+  'skill_alias.removed',
+  'skill_alias.disabled',
+  'skill_alias.enabled',
 ] as const;
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
 

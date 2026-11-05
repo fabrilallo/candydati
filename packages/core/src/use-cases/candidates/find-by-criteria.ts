@@ -2,6 +2,7 @@ import { candidateCriteriaSchema, describeCriteria } from '@candydati/domain';
 import { z } from 'zod';
 import { CRITERIA_POOLS, type CriteriaMatch, type CriteriaPool } from '../../candidate-ports.js';
 import { requireJob } from '../jobs/shared.js';
+import { loadSkillBook } from '../skills/skill-aliases.js';
 import { defineCandidateUseCase } from './define.js';
 
 export const CRITERIA_PAGE_MAX = 50;
@@ -47,6 +48,7 @@ export const findCandidatesByCriteria = defineCandidateUseCase({
       jobId: job.id,
       pool: input.pool,
       criteria: input.criteria,
+      skills: await loadSkillBook(deps, actor.organizationId),
       page: input.page,
       limit: input.limit,
     });

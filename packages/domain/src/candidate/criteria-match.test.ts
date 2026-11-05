@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { candidateCriteriaSchema, type CandidateCriteria } from './criteria.js';
-import { cvMatchesCriteria, needsStructuredCv, termPattern, type MatchableCv } from './criteria-match.js';
+import { skillBookOf } from '../skills/dictionary.js';
+import { cvMatchesCriteria, needsStructuredCv, skillMatchesOf, termPattern, type MatchableCv } from './criteria-match.js';
 
 const criteria = (input: unknown): CandidateCriteria => candidateCriteriaSchema.parse(input);
 const structured: MatchableCv = {
@@ -75,6 +76,34 @@ describe('needsStructuredCv', () => {
     expect(needsStructuredCv(criteria({ skills: ['Vue'], keywords: ['x'] }))).toBe(false);
     expect(needsStructuredCv(criteria({ minYearsOfExperience: 1 }))).toBe(true);
     expect(needsStructuredCv(criteria({ locations: ['Milano'] }))).toBe(true);
+  });
+});
+
+function textOnlyWith(text: string): MatchableCv {
+  return { status: 'text_only', text, data: null };
+}
+
+describe('the skills of an organization', () => {
+  const cv = (skills: string[], text: string | null = null): MatchableCv => ({ ...structured, text, data: { ...structured.data!, skills } });
+  const book = skillBookOf({ aliases: [{ skill: 'Go', alias: 'Gopher' }, { skill: 'Figma', alias: 'Figjam' }], disabled: ['k8s'] });
+
+  it('matches under the organization aliases, and only for that organization', () => {
+    expect(cvMatchesCriteria(cv(['Gopher']), criteria({ skills: ['Go'] }), book)).toBe(true);
+    expect(cvMatchesCriteria(cv(['Gopher']), criteria({ skills: ['Go'] }))).toBe(false);
+    expect(cvMatchesCriteria(cv(['Figjam']), criteria({ skills: ['figma'] }), book)).toBe(true);
+  });
+
+  it('stops matching a built-in alias the organization disabled', () => {
+    expect(cvMatchesCriteria(cv(['K8s']), criteria({ skills: ['Kubernetes'] }), book)).toBe(false);
+    expect(cvMatchesCriteria(cv(['K8s']), criteria({ skills: ['Kubernetes'] }))).toBe(true);
+    expect(cvMatchesCriteria(textOnlyWith('Deploy su k8s.'), criteria({ skills: ['Kubernetes'] }), book)).toBe(false);
+  });
+
+  it('says which spelling met a criterion, and nothing for the spelling that was asked for', () => {
+    expect(skillMatchesOf(cv(['Golang', 'Gopher']), criteria({ skills: ['Go', 'Vue'] }), book)).toEqual([{ criterion: 'Go', matchedAs: 'Golang' }]);
+    expect(skillMatchesOf(cv(['Go', 'Golang']), criteria({ skills: ['Go'] }), book)).toEqual([]);
+    expect(skillMatchesOf(cv([]), criteria({ skills: ['Go'] }), book)).toEqual([]);
+    expect(skillMatchesOf(textOnlyWith('Backend in Golang.'), criteria({ skills: ['Go'] }), book)).toEqual([{ criterion: 'Go', matchedAs: 'golang' }]);
   });
 });
 

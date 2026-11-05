@@ -56,7 +56,8 @@
     "reports": "Reports",
     "security": "Security",
     "migrations": "Migration",
-    "clients": "Clients"
+    "clients": "Clients",
+    "skills": "Skills"
   },
   "jobRequests": {
     "title": "Hiring requests",
@@ -650,6 +651,12 @@
         "opened": "Opened a shortlist",
         "cv_opened": "Opened a CV from a shortlist",
         "answered": "Answered on a candidate of a shortlist"
+      },
+      "skill_alias": {
+        "added": "Added a skill alias",
+        "removed": "Removed a skill alias",
+        "disabled": "Turned off a built-in skill alias",
+        "enabled": "Turned a built-in skill alias back on"
       },
       "connected_app": {
         "granted": "Connected an app to their account",
@@ -2415,6 +2422,41 @@
       "done": "No rule copied | 1 rule copied | {count} rules copied"
     }
   },
+  "skills": {
+    "title": "Skills",
+    "description": "The filter on declared criteria treats different spellings as one skill: \"Go\" finds \"Golang\". Add the names your CVs use, and turn off built-in ones you do not want.",
+    "own": {
+      "title": "Your aliases",
+      "body": "An alias is another way of writing a skill. It applies to every search of this organization, on both sides: the criterion and the CV. A new skill needs only one alias to exist.",
+      "skill": "Skill",
+      "skillHint": "A known skill (Go) or a new one.",
+      "alias": "Also written as",
+      "aliasHint": "For example Go developer.",
+      "add": "Add alias",
+      "adding": "Adding",
+      "empty": "No aliases of your own yet. The built-in ones below already cover the common spellings.",
+      "countsAs": "counts as",
+      "remove": "Remove the alias {alias}",
+      "count": "{count} of {limit} aliases"
+    },
+    "builtIn": {
+      "title": "Built-in aliases",
+      "body": "The shared dictionary, the same for every organization. Turn an alias off here if it should not count as the same skill for you.",
+      "search": "Find a skill or an alias",
+      "none": "Nothing matches your search.",
+      "toggle": "{alias} counts as {skill}",
+      "off": "{count} turned off for this organization."
+    },
+    "removed": "Alias removed.",
+    "errors": {
+      "required": "Write a skill, with at least one letter or digit.",
+      "tooLong": "Keep it under 60 characters.",
+      "invalid": "This text cannot be used as a skill name.",
+      "aliasTaken": "This name already belongs to another skill.",
+      "aliasRedundant": "This skill is already known by that name.",
+      "aliasLimit": "You reached the limit of aliases for this organization."
+    }
+  },
   "webhooks": {
     "title": "Webhooks",
     "description": "They tell your systems when something happens in hiring. The payload carries ids only, never names or emails: details are read through the API.",
@@ -2791,6 +2833,9 @@
       "shortlist": {
         "read": "Read the shortlists sent to clients",
         "send": "Send shortlists to clients"
+      },
+      "skill_alias": {
+        "manage": "Manage skill aliases"
       }
     },
     "withheld": "Some things a key can never do: decisions about candidates, messages to candidates and administration stay with a person.",
