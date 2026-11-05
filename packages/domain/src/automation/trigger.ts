@@ -66,3 +66,12 @@ export function occurrenceOf(trigger: AutomationTrigger, subject: TriggerSubject
   if (trigger.type === 'response_due_soon') return `due:${responseDeadline(subject, job)?.toISOString() ?? ''}`;
   return event;
 }
+
+/** Pure: which trigger a recorded occurrence (`occurrenceOf`) belongs to. Unknown shapes read as the entry itself. */
+export function triggerOfOccurrence(occurrence: string): AutomationTriggerType {
+  if (occurrence === 'stuck') return 'stage_stuck';
+  if (occurrence.startsWith('due:')) return 'response_due_soon';
+  if (occurrence.startsWith('message:')) return 'candidate_replied';
+  if (occurrence.startsWith('feedback:')) return 'feedback_submitted';
+  return 'stage_entered';
+}

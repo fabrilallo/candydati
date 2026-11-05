@@ -64,6 +64,7 @@ const submit = (): void => {
         <RuleConditionsFields :form="form" :errors="errors" @patch="patch" />
         <RuleActionFields :form="form" :errors="errors" :templates="templates" :members="members" :stages="stages" @patch="patch" />
         <RulePreview :job-id="jobId" :rule-id="rule?.id ?? null" :match="match" />
+        <RuleRuns v-if="rule" :key="rule.id" :job-id="jobId" :rule-id="rule.id" />
         <FormAlert :message-key="errorKey" />
       </form>
       <DialogFooter>

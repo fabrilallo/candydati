@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+No migrations.
+
+### Added
+
+- **Recent runs of an automation rule.** The rule editor shows "Ultime esecuzioni" / "Recent runs": the last 20 times
+  the rule fired, newest first, with the kind of trigger, the time and a link to the application. Read-only
+  (`GET /api/v1/automations/:id/runs?limit=`, at most 50, names only with `candidate:read`); a log of what the rule
+  did, never a score or a ranking.
+
 ## [0.3.1] - 2026-11-05
 
 No migrations.

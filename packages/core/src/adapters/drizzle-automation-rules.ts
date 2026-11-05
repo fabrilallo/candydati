@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, schema } from '@candydati/db';
+import { and, asc, desc, eq, inArray, schema } from '@candydati/db';
 import { automationActionSchema, automationConditionsSchema, automationTriggerSchema, TIME_BASED_TRIGGERS, type AutomationRule } from '@candydati/domain';
 import type { AutomationExecutionRepository, AutomationRuleRepository } from '../automation-ports.js';
 import type { DbExecutor } from './db-executor.js';
@@ -112,6 +112,14 @@ export function createDrizzleAutomationExecutions(db: DbExecutor): AutomationExe
     async claim(execution) {
       const rows = await db.insert(automationExecution).values(execution).onConflictDoNothing().returning({ id: automationExecution.id });
       return rows.length > 0;
+    },
+    async listRecentByRule(organizationId, ruleId, limit) {
+      return db
+        .select()
+        .from(automationExecution)
+        .where(and(eq(automationExecution.organizationId, organizationId), eq(automationExecution.ruleId, ruleId)))
+        .orderBy(desc(automationExecution.createdAt), desc(automationExecution.id))
+        .limit(limit);
     },
     async listByRule(organizationId, ruleId, applicationIds) {
       if (applicationIds.length === 0) return [];

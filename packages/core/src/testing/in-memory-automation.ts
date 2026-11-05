@@ -142,6 +142,13 @@ export function createInMemoryAutomationExecutions(): InMemoryAutomationExecutio
     async listByRule(organizationId, ruleId, applicationIds) {
       return rows.get().filter((e) => e.organizationId === organizationId && e.ruleId === ruleId && applicationIds.includes(e.applicationId));
     },
+    async listRecentByRule(organizationId, ruleId, limit) {
+      return rows
+        .get()
+        .filter((e) => e.organizationId === organizationId && e.ruleId === ruleId)
+        .toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime() || b.id.localeCompare(a.id))
+        .slice(0, limit);
+    },
     snapshot: () => rows.get(),
   };
 }

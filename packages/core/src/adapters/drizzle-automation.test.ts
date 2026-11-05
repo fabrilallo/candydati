@@ -252,6 +252,9 @@ describe('createDrizzleAutomationRules', () => {
     expect(await repo.claim(run('message:m2'))).toBe(true);
     expect((await repo.listByRule(w.org, rule.id, [w.applicationId])).map((e) => e.occurrence).toSorted()).toEqual(['message:m1', 'message:m2']);
     expect(await repo.listByRule(w.org, rule.id, [])).toEqual([]);
+    expect((await repo.listRecentByRule(w.org, rule.id, 10)).map((e) => e.occurrence).toSorted()).toEqual(['message:m1', 'message:m2']);
+    expect(await repo.listRecentByRule(w.org, rule.id, 1)).toHaveLength(1);
+    expect(await repo.listRecentByRule((await insertWorld()).org, rule.id, 10)).toEqual([]);
     const other = await insertWorld();
     expect(await repo.listByRule(other.org, rule.id, [w.applicationId])).toEqual([]);
   });

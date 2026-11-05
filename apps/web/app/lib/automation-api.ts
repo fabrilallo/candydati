@@ -1,6 +1,7 @@
 import {
   applicationCardSchema,
   automationPreviewSchema,
+  automationRunSchema,
   automationRuleSchema,
   copyAutomationsResultSchema,
   moveProposalSchema,
@@ -11,6 +12,7 @@ import {
   type AutomationMatchInput,
   type AutomationPreviewDto,
   type AutomationRuleDto,
+  type AutomationRunDto,
   type AutomationRuleInput,
   type ApplicationCardDto,
   type CopyAutomationsInput,
@@ -43,6 +45,10 @@ export const updateRule = async (request: JobApiRequest, ruleId: string, input: 
 /** Read-only: who the rule being edited would act for now. `ruleId` once it is saved, so what it already did is left out. */
 export const previewRule = async (request: JobApiRequest, jobId: string, input: AutomationMatchInput & { readonly ruleId?: string }): Promise<AutomationPreviewDto> =>
   (await callApi(request, `/api/v1/jobs/${id(jobId)}/automations/preview`, automationPreviewSchema, { method: 'POST', body: input })).data
+
+/** Read-only log: the latest runs of a saved rule, newest first. */
+export const listRuns = async (request: JobApiRequest, ruleId: string): Promise<readonly AutomationRunDto[]> =>
+  (await callApi(request, `/api/v1/automations/${id(ruleId)}/runs`, z.array(automationRunSchema))).data
 
 export const deleteRule = async (request: JobApiRequest, ruleId: string): Promise<void> => {
   await callApi(request, `/api/v1/automations/${id(ruleId)}`, z.unknown(), { method: 'DELETE' })
