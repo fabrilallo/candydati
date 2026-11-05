@@ -50,7 +50,7 @@ any other agent:
   full dates** are replaced by markers such as `[surname]`, `[email]`, `[phone]`.
 - Names of other people are replaced by `[name]` where the text marks them: a references section, a title such as
   "Dott." or "Mr", a name right before a phone or email.
-- A message draft keeps `{{candidate.lastName}}` as a variable: your composer fills it in when you review and send.
+- A message draft keeps <code v-pre>{{candidate.lastName}}</code> as a variable: your composer fills it in when you review and send.
 
 Not covered: names of other people written in plain prose ("I worked with Mario Bianchi"), street addresses outside the
 Italian, UK and US formats, and anything the patterns cannot recognize. Pseudonymized data is still personal data: what a CV says about someone's career can still identify them, so the rules
