@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { GlobeIcon, LifeBuoyIcon } from '@lucide/vue'
+import { ChevronDownIcon, GlobeIcon, LifeBuoyIcon } from '@lucide/vue'
 import { careersPath } from '@/lib/job-view'
-import { NAV_ICONS } from '@/lib/nav-icons'
 import { activeNavId, can, navSections, visibleNav, type NavId } from '@/lib/permissions-ui'
+import { readSettingsCollapsed, writeSettingsCollapsed } from '@/lib/nav-settings-state'
 
 /**
- * Navigation panel: organization switcher, then the sections with a heading and, where a real number exists, a count
- * (published ads), then the help recipes, the public careers page and the user menu. In the mobile drawer it also carries the language
- * and theme controls, which on desktop sit in the top bar.
+ * Navigation panel: organization switcher, then the daily work with a heading and, where a real number exists, a count
+ * (published ads), then the settings groups in one block that the viewer can collapse, then the help recipes, the public
+ * careers page and the user menu. In the mobile drawer it also carries the language and theme controls, which on desktop sit in the top bar.
  */
 const props = defineProps<{ inDrawer?: boolean }>()
 const { t } = useI18n()
@@ -20,7 +20,25 @@ const roleLabel = computed(() => (role.value ? t(`roles.${role.value}`) : ''))
 const { recruitsForClients } = role.value ? useAgencySetting() : { recruitsForClients: computed(() => false) }
 const navOptions = computed(() => ({ recruitsForClients: recruitsForClients.value }))
 const sections = computed(() => navSections(role.value, navOptions.value))
+const workSections = computed(() => sections.value.filter((section) => !section.settings))
+const settingsSections = computed(() => sections.value.filter((section) => section.settings))
 const active = computed(() => activeNavId(route.path, visibleNav(role.value, navOptions.value)))
+const settingsIds = computed(() => new Set(settingsSections.value.flatMap((section) => section.items.map((item) => item.id))))
+const onSettingsRoute = computed(() => active.value !== null && settingsIds.value.has(active.value))
+// Expanded until the viewer collapses it; the choice is read after mount, so the server and the first render agree.
+const collapsed = ref(false)
+const storage = () => window.localStorage
+onMounted(() => {
+  collapsed.value = readSettingsCollapsed(storage) && !onSettingsRoute.value
+})
+// Opening a settings page always shows its group, whatever the viewer left last time.
+watch(onSettingsRoute, (inside) => {
+  if (inside) collapsed.value = false
+})
+const toggleSettings = () => {
+  collapsed.value = !collapsed.value
+  writeSettingsCollapsed(storage, collapsed.value)
+}
 const canReadJobs = computed(() => can(role.value, 'job:read'))
 const { stats } = canReadJobs.value ? useJobStats() : { stats: computed(() => null) }
 const canReadCandidates = computed(() => can(role.value, 'candidate:read'))
@@ -32,8 +50,6 @@ const counts = computed<Partial<Record<NavId, number>>>(() => ({
   ...(attentionCount.value === null ? {} : { attention: attentionCount.value }),
 }))
 const publicPath = computed(() => (viewer.value?.organization ? careersPath(viewer.value.organization.slug) : null))
-/** What a screen reader hears for each count. */
-const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount', candidates: 'nav.candidateCount', attention: 'nav.attentionCount' }
 </script>
 
 <template>
@@ -45,38 +61,24 @@ const COUNT_KEYS: Partial<Record<NavId, string>> = { jobs: 'nav.publishedCount',
     <OrgSwitcher v-if="viewer?.organization" :organization="viewer.organization" :role-label="roleLabel" />
     <!-- min-h-0 + overflow: with every item (owners) the menu is taller than a short screen; it scrolls, the footer stays. -->
     <nav :aria-label="t('nav.main')" class="-mx-1 grid min-h-0 flex-1 content-start gap-5 overflow-y-auto overscroll-contain px-1">
-      <!-- The settings groups sit below a rule and are more compact, so the daily work reads first. -->
-      <section
-        v-for="(section, index) in sections"
-        :key="section.id"
-        :aria-labelledby="`nav-${section.id}`"
-        class="grid gap-1"
-        :class="section.settings && !sections[index - 1]?.settings ? 'border-t pt-4' : undefined"
-        :data-testid="`nav-section-${section.id}`"
-      >
-        <h2 :id="`nav-${section.id}`" class="px-2.5 pb-1 text-xs font-medium text-muted-foreground">{{ t(`nav.sections.${section.id}`) }}</h2>
-        <ul class="grid gap-0.5">
-          <li v-for="item in section.items" :key="item.id">
-            <NuxtLink
-              :to="item.to"
-              :aria-current="active === item.id ? 'page' : undefined"
-              class="flex items-center gap-3 rounded-md px-3 transition-colors duration-150"
-              :class="[section.settings ? 'h-9 text-sm' : 'h-10 text-[0.9375rem]', active === item.id ? 'bg-primary font-semibold text-primary-foreground' : 'font-medium text-foreground hover:bg-muted']"
-            >
-              <component :is="NAV_ICONS[item.id]" class="shrink-0" :class="section.settings ? 'size-4' : 'size-[1.125rem]'" aria-hidden="true" />
-              <span class="min-w-0 flex-1 truncate">{{ t(`nav.${item.id}`) }}</span>
-              <span
-                v-if="counts[item.id] !== undefined"
-                class="figure rounded-full bg-card px-2 py-0.5 text-xs font-bold text-foreground ring-[1.5px] ring-ink"
-                :data-testid="`nav-count-${item.id}`"
-              >
-                <span class="sr-only">{{ t(COUNT_KEYS[item.id] ?? 'nav.publishedCount', { count: counts[item.id] }) }}</span>
-                <span aria-hidden="true">{{ counts[item.id] }}</span>
-              </span>
-            </NuxtLink>
-          </li>
-        </ul>
-      </section>
+      <AppNavSection v-for="section in workSections" :key="section.id" :section="section" :active="active" :counts="counts" />
+      <!-- The settings groups sit below a rule, more compact, and fold away as one block so the daily work stays in view. -->
+      <div v-if="settingsSections.length" class="grid gap-1 border-t pt-4" data-testid="nav-settings">
+        <button
+          type="button"
+          class="flex h-8 items-center gap-2 rounded-md px-2.5 text-xs font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted hover:text-foreground"
+          :aria-expanded="!collapsed"
+          aria-controls="nav-settings-groups"
+          data-testid="nav-settings-toggle"
+          @click="toggleSettings"
+        >
+          <span class="min-w-0 flex-1 truncate text-left">{{ t('nav.settings') }}</span>
+          <ChevronDownIcon class="size-4 shrink-0 transition-transform duration-150" :class="collapsed ? '-rotate-90' : undefined" aria-hidden="true" />
+        </button>
+        <div v-show="!collapsed" id="nav-settings-groups" class="grid gap-5" data-testid="nav-settings-groups">
+          <AppNavSection v-for="section in settingsSections" :key="section.id" :section="section" :active="active" :counts="counts" />
+        </div>
+      </div>
     </nav>
     <div class="grid shrink-0 gap-2 border-t pt-3" data-testid="nav-footer">
       <NuxtLink
