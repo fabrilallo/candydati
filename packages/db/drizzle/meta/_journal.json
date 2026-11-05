@@ -351,6 +351,13 @@
       "when": 1793833085191,
       "tag": "0049_automation_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1793889899760,
+      "tag": "0050_mcp_move_proposals",
+      "breakpoints": true
     }
   ]
 }

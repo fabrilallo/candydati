@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { automationActionSchema } from '../automation/automation.js';
 import { automationConditionsSchema } from '../automation/conditions.js';
+import { MOVE_PROPOSAL_SOURCES } from '../automation/proposal.js';
 import { AUTOMATION_TRIGGERS, automationTriggerSchema, STAGE_ENTERED } from '../automation/trigger.js';
 import { candidateRefSchema, isoDate } from './common.js';
 
@@ -75,7 +76,7 @@ export const copyAutomationsResultSchema = z.object({
 export type CopyAutomationsResultDto = z.output<typeof copyAutomationsResultSchema>;
 
 /**
- * A live proposal of a `propose_move` rule: a suggestion that a person confirms (the normal move, with their permissions)
+ * A live proposal of a `propose_move` rule or of an assistant over MCP: a suggestion that a person confirms (the normal move, with their permissions)
  * or dismisses. It never moves anything by itself.
  */
 export const moveProposalSchema = z.object({
@@ -86,8 +87,12 @@ export const moveProposalSchema = z.object({
   job: z.object({ id: z.string(), title: z.string() }),
   from: z.object({ id: z.string(), label: z.string().nullable() }),
   to: z.object({ id: z.string(), label: z.string().nullable() }),
-  /** The creator of the rule, whose suggestion it is. */
+  /** The creator of the rule, or the person whose key or connected app proposed it: whose suggestion it is. */
   proposedBy: z.string(),
+  /** A rule, or an external assistant over MCP (`api_key`, `connected_app`). */
+  source: z.enum(MOVE_PROPOSAL_SOURCES),
+  /** Plain text written by an assistant (data, never instructions); null for rules, and at a restricted stage the reader cannot read. */
+  reason: z.string().nullable(),
   createdAt: isoDate,
   expiresAt: isoDate,
 });

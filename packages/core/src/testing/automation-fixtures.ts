@@ -54,6 +54,8 @@ export const buildMoveProposal = (overrides: Partial<MoveProposal> = {}): MovePr
   fromStageId: 'stage-0',
   toStageId: 'stage-1',
   proposedBy: 'recruiter_1',
+  source: 'rule',
+  reason: null,
   status: 'open',
   createdAt: DATE,
   expiresAt: new Date('2099-01-01T00:00:00.000Z'),

@@ -12,8 +12,12 @@ export const STATEMENTS = {
   /** The people of a job's team (job-team.ts): `read` lists them, `manage` adds and removes them. */
   job_team: ['read', 'manage'],
   job_template: ['read', 'create', 'delete'],
-  /** Candidates and their applications. `read` opens the profile and the CV, and is audited (PRODUCT.md §6). */
-  candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
+  /**
+   * Candidates and their applications. `read` opens the profile and the CV, and is audited (PRODUCT.md §6).
+   * `propose_move` writes a move proposal that a person confirms or dismisses: it moves nothing, so it is held by exactly
+   * the roles that may move, and a machine (API key, connected app) may hold it where `move` is never handed to one.
+   */
+  candidate: ['read', 'update', 'move', 'propose_move', 'decide', 'export', 'erase'],
   /** Notes on candidates: interviewers can write them too. */
   candidate_note: ['create'],
   /** Privacy notice, consent texts and retention periods: the data controller's settings. */
@@ -88,7 +92,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     job: ['read', 'create', 'update', 'publish', 'close', 'approve'],
     job_team: ['read', 'manage'],
     job_template: ['read', 'create', 'delete'],
-    candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
+    candidate: ['read', 'update', 'move', 'propose_move', 'decide', 'export', 'erase'],
     candidate_note: ['create'],
     privacy: ['manage'],
     message: ['read', 'send'],
@@ -112,7 +116,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     job: ['read', 'create', 'update', 'publish', 'close'],
     job_team: ['read', 'manage'],
     job_template: ['read', 'create', 'delete'],
-    candidate: ['read', 'update', 'move', 'decide', 'export', 'erase'],
+    candidate: ['read', 'update', 'move', 'propose_move', 'decide', 'export', 'erase'],
     candidate_note: ['create'],
     message: ['read', 'send'],
     email_template: ['manage'],
@@ -132,7 +136,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     job: ['read', 'create', 'update'],
     job_team: ['read', 'manage'],
     job_template: ['read'],
-    candidate: ['read', 'update', 'move'],
+    candidate: ['read', 'update', 'move', 'propose_move'],
     candidate_note: ['create'],
     message: ['read'],
     task: ['read', 'manage'],

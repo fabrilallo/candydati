@@ -142,6 +142,8 @@ export const toMoveProposalDto = ({ proposal, candidate, job, fromLabel, toLabel
   from: { id: proposal.fromStageId, label: fromLabel },
   to: { id: proposal.toStageId, label: toLabel },
   proposedBy: proposal.proposedBy,
+  source: proposal.source,
+  reason: proposal.reason,
   createdAt: iso(proposal.createdAt),
   expiresAt: iso(proposal.expiresAt),
 });

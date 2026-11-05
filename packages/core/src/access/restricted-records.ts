@@ -1,6 +1,7 @@
-import type { CandidateNote, FeedbackRequest, InterviewFeedback } from '@candydati/domain';
+import type { CandidateNote, FeedbackRequest, InterviewFeedback, MoveProposal } from '@candydati/domain';
 import type { CandidateNoteRepository } from '../candidate-ports.js';
 import type { FeedbackRequestRepository, InterviewFeedbackRepository } from '../feedback-ports.js';
+import type { MoveProposalRepository } from '../proposal-ports.js';
 import type { RestrictedItem, StageRestrictionContext } from './restricted-stages.js';
 
 /**
@@ -60,5 +61,29 @@ export function restrictInterviewFeedback(
       return feedback && (await visible(organizationId, feedback.applicationId, [feedback])).length > 0 ? feedback : null;
     },
     listByApplication: async (organizationId, applicationId) => visible(organizationId, applicationId, await raw.listByApplication(organizationId, applicationId)),
+  };
+}
+
+/**
+ * The reason an assistant gave with a move proposal is written at the stage the application was in: at a restricted stage
+ * only those who read that stage (and the person it was proposed for) read it. Everyone else still sees the proposal
+ * itself, which says nothing more than a move would, with no reason.
+ */
+const aboutReason = (proposal: MoveProposal): RestrictedItem => ({ applicationId: proposal.applicationId, stageId: proposal.fromStageId, authorIds: [proposal.proposedBy] });
+
+export function restrictProposalReasons(raw: MoveProposalRepository, ctx: StageRestrictionContext): MoveProposalRepository {
+  const readable = async (proposals: readonly MoveProposal[]): Promise<readonly MoveProposal[]> => {
+    const withReason = proposals.filter((proposal) => proposal.reason !== null);
+    if (withReason.length === 0 || (await ctx.hidden()).size === 0) return proposals;
+    const kept = new Set(await ctx.visible(withReason, aboutReason));
+    return proposals.map((proposal) => (proposal.reason === null || kept.has(proposal) ? proposal : { ...proposal, reason: null }));
+  };
+  return {
+    ...raw,
+    async findById(organizationId, id) {
+      const proposal = await raw.findById(organizationId, id);
+      return proposal ? ((await readable([proposal]))[0] ?? null) : null;
+    },
+    listOpen: async (query) => readable(await raw.listOpen(query)),
   };
 }
