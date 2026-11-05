@@ -47,6 +47,8 @@ const SAFE_BY_CONSTRUCTION = [
   /^apiKeyUrl\(/,
   // A page of the public guide, a fixed https site (`lib/guide-links.ts`).
   /^guideUrl\(/,
+  // Same-origin start of "Fill in with LinkedIn": a fixed path, the job page encoded as its query (`@candydati/domain`).
+  /^linkedInStartPath\(/,
 ]
 
 const BOUND = /(?:v-bind)?:(?:href|src)="([^"]+)"/g

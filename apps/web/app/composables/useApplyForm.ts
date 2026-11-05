@@ -1,9 +1,10 @@
-import type { PublicPrivacyNoticeDto } from '@candydati/domain'
+import type { LinkedInPrefill, PublicPrivacyNoticeDto } from '@candydati/domain'
 import type { Ref } from 'vue'
 import { ApiFailure } from '@/lib/api-call'
 import { applicationCampaign, applicationOrigin } from '@/lib/application-origin'
 import { emptyApplyValues, needsNoticeReload, submitApplication, toApplicationForm, type ApplyErrors, type ApplyValues } from '@/lib/application-form'
 import { checkCvFile } from '@/lib/cv-file'
+import { withLinkedInPrefill } from '@/lib/linkedin-prefill'
 import { fetchPublicJob } from '@/lib/job-api'
 
 const CV_ERRORS = { empty: 'apply.cv.errors.empty', too_large: 'apply.cv.errors.tooLarge', unsupported: 'apply.cv.errors.unsupported' } as const
@@ -23,9 +24,18 @@ const fetchNotice = async (request: ReturnType<typeof useJobsApi>, target: { rea
 
 const withoutError = (errors: ApplyErrors, field: string): ApplyErrors => Object.fromEntries(Object.entries(errors).filter(([name]) => name !== field))
 
+/** What "Fill in with LinkedIn" may fill: shown in the fields for the candidate to review, never sent by itself. */
+const PREFILLED_FIELDS: readonly string[] = ['firstName', 'lastName', 'email']
+
+const fillFromLinkedIn = (values: Ref<ApplyValues>, errors: Ref<ApplyErrors>, prefill: LinkedInPrefill): void => {
+  values.value = withLinkedInPrefill(values.value, prefill)
+  errors.value = PREFILLED_FIELDS.reduce(withoutError, errors.value)
+}
+
 /**
  * State of the public application form: values, CV, per-field errors (translation keys in the ad's language), the
- * submission and its outcome. If the notice changed meanwhile, the new one is loaded and consent is asked again.
+ * submission and its outcome. If the notice changed meanwhile, the new one is loaded and consent is asked again
+ * (`noticeChanged`). `fill` puts in what "Fill in with LinkedIn" gave, for the candidate to review.
  */
 export const useApplyForm = (target: { readonly org: string; readonly job: string }, notice: Ref<PublicPrivacyNoticeDto>) => {
   const request = useJobsApi()
@@ -35,13 +45,13 @@ export const useApplyForm = (target: { readonly org: string; readonly job: strin
   const pending = ref(false)
   const errorKey = ref<string | null>(null)
   const done = ref(false)
-  /** The notice was replaced while the candidate was filling the form. */
   const noticeChanged = ref(false)
 
   const setField = <K extends keyof ApplyValues>(key: K, value: ApplyValues[K]): void => {
     values.value = { ...values.value, [key]: value }
     errors.value = withoutError(errors.value, key)
   }
+  const fill = (prefill: LinkedInPrefill): void => fillFromLinkedIn(values, errors, prefill)
   const setFile = (next: File | null): void => {
     const check = next ? checkCvFile(next) : null
     file.value = check && !check.ok ? null : next
@@ -78,5 +88,5 @@ export const useApplyForm = (target: { readonly org: string; readonly job: strin
     }
   }
 
-  return { values, file, errors, pending, errorKey, done, noticeChanged, setField, setFile, submit }
+  return { values, file, errors, pending, errorKey, done, noticeChanged, setField, setFile, fill, submit }
 }

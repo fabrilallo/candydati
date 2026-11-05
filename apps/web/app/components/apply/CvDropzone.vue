@@ -28,7 +28,7 @@ const remove = async (): Promise<void> => {
 </script>
 
 <template>
-  <div class="grid gap-1.5" role="group" aria-labelledby="apply-cv-label" :aria-describedby="error ? 'apply-cv-error' : 'apply-cv-hint'">
+  <div class="grid gap-1.5" role="group" aria-labelledby="apply-cv-label" :aria-describedby="error ? 'apply-cv-error apply-cv-tip' : 'apply-cv-hint apply-cv-tip'">
     <p id="apply-cv-label" class="text-sm font-medium">{{ x('apply.cv.label') }}</p>
     <div
       v-if="!file"
@@ -56,6 +56,7 @@ const remove = async (): Promise<void> => {
       </div>
       <Button type="button" variant="ghost" size="sm" :disabled="disabled" data-testid="cv-remove" :aria-label="x('apply.cv.removeNamed', { name: file.name })" @click="remove"><XIcon aria-hidden="true" />{{ x('apply.cv.remove') }}</Button>
     </div>
+    <p id="apply-cv-tip" class="text-xs text-muted-foreground" data-testid="cv-linkedin-tip">{{ x('apply.cv.linkedinTip') }}</p>
     <p v-if="error" id="apply-cv-error" class="text-xs font-medium text-destructive" data-testid="field-error">{{ error }}</p>
   </div>
 </template>
