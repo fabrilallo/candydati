@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { expectLinearOnHostileInput } from '../testing/linear-time.js';
 import { jobSlug, SLUG_MAX } from './job.js';
 
 describe('jobSlug', () => {
@@ -36,6 +36,6 @@ describe('jobSlug', () => {
     const run = (size: number) => {
       jobSlug(`a${' -'.repeat(size)}b`, 'x1');
     };
-    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
-  });
+    expectLinearOnHostileInput(run, { size: 50_000 });
+  }, 20_000);
 });

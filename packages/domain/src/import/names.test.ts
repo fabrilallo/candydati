@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { expectLinearOnHostileInput } from '../testing/linear-time.js';
 import { fileStem, levenshtein, levenshteinRatio, nameFromFileName, nameKey, nameSimilarity, normalizeEmail, normalizeText, phoneDigits, splitFullName } from './names.js';
 
 describe('normalizeText and nameKey', () => {
@@ -61,9 +61,8 @@ describe('splitFullName', () => {
       splitFullName(`+,${' '.repeat(size)};x`);
       splitFullName(`a,${' '.repeat(size)}b`);
     };
-    run(50_000);
-    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
-  });
+    expectLinearOnHostileInput(run, { size: 100_000 });
+  }, 20_000);
   it('keeps an all-caps full name as written', () => {
     expect(splitFullName('MARIO ROSSI')).toEqual({ firstName: 'MARIO', lastName: 'ROSSI' });
   });
@@ -104,8 +103,8 @@ describe('file names, emails and phones', () => {
       normalizeEmail(`!@!.${'!.'.repeat(size / 2)}@`);
       normalizeEmail(`!@!${'.'.repeat(size)} `);
     };
-    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
-  });
+    expectLinearOnHostileInput(run, { size: 100_000 });
+  }, 20_000);
   it('compares phones by digits', () => {
     expect(phoneDigits('+39 333 123 4567')).toBe(phoneDigits('333-1234567'));
     expect(phoneDigits('0039 333 1234567')).toBe('3331234567');

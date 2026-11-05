@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { expectLinearOnHostileInput } from '../testing/linear-time.js';
 import { CAMPAIGN_MAX, pickOrigin, sanitizeCampaign, sanitizeOrigin, ORIGIN_MAX } from './origin.js';
 
 describe('sanitizeOrigin', () => {
@@ -50,6 +50,6 @@ describe('label cleaning on hostile input', () => {
     const hostile = `${'-'.repeat(50_000)}x${'.-'.repeat(50_000)}`;
     expect(sanitizeOrigin(hostile)).toBe('direct');
     expect(sanitizeCampaign(`--.${'a'.repeat(10)}.--`)).toBe('a'.repeat(10));
-    expect(growthRatio((size) => { sanitizeOrigin(`${'-'.repeat(size)}x${'.-'.repeat(size)}`); }, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
-  });
+    expectLinearOnHostileInput((size) => { sanitizeOrigin(`${'-'.repeat(size)}x${'.-'.repeat(size)}`); }, { size: 40_000 });
+  }, 20_000);
 });

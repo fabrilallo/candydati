@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { expectLinearOnHostileInput } from '../testing/linear-time.js';
 import { extractContacts } from './contacts.js';
 
 describe('extractContacts', () => {
@@ -59,9 +59,8 @@ Esperienza 2019-2023`;
       extractContacts(`linkedin.com/in/a${'.'.repeat(size)}b ${')'.repeat(size)}`);
       extractContacts(`${'a'.repeat(500)}@b.it `.repeat(size / 500));
     };
-    run(50_000);
-    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
-  });
+    expectLinearOnHostileInput(run, { size: 100_000 });
+  }, 20_000);
 
   it('drops the punctuation that follows a linkedin url', () => {
     expect(extractContacts('linkedin.com/in/anna.bianchi.').linkedin).toBe('https://www.linkedin.com/in/anna.bianchi');

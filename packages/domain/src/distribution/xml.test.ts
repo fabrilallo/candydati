@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { expectLinearOnHostileInput } from '../testing/linear-time.js';
 import { trimBaseUrl } from './xml.js';
 
 describe('trimBaseUrl', () => {
@@ -12,6 +12,6 @@ describe('trimBaseUrl', () => {
   it('finishes fast on many slashes not at the end (CodeQL js/polynomial-redos)', () => {
     const hostile = `https://x${'/'.repeat(50_000)}a`;
     expect(trimBaseUrl(hostile)).toBe(hostile);
-    expect(growthRatio((size) => { trimBaseUrl(`https://x${'/'.repeat(size)}a`); }, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
-  });
+    expectLinearOnHostileInput((size) => { trimBaseUrl(`https://x${'/'.repeat(size)}a`); }, { size: 100_000 });
+  }, 20_000);
 });
