@@ -1,7 +1,8 @@
-import { pipelineStagesOf, responseState, type Application, type Candidate, type CandidateNote } from '@candydati/domain';
+import { groupExtractedSkills, pipelineStagesOf, responseState, type Application, type Candidate, type CandidateNote } from '@candydati/domain';
 import type { CandidateDeps } from '../../candidate-ports.js';
 import { NotFoundError } from '../../errors.js';
 import { requireJob } from '../jobs/shared.js';
+import { loadSkillBook } from '../skills/skill-aliases.js';
 import type { ApplicationCardView, CandidateDetailView, NoteView } from './views.js';
 import { mapSequential, sequential } from '../../sequential.js';
 
@@ -83,16 +84,19 @@ export async function loadCandidateDetail(
   const jobIds = [...new Set(applications.map((a) => a.jobId))];
   const jobs = await mapSequential(jobIds, (id) => requireJob(deps, organizationId, id));
   const restricted = await restrictedStagesOf(deps, organizationId, jobIds);
+  const book = await loadSkillBook(deps, organizationId);
   return {
     candidate,
     applications: applications.map((application) => {
       const job = jobs.find((j) => j.id === application.jobId);
       if (!job) throw new NotFoundError('Job not found.');
+      const extraction = extractions.find((e) => e.applicationId === application.id) ?? null;
       return {
         application,
         job,
         stages: pipelineStagesOf(job.content.process),
-        extraction: extractions.find((e) => e.applicationId === application.id) ?? null,
+        extraction,
+        skills: groupExtractedSkills(book, extraction?.data?.skills ?? []),
         messageCount: messageCounts[application.id] ?? 0,
         responseState: responseState(application, job, deps.now()),
         attachments: attachments.filter((attachment) => attachment.applicationId === application.id),

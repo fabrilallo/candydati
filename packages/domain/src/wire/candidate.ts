@@ -92,6 +92,8 @@ const extractionSchema = z.object({
   status: z.enum(EXTRACTION_STATUSES),
   data: cvExtractionSchema.nullable(),
   source: z.enum(['model', 'text']).nullable(),
+  /** `data.skills` read with the organization's skill dictionary: canonical name (null when unknown) and the ways the CV wrote it. Read time only. */
+  skills: z.array(z.object({ canonical: z.string().nullable(), writtenAs: z.array(z.string()) })),
 });
 export type ExtractionDto = z.infer<typeof extractionSchema>;
 

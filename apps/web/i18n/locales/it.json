@@ -1718,6 +1718,7 @@
       "experiences": "Esperienze",
       "education": "Formazione",
       "skills": "Competenze",
+      "writtenAs": "scritto come {forms}",
       "languages": "Lingue",
       "fromText": "Ricavato dal solo testo del documento, senza modello linguistico.",
       "states": {
@@ -2428,7 +2429,7 @@
   },
   "skills": {
     "title": "Competenze",
-    "description": "Il filtro sui criteri dichiarati tratta come una sola competenza le sue diverse grafie: \"Go\" trova \"Golang\". Aggiungi i nomi che usano i vostri CV e disattiva quelli predefiniti che non volete.",
+    "description": "Il filtro sui criteri dichiarati tratta come una sola competenza le sue diverse grafie: \"Go\" trova \"Golang\". Aggiungi i nomi che usano i vostri CV e disattiva quelli predefiniti che non volete. I profili mostrano gli stessi nomi accanto a quanto scrive il CV; nulla di salvato viene modificato.",
     "own": {
       "title": "I vostri alias",
       "body": "Un alias è un altro modo di scrivere una competenza. Vale per ogni ricerca di questa organizzazione, da entrambe le parti: il criterio e il CV. Per creare una competenza nuova basta un alias.",

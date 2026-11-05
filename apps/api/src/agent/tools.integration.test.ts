@@ -127,6 +127,16 @@ describe('candidate-authored text', () => {
     expect(CV_INJECTION).toContain('</candidate_data>');
   });
 
+  it('adds the canonical skills of the organization next to the CV, as candidate data', async () => {
+    const giulia = w.candidates.find((c) => c.key === 'giulia')!;
+    await t.handle.db
+      .update(schema.cvExtraction)
+      .set({ data: { experiences: [], education: [], skills: ['Golang', 'Go', 'Zorgbase'], languages: [] } })
+      .where(eq(schema.cvExtraction.applicationId, giulia.applicationId));
+    const brief = (await call('get_candidate_brief', { candidateId: giulia.candidateId })) as { candidateData: string };
+    expect(brief.candidateData.replace(/\s/g, '')).toContain('"cvSkills":[{"canonical":"Go","writtenAs":["Golang","Go"]},{"canonical":null,"writtenAs":["Zorgbase"]}]');
+  });
+
   it('wraps the messages of the candidate and names in the attention list', async () => {
     const luca = w.candidates.find((c) => c.key === 'luca')!;
     const brief = (await call('get_candidate_brief', { candidateId: luca.candidateId })) as { messages: string };

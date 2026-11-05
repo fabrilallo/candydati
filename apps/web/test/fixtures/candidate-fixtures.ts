@@ -119,6 +119,10 @@ export const detail = (overrides: Partial<CandidateDetailDto> = {}): CandidateDe
           skills: ['TypeScript', 'Postgres'],
           languages: ['Italiano', 'Inglese'],
         },
+        skills: [
+          { canonical: 'TypeScript', writtenAs: ['TypeScript'] },
+          { canonical: 'PostgreSQL', writtenAs: ['Postgres'] },
+        ],
       },
     },
   ],

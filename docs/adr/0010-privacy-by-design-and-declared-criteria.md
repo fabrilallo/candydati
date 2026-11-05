@@ -82,8 +82,13 @@ AI system: it conflicts with ADR 0005, GDPR art. 22, and is a high-risk use unde
    alias belongs to one skill per organization (a word the dictionary or another alias already owns is refused), so the
    book of an organization is still a plain table of spellings: it widens or narrows the spelling and weighs nothing.
    A result names the spelling a CV used for each skill criterion ("Golang" met "Go"), so a person sees why it is
-   there; the order stays the date of application. CV extraction does not normalize skills (it stores them as written),
-   so the matching at search time is the only place the aliases apply.
+   there; the order stays the date of application. CV extraction does not normalize skills (it stores them as written,
+   and an alias change never recomputes anything). The aliases are applied at read time in two places: at search time,
+   and on a candidate's profile, where each extracted skill carries the organization's canonical name (null when the
+   book does not know it) and skills that are the same skill under different names are grouped ("Go" and "Golang":
+   one Go, written two ways). The book is loaded once per request, for the organization of the request only, and the
+   profile keeps the order of first appearance. The assistant's candidate brief carries the same grouping (`cvSkills`)
+   as candidate data. The data export and the stored extraction stay exactly as the candidate wrote them.
 3. **Only people whose consent covers the job.** The search looks at the job's applicants and at the talent pool,
    never at people who applied to another position only.
 4. **No proxies for protected characteristics.** Criteria naming age, sex, origin, religion, family, disability or

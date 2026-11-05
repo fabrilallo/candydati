@@ -326,7 +326,7 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
   confirmed, in Postgres (`drizzle-criteria-search.ts`, checked against the reference `cvMatchesCriteria`): no score,
   ordered by date of application, unchecked CVs counted, protected characteristics refused, every search audited;
   skills match through the built-in dictionary plus the organization's own aliases (`skill_alias`, loaded per search by
-  `loadSkillBook`), and each result says which spelling met a skill ([ADR 0010](adr/0010-privacy-by-design-and-declared-criteria.md)).
+  `loadSkillBook`), and each result says which spelling met a skill; the profile reads the extracted skills with the same book (`groupExtractedSkills`: canonical name plus written forms, never stored) ([ADR 0010](adr/0010-privacy-by-design-and-declared-criteria.md)).
 - The conversation lives in the browser; the server stores nothing of it ([ADR 0007](adr/0007-stateless-assistant.md)).
 - MCP clients authenticate with an API key or, as Claude custom connectors, with OAuth 2.1 (Better Auth's MCP plugin,
   PKCE, dynamic registration with a callback allowlist, opaque tokens bound to the `/mcp` resource). An OAuth

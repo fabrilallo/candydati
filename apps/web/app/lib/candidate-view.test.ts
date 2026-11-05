@@ -64,16 +64,32 @@ describe('extractionView', () => {
     expect(view.kind === 'done' && view.source).toBe('model')
   })
 
+  it('shows the canonical name with the written forms that differ, in order of first appearance', () => {
+    const base = { status: 'done' as const, source: 'model' as const, data: { experiences: [], education: [], skills: ['Go', 'Golang', 'Zorg', 'zorg'], languages: [] } }
+    const view = extractionView({ ...base, skills: [{ canonical: 'Go', writtenAs: ['Go', 'Golang'] }, { canonical: 'Rust', writtenAs: ['Ferris'] }, { canonical: null, writtenAs: ['Zorg', 'zorg-x'] }] })
+    expect(view.kind === 'done' && view.skills).toEqual([
+      { label: 'Go', writtenAs: ['Golang'] },
+      { label: 'Rust', writtenAs: ['Ferris'] },
+      { label: 'Zorg', writtenAs: ['zorg-x'] },
+    ])
+  })
+
+  it('falls back to the skills as written when the api sent no grouping', () => {
+    const data = { experiences: [], education: [], skills: ['Go', 'Rust'], languages: [] }
+    const view = extractionView({ status: 'done', source: 'model', data, skills: [] })
+    expect(view.kind === 'done' && view.skills).toEqual([{ label: 'Go', writtenAs: [] }, { label: 'Rust', writtenAs: [] }])
+  })
+
   it('handles every other state', () => {
     expect(extractionView(null)).toEqual({ kind: 'pending' })
-    expect(extractionView({ status: 'pending', data: null, source: null })).toEqual({ kind: 'pending' })
-    expect(extractionView({ status: 'text_only', data: null, source: 'text' })).toEqual({ kind: 'text_only' })
-    expect(extractionView({ status: 'failed', data: null, source: null })).toEqual({ kind: 'failed' })
-    expect(extractionView({ status: 'done', data: null, source: 'model' })).toEqual({ kind: 'failed' })
+    expect(extractionView({ status: 'pending', data: null, source: null, skills: [] })).toEqual({ kind: 'pending' })
+    expect(extractionView({ status: 'text_only', data: null, source: 'text', skills: [] })).toEqual({ kind: 'text_only' })
+    expect(extractionView({ status: 'failed', data: null, source: null, skills: [] })).toEqual({ kind: 'failed' })
+    expect(extractionView({ status: 'done', data: null, source: 'model', skills: [] })).toEqual({ kind: 'failed' })
   })
 
   it('treats a done extraction with nothing in it as empty', () => {
     const empty = { experiences: [], education: [], skills: [], languages: [] }
-    expect(extractionView({ status: 'done', data: empty, source: 'model' })).toEqual({ kind: 'empty' })
+    expect(extractionView({ status: 'done', data: empty, source: 'model', skills: [] })).toEqual({ kind: 'empty' })
   })
 })
