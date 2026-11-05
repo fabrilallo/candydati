@@ -3,6 +3,10 @@
  * with the first name and the ids only. The surname, contacts and direct identifiers are replaced by these markers.
  * It lowers the risk, it does not make data anonymous (GDPR recital 26): CV content can still single someone out.
  */
+import { replacePostalAfterAddress, STREET_DE, STREET_EN, STREET_ES, STREET_FR, STREET_FR_FIRST, STREET_IT, UK_POSTCODE } from './address-patterns.js';
+import { ISO_DATE, MONTH_FIRST_DATE, NUMERIC_DATE, WORDED_DATE } from './date-patterns.js';
+import { isSpanishId, LABELLED_ID, SPANISH_ID } from './id-patterns.js';
+import { replaceSurnameToken, surnamePattern, surnameTokenPattern } from './surname.js';
 import { NAME_MARKER, replaceKnownNames, replaceMarkedNames } from './third-party-names.js';
 
 export const REDACTED = {
@@ -17,6 +21,7 @@ export const REDACTED = {
   handle: '[handle]',
   name: NAME_MARKER,
   vat: '[vat number]',
+  idNumber: '[id number]',
 } as const;
 
 /** What identifies one person beyond the first name: removed wherever it appears. */
@@ -33,7 +38,7 @@ export interface PersonIdentifiers {
 const URL = /(?:\bhttps?:\/\/|\bwww\.)[^\s<>"'(),]{0,2000}[^\s<>"'(),.;:!?]/gi;
 const PROFILE_TAIL = String.raw`\/[^\s<>"'(),]{0,500}[^\s<>"'(),.;:!?]`;
 const PROFILE = new RegExp(
-  String.raw`\b(?:[a-z]{2,3}\.)?(?:linkedin|github|gitlab|twitter|x|facebook|instagram|behance|dribbble|medium|stackoverflow)\.(?:com|it|org|net)` + PROFILE_TAIL,
+  String.raw`\b(?:[a-z]{2,3}\.)?(?:linkedin|github|gitlab|twitter|x|facebook|instagram|behance|dribbble|medium|stackoverflow|xing|viadeo|malt)\.(?:com|it|org|net|fr|de|es|ch|at|be|co\.uk)` + PROFILE_TAIL,
   'gi',
 );
 /** Short forms and hosted pages: `t.me/x`, `wa.me/39...`, `name.github.io/page`. */
@@ -45,27 +50,21 @@ const LINKEDIN_PATH = /\blinkedin[\s:.-]{1,4}in\/[\w%-]{2,100}/gi;
 const HANDLE = /(?<![\w@.+-])@[A-Za-z][\w.]{0,28}\w(?![\w@])/g;
 /** A personal site without `www`: a personal TLD, or a common one with a path. Lower case, so `ASP.NET` stays. */
 const PERSONAL_SITE = new RegExp(
-  String.raw`(?<![\w.@/-])[a-z0-9][a-z0-9-]{0,62}\.(?:(?:it|dev|me|page|site|blog|name|eu)(?:${PROFILE_TAIL})?|(?:com|net|org|io)${PROFILE_TAIL})(?![\w-])`,
+  String.raw`(?<![\w.@/-])[a-z0-9][a-z0-9-]{0,62}\.(?:(?:it|dev|me|page|site|blog|name|eu|fr|ch|nl|pt|co\.uk|co\.[a-z]{2}|com\.[a-z]{2})(?:${PROFILE_TAIL})?|(?:com|net|org|io)${PROFILE_TAIL})(?![\w-])`,
   'g',
 );
 /** "Skype: live:name", "Discord: name#1234", "skype:name?call": the id after the app name. */
 const MESSAGING = /\b(skype|discord|signal|teams)((?:\s?id)?\s?:\s{0,3})(?:live:)?@?[\w.#-]{1,63}\w(?:\?\w{1,20})?/gi;
+/** "GitHub: emjdev": a handle after a profile's name, when it looks like one (lower case first, or a digit, `_`, `.`). */
+const PROFILE_HANDLE = /\b([Gg]it[Hh]ub|[Gg]it[Ll]ab|[Tt]witter|[Ii]nstagram|[Tt]elegram|[Tt]ik[Tt]ok|[Bb]luesky|[Mm]astodon)(\s?:\s{0,3})@?(?=[a-z\d_]|[A-Za-z]{1,38}[\d_.])[\w.-]{1,38}[\w](?![\w@])/g;
 const VAT = /\b((?:P\.?\s?IVA|Partita\s{1,3}IVA|VAT(?:\s?(?:no|n|number)\.?)?)\s?:?\s{0,3})(?:IT\s?)?\d{11}(?!\d)/gi;
-const UK_POSTCODE = /\b[A-Z]{1,2}\d[A-Z\d]?\s\d[A-Z]{2}\b/g;
 const EMAIL = /(?<![\w.+-])[\w.+-]{1,64}@[\w-]{1,63}(?:\.[\w-]{1,63}){1,8}/g;
 const IBAN = /\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]{4}){2,7}(?: ?[A-Z0-9]{1,4})?\b/gi;
 const IBAN_DIGITS_MIN = 10;
 /** Omocodia replaces digits by the letters L-V. */
 const TAX_CODE = /\b[A-Z]{6}[\dLMNP-V]{2}[A-EHLMPRST][\dLMNP-V]{2}[A-Z][\dLMNP-V]{3}[A-Z]\b/gi;
-const NUMERIC_DATE = /(?<!\d)\d{1,2}[/.-]\d{1,2}[/.-](?:19|20)\d{2}(?!\d)/g;
-const MONTHS = 'gen|feb|mar|apr|mag|giu|lug|ago|set|ott|nov|dic|jan|may|jun|jul|aug|sep|oct|dec';
-const WORDED_DATE = new RegExp(`(?<![\\p{L}\\d])\\d{1,2}\\s{1,3}(?:${MONTHS})\\p{L}{0,8}\\.?\\s{1,3}(?:19|20)\\d{2}(?!\\d)`, 'giu');
-const STREET_IT =
-  /\b(?:Via|Viale|Piazza|Piazzale|Corso|Largo|Vicolo|Strada|Contrada|Borgo)(?:\s{1,3}(?:\p{Lu}[\p{L}'.]{0,30}|d[aei]|del|della|dei|degli|delle)){1,5},?\s{1,3}\d{1,3}(?:\s?\/\s?[a-zA-Z]|[a-zA-Z])?(?:[\s,-]{1,5}\d{5}\s{1,3}\p{Lu}[\p{L}']{1,30}(?:\s\p{Lu}[\p{L}']{1,30}){0,2}(?:\s{0,3}\([A-Z]{2}\))?)?(?![\d\p{L}])/gu;
-const EN_SUFFIX = String.raw`(?:Street|St\.?|Road|Rd\.?|Avenue|Ave\.?|Lane|Ln\.?|Drive|Dr\.?|Boulevard|Blvd\.?|Way|Court|Ct\.?|Place|Pl\.?|Square|Sq\.?|Terrace|Close|Crescent|Highway|Parkway|Row|Gardens|Grove)`;
-const EN_POSTAL = String.raw`(?:,\s{0,3}\p{Lu}\p{L}{1,30}(?:\s{1,3}\p{Lu}\p{L}{1,30}){0,2},?\s{1,3}(?:[A-Z]{2}\s{1,3}\d{5}(?:-\d{4})?|[A-Z]{1,2}\d[A-Z\d]?\s\d[A-Z]{2}))?`;
-const STREET_EN = new RegExp(String.raw`(?<!\d)\d{1,5}[A-Z]?\s{1,3}(?:\p{Lu}\p{L}{0,30}\s{1,3}){1,3}${EN_SUFFIX}(?!\p{L})${EN_POSTAL}`, 'gu');
-const PHONE = /(?<![\w+./])(?:(?:\+|00)\d{1,3}[ .-]?)?(?:\(\d{2,4}\)[ .-]?)?\d{2,12}(?:[ .-]\d{2,12}){0,4}(?:\s{0,2}(?:int|ext|interno)\.?\s{0,2}\d{1,5})?(?![\w/])/g;
+/** A country code may be followed by a `(0)` trunk prefix and a one-digit area ("+33 6 ...", "+44 (0)20 ..."). */
+const PHONE = /(?<![\w+./])(?:(?:\+|00)\d{1,3}[ .-]?(?:\(0\)[ .-]?)?(?:\d[ .-](?=\d{2}))?)?(?:\(\d{2,4}\)[ .-]?)?\d{2,12}(?:[ .-]\d{2,12}){0,4}(?:\s{0,2}(?:int|ext|interno)\.?\s{0,2}\d{1,5})?(?![\w/])/g;
 
 const PHONE_DIGITS_MIN = 9;
 const PHONE_DIGITS_MAX = 15;
@@ -78,22 +77,6 @@ const replacePhone = (match: string): string => {
   const years = groups.every((group) => YEAR.test(group));
   return digits.length >= PHONE_DIGITS_MIN && digits.length <= PHONE_DIGITS_MAX && !years ? REDACTED.phone : match;
 };
-
-/** Particles are shared by many surnames and are ordinary words: only the full surname removes them. */
-const PARTICLES = new Set(['da', 'de', 'di', 'del', 'della', 'dei', 'degli', 'delle', 'dal', 'dalla', 'lo', 'la', 'le', 'li', 'van', 'von', 'der', 'den', 'dos', 'das', 'du', 'mac', 'san', 'santa', 'santo']);
-const SURNAME_PART_MIN = 3;
-
-const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-/** The full surname, then each distinctive part of it, as whole words in any case. */
-function surnamePattern(lastName: string): RegExp | null {
-  const full = lastName.trim().replace(/\s+/g, ' ');
-  const parts = full.split(/[\s'’-]+/).filter((part) => part.length >= SURNAME_PART_MIN && !PARTICLES.has(part.toLowerCase()));
-  const words = [...new Set([full, ...parts])].filter((word) => word.length > 0).sort((a, b) => b.length - a.length);
-  if (words.length === 0) return null;
-  const alternatives = words.map((word) => escapeRegExp(word).replace(/ /g, '\\s{1,3}')).join('|');
-  return new RegExp(`(?<![\\p{L}\\p{N}])(?:${alternatives})(?![\\p{L}\\p{N}])`, 'giu');
-}
 
 const KNOWN_VALUE_MIN = 5;
 
@@ -118,23 +101,36 @@ const PATTERNS: readonly (readonly [RegExp, (match: string, ...groups: string[])
   [EMAIL, () => REDACTED.email],
   [MESSAGING, (_match, app: string, separator: string) => `${app}${separator}${REDACTED.handle}`],
   [HANDLE, () => REDACTED.handle],
+  [PROFILE_HANDLE, (_match, site: string, separator: string) => `${site}${separator}${REDACTED.handle}`],
   [VAT, (_match, label: string) => `${label}${REDACTED.vat}`],
+  [LABELLED_ID, (_match, label: string) => `${label}${REDACTED.idNumber}`],
+  [SPANISH_ID, (match) => (isSpanishId(match) ? REDACTED.idNumber : match)],
   [IBAN, (match) => (match.replace(/\D/g, '').length >= IBAN_DIGITS_MIN ? REDACTED.iban : match)],
   [TAX_CODE, () => REDACTED.taxCode],
   [NUMERIC_DATE, () => REDACTED.date],
+  [ISO_DATE, () => REDACTED.date],
   [WORDED_DATE, () => REDACTED.date],
+  [MONTH_FIRST_DATE, () => REDACTED.date],
   [STREET_IT, () => REDACTED.address],
   [STREET_EN, () => REDACTED.address],
+  [STREET_FR, () => REDACTED.address],
+  [STREET_FR_FIRST, () => REDACTED.address],
+  [STREET_DE, () => REDACTED.address],
+  [STREET_ES, () => REDACTED.address],
   [UK_POSTCODE, () => REDACTED.address],
   [PHONE, replacePhone],
 ];
 
+const replacePostal = replacePostalAfterAddress(REDACTED.address);
+
 /** Text as a model may read it: first name kept, surname and identifiers replaced by `REDACTED` markers. */
 export function pseudonymizeText(text: string, person: PersonIdentifiers): string {
   const known = replaceKnownNames(replaceKnown(text, person), person.otherNames);
-  const generic = PATTERNS.reduce((current, [pattern, replacement]) => current.replace(pattern, replacement), known);
+  const generic = replacePostal(PATTERNS.reduce((current, [pattern, replacement]) => current.replace(pattern, replacement), known));
+  const token = surnameTokenPattern(person.lastName);
+  const tokens = token ? generic.replace(token, replaceSurnameToken(REDACTED)) : generic;
   const surname = surnamePattern(person.lastName);
-  return replaceMarkedNames(surname ? generic.replace(surname, REDACTED.surname) : generic);
+  return replaceMarkedNames(surname ? tokens.replace(surname, REDACTED.surname) : tokens);
 }
 
 /** Every string of a JSON-like value (CV fields, message lists) through `pseudonymizeText`; returns a new value. */
