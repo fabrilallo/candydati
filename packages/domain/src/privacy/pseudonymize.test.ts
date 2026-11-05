@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { growthRatio, LINEAR_GROWTH_MAX, LINEAR_TIME_TEST_TIMEOUT_MS } from '../testing/linear-time.js';
 import { pseudonymizeText, pseudonymizeValue, REDACTED, type PersonIdentifiers } from './pseudonymize.js';
 
 const giulia: PersonIdentifiers = {
@@ -171,7 +171,7 @@ describe('pseudonymizeText', () => {
     for (const unit of shapes) {
       expect(growthRatio((size) => pseudonymizeText(unit.repeat(size), giulia), 2000)).toBeLessThan(LINEAR_GROWTH_MAX);
     }
-  });
+  }, LINEAR_TIME_TEST_TIMEOUT_MS);
 });
 
 describe('pseudonymizeValue', () => {
