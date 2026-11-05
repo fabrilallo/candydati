@@ -6,8 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-05
+
 Three additive migrations (`0047_automation_triggers`, then `0048_mcp_oauth` and `0049_automation_actions` with new
-tables only) run at start as usual.
+tables only) run at start as usual; take a backup first (docs/OPERATIONS.md). Nothing existing is changed or dropped.
 
 ### Added
 
