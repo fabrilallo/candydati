@@ -2,6 +2,7 @@ import { proposalStaleReason, type Application, type Job, type MoveProposal } fr
 import { z } from 'zod';
 import type { Actor } from '../../actor.js';
 import { toActorUserId } from '../../actor-user.js';
+import type { MemberDirectory, NotificationRepository } from '../../automation-ports.js';
 import type { CandidateDeps } from '../../candidate-ports.js';
 import { ConflictError, NotFoundError } from '../../errors.js';
 import type { MoveProposalRepository } from '../../proposal-ports.js';
@@ -13,6 +14,9 @@ import { stageName } from '../messaging/shared.js';
 /** Proposals are read and acted on with the candidate dependencies: confirming one is the normal move. */
 export interface ProposalDeps extends CandidateDeps {
   readonly moveProposals: MoveProposalRepository;
+  /** Who is told when someone proposes a move: the job owner, if they can still open the job. */
+  readonly members: MemberDirectory;
+  readonly notifications: NotificationRepository;
 }
 
 export const PROPOSALS_LIST_MAX = 100;

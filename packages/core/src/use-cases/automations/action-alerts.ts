@@ -7,41 +7,16 @@ import {
 } from '@candydati/domain';
 import type { AutomationRunDeps } from '../../automation-ports.js';
 import { recordEvent } from '../webhooks/record-event.js';
-import { reachingRole, runKey, type ActionContext } from './action-context.js';
+import { runKey, type ActionContext } from './action-context.js';
+import { notifyPeople, reachablePeople } from './proposal-notice.js';
 
 type Payload = Readonly<Record<string, string | number | boolean | null>>;
 
-/** Of these people (or `job_owner`), the members who can open the job today: nobody hears about a job they cannot open. */
-async function reachableRecipients(deps: AutomationRunDeps, ctx: ActionContext, people: readonly string[]): Promise<readonly string[]> {
-  const ids = [...new Set(people.map((person) => (person === JOB_OWNER_ASSIGNEE ? ctx.job.createdBy : person)))];
-  const members = await deps.members.list(ctx.rule.organizationId);
-  const kept: string[] = [];
-  for (const id of ids) {
-    const member = members.find((m) => m.userId === id);
-    if (member && (await reachingRole(deps, ctx.rule.organizationId, member, ctx.job.id)) !== null) kept.push(id);
-  }
-  return kept;
-}
+const reachableRecipients = (deps: AutomationRunDeps, ctx: ActionContext, people: readonly string[]): Promise<readonly string[]> =>
+  reachablePeople(deps, ctx.rule.organizationId, ctx.job, people);
 
-async function notifyEach(deps: AutomationRunDeps, ctx: ActionContext, userIds: readonly string[], kind: NotificationKind, payload: Payload, key: string): Promise<void> {
-  for (const userId of userIds) {
-    await deps.notifications.createIfAbsent(
-      {
-        id: deps.newId(),
-        organizationId: ctx.rule.organizationId,
-        userId,
-        kind,
-        applicationId: ctx.application.id,
-        jobId: ctx.job.id,
-        taskId: null,
-        payload,
-        createdAt: deps.now(),
-        readAt: null,
-      },
-      key,
-    );
-  }
-}
+const notifyEach = (deps: AutomationRunDeps, ctx: ActionContext, userIds: readonly string[], kind: NotificationKind, payload: Payload, key: string): Promise<void> =>
+  notifyPeople(deps, { organizationId: ctx.rule.organizationId, applicationId: ctx.application.id, jobId: ctx.job.id }, userIds, kind, payload, key);
 
 /**
  * Alerts people about the application: an in-app notification (`email` also puts it in the hourly digest, which names the
@@ -95,5 +70,5 @@ export async function proposeMove(deps: AutomationRunDeps, ctx: ActionContext, t
   });
   if (!proposal) return;
   const people = await reachableRecipients(deps, ctx, [rule.createdBy, JOB_OWNER_ASSIGNEE]);
-  await notifyEach(deps, ctx, people, 'move_proposed', { proposalId: proposal.id, toStageId }, `move_proposed:${proposal.id}`);
+  await notifyEach(deps, ctx, people, 'move_proposed', { proposalId: proposal.id, toStageId, source: 'rule' }, `move_proposed:${proposal.id}`);
 }

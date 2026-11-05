@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **A move proposed over MCP or an API key now notifies the job owner.** Like a `propose_move` rule, a new proposal
+  from `propose_stage_move` sends the job owner an in-app notification that says it came from a connected app (or an
+  API key), unless the owner is the one who proposed it. The notification carries ids only, never the reason text.
+  Asking again for the same target sends nothing.
+
 ## [0.4.0] - 2026-11-05
 
 Two additive migrations run at start as usual; take a backup first (docs/OPERATIONS.md). Nothing existing is changed or

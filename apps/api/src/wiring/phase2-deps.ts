@@ -51,6 +51,8 @@ export function createPhase2Deps({ uow, files, queue, receipts, feedback }: Phas
     feedback,
     outbox: r.outbox,
     moveProposals: r.moveProposals,
+    members: r.members,
+    notifications: r.notifications,
     ...clock,
   };
   return {

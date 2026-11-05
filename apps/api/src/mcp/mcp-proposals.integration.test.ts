@@ -105,6 +105,14 @@ describe('propose_stage_move over a connected app (OAuth)', () => {
     const result = await propose(tokens.access_token, { applicationId, toStageId: 'received', reason: 'Asked to repeat the first call' });
     expect(result.isError, result.text).toBe(false);
     expect((await proposals()).find((p) => p.id === result.data.proposalId)).toMatchObject({ source: 'connected_app', reason: 'Asked to repeat the first call' });
+    const inbox = await world.owner.get<{ kind: string; payload: Record<string, unknown>; applicationId: string }[]>('/api/v1/notifications');
+    const notices = (inbox.body.data ?? []).filter((n) => n.kind === 'move_proposed' && n.payload.proposalId === result.data.proposalId);
+    expect(notices).toEqual([expect.objectContaining({ applicationId, payload: expect.objectContaining({ source: 'connected_app', toStageId: 'received' }) })]);
+    expect(JSON.stringify(notices)).not.toContain('Asked to repeat');
+    const again = await propose(tokens.access_token, { applicationId, toStageId: 'received', reason: 'Again' });
+    expect(again.data.created).toBe(false);
+    const after = await world.owner.get<{ kind: string; payload: Record<string, unknown> }[]>('/api/v1/notifications');
+    expect((after.body.data ?? []).filter((n) => n.kind === 'move_proposed' && n.payload.proposalId === result.data.proposalId)).toHaveLength(1);
   });
 
   it('an interviewer who ticked it still cannot propose: the role decides first', async () => {

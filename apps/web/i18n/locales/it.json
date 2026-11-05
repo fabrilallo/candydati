@@ -2188,7 +2188,11 @@
       "retention_expiring": "Dati in scadenza",
       "automation_alert": "Un'automazione ti ha inviato un avviso",
       "automation_alert_email": "Un'automazione ti ha inviato un avviso",
-      "move_proposed": "Un'automazione ha proposto uno spostamento da confermare"
+      "move_proposed": "Un'automazione ha proposto uno spostamento da confermare",
+      "move_proposed_user": "Un collega ha proposto uno spostamento da confermare",
+      "move_proposed_agent": "L'assistente ha proposto uno spostamento da confermare",
+      "move_proposed_api_key": "Una chiave API ha proposto uno spostamento da confermare",
+      "move_proposed_connected_app": "Un'app collegata (MCP) ha proposto uno spostamento da confermare"
     },
     "retention": {
       "named": "I dati di {name} scadono tra 1 giorno | I dati di {name} scadono tra {count} giorni",
