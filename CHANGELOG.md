@@ -18,6 +18,12 @@ No migrations.
   reaches the form once. Next to the CV, the form explains how to save the LinkedIn profile as a PDF and upload it.
   The default privacy notice mentions it. Set up: Configuration guide, "Fill in with LinkedIn".
 
+### Changed
+
+- **The settings in the side menu fold away.** The settings groups below the daily work sit under one "Settings" button
+  that opens and closes them, keyboard reachable. This browser remembers a collapsed menu, and a settings page always
+  opens its group. No data or migrations change.
+
 ## [0.3.1] - 2026-11-05
 
 No migrations.

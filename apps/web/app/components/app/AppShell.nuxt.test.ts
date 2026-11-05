@@ -29,8 +29,9 @@ describe('AppNavPanel', () => {
     useViewer().viewer.value = viewerWith('owner')
     const wrapper = track(await mountSuspended(AppNavPanel))
     expect(wrapper.findAll('h2').map((heading) => heading.text())).toEqual(['Selezione', 'Annunci e messaggi', 'Integrazioni', 'Organizzazione'])
-    // Only the first settings group draws the rule that sets the settings apart from the daily work.
-    expect(wrapper.findAll('section').map((section) => section.classes().includes('border-t'))).toEqual([false, true, false, false])
+    // The settings sit in one block below a rule that sets them apart from the daily work.
+    expect(wrapper.find('[data-testid="nav-settings"]').classes()).toContain('border-t')
+    expect(wrapper.findAll('section').map((section) => section.attributes('data-testid'))).toEqual(['nav-section-work', 'nav-section-hiringSetup', 'nav-section-integrations', 'nav-section-organization'])
     await vi.waitFor(() => expect(wrapper.find('[data-testid="nav-count-jobs"]').text()).toContain('3'))
     expect(wrapper.find('[data-testid="nav-count-jobs"]').text()).toContain('3 pubblicati')
   })
@@ -93,6 +94,63 @@ describe('AppNavPanel', () => {
     expect(desktop.find('[aria-label="Lingua"]').exists()).toBe(false)
     const drawer = track(await mountSuspended(AppNavPanel, { props: { inDrawer: true } }))
     expect(drawer.find('[aria-label="Lingua"]').exists()).toBe(true)
+  })
+
+  it('opens the settings part by default, and a button names and controls it', async () => {
+    useViewer().viewer.value = viewerWith('owner')
+    const wrapper = track(await mountSuspended(AppNavPanel))
+    const toggle = wrapper.find('[data-testid="nav-settings-toggle"]')
+    expect(toggle.element.tagName).toBe('BUTTON')
+    expect(toggle.attributes('type')).toBe('button')
+    expect(toggle.text()).toBe('Impostazioni')
+    expect(toggle.attributes('aria-expanded')).toBe('true')
+    const region = wrapper.find(`#${toggle.attributes('aria-controls')}`)
+    expect(region.exists()).toBe(true)
+    expect((region.element as HTMLElement).style.display).not.toBe('none')
+  })
+
+  it('collapses the settings on click, keeps the daily work in view, and remembers the choice for the viewer', async () => {
+    useViewer().viewer.value = viewerWith('owner')
+    const wrapper = track(await mountSuspended(AppNavPanel))
+    const toggle = wrapper.find('[data-testid="nav-settings-toggle"]')
+    await toggle.trigger('click')
+    expect(toggle.attributes('aria-expanded')).toBe('false')
+    expect((wrapper.find(`#${toggle.attributes('aria-controls')}`).element as HTMLElement).style.display).toBe('none')
+    expect((wrapper.find('[data-testid="nav-section-work"]').element as HTMLElement).style.display).toBe('')
+    expect(window.localStorage.getItem('candydati.nav.settingsCollapsed')).toBe('1')
+    const later = track(await mountSuspended(AppNavPanel))
+    expect(later.find('[data-testid="nav-settings-toggle"]').attributes('aria-expanded')).toBe('false')
+    await later.find('[data-testid="nav-settings-toggle"]').trigger('click')
+    expect(later.find('[data-testid="nav-settings-toggle"]').attributes('aria-expanded')).toBe('true')
+    expect(window.localStorage.getItem('candydati.nav.settingsCollapsed')).toBe('0')
+  })
+
+  it('opens the settings by itself on a settings page, even when they were left collapsed', async () => {
+    useViewer().viewer.value = viewerWith('owner')
+    window.localStorage.setItem('candydati.nav.settingsCollapsed', '1')
+    const wrapper = track(await mountSuspended(AppNavPanel, { route: '/app/settings/ai' }))
+    expect(wrapper.find('[data-testid="nav-settings-toggle"]').attributes('aria-expanded')).toBe('true')
+    expect((wrapper.find('[data-testid="nav-settings-groups"]').element as HTMLElement).style.display).not.toBe('none')
+  })
+
+  it('still works when the browser blocks its storage', async () => {
+    useViewer().viewer.value = viewerWith('owner')
+    const read = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('blocked')
+    })
+    const write = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('blocked')
+    })
+    try {
+      const wrapper = track(await mountSuspended(AppNavPanel))
+      const toggle = wrapper.find('[data-testid="nav-settings-toggle"]')
+      expect(toggle.attributes('aria-expanded')).toBe('true')
+      await toggle.trigger('click')
+      expect(toggle.attributes('aria-expanded')).toBe('false')
+    } finally {
+      read.mockRestore()
+      write.mockRestore()
+    }
   })
 })
 
