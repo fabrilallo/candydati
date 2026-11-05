@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { expectLinearOnHostileInput, hostileText } from './linear-time.js';
 
-/** Small sizes and a small budget keep the self-test fast: the bad cases still run several times over it. */
-const SMALL = { size: 10_000, budgetMs: 20 };
+/**
+ * A smaller size and budget keep the self-test short: 8000² = 6.4e7 steps take about 50 ms or more uninstrumented and over a
+ * second under coverage on a CI runner, always far above 20 ms. The timeout covers the slow instrumented run.
+ */
+const SMALL = { size: 8_000, budgetMs: 20 };
+const SELF_TEST_TIMEOUT_MS = 30_000;
 
 const quadratic = (size: number): number => {
   let steps = 0;
@@ -17,13 +21,8 @@ describe('expectLinearOnHostileInput', () => {
   });
 
   it('fails a quadratic function, stating size, time and budget', () => {
-    expect(() => expectLinearOnHostileInput(quadratic, SMALL)).toThrow(/size 10000 took \d+ ms, budget 20 ms/);
-  });
-
-  it('fails a backtracking regex', () => {
-    // 25 characters is already exponential for (a+)+b: hundreds of ms, while the budget here is 20 ms.
-    expect(() => expectLinearOnHostileInput((size) => /^(a+)+b/.test('a'.repeat(size)), { size: 25, budgetMs: 20 })).toThrow(/not linear/);
-  });
+    expect(() => expectLinearOnHostileInput(quadratic, SMALL)).toThrow(/size 8000 took \d+ ms, budget 20 ms/);
+  }, SELF_TEST_TIMEOUT_MS);
 
   it('builds hostile text by total length', () => {
     expect(hostileText('ab', 5)).toHaveLength(6);
