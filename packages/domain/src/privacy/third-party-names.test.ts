@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { expectLinearOnHostileInput, hostileText } from '../testing/linear-time.js';
 import { NAME_MARKER, replaceMarkedNames } from './third-party-names.js';
 
 const N = NAME_MARKER;
@@ -59,7 +59,7 @@ describe('replaceMarkedNames', () => {
   it('runs in linear time on hostile input', () => {
     const shapes = ['Mme Aa ', 'M. Aa ', 'reporting to Aa ', "O'Aa ", 'Aa-Bb ', 'Referencias\nAa Bb ', 'mi jefa era Aa '];
     for (const unit of shapes) {
-      expect(growthRatio((size) => replaceMarkedNames(unit.repeat(size)), 2000)).toBeLessThan(LINEAR_GROWTH_MAX);
+      expectLinearOnHostileInput((length) => { replaceMarkedNames(hostileText(unit, length)); });
     }
-  });
+  }, 20_000);
 });
