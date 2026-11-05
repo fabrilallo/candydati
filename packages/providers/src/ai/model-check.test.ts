@@ -10,7 +10,7 @@ vi.mock('@mastra/core/agent', () => ({
     generate = generate;
   },
 }));
-const { checkAiModel } = await import('./model-check.js');
+const { checkAiModel, MODEL_CHECK_MAX_OUTPUT_TOKENS } = await import('./model-check.js');
 
 beforeEach(() => {
   generate.mockReset();
@@ -23,6 +23,15 @@ describe('checkAiModel', () => {
     await checkAiModel({ id: 'anthropic/m', apiKey: 'sk' });
     expect((construct.mock.calls[0]![0] as { model: unknown }).model).toEqual({ id: 'anthropic/m', apiKey: 'sk' });
     expect(generate.mock.calls[0]![1]).toMatchObject({ modelSettings: { maxRetries: 0 } });
+  });
+
+  it('leaves room for every provider and for reasoning models', async () => {
+    generate.mockResolvedValue({ text: 'OK' });
+    await checkAiModel({ id: 'openai/m', apiKey: 'sk' });
+    const { maxOutputTokens } = (generate.mock.calls[0]![1] as { modelSettings: { maxOutputTokens: number } }).modelSettings;
+    // OpenAI refuses fewer than 16; reasoning models spend output tokens thinking before the word OK.
+    expect(maxOutputTokens).toBeGreaterThanOrEqual(MODEL_CHECK_MAX_OUTPUT_TOKENS);
+    expect(MODEL_CHECK_MAX_OUTPUT_TOKENS).toBeGreaterThanOrEqual(1024);
   });
 
   it('fails on an empty answer and passes the provider message through', async () => {
