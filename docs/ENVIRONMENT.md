@@ -35,6 +35,8 @@ Variables without a default are required or optional as described; see `.env.exa
 | `IMPORT_STALE_DAYS` | worker | `7` | Worker: days after which an import never committed is purged. |
 | `INBOUND_WEBHOOK_SECRET` | api, worker |  | Inbound email webhook secret, at least 32 random characters; required in production, where example and low-entropy values are refused. |
 | `INSTANCE_ADMIN_EMAILS` | api |  | Comma-separated addresses that may always create organizations (ORGANIZATION_CREATION). |
+| `LINKEDIN_CLIENT_ID` | api |  | Client ID of a LinkedIn app with the "Sign In with LinkedIn using OpenID Connect" product. Set with LINKEDIN_CLIENT_SECRET: the application form offers "Fill in with LinkedIn" (name and verified email only). Empty: off. |
+| `LINKEDIN_CLIENT_SECRET` | api |  | Client secret of that LinkedIn app (both or none). Redirect URL to register: {PLATFORM_URL}/api/v1/public/linkedin/callback. |
 | `LOG_LEVEL` | api, worker | `info` | Log level: fatal, error, warn, info, debug, trace or silent. |
 | `MCP_MODEL_DAILY_BUDGET_PER_KEY` | api |  | MCP calls of model-backed tools (analyze_job_ad, publish_job) per API key per UTC day, while a fast model is on. |
 | `MCP_MODEL_DAILY_BUDGET_PER_ORGANIZATION` | api |  | MCP calls of model-backed tools per organization per UTC day, while a fast model is on. |

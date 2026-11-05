@@ -14,7 +14,7 @@ Versione: [numero versione] - Data: [gg/mm/aaaa]
 
 ## Quali dati trattiamo
 
-I dati che ci fornisci candidandoti: nome, cognome, indirizzo email, telefono, profilo LinkedIn se lo indichi, messaggio di presentazione e contenuto del curriculum. Non chiediamo fotografia, data di nascita, genere, stato civile né dati su salute, opinioni o appartenenze: ti invitiamo a non inserirli nel curriculum. Durante la selezione vengono registrati anche gli esiti di colloqui e valutazioni e le comunicazioni scambiate con te.
+I dati che ci fornisci candidandoti: nome, cognome, indirizzo email, telefono, profilo LinkedIn se lo indichi, messaggio di presentazione e contenuto del curriculum. Non chiediamo fotografia, data di nascita, genere, stato civile né dati su salute, opinioni o appartenenze: ti invitiamo a non inserirli nel curriculum. [Se è attivo il pulsante "Compila con LinkedIn":] Se scegli "Compila con LinkedIn", LinkedIn ci trasmette nome, cognome ed email (se verificata) solo per compilare il modulo, che puoi controllare e modificare: la foto e gli altri dati del profilo vengono scartati e non conserviamo nulla finché non invii la candidatura. Durante la selezione vengono registrati anche gli esiti di colloqui e valutazioni e le comunicazioni scambiate con te.
 
 ## Perché li trattiamo e su quale base
 

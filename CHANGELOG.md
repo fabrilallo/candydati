@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+No migrations.
+
+### Added
+
+- **Fill in with LinkedIn on the application form.** When the api has `LINKEDIN_CLIENT_ID` and
+  `LINKEDIN_CLIENT_SECRET` (a LinkedIn app with "Sign In with LinkedIn using OpenID Connect", redirect URL
+  `{PLATFORM_URL}/api/v1/public/linkedin/callback`), the public form offers "Fill in with LinkedIn": first name, last
+  name and a verified email fill the form, which the candidate reviews and sends as usual. No account, nothing stored:
+  photo, language and member id are discarded, the data waits at most 10 minutes in an encrypted HttpOnly cookie and
+  reaches the form once. Next to the CV, the form explains how to save the LinkedIn profile as a PDF and upload it.
+  The default privacy notice mentions it. Set up: Configuration guide, "Fill in with LinkedIn".
+
 ## [0.3.1] - 2026-11-05
 
 No migrations.
