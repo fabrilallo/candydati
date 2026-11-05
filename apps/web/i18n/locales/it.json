@@ -1872,7 +1872,8 @@
         "empty": "Il file è vuoto",
         "tooLarge": "Il file supera i 10 MB",
         "unsupported": "Usa un file PDF o DOCX"
-      }
+      },
+      "linkedinTip": "Non hai il CV a portata di mano? Salva il tuo profilo LinkedIn in PDF (dal profilo: Altro, poi Salva in PDF) e caricalo qui."
     },
     "consent": {
       "legend": "Privacy e consenso",
@@ -1923,6 +1924,13 @@
       "received": "Abbiamo ricevuto la tua candidatura per {title} in {organization}.",
       "commitment": "Riceverai una risposta entro 1 giorno dopo ogni fase. | Riceverai una risposta entro {count} giorni dopo ogni fase.",
       "email": "Ti scriveremo a {email}."
+    },
+    "linkedin": {
+      "button": "Compila con LinkedIn",
+      "hint": "Da LinkedIn prendiamo solo nome, cognome ed email. La foto e il resto del profilo vengono scartati, e non conserviamo nulla finché non invii la candidatura.",
+      "filled": "Abbiamo compilato quello che LinkedIn ha condiviso. Controlla i campi, aggiungi il CV e invia la candidatura quando vuoi.",
+      "cancelled": "Nessun problema: da LinkedIn non abbiamo preso nulla. Puoi compilare il modulo tu.",
+      "failed": "Non siamo riusciti a compilare il modulo da LinkedIn, e non abbiamo conservato nulla. Puoi compilarlo tu."
     }
   },
   "messages": {

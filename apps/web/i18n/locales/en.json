@@ -1872,7 +1872,8 @@
         "empty": "The file is empty",
         "tooLarge": "The file is larger than 10 MB",
         "unsupported": "Use a PDF or DOCX file"
-      }
+      },
+      "linkedinTip": "No CV at hand? Save your LinkedIn profile as a PDF (on your profile: More, then Save to PDF) and upload it here."
     },
     "consent": {
       "legend": "Privacy and consent",
@@ -1923,6 +1924,13 @@
       "received": "We received your application for {title} at {organization}.",
       "commitment": "You will hear back within 1 day after each stage. | You will hear back within {count} days after each stage.",
       "email": "We will write to you at {email}."
+    },
+    "linkedin": {
+      "button": "Fill in with LinkedIn",
+      "hint": "Takes only your first name, last name and email from LinkedIn. Your photo and the rest of your profile are discarded, and nothing is kept until you send the application.",
+      "filled": "We filled in what LinkedIn shared. Check the fields, add your CV and send the application when you are ready.",
+      "cancelled": "No problem: nothing was taken from LinkedIn. You can fill in the form yourself.",
+      "failed": "We could not fill in the form from LinkedIn, and nothing was kept. You can fill it in yourself."
     }
   },
   "messages": {
