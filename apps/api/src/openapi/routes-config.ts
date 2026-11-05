@@ -3,6 +3,7 @@ import {
   PERMISSIONS,
   automationMatchSchema,
   automationPreviewSchema,
+  automationRunSchema,
   automationRuleInputSchema,
   copyAutomationsInputSchema,
   copyAutomationsResultSchema,
@@ -42,6 +43,13 @@ export const configRoutes: readonly RouteSpec[] = [
       'Read-only, no side effects: the open applications of `stageId` that meet the conditions and, for a time-based trigger, those it would fire for at the next scan (with `ruleId`, leaving out what that rule already did). Names, at most 50, by date of application, only with `candidate:read`; otherwise `items` is null and only the counts are given.',
     body: automationMatchSchema.extend({ ruleId: z.string().min(1).optional().describe('The rule being edited, if it is saved already.') }),
     response: { schema: automationPreviewSchema },
+  },
+  {
+    method: 'get', path: '/api/v1/automations/:id/runs', tag: 'Automations', summary: 'Recent runs of a rule', scope: 'automation:manage',
+    description:
+      'Read-only log of what the rule did, newest first: when, the kind of trigger occurrence (`stage_entered`, `stage_stuck`, `response_due_soon`, `candidate_replied`, `feedback_submitted`) and the application. `limit` defaults to 20, at most 50. `candidate` (name) only with `candidate:read`, otherwise null. Never a score or a ranking.',
+    query: z.object({ limit: z.number().int().min(1).max(50).optional() }),
+    response: { schema: automationRunSchema, list: true },
   },
   { method: 'put', path: '/api/v1/automations/:id', tag: 'Automations', summary: 'Replace a rule', scope: 'automation:manage', body: automationRuleInputSchema, response: { schema: 'AutomationRule' } },
   { method: 'delete', path: '/api/v1/automations/:id', tag: 'Automations', summary: 'Delete a rule', scope: 'automation:manage', response: { schema: deletedResult } },

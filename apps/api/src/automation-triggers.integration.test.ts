@@ -65,5 +65,12 @@ describe('automation triggers, conditions and preview', () => {
     await drainAutomations(t);
     const tasks = (await w.owner.get<Task[]>(`/api/v1/applications/${applicationId}/tasks`)).body.data!;
     expect(tasks.map((task) => task.title)).toEqual(['Still waiting']);
+    const rules = (await w.owner.get<Rule[]>(`/api/v1/jobs/${w.job.id}/automations`)).body.data!;
+    const runsUrl = `/api/v1/automations/${rules[0]!.id}/runs`;
+    const runs = await w.owner.get<{ trigger: string; applicationId: string; candidate: { firstName: string } | null }[]>(runsUrl);
+    expect(runs.body.data).toEqual([expect.objectContaining({ trigger: 'stage_stuck', applicationId, candidate: expect.objectContaining({ firstName: 'Marta' }) })]);
+    expect((await w.owner.get(`${runsUrl}?limit=0`)).status).toBe(422);
+    expect((await (await w.member('interviewer')).get(runsUrl)).status).toBe(403);
+    expect((await w.owner.get('/api/v1/automations/nope/runs')).status).toBe(404);
   });
 });

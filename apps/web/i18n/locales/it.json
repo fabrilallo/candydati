@@ -2375,6 +2375,20 @@
       "more": "e altre {count}",
       "namesHidden": "Non hai accesso ai nomi dei candidati: vedi solo i numeri."
     },
+    "runs": {
+      "title": "Ultime esecuzioni",
+      "readOnly": "Cosa ha fatto la regola, dalla più recente. Solo un registro.",
+      "empty": "Non è ancora stata eseguita.",
+      "loading": "Caricamento",
+      "application": "Candidatura",
+      "kind": {
+        "stage_entered": "candidatura entrata nella fase",
+        "stage_stuck": "candidatura ferma nella fase",
+        "candidate_replied": "il candidato ha risposto",
+        "feedback_submitted": "feedback arrivato",
+        "response_due_soon": "scadenza della risposta vicina"
+      }
+    },
     "copy": {
       "rule": "Copia la regola",
       "stageButton": "Copia",

@@ -46,6 +46,22 @@ export const automationPreviewSchema = z.object({
 });
 export type AutomationPreviewDto = z.output<typeof automationPreviewSchema>;
 
+/** How many runs of a rule are listed by default, and at most. */
+export const AUTOMATION_RUNS_DEFAULT = 20;
+export const AUTOMATION_RUNS_MAX = 50;
+
+/** One run of a rule: when, for which application and on which occurrence of its trigger. A log, never a score. */
+export const automationRunSchema = z.object({
+  id: z.string(),
+  at: isoDate,
+  /** The trigger of the occurrence that ran the rule (entry, stuck, deadline, reply, feedback). */
+  trigger: z.enum(AUTOMATION_TRIGGERS),
+  applicationId: z.string(),
+  /** Null when the caller may not read candidates. */
+  candidate: candidateRefSchema.nullable(),
+});
+export type AutomationRunDto = z.output<typeof automationRunSchema>;
+
 /** A rule kept with a job template (`GET /job-templates/:id/automations`): copied to each job created from the template. */
 export const templateAutomationRuleSchema = automationRuleSchema.omit({ jobId: true }).extend({ templateId: z.string() });
 export type TemplateAutomationRuleDto = z.output<typeof templateAutomationRuleSchema>;

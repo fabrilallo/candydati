@@ -17,6 +17,10 @@ No migrations.
   photo, language and member id are discarded, the data waits at most 10 minutes in an encrypted HttpOnly cookie and
   reaches the form once. Next to the CV, the form explains how to save the LinkedIn profile as a PDF and upload it.
   The default privacy notice mentions it. Set up: Configuration guide, "Fill in with LinkedIn".
+- **Recent runs of an automation rule.** The rule editor shows "Ultime esecuzioni" / "Recent runs": the last 20 times
+  the rule fired, newest first, with the kind of trigger, the time and a link to the application. Read-only
+  (`GET /api/v1/automations/:id/runs?limit=`, at most 50, names only with `candidate:read`); a log of what the rule
+  did, never a score or a ranking.
 
 ### Changed
 
