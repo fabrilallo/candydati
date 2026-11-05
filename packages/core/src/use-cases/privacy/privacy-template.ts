@@ -26,7 +26,7 @@ const ITALIAN = (org: string, contact: string, agency: boolean): string => `Info
 
 Titolare del trattamento. Il titolare è ${org}. Per qualsiasi richiesta sul trattamento dei tuoi dati puoi scrivere a ${contact}.
 
-Quali dati trattiamo. Trattiamo i dati che ci fornisci candidandoti: nome, cognome, indirizzo email, telefono, profilo LinkedIn se lo indichi, il messaggio di presentazione e il contenuto del curriculum che carichi. Non ti chiediamo fotografia, data di nascita, genere, stato civile né dati su salute, opinioni o appartenenze: ti invitiamo a non inserirli nel curriculum.
+Quali dati trattiamo. Trattiamo i dati che ci fornisci candidandoti: nome, cognome, indirizzo email, telefono, profilo LinkedIn se lo indichi, il messaggio di presentazione e il contenuto del curriculum che carichi. Non ti chiediamo fotografia, data di nascita, genere, stato civile né dati su salute, opinioni o appartenenze: ti invitiamo a non inserirli nel curriculum. Se scegli "Compila con LinkedIn", LinkedIn ci trasmette nome, cognome ed email solo per compilare il modulo, che puoi controllare e modificare: la foto e gli altri dati del profilo vengono scartati e non conserviamo nulla finché non invii la candidatura.
 
 Perché li trattiamo. Li usiamo per valutare la tua candidatura alla posizione per cui ti candidi e per comunicare con te sul processo di selezione. La base giuridica è l'esecuzione di misure precontrattuali adottate su tua richiesta (art. 6.1.b GDPR).
 
@@ -50,7 +50,7 @@ const ENGLISH = (org: string, contact: string, agency: boolean): string => `Priv
 
 Data controller. The controller is ${org}. For any request about how your personal data is handled you can write to ${contact}.
 
-What data we process. We process the data you give us when you apply: first and last name, email address, phone number, your LinkedIn profile if you provide it, your cover message and the content of the CV you upload. We do not ask for a photo, date of birth, gender, marital status or data about health, opinions or memberships: please do not include them in your CV.
+What data we process. We process the data you give us when you apply: first and last name, email address, phone number, your LinkedIn profile if you provide it, your cover message and the content of the CV you upload. We do not ask for a photo, date of birth, gender, marital status or data about health, opinions or memberships: please do not include them in your CV. If you choose "Fill in with LinkedIn", LinkedIn sends us your name and email only to fill in the form, which you can check and change: your photo and the rest of your profile are discarded, and nothing is kept until you send the application.
 
 Why we process it. We use it to assess your application for the position you applied for and to communicate with you about the selection process. The legal basis is the performance of pre-contractual steps taken at your request (Article 6(1)(b) GDPR).
 

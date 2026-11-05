@@ -25,3 +25,4 @@ export { parseCvs, DEFAULT_ANALYSIS_CONCURRENCY, DEFAULT_ANALYSIS_BUDGET_MS, typ
 export { runImportAnalysis, type ImportAnalysisDeps, type ImportAnalysisOutcome, type RunImportAnalysisOptions } from './import/run-analysis.js';
 export { createPgBossQueue, singletonJobId, TASK_RETRY, WEBHOOK_RETRY, FILES_DELETE_RETRY, MIGRATION_FETCH_RETRY, type BossSender, type RetryPolicy, type SendOptions } from './queue/pg-boss-queue.js';
 export * from './observability/index.js';
+export * from './linkedin/index.js';

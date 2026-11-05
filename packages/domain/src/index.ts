@@ -64,3 +64,4 @@ export * from './observability/index.js';
 export * from './migration/index.js';
 export * from './help/index.js';
 export * from './client/index.js';
+export * from './linkedin/index.js';

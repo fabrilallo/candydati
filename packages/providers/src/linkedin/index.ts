@@ -1,0 +1,1 @@
+export { createLinkedInIdentity, LinkedInExchangeError, LINKEDIN_AUTHORIZATION_URL, LINKEDIN_TOKEN_URL, LINKEDIN_USERINFO_URL, LINKEDIN_ISSUER, LINKEDIN_SCOPES, type LinkedInClientOptions, type LinkedInExchangeReason } from './oidc-client.js';

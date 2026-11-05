@@ -46,3 +46,8 @@ export const careersMediaRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLi
 
 /** A careers page loads many images (several widths each) and range requests of a video: far more than a JSON page. */
 export const publicMediaRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.publicMediaMax ?? DEFAULT_PUBLIC_MEDIA_MAX);
+
+export const DEFAULT_LINKEDIN_MAX = 20;
+
+/** "Fill in with LinkedIn": a candidate goes through it once or twice; each callback costs two calls to LinkedIn. */
+export const linkedInRouteConfig = (ctx: AppContext) => perMinute(ctx.rateLimit.linkedInMax ?? DEFAULT_LINKEDIN_MAX);
