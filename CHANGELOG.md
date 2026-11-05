@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-05
+
 Two additive migrations run at start as usual; take a backup first (docs/OPERATIONS.md). Nothing existing is changed or
 dropped: `0050_mcp_move_proposals` (two columns on `move_proposal`, `source` with default `rule` and a nullable
 `reason`) and `0051_skill_aliases` (two new tables).
