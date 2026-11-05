@@ -14,6 +14,7 @@ import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '.
 import { requireJob } from '../jobs/shared.js';
 import { isVisibleApplication, requireApplication } from '../candidates/shared.js';
 import { defineUseCase } from '../../use-case.js';
+import { notifyProposedMove } from './proposal-notice.js';
 import type { ProposalDeps } from './proposals.js';
 
 // eslint-disable-next-line no-control-regex -- the point is to refuse control characters (newlines and tabs stay)
@@ -94,7 +95,8 @@ function newProposal(deps: ProposalDeps, actor: Actor, application: Application,
  *
  * `candidate:propose_move` is held by exactly the roles that may move, and the application is read through the same
  * per-job scope as a move: who could not move it cannot propose it. Idempotent for the same target: the proposal already
- * waiting is returned. A different one waiting (a rule's too) is a conflict: a person acts on it first.
+ * waiting is returned, and nobody is told again. A new proposal tells the job owner (never the proposer), as a rule's
+ * does. A different one waiting (a rule's too) is a conflict: a person acts on it first.
  */
 export const proposeApplicationMove = defineUseCase<ProposalDeps, typeof proposeInput, ProposeMoveResult>({
   name: 'proposeApplicationMove',
@@ -123,6 +125,7 @@ export const proposeApplicationMove = defineUseCase<ProposalDeps, typeof propose
     if (open) throw new ConflictError('Another move proposal for this application is waiting for a person to confirm or dismiss it.');
     const created = await deps.moveProposals.createIfNoneOpen(newProposal(deps, actor, application, input));
     if (!created) throw new ConflictError('Another move proposal for this application was just made.');
+    await notifyProposedMove(deps, await requireJob(deps, application.organizationId, application.jobId), application, created);
     return { proposal: created, created: true };
   },
 });

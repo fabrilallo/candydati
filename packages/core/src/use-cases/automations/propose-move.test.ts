@@ -98,4 +98,43 @@ describe('proposeApplicationMove', () => {
     expect(await reasonFor('recruiter_1', 'recruiter')).toBeNull();
     expect(await reasonFor('int_1', 'interviewer')).toBeNull();
   });
+
+  describe('notifies the job owner', () => {
+    const notices = (deps: ReturnType<typeof world>) => deps.notifications.snapshot().filter((n) => n.kind === 'move_proposed');
+
+    it('tells the job owner who proposed, with ids and source only', async () => {
+      const deps = world();
+      const { proposal } = await proposeApplicationMove(deps, app('grant_1', true), input);
+      expect(notices(deps)).toEqual([
+        expect.objectContaining({ userId: 'user_test', applicationId: 'app_1', jobId: 'job_1', payload: { proposalId: proposal.id, toStageId: 'stage-1', source: 'connected_app' } }),
+      ]);
+      expect(JSON.stringify(notices(deps))).not.toContain('Postgres');
+    });
+
+    it('does not tell the proposer themself', async () => {
+      const deps = world();
+      await proposeApplicationMove(deps, apiKeyActor({ organizationId: ORG_A, onBehalfOfUserId: 'user_test', role: 'owner' }), input);
+      expect(notices(deps)).toEqual([]);
+    });
+
+    it('sends nothing again when the same proposal is returned', async () => {
+      const deps = world();
+      await proposeApplicationMove(deps, app('key_1'), input);
+      await proposeApplicationMove(deps, app('key_1'), input);
+      expect(notices(deps)).toHaveLength(1);
+    });
+
+    it('sends nothing when the proposal is refused', async () => {
+      const deps = world({}, [buildMoveProposal({ toStageId: 'received' })]);
+      await expect(proposeApplicationMove(deps, app('key_1'), input)).rejects.toBeInstanceOf(ConflictError);
+      expect(notices(deps)).toEqual([]);
+    });
+
+    it('never copies the reason of a restricted stage into the notice', async () => {
+      const deps = await seedRestrictedStageWorld();
+      const hmKey = apiKeyActor({ organizationId: ORG_A, onBehalfOfUserId: 'hm_1', role: 'hiring_manager' });
+      await proposeApplicationMove(deps, hmKey, { applicationId: 'app_1', toStageId: 'stage-0', reason: 'RESTRICTED-REASON' });
+      expect(JSON.stringify(deps.notifications.snapshot())).not.toContain('RESTRICTED-REASON');
+    });
+  });
 });

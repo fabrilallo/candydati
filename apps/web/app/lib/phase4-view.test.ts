@@ -28,6 +28,11 @@ describe('notifications view', () => {
     expect(notificationText({ ...item, payload: { expiresAt: '2026-10-13T20:00:00.000Z' } }, NOW, TZ).key).toBe('notifications.retention.namedToday')
     expect(notificationText({ ...item, candidate: null, payload: {} }, NOW, TZ).key).toBe('notifications.retention.anonymousSoon')
     expect(notificationContext(item)).toBe('Backend developer')
+    const proposed = (payload: Record<string, string>) => notificationText(notification('n3', { kind: 'move_proposed', payload }), NOW, TZ).key
+    expect(proposed({ source: 'connected_app' })).toBe('notifications.kinds.move_proposed_connected_app')
+    expect(proposed({ source: 'api_key' })).toBe('notifications.kinds.move_proposed_api_key')
+    expect(proposed({ source: 'rule' })).toBe('notifications.kinds.move_proposed')
+    expect(proposed({})).toBe('notifications.kinds.move_proposed')
     expect(notificationText(notification('n2'), NOW, TZ)).toEqual({ key: 'notifications.kinds.response_overdue', params: {}, count: 0 })
     expect(notificationContext(notification('n2'))).toBe('Giulia Rossi, Backend developer')
   })

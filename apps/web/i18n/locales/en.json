@@ -2188,7 +2188,11 @@
       "retention_expiring": "Data about to expire",
       "automation_alert": "An automation sent you an alert",
       "automation_alert_email": "An automation sent you an alert",
-      "move_proposed": "An automation proposed a move to confirm"
+      "move_proposed": "An automation proposed a move to confirm",
+      "move_proposed_user": "A colleague proposed a move to confirm",
+      "move_proposed_agent": "The assistant proposed a move to confirm",
+      "move_proposed_api_key": "An API key proposed a move to confirm",
+      "move_proposed_connected_app": "A connected app (MCP) proposed a move to confirm"
     },
     "retention": {
       "named": "{name}'s data expire in 1 day | {name}'s data expire in {count} days",

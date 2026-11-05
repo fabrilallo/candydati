@@ -12,8 +12,15 @@ const stringOf = (value: unknown): string | null => (typeof value === 'string' &
 /** Phase 5: the retention job warns owners and admins before the data of an application are erased. */
 export const RETENTION_KIND = 'retention_expiring'
 
+const MOVE_PROPOSED_KIND = 'move_proposed'
+const MOVE_PROPOSERS: ReadonlySet<string> = new Set(['user', 'agent', 'api_key', 'connected_app'])
+
+/** Pure: who proposed the move (a rule, or one of these sources) picks the wording; an unknown source reads as a rule's. */
+const proposedMoveKey = (source: string | null): string => (source !== null && MOVE_PROPOSERS.has(source) ? `notifications.kinds.move_proposed_${source}` : notificationKey(MOVE_PROPOSED_KIND))
+
 /** Pure: the wording of a notification. A retention warning names the person and the days left. */
 export const notificationText = (notification: NotificationDto, now: Date, timeZone?: string): { readonly key: string; readonly params: Readonly<Record<string, string | number>>; readonly count: number } => {
+  if (notification.kind === MOVE_PROPOSED_KIND) return { key: proposedMoveKey(stringOf(notification.payload.source)), params: {}, count: 0 }
   if (notification.kind !== RETENTION_KIND) return { key: notificationKey(notification.kind), params: {}, count: 0 }
   const expiresAt = stringOf(notification.payload.retentionExpiresAt) ?? stringOf(notification.payload.expiresAt)
   return retentionNotice({ candidateName: notification.candidate ? fullName(notification.candidate) : null, expiresAt }, now, timeZone)
