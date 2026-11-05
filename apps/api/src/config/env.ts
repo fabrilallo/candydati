@@ -46,6 +46,12 @@ const dailyCap = (fallback: number) => z.coerce.number().int().min(1).default(fa
 const refuseOpenWebhooksInProduction = (env: { NODE_ENV: string; WEBHOOKS_ALLOW_PRIVATE: boolean }): boolean =>
   !(env.NODE_ENV === 'production' && env.WEBHOOKS_ALLOW_PRIVATE);
 
+/** The LinkedIn app is configured whole or not at all: one half alone is a mistake, said at startup. */
+const requireLinkedInPair = (env: { LINKEDIN_CLIENT_ID?: string | undefined; LINKEDIN_CLIENT_SECRET?: string | undefined }, ctx: z.RefinementCtx): void => {
+  if (env.LINKEDIN_CLIENT_ID !== undefined && env.LINKEDIN_CLIENT_SECRET === undefined) ctx.addIssue({ code: 'custom', path: ['LINKEDIN_CLIENT_SECRET'], message: 'is required when LINKEDIN_CLIENT_ID is set' });
+  if (env.LINKEDIN_CLIENT_SECRET !== undefined && env.LINKEDIN_CLIENT_ID === undefined) ctx.addIssue({ code: 'custom', path: ['LINKEDIN_CLIENT_ID'], message: 'is required when LINKEDIN_CLIENT_SECRET is set' });
+};
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
@@ -86,6 +92,9 @@ const envSchema = z.object({
   RECEIPTS_DAILY_MAX_PER_ORGANIZATION: dailyCap(300),
   /** Cloudflare Turnstile secret key. Set: the public application form needs a valid Turnstile answer. Empty = off (default). */
   TURNSTILE_SECRET_KEY: z.string().trim().optional(),
+  /** LinkedIn app with "Sign In with LinkedIn using OpenID Connect": the application form offers "Fill in with LinkedIn". Both or none. */
+  LINKEDIN_CLIENT_ID: z.string().trim().min(1).max(200).optional(),
+  LINKEDIN_CLIENT_SECRET: z.string().trim().min(1).max(500).optional(),
   /** `open`: anyone may create an account. `invite_only`: only with a pending invitation, or the very first account. */
   SIGNUP_MODE: z.enum(SIGNUP_MODES).optional(),
   /**
@@ -126,12 +135,18 @@ const envSchema = z.object({
 }).refine(refuseOpenWebhooksInProduction, {
   path: ['WEBHOOKS_ALLOW_PRIVATE'],
   message: 'must not be true in production (it turns off the protection against requests to internal addresses)',
-});
+}).superRefine(requireLinkedInPair);
+
+/** The LinkedIn app of "Fill in with LinkedIn"; null when it is not configured (the button does not show). */
+export interface LinkedInAppConfig {
+  readonly clientId: string;
+  readonly clientSecret: string;
+}
 
 export type SignupMode = (typeof SIGNUP_MODES)[number];
 export type OrganizationCreationMode = (typeof ORGANIZATION_CREATION_MODES)[number];
 
-export type Env = Readonly<Omit<z.infer<typeof envSchema>, 'SIGNUP_MODE' | 'ORGANIZATION_CREATION'>> & { readonly SIGNUP_MODE: SignupMode; readonly ORGANIZATION_CREATION: OrganizationCreationMode } & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig; readonly observability: ObservabilityConfig };
+export type Env = Readonly<Omit<z.infer<typeof envSchema>, 'SIGNUP_MODE' | 'ORGANIZATION_CREATION'>> & { readonly SIGNUP_MODE: SignupMode; readonly ORGANIZATION_CREATION: OrganizationCreationMode } & { readonly linkedIn: LinkedInAppConfig | null } & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig; readonly observability: ObservabilityConfig };
 
 type Source = Readonly<Record<string, string | undefined>>;
 
@@ -181,6 +196,7 @@ export function parseEnv(source: Source): Env {
     ...parsed.data,
     SIGNUP_MODE: signupMode,
     ORGANIZATION_CREATION: parsed.data.ORGANIZATION_CREATION ?? (signupMode === 'invite_only' ? 'one_per_user' : 'open'),
+    linkedIn: parsed.data.LINKEDIN_CLIENT_ID && parsed.data.LINKEDIN_CLIENT_SECRET ? { clientId: parsed.data.LINKEDIN_CLIENT_ID, clientSecret: parsed.data.LINKEDIN_CLIENT_SECRET } : null,
     platform: loadPlatformConfig(clean), s3: parseS3(clean),
     email: parseEmail(clean, production),
     observability: parseObservability(clean),

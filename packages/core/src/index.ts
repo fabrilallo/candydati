@@ -253,3 +253,5 @@ export * from './use-cases/clients/shortlist-public.js';
 export * from './use-cases/clients/shortlist-reminders.js';
 export * from './use-cases/clients/shortlist-export.js';
 export * from './use-cases/connected-apps/preview-consent.js';
+export * from './linkedin-prefill-ports.js';
+export * from './use-cases/linkedin/prefill-flow.js';
