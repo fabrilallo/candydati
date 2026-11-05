@@ -63,9 +63,11 @@ describe('MCP tools', () => {
     expect([...names].sort()).toEqual([...MCP_TOOL_NAMES].sort());
     expect(names).toEqual([
       'list_jobs', 'get_job', 'create_job', 'update_job', 'analyze_job_ad', 'check_publishable', 'publish_job',
-      'get_evaluation_criteria', 'set_evaluation_criteria', 'get_pipeline', 'list_attention', 'find_candidates_by_criteria', 'add_candidate_note', 'create_task', 'list_job_templates', 'get_job_stats', 'get_reports', 'list_clients',
+      'get_evaluation_criteria', 'set_evaluation_criteria', 'get_pipeline', 'list_attention', 'find_candidates_by_criteria', 'add_candidate_note', 'create_task', 'propose_stage_move', 'list_job_templates', 'get_job_stats', 'get_reports', 'list_clients',
     ]);
-    expect(names.filter((name) => /move|decid|messag|send|erase|delete|reject|hire|rank|score|compare/.test(name))).toEqual([]);
+    // The one exception only proposes: a person confirms or dismisses (mcp-proposals.integration.test.ts).
+    expect(names.filter((name) => name !== 'propose_stage_move' && /move|decid|messag|send|erase|delete|reject|hire|rank|score|compare/.test(name))).toEqual([]);
+    expect(tools.find((tool) => tool.name === 'propose_stage_move')!.description).toMatch(/only proposes: it never moves, decides on or messages/);
     for (const tool of tools) expect(tool.description!.length).toBeGreaterThan(40);
     expect(tools.find((tool) => tool.name === 'publish_job')!.description).toMatch(/RAL/);
     expect(tools.find((tool) => tool.name === 'get_pipeline')!.description).toMatch(/no tool to move, decide on, message or erase/);

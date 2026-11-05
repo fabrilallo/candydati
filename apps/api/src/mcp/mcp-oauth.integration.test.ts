@@ -32,7 +32,7 @@ describe('discovery', () => {
     for (const url of ['/.well-known/oauth-protected-resource/mcp', '/.well-known/oauth-protected-resource']) {
       const reply = await t.app.inject({ method: 'GET', url });
       expect(reply.statusCode, url).toBe(200);
-      expect(JSON.parse(reply.body)).toMatchObject({ resource: MCP_RESOURCE, authorization_servers: [`${WEB_ORIGIN}/api/auth`], bearer_methods_supported: ['header'], scopes_supported: ['mcp'] });
+      expect(JSON.parse(reply.body)).toMatchObject({ resource: MCP_RESOURCE, authorization_servers: [`${WEB_ORIGIN}/api/auth`], bearer_methods_supported: ['header'], scopes_supported: ['mcp', 'candidate:propose_move'] });
     }
   });
 
@@ -57,7 +57,7 @@ describe('the 401 challenge', () => {
   it('names the protected resource metadata without credentials, and says invalid_token with bad ones', async () => {
     const missing = await mcp(null, INIT);
     expect(missing.statusCode).toBe(401);
-    expect(missing.headers['www-authenticate']).toBe(`Bearer resource_metadata="${WEB_ORIGIN}/.well-known/oauth-protected-resource/mcp", scope="mcp"`);
+    expect(missing.headers['www-authenticate']).toBe(`Bearer resource_metadata="${WEB_ORIGIN}/.well-known/oauth-protected-resource/mcp", scope="mcp candidate:propose_move"`);
     const invalid = await mcp(`candydati_oat_${'A'.repeat(32)}`, INIT);
     expect(invalid.statusCode).toBe(401);
     expect(invalid.headers['www-authenticate']).toMatch(/^Bearer error="invalid_token", resource_metadata=/);
