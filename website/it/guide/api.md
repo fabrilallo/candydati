@@ -1,8 +1,9 @@
 # API, webhook e MCP
 
 Tutto quello che si fa nell'interfaccia si può fare tramite l'API REST (OpenAPI). Il server MCP è più stretto per scelta:
-legge, scrive e pubblica annunci, legge la pipeline, filtra su criteri dichiarati e aggiunge note, attività e report, ma
-non può spostare, valutare, scrivere o cancellare candidati. Le superfici chiamano gli stessi
+legge, scrive e pubblica annunci, legge la pipeline, filtra su criteri dichiarati e aggiunge note, attività e report, e può
+proporre di spostare una candidatura in un'altra fase, che una persona conferma, ma non può spostare, valutare, scrivere o
+cancellare candidati. Le superfici chiamano gli stessi
 servizi dell'interfaccia, con gli stessi permessi e lo stesso registro delle azioni.
 
 ## Chiavi API
@@ -109,11 +110,14 @@ Strumenti:
 | `list_attention` | candidature in attesa di risposta o vicine alla scadenza |
 | `add_candidate_note` | aggiunge una nota interna a un candidato |
 | `create_task` | crea un'attività su un candidato o un annuncio |
+| `propose_stage_move` | propone di spostare una candidatura in un'altra fase del suo annuncio, con un breve motivo; una persona la conferma o la scarta (scope opzionale `candidate:propose_move`) |
 | `list_job_templates` | elenca i template degli annunci |
 | `get_job_stats` | numeri degli annunci per la panoramica |
 | `get_reports` | numeri aggregati del periodo, senza dati personali |
 
-Non ci sono strumenti per spostare, valutare, scartare o scrivere ai candidati: restano decisioni di una persona. Ogni
+Non ci sono strumenti per spostare, valutare, scartare o scrivere ai candidati: restano decisioni di una persona.
+`propose_stage_move` scrive solo una proposta: compare in Da gestire e sulla candidatura, e niente si sposta finché una
+persona non la conferma (uno spostamento suo, con il suo permesso) o la scarta. Ogni
 chiamata a uno strumento conta nel limite della chiave, un batch contiene al massimo 20 messaggi e le letture vengono
 registrate. Gli strumenti che usano il modello (`analyze_job_ad`, e `publish_job` quando `FAST_MODEL` è impostato)
 hanno budget giornalieri, vedi [Assistente AI](./ai).

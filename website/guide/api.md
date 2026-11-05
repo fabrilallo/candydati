@@ -2,7 +2,8 @@
 
 Everything that can be done in the interface can be done through the REST API (OpenAPI). The MCP server is narrower by
 design: it reads, drafts and publishes job ads, reads the pipeline, filters on declared criteria and adds notes, tasks
-and reports, but cannot move, decide on, message or erase candidates. All surfaces call the same services as the
+and reports, and can propose moving an application to another stage for a person to confirm, but cannot move, decide
+on, message or erase candidates. All surfaces call the same services as the
 interface, with the same permissions and the same audit log.
 
 ## API keys
@@ -108,13 +109,15 @@ Tools:
 | `find_candidates_by_criteria` | candidates of a job's applicants and talent pool who meet objective criteria the person confirmed; no score, no ranking |
 | `add_candidate_note` | adds an internal note to a candidate |
 | `create_task` | creates a task on a candidate or a job ad |
+| `propose_stage_move` | proposes moving an application to another stage of its job, with a short reason; a person confirms or dismisses it (opt-in scope `candidate:propose_move`) |
 | `list_job_templates` | lists job ad templates |
 | `get_job_stats` | job ad figures for the overview |
 | `get_reports` | aggregated figures of a period, with no personal data |
 
 Privacy by design: MCP results name candidates by first name and id only, never surname or contacts (see
 [AI assistant](./ai#privacy-by-design)). There are no tools to move, assess, reject or write to candidates: those stay a
-person's decision. Each tool call counts
+person's decision. `propose_stage_move` only writes a proposal: it shows in Needs attention and on the application, and
+nothing moves until a person confirms it (their move, with their permission) or dismisses it. Each tool call counts
 against the key's rate limit, a batch holds at most 20 messages, and reads are audited. Model-backed tools
 (`analyze_job_ad`, and `publish_job` when `FAST_MODEL` is set) have daily budgets, see [AI assistant](./ai).
 

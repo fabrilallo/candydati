@@ -30,7 +30,15 @@ account, so each acts with their own role.
 Exactly what the MCP tools do (job ads, criteria, pipeline, searches on declared criteria, notes, tasks, reports),
 limited by your role, and never what no machine may do: it cannot move, decide on, message or erase candidates, nor
 manage members, keys or settings (moving a candidate is a decision about a person, so a connector never holds it even
-when your role does). Candidates come with first name and id only. Every call is in the audit log as
+when your role does).
+
+One opt-in: the consent page offers, unticked, *Propose moving candidates between stages* (OAuth scope
+`candidate:propose_move`, requested by the client because the 401 challenge names it). Ticked, and only if your role may
+move candidates, the connector can call `propose_stage_move`: it writes a proposal with a short reason that shows in
+*Needs attention* and on the application, and nothing moves until a person confirms it (the normal move, with their own
+permission) or dismisses it. Unticked, the token carries `mcp` only and the tool answers `forbidden`. A connection made
+before this option sees the consent page again the next time the client authorizes. Proposals are audited as
+`move_proposal.proposed`. Candidates come with first name and id only. Every call is in the audit log as
 `mcp.read` (reads) or the action itself, with actor *connected app*; connecting and revoking are logged as
 `connected_app.granted` and `connected_app.revoked`.
 
