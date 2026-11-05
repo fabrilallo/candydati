@@ -62,13 +62,16 @@ export function consentQueryOf(location: unknown): string {
   return location.slice(location.indexOf('?') + 1);
 }
 
-/** The consent page's answer, as the web app posts it. Returns the redirect URL Better Auth hands back. */
-export async function consent(user: TestUser, oauthQuery: string, accept = true) {
-  return user.post<never>('/api/auth/oauth2/consent', { accept, oauth_query: oauthQuery });
+/**
+ * The consent page's answer, as the web app posts it. `scope` narrows what was requested (an opt-in left unchecked).
+ * Returns the redirect URL Better Auth hands back.
+ */
+export async function consent(user: TestUser, oauthQuery: string, accept = true, scope?: string) {
+  return user.post<never>('/api/auth/oauth2/consent', { accept, oauth_query: oauthQuery, ...(scope === undefined ? {} : { scope }) });
 }
 
-async function consentedUrl(user: TestUser, oauthQuery: string): Promise<string> {
-  const answered = await consent(user, oauthQuery);
+async function consentedUrl(user: TestUser, oauthQuery: string, scope?: string): Promise<string> {
+  const answered = await consent(user, oauthQuery, true, scope);
   const url = (answered.body as unknown as { url?: string } | null)?.url;
   if (!url) throw new Error(`consent failed: ${answered.status} ${JSON.stringify(answered.body)}`);
   return url;
@@ -86,14 +89,20 @@ export async function token(app: FastifyInstance, params: Record<string, string>
   });
 }
 
+/** What the client asks for and what the person grants on the consent page (absent: everything asked for). */
+export interface ConnectScopes {
+  readonly requested?: string;
+  readonly granted?: string;
+}
+
 /** The whole flow for `user` with the active organization they have: a token pair. */
-export async function connect(app: FastifyInstance, user: TestUser, clientId?: string): Promise<TokenResponse & { readonly clientId: string }> {
+export async function connect(app: FastifyInstance, user: TestUser, clientId?: string, scopes: ConnectScopes = {}): Promise<TokenResponse & { readonly clientId: string }> {
   const id = clientId ?? (await registeredClientId(app));
   const pkce = newPkce();
-  const authorized = await authorize(app, user, id, pkce);
+  const authorized = await authorize(app, user, id, pkce, scopes.requested === undefined ? {} : { scope: scopes.requested });
   const location = String(authorized.headers.location ?? '');
   // An app already connected to this organization goes straight back to its callback (no consent page again).
-  const url = location.startsWith(`${CLAUDE_CALLBACK}?`) ? location : await consentedUrl(user, consentQueryOf(location));
+  const url = location.startsWith(`${CLAUDE_CALLBACK}?`) ? location : await consentedUrl(user, consentQueryOf(location), scopes.granted);
   const code = url ? codeOf(url) : null;
   if (!code) throw new Error(`no code: ${url}`);
   const exchanged = await token(app, { grant_type: 'authorization_code', code, redirect_uri: CLAUDE_CALLBACK, client_id: id, code_verifier: pkce.verifier, resource: MCP_RESOURCE });

@@ -12,11 +12,11 @@ describe('mcpChallenge', () => {
   const resource = 'https://ats.example.org/mcp';
 
   it('points a client without credentials to the metadata (RFC 6750 §3: no error code)', () => {
-    expect(mcpChallenge(resource, 'missing')).toBe('Bearer resource_metadata="https://ats.example.org/.well-known/oauth-protected-resource/mcp", scope="mcp"');
+    expect(mcpChallenge(resource, 'missing')).toBe('Bearer resource_metadata="https://ats.example.org/.well-known/oauth-protected-resource/mcp", scope="mcp candidate:propose_move"');
   });
 
   it('says invalid_token when credentials were sent but refused', () => {
-    expect(mcpChallenge(resource, 'invalid')).toBe('Bearer error="invalid_token", resource_metadata="https://ats.example.org/.well-known/oauth-protected-resource/mcp", scope="mcp"');
+    expect(mcpChallenge(resource, 'invalid')).toBe('Bearer error="invalid_token", resource_metadata="https://ats.example.org/.well-known/oauth-protected-resource/mcp", scope="mcp candidate:propose_move"');
   });
 
   it('is a plain bearer challenge while OAuth is off', () => {
