@@ -2,7 +2,7 @@ import { isJobScopedRole } from '@candydati/domain';
 import type { Actor } from '../actor.js';
 import type { JobTeamRepository } from '../job-team-ports.js';
 import { createJobScopeContext, type JobScopeContext } from './job-scope.js';
-import { restrictFeedbackRequests, restrictInterviewFeedback, restrictNotes } from './restricted-records.js';
+import { restrictFeedbackRequests, restrictInterviewFeedback, restrictNotes, restrictProposalReasons } from './restricted-records.js';
 import { createStageRestrictionContext, type StageRestrictionContext } from './restricted-stages.js';
 import { scopeApplications, scopeCandidateSearch, scopeCandidates, scopeExtractions, scopeNotes } from './scoped-candidates.js';
 import { scopeJobClients, scopeShortlists } from './scoped-clients.js';
@@ -71,6 +71,7 @@ const RESTRICTIONS: Readonly<Record<string, Restriction>> = {
   notes: (scoped, ctx) => restrictNotes(scoped, ctx),
   feedbackRequests: (scoped, ctx) => restrictFeedbackRequests(scoped, ctx),
   interviewFeedback: (scoped, ctx, raw) => restrictInterviewFeedback(scoped, ctx, raw.feedbackRequests),
+  moveProposals: (scoped, ctx) => restrictProposalReasons(scoped, ctx),
 };
 /* eslint-enable @typescript-eslint/no-explicit-any */
 

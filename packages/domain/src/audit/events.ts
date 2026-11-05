@@ -53,6 +53,7 @@ export const AUDIT_ACTIONS = [
   'automation.deleted',
   'automation.ran',
   'automation.copied',
+  'move_proposal.proposed',
   'move_proposal.confirmed',
   'move_proposal.dismissed',
   'webhook.saved',

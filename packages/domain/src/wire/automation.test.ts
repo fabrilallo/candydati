@@ -30,7 +30,7 @@ describe('automationRuleSchema', () => {
 describe('proposals and template rules on the wire', () => {
   it('reads a template rule and a live proposal', () => {
     expect(templateAutomationRuleSchema.parse({ ...base, jobId: undefined, templateId: 't1', action: { type: 'add_tag', tag: 'Fast' } }).action).toEqual({ type: 'add_tag', tag: 'fast' });
-    const proposal = { id: 'p1', applicationId: 'a1', ruleId: null, candidate: { id: 'c1', firstName: 'Anna', lastName: 'Rossi' }, job: { id: 'j1', title: 'Dev' }, from: { id: 's0', label: 'HR' }, to: { id: 's1', label: null }, proposedBy: 'u1', createdAt: base.createdAt, expiresAt: base.createdAt };
+    const proposal = { id: 'p1', applicationId: 'a1', ruleId: null, candidate: { id: 'c1', firstName: 'Anna', lastName: 'Rossi' }, job: { id: 'j1', title: 'Dev' }, from: { id: 's0', label: 'HR' }, to: { id: 's1', label: null }, proposedBy: 'u1', source: 'connected_app', reason: 'Strong Postgres answers', createdAt: base.createdAt, expiresAt: base.createdAt };
     expect(moveProposalSchema.parse(proposal)).toEqual(proposal);
   });
 });

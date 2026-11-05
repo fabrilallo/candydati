@@ -7,6 +7,8 @@ import {
   consentPreviewRequestSchema,
   consentPreviewSchema,
   isConnectedAppAccessToken,
+  connectedAppPermissions,
+  MCP_OAUTH_PROPOSE_MOVE_SCOPE,
   MCP_OAUTH_SCOPE,
   MCP_OAUTH_SCOPES,
 } from './connected-app.js';
@@ -28,8 +30,9 @@ describe('connected app tokens', () => {
     expect(isConnectedAppAccessToken(42)).toBe(false);
   });
 
-  it('asks for the MCP scope and offline access only', () => {
-    expect(MCP_OAUTH_SCOPES).toEqual([MCP_OAUTH_SCOPE, 'offline_access']);
+  it('offers the MCP scope, the opt-in to propose moves, and offline access', () => {
+    expect(MCP_OAUTH_SCOPES).toEqual([MCP_OAUTH_SCOPE, MCP_OAUTH_PROPOSE_MOVE_SCOPE, 'offline_access']);
+    expect(MCP_OAUTH_PROPOSE_MOVE_SCOPE).toBe('candidate:propose_move');
   });
 });
 
@@ -38,6 +41,14 @@ describe('connected app access', () => {
     expect(forbiddenPermissions('connected_app')).toEqual([...MACHINE_FORBIDDEN_PERMISSIONS, 'candidate:move']);
     expect(grantablePermissions('owner', 'connected_app')).not.toContain('candidate:move');
     expect(grantablePermissions('recruiter', 'connected_app')).toContain('job:publish');
+  });
+
+  it('proposing a move is opt-in: only with the scope granted on the consent page, and only for a role that may move', () => {
+    expect(connectedAppPermissions('recruiter', ['mcp', 'offline_access'])).not.toContain('candidate:propose_move');
+    expect(connectedAppPermissions('recruiter', ['mcp', 'candidate:propose_move'])).toContain('candidate:propose_move');
+    expect(connectedAppPermissions('interviewer', ['mcp', 'candidate:propose_move'])).not.toContain('candidate:propose_move');
+    expect(connectedAppPermissions('recruiter', ['mcp'])).toEqual(grantablePermissions('recruiter', 'connected_app').filter((p) => p !== 'candidate:propose_move'));
+    expect(connectedAppPermissions('owner', ['mcp', 'candidate:propose_move'])).not.toContain('candidate:move');
   });
 });
 

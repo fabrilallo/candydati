@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { ROLES } from './permissions.js';
+import { grantablePermissions } from './machine-access.js';
+import { ROLES, type Permission, type Role } from './permissions.js';
 
 /**
  * A connected app is an MCP client (Claude, ...) a person authorized with OAuth for one organization. It acts for that
@@ -11,9 +12,27 @@ export const CONNECTED_APP_ACCESS_TOKEN_PREFIX = 'candydati_oat_';
 export const CONNECTED_APP_REFRESH_TOKEN_PREFIX = 'candydati_ort_';
 export const CONNECTED_APP_CLIENT_SECRET_PREFIX = 'candydati_ocs_';
 
-/** The one scope of the MCP resource: what the app may do comes from the person's role, not from scopes. */
+/** The scope of the MCP resource: what the app may do comes from the person's role, not from scopes. */
 export const MCP_OAUTH_SCOPE = 'mcp';
-export const MCP_OAUTH_SCOPES = [MCP_OAUTH_SCOPE, 'offline_access'] as const;
+/**
+ * Opt-in on top of the role: proposing a move (`propose_stage_move`), which a person then confirms or dismisses. The
+ * consent page leaves it unchecked; without it the app cannot propose, whatever the role.
+ */
+export const MCP_OAUTH_PROPOSE_MOVE_SCOPE = 'candidate:propose_move' satisfies Permission;
+export const MCP_OAUTH_SCOPES = [MCP_OAUTH_SCOPE, MCP_OAUTH_PROPOSE_MOVE_SCOPE, 'offline_access'] as const;
+
+/** Permissions a connected app holds only when the person granted the scope of the same name on the consent page. */
+export const CONNECTED_APP_OPT_IN_PERMISSIONS: readonly Permission[] = [MCP_OAUTH_PROPOSE_MOVE_SCOPE];
+
+/**
+ * What a connected app may do: the person's role minus what no machine may do, minus the opt-in permissions whose scope
+ * the grant does not carry.
+ */
+export function connectedAppPermissions(role: Role, grantedScopes: readonly string[]): readonly Permission[] {
+  return grantablePermissions(role, 'connected_app').filter(
+    (permission) => !CONNECTED_APP_OPT_IN_PERMISSIONS.includes(permission) || grantedScopes.includes(permission),
+  );
+}
 
 const ACCESS_TOKEN_PATTERN = new RegExp(`^${CONNECTED_APP_ACCESS_TOKEN_PREFIX}[0-9A-Za-z]{32,128}$`);
 

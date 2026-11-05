@@ -41,6 +41,7 @@ describe('permissions', () => {
       'candidate:read',
       'candidate:update',
       'candidate:move',
+      'candidate:propose_move',
       'candidate:decide',
       'candidate_note:create',
     ] as const) {
@@ -67,6 +68,7 @@ describe('permissions', () => {
       'candidate:read',
       'candidate:update',
       'candidate:move',
+      'candidate:propose_move',
       'candidate_note:create',
       'message:read',
       'task:read',
@@ -83,6 +85,10 @@ describe('permissions', () => {
     expect(roleHasPermission('hiring_manager', 'job:close')).toBe(false);
     expect(roleHasPermission('hiring_manager', 'candidate:decide')).toBe(false);
     expect(roleHasPermission('hiring_manager', 'privacy:manage')).toBe(false);
+  });
+
+  it('gives propose_move to exactly the roles that may move a candidate', () => {
+    for (const role of ROLES) expect(roleHasPermission(role, 'candidate:propose_move')).toBe(roleHasPermission(role, 'candidate:move'));
   });
 
   it('gives an interviewer read access to ads and candidates and note writing, and nothing else', () => {

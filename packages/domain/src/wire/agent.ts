@@ -40,6 +40,7 @@ export const MCP_TOOL_NAMES = [
   'list_attention',
   'add_candidate_note',
   'create_task',
+  'propose_stage_move',
   'list_job_templates',
   'get_job_stats',
   'get_reports',

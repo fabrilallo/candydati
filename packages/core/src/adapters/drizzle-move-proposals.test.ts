@@ -33,6 +33,20 @@ afterAll(async () => {
 });
 
 describe('move proposals on Postgres', () => {
+  it('keeps who wrote a proposal and its reason, and reads a rule\'s as before', async () => {
+    const w = await world();
+    const repo = createDrizzleMoveProposals(handle.db);
+    const mcp = w.proposal({ source: 'connected_app', reason: 'Clear answers <b>on</b> Postgres' });
+    expect(await repo.createIfNoneOpen(mcp)).toEqual(mcp);
+    expect(await repo.findById(w.org, mcp.id)).toMatchObject({ source: 'connected_app', reason: 'Clear answers <b>on</b> Postgres' });
+    const legacy = await world();
+    const [row] = await handle.db
+      .insert(schema.moveProposal)
+      .values({ id: randomUUID(), organizationId: legacy.org, applicationId: legacy.application.id, jobId: legacy.job.id, fromStageId: 'received', toStageId: 'stage-0', proposedBy: 'u1', expiresAt: new Date('2099-01-01T00:00:00Z') })
+      .returning();
+    expect(await repo.findById(legacy.org, row!.id)).toMatchObject({ source: 'rule', reason: null });
+  });
+
   it('keeps at most one open proposal per application, and resolves it once', async () => {
     const w = await world();
     const repo = createDrizzleMoveProposals(handle.db);

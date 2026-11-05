@@ -1,4 +1,4 @@
-import type { AutomationActionType, AutomationTriggerType, MoveProposalStatus } from '@candydati/domain';
+import type { AutomationActionType, AutomationTriggerType, MoveProposalSource, MoveProposalStatus } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { boolean, index, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
@@ -12,7 +12,7 @@ const organizationRef = () =>
     .references(() => organization.id, { onDelete: 'restrict' });
 
 /**
- * A `propose_move` rule's suggestion to move an application, for a person to confirm (through the normal move, with
+ * A `propose_move` rule's (or an MCP assistant's, `source`) suggestion to move an application, for a person to confirm (through the normal move, with
  * their own permissions) or dismiss. At most one open proposal per application: the first one stands until a person acts
  * on it, it expires, or the application moves or is decided (then it is `dropped`). Goes with the application.
  */
@@ -31,8 +31,12 @@ export const moveProposal = pgTable(
     ruleId: text('rule_id').references(() => automationRule.id, { onDelete: 'set null' }),
     fromStageId: text('from_stage_id').notNull(),
     toStageId: text('to_stage_id').notNull(),
-    /** The creator of the rule. People are plain text with no foreign key, like tasks. */
+    /** The creator of the rule, or the person the key or app acts for. People are plain text with no foreign key, like tasks. */
     proposedBy: text('proposed_by').notNull(),
+    /** A rule, or a key or connected app over MCP. Existing rows are rules. */
+    source: text('source').$type<MoveProposalSource>().notNull().default('rule'),
+    /** Plain text given by an assistant (capped in the domain); null for rules. */
+    reason: text('reason'),
     status: text('status').$type<MoveProposalStatus>().notNull().default('open'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
