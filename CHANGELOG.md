@@ -32,12 +32,28 @@ nullable `reason`) runs at start as usual. Nothing existing is changed or droppe
   the consent page, OAuth scope `candidate:propose_move`). A reason given at a restricted stage is shown only to those
   who read that stage. Audited as `move_proposal.proposed`. MCP still cannot move, decide on, message or erase
   candidates. Connected apps authorized before this change see the consent page once more the next time they connect.
+- **A measured pseudonymization corpus.** 20 synthetic CVs (Italian, English, French, German, Spanish; four each) list
+  what must disappear before a model reads them and what must stay; the suite reports per language what is removed
+  and asserts the known gaps as they are. ADR 0010 now states the measured residual risk: 225 of 247 identifying
+  strings removed (152 before this change); the 22 left are 19 third-party names in plain prose, a German street with
+  no type word and its postal code, and a second surname missing from the stored last name.
 
 ### Changed
 
 - **The settings in the side menu fold away.** The settings groups below the daily work sit under one "Settings" button
   that opens and closes them, keyboard reachable. This browser remembers a collapsed menu, and a settings page always
   opens its group. No data or migrations change.
+
+### Fixed
+
+- Pseudonymization outside Italy: French, Belgian, Swiss, German, Austrian, Spanish and Latin American street
+  addresses, and the postal code after any found address (Canadian, Australian and US ZIP codes too); phones with a
+  `(0)` trunk prefix or a one-digit area (`+33 6 ...`, `+44 (0)20 ...`, `+54 9 11 ...`); full dates in French, German,
+  Spanish and English word order and ISO dates; Spanish DNI/NIE and labelled national ids (DNI, RFC, CURP, ...); xing,
+  viadeo and malt profiles, `GitHub: name` handles and personal sites on `.fr`, `.ch`, `.co.uk`, `.com.ar` and similar.
+  The surname is also removed without accents, transliterated and inside a site or handle (`emilyjohnson.io`). Names
+  of other people are also removed after French, German and Spanish titles, after phrases such as "reporting to" or
+  "mi jefa", under French, German and Spanish reference headings, and wherever a name already found is repeated.
 
 ## [0.3.1] - 2026-11-05
 
