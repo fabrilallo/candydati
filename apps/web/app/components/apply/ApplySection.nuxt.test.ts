@@ -20,6 +20,7 @@ registerEndpoint(`${BASE}/applications`, {
     return (setResponseStatus(event, 201), ok({ received: true }))
   },
 })
+registerEndpoint('/api/v1/public/linkedin/status', () => ok({ enabled: false }))
 registerEndpoint(BASE, () =>
   ok({
     organization: { name: 'Acme', slug: 'acme', logo: null },

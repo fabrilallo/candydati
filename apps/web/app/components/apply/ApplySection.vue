@@ -27,6 +27,10 @@ const done = async (firstName: string, email: string): Promise<void> => {
   sent.value = { firstName, email }
   await focusFirst('apply-success-title')
 }
+// Back from "Fill in with LinkedIn": the form opens by itself and takes the prefill.
+onMounted(() => {
+  if (cameBackFromLinkedIn()) void reveal()
+})
 defineExpose({ reveal })
 </script>
 

@@ -33,6 +33,8 @@ const FOCUS_IDS: Readonly<Record<Field, string>> = {
   selection: 'consent-selection',
 }
 
+const linkedIn = useLinkedInPrefill((prefill) => form.fill(prefill))
+
 const turnstileToken = ref('')
 const turnstileKey = computed(() => String(useRuntimeConfig().public.turnstileSiteKey ?? ''))
 const send = async (): Promise<void> => {
@@ -48,6 +50,7 @@ const send = async (): Promise<void> => {
 
 <template>
   <form class="grid gap-6" novalidate :aria-busy="form.pending.value" data-testid="application-form" @submit.prevent="send">
+    <LinkedInFill :org="org" :job="job" :enabled="linkedIn.enabled.value" :notice-key="linkedIn.noticeKey.value" :x="x" />
     <div class="grid gap-5 sm:grid-cols-2">
       <ApplyField id="apply-first-name" v-slot="{ invalid, describedBy }" :label="x('apply.fields.firstName')" :error="err('firstName')">
         <Input id="apply-first-name" autocomplete="given-name" :maxlength="NAME_MAX" :model-value="values.firstName" :aria-invalid="invalid" :aria-describedby="describedBy" required @update:model-value="form.setField('firstName', String($event))" />
