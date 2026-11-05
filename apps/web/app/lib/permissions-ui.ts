@@ -37,7 +37,7 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   return allowed[0] ?? null
 }
 
-export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'ai' | 'emailTemplates' | 'webhooks' | 'distribution' | 'careersPage' | 'api' | 'data' | 'migrations' | 'audit' | 'clients'
+export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'ai' | 'emailTemplates' | 'webhooks' | 'distribution' | 'careersPage' | 'api' | 'data' | 'migrations' | 'audit' | 'clients' | 'skills'
 /** Daily work first, then the settings in three groups: what candidates see, what connects outside, the organization itself. */
 export type NavSectionId = 'work' | 'hiringSetup' | 'integrations' | 'organization'
 const NAV_SECTION_ORDER: readonly NavSectionId[] = ['work', 'hiringSetup', 'integrations', 'organization']
@@ -80,6 +80,7 @@ const NAV: readonly NavItem[] = [
   // Everyone: the person's own second factor; owners and admins also find the organization's requirement there.
   { id: 'security', to: '/app/settings/security', section: 'organization' },
   { id: 'privacy', to: '/app/settings/privacy', section: 'organization', permission: 'privacy:manage' },
+  { id: 'skills', to: '/app/settings/skills', section: 'organization', permission: 'skill_alias:manage' },
   { id: 'data', to: '/app/settings/data', section: 'organization', permission: 'data:export' },
   { id: 'audit', to: '/app/settings/audit-log', section: 'organization', permission: 'audit:read' },
 ]

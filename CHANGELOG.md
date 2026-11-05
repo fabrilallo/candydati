@@ -6,8 +6,9 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-One additive migration (`0050_mcp_move_proposals`: two columns on `move_proposal`, `source` with default `rule` and a
-nullable `reason`) runs at start as usual. Nothing existing is changed or dropped.
+Two additive migrations run at start as usual; take a backup first (docs/OPERATIONS.md). Nothing existing is changed or
+dropped: `0050_mcp_move_proposals` (two columns on `move_proposal`, `source` with default `rule` and a nullable
+`reason`) and `0051_skill_aliases` (two new tables).
 
 ### Added
 
@@ -32,6 +33,14 @@ nullable `reason`) runs at start as usual. Nothing existing is changed or droppe
   the consent page, OAuth scope `candidate:propose_move`). A reason given at a restricted stage is shown only to those
   who read that stage. Audited as `move_proposal.proposed`. MCP still cannot move, decide on, message or erase
   candidates. Connected apps authorized before this change see the consent page once more the next time they connect.
+- **Skill aliases per organization.** Owners and admins (new permission `skill_alias:manage`, never an API key or the
+  assistant) can add their own aliases on top of the built-in dictionary ("Go developer" for Go, or a brand-new skill with
+  its aliases) and switch off a built-in alias they do not want, under **Settings, Skills**. The filter on declared criteria
+  (assistant and MCP) reads the built-in dictionary plus the organization's changes, on both sides, and each result says
+  which name a CV used for a skill ("Golang" for "Go"). An alias belongs to one skill, ignoring case, punctuation and
+  diacritics; at most 500 per organization. Still a filter: no score, ordered by date of application. REST:
+  `/api/v1/skill-aliases` (session only, in the OpenAPI reference); audited as `skill_alias.added`, `.removed`,
+  `.disabled` and `.enabled`.
 
 ### Changed
 

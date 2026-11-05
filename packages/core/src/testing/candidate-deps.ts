@@ -30,10 +30,13 @@ import { createInMemoryPrivacyNoticeRepository } from './in-memory-privacy.js';
 import { createInMemoryOutbox, type InMemoryOutbox } from './in-memory-automation.js';
 import { createInMemoryMessageRepository, createMessagingStore, type MessagingStore } from './in-memory-messaging.js';
 import { createInMemoryJobTeams, type InMemoryJobTeams } from './in-memory-job-teams.js';
+import { createInMemorySkillAliases } from './in-memory-skill-aliases.js';
 import { createInMemoryTransaction } from './in-memory-transaction.js';
+import type { SkillAliasDeps } from '../skill-alias-ports.js';
 
 /** Everything the Phase 2 use cases may ask for, fully in memory, with a counter-based id generator and a fixed clock. */
 export type TestCandidateDeps = CandidateDeps &
+  Pick<SkillAliasDeps, 'skillAliases'> &
   PrivacyDeps &
   SubmitApplicationDeps &
   CvExtractionDeps &
@@ -77,6 +80,7 @@ export function createTestCandidateDeps(overrides: Partial<TestCandidateDeps> = 
     notes: createInMemoryCandidateNoteRepository(store),
     extractions: createInMemoryCvExtractionRepository(store),
     candidateSearch: createInMemoryCandidateSearch(store),
+    skillAliases: createInMemorySkillAliases(),
     users: createInMemoryUserDirectory(),
     intake: createInMemoryApplicationIntake(store, auditLog, outbox, jobs),
     files: createInMemoryFileStorage(),

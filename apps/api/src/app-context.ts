@@ -13,6 +13,7 @@ import {
   type AutomationRuleDeps,
   type NotificationDeps,
   type TaskDeps,
+  type SkillAliasDeps,
   type WebhookDeps,
   type CandidateDeps,
   type ProposalDeps,
@@ -161,6 +162,8 @@ export interface AppContext extends ClientWiring {
   readonly taskDeps: TaskDeps;
   readonly automationDeps: AutomationRuleDeps;
   readonly webhookDeps: WebhookDeps;
+  /** The organization's own skill aliases (settings). */
+  readonly skillAliasDeps: SkillAliasDeps;
   readonly distributionDeps: DistributionDeps;
   readonly trackedLinkDeps: TrackedLinkDeps;
   /** What the public reads need: published jobs, organizations, the privacy notice and the public base URL. */

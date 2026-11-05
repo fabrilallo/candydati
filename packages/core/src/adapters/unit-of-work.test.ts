@@ -97,6 +97,7 @@ const candidateDeps = (overrides: Partial<CandidateDeps> = {}): CandidateDeps =>
     extractions: r.extractions,
     messages: r.messages,
     candidateSearch: r.candidateSearch,
+    skillAliases: r.skillAliases,
     users: r.users,
     files: createInMemoryFileStorage(),
     queue: createInMemoryTaskQueue(),

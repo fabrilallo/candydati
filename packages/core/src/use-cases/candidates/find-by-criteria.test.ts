@@ -32,6 +32,18 @@ describe('findCandidatesByCriteria', () => {
     expect(result).toMatchObject({ job: { id: 'job_1' }, criteria: ['skill: vue'], pool: 'both', total: 1, notEvaluable: 1, page: 1, limit: 25 });
   });
 
+  it('reads skills through the dictionary of the organization and says which name matched', async () => {
+    const deps = world();
+    const aliasOf = { organizationId: ORG_A, createdBy: 'u', createdAt: new Date(), id: 'alias_1', skill: 'Vue', alias: 'Vue Framework', aliasKey: 'vueframework' };
+    expect((await findCandidatesByCriteria(deps, recruiter, { jobId: 'job_1', criteria: { skills: ['Golang'] } })).items.map((item) => [item.candidate.id, item.skillMatches])).toEqual([['c_go', [{ criterion: 'Golang', matchedAs: 'Go' }]]]);
+    expect((await findCandidatesByCriteria(deps, recruiter, { jobId: 'job_1', criteria: { skills: ['vue framework'] } })).items).toEqual([]);
+    await deps.skillAliases.add(aliasOf);
+    const found = await findCandidatesByCriteria(deps, recruiter, { jobId: 'job_1', criteria: { skills: ['vue framework'] } });
+    expect(found.items.map((item) => [item.candidate.id, item.skillMatches])).toEqual([['c_vue', [{ criterion: 'vue framework', matchedAs: 'Vue' }]]]);
+    await deps.skillAliases.disable(ORG_A, 'golang', 'u', new Date());
+    expect((await findCandidatesByCriteria(deps, recruiter, { jobId: 'job_1', criteria: { skills: ['Golang'] } })).items).toEqual([]);
+  });
+
   it('records the search, its criteria and the count in the audit log, never who was found', async () => {
     const deps = world();
     await findCandidatesByCriteria(deps, recruiter, { jobId: 'job_1', criteria: { skills: ['Vue'], minYearsOfExperience: 1 }, pool: 'applicants' });
