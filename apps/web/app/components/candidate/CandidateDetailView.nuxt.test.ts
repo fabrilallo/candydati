@@ -145,12 +145,12 @@ describe('CandidateDetailView', () => {
     const extraction = wrapper.find('[data-testid="cv-extraction"]')
     expect(extraction.text()).toContain('Estrazione automatica: può contenere errori')
     expect(extraction.find('[data-testid="extraction-experiences"]').text()).toContain('Backend engineer, Beta')
-    expect(extraction.findAll('[data-testid="extraction-skills"] li').map((node) => node.text())).toEqual(['TypeScript', 'Postgres'])
+    expect(extraction.findAll('[data-testid="extraction-skills"] li').map((node) => node.text())).toEqual(['TypeScript', 'PostgreSQL · scritto come Postgres'])
   })
 
   it('says when the extraction is still running', async () => {
     const value = detail()
-    state.value = { ...value, applications: value.applications.map((app) => ({ ...app, extraction: { status: 'pending', data: null, source: null } })) }
+    state.value = { ...value, applications: value.applications.map((app) => ({ ...app, extraction: { status: 'pending', data: null, source: null, skills: [] } })) }
     const wrapper = await mountDetail()
     expect(wrapper.find('[data-testid="extraction-state"]').text()).toContain('Stiamo leggendo il CV')
   })

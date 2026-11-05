@@ -28,6 +28,7 @@ export * from './candidate/criteria.js';
 export * from './candidate/criteria-match.js';
 export * from './skills/dictionary.js';
 export * from './skills/aliases.js';
+export * from './skills/group.js';
 export * from './candidate/attachment.js';
 export { isSafePersonName, personNameSchema, safePersonNameOrEmpty } from './candidate/person-name.js';
 export * from './messaging/variables.js';

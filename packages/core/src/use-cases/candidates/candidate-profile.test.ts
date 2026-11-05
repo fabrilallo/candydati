@@ -101,6 +101,33 @@ describe('getCandidate messageCount', () => {
   });
 });
 
+describe('getCandidate skills', () => {
+  const withSkills = (skills: string[]) =>
+    seedCandidateWorld({
+      candidates: [buildCandidate({ organizationId: ORG_A })],
+      applications: [buildApplication({ organizationId: ORG_A })],
+      extractions: [buildExtraction({ organizationId: ORG_A, data: { experiences: [], education: [], skills, languages: [] } })],
+    });
+
+  it('groups the skills under the canonical name of the organization book and stores nothing', async () => {
+    const d = withSkills(['Go', 'Rust', 'Golang', 'Zorgbase']);
+    await d.skillAliases.add({ id: 'al_1', organizationId: ORG_A, skill: 'Rust', alias: 'Zorgbase', aliasKey: 'zorgbase', createdBy: 'u', createdAt: new Date() });
+    const view = await getCandidate(d, recruiter, { candidateId: 'cand_1' });
+    expect(view.applications[0]?.skills).toEqual([
+      { canonical: 'Go', writtenAs: ['Go', 'Golang'] },
+      { canonical: 'Rust', writtenAs: ['Rust', 'Zorgbase'] },
+    ]);
+    expect(view.applications[0]?.extraction?.data?.skills).toEqual(['Go', 'Rust', 'Golang', 'Zorgbase']);
+  });
+
+  it('uses only the aliases of its own organization', async () => {
+    const d = withSkills(['Zorgbase']);
+    await d.skillAliases.add({ id: 'al_2', organizationId: ORG_B, skill: 'Rust', alias: 'Zorgbase', aliasKey: 'zorgbase', createdBy: 'u', createdAt: new Date() });
+    const view = await getCandidate(d, recruiter, { candidateId: 'cand_1' });
+    expect(view.applications[0]?.skills).toEqual([{ canonical: null, writtenAs: ['Zorgbase'] }]);
+  });
+});
+
 describe('getCandidate', () => {
   it('returns the profile with applications, stages, extraction and notes with author names, and audits the view', async () => {
     const d = world();

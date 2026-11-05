@@ -85,6 +85,8 @@ const candidateAuthored = (view: CandidateDetailView) => {
       applicationId: a.application.id,
       coverLetter: pseudonymizeText(truncate(a.application.message, MESSAGE_TEXT_MAX), person),
       cv: a.extraction?.data ? pseudonymizeValue(a.extraction.data, person) : null,
+      // The organization's dictionary read on `cv.skills`: candidate data too (canonical name, null when unknown, and as written).
+      cvSkills: pseudonymizeValue(a.skills, person),
       cvText: a.extraction?.text ? pseudonymizeText(truncate(a.extraction.text, CV_TEXT_MAX), person) : null,
     })),
   };

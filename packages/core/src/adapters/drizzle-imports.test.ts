@@ -22,6 +22,7 @@ import { createDrizzleConsentTokens, createDrizzleImportAnalyses, createDrizzleI
 import { createDrizzleJobs } from './drizzle-jobs.js';
 import { createDrizzleJobTeams } from './drizzle-job-teams.js';
 import { createDrizzleMessages } from './drizzle-messages.js';
+import { createDrizzleSkillAliases } from './drizzle-skill-aliases.js';
 import { createDrizzleTransaction } from './drizzle-repositories.js';
 
 let handle: DbHandle;
@@ -176,7 +177,7 @@ describe('import on Postgres', () => {
     expect((await search.search({ organizationId: world.org, query: person.last, page: 1, limit: 10 })).total).toBe(0);
     expect((await searchCandidates(searchDeps, actor, { query: person.first })).total).toBe(0);
     const { person: imported, application } = await applicationOf(world.org, person.email);
-    const profileDeps = { auditLog: createDrizzleAuditLog(handle.db), transaction: createDrizzleTransaction(handle.db), jobTeams: createDrizzleJobTeams(handle.db), candidates: createDrizzleCandidates(handle.db), applications: createDrizzleApplications(handle.db), extractions: createDrizzleCvExtractions(handle.db), messages: createDrizzleMessages(handle.db), jobs: createDrizzleJobs(handle.db), notes: createDrizzleCandidateNotes(handle.db), users: { namesOf: async () => ({}) }, now: () => NOW } as never;
+    const profileDeps = { auditLog: createDrizzleAuditLog(handle.db), transaction: createDrizzleTransaction(handle.db), jobTeams: createDrizzleJobTeams(handle.db), candidates: createDrizzleCandidates(handle.db), applications: createDrizzleApplications(handle.db), extractions: createDrizzleCvExtractions(handle.db), messages: createDrizzleMessages(handle.db), skillAliases: createDrizzleSkillAliases(handle.db), jobs: createDrizzleJobs(handle.db), notes: createDrizzleCandidateNotes(handle.db), users: { namesOf: async () => ({}) }, now: () => NOW } as never;
     await expect(getCandidate(profileDeps, actor, { candidateId: imported!.id })).rejects.toBeInstanceOf(NotFoundError);
     await expect(getCandidate(profileDeps, actor, { candidateId: imported!.id, viaJobId: world.otherJobId })).rejects.toBeInstanceOf(NotFoundError);
     expect((await getCandidate(profileDeps, actor, { candidateId: imported!.id, viaJobId: world.jobId })).applications).toHaveLength(1);
