@@ -6,7 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-No migrations.
+One additive migration (`0050_mcp_move_proposals`: two columns on `move_proposal`, `source` with default `rule` and a
+nullable `reason`) runs at start as usual. Nothing existing is changed or dropped.
 
 ### Added
 
@@ -17,6 +18,16 @@ No migrations.
   photo, language and member id are discarded, the data waits at most 10 minutes in an encrypted HttpOnly cookie and
   reaches the form once. Next to the CV, the form explains how to save the LinkedIn profile as a PDF and upload it.
   The default privacy notice mentions it. Set up: Configuration guide, "Fill in with LinkedIn".
+- **MCP can propose a move, a person decides.** New tool `propose_stage_move`: an external assistant (Claude, ...)
+  proposes moving an application to another stage of the same job, with a short reason (500 characters, plain text). It
+  is the same proposal a `propose_move` rule writes, attributed to the person behind the key or connected app (shown as
+  such, with the reason, in Needs attention and on the application) and confirmed or dismissed by a person with one
+  click; it moves nothing itself. Asking again for the same target returns the waiting proposal. It needs the new
+  permission `candidate:propose_move`, held by the roles that may move (owner, admin, recruiter, hiring manager) and
+  limited to the jobs they reach; it is opt-in for API keys (a scope to tick) and for connected apps (an unticked box on
+  the consent page, OAuth scope `candidate:propose_move`). A reason given at a restricted stage is shown only to those
+  who read that stage. Audited as `move_proposal.proposed`. MCP still cannot move, decide on, message or erase
+  candidates. Connected apps authorized before this change see the consent page once more the next time they connect.
 
 ## [0.3.1] - 2026-11-05
 

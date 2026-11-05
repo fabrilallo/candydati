@@ -34,11 +34,11 @@ Every candidate always receives an outcome. The system supports this structurall
 
 ### 2.4 No automated decisions about candidates
 
-The product does not rank, score, order or reject people, and no automation rule moves or decides: the most a rule may do is propose a move (`propose_move`), which stays a suggestion until a person confirms it, through the normal move with their own permissions, or dismisses it. A person may filter candidates on objective criteria they declare; every result meets every criterion and the list is ordered by date of application, never by merit. Skills match under their known names (a curated synonym dictionary: "Go" finds "Golang", "k8s" finds "Kubernetes"), which widens the spelling and never ranks. Quality scores evaluate the ad, never candidates. Interview feedback describes what was seen and carries no score. This is also the GDPR position on automated decision-making (§6).
+The product does not rank, score, order or reject people, and no automation rule moves or decides: the most a rule may do is propose a move (`propose_move`), which stays a suggestion until a person confirms it, through the normal move with their own permissions, or dismisses it. An external assistant over MCP may make the same kind of proposal (`propose_stage_move`, with a short reason, behind an opt-in scope), never the move. A person may filter candidates on objective criteria they declare; every result meets every criterion and the list is ordered by date of application, never by merit. Skills match under their known names (a curated synonym dictionary: "Go" finds "Golang", "k8s" finds "Kubernetes"), which widens the spelling and never ranks. Quality scores evaluate the ad, never candidates. Interview feedback describes what was seen and carries no score. This is also the GDPR position on automated decision-making (§6).
 
 ### 2.5 Agentic-ready
 
-Everything that can be done in the interface can be done through the REST API, with the same use cases and the same permissions (see §5). The MCP server is deliberately narrower: read and draft job ads and their evaluation criteria, read the pipeline, filter on declared criteria, notes, tasks and reports. It cannot move, decide on, message or erase candidates.
+Everything that can be done in the interface can be done through the REST API, with the same use cases and the same permissions (see §5). The MCP server is deliberately narrower: read and draft job ads and their evaluation criteria, read the pipeline, filter on declared criteria, notes, tasks and reports, and propose moving an application to another stage (opt-in scope `candidate:propose_move`, held only by roles that may move), which a person confirms or dismisses like a rule's proposal. It cannot move, decide on, message or erase candidates.
 
 ### 2.6 GDPR by design
 
@@ -216,7 +216,7 @@ The schemas of the job ad and of the application are public and versioned (`docs
 |---|---|
 | Internal assistant | An assistant in the interface whose tools call the same application services as everything else |
 | Public API | REST documented with OpenAPI, keys with permission scopes per organization |
-| MCP server | A subset of the use cases (job ads and their evaluation criteria, pipeline, declared-criteria search, notes, tasks, reports) as tools and prompts for a company's own agents; no decisions about candidates |
+| MCP server | A subset of the use cases (job ads and their evaluation criteria, pipeline, declared-criteria search, notes, tasks, reports, move proposals a person confirms) as tools and prompts for a company's own agents; no decisions about candidates |
 | Webhooks | Signed events: application received, stage change, outcome, ad published |
 
 ### 5.2 What the assistant may do

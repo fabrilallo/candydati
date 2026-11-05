@@ -35,7 +35,7 @@ switch these principles off.
 - **No automated decisions.** The assistant works on the process. It never ranks, scores or rejects people. The only
   score in the product rates the job ad, not who applies; the CV reader extracts facts (roles, skills, languages) shown
   next to the original, without judging them.
-- **Agentic-ready.** Everything in the UI is available through a REST API (OpenAPI), with the same permissions. The MCP server covers job ads (read, draft, publish), their evaluation criteria, the pipeline, searches on declared criteria, notes, tasks and reports; it cannot move, decide on, message or erase candidates, which stays with a person.
+- **Agentic-ready.** Everything in the UI is available through a REST API (OpenAPI), with the same permissions. The MCP server covers job ads (read, draft, publish), their evaluation criteria, the pipeline, searches on declared criteria, notes, tasks and reports, and can propose moving an application to another stage, which a person confirms or dismisses; it cannot move, decide on, message or erase candidates, which stays with a person.
 - **Privacy by design.** Versioned consent, retention and automatic erasure, data subject rights, full export in open
   formats. AI included: the assistant and external agents over MCP (Claude Code, Codex, Cursor...) see candidates by
   first name and id only. Surnames, emails, phone numbers, links, addresses and other identifiers are removed before
