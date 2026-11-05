@@ -144,7 +144,7 @@ export const getPipelineTool = {
   description:
     'Where the applications of a job stand: the stages with how many open applications each has, and one card per application with the candidate\'s first name and id (never the surname), ' +
     'stage, outcome and response state (on_track, due_soon, overdue, answered, closed). No CV text, messages or notes. ' +
-    'Read only: there is no tool to move, decide on, message or erase a candidate, those stay with a person.',
+    'Read only: there is no tool to move, decide on, message or erase a candidate, those stay with a person (propose_stage_move only proposes a move for a person to confirm).',
   shape: { jobId },
   readOnly: true,
   run: async ({ app, actor }, input) => toMcpPipeline(await getPipeline(app.candidateDeps, actor, input)),
