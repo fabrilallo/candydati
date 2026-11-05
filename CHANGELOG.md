@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Skill names on the candidate profile.** The skills read from a CV now show the organization's name for them with
+  the form the candidate wrote ("Go, scritto come Golang" / "Go, written as Golang"), and a CV that lists "Go" and
+  "Golang" shows one Go with both forms. The API adds `extraction.skills` (canonical name or null, written forms) to the
+  candidate detail, and the assistant's candidate brief carries the same as `cvSkills`. Applied when the profile is
+  read, never stored: `extraction.data.skills`, the export and the stored CV data stay as the candidate wrote them, and
+  a change to the organization's skills settings shows at once without recomputing anything.
+
 ## [0.4.0] - 2026-11-05
 
 Two additive migrations run at start as usual; take a backup first (docs/OPERATIONS.md). Nothing existing is changed or

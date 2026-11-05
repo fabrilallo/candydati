@@ -1,4 +1,4 @@
-import type { ApplicationTimelineDto, Application, ApplicationAttachment, AttachmentMediaType, Candidate, CandidateNote, CvExtractionRecord, CvMediaType, Job, PipelineStage, ResponseState } from '@candydati/domain';
+import type { ApplicationTimelineDto, GroupedSkill, Application, ApplicationAttachment, AttachmentMediaType, Candidate, CandidateNote, CvExtractionRecord, CvMediaType, Job, PipelineStage, ResponseState } from '@candydati/domain';
 
 /** What the use cases return: domain objects. The mappers in `mappers/candidate-dto.ts` turn them into DTOs. */
 export interface ApplicationCardView {
@@ -30,6 +30,8 @@ export interface CandidateApplicationView {
   readonly job: Job;
   readonly stages: readonly PipelineStage[];
   readonly extraction: CvExtractionRecord | null;
+  /** The extracted skills as the organization's dictionary reads them (read time, nothing stored): one skill under several names merged. */
+  readonly skills: readonly GroupedSkill[];
   readonly messageCount: number;
   readonly responseState: ResponseState;
   /** Files of the application other than its CV, oldest first. */

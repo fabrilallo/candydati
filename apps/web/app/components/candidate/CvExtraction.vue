@@ -54,7 +54,9 @@ const period = (from?: string, to?: string): string => [from, to].filter((part) 
       <div v-if="view.data.skills.length > 0" class="grid gap-2">
         <h4 class="text-sm font-medium text-muted-foreground">{{ t('candidate.extraction.skills') }}</h4>
         <ul class="flex flex-wrap gap-1.5" data-testid="extraction-skills">
-          <li v-for="skill in view.data.skills" :key="skill" class="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">{{ skill }}</li>
+          <li v-for="skill in view.skills" :key="skill.label" class="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
+            {{ skill.label }}<span v-if="skill.writtenAs.length > 0" class="font-normal text-muted-foreground"> · {{ t('candidate.extraction.writtenAs', { forms: skill.writtenAs.join(', ') }) }}</span>
+          </li>
         </ul>
       </div>
 

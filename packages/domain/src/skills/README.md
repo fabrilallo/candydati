@@ -22,3 +22,7 @@ same skill.
 This dictionary is the shared base. Each organization adds its own aliases (or whole skills) and switches off built-in
 aliases from Settings, Skills; `buildSkillBook` (`book.ts`) merges them into the book a search uses, and a built-in word
 always wins over an alias an organization wrote for the same word. Only aliases (not skill names) can be switched off.
+
+The same book is read on a candidate's profile (`groupExtractedSkills`, `group.ts`): each extracted skill shows its
+canonical name and the forms the CV used, forms of one skill are merged, and nothing is stored, so a change shows on
+the next view.

@@ -136,6 +136,9 @@ export const candidateDetailSchema: z.ZodType<CandidateDetailDto> = z.object({
         status: z.enum(EXTRACTION_STATUSES),
         data: cvExtractionSchema.nullable(),
         source: z.enum(['model', 'text']).nullable(),
+        skills: z
+          .array(z.object({ canonical: z.string().nullable(), writtenAs: z.array(z.string()) }))
+          .describe('data.skills read with the organization skill dictionary, one skill under several names merged. data.skills itself stays as written in the CV.'),
       }),
       messageCount: z.number().int(),
       restrictedStageIds: z.array(z.string()).describe('Stages of the job marked restricted: notes and feedback written there are not shown to everyone on the team.'),

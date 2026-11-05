@@ -1718,6 +1718,7 @@
       "experiences": "Experience",
       "education": "Education",
       "skills": "Skills",
+      "writtenAs": "written as {forms}",
       "languages": "Languages",
       "fromText": "Read from the plain text of the document, without a language model.",
       "states": {
@@ -2424,7 +2425,7 @@
   },
   "skills": {
     "title": "Skills",
-    "description": "The filter on declared criteria treats different spellings as one skill: \"Go\" finds \"Golang\". Add the names your CVs use, and turn off built-in ones you do not want.",
+    "description": "The filter on declared criteria treats different spellings as one skill: \"Go\" finds \"Golang\". Add the names your CVs use, and turn off built-in ones you do not want. Profiles show the same names next to what the CV says; nothing stored is changed.",
     "own": {
       "title": "Your aliases",
       "body": "An alias is another way of writing a skill. It applies to every search of this organization, on both sides: the criterion and the CV. A new skill needs only one alias to exist.",

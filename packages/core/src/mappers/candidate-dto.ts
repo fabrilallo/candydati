@@ -6,6 +6,7 @@ import type {
   ConsentScope,
   ConsentStatus,
   CvExtraction,
+  GroupedSkill,
   ExtractionStatus,
   JobStatus,
   Outcome,
@@ -167,7 +168,14 @@ export interface CandidateDetailDto {
     /** null for an application brought by a migration without a CV. */
     readonly cv: { readonly fileName: string; readonly mediaType: string; readonly sizeBytes: number } | null;
     readonly submittedContact?: SubmittedContact | null;
-    readonly extraction: { readonly status: ExtractionStatus; readonly data: CvExtraction | null; readonly source: 'model' | 'text' | null };
+    readonly extraction: {
+      readonly status: ExtractionStatus;
+      /** As extracted: the skills stay as the candidate wrote them. */
+      readonly data: CvExtraction | null;
+      readonly source: 'model' | 'text' | null;
+      /** The same skills read with the organization's dictionary: canonical name (null if unknown) and written forms. */
+      readonly skills: readonly GroupedSkill[];
+    };
     /** Messages in the conversation of this application (sent, received and failed). */
     readonly messageCount: number;
     /** Stages of the job marked restricted: notes and feedback there are read only by owners, admins and the hiring manager. */
@@ -302,7 +310,7 @@ const toAttachmentDto = (attachment: ApplicationAttachment): AttachmentDto => ({
 
 export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetailDto => ({
   candidate: toCandidateDto(view.candidate, view.applications.some((a) => a.application.consentStatus === 'given') ? 'given' : 'to_renew'),
-  applications: view.applications.map(({ application, job, stages, extraction, messageCount, responseState, attachments, restrictedStageIds }) => ({
+  applications: view.applications.map(({ application, job, stages, extraction, skills, messageCount, responseState, attachments, restrictedStageIds }) => ({
     id: application.id,
     job: { id: job.id, title: job.content.title, slug: job.slug },
     stageId: application.stageId,
@@ -327,7 +335,7 @@ export const toCandidateDetailDto = (view: CandidateDetailView): CandidateDetail
     retentionExpiresAt: iso(application.retentionExpiresAt),
     cv: application.cv ? { fileName: application.cv.fileName, mediaType: application.cv.mediaType, sizeBytes: application.cv.sizeBytes } : null,
     submittedContact: application.submittedContact ?? null,
-    extraction: { status: extraction?.status ?? 'pending', data: extraction?.data ?? null, source: extraction?.source ?? null },
+    extraction: { status: extraction?.status ?? 'pending', data: extraction?.data ?? null, source: extraction?.source ?? null, skills },
     messageCount,
     restrictedStageIds,
     attachments: attachments.map(toAttachmentDto),
