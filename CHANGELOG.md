@@ -49,6 +49,9 @@ dropped: `0050_mcp_move_proposals` (two columns on `move_proposal`, `source` wit
 
 ### Changed
 
+- The linear-time tests (ReDoS guards) no longer compare timings at two input sizes, which runner noise broke on CI.
+  They run the function once on a hostile input of about 100 000 characters and require it to finish under 1.5 s:
+  milliseconds for linear code, many seconds for a quadratic one.
 - **The settings in the side menu fold away.** The settings groups below the daily work sit under one "Settings" button
   that opens and closes them, keyboard reachable. This browser remembers a collapsed menu, and a settings page always
   opens its group. No data or migrations change.

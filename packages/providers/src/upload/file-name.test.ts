@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { expectLinearOnHostileInput } from '../testing/linear-time.js';
 import { safeFileName } from './file-name.js';
 
 describe('safeFileName', () => {
@@ -11,6 +11,6 @@ describe('safeFileName', () => {
     const run = (size: number) => {
       safeFileName(`a${'. '.repeat(size)}b.pdf`, 'application/pdf');
     };
-    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
-  });
+    expectLinearOnHostileInput(run, { size: 50_000 });
+  }, 20_000);
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { expectLinearOnHostileInput } from '../testing/linear-time.js';
 import { textToHtml } from './html.js';
 import { decodeEntities, htmlToText } from './html-text.js';
 
@@ -54,9 +54,8 @@ describe('htmlToText', () => {
       htmlToText(`<a title="${'x'.repeat(size)}`);
       htmlToText('&#'.repeat(size / 2));
     };
-    run(50_000);
-    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
-  });
+    expectLinearOnHostileInput(run, { size: 100_000 });
+  }, 20_000);
 });
 
 describe('decodeEntities', () => {

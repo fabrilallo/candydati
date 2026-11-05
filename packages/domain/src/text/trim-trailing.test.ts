@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { expectLinearOnHostileInput } from '../testing/linear-time.js';
 import { trimTrailing } from './trim-trailing.js';
 
 describe('trimTrailing', () => {
@@ -20,6 +20,6 @@ describe('trimTrailing', () => {
       trimTrailing(`${'/'.repeat(size)}a`, '/');
       trimTrailing(`a${')'.repeat(size)}`, '.,;)');
     };
-    expect(growthRatio(run, 10_000)).toBeLessThan(LINEAR_GROWTH_MAX);
-  });
+    expectLinearOnHostileInput(run, { size: 100_000 });
+  }, 20_000);
 });

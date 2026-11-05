@@ -1,31 +1,49 @@
-/** Smallest time worth comparing: below it, timer noise dominates. */
-const FLOOR_MS = 5;
-
-const bestOf = (runs: number, task: () => void): number => {
-  let best = Number.POSITIVE_INFINITY;
-  for (let i = 0; i < runs; i += 1) {
-    const started = performance.now();
-    task();
-    best = Math.min(best, performance.now() - started);
-  }
-  return best;
-};
-
-const RUNS = 5;
-/** How much bigger the second input is: wide enough that runner noise cannot pass linear code for quadratic. */
-const GROWTH = 8;
-
 /**
- * How much slower `run` gets when the input grows 8×: about 8 for linear code, about 64 for a quadratic regex.
- * Independent of the machine's speed, unlike a fixed time limit; the wide gap between the two keeps a noisy CI runner
- * (coverage, garbage collection) from failing linear code while quadratic code stays far above the limit.
+ * Guard against regular-expression denial of service (ReDoS) with an absolute time bound, not a growth ratio.
+ *
+ * Why not a ratio: timing a function on n and 8n and comparing puts linear code near 8, so ordinary runner noise
+ * (coverage instrumentation, garbage collection, a loaded CI machine) pushes it over any sensible limit. Making a
+ * ratio robust (CPU clocks, repetition, wider limit) only moved the noise around.
+ *
+ * Why an absolute bound works: on a hostile input of about 100 000 characters, linear code takes a few milliseconds,
+ * even under coverage on a loaded runner. A quadratic or backtracking implementation takes n² = 1e10 steps, which is
+ * many seconds (or never ends). The budget sits between the two with a wide margin on both sides, so noise cannot
+ * fail linear code and a real regression cannot slip under it.
  */
-export function growthRatio(run: (size: number) => void, size: number): number {
-  run(size); // warm-up
-  const small = bestOf(RUNS, () => run(size));
-  const large = bestOf(RUNS, () => run(size * GROWTH));
-  return large / Math.max(small, FLOOR_MS);
+
+/** Hostile inputs are about this many characters: n² is about 1e10 character steps for a quadratic implementation. */
+export const HOSTILE_SIZE = 100_000;
+/** Generous for linear code (milliseconds), far below what a quadratic implementation needs (seconds or more). */
+export const LINEAR_BUDGET_MS = 1500;
+/** The warm-up input is this many times smaller than the hostile one: enough to compile the code paths. */
+const WARM_UP_DIVISOR = 50;
+
+export interface HostileInputOptions {
+  /** The number `run` scales its input by (characters, or repetitions of a short unit). Default `HOSTILE_SIZE`. */
+  readonly size?: number;
+  /** Time allowed for the one run on the large input, in milliseconds. Default `LINEAR_BUDGET_MS`. */
+  readonly budgetMs?: number;
 }
 
-/** Linear enough: linear code gives about 8, quadratic code about 64. */
-export const LINEAR_GROWTH_MAX = 16;
+/** `unit` repeated until the text is at least `length` characters long, so shapes are compared by total length. */
+export function hostileText(unit: string, length: number = HOSTILE_SIZE): string {
+  return unit.repeat(Math.ceil(length / Math.max(unit.length, 1)));
+}
+
+/**
+ * Runs `run(size)` once on a small input (warm-up) and once on the large one, and fails when the large run exceeds
+ * the budget. `run` builds its hostile input from `size` and calls the function under test.
+ */
+export function expectLinearOnHostileInput(run: (size: number) => void, options: HostileInputOptions = {}): void {
+  const size = options.size ?? HOSTILE_SIZE;
+  const budgetMs = options.budgetMs ?? LINEAR_BUDGET_MS;
+  run(Math.max(Math.floor(size / WARM_UP_DIVISOR), 1));
+  const started = performance.now();
+  run(size);
+  const elapsedMs = performance.now() - started;
+  if (elapsedMs >= budgetMs) {
+    throw new Error(
+      `not linear: hostile input of size ${size} took ${elapsedMs.toFixed(0)} ms, budget ${budgetMs} ms (linear code needs a few ms)`,
+    );
+  }
+}

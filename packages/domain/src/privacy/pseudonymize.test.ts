@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { growthRatio, LINEAR_GROWTH_MAX } from '../testing/linear-time.js';
+import { expectLinearOnHostileInput, hostileText } from '../testing/linear-time.js';
 import { pseudonymizeText, pseudonymizeValue, REDACTED, type PersonIdentifiers } from './pseudonymize.js';
 
 const giulia: PersonIdentifiers = {
@@ -169,9 +169,9 @@ describe('pseudonymizeText', () => {
   it('runs in linear time on hostile input', () => {
     const shapes = ['Referenze: Aa ', 'Dott. Aa ', 'Aa Bb, a@b.it ', 'skype: a', '1 Aa Way, ', 'P.IVA 1', 'a.it/', 'a'.repeat(1), '1 ', 'a.', 'Via A ', '+3', 'a@', '@a.', 'linkedin ', 'a.github.io', 't.me/', 'x.'];
     for (const unit of shapes) {
-      expect(growthRatio((size) => pseudonymizeText(unit.repeat(size), giulia), 2000)).toBeLessThan(LINEAR_GROWTH_MAX);
+      expectLinearOnHostileInput((length) => { pseudonymizeText(hostileText(unit, length), giulia); });
     }
-  });
+  }, 20_000);
 });
 
 describe('pseudonymizeValue', () => {
