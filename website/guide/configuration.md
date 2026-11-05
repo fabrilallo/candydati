@@ -51,6 +51,30 @@ owners and admins can require it in their organization.
 | `APPLICATIONS_DAILY_MAX_PER_JOB` | `200` | the same, per job |
 | `RECEIPTS_DAILY_MAX_PER_ORGANIZATION` | `300` | application receipt emails per organization per day |
 | `NUXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | | optional Cloudflare Turnstile check on the form. Off when empty: Cloudflare is never required |
+| `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET` | | optional "Fill in with LinkedIn" button on the form (both or none). Off when empty: see below |
+
+#### Fill in with LinkedIn
+
+Candidates can fill in their first name, last name and email from LinkedIn, then review the form and send it as usual.
+They have no account: LinkedIn only fills the form. LinkedIn's "Sign In with LinkedIn using OpenID Connect" shares
+name, email, photo and language; the photo, the language and the LinkedIn member id are discarded, and an email is
+used only when LinkedIn marks it as verified. Nothing is stored on the server: the data waits at most 10 minutes in an
+encrypted cookie of the candidate's browser and is handed to the form once. The full profile is not available through
+this product, so next to the CV the form explains how to save the LinkedIn profile as a PDF and upload it as the CV.
+
+To turn it on:
+
+1. On [LinkedIn Developers](https://www.linkedin.com/developers/apps) create an app (it needs a LinkedIn company
+   page to associate it with).
+2. In **Products**, add **Sign In with LinkedIn using OpenID Connect**. The scopes it grants, `openid`, `profile` and
+   `email`, are the only ones requested.
+3. In **Auth**, under **Authorized redirect URLs**, add exactly `{PLATFORM_URL}/api/v1/public/linkedin/callback`, for
+   example `https://jobs.example.com/api/v1/public/linkedin/callback`.
+4. Copy the **Client ID** and the **Primary Client Secret** into `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET` of
+   the api and restart it. The button appears on every application form of the instance.
+
+Keep the secret like any other secret (never in the repository). Mention in your privacy notice that candidates may
+use LinkedIn to fill in the form: the default notice already says so.
 
 ### Job ads
 
