@@ -88,6 +88,7 @@ const ROWS: readonly Row[] = [
   read('listMoveProposals', { applicationId: 'app_b' }, { label: 'of an application of job B' }),
   read('previewAutomation', { jobId: JOB_B, stageId: 'stage-0' }),
   read('previewAutomation', { jobId: 'job_1', stageId: 'stage-0', ruleId: 'rule_b' }, { label: 'a rule of job B' }),
+  read('listAutomationRuns', { ruleId: 'rule_b' }, { label: 'the runs of a rule of job B' }),
   read('listImports', {}),
   read('getImportBatch', { batchId: 'batch_b' }),
   read('exportCandidate', { candidateId: 'cand_b' }),

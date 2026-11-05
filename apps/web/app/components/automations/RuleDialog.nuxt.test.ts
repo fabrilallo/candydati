@@ -7,7 +7,14 @@ import { template } from '~~/test/fixtures/message-fixtures'
 import { rule } from '~~/test/fixtures/phase4-fixtures'
 import RuleDialog from './RuleDialog.vue'
 
-const { state } = vi.hoisted(() => ({ state: { previews: [] as unknown[], items: true } }))
+const { state } = vi.hoisted(() => ({ state: { previews: [] as unknown[], items: true, runs: true } }))
+registerEndpoint('/api/v1/automations/r1/runs', () =>
+  ok(
+    state.runs
+      ? [{ id: 'x1', at: new Date(Date.now() - 2 * 86_400_000).toISOString(), trigger: 'stage_stuck', applicationId: 'a1', candidate: { id: 'c1', firstName: 'Anna', lastName: 'Rossi' } }]
+      : [],
+  ),
+)
 registerEndpoint('/api/v1/jobs/j1/automations/preview', async (event) => {
   const body = await readBody<Record<string, unknown>>(event)
   state.previews.push(body)
@@ -29,6 +36,7 @@ afterEach(() => {
   mounted.splice(0).forEach((wrapper) => wrapper.unmount())
   state.previews.length = 0
   state.items = true
+  state.runs = true
 })
 const q = <T extends Element>(testId: string) => document.body.querySelector<T>(`[data-testid="${testId}"]`)
 const select = async (testId: string, value: string) => {
@@ -107,6 +115,27 @@ describe('rule dialog: trigger, conditions and preview', () => {
     q<HTMLButtonElement>('rule-preview-run')?.click()
     await vi.waitFor(() => expect(q('rule-preview-hidden')).not.toBeNull())
     expect(q('rule-preview-list')).toBeNull()
+  })
+})
+
+describe('rule dialog: recent runs', () => {
+  it('lists the runs of a saved rule with a link to the application', async () => {
+    await mountDialog({ rule: rule('r1', { stageId: 'tech' }) })
+    await vi.waitFor(() => expect(q('rule-runs-list')).not.toBeNull())
+    expect(q('rule-runs-list')?.textContent).toContain('Anna Rossi')
+    expect(q('rule-runs-list')?.textContent).toContain('candidatura ferma nella fase')
+    expect(q('rule-runs-list')?.querySelector('a')?.getAttribute('href')).toBe('/app/candidates/c1?application=a1&viaJobId=j1')
+  })
+
+  it('says so when the rule has not run yet', async () => {
+    state.runs = false
+    await mountDialog({ rule: rule('r1', { stageId: 'tech' }) })
+    await vi.waitFor(() => expect(q('rule-runs-empty')).not.toBeNull())
+  })
+
+  it('shows nothing for a rule that is not saved yet', async () => {
+    await mountDialog()
+    expect(q('rule-runs')).toBeNull()
   })
 })
 

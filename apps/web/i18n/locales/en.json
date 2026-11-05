@@ -2375,6 +2375,20 @@
       "more": "and {count} more",
       "namesHidden": "You have no access to candidate names: you see the numbers only."
     },
+    "runs": {
+      "title": "Recent runs",
+      "readOnly": "What the rule did, newest first. A log, nothing more.",
+      "empty": "It has not run yet.",
+      "loading": "Loading",
+      "application": "Application",
+      "kind": {
+        "stage_entered": "application entered the stage",
+        "stage_stuck": "application stayed in the stage",
+        "candidate_replied": "candidate replied",
+        "feedback_submitted": "feedback arrived",
+        "response_due_soon": "response deadline approaching"
+      }
+    },
     "copy": {
       "rule": "Copy the rule",
       "stageButton": "Copy",

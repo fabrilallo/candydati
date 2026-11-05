@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { DAY_MS } from '../response/response-state.js';
-import { automationTriggerSchema, isTimeBased, occurrenceOf, requiresCurrentStage, triggerDueNow, type TriggerSubject } from './trigger.js';
+import { automationTriggerSchema, isTimeBased, occurrenceOf, requiresCurrentStage, triggerDueNow, triggerOfOccurrence, type TriggerSubject } from './trigger.js';
 
 const NOW = new Date('2026-06-10T12:00:00.000Z');
 const job = { content: { responseDays: 5 } } as unknown as Parameters<typeof triggerDueNow>[2];
@@ -68,5 +68,13 @@ describe('occurrenceOf', () => {
     const due = new Date('2026-06-12T00:00:00.000Z');
     expect(occurrenceOf({ type: 'response_due_soon', daysBefore: 2 }, subject({ responseDueAt: due }), job, '')).toBe('due:2026-06-12T00:00:00.000Z');
     expect(occurrenceOf({ type: 'candidate_replied' }, subject(), job, 'message:m1')).toBe('message:m1');
+  });
+});
+
+describe('triggerOfOccurrence', () => {
+  it('maps every recorded occurrence to its trigger', () => {
+    expect(['', 'stuck', 'due:2026-06-01T00:00:00.000Z', 'message:m1', 'feedback:f1', 'weird'].map(triggerOfOccurrence)).toEqual([
+      'stage_entered', 'stage_stuck', 'response_due_soon', 'candidate_replied', 'feedback_submitted', 'stage_entered',
+    ]);
   });
 });

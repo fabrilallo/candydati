@@ -183,6 +183,8 @@ export interface AutomationExecutionRepository {
   claim(execution: AutomationExecution): Promise<boolean>;
   /** The runs of one rule for these applications (any entry, any occurrence). Empty list: nothing. */
   listByRule(organizationId: string, ruleId: string, applicationIds: readonly string[]): Promise<readonly AutomationExecution[]>;
+  /** The latest runs of one rule, newest first (ties by id, descending), at most `limit`. */
+  listRecentByRule(organizationId: string, ruleId: string, limit: number): Promise<readonly AutomationExecution[]>;
 }
 
 /** `runAutomations`: sends through the normal messaging path, so it needs everything messaging needs. */
