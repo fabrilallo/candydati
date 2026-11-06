@@ -6,6 +6,40 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-06
+
+Two migrations run at start as usual; take a backup first (docs/OPERATIONS.md). `0052_automation_packs` is additive
+(three new tables, two nullable columns on `automation_rule`). `0053_template_rules_to_packs` moves data and drops a
+table: the rules kept with each job template become one automation pack "<template name> (template)", linked to the
+template, and `job_template_automation` is removed. Rules a pack cannot express (their stage no longer exists in the
+template, or a proposed move back to the received stage or to a stage of the same type) are dropped.
+
+### Added
+
+- **Automation packs.** A pack is a set of automation rules the organization writes once, by kind of stage
+  ("every technical interview") instead of by stage of one job, under the new **Automazioni** page (hiring setup,
+  `automation:manage`). Attaching a pack to a job copies its rules onto every stage of that kind, as the rules of who
+  attaches it; copied rules show the pack they came from. Attaching it again brings the copies up to date in place, so
+  time-based rules do not act twice for what they already did. A new job can bring packs from the start, and job
+  templates bring their packs to every job created from them. Rules that find no stage of their kind are reported,
+  never guessed. API: `/api/v1/automation-packs` (packs and their rules), `POST /api/v1/jobs/:id/automation-packs`,
+  `GET|PUT /api/v1/job-templates/:id/automation-packs`, and `automationPackIds` on `POST /api/v1/jobs`.
+
+### Changed
+
+- **The digest email says what needs attention.** Each line names the candidate (first name and surname initial,
+  never a full name or a contact), the stage, the promised answer, task deadline or erasure date in the platform time
+  zone (`PLATFORM_TIME_ZONE`), the task title or the idle days of an ad, and links to the candidate profile, the ad or
+  the task list. Before, it listed job titles, kinds and counts only.
+- **Copying rules goes to a job or a pack.** `POST /api/v1/automations/copy` copies rules of a job to a stage of a job
+  or into a pack (`to.packId`, with `to.stageId` a stage type).
+
+### Removed
+
+- **Rules kept inside job templates** (replaced by the packs a template brings, see the migration above):
+  `GET /api/v1/job-templates/:id/automations`, `DELETE /api/v1/job-template-automations/:id`, and `templateId` in
+  `POST /api/v1/automations/copy`. API clients using them must move to packs.
+
 ## [0.4.1] - 2026-11-05
 
 No migrations.
