@@ -15,8 +15,8 @@ const { t } = useI18n()
 const route = useRoute()
 const assistant = useAssistant()
 const page = computed(() => pageContextOf(route, assistant.focus.value))
-const linkedin = useLinkedinBridge()
-const chat = useAssistantChat(() => page.value, linkedin)
+const bridge = useLinkedinBridge()
+const chat = useAssistantChat(() => page.value, bridge)
 const input = ref('')
 const composer = ref<{ focus: () => void } | null>(null)
 const thread = ref<HTMLElement | null>(null)
@@ -114,6 +114,6 @@ const focusInput = (event: Event): void => {
       </div>
     </SheetContent>
   </Sheet>
-  <LinkedinRiskDialog :open="linkedin.pendingConsent.value !== null" @answer="linkedin.answerConsent" />
+  <LinkedinRiskDialog :open="bridge.pendingConsent.value !== null" @answer="bridge.answerConsent" />
   <BulkComposerSheet :cards="reviewCards" :draft="reviewing" @close="reviewed" @sent="reviewed" />
 </template>
