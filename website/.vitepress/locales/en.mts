@@ -15,6 +15,7 @@ export const en: LocaleSpecificConfig<DefaultTheme.Config> = {
         { start: 'Getting started', run: 'Run your instance', integrate: 'Integrate', project: 'Project' },
         {
           introduction: 'Introduction',
+          sourcing: 'Agentic sourcing',
           quickStart: 'Quick start',
           email: 'Email',
           ai: 'AI assistant (optional)',
