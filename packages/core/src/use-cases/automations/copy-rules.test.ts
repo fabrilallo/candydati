@@ -1,10 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError, NotFoundError, ValidationError } from '../../errors.js';
-import { buildAutomationRule, buildJob, completeJobContent, seedAutomationWorld, userActor, ORG_A } from '../../testing/index.js';
-import { createJobTemplate } from '../jobs/create-job-template.js';
-import { createJob } from '../jobs/create-job.js';
+import { buildAutomationRule, buildJob, buildPack, completeJobContent, seedAutomationWorld, userActor, ORG_A } from '../../testing/index.js';
 import { copyAutomations } from './copy-rules.js';
-import { listTemplateAutomations, deleteTemplateAutomation } from './template-rules.js';
 
 const rita = userActor({ organizationId: ORG_A, id: 'recruiter_1', role: 'recruiter' });
 const adam = userActor({ organizationId: ORG_A, id: 'admin_1', role: 'admin' });
@@ -55,7 +52,7 @@ describe('copyAutomations between stages and jobs', () => {
     expect(await rulesOf(deps, 'job_2')).toEqual([]);
   });
 
-  it('refuses people who are not members and templates that do not exist', async () => {
+  it('refuses people who are not members and email templates that do not exist', async () => {
     const deps = seedAutomationWorld({
       jobs: [buildJob({ organizationId: ORG_A }), buildJob({ id: 'job_2', slug: 'job-2', organizationId: ORG_A })],
       rules: [
@@ -75,42 +72,33 @@ describe('copyAutomations between stages and jobs', () => {
   });
 });
 
-describe('copyAutomations with job templates', () => {
-  it('a template keeps rules, and a job created from it gets copies made by its creator', async () => {
-    const deps = world();
-    const template = await createJobTemplate(deps, adam, { name: 'Backend', content: completeJobContent() });
-    const first = template.content.process[0]?.id ?? '';
-    await copyAutomations(deps, adam, { from: { jobId: 'job_1', ruleIds: ['r1'] }, to: { templateId: template.id, stageId: first } });
-    const kept = await listTemplateAutomations(deps, adam, { templateId: template.id });
-    expect(kept.map((r) => [r.stageId, r.createdBy])).toEqual([[first, 'admin_1']]);
-
-    const job = await createJob(deps, rita, { templateId: template.id, content: {} });
-    expect((await rulesOf(deps, job.id)).map((r) => [r.stageId, r.action, r.createdBy])).toEqual([[first, task('First'), 'recruiter_1']]);
-    expect(deps.auditLog.events().filter((e) => e.action === 'automation.copied').map((e) => e.target)).toContainEqual({ type: 'job', id: job.id });
+describe('copyAutomations into a pack', () => {
+  const withPack = () => seedAutomationWorld({
+    jobs: [buildJob({ organizationId: ORG_A })],
+    packs: [buildPack({ organizationId: ORG_A })],
+    rules: [
+      buildAutomationRule({ id: 'r1', stageId: 'stage-0', action: task('First') }),
+      buildAutomationRule({ id: 'r2', stageId: 'stage-0', action: { type: 'propose_move', toStageId: 'stage-1' } }),
+      buildAutomationRule({ id: 'back', stageId: 'stage-1', action: { type: 'propose_move', toStageId: 'received' } }),
+    ],
   });
 
-  it('copies from a template to an existing job, and a template rule can be removed', async () => {
-    const deps = world();
-    const template = await createJobTemplate(deps, adam, { name: 'Backend', content: completeJobContent() });
-    const stage = template.content.process[0]?.id ?? '';
-    const { created } = await copyAutomations(deps, adam, { from: { jobId: 'job_1', ruleIds: ['r3'] }, to: { templateId: template.id, stageId: stage } });
-    await copyAutomations(deps, rita, { from: { templateId: template.id, stageId: stage }, to: { jobId: 'job_2', stageId: 'stage-1' } });
-    expect((await rulesOf(deps, 'job_2')).map((r) => [r.stageId, r.createdBy])).toEqual([['stage-1', 'recruiter_1']]);
-    await deleteTemplateAutomation(deps, adam, { ruleId: created[0] });
-    expect(await listTemplateAutomations(deps, adam, { templateId: template.id })).toEqual([]);
+  it('writes the rules on a stage type, a proposed move pointing at the type of its target stage', async () => {
+    const deps = withPack();
+    const result = await copyAutomations(deps, rita, { from: { jobId: 'job_1', stageId: 'stage-0' }, to: { packId: 'pack_1', stageId: 'hr_interview' } });
+    expect(result.to).toEqual({ kind: 'pack', packId: 'pack_1' });
+    expect(deps.automationPacks.snapshot().rules.map((r) => [r.stage, r.action, r.createdBy])).toEqual([
+      ['hr_interview', task('First'), 'recruiter_1'],
+      ['hr_interview', { type: 'propose_move', toStageId: 'technical_interview' }, 'recruiter_1'],
+    ]);
+    expect(deps.auditLog.events().map((e) => e.target)).toEqual([{ type: 'automation_pack', id: 'pack_1' }]);
   });
 
-  it('a hiring manager creating a job from a template gets no rules: they may not manage automations', async () => {
-    const deps = world();
-    const template = await createJobTemplate(deps, adam, { name: 'Backend', content: completeJobContent() });
-    await copyAutomations(deps, adam, { from: { jobId: 'job_1', ruleIds: ['r1'] }, to: { templateId: template.id, stageId: template.content.process[0]?.id ?? '' } });
-    const job = await createJob(deps, hugo, { templateId: template.id, content: {} });
-    expect(await rulesOf(deps, job.id)).toEqual([]);
-  });
-
-  it('a template of another organization is not found', async () => {
-    const deps = world();
-    const template = await createJobTemplate(deps, adam, { name: 'Backend', content: completeJobContent() });
-    await expect(listTemplateAutomations(deps, otherOrg, { templateId: template.id })).rejects.toBeInstanceOf(NotFoundError);
+  it('refuses a stage that is not a type, a move back to received and an unknown pack', async () => {
+    const deps = withPack();
+    await expect(copyAutomations(deps, rita, { from: { jobId: 'job_1', ruleIds: ['r1'] }, to: { packId: 'pack_1', stageId: 'stage-0' } })).rejects.toBeInstanceOf(ValidationError);
+    await expect(copyAutomations(deps, rita, { from: { jobId: 'job_1', ruleIds: ['back'] }, to: { packId: 'pack_1', stageId: 'offer' } })).rejects.toMatchObject({ issues: [{ path: 'rules.0.action.toStageId', message: 'unknown_stage' }] });
+    await expect(copyAutomations(deps, rita, { from: { jobId: 'job_1', ruleIds: ['r1'] }, to: { packId: 'nope', stageId: 'offer' } })).rejects.toBeInstanceOf(NotFoundError);
+    expect(deps.automationPacks.snapshot().rules).toEqual([]);
   });
 });

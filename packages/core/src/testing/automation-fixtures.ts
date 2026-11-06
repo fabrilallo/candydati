@@ -1,4 +1,4 @@
-import type { AutomationPack, AutomationPackRule, AutomationRule, MoveProposal, Notification, OutboxEvent, Task, TemplateAutomationRule, WebhookDelivery, WebhookEndpoint } from '@candydati/domain';
+import type { AutomationPack, AutomationPackRule, AutomationRule, MoveProposal, Notification, OutboxEvent, Task, WebhookDelivery, WebhookEndpoint } from '@candydati/domain';
 import type { Member } from '../automation-ports.js';
 
 const DATE = new Date('2026-01-01T00:00:00.000Z');
@@ -63,20 +63,6 @@ export const buildMoveProposal = (overrides: Partial<MoveProposal> = {}): MovePr
   expiresAt: new Date('2099-01-01T00:00:00.000Z'),
   resolvedBy: null,
   resolvedAt: null,
-  ...overrides,
-});
-
-export const buildTemplateRule = (overrides: Partial<TemplateAutomationRule> = {}): TemplateAutomationRule => ({
-  id: 'trule_1',
-  organizationId: 'org_a',
-  templateId: 'tpl_1',
-  stageId: 'stage-0',
-  trigger: { type: 'stage_entered' },
-  conditions: {},
-  action: { type: 'create_task', title: 'Prepare the interview', assignee: 'job_owner' },
-  enabled: true,
-  createdBy: 'recruiter_1',
-  createdAt: DATE,
   ...overrides,
 });
 

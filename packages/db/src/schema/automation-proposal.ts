@@ -1,10 +1,10 @@
-import type { AutomationActionType, AutomationTriggerType, MoveProposalSource, MoveProposalStatus } from '@candydati/domain';
+import type { MoveProposalSource, MoveProposalStatus } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
-import { boolean, index, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { index, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { automationRule } from './automation.js';
 import { application } from './candidate.js';
-import { job, jobTemplate } from './job.js';
+import { job } from './job.js';
 
 const organizationRef = () =>
   text('organization_id')
@@ -53,30 +53,4 @@ export const moveProposal = pgTable(
   ],
 );
 
-/**
- * A rule kept with a job template, same shape as `automation_rule` with the template instead of the job. A job created
- * from the template gets a copy of each one whose stage it still has. Goes with the template.
- */
-export const jobTemplateAutomation = pgTable(
-  'job_template_automation',
-  {
-    id: text('id').primaryKey(),
-    organizationId: organizationRef(),
-    templateId: text('template_id')
-      .notNull()
-      .references(() => jobTemplate.id, { onDelete: 'cascade' }),
-    stageId: text('stage_id').notNull(),
-    trigger: text('trigger').$type<AutomationTriggerType>().notNull(),
-    triggerConfig: jsonb('trigger_config').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
-    conditions: jsonb('conditions').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
-    action: text('action').$type<AutomationActionType>().notNull(),
-    config: jsonb('config').$type<Record<string, unknown>>().notNull(),
-    enabled: boolean('enabled').notNull().default(true),
-    createdBy: text('created_by').notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [index('job_template_automation_org_template_idx').on(table.organizationId, table.templateId)],
-);
-
 export type MoveProposalRow = typeof moveProposal.$inferSelect;
-export type JobTemplateAutomationRow = typeof jobTemplateAutomation.$inferSelect;

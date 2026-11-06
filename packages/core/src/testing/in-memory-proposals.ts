@@ -1,5 +1,5 @@
-import type { MoveProposal, TemplateAutomationRule } from '@candydati/domain';
-import type { MoveProposalRepository, TemplateAutomationRepository } from '../proposal-ports.js';
+import type { MoveProposal } from '@candydati/domain';
+import type { MoveProposalRepository } from '../proposal-ports.js';
 import { cell } from './in-memory-transaction.js';
 
 export interface InMemoryMoveProposals extends MoveProposalRepository {
@@ -47,33 +47,6 @@ export function createInMemoryMoveProposals(initial: readonly MoveProposal[] = [
       const due = rows.get().filter((p) => p.status === 'open' && p.expiresAt.getTime() <= now.getTime());
       for (const proposal of due) replace({ ...proposal, status: 'expired', resolvedAt: now });
       return due.length;
-    },
-    snapshot: () => rows.get(),
-  };
-}
-
-export interface InMemoryTemplateAutomations extends TemplateAutomationRepository {
-  snapshot(): readonly TemplateAutomationRule[];
-}
-
-export function createInMemoryTemplateAutomations(initial: readonly TemplateAutomationRule[] = []): InMemoryTemplateAutomations {
-  const rows = cell<readonly TemplateAutomationRule[]>([...initial]);
-  const inOrg = (organizationId: string) => rows.get().filter((r) => r.organizationId === organizationId);
-  return {
-    async create(rule) {
-      rows.set([...rows.get(), rule]);
-      return rule;
-    },
-    async findById(organizationId, id) {
-      return inOrg(organizationId).find((r) => r.id === id) ?? null;
-    },
-    async listByTemplate(organizationId, templateId) {
-      return oldestFirst(inOrg(organizationId).filter((r) => r.templateId === templateId));
-    },
-    async delete(organizationId, id) {
-      const exists = inOrg(organizationId).some((r) => r.id === id);
-      rows.set(rows.get().filter((r) => !(r.organizationId === organizationId && r.id === id)));
-      return exists;
     },
     snapshot: () => rows.get(),
   };

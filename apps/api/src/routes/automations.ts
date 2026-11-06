@@ -2,14 +2,11 @@ import {
   copyAutomations,
   createAutomation,
   deleteAutomation,
-  deleteTemplateAutomation,
   listAutomationRuns,
   listAutomations,
-  listTemplateAutomations,
   previewAutomation,
   toAutomationRuleDto,
   toCopyAutomationsResultDto,
-  toTemplateAutomationRuleDto,
   updateAutomation,
 } from '@candydati/core';
 import { ok } from '@candydati/domain';
@@ -58,14 +55,7 @@ export function registerAutomationRoutes(app: FastifyInstance, ctx: AppContext):
     return reply.status(201).send(ok(toCopyAutomationsResultDto(result)));
   });
 
-  app.get('/api/v1/job-templates/:id/automations', async (request) =>
-    ok((await listTemplateAutomations(deps, await ctx.resolveActor(request), { templateId: paramOf(request, 'id') })).map(toTemplateAutomationRuleDto)),
-  );
 
-  app.delete('/api/v1/job-template-automations/:id', async (request) => {
-    await deleteTemplateAutomation(deps, await ctx.resolveActor(request), { ruleId: paramOf(request, 'id') });
-    return ok({ deleted: true });
-  });
 
   registerAutomationPackRoutes(app, ctx);
   registerMoveProposalRoutes(app, ctx);

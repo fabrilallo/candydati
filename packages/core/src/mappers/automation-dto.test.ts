@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { buildApplication, buildAutomationRule, buildCandidate, buildJob, buildMoveProposal, buildNotification, buildTask, buildTemplateRule } from '../testing/index.js';
+import { buildApplication, buildAutomationRule, buildCandidate, buildJob, buildMoveProposal, buildNotification, buildTask } from '../testing/index.js';
 import type { AttentionItemView } from '../use-cases/candidates/list-attention.js';
-import { toAttentionItemDtos, toAutomationRuleDto, toCopyAutomationsResultDto, toMoveProposalDto, toNotificationDto, toTaskDto, toTemplateAutomationRuleDto } from './automation-dto.js';
+import { toAttentionItemDtos, toAutomationRuleDto, toCopyAutomationsResultDto, toMoveProposalDto, toNotificationDto, toTaskDto } from './automation-dto.js';
 
 const candidate = buildCandidate();
 const job = buildJob({ id: 'job_1' });
@@ -76,9 +76,8 @@ describe('automation DTO mappers', () => {
     });
   });
 
-  it('maps a template rule, a copy result and a proposal with ISO dates', () => {
-    expect(toTemplateAutomationRuleDto(buildTemplateRule())).toMatchObject({ id: 'trule_1', templateId: 'tpl_1', createdAt: '2026-01-01T00:00:00.000Z' });
-    expect(toCopyAutomationsResultDto({ to: { kind: 'template', templateId: 't1' }, stageId: 's1', created: ['r9'] })).toEqual({ to: { kind: 'template', id: 't1' }, stageId: 's1', created: ['r9'] });
+  it('maps a copy result and a proposal with ISO dates', () => {
+    expect(toCopyAutomationsResultDto({ to: { kind: 'pack', packId: 'p1' }, stageId: 'offer', created: ['r9'] })).toEqual({ to: { kind: 'pack', id: 'p1' }, stageId: 'offer', created: ['r9'] });
     const dto = toMoveProposalDto({ proposal: buildMoveProposal(), candidate: { id: 'c1', firstName: 'Anna', lastName: 'Rossi' }, job: { id: 'job_1', title: 'Dev' }, fromLabel: 'HR', toLabel: null });
     expect(dto).toMatchObject({ id: 'prop_1', from: { id: 'stage-0', label: 'HR' }, to: { id: 'stage-1', label: null }, expiresAt: '2099-01-01T00:00:00.000Z' });
   });

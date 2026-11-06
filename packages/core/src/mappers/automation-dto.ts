@@ -8,8 +8,6 @@ import type {
   MoveProposalDto,
   NotificationKind,
   Task,
-  TemplateAutomationRule,
-  TemplateAutomationRuleDto,
 } from '@candydati/domain';
 import type { CopyAutomationsResult } from '../use-cases/automations/copy-rules.js';
 import type { MoveProposalView } from '../use-cases/automations/proposals.js';
@@ -117,20 +115,8 @@ export const toTaskDto = ({ task, assigneeName, candidate, jobTitle }: TaskView)
   jobTitle,
 });
 
-export const toTemplateAutomationRuleDto = (rule: TemplateAutomationRule): TemplateAutomationRuleDto => ({
-  id: rule.id,
-  templateId: rule.templateId,
-  stageId: rule.stageId,
-  trigger: rule.trigger,
-  conditions: rule.conditions,
-  action: rule.action,
-  enabled: rule.enabled,
-  createdBy: rule.createdBy,
-  createdAt: iso(rule.createdAt),
-});
-
 export const toCopyAutomationsResultDto = (result: CopyAutomationsResult): CopyAutomationsResultDto => ({
-  to: result.to.kind === 'job' ? { kind: 'job', id: result.to.jobId } : { kind: 'template', id: result.to.templateId },
+  to: result.to.kind === 'job' ? { kind: 'job', id: result.to.jobId } : { kind: 'pack', id: result.to.packId },
   stageId: result.stageId,
   created: [...result.created],
 });

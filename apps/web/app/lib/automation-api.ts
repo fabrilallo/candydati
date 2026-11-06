@@ -5,7 +5,6 @@ import {
   automationRuleSchema,
   copyAutomationsResultSchema,
   moveProposalSchema,
-  templateAutomationRuleSchema,
   webhookCreatedSchema,
   webhookDeliverySchema,
   webhookEndpointSchema,
@@ -18,7 +17,6 @@ import {
   type CopyAutomationsInput,
   type CopyAutomationsResultDto,
   type MoveProposalDto,
-  type TemplateAutomationRuleDto,
   type WebhookCreatedDto,
   type WebhookDeliveryDto,
   type WebhookEndpointDto,
@@ -54,16 +52,10 @@ export const deleteRule = async (request: JobApiRequest, ruleId: string): Promis
   await callApi(request, `/api/v1/automations/${id(ruleId)}`, z.unknown(), { method: 'DELETE' })
 }
 
-/** Copies rules (some, or every rule of a stage) of a job or template to one stage of a job or template. */
+/** Copies rules (some, or every rule of a stage) of a job to one stage of a job, or into a pack. */
 export const copyRules = async (request: JobApiRequest, input: CopyAutomationsInput): Promise<CopyAutomationsResultDto> =>
   (await callApi(request, '/api/v1/automations/copy', copyAutomationsResultSchema, { method: 'POST', body: input })).data
 
-export const listTemplateRules = async (request: JobApiRequest, templateId: string): Promise<readonly TemplateAutomationRuleDto[]> =>
-  (await callApi(request, `/api/v1/job-templates/${id(templateId)}/automations`, z.array(templateAutomationRuleSchema))).data
-
-export const deleteTemplateRule = async (request: JobApiRequest, ruleId: string): Promise<void> => {
-  await callApi(request, `/api/v1/job-template-automations/${id(ruleId)}`, z.unknown(), { method: 'DELETE' })
-}
 
 /** Live proposals of `propose_move` rules: of one application, or of every job the person reaches. */
 export const listProposals = async (request: JobApiRequest, applicationId: string | null): Promise<readonly MoveProposalDto[]> =>

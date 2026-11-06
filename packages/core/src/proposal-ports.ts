@@ -1,4 +1,4 @@
-import type { MoveProposal, MoveProposalStatus, TemplateAutomationRule } from '@candydati/domain';
+import type { MoveProposal, MoveProposalStatus } from '@candydati/domain';
 
 export interface MoveProposalListQuery {
   readonly organizationId: string;
@@ -30,12 +30,3 @@ export interface MoveProposalRepository {
   expireDue(now: Date): Promise<number>;
 }
 
-/** Rules kept with job templates. Every method takes the organization. */
-export interface TemplateAutomationRepository {
-  create(rule: TemplateAutomationRule): Promise<TemplateAutomationRule>;
-  findById(organizationId: string, id: string): Promise<TemplateAutomationRule | null>;
-  /** Oldest first. */
-  listByTemplate(organizationId: string, templateId: string): Promise<readonly TemplateAutomationRule[]>;
-  /** True when a rule was deleted. */
-  delete(organizationId: string, id: string): Promise<boolean>;
-}

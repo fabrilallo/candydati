@@ -241,12 +241,12 @@ index) and tells the rule's creator and the job owner; it moves nothing. A perso
 only while the application is open, in the stage it was proposed from, and for 14 days: a move or a decision drops it
 (`dropped`, in the same transaction), and the hourly `automation.scan` marks the old ones `expired`.
 
-**Copied rules.** `copyAutomations` copies some rules, or every rule of a stage, to a stage of the same job, another
-job or a job template (`job_template_automation`), and from a template to a job. Every copy is validated against the
-target first (the stage exists, templates resolve in its language, the people named are members, a proposed move points
-at one of its stages) and becomes the copying person's rule (`createdBy`); audited as `automation.copied`. A job created
-from a template gets a copy of each template rule whose stages it has, made by its creator if they may manage
-automations.
+**Copied rules.** `copyAutomations` copies some rules of a job, or every rule of a stage, to a stage of the same job or
+another job, or into an automation pack on a stage type (a proposed move then names the type of its target stage).
+Every copy is validated against the target first (the stage exists, templates resolve, the people named are members, a
+proposed move points at one of its stages) and becomes the copying person's rule (`createdBy`); audited as
+`automation.copied`. Job templates hold no rules of their own: they bring packs (below). Migration 0053 turned the rules
+templates held before into one pack per template.
 
 **Automation packs.** A pack (`automation_pack`, `automation_pack_rule`) is a named set of rules the organization keeps
 once. Its rules never name a stage id: `stage_anchor` is `received` or a stage type, and a `propose_move` names a stage
@@ -381,7 +381,7 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 | Jobs | `job`, `job_team_member`, `job_stage_restriction`, `job_template`, `job_stage_interviewer`, `job_request`, `job_distribution`, `distribution_setting`, `job_tracked_link` |
 | Candidates | `candidate`, `application`, `application_stage_event`, `candidate_note`, `cv_extraction`, `response_promise` |
 | Communication | `conversation`, `message`, `email_template`, `email_settings` |
-| Automation | `automation_rule`, `automation_execution`, `move_proposal`, `job_template_automation`, `automation_pack`, `automation_pack_rule`, `job_template_pack`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |
+| Automation | `automation_rule`, `automation_execution`, `move_proposal`, `automation_pack`, `automation_pack_rule`, `job_template_pack`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |
 | Privacy | `privacy_notice`, `consent_token`, `data_export`, `retention_run` |
 | Import | `import_batch`, `import_item`, `import_analysis` |
 | HR tools | `feedback_request`, `interview_feedback` (scorecard observations in `observations`), `job_scorecard_criterion` |

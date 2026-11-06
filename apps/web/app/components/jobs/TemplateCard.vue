@@ -16,7 +16,7 @@ const tr = (key: string, params: Params = {}): string => (typeof params.count ==
 const summary = computed(() => templateSummary(props.template.content, tr))
 const updated = computed(() => relativeTime(props.template.updatedAt, props.now, locale.value))
 const { viewer } = useViewer()
-/** The rules kept with the template, for those who manage automations. */
+/** The automation packs the template brings, for those who manage automations. */
 const canRules = computed(() => can(viewer.value?.role ?? null, 'automation:manage'))
 const canEditPacks = computed(() => canRules.value && can(viewer.value?.role ?? null, 'job_template:create'))
 </script>
@@ -30,7 +30,6 @@ const canEditPacks = computed(() => canRules.value && can(viewer.value?.role ?? 
       </div>
       <p class="text-sm text-muted-foreground" data-testid="template-summary">{{ summary }}</p>
       <TemplatePacks v-if="canRules" :template="template" :can-edit="canEditPacks" />
-      <TemplateRules v-if="canRules" :template="template" />
     </div>
     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
       <p class="text-xs text-muted-foreground">
