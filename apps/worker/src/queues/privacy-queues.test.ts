@@ -1,5 +1,5 @@
 import { dataExportKey, emptyImportCounts } from '@candydati/domain';
-import { buildApplication, createFakeEmailSender, createInMemoryFileStorage, ORG_A, ORG_B, seedImportWorld, seedPrivacyData, userActor, createInMemoryTransaction } from '@candydati/core/testing';
+import { buildApplication, createFakeEmailSender, createInMemoryFileStorage, ORG_A, ORG_B, seedAutomationWorld, seedImportWorld, seedPrivacyData, userActor, createInMemoryTransaction } from '@candydati/core/testing';
 import { formatDigestFrom } from '@candydati/core';
 import { requestOrganizationExport } from '@candydati/core';
 import pino from 'pino';
@@ -66,7 +66,7 @@ describe('retention.run: abandoned imports', () => {
       retention,
       imports,
       importStaleDays: 7,
-      digest: { transaction: createInMemoryTransaction(), mail: { sender: createFakeEmailSender(), from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' } },
+      digest: { transaction: createInMemoryTransaction(), mail: { sender: createFakeEmailSender(), from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' }, details: seedAutomationWorld() },
       now: () => NOW,
     });
     await queue.handle(job({}));
@@ -78,7 +78,7 @@ describe('retention.run: abandoned imports', () => {
 describe('retention.run', () => {
   const NOW = new Date('2027-06-01T03:00:00Z');
 
-  it('is scheduled daily at 03:00, erases the expired, warns about the expiring and emails the digest without names', async () => {
+  it('is scheduled daily at 03:00, erases the expired, warns about the expiring and emails the digest with first name and initial only', async () => {
     const deps = await seedPrivacyData({
       applications: [
         buildApplication({ id: 'app_old', organizationId: ORG_A, candidateId: 'cand_1', retentionExpiresAt: new Date(NOW.getTime() - DAY), cv: { key: `organizations/${ORG_A}/applications/app_old/cv`, fileName: 'cv.pdf', mediaType: 'application/pdf', sizeBytes: 1 } }),
@@ -90,7 +90,7 @@ describe('retention.run', () => {
       retention: deps,
       imports: seedImportWorld(),
       importStaleDays: 7,
-      digest: { transaction: createInMemoryTransaction(), mail: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' } },
+      digest: { transaction: createInMemoryTransaction(), mail: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' }, details: { ...seedAutomationWorld(), applications: deps.applications, candidates: deps.candidates } },
       now: () => NOW,
     });
     expect(queue.schedule).toEqual({ cron: '0 3 * * *', data: {} });
@@ -99,7 +99,7 @@ describe('retention.run', () => {
     expect(deps.store.read().applications.map((a) => a.id)).toEqual(['app_soon']);
     expect(deps.notifications.snapshot().filter((n) => n.kind === 'retention_expiring')).not.toHaveLength(0);
     expect(sender.sent().length).toBeGreaterThan(0);
-    expect(sender.sent()[0]?.text).toContain('data retention expiring');
-    expect(JSON.stringify(sender.sent())).not.toMatch(/Zelda|Bruno/i);
+    expect(sender.sent()[0]?.text).toMatch(/- Data to be erased on 11 June 2027 \(end of retention\): Bruno B\.\n {2}https:\/\/app\.example\/app\/candidates\/cand_2/);
+    expect(JSON.stringify(sender.sent())).not.toMatch(/Zelda|Bystander|bruno\.bystander/i);
   });
 });

@@ -230,8 +230,8 @@ again that the creator is a member, holds the permission the action needs (`ACTI
 `assign` has no owner field to write: it gives the person a "follow this application" task, one open at a time.
 `request_feedback` asks the stage's interviewers through `requestMissingFeedback` (nobody with a request open or
 answered is asked again; the hourly reminder scan follows up). `notify` creates `automation_alert` notifications for
-the recipients who can open the job, or `automation_alert_email` ones that the hourly digest also carries (job title and
-kind only), or an `automation.notified` webhook event with ids only (`ruleId`, `applicationId`, `jobId`, `stageId`,
+the recipients who can open the job, or `automation_alert_email` ones that the hourly digest also carries (job title,
+candidate's first name and surname initial, stage), or an `automation.notified` webhook event with ids only (`ruleId`, `applicationId`, `jobId`, `stageId`,
 `trigger`).
 
 **Proposed moves.** `propose_move` writes a row in `move_proposal` (at most one open per application, a partial unique

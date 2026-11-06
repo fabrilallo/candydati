@@ -4,9 +4,11 @@ import type { EmailSender } from '../../messaging-ports.js';
 import { buildNotification, createFakeEmailSender, createInMemoryNotifications } from '../../testing/index.js';
 import { createInMemoryTransaction } from '../../testing/in-memory-transaction.js';
 import type { DigestEntry } from '../automations/scan-deadlines.js';
+import type { DigestDetailSources } from './digest-details.js';
 import { formatDigestFrom } from './digest-email.js';
 import { sendDigests, type DigestDeps } from './send-digests.js';
 
+const NO_DETAILS: DigestDetailSources = { applications: { findById: async () => null }, candidates: { findByIds: async () => [] }, tasks: { findById: async () => null }, jobs: { findById: async () => null } };
 const NOW = new Date('2026-06-01T10:00:00.000Z');
 const note = (id: string, userId: string): Notification => buildNotification({ id, organizationId: 'org_a', userId, kind: 'response_overdue', createdAt: NOW });
 const entryOf = (userId: string, email: string, notifications: readonly Notification[]): DigestEntry => ({ organizationId: 'org_a', userId, email, name: userId, notifications, jobTitles: {} });
@@ -18,6 +20,7 @@ const world = (sender: EmailSender) => {
     transaction: createInMemoryTransaction(),
     notifications,
     mail: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' },
+    details: NO_DETAILS,
     now: () => NOW,
   };
   const entries = [entryOf('u1', 'olivia@acme.example', [notes[0] as Notification]), entryOf('u2', 'bob@acme.example', [notes[1] as Notification])];
