@@ -72,6 +72,7 @@ import { registerFeedbackRoutes } from './routes/feedback.js';
 import { registerPublicFeedbackRoutes } from './routes/public-feedback.js';
 import { registerClientRoutes } from './routes/clients.js';
 import { registerPublicShortlistRoutes } from './routes/public-shortlists.js';
+import { registerSourcingRoutes } from './routes/sourcing.js';
 import { registerJobRequestRoutes } from './routes/job-requests.js';
 import { registerJobTeamRoutes } from './routes/job-team.js';
 import { registerStaleJobRoutes } from './routes/stale-jobs.js';
@@ -256,6 +257,7 @@ function registerRecruitingRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerPublicFeedbackRoutes(app, ctx);
   registerClientRoutes(app, ctx);
   registerPublicShortlistRoutes(app, ctx);
+  registerSourcingRoutes(app, ctx);
   registerJobTemplateRoutes(app, ctx);
   registerDistributionRoutes(app, ctx);
   registerPublicJobRoutes(app, ctx);

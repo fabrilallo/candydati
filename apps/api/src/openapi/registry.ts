@@ -4,6 +4,7 @@ import { careersRoutes } from './routes-careers.js';
 import { clientRoutes } from './routes-clients.js';
 import { configRoutes } from './routes-config.js';
 import { automationPackRoutes } from './routes-automation-packs.js';
+import { sourcingRoutes } from './routes-sourcing.js';
 import { hrRoutes } from './routes-hr.js';
 import { importRoutes } from './routes-import.js';
 import { migrationRoutes } from './routes-migration.js';
@@ -30,6 +31,7 @@ export const ROUTE_REGISTRY: readonly RouteSpec[] = [
   ...privacyRoutes,
   ...configRoutes,
   ...automationPackRoutes,
+  ...sourcingRoutes,
   ...importRoutes,
   ...migrationRoutes,
   ...careersRoutes,

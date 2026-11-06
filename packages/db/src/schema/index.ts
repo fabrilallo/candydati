@@ -21,3 +21,4 @@ export * from './careers.js';
 export * from './client.js';
 export * from './oauth.js';
 export * from './skill-alias.js';
+export * from './sourcing.js';
