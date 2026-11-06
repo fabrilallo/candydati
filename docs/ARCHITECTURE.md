@@ -365,6 +365,14 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 - **Export:** per-candidate ZIP and whole-organization export, in the public schemas under [`schema/`](schema).
 - **Import:** imported people get consent marked "to renew" and an email asking to reconfirm; no reply in the window
   means erasure ([ADR 0008](adr/0008-imports-consent-renewal.md)).
+- **Sourcing (art. 14):** people found outside Candydati for a job (a LinkedIn or GitHub profile, a web page) are
+  `sourced_contact` rows, never candidates. Each expires 30 days after collection (erased by `retention.run`). Each has a
+  personal notice link (only the hash is stored; renewing it kills the old one) to a public page that shows everything
+  kept and erases it on request; the notice is emailed by the worker (`sourcing.notice`) when the address is known,
+  otherwise the recruiter pastes its short form into the first message. Erasing on request keeps only a keyed hash
+  (HMAC with the instance secret and the organization) of the profile and email in `sourcing_objection`, so the person is
+  never added again. Duplicates of candidates (same email or LinkedIn profile) and of contacts are skipped, never merged.
+  Evidence per criterion only: no score, no ranking.
 - **Minimization:** no special-category fields; CV extraction drops photo, birth date and marital status; the assistant
   and MCP never send a model a surname or contact (see the assistant and MCP constraints).
 - Legal templates (privacy notice, DPA, record of processing) are in [`legal/`](legal). They need legal review.
@@ -383,6 +391,7 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 | Communication | `conversation`, `message`, `email_template`, `email_settings` |
 | Automation | `automation_rule`, `automation_execution`, `move_proposal`, `automation_pack`, `automation_pack_rule`, `job_template_pack`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |
 | Privacy | `privacy_notice`, `consent_token`, `data_export`, `retention_run` |
+| Sourcing | `sourced_contact` (a person found outside Candydati for a job, evidence as validated jsonb, notice hash, expiry), `sourcing_objection` (keyed hashes of who asked not to be added again) |
 | Import | `import_batch`, `import_item`, `import_analysis` |
 | HR tools | `feedback_request`, `interview_feedback` (scorecard observations in `observations`), `job_scorecard_criterion` |
 | Clients (agencies) | `client` (contacts as validated jsonb), `job_client` (the client of a job and how its ad shows it), `client_shortlist` (hash of the link, expiry, revocation, reminders), `client_shortlist_item` (what is shared per candidate and the client's answer) |

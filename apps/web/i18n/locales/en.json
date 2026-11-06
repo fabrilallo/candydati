@@ -672,6 +672,13 @@
         "proposed": "Proposed moving an application to another stage",
         "confirmed": "Confirmed a proposed move",
         "dismissed": "Dismissed a proposed move"
+      },
+      "sourced_contact": {
+        "added": "Added contacts found outside Candydati",
+        "contacted": "Marked a contact as written to",
+        "notified": "Sent the notice to a sourced contact",
+        "deleted": "Erased a sourced contact",
+        "objected": "A sourced contact asked to be erased"
       }
     }
   },
@@ -2841,6 +2848,9 @@
       },
       "skill_alias": {
         "manage": "Manage skill aliases"
+      },
+      "sourcing": {
+        "manage": "Manage sourced contacts"
       }
     },
     "withheld": "Some things a key can never do: decisions about candidates, messages to candidates and administration stay with a person.",
@@ -5198,6 +5208,48 @@
       "title": "Packs of the template {name}",
       "description": "Every job created from this template gets a copy of the rules of these packs.",
       "saved": "Template packs saved"
+    }
+  },
+  "sourcingNotice": {
+    "metaTitle": "Your data at {organization}",
+    "title": "Hi {name}, here is what we know about you",
+    "intro": "{organization} found your {source} and thinks you may be interested in the {job} role. You did not apply: this is why the law (GDPR, art. 14) asks us to tell you what we keep and why.",
+    "sources": {
+      "linkedin": "public LinkedIn profile",
+      "github": "public GitHub profile",
+      "web": "public web page",
+      "manual": "public profile"
+    },
+    "keptTitle": "What we keep",
+    "fields": {
+      "name": "Name",
+      "headline": "Title",
+      "location": "City",
+      "email": "Email",
+      "profile": "Profile",
+      "evidence": "What relates to the role",
+      "collected": "Collected on"
+    },
+    "purpose": "Only to consider offering you this role. No score and no automated decision: if anyone writes to you, it will be a person.",
+    "deadline": "If you do not reply, this data is erased by {date}.",
+    "eraseTitle": "Not interested?",
+    "eraseBody": "We erase everything at once. {organization} keeps only an encrypted fingerprint of your profile, which cannot be traced back to you, so it never adds you again.",
+    "eraseButton": "Erase my data and do not contact me",
+    "erasedTitle": "Done: your data has been erased",
+    "erasedBody": "{organization} will not contact you again and cannot add you again.",
+    "failure": {
+      "invalid": {
+        "title": "Link not valid",
+        "body": "This link no longer works: the data may already have been erased, or you received a newer link."
+      },
+      "rateLimited": {
+        "title": "Too many requests",
+        "body": "Try again in a few minutes."
+      },
+      "unavailable": {
+        "title": "Page not available",
+        "body": "We cannot load the page right now. Try again later."
+      }
     }
   }
 }

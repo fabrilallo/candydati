@@ -6,6 +6,17 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Sourced contacts (foundation of sourcing).** People found outside Candydati for a job (a LinkedIn or GitHub profile,
+  a web page) can be added as contacts of the job: `POST /api/v1/jobs/:id/sourced-contacts` with evidence per criterion
+  (never a score). Duplicates of candidates (same email or LinkedIn profile) and of contacts are skipped, never merged.
+  Each contact gets a personal GDPR art. 14 link to a public page (`/sourcing/notice/<token>`) that shows everything kept
+  and erases it on request; the organization then keeps only a keyed hash so the person is never added again. With a
+  known email the notice is emailed by the worker; otherwise `POST /api/v1/sourced-contacts/:id/notice` gives a short
+  text to paste into a first message. Contacts are erased 30 days after collection. New permission `sourcing:manage`
+  (owner, admin, recruiter; grantable to API keys and the assistant). Migration `0054_sourced_contacts` (two new tables).
+
 ## [0.5.0] - 2026-11-06
 
 Two migrations run at start as usual; take a backup first (docs/OPERATIONS.md). `0052_automation_packs` is additive

@@ -1,3 +1,5 @@
+import type { Candidate, SourcedContact } from '@candydati/domain';
+import { createInMemorySourcedContacts, createInMemorySourcingCandidateLookup, createInMemorySourcingObjections, type InMemorySourcedContacts } from './in-memory-sourcing.js';
 import type { Actor } from '../actor.js';
 import { NotFoundError, ForbiddenError } from '../errors.js';
 import { agentActor, apiKeyActor, userActor } from './actors.js';
@@ -48,7 +50,7 @@ const APPLICATIONS = [
   buildApplication({ id: 'app_s2', candidateId: 'cand_s', jobId: JOB_B, cv: cv('app_s2'), ...org }),
 ];
 
-export type JobScopeWorld = TestImportDeps & TestHrDeps & { readonly trackedLinks: InMemoryTrackedLinks; readonly clientStore: ClientStore };
+export type JobScopeWorld = TestImportDeps & TestHrDeps & { readonly trackedLinks: InMemoryTrackedLinks; readonly clientStore: ClientStore; readonly contacts: InMemorySourcedContacts };
 
 /** Everything about job B the use cases could expose: candidate, CV, notes, messages, tasks, feedback, rules, imports. */
 export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
@@ -105,10 +107,26 @@ export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
     registry: createDistributionRegistry([createFakeDistributionChannel()]),
     publicBaseUrl: 'https://jobs.example.org',
     ...clientRepositories(),
+    ...sourcingRepositories(world),
   };
   const deps = { ...hr, feedback: { ...hr, feedbackRequests: hr.feedbackRequests } } as unknown as JobScopeWorld;
   await seedJobB(deps);
   return deps;
+}
+
+/** One contact sourced for job B: a job-scoped actor of job A must never see, renew, mark or erase it. */
+function sourcingRepositories(world: { readonly store: { read(): { readonly candidates: readonly Candidate[] } } }) {
+  const contactB: SourcedContact = {
+    id: 'contact_b', organizationId: ORG_A, jobId: JOB_B, firstName: 'Bianca', lastName: 'Bravoleak', headline: 'B-ONLY headline', location: null, source: 'linkedin',
+    profileUrl: 'https://www.linkedin.com/in/b-only', profileKey: 'linkedin.com/in/b-only', email: null, evidence: [], status: 'found', noticeTokenHash: 'notice_b',
+    noticeSentAt: null, contactedAt: null, expiresAt: new Date('2099-01-01T00:00:00Z'), createdBy: 'user_test', createdAt: new Date('2026-05-01T00:00:00Z'),
+  };
+  return {
+    contacts: createInMemorySourcedContacts([contactB]),
+    objections: createInMemorySourcingObjections(),
+    existingCandidates: createInMemorySourcingCandidateLookup(() => world.store.read().candidates),
+    fingerprint: (organizationId: string, value: string) => `${organizationId}:${value}`,
+  };
 }
 
 async function seedJobB(deps: JobScopeWorld): Promise<void> {

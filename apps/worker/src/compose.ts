@@ -1,4 +1,4 @@
-import { formatDigestFrom, type DrizzleUnitOfWork, type FileStorage, type TaskQueue } from '@candydati/core';
+import { createSourcingDeps, formatDigestFrom, type DrizzleUnitOfWork, type FileStorage, type TaskQueue } from '@candydati/core';
 import { liveMessagingConfig, toEmailIdentity, toEmailSender, type AiRuntime, type EmailRuntime } from '@candydati/providers';
 import type { WorkerEnv } from './config/env.js';
 import { createDeliverDeps } from './email/deps.js';
@@ -26,6 +26,7 @@ import { createMigrationCommitQueue } from './queues/migration-commit.js';
 import { createMigrationFetchQueue } from './queues/migration-fetch.js';
 import { createEmailSendQueue } from './queues/email-send.js';
 import { createReconcileQueue } from './queues/reconcile.js';
+import { createSourcingNoticeQueue } from './queues/sourcing-notice.js';
 import { QUEUE_DEFINITIONS } from './queues/definitions.js';
 import type { Logger } from 'pino';
 
@@ -97,10 +98,11 @@ function createSharedDeps({ env, logger, uow, files, queue, emailRuntime, aiRunt
     authSecret: env.BETTER_AUTH_SECRET,
     onFetchError: (info) => logger.warn({ ...info }, 'migration fetch failed'),
   });
-  return { sender, messaging, phase4, imports, hr, digest, migrations, privacy: createPrivacyWorkerDeps({ uow, files, queue }) };
+  const sourcing = createSourcingDeps({ uow, queue, sender, config: messaging, secret: env.BETTER_AUTH_SECRET, onMailError: (error) => logger.error({ err: error }, 'sourcing notice not sent') });
+  return { sender, messaging, phase4, imports, hr, digest, migrations, sourcing, privacy: createPrivacyWorkerDeps({ uow, files, queue }) };
 }
 
-function createTaskQueues({ logger, uow, files, aiRuntime, env }: Composition, { sender, messaging, phase4, imports, hr, digest, migrations }: Shared) {
+function createTaskQueues({ logger, uow, files, aiRuntime, env }: Composition, { sender, messaging, phase4, imports, hr, digest, migrations, sourcing }: Shared) {
   const cvDeps = createCvExtractionDeps({
     uow,
     files,
@@ -119,6 +121,7 @@ function createTaskQueues({ logger, uow, files, aiRuntime, env }: Composition, {
     createDeadlinesScanQueue({ scan: phase4.scan, feedback: hr.feedback, stale: hr.stale, shortlists: hr.shortlists, digest, now: () => new Date() }),
     createImportAnalyzeQueue({ deps: imports.analysis, extractor: imports.extractor }),
     createImportCommitQueue(imports.commit),
+    createSourcingNoticeQueue(sourcing),
     createMigrationAnalyzeQueue(migrations.analysis),
     createMigrationCommitQueue(migrations.commit),
     createMigrationFetchQueue(migrations.fetch),
@@ -139,6 +142,7 @@ function createMaintenanceQueues({ env, uow, files, queue }: Composition, { impo
       deliveryLog: { outbox: uow.repositories.outbox, deliveries: uow.repositories.deliveries },
       deliveryLogRetentionDays: env.DELIVERY_LOG_RETENTION_DAYS,
       jobViews: uow.repositories.jobViews,
+      sourcedContacts: uow.repositories.sourcedContacts,
       digest,
       now: () => new Date(),
     }),
