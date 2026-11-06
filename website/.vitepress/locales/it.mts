@@ -15,6 +15,7 @@ export const it: LocaleSpecificConfig<DefaultTheme.Config> = {
         { start: 'Per iniziare', run: 'Gestire la tua installazione', integrate: 'Integrazioni', project: 'Progetto' },
         {
           introduction: 'Introduzione',
+          sourcing: 'Sourcing agentico',
           quickStart: 'Avvio rapido',
           email: 'Email',
           ai: 'Assistente AI (facoltativo)',

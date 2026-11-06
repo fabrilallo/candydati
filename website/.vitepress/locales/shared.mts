@@ -12,6 +12,7 @@ export interface SidebarLabels {
 
 export interface PageTitles {
   readonly introduction: string;
+  readonly sourcing: string;
   readonly quickStart: string;
   readonly email: string;
   readonly ai: string;
@@ -36,6 +37,7 @@ export function sidebar(prefix: string, groups: SidebarLabels, pages: PageTitles
       text: groups.start,
       items: [
         { text: pages.introduction, link: link('introduction') },
+        { text: pages.sourcing, link: link('sourcing') },
         { text: pages.quickStart, link: link('quick-start') },
       ],
     },
