@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Candydati
-  text: An open, self-hostable agentic ATS built for candidates, not just recruiters.
-  tagline: Its assistant finds people for your jobs, with evidence and no ranking, and the GDPR notice built in. Run it on your own server with one command. Salary ranges, declared processes and an answer for every applicant are built in, not left to goodwill.
+  text: An open, self-hostable agentic ATS that finds people for your jobs and answers every applicant.
+  tagline: Sourcing with evidence, never scores, and the GDPR notice built in. Salary ranges, declared processes and an answer for every applicant are part of the product, not left to goodwill. One command to run it on your own server.
   actions:
     - theme: brand
       text: Quick start
