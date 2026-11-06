@@ -37,6 +37,10 @@ export interface OrganizationSettings {
   readonly agencyAuthorization: string | null;
   /** Sourced contacts with a known email get the art. 14 notice by email at once. Off by default. */
   readonly sourcingNoticeByEmail: boolean;
+  /** Sourcing may read LinkedIn through the recruiter's browser (the extension). Off by default. */
+  readonly linkedinSourcingEnabled: boolean;
+  /** The most LinkedIn profiles one search may read. */
+  readonly linkedinMaxPerRun: number;
 }
 
 export interface OrganizationSettingsRepository {
@@ -45,6 +49,7 @@ export interface OrganizationSettingsRepository {
   setRestrictRecruitersToTeam(organizationId: string, value: boolean, at: Date): Promise<OrganizationSettings>;
   setAgency(organizationId: string, value: Pick<OrganizationSettings, 'recruitsForClients' | 'agencyAuthorization'>, at: Date): Promise<OrganizationSettings>;
   setSourcingNoticeByEmail(organizationId: string, value: boolean, at: Date): Promise<OrganizationSettings>;
+  setLinkedinSourcing(organizationId: string, value: { readonly enabled: boolean; readonly maxPerRun: number }, at: Date): Promise<OrganizationSettings>;
 }
 
 /**

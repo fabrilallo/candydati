@@ -84,3 +84,34 @@ export interface SourcedContact extends SourcedContactData {
 /** What happened to one person given to `addSourcedContacts`. */
 export const SOURCING_OUTCOMES = ['added', 'already_contact', 'already_candidate', 'objected'] as const;
 export type SourcingOutcome = (typeof SOURCING_OUTCOMES)[number];
+
+/**
+ * Reading LinkedIn through the recruiter's own browser session (the Candydati extension). Off by default; the
+ * organization sets the most profiles one search may read, and each person accepts the account risk once per text
+ * version: LinkedIn's terms forbid automated reading and it may restrict or block their account.
+ */
+export const LINKEDIN_DEFAULT_MAX_PER_RUN = 20;
+export const LINKEDIN_MAX_PER_RUN_CEILING = 100;
+/** Bump when the risk text changes: everyone is asked to accept again. */
+export const LINKEDIN_RISK_TEXT_VERSION = 1;
+
+export const linkedinSettingSchema = z
+  .object({
+    enabled: z.boolean(),
+    maxProfilesPerRun: z.number().int().min(1).max(LINKEDIN_MAX_PER_RUN_CEILING),
+  })
+  .strict();
+export type LinkedinSetting = z.output<typeof linkedinSettingSchema>;
+
+/** One profile as the extension read it from the page the recruiter's browser rendered. Text only, never a photo. */
+export const linkedinProfileSchema = z
+  .object({
+    profileUrl: httpUrlSchema.max(500),
+    fullName: z.string().trim().min(1).max(160),
+    headline: z.string().trim().max(300).nullable().default(null),
+    location: z.string().trim().max(160).nullable().default(null),
+    /** The visible text of the profile's main sections (about, experience, skills), already capped by the extension. */
+    text: z.string().max(20_000).default(''),
+  })
+  .strict();
+export type LinkedinProfile = z.output<typeof linkedinProfileSchema>;

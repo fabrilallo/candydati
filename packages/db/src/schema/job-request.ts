@@ -59,6 +59,10 @@ export const organizationSetting = pgTable('organization_setting', {
    * with the first message, and contacts never written to are erased within the month.
    */
   sourcingNoticeByEmail: boolean('sourcing_notice_by_email').notNull().default(false),
+  /** Sourcing may read LinkedIn through the recruiter's browser (the Candydati extension). Off by default. */
+  linkedinSourcingEnabled: boolean('linkedin_sourcing_enabled').notNull().default(false),
+  /** The most LinkedIn profiles one search may read. */
+  linkedinMaxPerRun: integer('linkedin_max_per_run').notNull().default(20),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 

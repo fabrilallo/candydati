@@ -1,6 +1,6 @@
 import type { Candidate, SourcedContact } from '@candydati/domain';
 import { normalizeProfileUrl } from '@candydati/domain';
-import type { SourcedContactRepository, SourcingCandidateLookup, SourcingObjectionRepository } from '../sourcing-ports.js';
+import type { SourcedContactRepository, SourcingCandidateLookup, SourcingObjectionRepository, SourcingRiskAcceptanceRepository } from '../sourcing-ports.js';
 import { cell } from './in-memory-transaction.js';
 
 export interface InMemorySourcedContacts extends SourcedContactRepository {
@@ -77,3 +77,15 @@ export const createInMemorySourcingCandidateLookup = (candidates: () => readonly
     );
   },
 });
+
+export function createInMemoryRiskAcceptances(): SourcingRiskAcceptanceRepository {
+  const rows = cell<Readonly<Record<string, { readonly textVersion: number; readonly acceptedAt: Date }>>>({});
+  return {
+    async find(organizationId, userId) {
+      return rows.get()[`${organizationId}\u0000${userId}`] ?? null;
+    },
+    async accept(organizationId, userId, textVersion, at) {
+      rows.set({ ...rows.get(), [`${organizationId}\u0000${userId}`]: { textVersion, acceptedAt: at } });
+    },
+  };
+}

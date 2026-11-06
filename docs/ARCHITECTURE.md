@@ -374,6 +374,14 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
   (HMAC with the instance secret and the organization) of the profile and email in `sourcing_objection`, so the person is
   never added again. Duplicates of candidates (same email or LinkedIn profile) and of contacts are skipped, never merged.
   Evidence per criterion only: no score, no ranking.
+- **Sourcing through the assistant:** `search_github_people` runs on the server (GitHub's official API).
+  `search_linkedin_people` has no server `execute`: the run stops at the call, the web app checks the organization
+  setting (`organization_setting.linkedin_sourcing_enabled`, cap per search) and the person's acceptance of the account
+  risk (`sourcing_risk_acceptance`, per text version), asks the Candydati Chrome extension (`externally_connectable`) to
+  read LinkedIn in the recruiter's own browser, has the api compute facts per criterion and seal the rest
+  (`POST /api/v1/sourcing/linkedin/results`), and returns the result with `addToolOutput`. Whatever the source, the model
+  sees first name, city and facts; surname, handle and profile link travel in an AES-256-GCM reference bound to the
+  organization (2 h) that only the server opens (`agent/sealed-ref.ts`). People are added only on confirmation.
 - **Minimization:** no special-category fields; CV extraction drops photo, birth date and marital status; the assistant
   and MCP never send a model a surname or contact (see the assistant and MCP constraints).
 - Legal templates (privacy notice, DPA, record of processing) are in [`legal/`](legal). They need legal review.

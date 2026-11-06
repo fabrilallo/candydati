@@ -22,6 +22,7 @@ export const AGENT_TOOL_NAMES = [
   'create_task',
   'get_reports_summary',
   'search_github_people',
+  'search_linkedin_people',
   'add_sourced_contacts',
 ] as const;
 export type AgentToolName = (typeof AGENT_TOOL_NAMES)[number];

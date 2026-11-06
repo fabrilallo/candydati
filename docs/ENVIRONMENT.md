@@ -53,6 +53,8 @@ Variables without a default are required or optional as described; see `.env.exa
 | `NUXT_API_INTERNAL_URL` | web |  | Origin of the Fastify api that the web proxy forwards /api/** and /mcp to. |
 | `NUXT_API_MAX_BODY_BYTES` | web |  | Web proxy: largest request body streamed to the api, in bytes (default 204 MiB); bigger ones get 413. |
 | `NUXT_API_TIMEOUT_MS` | web |  | Web proxy: milliseconds to wait for the api to start answering (default 300000). |
+| `NUXT_PUBLIC_EXTENSION_ID` | web |  | Id of the Candydati Chrome extension: the assistant reads LinkedIn through it, in the recruiter's own browser. Empty: LinkedIn sourcing is not offered. |
+| `NUXT_PUBLIC_EXTENSION_URL` | web |  | Chrome Web Store page of the Candydati extension, shown when it is not installed. |
 | `NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE` | web |  | Default language of the web app: it or en. Read at build time too. |
 | `NUXT_PUBLIC_PLATFORM_ICON_URL` | web |  | Tab icon of the web app, an https address. Empty: the bundled mark. Careers pages show the organization logo when set. |
 | `NUXT_PUBLIC_PLATFORM_NAME` | web |  | Product name in the web app. |

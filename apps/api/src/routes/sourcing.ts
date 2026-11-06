@@ -16,6 +16,7 @@ import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
 import { feedbackRouteConfig } from './limits.js';
+import { registerLinkedinSourcingRoutes } from './sourcing-linkedin.js';
 import { bodyOf, paramOf, queryOf } from './request.js';
 
 const NO_STORE = 'no-store';
@@ -52,6 +53,8 @@ export function registerSourcingRoutes(app: FastifyInstance, ctx: AppContext): v
   app.get('/api/v1/settings/sourcing', async (request) => ok(await getSourcingSetting(deps, await ctx.resolveActor(request), {})));
 
   app.put('/api/v1/settings/sourcing', async (request) => ok(await setSourcingSetting(deps, await ctx.resolveActor(request), bodyOf(request))));
+
+  registerLinkedinSourcingRoutes(app, ctx);
 
   // The person's own page, from the link of their notice: the token is the only credential, no session is read.
   const config = feedbackRouteConfig(ctx);

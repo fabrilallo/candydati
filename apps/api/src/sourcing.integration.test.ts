@@ -65,3 +65,29 @@ describe('sourcing over the api', () => {
     expect((await w.owner.delete(`/api/v1/sourced-contacts/${added!.contactId}?doNotContact=true`)).status).toBe(200);
   });
 });
+
+describe('LinkedIn through the extension', () => {
+  const profile = { profileUrl: 'https://www.linkedin.com/in/maja-lind-42/', fullName: 'Maja Lind', headline: 'Backend engineer', location: 'Stockholm, Sweden', text: 'Go and Kubernetes at Spotify. Write to maja.lind@example.com' };
+
+  it('is off until an owner turns it on, needs each person to accept the risk, and seals what was read', async () => {
+    const w = await createWorld(t);
+    const body = { jobId: w.job.id, keywords: ['Kubernetes'], location: 'Stockholm', profiles: [profile] };
+    expect((await w.owner.get<{ enabled: boolean; accepted: boolean }>('/api/v1/sourcing/linkedin/status')).body.data).toMatchObject({ enabled: false, accepted: false });
+    expect((await w.owner.post('/api/v1/sourcing/linkedin/results', body)).status).toBe(409);
+    expect((await w.owner.put('/api/v1/settings/linkedin-sourcing', { enabled: true, maxProfilesPerRun: 10 })).status).toBe(200);
+    expect((await w.owner.post('/api/v1/sourcing/linkedin/results', body)).status).toBe(409);
+    const { textVersion } = (await w.owner.get<{ textVersion: number }>('/api/v1/sourcing/linkedin/status')).body.data!;
+    expect((await w.owner.post('/api/v1/sourcing/linkedin/accept', { textVersion })).status).toBe(200);
+
+    const sealed = await w.owner.post<{ order: string; people: { ref: string; firstName: string; status: string; evidence: { criterion: string }[] }[] }>('/api/v1/sourcing/linkedin/results', body);
+    expect(sealed.status).toBe(200);
+    const text = JSON.stringify(sealed.body.data);
+    for (const secret of ['Lind', 'maja-lind-42', 'linkedin.com', 'maja.lind@example.com']) expect(text).not.toContain(secret);
+    expect(sealed.body.data).toMatchObject({ order: expect.stringContaining('not a ranking'), people: [{ status: 'new', evidence: [{ criterion: 'Kubernetes' }, { criterion: 'Stockholm' }] }] });
+    expect((await w.owner.post('/api/v1/sourcing/linkedin/results', { ...body, profiles: Array.from({ length: 11 }, () => profile) })).status).toBe(422);
+
+    const recruiter = await w.member('recruiter');
+    expect((await recruiter.put('/api/v1/settings/linkedin-sourcing', { enabled: false, maxProfilesPerRun: 10 })).status).toBe(403);
+    expect((await recruiter.post('/api/v1/sourcing/linkedin/results', body)).status).toBe(409);
+  });
+});
