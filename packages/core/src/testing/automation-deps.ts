@@ -1,3 +1,5 @@
+import type { AutomationPack, AutomationPackRule } from '@candydati/domain';
+import { createInMemoryAutomationPacks, createInMemoryJobTemplatePacks, type InMemoryAutomationPacks } from './in-memory-packs.js';
 import type { AutomationRule, MoveProposal, Notification, OutboxEvent, Task, TemplateAutomationRule, WebhookEndpoint } from '@candydati/domain';
 import type { AutomationRuleDeps, AutomationRunDeps, NotificationDeps, ScanDeps, TaskDeps, Member } from '../automation-ports.js';
 import type { JobDeps } from '../job-ports.js';
@@ -46,6 +48,7 @@ export type TestAutomationDeps = TestMessagingDeps &
     readonly executions: InMemoryAutomationExecutions;
     readonly moveProposals: InMemoryMoveProposals;
     readonly templateAutomations: InMemoryTemplateAutomations;
+    readonly automationPacks: InMemoryAutomationPacks;
     readonly endpoints: InMemoryWebhookEndpoints;
     readonly deliveries: InMemoryWebhookDeliveries;
     readonly poster: FakeHttpPoster;
@@ -57,6 +60,9 @@ export interface AutomationSeedOptions extends MessagingSeedOptions {
   readonly rules?: readonly AutomationRule[];
   readonly proposals?: readonly MoveProposal[];
   readonly templateRules?: readonly TemplateAutomationRule[];
+  readonly packs?: readonly AutomationPack[];
+  readonly packRules?: readonly AutomationPackRule[];
+  readonly templatePacks?: Parameters<typeof createInMemoryJobTemplatePacks>[0];
   readonly endpoints?: readonly WebhookEndpoint[];
   readonly outbox?: readonly OutboxEvent[];
   readonly members?: Readonly<Record<string, readonly Member[]>>;
@@ -73,6 +79,9 @@ export function seedAutomationWorld(options: AutomationSeedOptions = {}): TestAu
   const members = options.members ?? { [ORG_A]: defaultMembers };
   const names = Object.fromEntries(Object.values(members).flat().map((m) => [m.userId, m.name]));
   const rules = createInMemoryAutomationRules(options.rules);
+  const automationPacks = createInMemoryAutomationPacks({ packs: options.packs, rules: options.packRules });
+  const templatePacks = createInMemoryJobTemplatePacks(options.templatePacks);
+  const memberDirectory = createInMemoryMemberDirectory(members);
   const organizationSettings = createInMemoryOrganizationSettings();
   let secretCounter = 0;
   for (const event of options.outbox ?? []) void world.outbox.append(event);
@@ -86,7 +95,10 @@ export function seedAutomationWorld(options: AutomationSeedOptions = {}): TestAu
     executions: createInMemoryAutomationExecutions(),
     moveProposals: createInMemoryMoveProposals(options.proposals),
     templateAutomations: createInMemoryTemplateAutomations(options.templateRules),
-    members: createInMemoryMemberDirectory(members),
+    automationPacks,
+    templatePacks,
+    packs: { automationPacks, templatePacks, templates: world.templates, members: memberDirectory },
+    members: memberDirectory,
     endpoints: createInMemoryWebhookEndpoints(options.endpoints),
     deliveries: createInMemoryWebhookDeliveries(),
     poster: createFakeHttpPoster(),

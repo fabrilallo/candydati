@@ -248,6 +248,18 @@ at one of its stages) and becomes the copying person's rule (`createdBy`); audit
 from a template gets a copy of each template rule whose stages it has, made by its creator if they may manage
 automations.
 
+**Automation packs.** A pack (`automation_pack`, `automation_pack_rule`) is a named set of rules the organization keeps
+once. Its rules never name a stage id: `stage_anchor` is `received` or a stage type, and a `propose_move` names a stage
+type too. Attaching a pack to a job (`attachPack`) resolves the anchors against the job's process (`resolvePackRules`:
+every stage of the type; a proposed move goes to the first stage of the target type after the rule's stage), checks
+each copy like a rule written in the job, and writes the copies as the attaching person's rules with
+`automation_rule.pack_id` and `pack_rule_id`. Attaching again (the job row locked) updates each copy of the same pack
+rule and stage in place, so it keeps its id and its runs and a time-based trigger does not fire twice; it creates new
+placements, removes copies whose pack rule or stage is gone, and leaves the job's other rules alone. Rules that find
+no stage, or name what the job cannot take, are reported as skipped. Job templates reference packs
+(`job_template_pack`); a job created from a template, or with packs picked on creation, gets their copies, made by its
+creator if they may manage automations. Deleting a pack leaves the copies in the jobs (`pack_id` becomes null).
+
 **Where a job is queued.** With pg-boss, the unit of work sends a job on the connection of the transaction that stores
 the work (`BindableTaskQueue.bindTo`), so the job exists if and only if the transaction committed. Two sends happen
 after the commit and are not atomic with it: `cv.extract` of a public application (it keeps its own intake
@@ -369,7 +381,7 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 | Jobs | `job`, `job_team_member`, `job_stage_restriction`, `job_template`, `job_stage_interviewer`, `job_request`, `job_distribution`, `distribution_setting`, `job_tracked_link` |
 | Candidates | `candidate`, `application`, `application_stage_event`, `candidate_note`, `cv_extraction`, `response_promise` |
 | Communication | `conversation`, `message`, `email_template`, `email_settings` |
-| Automation | `automation_rule`, `automation_execution`, `move_proposal`, `job_template_automation`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |
+| Automation | `automation_rule`, `automation_execution`, `move_proposal`, `job_template_automation`, `automation_pack`, `automation_pack_rule`, `job_template_pack`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |
 | Privacy | `privacy_notice`, `consent_token`, `data_export`, `retention_run` |
 | Import | `import_batch`, `import_item`, `import_analysis` |
 | HR tools | `feedback_request`, `interview_feedback` (scorecard observations in `observations`), `job_scorecard_criterion` |

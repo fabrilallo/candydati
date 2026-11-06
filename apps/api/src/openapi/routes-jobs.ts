@@ -13,8 +13,9 @@ export const jobRoutes: readonly RouteSpec[] = [
   },
   {
     method: 'post', path: '/api/v1/jobs', tag: 'Jobs', summary: 'Create a draft', scope: 'job:create', status: 201,
-    description: 'Always a draft. With `templateId` the template is the base and `content` overrides it field by field, so `title` may then be omitted.',
-    body: z.object({ content: jobContentSchema.partial({ title: true }), templateId: z.string().min(1).optional() }),
+    description:
+      'Always a draft. With `templateId` the template is the base and `content` overrides it field by field, so `title` may then be omitted. The rules of the template’s automation packs and of the packs in `automationPackIds` are copied to the job as the caller’s own (packs picked need `automation:manage`).',
+    body: z.object({ content: jobContentSchema.partial({ title: true }), templateId: z.string().min(1).optional(), automationPackIds: z.array(z.string().min(1)).max(20).optional() }),
     response: { schema: 'Job' },
   },
   { method: 'get', path: '/api/v1/jobs/:id', tag: 'Jobs', summary: 'Read a job ad', scope: 'job:read', response: { schema: 'Job' } },

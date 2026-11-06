@@ -2,6 +2,7 @@ import type { AutomationActionType, AutomationTriggerType, DeliveredEventType, N
 import { sql } from 'drizzle-orm';
 import { boolean, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
+import { automationPack, automationPackRule } from './automation-pack.js';
 import { application } from './candidate.js';
 import { job } from './job.js';
 
@@ -86,6 +87,10 @@ export const automationRule = pgTable(
     /** The action's own fields without `type` (validated with `automationActionSchema` when read). */
     config: jsonb('config').$type<Record<string, unknown>>().notNull(),
     enabled: boolean('enabled').notNull().default(true),
+    /** The pack the rule was copied from; null when written in the job or the pack is gone. */
+    packId: text('pack_id').references(() => automationPack.id, { onDelete: 'set null' }),
+    /** The pack rule this is a copy of: attaching the pack again updates the copy in place (its runs stay). */
+    packRuleId: text('pack_rule_id').references(() => automationPackRule.id, { onDelete: 'set null' }),
     createdBy: text('created_by').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
@@ -93,6 +98,7 @@ export const automationRule = pgTable(
     index('automation_rule_org_job_stage_idx').on(table.organizationId, table.jobId, table.stageId),
     // Backs the hourly scan of time-based rules across organizations.
     index('automation_rule_enabled_trigger_idx').on(table.trigger).where(sql`${table.enabled}`),
+    index('automation_rule_job_pack_idx').on(table.organizationId, table.jobId, table.packId).where(sql`${table.packId} is not null`),
   ],
 );
 

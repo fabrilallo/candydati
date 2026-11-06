@@ -52,6 +52,8 @@ export const createAutomation = defineAutomationUseCase({
       conditions: input.conditions,
       action: input.action,
       enabled: input.enabled,
+      packId: null,
+      packRuleId: null,
       createdBy: toActorUserId(actor),
       createdAt: deps.now(),
     });

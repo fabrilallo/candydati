@@ -64,7 +64,7 @@ export async function copyTemplateRulesToJob(deps: TemplateCopyDeps, actor: Acto
   const created: string[] = [];
   for (const { stageId, trigger, conditions, action, enabled } of rules) {
     const id = deps.newId();
-    await deps.automationRules.create({ id, organizationId: job.organizationId, jobId: job.id, stageId, trigger, conditions, action, enabled, createdBy: toActorUserId(actor), createdAt: deps.now() });
+    await deps.automationRules.create({ id, organizationId: job.organizationId, jobId: job.id, stageId, trigger, conditions, action, enabled, packId: null, packRuleId: null, createdBy: toActorUserId(actor), createdAt: deps.now() });
     created.push(id);
   }
   if (created.length > 0) {

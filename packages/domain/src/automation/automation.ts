@@ -6,6 +6,7 @@ import { automationTriggerSchema, STAGE_ENTERED, type AutomationTrigger } from '
 export * from './actions.js';
 export * from './conditions.js';
 export * from './copy.js';
+export * from './pack.js';
 export * from './proposal.js';
 export * from './trigger.js';
 
@@ -35,6 +36,10 @@ export interface AutomationRule {
   readonly conditions: AutomationConditions;
   readonly action: AutomationAction;
   readonly enabled: boolean;
+  /** The pack the rule was copied from (`null`: written in the job, or the pack was deleted). */
+  readonly packId: string | null;
+  /** The pack rule it is a copy of: attaching the pack again updates this copy in place instead of making a new one. */
+  readonly packRuleId: string | null;
   /** The person whose decision the rule is: messages go out in their name. */
   readonly createdBy: string;
   readonly createdAt: Date;

@@ -543,7 +543,8 @@
       },
       "job_template": {
         "created": "Saved a job ad template",
-        "deleted": "Deleted a job ad template"
+        "deleted": "Deleted a job ad template",
+        "packs_updated": "Changed the automation packs of a job ad template"
       },
       "privacy_notice": {
         "published": "Published a version of the privacy notice"
@@ -590,6 +591,10 @@
         "deleted": "Deleted an automation",
         "ran": "An automation acted",
         "copied": "Copied automation rules"
+      },
+      "automation_pack": {
+        "saved": "Saved an automation pack",
+        "deleted": "Deleted an automation pack"
       },
       "webhook": {
         "saved": "Saved a webhook",

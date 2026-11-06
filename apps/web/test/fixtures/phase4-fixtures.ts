@@ -51,6 +51,7 @@ export const rule = (id: string, overrides: Partial<AutomationRuleDto> = {}): Au
   trigger: { type: 'stage_entered' },
   conditions: {},
   enabled: true,
+  packId: null,
   createdBy: 'u1',
   createdAt: P4_NOW,
   action: { type: 'send_template', templateId: 't-update' },

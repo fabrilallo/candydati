@@ -67,6 +67,8 @@ export interface AutomationRuleDto {
   readonly conditions: AutomationConditions;
   readonly action: AutomationAction;
   readonly enabled: boolean;
+  /** The pack the rule was copied from, if any. */
+  readonly packId: string | null;
   readonly createdBy: string;
   readonly createdAt: string;
 }
@@ -156,6 +158,7 @@ export const toAutomationRuleDto = (rule: AutomationRule): AutomationRuleDto => 
   conditions: rule.conditions,
   action: rule.action,
   enabled: rule.enabled,
+  packId: rule.packId,
   createdBy: rule.createdBy,
   createdAt: iso(rule.createdAt),
 });
