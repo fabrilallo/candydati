@@ -1,6 +1,6 @@
 import type { AutomationPack, AutomationPackRule } from '@candydati/domain';
 import { createInMemoryAutomationPacks, createInMemoryJobTemplatePacks, type InMemoryAutomationPacks } from './in-memory-packs.js';
-import type { AutomationRule, MoveProposal, Notification, OutboxEvent, Task, TemplateAutomationRule, WebhookEndpoint } from '@candydati/domain';
+import type { AutomationRule, MoveProposal, Notification, OutboxEvent, Task, WebhookEndpoint } from '@candydati/domain';
 import type { AutomationRuleDeps, AutomationRunDeps, NotificationDeps, ScanDeps, TaskDeps, Member } from '../automation-ports.js';
 import type { JobDeps } from '../job-ports.js';
 import type { WebhookDeliverDeps, WebhookDeps, WebhookPublishDeps } from '../webhook-ports.js';
@@ -30,7 +30,7 @@ import { createInMemoryJobTemplateRepository } from './in-memory-jobs.js';
 import { createInMemoryJobApprovals, createInMemoryOrganizationSettings } from './in-memory-job-requests.js';
 import type { TestMessagingDeps } from './messaging-deps.js';
 import { ORG_A } from './candidate-seed.js';
-import { createInMemoryMoveProposals, createInMemoryTemplateAutomations, type InMemoryMoveProposals, type InMemoryTemplateAutomations } from './in-memory-proposals.js';
+import { createInMemoryMoveProposals, type InMemoryMoveProposals } from './in-memory-proposals.js';
 
 export type TestAutomationDeps = TestMessagingDeps &
   AutomationRunDeps &
@@ -47,7 +47,6 @@ export type TestAutomationDeps = TestMessagingDeps &
     readonly rules: InMemoryAutomationRules;
     readonly executions: InMemoryAutomationExecutions;
     readonly moveProposals: InMemoryMoveProposals;
-    readonly templateAutomations: InMemoryTemplateAutomations;
     readonly automationPacks: InMemoryAutomationPacks;
     readonly endpoints: InMemoryWebhookEndpoints;
     readonly deliveries: InMemoryWebhookDeliveries;
@@ -59,7 +58,6 @@ export interface AutomationSeedOptions extends MessagingSeedOptions {
   readonly tasks?: readonly Task[];
   readonly rules?: readonly AutomationRule[];
   readonly proposals?: readonly MoveProposal[];
-  readonly templateRules?: readonly TemplateAutomationRule[];
   readonly packs?: readonly AutomationPack[];
   readonly packRules?: readonly AutomationPackRule[];
   readonly templatePacks?: Parameters<typeof createInMemoryJobTemplatePacks>[0];
@@ -94,7 +92,6 @@ export function seedAutomationWorld(options: AutomationSeedOptions = {}): TestAu
     automationRules: rules,
     executions: createInMemoryAutomationExecutions(),
     moveProposals: createInMemoryMoveProposals(options.proposals),
-    templateAutomations: createInMemoryTemplateAutomations(options.templateRules),
     automationPacks,
     templatePacks,
     packs: { automationPacks, templatePacks, templates: world.templates, members: memberDirectory },

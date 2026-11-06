@@ -48,7 +48,6 @@ export function createPhase4Deps({ uow, queue, allowPrivateWebhooks }: Phase4Inp
       candidates,
       executions: r.executions,
       jobTemplates: r.jobTemplates,
-      templateAutomations: r.templateAutomations,
       automationPacks: r.automationPacks,
       templatePacks: r.templatePacks,
       members: r.members,

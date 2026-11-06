@@ -7,7 +7,7 @@ import type { FeedbackStageEntryParts } from './feedback-ports.js';
 import type { JobRepository, JobTemplateRepository } from './job-ports.js';
 import type { EmailTemplateRepository, MessagingDeps } from './messaging-ports.js';
 import type { CoreDeps } from './ports.js';
-import type { MoveProposalRepository, TemplateAutomationRepository } from './proposal-ports.js';
+import type { MoveProposalRepository } from './proposal-ports.js';
 import type { ResponsePromiseRepository } from './report-ports.js';
 import type { OutboxRepository } from './webhook-ports.js';
 
@@ -127,9 +127,8 @@ export interface AutomationRuleDeps extends CoreDeps {
   readonly applications: ApplicationRepository;
   readonly candidates: CandidateRepository;
   readonly executions: AutomationExecutionRepository;
-  /** Copying rules to and from job templates; a template's rules are listed and removed through these too. */
+  /** Job templates: which packs each one brings. */
   readonly jobTemplates: JobTemplateRepository;
-  readonly templateAutomations: TemplateAutomationRepository;
   /** Packs of rules kept by the organization, and the packs each job template brings. */
   readonly automationPacks: AutomationPackRepository;
   readonly templatePacks: JobTemplatePackRepository;

@@ -408,7 +408,6 @@ function createJobDeps(uow: DrizzleUnitOfWork, adQuality: AdQualityAnalyzer, adQ
     organizations: r.organizations,
     privacyNotices: r.privacyNotices,
     automationRules: r.automationRules,
-    templateAutomations: r.templateAutomations,
     packs: { automationPacks: r.automationPacks, templatePacks: r.templatePacks, templates: r.templates, members: r.members },
     outbox: r.outbox,
     approvals: r.approvals,

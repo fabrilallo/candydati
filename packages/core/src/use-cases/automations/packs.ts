@@ -12,7 +12,7 @@ const id = z.string().min(1);
  * A pack serves jobs in any language: its rules may name every anchor, and an email template only has to exist (each
  * built-in default exists in every language; the job's language is checked again when the pack is attached).
  */
-const PACK_TARGET: RuleTarget = { stageIds: STAGE_ANCHORS, language: 'it' };
+export const PACK_TARGET: RuleTarget = { stageIds: STAGE_ANCHORS, language: 'it' };
 
 export interface PackSummary {
   readonly pack: AutomationPack;

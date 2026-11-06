@@ -56,17 +56,11 @@ export const configRoutes: readonly RouteSpec[] = [
   { method: 'put', path: '/api/v1/automations/:id', tag: 'Automations', summary: 'Replace a rule', scope: 'automation:manage', body: automationRuleInputSchema, response: { schema: 'AutomationRule' } },
   { method: 'delete', path: '/api/v1/automations/:id', tag: 'Automations', summary: 'Delete a rule', scope: 'automation:manage', response: { schema: deletedResult } },
   {
-    method: 'post', path: '/api/v1/automations/copy', tag: 'Automations', summary: 'Copy rules to a stage of a job or a job template', scope: 'automation:manage', status: 201,
+    method: 'post', path: '/api/v1/automations/copy', tag: 'Automations', summary: 'Copy rules of a job to a stage of a job or into a pack', scope: 'automation:manage', status: 201,
     description:
-      'Copies some rules (`from.ruleIds`) or every rule of a stage (`from.stageId`) of a job (`from.jobId`) or job template (`from.templateId`) to one stage of a job or template (`to`). Every copy is validated against the target first (the stage exists, templates resolve in its language, the people named are members, a proposed move points at one of its stages): all or nothing. The copies are the caller’s own rules (`createdBy`). Templates need `job_template:read` to copy from and `job_template:create` to copy to.',
+      'Copies some rules (`from.ruleIds`) or every rule of a stage (`from.stageId`) of a job (`from.jobId`) to one stage of a job (`to.jobId`) or into an automation pack (`to.packId`, with `to.stageId` a stage type or `received`; a proposed move then names the type of its target stage). Every copy is validated against the target first (the stage exists, templates resolve, the people named are members, a proposed move points at one of its stages): all or nothing. The copies are the caller’s own rules (`createdBy`).',
     body: copyAutomationsInputSchema, response: { schema: copyAutomationsResultSchema },
   },
-  {
-    method: 'get', path: '/api/v1/job-templates/:id/automations', tag: 'Automations', summary: 'Rules kept with a job template', scope: 'automation:manage',
-    description: 'A job created from the template gets a copy of each one whose stage it has, made by whoever creates the job (only if they may manage automations).',
-    response: { schema: 'TemplateAutomationRule', list: true },
-  },
-  { method: 'delete', path: '/api/v1/job-template-automations/:id', tag: 'Automations', summary: 'Delete a rule of a job template', scope: 'automation:manage', response: { schema: deletedResult } },
   { method: 'get', path: '/api/v1/jobs/:id/distribution', tag: 'Distribution', summary: 'Where a job is published', scope: 'job:read', response: { schema: jobDistributionSchema } },
   {
     method: 'post', path: '/api/v1/jobs/:id/distribution/sync', tag: 'Distribution', summary: 'Push a job to the enabled channels now', scope: 'job:publish',

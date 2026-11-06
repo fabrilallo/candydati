@@ -1296,13 +1296,7 @@
       "deleteConfirm": "Elimina template",
       "deleted": "Template eliminato",
       "loadFailed": "Non riusciamo a caricare i template.",
-      "forbidden": "Non hai il permesso di vedere i template.",
-      "rules": {
-        "summary": "Nessuna automazione | 1 automazione | {count} automazioni",
-        "note": "Un annuncio creato da questo modello riceve queste regole, come regole di chi lo crea.",
-        "line": "{stage}: {what}",
-        "delete": "Togli la regola dal modello"
-      }
+      "forbidden": "Non hai il permesso di vedere i template."
     },
     "close": {
       "checking": "Controllo le candidature aperte",
@@ -2419,15 +2413,15 @@
       "kinds": {
         "this_job": "Un'altra fase di questo annuncio",
         "other_job": "Un altro annuncio",
-        "template": "Un modello di annuncio"
+        "pack": "Un pacchetto di automazioni"
       },
       "holder": {
         "other_job": "Annuncio",
-        "template": "Modello"
+        "pack": "Pacchetto"
       },
       "choose": "Scegli",
       "stage": "Fase",
-      "note": "Ogni copia viene controllata prima: i modelli devono esistere nella lingua di destinazione, le persone devono essere membri, uno spostamento proposto deve puntare a una sua fase. Se una non va bene, non si copia niente. Un annuncio creato da un modello riceve le sue regole.",
+      "note": "Ogni copia viene controllata prima: i modelli devono esistere, le persone devono essere membri, uno spostamento proposto deve puntare a una fase della destinazione. Se una non va bene, non si copia niente. In un pacchetto la fase è un tipo di fase: la regola vale per ogni fase di quel tipo negli annunci a cui il pacchetto viene agganciato.",
       "save": "Copia",
       "copying": "Copia in corso",
       "done": "Nessuna regola copiata | 1 regola copiata | {count} regole copiate"

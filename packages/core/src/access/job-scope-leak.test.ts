@@ -173,8 +173,6 @@ const EXEMPT: Readonly<Record<string, string>> = {
   createJobTemplate: 'organization template',
   deleteJobTemplate: 'organization template',
   listJobTemplates: 'organization template',
-  listTemplateAutomations: 'rules of an organization template: no job, no candidate',
-  deleteTemplateAutomation: 'a rule of an organization template: no job, no candidate',
   listPacks: 'automation packs of the organization: no job, no candidate',
   createPack: 'automation packs of the organization: no job, no candidate',
   updatePack: 'automation packs of the organization: no job, no candidate',

@@ -1296,13 +1296,7 @@
       "deleteConfirm": "Delete template",
       "deleted": "Template deleted",
       "loadFailed": "We could not load the templates.",
-      "forbidden": "You do not have permission to see templates.",
-      "rules": {
-        "summary": "No automation | 1 automation | {count} automations",
-        "note": "A job created from this template gets these rules, as the rules of whoever creates it.",
-        "line": "{stage}: {what}",
-        "delete": "Remove the rule from the template"
-      }
+      "forbidden": "You do not have permission to see templates."
     },
     "close": {
       "checking": "Checking open applications",
@@ -2419,15 +2413,15 @@
       "kinds": {
         "this_job": "Another stage of this job",
         "other_job": "Another job",
-        "template": "A job template"
+        "pack": "An automation pack"
       },
       "holder": {
         "other_job": "Job",
-        "template": "Template"
+        "pack": "Pack"
       },
       "choose": "Choose",
       "stage": "Stage",
-      "note": "Each copy is checked first: the templates must exist in the target's language, the people must be members, a proposed move must point at one of its stages. If one does not fit, nothing is copied. A job created from a template gets its rules.",
+      "note": "Every copy is checked first: templates must exist, people must be members, a proposed move must point at a stage of the target. If one is not right, nothing is copied. In a pack the stage is a kind of stage: the rule applies to every stage of that kind in the jobs the pack is attached to.",
       "save": "Copy",
       "copying": "Copying",
       "done": "No rule copied | 1 rule copied | {count} rules copied"

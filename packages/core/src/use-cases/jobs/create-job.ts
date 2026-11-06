@@ -2,7 +2,6 @@ import { jobSlug, type Job } from '@candydati/domain';
 import { z } from 'zod';
 import { addToJobTeam } from '../../access/team-membership.js';
 import { assertPacksPickable, copyPacksOnCreate } from '../automations/attach-pack.js';
-import { copyTemplateRulesToJob } from '../automations/template-rules.js';
 import { NotFoundError } from '../../errors.js';
 import { defineJobUseCase } from './define.js';
 import { parseContent, withStageIds } from './shared.js';
@@ -26,9 +25,8 @@ const mergeContent = (base: object, overrides: Record<string, unknown>): Record<
 /**
  * Creates a draft. With `templateId` the template's content is the base and the given content overrides it
  * field by field (top-level keys; a given `salary` or `process` replaces the template's whole). The merged
- * result is validated, so a template makes `title` optional in the given content. The template's automation rules are
- * copied to the job, as the creator's own (`copyTemplateRulesToJob`), and so are the rules of the template's packs and of
- * the packs picked (`copyPacksOnCreate`).
+ * result is validated, so a template makes `title` optional in the given content. The rules of the template's automation
+ * packs and of the packs picked are copied to the job, as the creator's own (`copyPacksOnCreate`).
  */
 export const createJob = defineJobUseCase({
   name: 'createJob',
@@ -61,7 +59,6 @@ export const createJob = defineJobUseCase({
       closedAt: null,
     });
     await addToJobTeam(deps, actor, job, now);
-    if (template) await copyTemplateRulesToJob(deps, actor, template.id, job);
     await copyPacksOnCreate(deps, actor, job, { templateId: template?.id ?? null, packIds: input.automationPackIds });
     return job;
   },

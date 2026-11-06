@@ -4,15 +4,15 @@ import { copyAutomationsInputSchema, holderOf } from './copy.js';
 const ok = (value: unknown) => copyAutomationsInputSchema.safeParse(value).success;
 
 describe('copyAutomationsInputSchema', () => {
-  it('copies some rules or every rule of a stage, between jobs and templates', () => {
+  it('copies some rules or every rule of a stage of a job, to a job or a pack', () => {
     expect(ok({ from: { jobId: 'j1', ruleIds: ['r1'] }, to: { jobId: 'j1', stageId: 's2' } })).toBe(true);
-    expect(ok({ from: { jobId: 'j1', stageId: 's1' }, to: { templateId: 't1', stageId: 's1' } })).toBe(true);
-    expect(ok({ from: { templateId: 't1', stageId: 's1' }, to: { jobId: 'j2', stageId: 's1' } })).toBe(true);
+    expect(ok({ from: { jobId: 'j1', stageId: 's1' }, to: { packId: 'p1', stageId: 'technical_interview' } })).toBe(true);
   });
 
-  it('needs exactly one holder on each side and exactly one source selection', () => {
-    expect(ok({ from: { jobId: 'j1', templateId: 't1', stageId: 's1' }, to: { jobId: 'j1', stageId: 's2' } })).toBe(false);
-    expect(ok({ from: { stageId: 's1' }, to: { jobId: 'j1', stageId: 's2' } })).toBe(false);
+  it('needs a job as source, exactly one holder as target and exactly one source selection', () => {
+    expect(ok({ from: { templateId: 't1', stageId: 's1' }, to: { jobId: 'j2', stageId: 's1' } })).toBe(false);
+    expect(ok({ from: { jobId: 'j1', stageId: 's1' }, to: { jobId: 'j1', packId: 'p1', stageId: 's2' } })).toBe(false);
+    expect(ok({ from: { jobId: 'j1', stageId: 's1' }, to: { templateId: 't1', stageId: 's2' } })).toBe(false);
     expect(ok({ from: { jobId: 'j1', stageId: 's1', ruleIds: ['r1'] }, to: { jobId: 'j1', stageId: 's2' } })).toBe(false);
     expect(ok({ from: { jobId: 'j1' }, to: { jobId: 'j1', stageId: 's2' } })).toBe(false);
     expect(ok({ from: { jobId: 'j1', stageId: 's1' }, to: { stageId: 's2' } })).toBe(false);
@@ -25,8 +25,8 @@ describe('copyAutomationsInputSchema', () => {
 });
 
 describe('holderOf', () => {
-  it('names a job or a template', () => {
+  it('names a job or a pack', () => {
     expect(holderOf({ jobId: 'j1' })).toEqual({ kind: 'job', jobId: 'j1' });
-    expect(holderOf({ templateId: 't1' })).toEqual({ kind: 'template', templateId: 't1' });
+    expect(holderOf({ packId: 'p1' })).toEqual({ kind: 'pack', packId: 'p1' });
   });
 });

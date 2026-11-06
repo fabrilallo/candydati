@@ -66,10 +66,6 @@ export const automationRunSchema = z.object({
 });
 export type AutomationRunDto = z.output<typeof automationRunSchema>;
 
-/** A rule kept with a job template (`GET /job-templates/:id/automations`): copied to each job created from the template. */
-export const templateAutomationRuleSchema = automationRuleSchema.omit({ jobId: true, packId: true }).extend({ templateId: z.string() });
-export type TemplateAutomationRuleDto = z.output<typeof templateAutomationRuleSchema>;
-
 /** An automation pack (`GET /automation-packs`): `ruleCount` rules, `templateIds` the job templates that use it. */
 export const automationPackSchema = z.object({
   id: z.string(),
@@ -101,7 +97,7 @@ export type AttachPackResultDto = z.output<typeof attachPackResultSchema>;
 
 /** `POST /automations/copy`: where the copies went and their ids, in the order of the source. */
 export const copyAutomationsResultSchema = z.object({
-  to: z.object({ kind: z.enum(['job', 'template']), id: z.string() }),
+  to: z.object({ kind: z.enum(['job', 'pack']), id: z.string() }),
   stageId: z.string(),
   created: z.array(z.string()),
 });

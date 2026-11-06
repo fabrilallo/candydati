@@ -4,7 +4,6 @@ import type { EmailReadiness } from './instance-email-ports.js';
 import type { AdQualityAnalyzer, Job, JobStatus, JobTemplate } from '@candydati/domain';
 import type { PrivacyNoticeRepository } from './candidate-ports.js';
 import type { AutomationRuleRepository } from './automation-ports.js';
-import type { TemplateAutomationRepository } from './proposal-ports.js';
 import type { JobApprovalRepository, OrganizationSettingsRepository } from './job-request-ports.js';
 import type { CoreDeps } from './ports.js';
 import type { OutboxRepository } from './webhook-ports.js';
@@ -127,8 +126,6 @@ export interface JobDeps extends CoreDeps {
   readonly privacyNotices: PrivacyNoticeRepository;
   /** Removing a stage removes its automation rules. */
   readonly automationRules: AutomationRuleRepository;
-  /** A job created from a template gets copies of the template's rules. Absent: no copy. */
-  readonly templateAutomations?: TemplateAutomationRepository | undefined;
   /** A job gets copies of the rules of its template's packs and of the packs picked on creation. Absent: no copy. */
   readonly packs?: PackSources | undefined;
   /** `job.published` and `job.closed` events for webhooks. */

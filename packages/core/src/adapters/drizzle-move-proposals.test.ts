@@ -1,13 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { createDb, schema, type DbHandle } from '@candydati/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { buildApplication, buildCandidate, buildJob, buildMoveProposal, buildTemplateRule, completeJobContent } from '../testing/index.js';
+import { buildApplication, buildCandidate, buildJob, buildMoveProposal } from '../testing/index.js';
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { createDrizzleApplications } from './drizzle-applications.js';
 import { createDrizzleCandidates } from './drizzle-candidates.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
-import { createDrizzleJobTemplates } from './drizzle-job-templates.js';
-import { createDrizzleMoveProposals, createDrizzleTemplateAutomations } from './drizzle-move-proposals.js';
+import { createDrizzleMoveProposals } from './drizzle-move-proposals.js';
 
 let handle: DbHandle;
 
@@ -72,20 +71,5 @@ describe('move proposals on Postgres', () => {
     await repo.createIfNoneOpen(w.proposal({ expiresAt: new Date('2000-01-01T00:00:00Z') }));
     expect(await repo.expireDue(new Date())).toBeGreaterThanOrEqual(1);
     expect(await repo.listOpen({ organizationId: w.org, limit: 10 })).toEqual([]);
-  });
-});
-
-describe('template automations on Postgres', () => {
-  it('stores, lists and deletes the rules of a template, per organization', async () => {
-    const w = await world();
-    const now = new Date();
-    const template = await createDrizzleJobTemplates(handle.db).create({ id: randomUUID(), organizationId: w.org, name: 'T', content: completeJobContent(), createdBy: 'u1', createdAt: now, updatedAt: now });
-    const repo = createDrizzleTemplateAutomations(handle.db);
-    const rule = await repo.create(buildTemplateRule({ id: randomUUID(), organizationId: w.org, templateId: template.id, action: { type: 'notify', channel: 'email', recipients: ['job_owner'] } }));
-    expect(await repo.findById(w.org, rule.id)).toEqual(rule);
-    expect(await repo.listByTemplate(w.org, template.id)).toEqual([rule]);
-    expect(await repo.listByTemplate(randomUUID(), template.id)).toEqual([]);
-    expect(await repo.delete(w.org, rule.id)).toBe(true);
-    expect(await repo.listByTemplate(w.org, template.id)).toEqual([]);
   });
 });

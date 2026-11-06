@@ -89,20 +89,23 @@ describe('the other new actions', () => {
 });
 
 describe('copying rules', () => {
-  it('copies a stage to a job template, and a job created from it gets the rules as its creator’s', async () => {
+  it('copies a stage into an automation pack on its stage type, and a job created from a template with that pack gets the rules as its creator’s', async () => {
     const w = await createWorld(t);
     await w.owner.post(`/api/v1/jobs/${w.job.id}/automations`, { stageId: 'received', action: { type: 'create_task', title: 'Read the CV' } });
-    const template = (await w.owner.post<{ id: string; content: { process: { id: string }[] } }>('/api/v1/job-templates', { name: 'Backend', content: completeJobContent() })).body.data!;
-    const stageId = template.content.process[0]!.id;
-    const copied = await w.owner.post<{ created: string[] }>('/api/v1/automations/copy', { from: { jobId: w.job.id, stageId: 'received' }, to: { templateId: template.id, stageId } });
+    const pack = (await w.owner.post<{ id: string }>('/api/v1/automation-packs', { name: 'Backend' })).body.data!;
+    const copied = await w.owner.post<{ created: string[]; to: { kind: string } }>('/api/v1/automations/copy', { from: { jobId: w.job.id, stageId: 'received' }, to: { packId: pack.id, stageId: 'received' } });
     expect(copied.status).toBe(201);
-    expect((await w.owner.get<Rule[]>(`/api/v1/job-templates/${template.id}/automations`)).body.data).toHaveLength(1);
+    expect(copied.body.data!.to.kind).toBe('pack');
+    expect((await w.owner.get<{ stage: string }[]>(`/api/v1/automation-packs/${pack.id}/rules`)).body.data!.map((r) => r.stage)).toEqual(['received']);
 
+    const template = (await w.owner.post<{ id: string }>('/api/v1/job-templates', { name: 'Backend', content: completeJobContent() })).body.data!;
+    await w.owner.put(`/api/v1/job-templates/${template.id}/automation-packs`, { packIds: [pack.id] });
     const job = (await w.owner.post<{ id: string }>('/api/v1/jobs', { templateId: template.id, content: {} })).body.data!;
-    expect((await w.owner.get<Rule[]>(`/api/v1/jobs/${job.id}/automations`)).body.data!.map((r) => [r.stageId, r.action.type])).toEqual([[stageId, 'create_task']]);
+    expect((await w.owner.get<Rule[]>(`/api/v1/jobs/${job.id}/automations`)).body.data!.map((r) => [r.stageId, r.action.type])).toEqual([['received', 'create_task']]);
 
     const bad = await w.owner.post('/api/v1/automations/copy', { from: { jobId: w.job.id, stageId: 'received' }, to: { jobId: job.id, stageId: 'nope' } });
     expect(bad.status).toBe(422);
-    expect((await (await w.member('interviewer')).post('/api/v1/automations/copy', { from: { jobId: w.job.id, stageId: 'received' }, to: { jobId: job.id, stageId } })).status).toBe(403);
+    expect((await (await w.member('interviewer')).post('/api/v1/automations/copy', { from: { jobId: w.job.id, stageId: 'received' }, to: { packId: pack.id, stageId: 'offer' } })).status).toBe(403);
+    expect((await w.owner.get(`/api/v1/job-templates/${template.id}/automations`)).status).toBe(404);
   });
 });

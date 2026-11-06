@@ -3,29 +3,28 @@ import type { CopyAutomationsResultDto, JobContent } from '@candydati/domain'
 import { copyRules } from '@/lib/automation-api'
 import { copyInput, stageOptions, type CopySource, type CopyTargetKind, type StageOption } from '@/lib/automation-copy-view'
 import { errorKeyOf } from '@/lib/auth-errors'
-import { getJob, listJobs, listTemplates } from '@/lib/job-api'
-import { can } from '@/lib/permissions-ui'
+import { listPacks } from '@/lib/automation-pack-api'
+import { anchorLabelKey, anchorOptions } from '@/lib/automation-pack-view'
+import { getJob, listJobs } from '@/lib/job-api'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { NativeSelect } from '@/components/ui/native-select'
 
 /**
- * Copies one rule, or every rule of a stage, to another stage of this job, to a stage of another job, or to a job
- * template (a job created from it then gets the rules). The copies become the viewer's own rules; the api checks them
- * against the target first and copies all or nothing.
+ * Copies one rule, or every rule of a stage, to another stage of this job, to a stage of another job, or into an
+ * automation pack on a kind of stage. The copies become the viewer's own rules; the api checks them against the target
+ * first and copies all or nothing.
  */
 const props = defineProps<{ open: boolean; jobId: string; jobContent: JobContent; source: CopySource | null; sourceLabel: string }>()
 const emit = defineEmits<{ 'update:open': [open: boolean]; copied: [result: CopyAutomationsResultDto] }>()
 const { t } = useI18n()
 const request = useJobsApi()
-const { viewer } = useViewer()
-const canTemplates = computed(() => can(viewer.value?.role ?? null, 'job_template:create'))
 
 const kind = ref<CopyTargetKind>('this_job')
 const holderId = ref('')
 const stageId = ref('')
-/** Templates carry their content (their stages); a job is read when chosen. */
-const holders = ref<readonly { readonly id: string; readonly name: string; readonly content?: JobContent }[]>([])
+/** The jobs or packs to choose from; a job's stages are read when it is chosen, a pack takes every kind of stage. */
+const holders = ref<readonly { readonly id: string; readonly name: string }[]>([])
 const holderStages = ref<readonly StageOption[]>([])
 const busy = ref(false)
 const errorKey = ref<string | null>(null)
@@ -45,7 +44,7 @@ watch(
   },
 )
 
-/** The jobs (open, other than this one) or the templates to choose from. */
+/** The jobs (open, other than this one) or the packs to choose from. */
 const loadHolders = async (next: CopyTargetKind): Promise<void> => {
   holders.value = []
   holderId.value = ''
@@ -54,8 +53,8 @@ const loadHolders = async (next: CopyTargetKind): Promise<void> => {
   if (next === 'this_job') return
   try {
     holders.value =
-      next === 'template'
-        ? (await listTemplates(request)).map((template) => ({ id: template.id, name: template.name, content: template.content }))
+      next === 'pack'
+        ? (await listPacks(request)).map((pack) => ({ id: pack.id, name: pack.name }))
         : (await listJobs(request, null, 1, 100)).jobs.filter((job) => job.id !== props.jobId && job.status !== 'closed').map((job) => ({ id: job.id, name: job.title }))
   } catch (error) {
     errorKey.value = errorKeyOf(error)
@@ -63,14 +62,14 @@ const loadHolders = async (next: CopyTargetKind): Promise<void> => {
 }
 watch(kind, (next) => void loadHolders(next))
 
-/** The stages of the chosen job or template. */
+/** The stages of the chosen job, or every kind of stage for a pack. */
 watch(holderId, async (id) => {
   holderStages.value = []
   stageId.value = ''
   if (id === '') return
   try {
-    const content = kind.value === 'template' ? holders.value.find((holder) => holder.id === id)?.content : (await getJob(request, id)).content
-    holderStages.value = content ? stageOptions(content, t) : []
+    holderStages.value =
+      kind.value === 'pack' ? anchorOptions(null).map((anchor) => ({ id: anchor, label: t(anchorLabelKey(anchor)) })) : stageOptions((await getJob(request, id)).content, t)
   } catch (error) {
     errorKey.value = errorKeyOf(error)
   }
@@ -102,7 +101,7 @@ const submit = async (): Promise<void> => {
           <NativeSelect id="copy-kind" v-model="kind" data-testid="copy-kind">
             <option value="this_job">{{ t('automations.copy.kinds.this_job') }}</option>
             <option value="other_job">{{ t('automations.copy.kinds.other_job') }}</option>
-            <option v-if="canTemplates" value="template">{{ t('automations.copy.kinds.template') }}</option>
+            <option value="pack">{{ t('automations.copy.kinds.pack') }}</option>
           </NativeSelect>
         </FormField>
         <FormField v-if="kind !== 'this_job'" id="copy-holder" :label="t(`automations.copy.holder.${kind}`)">

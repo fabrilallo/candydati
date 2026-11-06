@@ -5,7 +5,7 @@ import { copyInput, stageOptions } from './automation-copy-view'
 const t = (key: string): string => key
 
 describe('copyInput', () => {
-  it('copies one rule or a whole stage to this job, another job or a template', () => {
+  it('copies one rule or a whole stage to this job, another job or a pack', () => {
     expect(copyInput('j1', { kind: 'rule', ruleId: 'r1', stageId: 's1' }, { kind: 'this_job', holderId: '', stageId: 's2' })).toEqual({
       from: { jobId: 'j1', ruleIds: ['r1'] },
       to: { jobId: 'j1', stageId: 's2' },
@@ -14,9 +14,9 @@ describe('copyInput', () => {
       from: { jobId: 'j1', stageId: 's1' },
       to: { jobId: 'j2', stageId: 's1' },
     })
-    expect(copyInput('j1', { kind: 'stage', stageId: 's1' }, { kind: 'template', holderId: 't1', stageId: 'x' })).toEqual({
+    expect(copyInput('j1', { kind: 'stage', stageId: 's1' }, { kind: 'pack', holderId: 'p1', stageId: 'offer' })).toEqual({
       from: { jobId: 'j1', stageId: 's1' },
-      to: { templateId: 't1', stageId: 'x' },
+      to: { packId: 'p1', stageId: 'offer' },
     })
   })
 
