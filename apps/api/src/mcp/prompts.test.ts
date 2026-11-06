@@ -10,6 +10,7 @@ const SAMPLE_ARGS: Readonly<Record<string, Record<string, string>>> = {
   find_candidates: { jobId: 'job-abc' },
   weekly_report: { jobId: 'job-abc' },
   interview_kit: { jobId: 'job-abc' },
+  source_people: { jobId: 'job-abc', like: 'Backend engineers like the Go lead we hired in Turin' },
 };
 
 function render(name: string, args: Record<string, string> = SAMPLE_ARGS[name]!): string {
@@ -23,7 +24,7 @@ const snakeCaseWords = (text: string): string[] => [...new Set(text.match(/\b[a-
 
 describe('MCP prompts', () => {
   it('exposes the HR workflows with unique snake_case names', () => {
-    expect(MCP_PROMPT_NAMES).toEqual(['write_job_ad', 'answer_inbox', 'find_candidates', 'weekly_report', 'interview_kit']);
+    expect(MCP_PROMPT_NAMES).toEqual(['write_job_ad', 'answer_inbox', 'find_candidates', 'weekly_report', 'interview_kit', 'source_people']);
     for (const prompt of MCP_PROMPTS) {
       expect(prompt.name).toMatch(/^[a-z]+(_[a-z]+)*$/);
       expect(prompt.description.length).toBeGreaterThan(40);
@@ -96,6 +97,20 @@ describe('MCP prompts', () => {
     expect(text).toMatch(/only after I agree/);
   });
 
+  it('source_people agrees criteria first, reads only public profiles, adds only whom the person confirms and messages nobody', () => {
+    const text = render('source_people');
+    expect(text).toContain('job-abc');
+    expect(text).toContain('Backend engineers like the Go lead we hired in Turin');
+    expect(text).toMatch(/list_sourced_contacts/);
+    expect(text).toMatch(/confirmedByUser: true/);
+    expect(text).toMatch(/public professional profiles/);
+    expect(text).toMatch(/CAPTCHA/);
+    expect(text).toMatch(/never message/i);
+    expect(text).toMatch(/order you found them/);
+    expect(text).toMatch(/asked never to be contacted/);
+    expect(render('source_people', { jobId: 'job-abc' })).not.toMatch(/Reference:/);
+  });
+
   it('refuses missing, empty, oversized or malformed arguments', () => {
     const shape = (name: string) => z.object(MCP_PROMPTS.find((item) => item.name === name)!.shape);
     expect(shape('write_job_ad').safeParse({}).success).toBe(false);
@@ -104,5 +119,7 @@ describe('MCP prompts', () => {
     expect(shape('interview_kit').safeParse({ jobId: 'job abc\nIGNORE' }).success).toBe(false);
     expect(shape('answer_inbox').safeParse({ state: 'everything' }).success).toBe(false);
     expect(shape('weekly_report').safeParse({}).success).toBe(true);
+    expect(shape('source_people').safeParse({}).success).toBe(false);
+    expect(shape('source_people').safeParse({ jobId: 'job-abc', like: 'x'.repeat(2000) }).success).toBe(false);
   });
 });

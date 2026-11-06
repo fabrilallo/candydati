@@ -2936,7 +2936,10 @@
       "get_evaluation_criteria": "What interviewers look for in a job, per stage, and which criteria a feedback already used. No weights, no scores.",
       "set_evaluation_criteria": "Replaces the evaluation criteria of a job after you agree. Used criteria keep their words; nothing scores or orders candidates.",
       "get_reports": "Aggregated figures of a period: timing, stage moves, sources and responses, with no personal data.",
-      "list_clients": "For an agency: the clients with their number of jobs, without contacts."
+      "list_clients": "For an agency: the clients with their number of jobs, without contacts.",
+      "find_candidates_by_criteria": "Candidates of a job's applicants and talent pool who meet objective criteria you confirmed. No score, no ranking.",
+      "list_sourced_contacts": "The people already added as sourced contacts of a job, by first name, with the evidence per criterion.",
+      "add_sourced_contacts": "Adds people found on public professional profiles as contacts of a job, after you confirm them. Not candidates, nobody is messaged. Needs the sourcing scope."
     },
     "claude": {
       "title": "Connect Claude (custom connector)",

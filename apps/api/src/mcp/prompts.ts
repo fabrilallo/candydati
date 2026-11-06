@@ -3,6 +3,7 @@ import type { GetPromptResult } from '@modelcontextprotocol/sdk/types.js';
 import type { z } from 'zod';
 import { answerInboxPrompt, findCandidatesPrompt, weeklyReportPrompt } from './prompts-candidates.js';
 import { interviewKitPrompt, writeJobAdPrompt } from './prompts-jobs.js';
+import { sourcePeoplePrompt } from './prompts-sourcing.js';
 import type { PromptDefinition } from './prompt-support.js';
 
 /** Every workflow the server offers. Each one names only tools in `TOOLS` (server.ts): the test checks it. */
@@ -12,6 +13,7 @@ export const MCP_PROMPTS: readonly PromptDefinition<z.ZodRawShape>[] = [
   findCandidatesPrompt,
   weeklyReportPrompt,
   interviewKitPrompt,
+  sourcePeoplePrompt,
 ] as readonly PromptDefinition<z.ZodRawShape>[];
 
 export const MCP_PROMPT_NAMES: readonly string[] = MCP_PROMPTS.map((prompt) => prompt.name);
