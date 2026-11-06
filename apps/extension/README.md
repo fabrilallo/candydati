@@ -76,4 +76,4 @@ sourcing search from their Candydati account, and return them to that Candydati 
 
 **Privacy policy URL**: https://fabrilallo.github.io/candydati/guide/chrome-extension#privacy
 
-**Support email**: _to fill in_
+**Support email**: fabrizio.lallo95@gmail.com
