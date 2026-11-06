@@ -91,3 +91,27 @@ describe('LinkedIn through the extension', () => {
     expect((await recruiter.post('/api/v1/sourcing/linkedin/results', body)).status).toBe(409);
   });
 });
+
+describe('web search through the extension', () => {
+  const results = [
+    { url: 'https://it.linkedin.com/in/giulia-verdi-42/', title: 'Giulia Verdi - Backend Engineer - Acme | LinkedIn', snippet: 'Località: Torino · Go and Kubernetes at Acme. Write to giulia.verdi@example.com' },
+    { url: 'https://www.linkedin.com/company/acme/', title: 'Acme | LinkedIn', snippet: 'A company' },
+  ];
+
+  it('needs sourcing:manage, caps the results and seals what Google showed', async () => {
+    const w = await createWorld(t);
+    const body = { jobId: w.job.id, query: 'site:linkedin.com/in "Go" Torino', results };
+    const sealed = await w.owner.post<{ order: string; people: { ref: string; firstName: string; status: string; evidence: { where: string }[] }[] }>('/api/v1/sourcing/web/results', body);
+    expect(sealed.status).toBe(200);
+    const text = JSON.stringify(sealed.body.data);
+    for (const secret of ['Verdi', 'giulia-verdi-42', 'linkedin.com/in/', 'giulia.verdi@example.com']) expect(text).not.toContain(secret);
+    expect(text).toContain('Giulia');
+    expect(sealed.body.data).toMatchObject({ order: expect.stringContaining('not a ranking'), people: [{ status: 'new', evidence: [{ where: 'Google result' }] }] });
+    expect(sealed.body.data!.people).toHaveLength(1);
+    expect((await w.owner.post('/api/v1/sourcing/web/results', { ...body, results: Array.from({ length: 31 }, () => results[0]) })).status).toBe(422);
+    expect((await w.owner.post('/api/v1/sourcing/web/results', { ...body, results: [{ ...results[0], url: 'javascript:alert(1)' }] })).status).toBe(422);
+
+    const interviewer = await w.member('interviewer');
+    expect((await interviewer.post('/api/v1/sourcing/web/results', body)).status).toBe(403);
+  });
+});

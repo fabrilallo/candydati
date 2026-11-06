@@ -5,9 +5,10 @@ import { defineComponent, h } from 'vue'
 import { ok, viewerWith } from '~~/test/fixtures/job-fixtures'
 import { useLinkedinBridge, type LinkedinBridge } from '@/composables/useLinkedinBridge'
 
-const state = vi.hoisted(() => ({ status: { enabled: true, maxProfilesPerRun: 3, accepted: false, textVersion: 1 }, accepted: [] as unknown[], sealed: [] as unknown[] }))
+const state = vi.hoisted(() => ({ status: { enabled: true, maxProfilesPerRun: 3, accepted: false, textVersion: 1 }, accepted: [] as unknown[], sealed: [] as unknown[], sealedWeb: [] as unknown[] }))
 registerEndpoint('/api/v1/sourcing/linkedin/status', () => ok(state.status))
 registerEndpoint('/api/v1/sourcing/linkedin/accept', async (event) => (state.accepted.push(await readBody(event)), ok({ accepted: true })))
+registerEndpoint('/api/v1/sourcing/web/results', async (event) => (state.sealedWeb.push(await readBody(event)), ok({ order: 'Google result order; not a ranking', people: [{ ref: 'w', firstName: 'Giulia' }] })))
 registerEndpoint('/api/v1/sourcing/linkedin/results', async (event) => (state.sealed.push(await readBody(event)), ok({ order: 'not a ranking', people: [{ ref: 'r', firstName: 'Maja' }] })))
 
 const profile = { profileUrl: 'https://www.linkedin.com/in/maja', fullName: 'Maja Lind', headline: null, location: null, text: '' }
@@ -24,6 +25,7 @@ beforeEach(() => {
   state.status = { enabled: true, maxProfilesPerRun: 3, accepted: false, textVersion: 1 }
   state.accepted = []
   state.sealed = []
+  state.sealedWeb = []
   requests.length = 0
   useRuntimeConfig().public.extensionId = 'ext-id'
   useViewer().viewer.value = viewerWith('recruiter')
@@ -63,5 +65,29 @@ describe('LinkedIn bridge', () => {
     delete (globalThis as { chrome?: unknown }).chrome
     expect(await bridge.run(input)).toMatchObject({ error: { code: 'extension_missing' } })
     expect(state.sealed).toEqual([])
+  })
+})
+
+describe('web search bridge', () => {
+  const webInput = { jobId: 'j1', query: 'site:github.com Rust Milano', limit: 5 }
+  const result = { url: 'https://github.com/gverdi', title: 'gverdi (Giulia Verdi) · GitHub', snippet: 'Rust' }
+
+  it('asks the extension to search Google, with no LinkedIn setting nor consent, and returns what the api sealed', async () => {
+    await mountBridge()
+    state.status = { ...state.status, enabled: false }
+    ;(globalThis as { chrome?: unknown }).chrome = fakeChrome({ ok: true, results: [result] })
+    expect(await bridge.runWeb(webInput)).toEqual({ order: 'Google result order; not a ranking', people: [{ ref: 'w', firstName: 'Giulia' }] })
+    expect(requests).toEqual([{ type: 'candydati.search_web', query: 'site:github.com Rust Milano', limit: 5 }])
+    expect(state.sealedWeb).toEqual([{ jobId: 'j1', query: 'site:github.com Rust Milano', results: [result] }])
+    expect(bridge.pendingConsent.value).toBeNull()
+  })
+
+  it('stops with a code the assistant explains: consent page, extension missing', async () => {
+    await mountBridge()
+    ;(globalThis as { chrome?: unknown }).chrome = fakeChrome({ ok: false, error: 'consent_required' })
+    expect(await bridge.runWeb(webInput)).toEqual({ error: { code: 'consent_required' } })
+    useRuntimeConfig().public.extensionId = ''
+    expect(await bridge.runWeb(webInput)).toMatchObject({ error: { code: 'extension_missing' } })
+    expect(state.sealedWeb).toEqual([])
   })
 })

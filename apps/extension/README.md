@@ -1,7 +1,7 @@
 # Candydati Chrome extension
 
-Lets the Candydati assistant read LinkedIn people search and profiles in the recruiter's own browser, when they ask it
-to source people for a job. User guide and privacy: `website/guide/chrome-extension.md`
+Lets the Candydati assistant read LinkedIn people search and profiles, and Google results pages, in the recruiter's own
+browser, when they ask it to source people for a job. User guide and privacy: `website/guide/chrome-extension.md`
 (https://fabrilallo.github.io/candydati/guide/chrome-extension).
 
 ## How it works
@@ -14,6 +14,11 @@ to source people for a job. User guide and privacy: `website/guide/chrome-extens
   person (`captcha`) and is never bypassed; closing the tab cancels.
 - `src/page-scripts.ts` runs inside the LinkedIn page and only reads text; `src/profile-parse.ts` turns it into the
   profile shape the api expects (`linkedinProfileSchema` of `@candydati/domain`).
+- Web search: `{ type: 'candydati.search_web', query, limit }` (`src/web-search.ts`) opens
+  `https://www.google.com/search?q=…&num=…` in the same visible tab, reads the organic results only (title, link,
+  snippet; `src/google-page-scripts.ts`), pages with `start=` up to `limit` (30 at most), and closes the tab. Google's
+  "unusual traffic" check (`/sorry/`) gives `captcha` and its cookie consent page gives `consent_required`: in both the
+  tab stays in front of the person, never bypassed. The pages behind the results are never opened.
 - Nothing is stored, nothing is sent anywhere but back to the Candydati page that asked.
 
 ## Build
@@ -39,17 +44,19 @@ The version comes from `package.json` (bumped with every release). Each update i
 **Name**: Candydati
 
 **Short description** (132 characters at most):
-Lets your Candydati assistant read LinkedIn search results and profiles in your own browser, when you ask it to.
+Lets your Candydati assistant read LinkedIn search results, profiles and Google results in your own browser, on request.
 
 **Description**:
 Candydati is a recruiting platform (ATS). With this extension, when you ask the Candydati assistant to find people for
 one of your positions, it opens LinkedIn in a visible tab of your own Chrome, with your own account, reads the people
-search and the profiles, and shows you who matches your criteria, with the facts from each profile. You choose whom to
-add; nobody is contacted automatically.
+search and the profiles, and shows you who matches your criteria, with the facts from each profile. It can also run a
+Google search for you, in the same visible tab, and read the results page (titles, links and snippets) to find public
+profiles. You choose whom to add; nobody is contacted automatically.
 
-- It works only when you start a search from Candydati, and only on linkedin.com.
+- It works only when you start a search from Candydati, and only on linkedin.com and google.com.
 - The tab is visible in a group named "Candydati": close it to stop.
-- If LinkedIn asks for a verification, the extension stops and leaves it to you.
+- If LinkedIn asks for a verification, or Google shows its traffic check or cookie consent page, the extension stops and
+  leaves it to you.
 - It stores nothing and sends what it reads only to your Candydati.
 
 Important: LinkedIn's terms of use forbid the automated reading of profiles, and LinkedIn may restrict the account used.
@@ -57,20 +64,22 @@ Candydati asks you to accept this risk before the first search.
 
 **Category**: Productivity (or Workflow & Planning)
 
-**Single purpose**: Read LinkedIn people search results and profiles in the user's browser when the user starts a
-sourcing search from their Candydati account, and return them to that Candydati page.
+**Single purpose**: Read LinkedIn people search results and profiles, and Google search results pages, in the user's
+browser when the user starts a sourcing search from their Candydati account, and return them to that Candydati page.
 
 **Permission justifications**:
 - `tabGroups`: the search runs in one tab placed in a visible group named "Candydati", so the user sees it and can close it.
-- `scripting`: to read the text of the LinkedIn pages the extension itself opened for the search.
-- Host permission `https://www.linkedin.com/*`: the only site the extension reads.
+- `scripting`: to read the text of the LinkedIn and Google pages the extension itself opened for the search.
+- Host permission `https://www.linkedin.com/*`: the LinkedIn people search and profiles the user asked for.
+- Host permission `https://www.google.com/*`: the Google results page of a web search the user asked for (titles, links
+  and snippets of the organic results only). With LinkedIn, the only sites the extension reads.
 - `externally_connectable` (no permission prompt): only the Candydati web app may start a search.
 
 **Remote code**: No. All code is in the package.
 
 **Data usage** (disclosures):
-- Collected: personally identifiable information (names) and website content (the text of LinkedIn profiles the user
-  searched for).
+- Collected: personally identifiable information (names) and website content (the text of LinkedIn profiles and the
+  Google results the user searched for).
 - Certify: not sold to third parties; not used or transferred for purposes unrelated to the single purpose; not used or
   transferred to determine creditworthiness or for lending.
 

@@ -1,16 +1,11 @@
 import { useChat } from '@ai-sdk/vue'
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls, type UIMessage } from 'ai'
-import type { LinkedinBridge, LinkedinToolInput } from './useLinkedinBridge'
+import type { LinkedinBridge } from './useLinkedinBridge'
 import { getAgentStatus } from '@/lib/agent-api'
 import { isAgentNotConfigured } from '@/lib/assistant-parts'
+import { runInBrowser } from '@/lib/browser-tools'
 import { toWirePage, type PageContext } from '@/lib/page-context'
 import { AGENT_CHAT_PATH } from '@/lib/api-paths'
-
-/** Tools the browser runs (LinkedIn, through the extension). Not awaited: the SDK waits for the output, awaiting would deadlock. */
-const runInBrowser = (bridge: LinkedinBridge | null, toolCall: { toolName: string; input: unknown }, done: (output: unknown) => void): void => {
-  if (toolCall.toolName !== 'search_linkedin_people' || !bridge) return
-  void bridge.run(toolCall.input as LinkedinToolInput).then(done)
-}
 
 const BUSY: ReadonlySet<string> = new Set(['submitted', 'streaming'])
 
@@ -33,9 +28,9 @@ export const useAssistantChat = (page: () => PageContext, bridge: LinkedinBridge
   const chat = useChat<UIMessage>({
     id: 'assistant',
     transport,
-    // A tool the browser ran (LinkedIn, through the extension) sends the conversation back once it has its result.
+    // A tool the browser ran (LinkedIn or Google, through the extension) sends the conversation back once it has its result.
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-    onToolCall: ({ toolCall }) => runInBrowser(bridge, toolCall, (output) => chat.addToolOutput({ tool: 'search_linkedin_people', toolCallId: toolCall.toolCallId, output })),
+    onToolCall: ({ toolCall }) => runInBrowser(bridge, toolCall, (tool, output) => chat.addToolOutput({ tool, toolCallId: toolCall.toolCallId, output })),
     onError: (error) => {
       if (isAgentNotConfigured(error)) configured.value = false
       else console.error('[assistant] turn failed', error.message.slice(0, 200))

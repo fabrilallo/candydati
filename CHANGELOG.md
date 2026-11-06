@@ -41,6 +41,16 @@ All notable changes to this project are documented here. The format follows
   Permissions: `tabGroups`, `scripting`, `www.linkedin.com` only; answers only the Candydati origins it was built for
   (`CANDYDATI_ORIGINS`). Build and Chrome Web Store listing texts in `apps/extension/README.md`; user guide and privacy
   on the documentation site.
+- **Web search through the extension.** New assistant tool `search_web_people`: the assistant writes a Google search
+  (X-ray queries such as `site:linkedin.com/in "Go" Torino` or `site:github.com Rust Milano`) and the Candydati Chrome
+  extension runs it in the recruiter's own Chrome, in the visible "Candydati" tab, reading only the organic results
+  (title, link, snippet; no ads, no "People also ask", never the pages behind them). No search API, no server-side
+  scraping. The api (`POST /api/v1/sourcing/web/results`, `sourcing:manage`, at most 30 results) keeps the results that
+  point to a person (LinkedIn or GitHub profile, a page titled with a name), uses the snippet as the fact, flags who is
+  already a contact or a candidate, leaves out who objected, and seals the rest like LinkedIn results: the model sees
+  first name, city and facts only. Google's traffic check (`captcha`) and cookie consent page (`consent_required`) stop
+  the search and are left to the person. No organization setting nor risk acceptance. The extension now also asks for
+  `www.google.com`. New audit event `sourcing.web_read` (counts only).
 
 ## [0.5.0] - 2026-11-06
 
