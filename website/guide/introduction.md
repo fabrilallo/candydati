@@ -28,7 +28,7 @@ The full product definition is in [PRODUCT.md](https://github.com/fabrilallo/can
 
 ## What you get
 
-- [Agentic sourcing](./sourcing): the assistant finds people for a job on GitHub and LinkedIn (in your own browser),
+- [Agentic sourcing](./sourcing): the assistant finds people for a job on GitHub, LinkedIn and Google (in your own browser),
   with a fact per criterion and no ranking; you choose who becomes a contact, and the GDPR notice and erasure are built in.
 - Structured job ads with a publish standard (salary, process, contract, work mode) and Italian compliance checks.
 - A careers page with a page builder, structured data (`JobPosting`), an XML feed and a public read-only ads API.

@@ -21,7 +21,7 @@ hero:
 
 features:
   - title: Agentic sourcing
-    details: "Ask the assistant to find people for a job: it agrees the criteria with you, searches GitHub and LinkedIn (in your own browser), shows a fact per criterion and never ranks. You pick who to add; the GDPR art. 14 notice and erasure after 30 days are built in."
+    details: "Ask the assistant to find people for a job: it agrees the criteria with you, searches GitHub, LinkedIn and Google (in your own browser), shows a fact per criterion and never ranks. You pick who to add; the GDPR art. 14 notice and erasure after 30 days are built in."
     link: /guide/sourcing
     linkText: How it works
   - title: Salary range in clear

@@ -1,7 +1,8 @@
 # Candydati Chrome extension
 
-Lets the Candydati assistant read LinkedIn people search and profiles in the recruiter's own browser, when they ask it
-to source people for a job, and adds a "Save to Candydati" button to LinkedIn profiles. User guide and privacy: `website/guide/chrome-extension.md`
+Lets the Candydati assistant read LinkedIn people search and profiles, and Google results pages, in the recruiter's own
+browser, when they ask it to source people for a job, and adds a "Save to Candydati" button to LinkedIn profiles. User
+guide and privacy: `website/guide/chrome-extension.md`
 (https://fabrilallo.github.io/candydati/guide/chrome-extension).
 
 ## How it works
@@ -14,6 +15,11 @@ to source people for a job, and adds a "Save to Candydati" button to LinkedIn pr
   person (`captcha`) and is never bypassed; closing the tab cancels.
 - `src/page-scripts.ts` runs inside the LinkedIn page and only reads text; `src/profile-parse.ts` turns it into the
   profile shape the api expects (`linkedinProfileSchema` of `@candydati/domain`).
+- Web search: `{ type: 'candydati.search_web', query, limit }` (`src/web-search.ts`) opens
+  `https://www.google.com/search?q=…&num=…` in the same visible tab, reads the organic results only (title, link,
+  snippet; `src/google-page-scripts.ts`), pages with `start=` up to `limit` (30 at most), and closes the tab. Google's
+  "unusual traffic" check (`/sorry/`) gives `captcha` and its cookie consent page gives `consent_required`: in both the
+  tab stays in front of the person, never bypassed. The pages behind the results are never opened.
 - Nothing of a search is stored, nothing is sent anywhere but back to the Candydati page that asked.
 
 ### "Save to Candydati" button
@@ -55,20 +61,23 @@ The version comes from `package.json` (bumped with every release). Each update i
 **Name**: Candydati
 
 **Short description** (132 characters at most):
-Lets the Candydati assistant read LinkedIn in your own browser when you ask, and saves the profile you are viewing in one click.
+Lets the Candydati assistant read LinkedIn and Google in your browser when you ask, and saves the profile you view in one click.
 
 **Description**:
 Candydati is a recruiting platform (ATS). With this extension, when you ask the Candydati assistant to find people for
 one of your positions, it opens LinkedIn in a visible tab of your own Chrome, with your own account, reads the people
-search and the profiles, and shows you who matches your criteria, with the facts from each profile. You choose whom to
-add; nobody is contacted automatically.
+search and the profiles, and shows you who matches your criteria, with the facts from each profile. It can also run a
+Google search for you, in the same visible tab, and read the results page (titles, links and snippets) to find public
+profiles. You choose whom to add; nobody is contacted automatically.
 
 While you browse LinkedIn yourself, a small "Save to Candydati" button on each profile adds that person to one of your
 positions: one click opens Candydati with the name, headline and city; you pick the position and confirm.
 
-- It reads LinkedIn only when you start a search from Candydati or click the save button, and only on linkedin.com.
+- It reads LinkedIn and Google only when you start a search from Candydati, and a LinkedIn profile only when you click
+  the save button; only on linkedin.com and google.com.
 - The search tab is visible in a group named "Candydati": close it to stop.
-- If LinkedIn asks for a verification, the extension stops and leaves it to you.
+- If LinkedIn asks for a verification, or Google shows its traffic check or cookie consent page, the extension stops and
+  leaves it to you.
 - It sends what it reads only to your Candydati. The only thing it keeps is the one profile you clicked, until your
   Candydati page picks it up (at most 10 minutes), and the address of your Candydati.
 
@@ -77,25 +86,27 @@ Candydati asks you to accept this risk before the first search.
 
 **Category**: Productivity (or Workflow & Planning)
 
-**Single purpose**: Bring LinkedIn people into the user's Candydati recruiting account: read LinkedIn people search
-results and profiles when the user starts a sourcing search from Candydati, or the profile the user is viewing when
-they click "Save to Candydati", and hand them only to that Candydati.
+**Single purpose**: Bring people for a job into the user's Candydati recruiting account: read LinkedIn people search
+results and profiles, and Google search results pages, when the user starts a sourcing search from Candydati, or the
+LinkedIn profile the user is viewing when they click "Save to Candydati", and hand them only to that Candydati.
 
 **Permission justifications**:
 - `tabGroups`: the search runs in one tab placed in a visible group named "Candydati", so the user sees it and can close it.
-- `scripting`: to read the text of the LinkedIn pages the extension itself opened for the search.
+- `scripting`: to read the text of the LinkedIn and Google pages the extension itself opened for the search.
 - `storage`: to keep the one profile the user clicked "Save to Candydati" on until their Candydati page picks it up
   (session storage, at most 10 minutes, cleared once read), and the address of their Candydati (local storage), where
   the save page opens.
-- Host permission `https://www.linkedin.com/*`: the only site the extension reads. The content script on it shows the
-  "Save to Candydati" button on profile pages and reads the profile only when the user clicks it.
+- Host permission `https://www.linkedin.com/*`: the LinkedIn people search and profiles the user asked for. The content
+  script on it shows the "Save to Candydati" button on profile pages and reads the profile only when the user clicks it.
+- Host permission `https://www.google.com/*`: the Google results page of a web search the user asked for (titles, links
+  and snippets of the organic results only). With LinkedIn, the only sites the extension reads.
 - `externally_connectable` (no permission prompt): only the Candydati web app may start a search or pick up a saved profile.
 
 **Remote code**: No. All code is in the package.
 
 **Data usage** (disclosures):
-- Collected: personally identifiable information (names) and website content (the text of LinkedIn profiles the user
-  searched for, or the name, headline and location of the profile the user chose to save).
+- Collected: personally identifiable information (names) and website content (the text of LinkedIn profiles and the
+  Google results the user searched for, or the name, headline and location of the profile the user chose to save).
 - Certify: not sold to third parties; not used or transferred for purposes unrelated to the single purpose; not used or
   transferred to determine creditworthiness or for lending.
 

@@ -684,7 +684,8 @@
       },
       "sourcing": {
         "linkedin_risk_accepted": "Accepted the risk of sourcing on LinkedIn",
-        "linkedin_read": "The assistant read LinkedIn profiles"
+        "linkedin_read": "The assistant read LinkedIn profiles",
+        "web_read": "The assistant read Google results"
       }
     }
   },
@@ -3085,6 +3086,10 @@
       "search_linkedin_people": {
         "running": "Reading LinkedIn in your browser",
         "done": "Read LinkedIn"
+      },
+      "search_web_people": {
+        "running": "Searching Google in your browser",
+        "done": "Searched Google"
       }
     },
     "draftMessage": {

@@ -12,8 +12,8 @@ On a job, ask the assistant something like *"Find backend engineers in Turin lik
 1. **Criteria first.** The assistant reads the job, and the reference person if you name one. It proposes objective,
    job-related criteria (skills, role, years of experience, city or remote) and waits for you to confirm or change them.
 2. **How many.** You choose how many people to look at (10 by default).
-3. **The search.** It looks on [GitHub](#sources), on [LinkedIn through your own browser](#linkedin-the-risk-plainly)
-   and, through an outside agent, [anywhere an MCP client can reach](#sources).
+3. **The search.** It looks on [GitHub](#sources), on [LinkedIn through your own browser](#linkedin-the-risk-plainly),
+   on Google in your own browser and, through an outside agent, [anywhere an MCP client can reach](#sources).
 4. **Evidence, not scores.** For each person you see the first name, the city and, for each criterion, a fact from the
    profile and where it was found ("Go: 4 years at a payments company, Experience"). People appear in the order they were
    found and are never ranked. Anyone already a contact or a candidate is flagged. People who asked not to be contacted
@@ -29,6 +29,8 @@ On a job, ask the assistant something like *"Find backend engineers in Turin lik
 |---|---|---|
 | GitHub | The server searches public accounts: languages of their own repositories, location, words in the bio | Nothing. `GITHUB_TOKEN` raises GitHub's rate limits ([environment variables](https://github.com/fabrilallo/candydati/blob/main/docs/ENVIRONMENT.md)) |
 | LinkedIn | The [Chrome extension](./chrome-extension) reads people search and profiles in a visible tab of **your** Chrome, with **your** account | An admin turns it on and sets the maximum per search; you accept the account risk once |
+| Google | The [Chrome extension](./chrome-extension#web-search-google) runs the search the assistant writes (often `site:linkedin.com/in "Go" Torino`) in **your** Chrome and reads the results page only | The extension; no setting and no account risk |
+| LinkedIn, while you browse | The **Save to Candydati** button on any profile you visit: pick the job, add the evidence, done ([how](./chrome-extension#save-a-profile-while-you-browse)) | The extension |
 | Outside agents | Claude (with its browser), Claude Code or any MCP client add what they found with `add_sourced_contacts`; the `source_people` prompt guides them ([API and MCP](./api)) | An API key with `sourcing:manage`, or Claude connected as a connector |
 | By hand | *Add contact* on the job's *Sourced* tab | Nothing |
 
@@ -65,7 +67,7 @@ personal account. That is why:
   one-line reminder at each search; a new version of the text asks again;
 - the search runs in a **visible tab group** named "Candydati": close it to stop.
 
-If that is not for you, leave it off: GitHub, outside agents and adding by hand work without it.
+If that is not for you, leave it off: GitHub, Google, the save button, outside agents and adding by hand work without it.
 
 ## Set it up
 

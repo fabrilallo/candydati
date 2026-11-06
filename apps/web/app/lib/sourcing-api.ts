@@ -1,4 +1,4 @@
-import { addSourcedResultSchema, sourcedContactSchema, sourcedNoticeTextSchema, type AddSourcedResultDto, type LinkedinProfile, type SourcedContactDto, type SourcedContactInput } from '@candydati/domain'
+import { addSourcedResultSchema, sourcedContactSchema, sourcedNoticeTextSchema, type AddSourcedResultDto, type LinkedinProfile, type SourcedContactDto, type SourcedContactInput, type WebResult } from '@candydati/domain'
 import { z } from 'zod'
 import { callApi } from './api-call'
 import type { JobApiRequest } from './job-api'
@@ -47,3 +47,7 @@ export const setLinkedinSetting = async (request: JobApiRequest, value: { readon
 /** What the extension read, sealed by the api: what the model may see (first names, facts) and opaque references. */
 export const sealLinkedinResults = async (request: JobApiRequest, body: { jobId: string; keywords: readonly string[]; location: string | null; profiles: readonly LinkedinProfile[] }): Promise<unknown> =>
   (await callApi(request, `${LINKEDIN}/results`, z.record(z.string(), z.unknown()), { method: 'POST', body })).data
+
+/** The Google results the extension read, sealed by the api the same way. */
+export const sealWebResults = async (request: JobApiRequest, body: { jobId: string; query: string; results: readonly WebResult[] }): Promise<unknown> =>
+  (await callApi(request, '/api/v1/sourcing/web/results', z.record(z.string(), z.unknown()), { method: 'POST', body })).data

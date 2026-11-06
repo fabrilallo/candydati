@@ -60,6 +60,7 @@ export const AUDIT_ACTIONS = [
   'organization.linkedin_sourcing_updated',
   'sourcing.linkedin_risk_accepted',
   'sourcing.linkedin_read',
+  'sourcing.web_read',
   'sourced_contact.added',
   'sourced_contact.contacted',
   'sourced_contact.notified',

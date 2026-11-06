@@ -71,10 +71,11 @@ default: an admin turns it on, each person accepts the account risk once, and a 
 ## Features
 
 **Sourcing**
-- The assistant finds people for a job on GitHub and LinkedIn (in your own browser, through the Chrome extension), with a
+- The assistant finds people for a job on GitHub, LinkedIn and Google (in your own browser, through the Chrome extension), with a
   fact per criterion and no ranking; you pick who becomes a contact
 - Sourced contacts on the job: notice text with a personal GDPR art. 14 link for the first message, erasure after 30
   days, permanent "don't contact me"
+- A "Save to Candydati" button on LinkedIn profiles adds the person you are viewing to a job in one click
 - Outside agents add what they found over MCP (`add_sourced_contacts`, `source_people` prompt)
 
 **Hiring**
