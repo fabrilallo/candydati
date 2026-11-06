@@ -15,8 +15,12 @@ All notable changes to this project are documented here. The format follows
   and erases it on request; the organization then keeps only a keyed hash so the person is never added again. The notice
   goes with the first message (`POST /api/v1/sourced-contacts/:id/notice` gives a short text with a fresh link); owners
   and admins can also have it emailed at once when the address is known (Privacy → Retention, off by default). Contacts
-  are erased 30 days after collection. The privacy notice template and `docs/legal` gain a section on sourcing. New permission `sourcing:manage`
-  (owner, admin, recruiter; grantable to API keys and the assistant). Migration `0054_sourced_contacts` (two new tables).
+  are erased 30 days after collection. The privacy notice template and `docs/legal` gain a section on sourcing. New
+  permission `sourcing:manage` (owner, admin, recruiter; grantable to API keys and the assistant). Migration
+  `0054_sourced_contacts` (additive: two new tables and one setting column).
+- **"Contatti trovati" tab on a job** (with `sourcing:manage`): the sourced contacts with source, profile link, evidence
+  and the days left before erasure; add one by hand; "Testo informativa" gives the notice lines with a fresh personal
+  link to paste into the first message, then marks the contact as written to; erase, optionally "do not contact again".
 
 ## [0.5.0] - 2026-11-06
 
