@@ -12,11 +12,11 @@ export interface RawProfilePage {
 
 const TEXT_MAX = 20_000;
 /** Lines LinkedIn puts between the name and the rest that are not a headline. */
-const NOISE = /^(he\/him|she\/her|they\/them|.*\b(connections?|followers?|contact info|informazioni di contatto|collegamenti|follower)\b.*|· ?\d+(st|nd|rd|th|°)?|\d+(st|nd|rd|th|°))$/i;
-/** A place reads like "City, Region, Country": commas, no sentence punctuation, short. */
+const NOISE = /^(·|he\/him|she\/her|they\/them|.*\b(connections?|followers?|contact info|informazioni di contatto|collegamenti|follower)\b.*|· ?\d+(st|nd|rd|th|°)?|\d+(st|nd|rd|th|°))$/i;
 /** The first section of the profile: the header (name, headline, location) ends here. */
 const SECTION = /^(about|activity|experience|education|skills|informazioni|attività|esperienza|formazione|competenze|highlights|in evidenza)$/i;
-const looksLikePlace = (line: string): boolean => line.includes(',') && line.length <= 120 && !/[.!?@]|\bat\b|\bpresso\b/i.test(line);
+/** A place reads like "City, Region, Country": commas, no sentence punctuation or headline separators, short. */
+const looksLikePlace = (line: string): boolean => line.includes(',') && line.length <= 120 && !/[.!?@|•]|\bat\b|\bpresso\b/i.test(line);
 
 const nameFromTitle = (title: string): string | null => {
   const name = title.replace(/^\(\d+\)\s*/, '').split('|')[0]?.trim() ?? '';
