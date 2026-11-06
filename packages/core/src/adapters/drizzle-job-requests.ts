@@ -93,6 +93,8 @@ const toSettings = (row: SettingRow | undefined): OrganizationSettings => ({
   recruitsForClients: row?.recruitsForClients ?? false,
   agencyAuthorization: row?.agencyAuthorization ?? null,
   sourcingNoticeByEmail: row?.sourcingNoticeByEmail ?? false,
+  linkedinSourcingEnabled: row?.linkedinSourcingEnabled ?? false,
+  linkedinMaxPerRun: row?.linkedinMaxPerRun ?? 20,
 });
 
 export function createDrizzleOrganizationSettings(db: DbExecutor): OrganizationSettingsRepository {
@@ -115,6 +117,7 @@ export function createDrizzleOrganizationSettings(db: DbExecutor): OrganizationS
     setRestrictRecruitersToTeam: (organizationId, value, at) => upsert(organizationId, { restrictRecruitersToTeam: value }, at),
     setAgency: (organizationId, value, at) => upsert(organizationId, { recruitsForClients: value.recruitsForClients, agencyAuthorization: value.agencyAuthorization }, at),
     setSourcingNoticeByEmail: (organizationId, value, at) => upsert(organizationId, { sourcingNoticeByEmail: value }, at),
+    setLinkedinSourcing: (organizationId, value, at) => upsert(organizationId, { linkedinSourcingEnabled: value.enabled, linkedinMaxPerRun: value.maxPerRun }, at),
   };
 }
 

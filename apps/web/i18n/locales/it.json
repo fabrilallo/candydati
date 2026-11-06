@@ -508,7 +508,8 @@
         "access_setting_updated": "Ha cambiato chi vede quali annunci",
         "logo_changed": "Ha cambiato il logo",
         "agency_setting_updated": "Ha cambiato se l'organizzazione seleziona per conto di clienti",
-        "sourcing_setting_updated": "Ha cambiato come vengono informate le persone trovate (sourcing)"
+        "sourcing_setting_updated": "Ha cambiato come vengono informate le persone trovate (sourcing)",
+        "linkedin_sourcing_updated": "Ha cambiato il sourcing su LinkedIn"
       },
       "invitation": {
         "created": "Ha invitato una persona",
@@ -680,6 +681,10 @@
         "notified": "Ha inviato l'informativa a un contatto trovato",
         "deleted": "Ha cancellato un contatto trovato",
         "objected": "Un contatto trovato ha chiesto la cancellazione"
+      },
+      "sourcing": {
+        "linkedin_risk_accepted": "Ha accettato il rischio del sourcing su LinkedIn",
+        "linkedin_read": "L'assistente ha letto profili LinkedIn"
       }
     }
   },
@@ -3073,6 +3078,10 @@
       "add_sourced_contacts": {
         "running": "Aggiungo i contatti",
         "done": "Ho aggiunto i contatti"
+      },
+      "search_linkedin_people": {
+        "running": "Leggo LinkedIn nel tuo browser",
+        "done": "Ho letto LinkedIn"
       }
     },
     "draftMessage": {
@@ -5332,5 +5341,24 @@
       "doNotContact": "Non ricontattare: tieni solo un'impronta cifrata per non aggiungerlo mai più",
       "confirm": "Cancella"
     }
+  },
+  "linkedinRisk": {
+    "title": "Prima di cercare su LinkedIn",
+    "lead": "L'assistente leggerà LinkedIn nel tuo browser, con il tuo account. Leggi con attenzione:",
+    "terms": "Le condizioni d'uso di LinkedIn vietano la lettura automatica dei profili.",
+    "account": "LinkedIn può chiederti verifiche, limitare o bloccare il tuo account. Il rischio riguarda il tuo account personale.",
+    "yours": "La scelta è tua e resta registrata con la data. Puoi smettere quando vuoi: basta non chiedere più ricerche su LinkedIn.",
+    "captcha": "Se LinkedIn mostra un controllo (CAPTCHA), l'assistente si ferma e te lo lascia risolvere: non lo aggira mai.",
+    "check": "Ho capito che LinkedIn può limitare o bloccare il mio account e accetto il rischio",
+    "accept": "Accetto e cerca",
+    "decline": "Non ora"
+  },
+  "linkedinSetting": {
+    "title": "Sourcing su LinkedIn",
+    "explain": "L'assistente legge LinkedIn nel browser di chi cerca, con l'estensione Candydati e il suo account. Ognuno deve accettare il rischio per il proprio account la prima volta.",
+    "enable": "Permetti il sourcing su LinkedIn",
+    "max": "Profili al massimo per ricerca",
+    "saved": "Impostazione salvata",
+    "adminOnly": "Solo titolari e amministratori possono cambiarla."
   }
 }

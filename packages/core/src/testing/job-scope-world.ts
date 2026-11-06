@@ -1,5 +1,5 @@
 import type { Candidate, SourcedContact } from '@candydati/domain';
-import { createInMemorySourcedContacts, createInMemorySourcingCandidateLookup, createInMemorySourcingObjections, type InMemorySourcedContacts } from './in-memory-sourcing.js';
+import { createInMemoryRiskAcceptances, createInMemorySourcedContacts, createInMemorySourcingCandidateLookup, createInMemorySourcingObjections, type InMemorySourcedContacts } from './in-memory-sourcing.js';
 import type { Actor } from '../actor.js';
 import { NotFoundError, ForbiddenError } from '../errors.js';
 import { agentActor, apiKeyActor, userActor } from './actors.js';
@@ -123,6 +123,7 @@ function sourcingRepositories(world: { readonly store: { read(): { readonly cand
   };
   return {
     contacts: createInMemorySourcedContacts([contactB]),
+    riskAcceptances: createInMemoryRiskAcceptances(),
     objections: createInMemorySourcingObjections(),
     existingCandidates: createInMemorySourcingCandidateLookup(() => world.store.read().candidates),
     fingerprint: (organizationId: string, value: string) => `${organizationId}:${value}`,

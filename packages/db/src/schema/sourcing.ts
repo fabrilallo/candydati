@@ -1,6 +1,6 @@
 import type { SourcedContactStatus, SourcingEvidence, SourcingSource } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
-import { index, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
+import { index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
 import { job } from './job.js';
 
@@ -60,6 +60,21 @@ export const sourcingObjection = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [primaryKey({ columns: [table.organizationId, table.fingerprint] })],
+);
+
+/**
+ * A person accepted, for themselves, the risk of letting the extension read LinkedIn with their account (its terms forbid
+ * automated reading; the account may be restricted). One row per person, with the version of the text they accepted.
+ */
+export const sourcingRiskAcceptance = pgTable(
+  'sourcing_risk_acceptance',
+  {
+    organizationId: organizationRef(),
+    userId: text('user_id').notNull(),
+    textVersion: integer('text_version').notNull(),
+    acceptedAt: timestamp('accepted_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.organizationId, table.userId] })],
 );
 
 export type SourcedContactRow = typeof sourcedContact.$inferSelect;

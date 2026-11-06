@@ -69,3 +69,4 @@ export * from './client/index.js';
 export * from './linkedin/index.js';
 export * from './sourcing/sourcing.js';
 export * from './sourcing/notice.js';
+export * from './sourcing/linkedin.js';

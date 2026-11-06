@@ -30,6 +30,7 @@ export function createSourcingDeps({ uow, queue, sender, config, secret, onMailE
     contacts: r.sourcedContacts,
     objections: r.sourcingObjections,
     existingCandidates: r.sourcingCandidates,
+    riskAcceptances: r.riskAcceptances,
     queue,
     sender,
     config,

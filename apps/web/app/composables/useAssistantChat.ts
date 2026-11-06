@@ -1,9 +1,16 @@
 import { useChat } from '@ai-sdk/vue'
-import { DefaultChatTransport, type UIMessage } from 'ai'
+import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls, type UIMessage } from 'ai'
+import type { LinkedinBridge, LinkedinToolInput } from './useLinkedinBridge'
 import { getAgentStatus } from '@/lib/agent-api'
 import { isAgentNotConfigured } from '@/lib/assistant-parts'
 import { toWirePage, type PageContext } from '@/lib/page-context'
 import { AGENT_CHAT_PATH } from '@/lib/api-paths'
+
+/** Tools the browser runs (LinkedIn, through the extension). Not awaited: the SDK waits for the output, awaiting would deadlock. */
+const runInBrowser = (linkedin: LinkedinBridge | null, toolCall: { toolName: string; input: unknown }, done: (output: unknown) => void): void => {
+  if (toolCall.toolName !== 'search_linkedin_people' || !linkedin) return
+  void linkedin.run(toolCall.input as LinkedinToolInput).then(done)
+}
 
 const BUSY: ReadonlySet<string> = new Set(['submitted', 'streaming'])
 
@@ -13,7 +20,7 @@ const BUSY: ReadonlySet<string> = new Set(['submitted', 'streaming'])
  * keeps nothing, so the conversation lives only here and a reload starts empty. Nothing is kept in browser storage:
  * "Nuova conversazione" just clears the list.
  */
-export const useAssistantChat = (page: () => PageContext) => {
+export const useAssistantChat = (page: () => PageContext, linkedin: LinkedinBridge | null = null) => {
   const request = useJobsApi()
   /** null = not known yet (or an api without the status route): the chat itself will say. Shared with the settings. */
   const configured = useAssistantConfigured()
@@ -26,6 +33,9 @@ export const useAssistantChat = (page: () => PageContext) => {
   const chat = useChat<UIMessage>({
     id: 'assistant',
     transport,
+    // A tool the browser ran (LinkedIn, through the extension) sends the conversation back once it has its result.
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
+    onToolCall: ({ toolCall }) => runInBrowser(linkedin, toolCall, (output) => chat.addToolOutput({ tool: 'search_linkedin_people', toolCallId: toolCall.toolCallId, output })),
     onError: (error) => {
       if (isAgentNotConfigured(error)) configured.value = false
       else console.error('[assistant] turn failed', error.message.slice(0, 200))
