@@ -57,7 +57,8 @@
     "security": "Sicurezza",
     "migrations": "Migrazione",
     "clients": "Clienti",
-    "skills": "Competenze"
+    "skills": "Competenze",
+    "automationPacks": "Automazioni"
   },
   "jobRequests": {
     "title": "Richieste di assunzione",
@@ -5131,5 +5132,78 @@
       "connected_app": "Proposto da un'app collegata (MCP)"
     },
     "reason": "Motivo indicato"
+  },
+  "automationPacks": {
+    "title": "Automazioni",
+    "description": "Pacchetti di regole scritti una volta per tipo di fase, da agganciare a qualsiasi annuncio. Agganciare un pacchetto copia le sue regole nell'annuncio, a nome di chi lo aggancia.",
+    "detailDescription": "Le regole di questo pacchetto, per tipo di fase.",
+    "add": "Nuovo pacchetto",
+    "emptyTitle": "Nessun pacchetto ancora",
+    "emptyBody": "Crea un pacchetto, ad esempio «Selezione tecnica», aggiungi le regole per tipo di fase e agganciale agli annunci, oppure collegalo a un template.",
+    "ruleCount": "Nessuna regola | 1 regola | {count} regole",
+    "templateCount": "Nessun template lo usa | Usato da 1 template | Usato da {count} template",
+    "saved": "Pacchetto salvato",
+    "deleted": "Pacchetto eliminato",
+    "rename": "Rinomina",
+    "delete": "Elimina pacchetto",
+    "deleteTitle": "Eliminare il pacchetto?",
+    "deleteBody": "Il pacchetto e le sue regole vengono eliminati e i template smettono di portarlo. Gli annunci a cui è già agganciato tengono le loro copie delle regole.",
+    "notFound": "Questo pacchetto non esiste più.",
+    "fromPack": "Dal pacchetto {name}",
+    "form": {
+      "addTitle": "Nuovo pacchetto",
+      "editTitle": "Modifica pacchetto",
+      "description": "Un nome che il team riconosce e, se serve, una riga su quando usarlo.",
+      "name": "Nome",
+      "namePlaceholder": "Es. Selezione tecnica",
+      "what": "A cosa serve",
+      "whatHint": "Facoltativo. Es. «Per tutte le posizioni tecniche: feedback dopo ogni colloquio tecnico».",
+      "save": "Salva"
+    },
+    "errors": {
+      "nameRequired": "Dai un nome al pacchetto",
+      "stageRequired": "Scegli il tipo di fase",
+      "packRequired": "Scegli un pacchetto"
+    },
+    "rules": {
+      "addTitle": "Nuova regola del pacchetto",
+      "editTitle": "Modifica regola del pacchetto",
+      "description": "La regola agisce su ogni fase di questo tipo negli annunci a cui il pacchetto è agganciato.",
+      "stage": "Tipo di fase",
+      "stageHint": "Se un annuncio ha due fasi di questo tipo, la regola vale per entrambe.",
+      "stagePlaceholder": "Scegli il tipo di fase",
+      "note": "Le regole di un pacchetto non agiscono da sole: vengono copiate in un annuncio quando il pacchetto viene agganciato. Come tutte le automazioni, non spostano e non decidono mai sui candidati.",
+      "empty": "Nessuna regola in questo pacchetto.",
+      "anchorRules": "Fase {stage}",
+      "deleteBody": "La regola viene tolta dal pacchetto. Gli annunci che l'hanno già copiata la tengono finché il pacchetto non viene agganciato di nuovo."
+    },
+    "attach": {
+      "button": "Aggiungi pacchetto",
+      "title": "Aggiungi un pacchetto di automazioni",
+      "description": "Le regole del pacchetto vengono copiate nelle fasi dello stesso tipo di questo annuncio, a tuo nome.",
+      "none": "Non ci sono ancora pacchetti.",
+      "goToPacks": "Crea un pacchetto",
+      "pack": "Pacchetto",
+      "placeholder": "Scegli un pacchetto",
+      "again": "Questo pacchetto è già agganciato: le sue regole in questo annuncio vengono aggiornate e le modifiche fatte qui sostituite.",
+      "update": "Aggiorna dal pacchetto",
+      "submit": "Aggiungi",
+      "done": "Pacchetto agganciato. Regole aggiunte: {created}, aggiornate: {updated}.",
+      "doneWithSkips": "Pacchetto agganciato. Regole aggiunte: {created}, aggiornate: {updated}, senza una fase adatta: {skipped}."
+    },
+    "picker": {
+      "title": "Automazioni",
+      "description": "I pacchetti scelti vengono agganciati quando salvi l'annuncio per la prima volta.",
+      "fromTemplate": "Portato dal template"
+    },
+    "template": {
+      "brings": "Pacchetti: {list}",
+      "none": "Nessun pacchetto di automazioni",
+      "edit": "Cambia",
+      "editFor": "Cambia i pacchetti del template {name}",
+      "title": "Pacchetti del template {name}",
+      "description": "Ogni annuncio creato da questo template riceve una copia delle regole di questi pacchetti.",
+      "saved": "Pacchetti del template salvati"
+    }
   }
 }

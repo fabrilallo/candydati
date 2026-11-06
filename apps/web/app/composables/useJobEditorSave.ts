@@ -5,7 +5,7 @@ import { adoptStageIds, snapshotOf, validateForm } from '@/lib/job-form'
 
 /** Save (create or update) and analyse. */
 export const useJobEditorSave = (init: EditorInit, state: JobEditorState) => {
-  const { t, api, draft, quality, job, busy, errorKey, attempted, blockedStages, counts, setKey, fail, goToSaved } = state
+  const { t, api, draft, quality, job, busy, errorKey, attempted, blockedStages, packIds, counts, setKey, fail, goToSaved } = state
 
   const save = async (options: { navigate: boolean } = { navigate: true }): Promise<boolean> => {
     attempted.value = true
@@ -18,7 +18,7 @@ export const useJobEditorSave = (init: EditorInit, state: JobEditorState) => {
     try {
       const current = job.value
       const created = current === null
-      job.value = created ? await createJob(api, content, init.template?.id) : await updateJob(api, current.id, content)
+      job.value = created ? await createJob(api, content, init.template?.id, packIds.value) : await updateJob(api, current.id, content)
       const adopted = adoptStageIds(sent, job.value.content)
       // The server gave ids to the new stages: the form keeps them, unless the stages were edited meanwhile.
       if (JSON.stringify(draft.form.value.process) === JSON.stringify(sent.process)) draft.patch({ process: adopted.process })

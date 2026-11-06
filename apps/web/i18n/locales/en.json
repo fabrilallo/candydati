@@ -57,7 +57,8 @@
     "security": "Security",
     "migrations": "Migration",
     "clients": "Clients",
-    "skills": "Skills"
+    "skills": "Skills",
+    "automationPacks": "Automations"
   },
   "jobRequests": {
     "title": "Hiring requests",
@@ -5131,5 +5132,78 @@
       "connected_app": "Proposed by a connected app (MCP)"
     },
     "reason": "Reason given"
+  },
+  "automationPacks": {
+    "title": "Automations",
+    "description": "Packs of rules written once per kind of stage, to attach to any job. Attaching a pack copies its rules into the job, as the rules of who attaches it.",
+    "detailDescription": "The rules of this pack, per kind of stage.",
+    "add": "New pack",
+    "emptyTitle": "No pack yet",
+    "emptyBody": "Create a pack, for instance “Technical hiring”, add rules per kind of stage and attach it to jobs, or link it to a template.",
+    "ruleCount": "No rules | 1 rule | {count} rules",
+    "templateCount": "No template uses it | Used by 1 template | Used by {count} templates",
+    "saved": "Pack saved",
+    "deleted": "Pack deleted",
+    "rename": "Rename",
+    "delete": "Delete pack",
+    "deleteTitle": "Delete the pack?",
+    "deleteBody": "The pack and its rules are deleted and templates stop bringing it. Jobs it is already attached to keep their copies of the rules.",
+    "notFound": "This pack no longer exists.",
+    "fromPack": "From pack {name}",
+    "form": {
+      "addTitle": "New pack",
+      "editTitle": "Edit pack",
+      "description": "A name the team recognises and, if useful, a line on when to use it.",
+      "name": "Name",
+      "namePlaceholder": "E.g. Technical hiring",
+      "what": "What it is for",
+      "whatHint": "Optional. E.g. “For every technical role: feedback after each technical interview”.",
+      "save": "Save"
+    },
+    "errors": {
+      "nameRequired": "Give the pack a name",
+      "stageRequired": "Choose the kind of stage",
+      "packRequired": "Choose a pack"
+    },
+    "rules": {
+      "addTitle": "New rule of the pack",
+      "editTitle": "Edit rule of the pack",
+      "description": "The rule acts on every stage of this kind in the jobs the pack is attached to.",
+      "stage": "Kind of stage",
+      "stageHint": "If a job has two stages of this kind, the rule applies to both.",
+      "stagePlaceholder": "Choose the kind of stage",
+      "note": "The rules of a pack do not act on their own: they are copied into a job when the pack is attached. Like every automation, they never move or decide about candidates.",
+      "empty": "No rules in this pack.",
+      "anchorRules": "Stage {stage}",
+      "deleteBody": "The rule is removed from the pack. Jobs that already copied it keep it until the pack is attached again."
+    },
+    "attach": {
+      "button": "Add pack",
+      "title": "Add an automation pack",
+      "description": "The rules of the pack are copied onto the stages of the same kind in this job, in your name.",
+      "none": "There are no packs yet.",
+      "goToPacks": "Create a pack",
+      "pack": "Pack",
+      "placeholder": "Choose a pack",
+      "again": "This pack is already attached: its rules in this job are brought up to date, replacing the changes made here.",
+      "update": "Update from pack",
+      "submit": "Add",
+      "done": "Pack attached. Rules added: {created}, updated: {updated}.",
+      "doneWithSkips": "Pack attached. Rules added: {created}, updated: {updated}, without a matching stage: {skipped}."
+    },
+    "picker": {
+      "title": "Automations",
+      "description": "The packs chosen are attached when you first save the job.",
+      "fromTemplate": "Brought by the template"
+    },
+    "template": {
+      "brings": "Packs: {list}",
+      "none": "No automation pack",
+      "edit": "Change",
+      "editFor": "Change the packs of the template {name}",
+      "title": "Packs of the template {name}",
+      "description": "Every job created from this template gets a copy of the rules of these packs.",
+      "saved": "Template packs saved"
+    }
   }
 }

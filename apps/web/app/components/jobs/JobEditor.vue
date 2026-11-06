@@ -50,6 +50,8 @@ const interviewerBinding = computed(() =>
   interviewers && !ed.readOnly.value ? { byStage: interviewers.byStage.value, members: interviewers.members.value, saving: interviewers.saving.value } : null,
 )
 const templateOpen = ref(false)
+/** A new job can bring automation packs, for who manages automations. */
+const canPickPacks = computed(() => can(viewer.value?.role ?? null, 'automation:manage'))
 /** The evaluation criteria (PRODUCT.md §2.4), saved apart from the ad: shown once it exists, editable by who manages feedback. */
 const showScorecard = computed(() => ed.job.value !== null && can(viewer.value?.role ?? null, 'feedback:read'))
 const manageScorecard = computed(() => can(viewer.value?.role ?? null, 'feedback:manage') && !ed.readOnly.value)
@@ -201,6 +203,7 @@ const saveTemplate = async (name: string): Promise<void> => {
             <JobExtrasSection :form="ed.form.value" :disabled="ed.readOnly.value" :errors="ed.errors.value" @patch="ed.patch" />
           </fieldset>
         </form>
+        <NewJobPacks v-if="!ed.job.value && canPickPacks" v-model="ed.packIds.value" :template-id="template?.id ?? null" />
         <ScorecardEditor v-if="showScorecard && ed.job.value" :job-id="ed.job.value.id" :stages="savedStages" :can-manage="manageScorecard" />
         <EditorFinish
           v-if="ed.permissions.value.publish && ed.status.value === 'draft' && !ed.readOnly.value"

@@ -131,8 +131,8 @@ const asJob = (parsed: Parsed<unknown>): JobDto => parsed.data as JobDto
 const post = (body: unknown): ApiCall => ({ method: 'POST', body })
 
 export const getJob = async (request: JobApiRequest, id: string): Promise<JobDto> => asJob(await call(request, `/api/v1/jobs/${encodeURIComponent(id)}`, jobSchema))
-export const createJob = async (request: JobApiRequest, content: JobContent, templateId?: string): Promise<JobDto> =>
-  asJob(await call(request, '/api/v1/jobs', jobSchema, post({ content, ...(templateId ? { templateId } : {}) })))
+export const createJob = async (request: JobApiRequest, content: JobContent, templateId?: string, automationPackIds: readonly string[] = []): Promise<JobDto> =>
+  asJob(await call(request, '/api/v1/jobs', jobSchema, post({ content, ...(templateId ? { templateId } : {}), ...(automationPackIds.length > 0 ? { automationPackIds } : {}) })))
 export const updateJob = async (request: JobApiRequest, id: string, content: JobContent): Promise<JobDto> =>
   asJob(await call(request, `/api/v1/jobs/${encodeURIComponent(id)}`, jobSchema, { method: 'PUT', body: { content } }))
 export const closeJob = async (request: JobApiRequest, id: string): Promise<JobDto> =>

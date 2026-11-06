@@ -37,7 +37,7 @@ export const defaultInviteRole = (actorRole: Role | null): Role | null => {
   return allowed[0] ?? null
 }
 
-export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'ai' | 'emailTemplates' | 'webhooks' | 'distribution' | 'careersPage' | 'api' | 'data' | 'migrations' | 'audit' | 'clients' | 'skills'
+export type NavId = 'dashboard' | 'attention' | 'tasks' | 'jobs' | 'jobRequests' | 'candidates' | 'reports' | 'imports' | 'templates' | 'members' | 'security' | 'privacy' | 'email' | 'ai' | 'emailTemplates' | 'webhooks' | 'distribution' | 'careersPage' | 'api' | 'data' | 'migrations' | 'audit' | 'clients' | 'skills' | 'automationPacks'
 /** Daily work first, then the settings in three groups: what candidates see, what connects outside, the organization itself. */
 export type NavSectionId = 'work' | 'hiringSetup' | 'integrations' | 'organization'
 const NAV_SECTION_ORDER: readonly NavSectionId[] = ['work', 'hiringSetup', 'integrations', 'organization']
@@ -69,6 +69,7 @@ const NAV: readonly NavItem[] = [
   { id: 'careersPage', to: '/app/settings/careers', section: 'hiringSetup', permission: 'careers_page:manage' },
   { id: 'distribution', to: '/app/settings/distribution', section: 'hiringSetup', permission: 'job:publish' },
   { id: 'emailTemplates', to: '/app/settings/email-templates', section: 'hiringSetup', permission: 'email_template:manage' },
+  { id: 'automationPacks', to: '/app/automations', section: 'hiringSetup', permission: 'automation:manage' },
   { id: 'email', to: '/app/settings/email', section: 'integrations', permission: 'email_settings:manage' },
   // The instance's language models: whoever manages its email finds them too; the page itself says who may change them.
   { id: 'ai', to: '/app/settings/ai', section: 'integrations', permission: 'email_settings:manage' },
