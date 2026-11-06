@@ -1,5 +1,5 @@
 {
-  "id": "6e9b99d6-9436-4f40-b46f-624dfe8803b9",
+  "id": "20caf626-2f10-4360-8920-83c83a4e363a",
   "prevId": "683cffd3-8c9a-4274-a542-130715bb7f6c",
   "version": "7",
   "dialect": "postgresql",
@@ -6860,6 +6860,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "sourcing_notice_by_email": {
+          "name": "sourcing_notice_by_email",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "updated_at": {
           "name": "updated_at",

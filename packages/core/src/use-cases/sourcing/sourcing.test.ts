@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { ForbiddenError, NotFoundError } from '../../errors.js';
-import { buildCandidate, buildJob, seedSourcingWorld, userActor, ORG_A, ORG_B } from '../../testing/index.js';
+import { apiKeyActor, buildCandidate, buildJob, seedSourcingWorld, userActor, ORG_A, ORG_B } from '../../testing/index.js';
 import { addSourcedContacts, deleteSourcedContact, listSourcedContacts, markSourcedContacted, sourcedNoticeText } from './contacts.js';
+import { getSourcingSetting, setSourcingSetting } from './setting.js';
 import { eraseExpiredSourcedContacts } from './expiry.js';
 import { objectToSourcing, viewSourcingNotice } from './public-notice.js';
 import { sendSourcingNotice } from './send-notice.js';
@@ -48,8 +49,14 @@ describe('adding sourced contacts', () => {
     ]);
   });
 
-  it('sends the art. 14 notice at once when the email is known, and marks the contact notified', async () => {
+  it('leaves the notice to the first message by default, even with a known email', async () => {
     const deps = world();
+    await addSourcedContacts(deps, rita, { jobId: 'job_1', contacts: [{ ...maja, email: 'maja@example.com' }] });
+    expect(deps.queue.jobs().filter((job) => job.name === 'sourcing.notice')).toEqual([]);
+  });
+
+  it('when the organization chose it, emails the art. 14 notice at once to a known address and marks the contact notified', async () => {
+    const deps = world({ noticeByEmail: true });
     const [added] = await addSourcedContacts(deps, rita, { jobId: 'job_1', contacts: [{ ...maja, email: 'maja@example.com' }] });
     expect(deps.queue.jobs()).toContainEqual({ name: 'sourcing.notice', payload: { organizationId: ORG_A, contactId: added?.contactId } });
     expect(await sendSourcingNotice(deps, { organizationId: ORG_A, contactId: added?.contactId ?? '' })).toEqual({ sent: true });
@@ -117,5 +124,17 @@ describe('expiry', () => {
     const later = new Date(deps.now().getTime() + 31 * 86_400_000);
     expect(await eraseExpiredSourcedContacts(deps, { now: later })).toEqual({ erased: 1 });
     expect(deps.contacts.snapshot()).toEqual([]);
+  });
+});
+
+describe('the sourcing setting', () => {
+  it('is off by default; owners and admins turn the notice email on, audited, and never a key', async () => {
+    const deps = world();
+    const owner = userActor({ id: 'user_test', role: 'owner', organizationId: ORG_A });
+    expect(await getSourcingSetting(deps, rita, {})).toEqual({ noticeByEmail: false });
+    await expect(setSourcingSetting(deps, rita, { noticeByEmail: true })).rejects.toBeInstanceOf(ForbiddenError);
+    expect(await setSourcingSetting(deps, owner, { noticeByEmail: true })).toEqual({ noticeByEmail: true });
+    expect(deps.auditLog.events().at(-1)).toMatchObject({ action: 'organization.sourcing_setting_updated', metadata: { noticeByEmail: true } });
+    await expect(setSourcingSetting(deps, apiKeyActor({ organizationId: ORG_A, role: 'owner' }), { noticeByEmail: false })).rejects.toBeInstanceOf(ForbiddenError);
   });
 });

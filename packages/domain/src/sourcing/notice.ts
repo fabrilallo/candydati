@@ -42,7 +42,7 @@ export function buildSourcingNotice(input: SourcingNoticeInput): { readonly subj
         `${org} ha trovato il tuo ${source} e pensa che potresti essere interessato alla posizione ${job}. Non ti sei candidato: per questo ti scriviamo, come chiede il GDPR (art. 14).`,
         `Cosa teniamo: nome, ruolo, città, il link al profilo e quello che nel profilo riguarda la posizione. Solo per valutare se proporti questa posizione. Nessun punteggio, nessuna decisione automatica.`,
         `Fino a quando: se non rispondi, i tuoi dati vengono cancellati entro il ${until}.`,
-        `Da qui vedi tutto quello che teniamo e puoi farlo cancellare subito; in quel caso ${org} si impegna a non ricontattarti: ${link}`,
+        `Da qui vedi tutto quello che teniamo e puoi farlo cancellare subito; in quel caso ${org} non potrà più ricontattarti: ${link}`,
       ].join('\n\n'),
     };
   }

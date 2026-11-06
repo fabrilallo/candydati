@@ -507,7 +507,8 @@
         "security_setting_updated": "Ha cambiato l'obbligo di verifica in due passaggi",
         "access_setting_updated": "Ha cambiato chi vede quali annunci",
         "logo_changed": "Ha cambiato il logo",
-        "agency_setting_updated": "Ha cambiato se l'organizzazione seleziona per conto di clienti"
+        "agency_setting_updated": "Ha cambiato se l'organizzazione seleziona per conto di clienti",
+        "sourcing_setting_updated": "Ha cambiato come vengono informate le persone trovate (sourcing)"
       },
       "invitation": {
         "created": "Ha invitato una persona",
@@ -5251,5 +5252,14 @@
         "body": "Non riusciamo a caricare la pagina in questo momento. Riprova più tardi."
       }
     }
+  },
+  "sourcingSetting": {
+    "title": "Persone trovate fuori da Candydati (sourcing)",
+    "always": "Chi viene trovato su LinkedIn, GitHub o sul web riceve l'informativa (art. 14 GDPR) al più tardi con il primo messaggio, con un link per vedere e cancellare i suoi dati. Chi non viene contattato è cancellato entro 30 giorni.",
+    "label": "Invia subito l'informativa via email quando l'indirizzo è noto",
+    "on": "Attivo: chi ha un'email pubblica riceve l'informativa appena viene aggiunto, anche se nessuno gli scrive.",
+    "off": "Spento: l'informativa parte con il primo messaggio. Nessuna email a chi non viene contattato.",
+    "saved": "Impostazione salvata",
+    "loadFailed": "Non siamo riusciti a caricare l'impostazione del sourcing."
   }
 }

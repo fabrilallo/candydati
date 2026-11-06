@@ -15,7 +15,7 @@ describe('art. 14 notice to a sourced contact', () => {
   it('says who, from where, why, until when, and how to have the data erased (Italian)', () => {
     const { subject, text } = buildSourcingNotice({ ...input, locale: 'it' });
     expect(subject).toBe('Acme ha trovato il tuo profilo per la posizione Backend Developer');
-    for (const part of ['Ciao Maja', 'Acme', 'profilo pubblico LinkedIn', 'Backend Developer', '6 dicembre 2026', 'https://app.example/sourcing/notice/s3cret', 'non ricontattarti']) expect(text).toContain(part);
+    for (const part of ['Ciao Maja', 'Acme', 'profilo pubblico LinkedIn', 'Backend Developer', '6 dicembre 2026', 'https://app.example/sourcing/notice/s3cret', 'non potrà più ricontattarti']) expect(text).toContain(part);
   });
 
   it('speaks English too, and names a web page or GitHub as the source', () => {

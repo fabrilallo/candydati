@@ -35,6 +35,8 @@ export interface OrganizationSettings {
   readonly recruitsForClients: boolean;
   /** The agency's authorization reference, shown on client ads. */
   readonly agencyAuthorization: string | null;
+  /** Sourced contacts with a known email get the art. 14 notice by email at once. Off by default. */
+  readonly sourcingNoticeByEmail: boolean;
 }
 
 export interface OrganizationSettingsRepository {
@@ -42,6 +44,7 @@ export interface OrganizationSettingsRepository {
   setRequireApproval(organizationId: string, value: boolean, at: Date): Promise<OrganizationSettings>;
   setRestrictRecruitersToTeam(organizationId: string, value: boolean, at: Date): Promise<OrganizationSettings>;
   setAgency(organizationId: string, value: Pick<OrganizationSettings, 'recruitsForClients' | 'agencyAuthorization'>, at: Date): Promise<OrganizationSettings>;
+  setSourcingNoticeByEmail(organizationId: string, value: boolean, at: Date): Promise<OrganizationSettings>;
 }
 
 /**

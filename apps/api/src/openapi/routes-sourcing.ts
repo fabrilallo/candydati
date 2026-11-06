@@ -14,7 +14,7 @@ export const sourcingRoutes: readonly RouteSpec[] = [
   },
   {
     method: 'post', path: '/api/v1/jobs/:id/sourced-contacts', tag, summary: 'Add people found outside Candydati', scope, status: 201,
-    description: `Up to ${MAX_SOURCED_PER_CALL} people found on LinkedIn, GitHub or the web. Skipped, never merged: who objected (\`objected\`), who is already a contact of the job (\`already_contact\`), a candidate of the organization with the same email or LinkedIn profile (\`already_candidate\`, with \`candidateId\`), and repeats in the call. Each added contact gets a personal GDPR art. 14 link (\`noticeUrl\`, only in this answer) to give them in the first message; with a known \`email\` the notice is emailed automatically. Evidence describes, never scores.`,
+    description: `Up to ${MAX_SOURCED_PER_CALL} people found on LinkedIn, GitHub or the web. Skipped, never merged: who objected (\`objected\`), who is already a contact of the job (\`already_contact\`), a candidate of the organization with the same email or LinkedIn profile (\`already_candidate\`, with \`candidateId\`), and repeats in the call. Each added contact gets a personal GDPR art. 14 link (\`noticeUrl\`, only in this answer) to give them in the first message (art. 14(3)(b)); when the organization turned on the notice email (\`PUT /settings/sourcing\`) and \`email\` is known, it is also emailed at once. Evidence describes, never scores.`,
     body: z.object({ contacts: z.array(sourcedContactInputSchema).min(1).max(MAX_SOURCED_PER_CALL) }),
     response: { schema: addSourcedResultSchema, list: true },
   },
@@ -30,6 +30,7 @@ export const sourcingRoutes: readonly RouteSpec[] = [
     query: z.object({ doNotContact: z.enum(['true', 'false']).optional() }),
     response: { schema: z.object({ deleted: z.literal(true) }) },
   },
+  { method: 'get', path: '/api/v1/settings/sourcing', tag, summary: 'How sourced people are informed', scope, response: { schema: z.object({ noticeByEmail: z.boolean() }) } },
   {
     method: 'get', path: '/api/v1/public/sourcing-notice/:token', tag: 'Public', summary: 'What is kept about a sourced person', scope: null,
     description: 'For the person, from the link of their notice: who holds the data, for which job, from which source, everything kept and until when. Unknown, renewed, erased or expired: 404. Never cached.',

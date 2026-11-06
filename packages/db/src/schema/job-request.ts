@@ -54,6 +54,11 @@ export const organizationSetting = pgTable('organization_setting', {
   recruitsForClients: boolean('recruits_for_clients').notNull().default(false),
   /** The agency's authorization reference, shown on the ads it publishes for clients (D.Lgs. 276/2003, art. 9). */
   agencyAuthorization: text('agency_authorization'),
+  /**
+   * Sourced contacts whose email is known get the art. 14 notice by email at once. Off by default: the notice then goes
+   * with the first message, and contacts never written to are erased within the month.
+   */
+  sourcingNoticeByEmail: boolean('sourcing_notice_by_email').notNull().default(false),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 

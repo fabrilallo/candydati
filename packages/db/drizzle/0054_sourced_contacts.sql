@@ -27,6 +27,7 @@ CREATE TABLE "sourcing_objection" (
 	CONSTRAINT "sourcing_objection_organization_id_fingerprint_pk" PRIMARY KEY("organization_id","fingerprint")
 );
 --> statement-breakpoint
+ALTER TABLE "organization_setting" ADD COLUMN "sourcing_notice_by_email" boolean DEFAULT false NOT NULL;--> statement-breakpoint
 ALTER TABLE "sourced_contact" ADD CONSTRAINT "sourced_contact_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sourced_contact" ADD CONSTRAINT "sourced_contact_job_id_job_id_fk" FOREIGN KEY ("job_id") REFERENCES "public"."job"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sourcing_objection" ADD CONSTRAINT "sourcing_objection_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint

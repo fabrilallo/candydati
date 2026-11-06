@@ -1,9 +1,11 @@
 import {
   addSourcedContacts,
   deleteSourcedContact,
+  getSourcingSetting,
   listSourcedContacts,
   markSourcedContacted,
   objectToSourcing,
+  setSourcingSetting,
   sourcedNoticeText,
   toAddSourcedResultDto,
   toSourcedContactDto,
@@ -46,6 +48,10 @@ export function registerSourcingRoutes(app: FastifyInstance, ctx: AppContext): v
   app.delete('/api/v1/sourced-contacts/:id', async (request) =>
     ok(await deleteSourcedContact(deps, await ctx.resolveActor(request), { contactId: paramOf(request, 'id'), doNotContact: queryOf(request).doNotContact === 'true' })),
   );
+
+  app.get('/api/v1/settings/sourcing', async (request) => ok(await getSourcingSetting(deps, await ctx.resolveActor(request), {})));
+
+  app.put('/api/v1/settings/sourcing', async (request) => ok(await setSourcingSetting(deps, await ctx.resolveActor(request), bodyOf(request))));
 
   // The person's own page, from the link of their notice: the token is the only credential, no session is read.
   const config = feedbackRouteConfig(ctx);

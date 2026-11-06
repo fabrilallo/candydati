@@ -56,6 +56,7 @@ export const AUDIT_ACTIONS = [
   'automation.copied',
   'automation_pack.saved',
   'automation_pack.deleted',
+  'organization.sourcing_setting_updated',
   'sourced_contact.added',
   'sourced_contact.contacted',
   'sourced_contact.notified',
