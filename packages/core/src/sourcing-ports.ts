@@ -60,4 +60,31 @@ export interface SourcingDeps extends CoreDeps, SourcingMailParts {
   readonly fingerprint: (organizationId: string, value: string) => string;
   readonly newId: () => string;
   readonly now: () => Date;
+  /** Absent: sourcing from GitHub is not available on this instance. */
+  readonly github?: GithubPeopleSearch | undefined;
+}
+
+/** A public GitHub account, as the API gives it. Never more: no email, no followers (popularity is not a criterion). */
+export interface GithubPerson {
+  readonly login: string;
+  readonly name: string | null;
+  readonly location: string | null;
+  readonly bio: string | null;
+  readonly profileUrl: string;
+  readonly publicRepos: number;
+  /** Languages of the person's own public repositories (forks left out), most repositories first. */
+  readonly languages: readonly { readonly language: string; readonly repos: number }[];
+}
+
+export interface GithubQuery {
+  readonly languages: readonly string[];
+  readonly location: string | null;
+  /** Words that must appear in the bio. */
+  readonly keywords: readonly string[];
+  readonly limit: number;
+}
+
+/** GitHub's public user search (official API). Ordered by join date, newest first: never by any notion of "best". */
+export interface GithubPeopleSearch {
+  search(query: GithubQuery): Promise<readonly GithubPerson[]>;
 }

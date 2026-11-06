@@ -95,6 +95,8 @@ const envSchema = z.object({
   /** LinkedIn app with "Sign In with LinkedIn using OpenID Connect": the application form offers "Fill in with LinkedIn". Both or none. */
   LINKEDIN_CLIENT_ID: z.string().trim().min(1).max(200).optional(),
   LINKEDIN_CLIENT_SECRET: z.string().trim().min(1).max(500).optional(),
+  /** GitHub token (no scope needed, public data only) for sourcing on GitHub: 5,000 calls an hour instead of 60. */
+  GITHUB_TOKEN: z.string().trim().min(1).max(500).optional(),
   /** `open`: anyone may create an account. `invite_only`: only with a pending invitation, or the very first account. */
   SIGNUP_MODE: z.enum(SIGNUP_MODES).optional(),
   /**

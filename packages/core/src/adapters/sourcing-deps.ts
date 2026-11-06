@@ -1,7 +1,7 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import type { TaskQueue } from '../intake-ports.js';
 import type { EmailSender, MessagingConfig } from '../messaging-ports.js';
-import type { SourcingDeps } from '../sourcing-ports.js';
+import type { GithubPeopleSearch, SourcingDeps } from '../sourcing-ports.js';
 import type { DrizzleUnitOfWork } from './drizzle-repositories.js';
 import { createSourcingFingerprint } from './sourcing-fingerprint.js';
 
@@ -13,10 +13,12 @@ export interface SourcingWiring {
   /** The instance secret (`BETTER_AUTH_SECRET`): keys the objection fingerprints. */
   readonly secret: string;
   readonly onMailError?: ((error: unknown) => void) | undefined;
+  /** GitHub's public user search; absent: sourcing on GitHub is not offered. */
+  readonly github?: GithubPeopleSearch | undefined;
 }
 
 /** The same sourcing dependencies for the api and the worker, on Postgres. */
-export function createSourcingDeps({ uow, queue, sender, config, secret, onMailError }: SourcingWiring): SourcingDeps {
+export function createSourcingDeps({ uow, queue, sender, config, secret, onMailError, github }: SourcingWiring): SourcingDeps {
   const r = uow.repositories;
   return {
     auditLog: r.auditLog,
@@ -37,5 +39,6 @@ export function createSourcingDeps({ uow, queue, sender, config, secret, onMailE
     fingerprint: createSourcingFingerprint(secret),
     newId: randomUUID,
     now: () => new Date(),
+    github,
   };
 }

@@ -30,6 +30,7 @@ Variables without a default are required or optional as described; see `.env.exa
 | `EMAIL_INBOUND_DOMAIN` | api, worker |  | Domain that receives replies (reply+<token>@<domain>). |
 | `EMAIL_PROVIDER` | api, worker | `log` | smtp, resend or log (log sends nothing, refused in production). Unset: the instance owner configures email from the app (Settings, Email), and invitations, publishing and applications wait until it works. Set, it wins and the app shows it read-only. |
 | `FAST_MODEL` | api, worker |  | provider/model of the fast model: the ad quality score and CV reading (applications, imports). Set, it wins over Settings, AI in the app (shown read-only). Empty and nothing set in the app: no ad quality score at all, plain text of CVs. |
+| `GITHUB_TOKEN` | api |  | Token of a GitHub account (fine-grained, no permission needed: public data only) for sourcing on GitHub from the assistant. Raises GitHub limits from 60 to 5,000 calls an hour; one search reads up to about 60. Empty: sourcing on GitHub still works, a search or two an hour. |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | api, worker |  | API key for google/* models. |
 | `GROQ_API_KEY` | api, worker |  | API key for groq/* models. |
 | `IMPORT_STALE_DAYS` | worker | `7` | Worker: days after which an import never committed is purged. |

@@ -136,6 +136,7 @@ const ROWS: readonly Row[] = [
   write('attachPack', { jobId: JOB_B, packId: 'pack_a' }),
   write('createJob', { content: { title: 'New' }, automationPackIds: ['pack_a'] }, { label: 'a new job with a pack touches no rule of job B' }),
   read('listSourcedContacts', { jobId: JOB_B }),
+  read('searchGithubPeople', { jobId: JOB_B, languages: ['Go'] }),
   write('addSourcedContacts', { jobId: JOB_B, contacts: [{ firstName: 'New', source: 'github', profileUrl: 'https://github.com/new-person' }] }),
   write('sourcedNoticeText', { contactId: 'contact_b' }),
   write('markSourcedContacted', { contactId: 'contact_b' }),

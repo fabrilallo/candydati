@@ -1,4 +1,4 @@
-export const ERROR_CODES = ['forbidden', 'not_found', 'validation_failed', 'conflict', 'rate_limited', 'audit_failed', 'storage_unavailable', 'stale_revision'] as const;
+export const ERROR_CODES = ['forbidden', 'not_found', 'validation_failed', 'conflict', 'rate_limited', 'audit_failed', 'storage_unavailable', 'source_unavailable', 'stale_revision'] as const;
 export type ErrorCode = (typeof ERROR_CODES)[number];
 
 /**
@@ -90,6 +90,15 @@ export class StorageUnavailableError extends CoreError {
 
   constructor(cause: unknown) {
     super('File storage is temporarily unavailable. Please try again shortly.', { cause });
+  }
+}
+
+/** An outside source the user asked to search (GitHub) failed. Safe message; the original error stays in `cause`. */
+export class SourceUnavailableError extends CoreError {
+  readonly code = 'source_unavailable';
+
+  constructor(cause: unknown) {
+    super('The source is temporarily unavailable. Please try again shortly.', { cause });
   }
 }
 

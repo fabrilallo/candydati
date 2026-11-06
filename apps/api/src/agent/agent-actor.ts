@@ -17,6 +17,8 @@ export const AGENT_TOOL_PERMISSIONS: readonly Permission[] = [
   'candidate:read',
   'message:read',
   'task:manage',
+  // Sourcing: search public profiles and add the people a user confirmed as contacts (never candidates).
+  'sourcing:manage',
 ];
 
 export const agentScopes = (actor: Pick<Actor, 'role'>): readonly Permission[] =>

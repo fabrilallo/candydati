@@ -43,6 +43,7 @@ export const DESCRIPTIONS = {
   RECEIPTS_DAILY_MAX_PER_ORGANIZATION: 'Application receipt emails the public form may queue per organization in 24 hours (the form is otherwise a way to mail strangers).',
   LINKEDIN_CLIENT_ID: 'Client ID of a LinkedIn app with the "Sign In with LinkedIn using OpenID Connect" product. Set with LINKEDIN_CLIENT_SECRET: the application form offers "Fill in with LinkedIn" (name and verified email only). Empty: off.',
   LINKEDIN_CLIENT_SECRET: 'Client secret of that LinkedIn app (both or none). Redirect URL to register: {PLATFORM_URL}/api/v1/public/linkedin/callback.',
+  GITHUB_TOKEN: 'Token of a GitHub account (fine-grained, no permission needed: public data only) for sourcing on GitHub from the assistant. Raises GitHub limits from 60 to 5,000 calls an hour; one search reads up to about 60. Empty: sourcing on GitHub still works, a search or two an hour.',
   TURNSTILE_SECRET_KEY: 'Cloudflare Turnstile secret key. Set: the public application form needs a valid Turnstile answer (also set NUXT_PUBLIC_TURNSTILE_SITE_KEY). Empty: off.',
   CV_MODEL_DAILY_BUDGET: 'Worker: CV extractions per organization and day that may call the model.',
   IMPORT_STALE_DAYS: 'Worker: days after which an import never committed is purged.',

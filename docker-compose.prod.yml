@@ -148,6 +148,7 @@ services:
       TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
       LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID:-}
       LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       INBOUND_WEBHOOK_SECRET: ${INBOUND_WEBHOOK_SECRET:?imposta INBOUND_WEBHOOK_SECRET (almeno 32 caratteri)}
       # invite_only (default in production): accounts only through an invitation, plus the first owner (SECURITY.md).
       SIGNUP_MODE: ${SIGNUP_MODE:-invite_only}

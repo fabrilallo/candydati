@@ -3065,7 +3065,15 @@
         "running": "Working on it",
         "done": "Done"
       },
-      "failed": "A step did not work"
+      "failed": "A step did not work",
+      "search_github_people": {
+        "running": "Searching GitHub",
+        "done": "Searched GitHub"
+      },
+      "add_sourced_contacts": {
+        "running": "Adding the contacts",
+        "done": "Added the contacts"
+      }
     },
     "draftMessage": {
       "title": "Draft for {name}",
