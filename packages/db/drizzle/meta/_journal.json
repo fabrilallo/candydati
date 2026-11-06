@@ -365,6 +365,13 @@
       "when": 1793894218343,
       "tag": "0051_skill_aliases",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1793961915701,
+      "tag": "0052_automation_packs",
+      "breakpoints": true
     }
   ]
 }

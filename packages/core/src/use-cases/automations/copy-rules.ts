@@ -85,7 +85,7 @@ async function validateCopies(deps: AutomationRuleDeps, actor: Actor, target: Ru
 async function writeCopy(deps: AutomationRuleDeps, actor: Actor, to: AutomationHolder, copy: RuleShape): Promise<string> {
   const { stageId, trigger, conditions, action, enabled } = copy;
   const base = { id: deps.newId(), organizationId: actor.organizationId, stageId, trigger, conditions, action, enabled, createdBy: toActorUserId(actor), createdAt: deps.now() };
-  if (to.kind === 'job') return (await deps.rules.create({ ...base, jobId: to.jobId })).id;
+  if (to.kind === 'job') return (await deps.rules.create({ ...base, jobId: to.jobId, packId: null, packRuleId: null })).id;
   return (await deps.templateAutomations.create({ ...base, templateId: to.templateId })).id;
 }
 

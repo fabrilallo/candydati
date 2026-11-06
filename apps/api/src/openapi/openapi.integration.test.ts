@@ -103,7 +103,7 @@ describe('OpenAPI document', () => {
     const list = doc.paths['/api/v1/jobs'].get;
     expect(list.parameters.map((parameter: Json) => parameter.name)).toEqual(['status', 'clientId', 'page', 'limit']);
     const create = doc.paths['/api/v1/jobs'].post.requestBody.content['application/json'].schema;
-    expect(Object.keys(create.properties)).toEqual(['content', 'templateId']);
+    expect(Object.keys(create.properties)).toEqual(['content', 'templateId', 'automationPackIds']);
     expect(create.properties.content.properties.title).toBeDefined();
     expect(create.properties.content.required ?? []).not.toContain('title');
     const task = doc.paths['/api/v1/tasks'].post.requestBody.content['application/json'].schema;

@@ -15,6 +15,8 @@ const toRule = (row: Row): AutomationRule => ({
   conditions: automationConditionsSchema.parse(row.conditions),
   action: automationActionSchema.parse({ ...row.config, type: row.action }),
   enabled: row.enabled,
+  packId: row.packId,
+  packRuleId: row.packRuleId,
   createdBy: row.createdBy,
   createdAt: row.createdAt,
 });
@@ -33,6 +35,8 @@ const toValues = (rule: AutomationRule) => {
     action: type,
     config,
     enabled: rule.enabled,
+    packId: rule.packId,
+    packRuleId: rule.packRuleId,
     createdBy: rule.createdBy,
     createdAt: rule.createdAt,
   };

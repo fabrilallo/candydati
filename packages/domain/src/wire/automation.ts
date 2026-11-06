@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { automationActionSchema } from '../automation/automation.js';
 import { automationConditionsSchema } from '../automation/conditions.js';
+import { PACK_SKIP_REASONS, stageAnchorSchema } from '../automation/pack.js';
 import { MOVE_PROPOSAL_SOURCES } from '../automation/proposal.js';
 import { AUTOMATION_TRIGGERS, automationTriggerSchema, STAGE_ENTERED } from '../automation/trigger.js';
 import { candidateRefSchema, isoDate } from './common.js';
@@ -14,6 +15,8 @@ export const automationRuleSchema = z.object({
   conditions: automationConditionsSchema.default({}),
   action: automationActionSchema,
   enabled: z.boolean(),
+  /** The pack the rule was copied from, if any. */
+  packId: z.string().nullable().default(null),
   createdBy: z.string(),
   createdAt: isoDate,
 });
@@ -64,8 +67,37 @@ export const automationRunSchema = z.object({
 export type AutomationRunDto = z.output<typeof automationRunSchema>;
 
 /** A rule kept with a job template (`GET /job-templates/:id/automations`): copied to each job created from the template. */
-export const templateAutomationRuleSchema = automationRuleSchema.omit({ jobId: true }).extend({ templateId: z.string() });
+export const templateAutomationRuleSchema = automationRuleSchema.omit({ jobId: true, packId: true }).extend({ templateId: z.string() });
 export type TemplateAutomationRuleDto = z.output<typeof templateAutomationRuleSchema>;
+
+/** An automation pack (`GET /automation-packs`): `ruleCount` rules, `templateIds` the job templates that use it. */
+export const automationPackSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string(),
+  ruleCount: z.number().int().min(0),
+  templateIds: z.array(z.string()),
+  createdBy: z.string(),
+  createdAt: isoDate,
+  updatedAt: isoDate,
+});
+export type AutomationPackDto = z.output<typeof automationPackSchema>;
+
+/** A rule of a pack: `stage` is a stage type or `received`; a proposed move's `toStageId` is a stage type too. */
+export const automationPackRuleSchema = automationRuleSchema.omit({ jobId: true, stageId: true, packId: true }).extend({ packId: z.string(), stage: stageAnchorSchema });
+export type AutomationPackRuleDto = z.output<typeof automationPackRuleSchema>;
+
+/** `POST /jobs/:id/automation-packs`: what the attach created, updated and removed in the job, and what found no place. */
+export const attachPackResultSchema = z.object({
+  packId: z.string(),
+  created: z.array(z.string()),
+  /** Copies made before, brought up to date in place (they keep their id, and with it what they already did). */
+  updated: z.array(z.string()),
+  /** Copies made before whose pack rule or stage is gone. */
+  removed: z.number().int().min(0),
+  skipped: z.array(z.object({ ruleId: z.string(), reason: z.enum(PACK_SKIP_REASONS), stageId: z.string().nullable() })),
+});
+export type AttachPackResultDto = z.output<typeof attachPackResultSchema>;
 
 /** `POST /automations/copy`: where the copies went and their ids, in the order of the source. */
 export const copyAutomationsResultSchema = z.object({

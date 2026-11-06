@@ -543,7 +543,8 @@
       },
       "job_template": {
         "created": "Ha salvato un modello di annuncio",
-        "deleted": "Ha eliminato un modello di annuncio"
+        "deleted": "Ha eliminato un modello di annuncio",
+        "packs_updated": "Ha cambiato i pacchetti di automazioni di un modello di annuncio"
       },
       "privacy_notice": {
         "published": "Ha pubblicato una versione dell'informativa privacy"
@@ -590,6 +591,10 @@
         "deleted": "Ha eliminato un'automazione",
         "ran": "Un'automazione ha agito",
         "copied": "Ha copiato delle regole di automazione"
+      },
+      "automation_pack": {
+        "saved": "Ha salvato un pacchetto di automazioni",
+        "deleted": "Ha eliminato un pacchetto di automazioni"
       },
       "webhook": {
         "saved": "Ha salvato un webhook",

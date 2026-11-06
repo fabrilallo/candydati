@@ -1,3 +1,4 @@
+import type { AutomationPackRepository, JobTemplatePackRepository } from './pack-ports.js';
 import type { JobTeamRepository } from './job-team-ports.js';
 import type { AutomationRule, AutomationTriggerType, Notification, NotificationKind, Role, Task } from '@candydati/domain';
 import type { ApplicationRepository, CandidateRepository, UserDirectory } from './candidate-ports.js';
@@ -129,6 +130,9 @@ export interface AutomationRuleDeps extends CoreDeps {
   /** Copying rules to and from job templates; a template's rules are listed and removed through these too. */
   readonly jobTemplates: JobTemplateRepository;
   readonly templateAutomations: TemplateAutomationRepository;
+  /** Packs of rules kept by the organization, and the packs each job template brings. */
+  readonly automationPacks: AutomationPackRepository;
+  readonly templatePacks: JobTemplatePackRepository;
   /** Rule creators, assignees and alert recipients must be members of the organization. */
   readonly members: MemberDirectory;
   readonly newId: () => string;

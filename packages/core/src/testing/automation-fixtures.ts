@@ -1,4 +1,4 @@
-import type { AutomationRule, MoveProposal, Notification, OutboxEvent, Task, TemplateAutomationRule, WebhookDelivery, WebhookEndpoint } from '@candydati/domain';
+import type { AutomationPack, AutomationPackRule, AutomationRule, MoveProposal, Notification, OutboxEvent, Task, TemplateAutomationRule, WebhookDelivery, WebhookEndpoint } from '@candydati/domain';
 import type { Member } from '../automation-ports.js';
 
 const DATE = new Date('2026-01-01T00:00:00.000Z');
@@ -40,6 +40,8 @@ export const buildAutomationRule = (overrides: Partial<AutomationRule> = {}): Au
   conditions: {},
   action: { type: 'create_task', title: 'Prepare the interview', assignee: 'job_owner' },
   enabled: true,
+  packId: null,
+  packRuleId: null,
   createdBy: 'recruiter_1',
   createdAt: DATE,
   ...overrides,
@@ -120,3 +122,29 @@ export const defaultMembers: readonly Member[] = [
   { userId: 'recruiter_1', name: 'Rita Recruiter', email: 'rita@acme.example', roles: ['recruiter'] },
   { userId: 'hm_1', name: 'Hugo Manager', email: 'hugo@acme.example', roles: ['hiring_manager'] },
 ];
+
+export const buildPack = (overrides: Partial<AutomationPack> = {}): AutomationPack => ({
+  id: 'pack_1',
+  organizationId: 'org_a',
+  name: 'Tech hiring',
+  description: '',
+  createdBy: 'recruiter_1',
+  createdAt: DATE,
+  updatedAt: DATE,
+  ...overrides,
+});
+
+/** A pack rule on every technical interview asking its interviewers for feedback. */
+export const buildPackRule = (overrides: Partial<AutomationPackRule> = {}): AutomationPackRule => ({
+  id: 'prule_1',
+  organizationId: 'org_a',
+  packId: 'pack_1',
+  stage: 'technical_interview',
+  trigger: { type: 'stage_entered' },
+  conditions: {},
+  action: { type: 'request_feedback' },
+  enabled: true,
+  createdBy: 'recruiter_1',
+  createdAt: DATE,
+  ...overrides,
+});

@@ -70,6 +70,7 @@ describe('automation DTO mappers', () => {
       conditions: {},
       action: { type: 'create_task', title: 'Prepare the interview', assignee: 'job_owner' },
       enabled: true,
+      packId: null,
       createdBy: 'recruiter_1',
       createdAt: '2026-01-01T00:00:00.000Z',
     });

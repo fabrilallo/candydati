@@ -1,3 +1,4 @@
+import type { PackSources } from './pack-ports.js';
 import type { ClientRepository, JobClientRepository, PublicJobClientDirectory, ShortlistRepository } from './client-ports.js';
 import type { EmailReadiness } from './instance-email-ports.js';
 import type { AdQualityAnalyzer, Job, JobStatus, JobTemplate } from '@candydati/domain';
@@ -128,6 +129,8 @@ export interface JobDeps extends CoreDeps {
   readonly automationRules: AutomationRuleRepository;
   /** A job created from a template gets copies of the template's rules. Absent: no copy. */
   readonly templateAutomations?: TemplateAutomationRepository | undefined;
+  /** A job gets copies of the rules of its template's packs and of the packs picked on creation. Absent: no copy. */
+  readonly packs?: PackSources | undefined;
   /** `job.published` and `job.closed` events for webhooks. */
   readonly outbox: OutboxRepository;
   /** Publishing needs an approved budget when the organization requires it. */

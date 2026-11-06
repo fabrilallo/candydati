@@ -15,6 +15,7 @@ import {
 import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
+import { registerAutomationPackRoutes } from './automation-packs.js';
 import { registerMoveProposalRoutes } from './move-proposals.js';
 import { asNumber, bodyOf, paramOf, queryOf } from './request.js';
 
@@ -66,5 +67,6 @@ export function registerAutomationRoutes(app: FastifyInstance, ctx: AppContext):
     return ok({ deleted: true });
   });
 
+  registerAutomationPackRoutes(app, ctx);
   registerMoveProposalRoutes(app, ctx);
 }
