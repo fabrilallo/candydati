@@ -1584,7 +1584,8 @@
       "automations": "Automations",
       "distribution": "Distribution",
       "team": "Team",
-      "shortlists": "Shortlists"
+      "shortlists": "Shortlists",
+      "sourcing": "Sourced"
     },
     "received": "Received",
     "receivedHint": "New applications, not looked at yet",
@@ -5261,5 +5262,67 @@
     "off": "Off: the notice goes with the first message. No email to people who are not contacted.",
     "saved": "Setting saved",
     "loadFailed": "We could not load the sourcing setting."
+  },
+  "sourcing": {
+    "title": "Sourced contacts",
+    "note": "People found outside Candydati (LinkedIn, GitHub, the web) for this position: contacts, not candidates. When you write to someone, put the notice text in the first message: the law requires it (GDPR, art. 14). People never written to are erased automatically after 30 days.",
+    "emptyTitle": "No sourced contacts",
+    "emptyBody": "Add here the people you found on LinkedIn, GitHub or the web for this position. Soon the assistant will do it too.",
+    "openProfile": "Open the profile",
+    "noticeButton": "Notice text",
+    "markContacted": "Mark as written to",
+    "markedContacted": "Contact marked as written to",
+    "deleted": "Contact erased",
+    "deleteFor": "Erase {name}",
+    "erasedIn": "Erased today | Erased in 1 day | Erased in {count} days",
+    "sources": {
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "web": "Web",
+      "manual": "Other"
+    },
+    "statuses": {
+      "found": "Found",
+      "notified": "Notice sent",
+      "contacted": "Written to"
+    },
+    "outcomes": {
+      "added": "Contact added",
+      "already_contact": "This person is already a contact of this position",
+      "already_candidate": "This person is already a candidate",
+      "objected": "This person asked not to be contacted again"
+    },
+    "errors": {
+      "firstName": "Enter the first name",
+      "profileUrl": "Paste the link to the profile (https://…)"
+    },
+    "add": {
+      "button": "Add contact",
+      "title": "Add a sourced contact",
+      "description": "A person found outside Candydati for this position. We keep only what is needed to consider offering it to them.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "profileUrl": "Profile link",
+      "source": "Source",
+      "headline": "Current title",
+      "location": "City",
+      "evidence": "What relates to the position",
+      "evidenceHint": "One line per criterion, for example “Go: 4 years at Spotify”. Facts, not judgements.",
+      "save": "Add"
+    },
+    "notice": {
+      "title": "Notice for {name}",
+      "description": "Paste these lines into the first message you send (LinkedIn, email).",
+      "linkNote": "The link is personal: whoever opens it sees what we keep and can have it erased. Each time you open this window a new one is made and the previous one stops working.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "sent": "I sent it: mark as written to"
+    },
+    "delete": {
+      "title": "Erase {name}?",
+      "body": "The contact is erased at once.",
+      "doNotContact": "Do not contact again: keep only an encrypted fingerprint so they are never added again",
+      "confirm": "Erase"
+    }
   }
 }
