@@ -6,7 +6,7 @@ import { createFindHelpRecipeTool } from './help-tools.js';
 import { createCandidateBriefTool, createListAttentionTool, createPipelineSummaryTool } from './candidate-tools.js';
 import { createReportsSummaryTool } from './report-tools.js';
 import { createFindCandidatesTool } from './search-tools.js';
-import { createAddSourcedContactsTool, createSearchGithubPeopleTool } from './sourcing-tools.js';
+import { createAddSourcedContactsTool, createSearchGithubPeopleTool, createSearchLinkedinPeopleTool } from './sourcing-tools.js';
 import {
   createAnalyzeJobAdTool,
   createDraftJobContentTool,
@@ -50,6 +50,7 @@ export function createAgentTools(deps: AgentToolDeps) {
     createCreateTaskTool(deps.taskDeps),
     createReportsSummaryTool(deps.reportDeps),
     createSearchGithubPeopleTool(deps.sourcingDeps, deps.sealer),
+    createSearchLinkedinPeopleTool(),
     createAddSourcedContactsTool(deps.sourcingDeps, deps.sealer),
     createFindHelpRecipeTool(),
   ];

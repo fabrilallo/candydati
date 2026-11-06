@@ -508,7 +508,8 @@
         "access_setting_updated": "Changed who sees which ads",
         "logo_changed": "Changed the logo",
         "agency_setting_updated": "Changed whether the organization recruits for clients",
-        "sourcing_setting_updated": "Changed how sourced people are informed"
+        "sourcing_setting_updated": "Changed how sourced people are informed",
+        "linkedin_sourcing_updated": "Changed sourcing on LinkedIn"
       },
       "invitation": {
         "created": "Invited a person",
@@ -680,6 +681,10 @@
         "notified": "Sent the notice to a sourced contact",
         "deleted": "Erased a sourced contact",
         "objected": "A sourced contact asked to be erased"
+      },
+      "sourcing": {
+        "linkedin_risk_accepted": "Accepted the risk of sourcing on LinkedIn",
+        "linkedin_read": "The assistant read LinkedIn profiles"
       }
     }
   },
@@ -3073,6 +3078,10 @@
       "add_sourced_contacts": {
         "running": "Adding the contacts",
         "done": "Added the contacts"
+      },
+      "search_linkedin_people": {
+        "running": "Reading LinkedIn in your browser",
+        "done": "Read LinkedIn"
       }
     },
     "draftMessage": {
@@ -5332,5 +5341,24 @@
       "doNotContact": "Do not contact again: keep only an encrypted fingerprint so they are never added again",
       "confirm": "Erase"
     }
+  },
+  "linkedinRisk": {
+    "title": "Before searching LinkedIn",
+    "lead": "The assistant will read LinkedIn in your browser, with your account. Read carefully:",
+    "terms": "LinkedIn's terms of use forbid the automated reading of profiles.",
+    "account": "LinkedIn may ask you to verify, restrict or block your account. The risk is on your personal account.",
+    "yours": "The choice is yours and is recorded with the date. You can stop at any time: just stop asking for LinkedIn searches.",
+    "captcha": "If LinkedIn shows a check (CAPTCHA), the assistant stops and leaves it to you: it never gets around it.",
+    "check": "I understand LinkedIn may restrict or block my account and I accept the risk",
+    "accept": "Accept and search",
+    "decline": "Not now"
+  },
+  "linkedinSetting": {
+    "title": "Sourcing on LinkedIn",
+    "explain": "The assistant reads LinkedIn in the browser of whoever searches, with the Candydati extension and their account. Each person accepts the risk for their own account the first time.",
+    "enable": "Allow sourcing on LinkedIn",
+    "max": "Most profiles per search",
+    "saved": "Setting saved",
+    "adminOnly": "Only owners and admins can change it."
   }
 }

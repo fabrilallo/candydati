@@ -29,6 +29,13 @@ export interface SourcingObjectionRepository {
   add(organizationId: string, fingerprints: readonly string[], at: Date): Promise<void>;
 }
 
+/** Who accepted the LinkedIn account risk, and which version of the text. */
+export interface SourcingRiskAcceptanceRepository {
+  find(organizationId: string, userId: string): Promise<{ readonly textVersion: number; readonly acceptedAt: Date } | null>;
+  /** Records (or replaces) the person's acceptance. */
+  accept(organizationId: string, userId: string, textVersion: number, at: Date): Promise<void>;
+}
+
 /** Candidates of the organization that are the same person: same email, or a LinkedIn link with the same profile key. */
 export interface SourcingCandidateLookup {
   findMatching(organizationId: string, match: { readonly profileKeys: readonly string[]; readonly emails: readonly string[] }): Promise<readonly Pick<Candidate, 'id' | 'email' | 'linkedinUrl'>[]>;
@@ -60,6 +67,7 @@ export interface SourcingDeps extends CoreDeps, SourcingMailParts {
   readonly fingerprint: (organizationId: string, value: string) => string;
   readonly newId: () => string;
   readonly now: () => Date;
+  readonly riskAcceptances: SourcingRiskAcceptanceRepository;
   /** Absent: sourcing from GitHub is not available on this instance. */
   readonly github?: GithubPeopleSearch | undefined;
 }

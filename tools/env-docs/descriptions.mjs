@@ -88,6 +88,8 @@ export const DESCRIPTIONS = {
   NUXT_PUBLIC_PLATFORM_ICON_URL: 'Tab icon of the web app, an https address. Empty: the bundled mark. Careers pages show the organization logo when set.',
   NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE: 'Default language of the web app: it or en. Read at build time too.',
   NUXT_PUBLIC_TIME_ZONE: 'IANA time zone dates are shown in.',
+  NUXT_PUBLIC_EXTENSION_ID: 'Id of the Candydati Chrome extension: the assistant reads LinkedIn through it, in the recruiter\'s own browser. Empty: LinkedIn sourcing is not offered.',
+  NUXT_PUBLIC_EXTENSION_URL: 'Chrome Web Store page of the Candydati extension, shown when it is not installed.',
   NUXT_PUBLIC_TURNSTILE_SITE_KEY: 'Cloudflare Turnstile site key: the application form shows the check and the page policy allows challenges.cloudflare.com. Empty: off.',
   NUXT_PUBLIC_SOURCE_URL: 'Where repository files can be browsed (e.g. https://host/blob/main); empty: paths as text.',
 };

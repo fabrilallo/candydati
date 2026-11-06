@@ -28,6 +28,13 @@ All notable changes to this project are documented here. The format follows
   confirms become contacts (`add_sourced_contacts`). The model never sees surname, username or profile link: they travel
   in an encrypted reference only the server opens. Optional `GITHUB_TOKEN` raises GitHub limits from 60 to 5,000 calls an
   hour. New error code `source_unavailable` (503) when GitHub is down.
+- **Sourcing on LinkedIn, the server side and the bridge.** `search_linkedin_people` runs in the recruiter's browser: the
+  web app checks the organization setting (Privacy → Retention, off by default, most profiles per search, owners and
+  admins), asks each person once to accept that LinkedIn may restrict or block their account (recorded with the text
+  version, asked again when the text changes), then asks the Candydati Chrome extension to read LinkedIn and has the api
+  seal what it read (facts per criterion, no model). The extension itself comes in the next release
+  (`NUXT_PUBLIC_EXTENSION_ID`, `NUXT_PUBLIC_EXTENSION_URL`). Migration `0055_linkedin_sourcing` (additive: one table and
+  two setting columns).
 
 ## [0.5.0] - 2026-11-06
 

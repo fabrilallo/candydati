@@ -84,6 +84,7 @@ describe('assistant tool list', () => {
       'list_job_templates',
       'list_jobs',
       'search_github_people',
+      'search_linkedin_people',
       'update_job_draft',
     ]);
     expect(ids.join(' ')).not.toMatch(/publish|close|move|decide|send|erase|delete|rank|score/);

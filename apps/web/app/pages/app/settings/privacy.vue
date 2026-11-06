@@ -32,6 +32,7 @@ const tabs = computed<readonly TabItem<Tab>[]>(() => [
         <template v-else-if="tab === 'retention'">
           <RetentionOverview />
           <SourcingSetting />
+          <LinkedinSetting />
         </template>
         <PrivacyDocuments v-else />
       </template>
