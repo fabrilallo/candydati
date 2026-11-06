@@ -35,6 +35,12 @@ All notable changes to this project are documented here. The format follows
   seal what it read (facts per criterion, no model). The extension itself comes in the next release
   (`NUXT_PUBLIC_EXTENSION_ID`, `NUXT_PUBLIC_EXTENSION_URL`). Migration `0055_linkedin_sourcing` (additive: one table and
   two setting columns).
+- **Candydati Chrome extension** (`apps/extension`, Manifest V3): reads LinkedIn people search and profiles in a visible
+  "Candydati" tab group of the recruiter's own Chrome when they start a search from the assistant, and returns them to
+  the Candydati page that asked; stops at the login wall and hands any security check to the person; stores nothing.
+  Permissions: `tabGroups`, `scripting`, `www.linkedin.com` only; answers only the Candydati origins it was built for
+  (`CANDYDATI_ORIGINS`). Build and Chrome Web Store listing texts in `apps/extension/README.md`; user guide and privacy
+  on the documentation site.
 
 ## [0.5.0] - 2026-11-06
 

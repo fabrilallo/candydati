@@ -22,6 +22,7 @@ export interface PageTitles {
   readonly migration: string;
   readonly otherDeployments: string;
   readonly api: string;
+  readonly chromeExtension: string;
   readonly security: string;
   readonly faq: string;
   readonly contributing: string;
@@ -53,7 +54,10 @@ export function sidebar(prefix: string, groups: SidebarLabels, pages: PageTitles
     },
     {
       text: groups.integrate,
-      items: [{ text: pages.api, link: link('api') }],
+      items: [
+        { text: pages.api, link: link('api') },
+        { text: pages.chromeExtension, link: link('chrome-extension') },
+      ],
     },
     {
       text: groups.project,
