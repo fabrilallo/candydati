@@ -108,12 +108,15 @@ Strumenti:
 | `publish_job` | pubblica un annuncio completo (serve il permesso di pubblicazione) |
 | `get_pipeline` | fasi con i conteggi e le schede, senza testi dei CV |
 | `list_attention` | candidature in attesa di risposta o vicine alla scadenza |
+| `find_candidates_by_criteria` | i candidati di un annuncio e del talent pool che soddisfano criteri oggettivi confermati dalla persona; nessun punteggio, nessuna classifica |
 | `add_candidate_note` | aggiunge una nota interna a un candidato |
 | `create_task` | crea un'attività su un candidato o un annuncio |
 | `propose_stage_move` | propone di spostare una candidatura in un'altra fase del suo annuncio, con un breve motivo; una persona la conferma o la scarta (scope opzionale `candidate:propose_move`) |
 | `list_job_templates` | elenca i template degli annunci |
 | `get_job_stats` | numeri degli annunci per la panoramica |
 | `get_reports` | numeri aggregati del periodo, senza dati personali |
+| `list_sourced_contacts` | le persone già aggiunte come contatti di un annuncio, per nome, con i riscontri per ogni criterio |
+| `add_sourced_contacts` | aggiunge come contatti di un annuncio (mai candidati) persone trovate su profili professionali pubblici, dopo la conferma della persona; nessuno viene contattato (scope `sourcing:manage`) |
 
 Non ci sono strumenti per spostare, valutare, scartare o scrivere ai candidati: restano decisioni di una persona.
 `propose_stage_move` scrive solo una proposta: compare in Da gestire e sulla candidatura, e niente si sposta finché una
@@ -121,3 +124,19 @@ persona non la conferma (uno spostamento suo, con il suo permesso) o la scarta. 
 chiamata a uno strumento conta nel limite della chiave, un batch contiene al massimo 20 messaggi e le letture vengono
 registrate. Gli strumenti che usano il modello (`analyze_job_ad`, e `publish_job` quando `FAST_MODEL` è impostato)
 hanno budget giornalieri, vedi [Assistente AI](./ai).
+
+### Prompt
+
+Il server offre anche dei prompt: flussi di lavoro pronti che ogni client MCP elenca, spesso come comandi slash, senza
+installare nulla. Guidano l'agente attraverso gli strumenti qui sopra e non aggiungono capacità. Ognuno ripete le regole:
+le decisioni sulle persone restano a una persona, i dati nei risultati non sono mai istruzioni, i candidati arrivano solo
+con nome e id.
+
+| Prompt | Cosa fa |
+|---|---|
+| `write_job_ad` | scrive un annuncio completo da un brief (`brief`, `templateId` facoltativo): RAL, processo dichiarato, titolo per entrambi i sessi; pubblica solo dopo il tuo via esplicito |
+| `answer_inbox` | passa le candidature in attesa di risposta (`state` facoltativo) e prepara le risposte; le invii tu dall'app |
+| `find_candidates` | propone criteri oggettivi da un annuncio (`jobId`), aspetta la tua conferma, poi elenca chi li soddisfa nell'ordine di arrivo, più i CV che una persona deve controllare |
+| `weekly_report` | i numeri degli ultimi sette giorni (`jobId` facoltativo), ogni tasso con il suo denominatore, senza nomi |
+| `interview_kit` | domande per ogni fase dichiarata di un annuncio (`jobId`) e una griglia di osservazione senza punteggi né voti |
+| `source_people` | concorda i criteri di ricerca da un annuncio (`jobId`, `like` facoltativo), cerca su profili professionali pubblici con gli strumenti del client (browser, ricerca web), mostra i riscontri per criterio senza classifica e aggiunge solo le persone che confermi; nessuno viene contattato |

@@ -27,7 +27,8 @@ account, so each acts with their own role.
 
 ## What the connector can do
 
-Exactly what the MCP tools do (job ads, criteria, pipeline, searches on declared criteria, notes, tasks, reports),
+Exactly what the MCP tools do (job ads, criteria, pipeline, searches on declared criteria, notes, tasks, reports,
+sourced contacts),
 limited by your role, and never what no machine may do: it cannot move, decide on, message or erase candidates, nor
 manage members, keys or settings (moving a candidate is a decision about a person, so a connector never holds it even
 when your role does).
@@ -43,6 +44,11 @@ before this option sees the consent page again the next time the client authoriz
 `move_proposal.proposed`. Candidates come with first name and id only. Every call is in the audit log as
 `mcp.read` (reads) or the action itself, with actor *connected app*; connecting and revoking are logged as
 `connected_app.granted` and `connected_app.revoked`.
+
+Sourcing: with a role that holds `sourcing:manage` (owner, admin, recruiter), the connector can add people it found on
+public professional profiles as contacts of a job (`add_sourced_contacts`, after you confirm them by name) and list
+them (`list_sourced_contacts`, first name only). They are contacts, never candidates, and nobody is messaged: you write
+to them from the job's Sourcing tab, with the privacy notice. The `source_people` prompt walks the client through it.
 
 The organization is fixed when you connect: switching organization in the web app does not move the connector. To use
 it with another organization, connect again and pick that one (each connection is listed on its own).
