@@ -41,6 +41,15 @@ All notable changes to this project are documented here. The format follows
   Permissions: `tabGroups`, `scripting`, `www.linkedin.com` only; answers only the Candydati origins it was built for
   (`CANDYDATI_ORIGINS`). Build and Chrome Web Store listing texts in `apps/extension/README.md`; user guide and privacy
   on the documentation site.
+- **"Save to Candydati" button on LinkedIn profiles** (Chrome extension). While browsing LinkedIn, one click on the small
+  floating button of a profile opens the new page `/app/sourcing/save` with the person's name, headline, city and
+  profile link; the recruiter picks an open position, optionally adds evidence lines, and adds the person as a sourced
+  contact (`POST /api/v1/jobs/:id/sourced-contacts`, source `linkedin`), seeing whether they were added, already a
+  contact or candidate, or asked not to be contacted. The extension reads the profile only on the click (no photo, the
+  page text is not sent), keeps it as the single pending profile in session storage until the Candydati page picks it
+  up (cleared once read, refused after 10 minutes) and remembers the address of the Candydati page that last talked to
+  it (the app sends `candydati.hello` when it loads). New extension permission `storage` and a content script on
+  `www.linkedin.com`; `CANDYDATI_EXTENSION_NAME` sets the product name on the button.
 
 ## [0.5.0] - 2026-11-06
 

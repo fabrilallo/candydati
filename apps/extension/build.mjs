@@ -11,6 +11,8 @@ import { build } from 'esbuild';
 const root = fileURLToPath(new URL('.', import.meta.url));
 const version = JSON.parse(readFileSync(`${root}package.json`, 'utf8')).version;
 const hosted = process.env.CANDYDATI_ORIGINS ?? 'https://*.candydati.it,https://*.candydati.com';
+// The product name on the LinkedIn save button (a rebranded deployment builds its own extension).
+const productName = process.env.CANDYDATI_EXTENSION_NAME?.trim() || 'Candydati';
 const origins = process.env.CANDYDATI_EXTENSION_DEV === '1' ? `${hosted},http://localhost:3000` : hosted;
 
 // The manifest helpers are TypeScript: bundle them once for this script.
@@ -31,12 +33,24 @@ await build({
   legalComments: 'none',
   define: { __CANDYDATI_ORIGINS__: JSON.stringify(allowed) },
 });
+// The "Save to Candydati" button on LinkedIn profiles (a content script: a classic script, not a module).
+await build({
+  entryPoints: [`${root}src/content-save.ts`],
+  outfile: `${root}dist/content-save.js`,
+  bundle: true,
+  format: 'iife',
+  platform: 'browser',
+  target: 'chrome116',
+  minify: true,
+  legalComments: 'none',
+  define: { __CANDYDATI_NAME__: JSON.stringify(productName) },
+});
 cpSync(`${root}icons`, `${root}dist/icons`, { recursive: true });
 writeFileSync(`${root}dist/manifest.json`, `${JSON.stringify(buildManifest(version, allowed), null, 2)}\n`);
 rmSync(`${root}.build`, { recursive: true, force: true });
 
 if (process.argv.includes('--zip')) {
   const zip = `candydati-extension-${version}.zip`;
-  execFileSync('zip', ['-qr', zip, 'manifest.json', 'background.js', 'icons'], { cwd: `${root}dist` });
+  execFileSync('zip', ['-qr', zip, 'manifest.json', 'background.js', 'content-save.js', 'icons'], { cwd: `${root}dist` });
   process.stdout.write(`dist/${zip}\n`);
 }

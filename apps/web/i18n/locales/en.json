@@ -5280,6 +5280,32 @@
     "saved": "Setting saved",
     "loadFailed": "We could not load the sourcing setting."
   },
+  "linkedinSave": {
+    "title": "Save a LinkedIn profile",
+    "job": "Position",
+    "jobPlaceholder": "Choose an open position",
+    "noJobs": "There is no open position to add this person to.",
+    "save": "Add as contact",
+    "openContacts": "Open the sourced contacts of the position",
+    "install": "Install the extension",
+    "errors": {
+      "job": "Choose the position"
+    },
+    "states": {
+      "empty": {
+        "title": "Nothing to save",
+        "body": "On a LinkedIn profile, click \"Save to {name}\" again: the profile waits for this page for 10 minutes and is given only once."
+      },
+      "extension_missing": {
+        "title": "Extension not found",
+        "body": "This page receives profiles from the {name} extension for Chrome. Install it, or open this page in the Chrome where it is installed."
+      },
+      "failed": {
+        "title": "Could not read the profile",
+        "body": "The extension did not answer as expected. Click \"Save to {name}\" on the LinkedIn profile again."
+      }
+    }
+  },
   "sourcing": {
     "title": "Sourced contacts",
     "note": "People found outside Candydati (LinkedIn, GitHub, the web) for this position: contacts, not candidates. When you write to someone, put the notice text in the first message: the law requires it (GDPR, art. 14). People never written to are erased automatically after 30 days.",

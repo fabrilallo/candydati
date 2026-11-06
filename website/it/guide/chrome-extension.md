@@ -25,18 +25,38 @@ che mostrano e lo passa al tuo Candydati.
 4. Scegli tu chi aggiungere. Diventano contatti della posizione: ricevono l'informativa con il tuo primo messaggio e
    vengono cancellati dopo 30 giorni se non si candidano.
 
+## Salvare un profilo mentre navighi
+
+Su ogni profilo LinkedIn che visiti tu, in basso a destra c'è un piccolo pulsante **Salva in Candydati**.
+
+1. Cliccalo: Candydati si apre in una nuova scheda con nome, titolo e città della persona e il link al profilo.
+2. Scegli la posizione aperta, aggiungi se vuoi cosa del profilo riguarda la posizione (una riga "criterio: fatto"), e
+   clicca **Aggiungi come contatto**.
+3. Candydati ti dice se la persona è stata aggiunta, se è già un contatto o un candidato, o se ha chiesto di non essere
+   ricontattata.
+
+Prima apri Candydati una volta nello stesso Chrome: è così che l'estensione impara l'indirizzo del tuo Candydati. Il
+pulsante funziona anche senza attivare il sourcing su LinkedIn per l'organizzazione: legge solo il profilo che stai
+guardando, quando clicchi. Possono usarlo titolari, amministratori e recruiter (i ruoli che gestiscono i contatti
+trovati).
+
 ## Privacy
 
 Cosa fa l'estensione con i dati, per intero:
 
 - **Cosa legge**: solo le pagine LinkedIn che apre per una ricerca avviata da te, nella scheda che ha aperto. Di ogni
-  profilo: nome, titolo, località e il testo visibile della pagina (con un limite). Mai foto, mai contatti nascosti dietro
-  pulsanti, mai i tuoi messaggi o la tua rete, mai altre schede o altri siti.
-- **Dove va**: solo all'istanza Candydati in cui sei entrato, dalla pagina che ha chiesto la ricerca. Non a chi sviluppa
-  Candydati, non a terzi, non a strumenti di analisi.
-- **Cosa conserva**: niente. Non ha permessi di archiviazione e non tiene storico: tutto finisce con la ricerca.
-- **Permessi**: `tabGroups` (il gruppo visibile "Candydati"), `scripting` (leggere le pagine che ha aperto) e accesso al
-  solo `www.linkedin.com`. Accetta richieste solo dagli indirizzi Candydati per cui è stata costruita.
+  profilo: nome, titolo, località e il testo visibile della pagina (con un limite). Con il pulsante di salvataggio, solo
+  il profilo che stai guardando e solo quando clicchi: nome, titolo, località e indirizzo (il testo della pagina non
+  viene inviato). Mai foto, mai contatti nascosti dietro pulsanti, mai i tuoi messaggi o la tua rete, mai altre schede o
+  altri siti.
+- **Dove va**: solo all'istanza Candydati in cui sei entrato, dalla pagina che ha chiesto la ricerca o dalla pagina di
+  salvataggio del tuo Candydati. Non a chi sviluppa Candydati, non a terzi, non a strumenti di analisi.
+- **Cosa conserva**: nessuno storico. Tiene solo il profilo su cui hai cliccato "Salva", nella memoria di sessione del
+  browser finché la pagina del tuo Candydati non lo prende (poi viene cancellato; dopo 10 minuti viene rifiutato e il
+  clic successivo lo sostituisce), e l'indirizzo del tuo Candydati, perché il pulsante sappia dove aprirlo.
+- **Permessi**: `tabGroups` (il gruppo visibile "Candydati"), `scripting` (leggere le pagine che ha aperto), `storage`
+  (il profilo in attesa di essere salvato e l'indirizzo del tuo Candydati) e accesso al solo `www.linkedin.com`, dove
+  mostra il pulsante di salvataggio. Accetta richieste solo dagli indirizzi Candydati per cui è stata costruita.
 - **Uso limitato**: i dati servono solo a mostrarti le persone che hai cercato e ad aggiungere quelle che scegli. Non
   vengono mai venduti, mai usati per pubblicità, mai usati per addestrare modelli.
 

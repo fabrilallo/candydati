@@ -5280,6 +5280,32 @@
     "saved": "Impostazione salvata",
     "loadFailed": "Non siamo riusciti a caricare l'impostazione del sourcing."
   },
+  "linkedinSave": {
+    "title": "Salva un profilo LinkedIn",
+    "job": "Posizione",
+    "jobPlaceholder": "Scegli una posizione aperta",
+    "noJobs": "Non c’è nessuna posizione aperta a cui aggiungere questa persona.",
+    "save": "Aggiungi come contatto",
+    "openContacts": "Apri i contatti trovati della posizione",
+    "install": "Installa l’estensione",
+    "errors": {
+      "job": "Scegli la posizione"
+    },
+    "states": {
+      "empty": {
+        "title": "Niente da salvare",
+        "body": "Su un profilo LinkedIn clicca di nuovo \"Salva in {name}\": il profilo aspetta questa pagina per 10 minuti e viene consegnato una volta sola."
+      },
+      "extension_missing": {
+        "title": "Estensione non trovata",
+        "body": "Questa pagina riceve i profili dall’estensione {name} per Chrome. Installala, oppure apri questa pagina nel Chrome dove è installata."
+      },
+      "failed": {
+        "title": "Profilo non letto",
+        "body": "L’estensione non ha risposto come previsto. Clicca di nuovo \"Salva in {name}\" sul profilo LinkedIn."
+      }
+    }
+  },
   "sourcing": {
     "title": "Contatti trovati",
     "note": "Persone trovate fuori da Candydati (LinkedIn, GitHub, web) per questa posizione: sono contatti, non candidati. Quando scrivi a qualcuno, metti nel primo messaggio il testo dell'informativa: è un obbligo di legge (GDPR, art. 14). Chi non viene contattato è cancellato da solo dopo 30 giorni.",
