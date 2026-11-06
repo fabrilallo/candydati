@@ -21,6 +21,8 @@ export const AGENT_TOOL_NAMES = [
   'draft_message',
   'create_task',
   'get_reports_summary',
+  'search_github_people',
+  'add_sourced_contacts',
 ] as const;
 export type AgentToolName = (typeof AGENT_TOOL_NAMES)[number];
 export const isAgentToolName = (name: string): name is AgentToolName => (AGENT_TOOL_NAMES as readonly string[]).includes(name);

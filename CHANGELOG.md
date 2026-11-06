@@ -21,6 +21,13 @@ All notable changes to this project are documented here. The format follows
 - **"Contatti trovati" tab on a job** (with `sourcing:manage`): the sourced contacts with source, profile link, evidence
   and the days left before erasure; add one by hand; "Testo informativa" gives the notice lines with a fresh personal
   link to paste into the first message, then marks the contact as written to; erase, optionally "do not contact again".
+- **Sourcing on GitHub from the assistant.** "Find backend engineers in Stockholm like Maja": the assistant reads the
+  reference profile, proposes objective criteria (languages, location, words in the bio), searches public GitHub accounts
+  with the official API (`search_github_people`), and lists first name, city, the facts per criterion and who is already a
+  contact or a candidate (people who objected are left out), in GitHub join order, never as a ranking. The people the user
+  confirms become contacts (`add_sourced_contacts`). The model never sees surname, username or profile link: they travel
+  in an encrypted reference only the server opens. Optional `GITHUB_TOKEN` raises GitHub limits from 60 to 5,000 calls an
+  hour. New error code `source_unavailable` (503) when GitHub is down.
 
 ## [0.5.0] - 2026-11-06
 

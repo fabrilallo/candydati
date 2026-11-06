@@ -47,7 +47,7 @@ async function known(deps: SourcingDeps, organizationId: string, jobId: string, 
   };
 }
 
-type Verdict = { readonly outcome: Exclude<SourcingOutcome, 'added'>; readonly candidateId: string | null } | null;
+export type Verdict = { readonly outcome: Exclude<SourcingOutcome, 'added'>; readonly candidateId: string | null } | null;
 
 function verdictFor(deps: SourcingDeps, organizationId: string, k: Known, seen: ReadonlySet<string>, person: { key: string; email: string | null }): Verdict {
   const values = [person.key, ...(person.email ? [person.email] : [])];
@@ -76,6 +76,20 @@ async function create(deps: SourcingDeps, actor: Actor, job: Job, data: SourcedC
   });
   if (emailNotice && contact.email) await deps.queue.enqueue('sourcing.notice', { organizationId: job.organizationId, contactId: contact.id }, { singletonKey: contact.id });
   return { contact, secret };
+}
+
+/**
+ * Read-only: what adding these people would meet (objected, already a contact of the job, already a candidate), one
+ * verdict per person in order, null for someone new. Repeats within the list count as already there.
+ */
+export async function classifyPeople(deps: SourcingDeps, organizationId: string, jobId: string, people: readonly { key: string; email: string | null }[]): Promise<readonly Verdict[]> {
+  const k = await known(deps, organizationId, jobId, people);
+  const seen = new Set<string>();
+  return people.map((person) => {
+    const verdict = verdictFor(deps, organizationId, k, seen, person);
+    for (const value of [person.key, ...(person.email ? [person.email] : [])]) seen.add(value);
+    return verdict;
+  });
 }
 
 const countOf = (results: readonly AddedContact[], outcome: SourcingOutcome): number => results.filter((r) => r.outcome === outcome).length;
