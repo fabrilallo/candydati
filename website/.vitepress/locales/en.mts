@@ -25,6 +25,7 @@ export const en: LocaleSpecificConfig<DefaultTheme.Config> = {
           migration: 'Migrating from another ATS',
           otherDeployments: 'Other ways to deploy',
           api: 'API, webhooks and MCP',
+          chromeExtension: 'Chrome extension (LinkedIn)',
           security: 'Security and privacy',
           faq: 'FAQ',
           contributing: 'Contributing',
