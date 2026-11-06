@@ -5,9 +5,15 @@
 declare namespace chrome {
   namespace runtime {
     interface MessageSender {
+      readonly id?: string;
       readonly origin?: string;
       readonly url?: string;
     }
+    const id: string;
+    function sendMessage(message: unknown): Promise<unknown>;
+    const onMessage: {
+      addListener(callback: (message: unknown, sender: MessageSender, sendResponse: (response: unknown) => void) => boolean | undefined): void;
+    };
     const onMessageExternal: {
       addListener(callback: (message: unknown, sender: MessageSender, sendResponse: (response: unknown) => void) => boolean | undefined): void;
     };
@@ -34,6 +40,15 @@ declare namespace chrome {
   }
   namespace windows {
     function update(windowId: number, properties: { focused?: boolean }): Promise<unknown>;
+  }
+  namespace storage {
+    interface StorageArea {
+      get(key: string): Promise<Record<string, unknown>>;
+      set(items: Record<string, unknown>): Promise<void>;
+      remove(key: string): Promise<void>;
+    }
+    const session: StorageArea;
+    const local: StorageArea;
   }
   namespace scripting {
     function executeScript<R>(injection: { target: { tabId: number }; func: () => R | Promise<R> }): Promise<{ result?: Awaited<R> }[]>;

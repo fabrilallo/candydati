@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { handleExternalSave, listenForSaves, saveDeps } from './background-save.js';
 import { chromeBrowser } from './chrome-browser.js';
 import { isAllowedOrigin } from './linkedin-urls.js';
 import { runSearch, type SearchAnswer } from './search.js';
@@ -18,8 +19,13 @@ const requestSchema = z
 /** One search at a time: a second request while one runs is refused, never queued behind the person's back. */
 let running = false;
 
+/** The "Save to Candydati" button: its messages are answered in `background-save.ts`. */
+const saves = saveDeps(__CANDYDATI_ORIGINS__);
+listenForSaves(saves);
+
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
   if (!isAllowedOrigin(sender.origin, __CANDYDATI_ORIGINS__)) return undefined;
+  if (handleExternalSave(saves, message, sender.origin, sendResponse)) return true;
   const request = requestSchema.safeParse(message);
   if (!request.success || running) {
     sendResponse({ ok: false, error: 'failed' } satisfies SearchAnswer);

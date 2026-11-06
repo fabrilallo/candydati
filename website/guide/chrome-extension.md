@@ -24,18 +24,35 @@ to your Candydati.
 4. You choose whom to add. They become contacts of the job; they get the privacy notice with your first message and are
    erased after 30 days unless they apply.
 
+## Save a profile while you browse
+
+On any LinkedIn profile you visit yourself, a small **Save to Candydati** button sits in the bottom right corner.
+
+1. Click it: Candydati opens in a new tab with the person's name, headline and city, and a link to the profile.
+2. Pick the open position, add if you like what in the profile relates to it (one "criterion: fact" per line), and click
+   **Add as contact**.
+3. Candydati says whether the person was added, is already a contact or a candidate, or asked not to be contacted again.
+
+Open Candydati once in the same Chrome first: that is how the extension learns the address of your Candydati. The button
+works without turning on LinkedIn sourcing for the organization: it reads only the profile you are looking at, when you
+click. Owners, admins and recruiters can use it (the roles that manage sourced contacts).
+
 ## Privacy
 
 What the extension does with data, in full:
 
 - **What it reads**: only the LinkedIn pages it opens for a search you started, in the tab it opened. Of each profile:
-  the name, the headline, the location and the visible text of the page (capped). Never photos, never contact details
-  behind buttons, never your messages or your network, never other tabs or sites.
-- **Where it goes**: only to the Candydati instance you are signed in to, from the page that asked for the search. Not to
-  the makers of Candydati, not to any third party, not to analytics.
-- **What it stores**: nothing. It has no storage permission and keeps no history; everything ends with the search.
-- **Permissions**: `tabGroups` (the visible "Candydati" group), `scripting` (reading the pages it opened) and access to
-  `www.linkedin.com` only. It accepts requests only from the Candydati addresses it was built for.
+  the name, the headline, the location and the visible text of the page (capped). With the save button, only the
+  profile you are viewing and only when you click: its name, headline, location and address (the page text is not sent).
+  Never photos, never contact details behind buttons, never your messages or your network, never other tabs or sites.
+- **Where it goes**: only to the Candydati instance you are signed in to, from the page that asked for the search or the
+  save page of your Candydati. Not to the makers of Candydati, not to any third party, not to analytics.
+- **What it stores**: no history. The only things it keeps are the one profile you clicked "Save" on, in the browser's
+  session storage until your Candydati page picks it up (then it is deleted; after 10 minutes it is refused and the next
+  click replaces it), and the address of your Candydati, so the button knows where to open.
+- **Permissions**: `tabGroups` (the visible "Candydati" group), `scripting` (reading the pages it opened), `storage` (the
+  profile waiting to be saved and the address of your Candydati) and access to `www.linkedin.com` only, where it shows
+  the save button. It accepts requests only from the Candydati addresses it was built for.
 - **Limited use**: the data is used only to show you the people you searched for and to add the ones you choose. It is
   never sold, never used for advertising, never used to train models.
 
