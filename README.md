@@ -3,7 +3,7 @@
   <img alt="Candydati" src="docs/assets/logo-dark.svg#gh-dark-mode-only" height="44">
 </p>
 
-<p align="center"><strong>An open, self-hostable agentic ATS built for candidates, not just recruiters.</strong></p>
+<p align="center"><strong>An open, self-hostable agentic ATS that finds people for your jobs and answers every applicant.</strong></p>
 
 <p align="center">
   <a href="LICENSE"><img alt="License: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1B1530"></a>

@@ -3,8 +3,8 @@ layout: home
 
 hero:
   name: Candydati
-  text: Un ATS agentico, aperto e installabile sul tuo server, pensato per chi si candida, non solo per chi seleziona.
-  tagline: Il suo assistente trova persone per i tuoi annunci, con i riscontri e senza classifiche, e con l'informativa GDPR già inclusa. Si installa sul tuo server con un solo comando. RAL in chiaro, processo dichiarato e una risposta a ogni candidato sono parte del prodotto, non lasciati alla buona volontà.
+  text: Un ATS agentico, aperto e installabile sul tuo server, che trova persone per i tuoi annunci e risponde a ogni candidato.
+  tagline: Sourcing con i riscontri, mai con i punteggi, e l'informativa GDPR già inclusa. RAL in chiaro, processo dichiarato e una risposta a ogni candidato sono parte del prodotto, non lasciati alla buona volontà. Si installa sul tuo server con un solo comando.
   actions:
     - theme: brand
       text: Avvio rapido

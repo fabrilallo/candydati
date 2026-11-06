@@ -3,7 +3,7 @@
   <img alt="Candydati" src="docs/assets/logo-dark.svg#gh-dark-mode-only" height="44">
 </p>
 
-<p align="center"><strong>Un ATS agentico, aperto e installabile sul tuo server, pensato per chi si candida, non solo per chi seleziona.</strong></p>
+<p align="center"><strong>Un ATS agentico, aperto e installabile sul tuo server, che trova persone per i tuoi annunci e risponde a ogni candidato.</strong></p>
 
 <p align="center">
   <a href="LICENSE"><img alt="Licenza: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1F47D6"></a>
