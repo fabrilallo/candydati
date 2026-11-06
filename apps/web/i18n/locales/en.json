@@ -5313,7 +5313,7 @@
     "title": "Sourced contacts",
     "note": "People found outside Candydati (LinkedIn, GitHub, the web) for this position: contacts, not candidates. When you write to someone, put the notice text in the first message: the law requires it (GDPR, art. 14). People never written to are erased automatically after 30 days.",
     "emptyTitle": "No sourced contacts",
-    "emptyBody": "Add here the people you found on LinkedIn, GitHub or the web for this position. Soon the assistant will do it too.",
+    "emptyBody": "Add here the people you found on LinkedIn, GitHub or the web for this position. Or ask the assistant to find them.",
     "openProfile": "Open the profile",
     "noticeButton": "Notice text",
     "markContacted": "Mark as written to",

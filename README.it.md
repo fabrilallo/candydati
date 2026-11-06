@@ -3,7 +3,7 @@
   <img alt="Candydati" src="docs/assets/logo-dark.svg#gh-dark-mode-only" height="44">
 </p>
 
-<p align="center"><strong>Un ATS agentico, aperto e installabile sul tuo server, pensato per chi si candida, non solo per chi seleziona.</strong></p>
+<p align="center"><strong>Un ATS agentico, aperto e installabile sul tuo server, che trova persone per i tuoi annunci e risponde a ogni candidato.</strong></p>
 
 <p align="center">
   <a href="LICENSE"><img alt="Licenza: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1F47D6"></a>
@@ -37,12 +37,45 @@ strutturale, non opzionale: un'installazione non può disattivare questi princip
 - **Nessuna decisione automatica.** L'assistente lavora sul processo. Non ordina, non assegna punteggi e non scarta persone.
   L'unico punteggio del prodotto valuta l'annuncio, non chi si candida; la lettura del CV estrae fatti (ruoli, competenze,
   lingue) mostrati accanto all'originale, senza giudicarli.
-- **Pronto per gli agenti.** Tutto ciò che è nell'interfaccia è disponibile tramite API REST (OpenAPI), con gli stessi permessi. Il server MCP copre annunci (lettura, bozze, pubblicazione), i loro criteri di valutazione, pipeline, ricerche su criteri dichiarati, note, attività e report, e può proporre di spostare una candidatura in un'altra fase, che una persona conferma o scarta; non può spostare, valutare, scrivere o cancellare candidati: resta a una persona.
+- **Pronto per gli agenti.** Tutto ciò che è nell'interfaccia è disponibile tramite API REST (OpenAPI), con gli stessi permessi. Il server MCP copre annunci (lettura, bozze, pubblicazione), i loro criteri di valutazione, pipeline, ricerche su criteri dichiarati, note, attività, report e contatti trovati, e può proporre di spostare una candidatura in un'altra fase, che una persona conferma o scarta; non può spostare, valutare, scrivere o cancellare candidati: resta a una persona.
 - **GDPR by design.** Consenso versionato, conservazione e cancellazione automatica, diritti dell'interessato, export completo in formati aperti.
 
 Stato: pre-1.0 (vedi il [changelog](CHANGELOG.md)). Definizione completa del prodotto: [docs/PRODUCT.md](docs/PRODUCT.md).
 
+## Sourcing agentico
+
+La maggior parte degli ATS aspetta le candidature; gli strumenti di sourcing ti vendono un database e danno un punteggio
+a tutti. In Candydati è l'assistente a cercare le persone per un annuncio, dentro l'ATS, e la scelta resta tua.
+
+> *"Trovami backend engineer a Torino come Giulia."*
+
+1. **Prima i criteri.** L'assistente legge l'annuncio (e la persona di riferimento), propone criteri oggettivi e legati
+   al ruolo e aspetta la tua conferma.
+2. **Cerca**, con ogni passaggio in chat: account GitHub pubblici, ricerca persone e profili LinkedIn **nel tuo Chrome**
+   tramite l'[estensione Candydati](website/it/guide/chrome-extension.md), e quello che porta un agente esterno via MCP
+   (Claude con il suo browser, Claude Code, qualsiasi client MCP).
+3. **Riscontri, non punteggi.** Per ogni persona: nome, città e un fatto per criterio con il punto in cui si trova,
+   nell'ordine in cui è stata trovata. Mai una classifica, mai un confronto. Già contatto o candidato? Segnalato. Ha
+   chiesto di non essere contattato? Escluso.
+4. **Scegli tu** chi diventa **contatto** dell'annuncio (mai candidato finché non si candida), e gli scrivi tu. Nessuno
+   viene contattato in automatico.
+
+Quello che nessuno strumento di sourcing fa per te, già incluso: l'**informativa dell'art. 14 GDPR** (un link personale
+con il primo messaggio, che mostra tutto quello che si conserva e un pulsante per cancellarlo), la **cancellazione dopo
+30 giorni** se nessuno scrive, un **"non contattatemi"** che vale per sempre (resta solo un'impronta cifrata) e
+un'**AI pseudonimizzata**: il modello legge nome, città e fatti, mentre cognomi e link ai profili viaggiano solo come
+riferimenti cifrati. La lettura di LinkedIn è spenta di base: la attiva un admin, ogni persona accetta una volta il
+rischio per l'account e un CAPTCHA non viene mai aggirato.
+[Come funziona](https://fabrilallo.github.io/candydati/it/guide/sourcing).
+
 ## Funzionalità
+
+**Sourcing**
+- L'assistente trova persone per un annuncio su GitHub e LinkedIn (nel tuo browser, tramite l'estensione Chrome), con
+  un fatto per criterio e senza classifiche; scegli tu chi diventa contatto
+- Contatti trovati sull'annuncio: testo informativa con link personale (art. 14 GDPR) per il primo messaggio,
+  cancellazione dopo 30 giorni, "non contattatemi" permanente
+- Gli agenti esterni aggiungono quello che hanno trovato via MCP (`add_sourced_contacts`, prompt `source_people`)
 
 **Selezione**
 - Annunci strutturati con uno standard di pubblicazione deterministico (retribuzione, processo, contratto, modalità di lavoro) e controlli di conformità al diritto italiano

@@ -5313,7 +5313,7 @@
     "title": "Contatti trovati",
     "note": "Persone trovate fuori da Candydati (LinkedIn, GitHub, web) per questa posizione: sono contatti, non candidati. Quando scrivi a qualcuno, metti nel primo messaggio il testo dell'informativa: è un obbligo di legge (GDPR, art. 14). Chi non viene contattato è cancellato da solo dopo 30 giorni.",
     "emptyTitle": "Nessun contatto trovato",
-    "emptyBody": "Aggiungi qui le persone trovate su LinkedIn, GitHub o sul web per questa posizione. Presto potrà farlo anche l'assistente.",
+    "emptyBody": "Aggiungi qui le persone trovate su LinkedIn, GitHub o sul web per questa posizione. Oppure chiedi all'assistente di trovarle.",
     "openProfile": "Apri il profilo",
     "noticeButton": "Testo informativa",
     "markContacted": "Segna come contattato",

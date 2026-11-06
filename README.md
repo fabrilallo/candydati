@@ -3,7 +3,7 @@
   <img alt="Candydati" src="docs/assets/logo-dark.svg#gh-dark-mode-only" height="44">
 </p>
 
-<p align="center"><strong>An open, self-hostable agentic ATS built for candidates, not just recruiters.</strong></p>
+<p align="center"><strong>An open, self-hostable agentic ATS that finds people for your jobs and answers every applicant.</strong></p>
 
 <p align="center">
   <a href="LICENSE"><img alt="License: BUSL-1.1" src="https://img.shields.io/badge/license-BUSL--1.1-1B1530"></a>
@@ -35,7 +35,7 @@ switch these principles off.
 - **No automated decisions.** The assistant works on the process. It never ranks, scores or rejects people. The only
   score in the product rates the job ad, not who applies; the CV reader extracts facts (roles, skills, languages) shown
   next to the original, without judging them.
-- **Agentic-ready.** Everything in the UI is available through a REST API (OpenAPI), with the same permissions. The MCP server covers job ads (read, draft, publish), their evaluation criteria, the pipeline, searches on declared criteria, notes, tasks and reports, and can propose moving an application to another stage, which a person confirms or dismisses; it cannot move, decide on, message or erase candidates, which stays with a person.
+- **Agentic-ready.** Everything in the UI is available through a REST API (OpenAPI), with the same permissions. The MCP server covers job ads (read, draft, publish), their evaluation criteria, the pipeline, searches on declared criteria, notes, tasks, reports and sourced contacts, and can propose moving an application to another stage, which a person confirms or dismisses; it cannot move, decide on, message or erase candidates, which stays with a person.
 - **Privacy by design.** Versioned consent, retention and automatic erasure, data subject rights, full export in open
   formats. AI included: the assistant and external agents over MCP (Claude Code, Codex, Cursor...) see candidates by
   first name and id only. Surnames, emails, phone numbers, links, addresses and other identifiers are removed before
@@ -43,7 +43,39 @@ switch these principles off.
 
 Status: pre-1.0 (see the [changelog](CHANGELOG.md)). Full product definition: [docs/PRODUCT.md](docs/PRODUCT.md).
 
+## Agentic sourcing
+
+Most ATSs wait for applicants; sourcing tools sell you a database and score everyone. In Candydati the assistant goes
+looking for people for a job, inside the ATS, and leaves the choice to you.
+
+> *"Find backend engineers in Turin like Giulia."*
+
+1. **Criteria first.** The assistant reads the job (and the reference person), proposes objective, job-related criteria
+   and waits for your confirmation.
+2. **It searches**, with every step in the chat: public GitHub accounts, LinkedIn people search and profiles **in your
+   own Chrome** through the [Candydati extension](website/guide/chrome-extension.md), and anything an outside agent
+   brings over MCP (Claude with its browser, Claude Code, any MCP client).
+3. **Evidence, not scores.** For each person: first name, city and a fact per criterion with where it was found, in the
+   order found. Never a ranking, never a comparison. Already a contact or a candidate? Flagged. Asked not to be
+   contacted? Left out.
+4. **You choose** who becomes a **contact** of the job (never a candidate until they apply), and you write to them. Nobody
+   is messaged automatically.
+
+What no sourcing tool does for you, built in: the **GDPR art. 14 notice** (a personal link with your first message,
+showing everything kept and a button to erase it), **erasure after 30 days** if nobody writes, a permanent
+**"don't contact me"** (only an encrypted fingerprint is kept), and **pseudonymized AI**: the model reads first name,
+city and facts, while surnames and profile links travel only as encrypted references. LinkedIn reading is off by
+default: an admin turns it on, each person accepts the account risk once, and a CAPTCHA is never bypassed.
+[How it works](https://fabrilallo.github.io/candydati/guide/sourcing).
+
 ## Features
+
+**Sourcing**
+- The assistant finds people for a job on GitHub and LinkedIn (in your own browser, through the Chrome extension), with a
+  fact per criterion and no ranking; you pick who becomes a contact
+- Sourced contacts on the job: notice text with a personal GDPR art. 14 link for the first message, erasure after 30
+  days, permanent "don't contact me"
+- Outside agents add what they found over MCP (`add_sourced_contacts`, `source_people` prompt)
 
 **Hiring**
 - Structured job ads with a deterministic publish standard (salary, process, contract, work mode) and Italian compliance checks
@@ -73,7 +105,7 @@ Status: pre-1.0 (see the [changelog](CHANGELOG.md)). Full product definition: [d
   ([guide](docs/MCP-CONNECTOR.md))
 - Pseudonymized data for every model: first name and id only, identifiers replaced by markers such as `[surname]`;
   message drafts keep `{{candidate.lastName}}` as a variable that the person's composer fills in
-- MCP prompts for HR workflows (write a job ad, answer the inbox, find candidates on declared criteria, weekly report, interview kit), with no install
+- MCP prompts for HR workflows (write a job ad, answer the inbox, find candidates on declared criteria, weekly report, interview kit, source people), with no install
 - Signed webhooks fed by a transactional outbox
 
 **Privacy and data**
