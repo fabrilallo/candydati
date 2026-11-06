@@ -24,6 +24,7 @@ export const it: LocaleSpecificConfig<DefaultTheme.Config> = {
           agencies: 'Selezioni per conto di clienti',
           migration: 'Migrare da un altro ATS',
           otherDeployments: 'Altri modi di installare',
+          chromeExtension: 'Estensione Chrome (LinkedIn)',
           api: 'API, webhook e MCP',
           security: 'Sicurezza e privacy',
           faq: 'Domande frequenti',
