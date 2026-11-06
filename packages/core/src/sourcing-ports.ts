@@ -3,6 +3,7 @@ import type { CoreDeps } from './ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { EmailSender, MessagingConfig } from './messaging-ports.js';
 import type { TaskQueue } from './intake-ports.js';
+import type { OrganizationSettingsRepository } from './job-request-ports.js';
 
 /** Contacts found by sourcing. Every method takes the organization, except the two the public link and the system job need. */
 export interface SourcedContactRepository {
@@ -47,6 +48,8 @@ export interface SourcingDeps extends CoreDeps, SourcingMailParts {
   readonly contacts: SourcedContactRepository;
   readonly objections: SourcingObjectionRepository;
   readonly existingCandidates: SourcingCandidateLookup;
+  /** Whether the organization emails the notice at once to contacts with a known address (off by default). */
+  readonly organizationSettings: OrganizationSettingsRepository;
   /** `sourcing.notice`: the email goes out from the worker, after the contact is committed. */
   readonly queue: TaskQueue;
   /** 24+ chars from a CSPRNG: the secret in the notice link. */

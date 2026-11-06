@@ -57,7 +57,7 @@ function verdictFor(deps: SourcingDeps, organizationId: string, k: Known, seen: 
   return candidate ? { outcome: 'already_candidate', candidateId: candidate.id } : null;
 }
 
-async function create(deps: SourcingDeps, actor: Actor, job: Job, data: SourcedContactData, key: string): Promise<{ contact: SourcedContact; secret: string }> {
+async function create(deps: SourcingDeps, actor: Actor, job: Job, data: SourcedContactData, key: string, emailNotice: boolean): Promise<{ contact: SourcedContact; secret: string }> {
   const secret = deps.newToken();
   const now = deps.now();
   const contact = await deps.contacts.create({
@@ -74,7 +74,7 @@ async function create(deps: SourcingDeps, actor: Actor, job: Job, data: SourcedC
     createdBy: toActorUserId(actor),
     createdAt: now,
   });
-  if (contact.email) await deps.queue.enqueue('sourcing.notice', { organizationId: job.organizationId, contactId: contact.id }, { singletonKey: contact.id });
+  if (emailNotice && contact.email) await deps.queue.enqueue('sourcing.notice', { organizationId: job.organizationId, contactId: contact.id }, { singletonKey: contact.id });
   return { contact, secret };
 }
 
@@ -83,8 +83,9 @@ const countOf = (results: readonly AddedContact[], outcome: SourcingOutcome): nu
 /**
  * People found outside Candydati become contacts of the job (never candidates: they did not apply). Skipped, never
  * merged: who objected, who is already a contact of the job or a candidate of the organization (same email or LinkedIn
- * profile), and repeats within the call. Each added contact expires in 30 days and has a personal art. 14 link; with a
- * known email the notice is emailed by the worker. The audit carries counts only, never who.
+ * profile), and repeats within the call. Each added contact expires in 30 days and has a personal art. 14 link that goes
+ * with the first message (art. 14(3)(b)); when the organization chose it and the email is known, the worker also emails
+ * the notice at once. The audit carries counts only, never who.
  */
 export const addSourcedContacts = defineSourcingUseCase({
   name: 'addSourcedContacts',
@@ -100,6 +101,7 @@ export const addSourcedContacts = defineSourcingUseCase({
     if (job.status === 'closed') throw new ConflictError('A closed job takes no new contacts.');
     const people = input.contacts.map((data) => ({ data, key: normalizeProfileUrl(data.profileUrl) ?? '', email: data.email }));
     const k = await known(deps, actor.organizationId, job.id, people);
+    const { sourcingNoticeByEmail } = await deps.organizationSettings.get(actor.organizationId);
     const seen = new Set<string>();
     const results: AddedContact[] = [];
     for (const person of people) {
@@ -109,7 +111,7 @@ export const addSourcedContacts = defineSourcingUseCase({
         results.push({ profileUrl: person.data.profileUrl, ...verdict, contactId: null, noticeUrl: null });
         continue;
       }
-      const { contact, secret } = await create(deps, actor, job, person.data, person.key);
+      const { contact, secret } = await create(deps, actor, job, person.data, person.key, sourcingNoticeByEmail);
       results.push({ profileUrl: person.data.profileUrl, outcome: 'added', contactId: contact.id, candidateId: null, noticeUrl: noticeUrl(deps, secret) });
     }
     return results;

@@ -29,7 +29,10 @@ const tabs = computed<readonly TabItem<Tab>[]>(() => [
       </PageHeader>
       <template v-if="allowed">
         <PrivacySettings v-if="tab === 'notice'" />
-        <RetentionOverview v-else-if="tab === 'retention'" />
+        <template v-else-if="tab === 'retention'">
+          <RetentionOverview />
+          <SourcingSetting />
+        </template>
         <PrivacyDocuments v-else />
       </template>
       <FormAlert v-else message-key="errors.forbidden" />

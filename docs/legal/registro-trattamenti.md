@@ -26,6 +26,7 @@ Versione: [numero] - Ultimo aggiornamento: [gg/mm/aaaa]
 |---|---|
 | Selezione | Misure precontrattuali su richiesta dell'interessato (art. 6.1.b) |
 | Database candidati | Consenso (art. 6.1.a), distinto, facoltativo e revocabile |
+| Sourcing [se effettuato] | Legittimo interesse del titolare (art. 6.1.f) a proporre posizioni a persone con profilo pubblico pertinente [bilanciamento da documentare]; informativa art. 14 al più tardi al primo contatto; opposizione (art. 21) con un clic |
 | Registro delle azioni e sicurezza | Legittimo interesse del titolare (art. 6.1.f) e obblighi di accountability (art. 5.2, 32) [da confermare con il legale] |
 
 ## Categorie di interessati
@@ -58,6 +59,7 @@ Personale autorizzato del titolare, con permessi per ruolo e per annuncio. Respo
 |---|---|---|
 | Selezione | [N] mesi dalla conclusione del processo | Conservazione, ambito selezione |
 | Database candidati (con consenso) | [N] mesi dal consenso, rinnovabile | Conservazione, ambito database candidati |
+| Contatti trovati (sourcing) | 30 giorni dalla raccolta, se la persona non si candida | Fisso nell'app; dopo un'opposizione resta solo un'impronta HMAC di profilo ed email |
 | Registro delle azioni | [N] mesi [motivazione] | [impostazione] |
 | Backup | [N] giorni, poi sovrascrittura | [placeholder] |
 

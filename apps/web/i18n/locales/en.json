@@ -507,7 +507,8 @@
         "security_setting_updated": "Changed the two-factor authentication requirement",
         "access_setting_updated": "Changed who sees which ads",
         "logo_changed": "Changed the logo",
-        "agency_setting_updated": "Changed whether the organization recruits for clients"
+        "agency_setting_updated": "Changed whether the organization recruits for clients",
+        "sourcing_setting_updated": "Changed how sourced people are informed"
       },
       "invitation": {
         "created": "Invited a person",
@@ -5251,5 +5252,14 @@
         "body": "We cannot load the page right now. Try again later."
       }
     }
+  },
+  "sourcingSetting": {
+    "title": "People found outside Candydati (sourcing)",
+    "always": "People found on LinkedIn, GitHub or the web get the notice (GDPR art. 14) at the latest with the first message, with a link to see and erase their data. People never written to are erased within 30 days.",
+    "label": "Email the notice at once when the address is known",
+    "on": "On: people with a public email get the notice as soon as they are added, even if nobody writes to them.",
+    "off": "Off: the notice goes with the first message. No email to people who are not contacted.",
+    "saved": "Setting saved",
+    "loadFailed": "We could not load the sourcing setting."
   }
 }

@@ -44,6 +44,14 @@ describe('sourcing over the api', () => {
     expect(JSON.stringify(audit)).not.toContain('Lind');
   });
 
+  it('leaves the notice email off until an owner turns it on; a recruiter may not', async () => {
+    const w = await createWorld(t);
+    expect((await w.owner.get<{ noticeByEmail: boolean }>('/api/v1/settings/sourcing')).body.data).toEqual({ noticeByEmail: false });
+    const recruiter = await w.member('recruiter');
+    expect((await recruiter.put('/api/v1/settings/sourcing', { noticeByEmail: true })).status).toBe(403);
+    expect((await w.owner.put<{ noticeByEmail: boolean }>('/api/v1/settings/sourcing', { noticeByEmail: true })).body.data).toEqual({ noticeByEmail: true });
+  });
+
   it('is refused without sourcing:manage, invisible to another organization, and validates what it gets', async () => {
     const w = await createWorld(t);
     const interviewer = await w.member('interviewer');

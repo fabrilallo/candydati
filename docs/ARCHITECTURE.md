@@ -368,8 +368,9 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 - **Sourcing (art. 14):** people found outside Candydati for a job (a LinkedIn or GitHub profile, a web page) are
   `sourced_contact` rows, never candidates. Each expires 30 days after collection (erased by `retention.run`). Each has a
   personal notice link (only the hash is stored; renewing it kills the old one) to a public page that shows everything
-  kept and erases it on request; the notice is emailed by the worker (`sourcing.notice`) when the address is known,
-  otherwise the recruiter pastes its short form into the first message. Erasing on request keeps only a keyed hash
+  kept and erases it on request. The notice goes with the first message (art. 14(3)(b)): the recruiter pastes its short
+  form; when the organization turns it on (`organization_setting.sourcing_notice_by_email`, off by default) the worker
+  also emails it at once (`sourcing.notice`) to a known address. Erasing on request keeps only a keyed hash
   (HMAC with the instance secret and the organization) of the profile and email in `sourcing_objection`, so the person is
   never added again. Duplicates of candidates (same email or LinkedIn profile) and of contacts are skipped, never merged.
   Evidence per criterion only: no score, no ranking.

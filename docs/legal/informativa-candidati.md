@@ -37,6 +37,10 @@ Dentro [Nome del titolare] solo a persone autorizzate: chi amministra le selezio
 
 Ogni volta che il tuo profilo viene presentato ti avvisiamo per email indicando l'azienda, o dicendoti che è un cliente che ha chiesto di restare riservato: in quel caso puoi chiederci quale azienda è (art. 15 GDPR). L'azienda cliente riceve i dati come titolare autonomo, solo per quella selezione; la base giuridica è la stessa della selezione (misure precontrattuali, art. 6.1.b GDPR). Le sue risposte sono un'opinione: la decisione su di te resta a una persona di [Nome del titolare]. Se cancelli i tuoi dati, il tuo profilo esce anche da ogni shortlist inviata ai clienti; le copie già scaricate dal cliente restano sotto la sua responsabilità di titolare.
 
+## [Se fai sourcing] Persone che non si sono candidate
+
+[Nome del titolare] può trovare il tuo profilo pubblico (ad esempio LinkedIn, GitHub o una pagina web) e considerarti per una posizione. In quel caso teniamo solo nome, ruolo, città, il link al profilo e ciò che nel profilo riguarda la posizione, per valutare se proportela (legittimo interesse, art. 6.1.f GDPR; [indicare l'esito del bilanciamento]). Ti informiamo al più tardi con il primo messaggio che ti mandiamo (art. 14.3.b GDPR), con un link personale da cui vedi tutto quello che teniamo e puoi farlo cancellare subito: in quel caso conserviamo solo un'impronta cifrata, che non permette di risalire a te, per non ricontattarti (art. 21 GDPR). Se non ti contattiamo o non rispondi, i dati vengono cancellati entro 30 giorni dalla raccolta.
+
 ## Per quanto tempo li conserviamo
 
 - Selezione: [N] mesi dalla conclusione del processo [motivazione].
