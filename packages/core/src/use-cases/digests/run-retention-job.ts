@@ -53,7 +53,7 @@ export async function runRetentionJob(deps: RetentionJobDeps, now: Date): Promis
   const result = await runRetention(deps.retention, { now });
   const sweep = await purgeStaleImports(deps.imports, { now, olderThanDays: deps.importStaleDays });
   const migrations = deps.migrations ? await purgeEndedMigrations(deps.migrations, { now }) : { purged: 0, failed: [] };
-  const mail = await sendDigests({ transaction: deps.digest.transaction, notifications: deps.retention.notifications, mail: deps.digest.mail, now: () => now }, result.digests);
+  const mail = await sendDigests({ transaction: deps.digest.transaction, notifications: deps.retention.notifications, mail: deps.digest.mail, details: deps.digest.details, now: () => now }, result.digests);
   const pruned = deps.deliveryLog ? await pruneDeliveryLog(deps.deliveryLog, { now, retentionDays: deps.deliveryLogRetentionDays }) : { events: 0, deliveries: 0 };
   const prunedViews = deps.jobViews ? await deps.jobViews.purgeBefore(viewRetentionCutoff(now)) : 0;
   return {

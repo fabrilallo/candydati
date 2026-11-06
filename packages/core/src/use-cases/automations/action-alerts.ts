@@ -20,7 +20,7 @@ const notifyEach = (deps: AutomationRunDeps, ctx: ActionContext, userIds: readon
 
 /**
  * Alerts people about the application: an in-app notification (`email` also puts it in the hourly digest, which names the
- * job and the kind only), or an `automation.notified` webhook event with ids only. Recipients who left or cannot open the
+ * job, the candidate by first name and surname initial, and the stage), or an `automation.notified` webhook event with ids only. Recipients who left or cannot open the
  * job are skipped; when nobody is left, the run fails and the creator hears about it.
  */
 export async function notify(deps: AutomationRunDeps, ctx: ActionContext, channel: NotifyChannel, recipients: readonly string[]): Promise<void> {

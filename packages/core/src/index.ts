@@ -117,6 +117,7 @@ export * from './use-cases/automations/template-rules.js';
 export * from './use-cases/automations/proposals.js';
 export * from './use-cases/automations/propose-move.js';
 export * from './use-cases/automations/expire-proposals.js';
+export * from './use-cases/digests/digest-details.js';
 export * from './use-cases/digests/digest-email.js';
 export * from './use-cases/digests/send-digests.js';
 export * from './use-cases/digests/run-deadline-scan.js';

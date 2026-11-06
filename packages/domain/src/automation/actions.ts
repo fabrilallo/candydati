@@ -17,7 +17,7 @@ export const MAX_NOTIFY_RECIPIENTS = 10;
 
 /**
  * Where a `notify` alert goes. `in_app`: a notification for each recipient. `email`: the same notification, also carried
- * by the hourly email digest (job title and kind only, never a candidate's name). `webhook`: an `automation.notified`
+ * by the hourly email digest (job title, the candidate's first name and surname initial, the stage; never a full name or contact). `webhook`: an `automation.notified`
  * event to the organization's endpoints that subscribe to it (ids only).
  */
 export const NOTIFY_CHANNELS = ['in_app', 'email', 'webhook'] as const;

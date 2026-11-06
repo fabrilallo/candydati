@@ -1,6 +1,7 @@
 import type { NotificationRepository } from '../../automation-ports.js';
 import { inTransaction, type TransactionalDeps } from '../../transaction.js';
 import type { DigestEntry } from '../automations/scan-deadlines.js';
+import { describeDigest, type DigestDetailSources } from './digest-details.js';
 import { buildDigestEmail, type DigestMailConfig } from './digest-email.js';
 
 export interface DigestDeps extends TransactionalDeps {
@@ -8,6 +9,8 @@ export interface DigestDeps extends TransactionalDeps {
   /** A second store the entries may come from (the stale-job scan in tests); in production the same repository. */
   readonly staleNotifications?: Pick<NotificationRepository, 'markEmailed'> | undefined;
   readonly mail: DigestMailConfig;
+  /** Where each line's candidate, stage, task and dates are read. */
+  readonly details: DigestDetailSources;
   readonly now: () => Date;
 }
 
@@ -33,10 +36,16 @@ async function claim(deps: DigestDeps, entry: DigestEntry, at: Date): Promise<Re
  * retried job never sends it again. Only what this claim took goes into the email.
  */
 async function sendOne(deps: DigestDeps, entry: DigestEntry): Promise<'sent' | 'skipped'> {
+  const items = await describeDigest(deps.details, entry);
   return inTransaction(deps, async (tx) => {
     const claimed = await claim(tx, entry, tx.now());
     if (claimed.size === 0) return 'skipped';
-    const { subject, text, html } = buildDigestEmail(tx.mail, { ...entry, notifications: entry.notifications.filter((n) => claimed.has(n.id)) });
+    const kept = entry.notifications.flatMap((n, index) => (claimed.has(n.id) ? [{ n, item: items[index] }] : []));
+    const { subject, text, html } = buildDigestEmail(
+      tx.mail,
+      { ...entry, notifications: kept.map(({ n }) => n) },
+      kept.flatMap(({ item }) => (item ? [item] : [])),
+    );
     await tx.mail.sender.send({ from: tx.mail.from, replyTo: tx.mail.from, to: entry.email, subject, text, html, headers: { 'Auto-Submitted': 'auto-generated' } });
     return 'sent';
   });

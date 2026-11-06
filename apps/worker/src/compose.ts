@@ -85,7 +85,9 @@ function createSharedDeps({ env, logger, uow, files, queue, emailRuntime, aiRunt
       },
       platformUrl: env.platform.url,
       locale: env.platform.defaultLocale,
+      timeZone: env.platform.timeZone,
     },
+    details: { applications: uow.repositories.applications, candidates: uow.repositories.candidates, tasks: uow.repositories.tasks, jobs: uow.repositories.jobs },
   };
   const migrations = createMigrationWorkerDeps({
     uow,

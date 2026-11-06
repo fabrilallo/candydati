@@ -6,6 +6,7 @@ import { scanDeadlines } from '../automations/scan-deadlines.js';
 import { scanFeedbackReminders } from '../feedback/scan-reminders.js';
 import { scanStaleJobs } from '../stale/scan-stale-jobs.js';
 import { scanShortlistReminders, type ShortlistReminderDeps } from '../clients/shortlist-reminders.js';
+import type { DigestDetailSources } from './digest-details.js';
 import { mergeDigests, type DigestMailConfig } from './digest-email.js';
 import { sendDigests, type DigestSendResult } from './send-digests.js';
 
@@ -13,6 +14,8 @@ import { sendDigests, type DigestSendResult } from './send-digests.js';
 export interface DigestJobConfig {
   readonly transaction: TransactionPort;
   readonly mail: DigestMailConfig;
+  /** Where the digest reads each line's candidate, stage, task and dates. */
+  readonly details: DigestDetailSources;
 }
 
 export interface DeadlineScanJobDeps {
@@ -48,7 +51,7 @@ export async function runDeadlineScan(deps: DeadlineScanJobDeps, now: Date): Pro
   const staleResult = stale ? await scanStaleJobs(stale, { now }) : { digests: [] };
   const digests = mergeDigests(deadlines.digests, staleResult.digests);
   const mail = await sendDigests(
-    { transaction: digest.transaction, notifications: scan.notifications, staleNotifications: stale?.notifications, mail: digest.mail, now: () => now },
+    { transaction: digest.transaction, notifications: scan.notifications, staleNotifications: stale?.notifications, mail: digest.mail, details: digest.details, now: () => now },
     digests,
   );
   return { digests: digests.length, missedPromises: deadlines.missedPromises ?? 0, feedbackReminded: reminders.reminded, feedbackFailed: reminders.failed, shortlistsReminded: shortlistResult.reminded, shortlistsFailed: shortlistResult.failed, ...mail };

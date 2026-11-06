@@ -3,14 +3,17 @@ import { buildApplication, buildOutboxEvent, createFakeEmailSender, createInMemo
 import { createInMemoryJobViews } from '../../testing/in-memory-job-views.js';
 import { createCandidateStore } from '../../testing/in-memory-candidates.js';
 import { createInMemoryTransaction } from '../../testing/in-memory-transaction.js';
+import type { DigestDetailSources } from './digest-details.js';
 import { formatDigestFrom } from './digest-email.js';
 import { runDeadlineScan } from './run-deadline-scan.js';
 import { runRetentionJob } from './run-retention-job.js';
 
 const DAY = 24 * 3600 * 1000;
-const digest = (sender = createFakeEmailSender()) => ({
+const NO_DETAILS: DigestDetailSources = { applications: { findById: async () => null }, candidates: { findByIds: async () => [] }, tasks: { findById: async () => null }, jobs: { findById: async () => null } };
+const digest = (sender = createFakeEmailSender(), details: DigestDetailSources = NO_DETAILS) => ({
   transaction: createInMemoryTransaction(),
-  mail: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' as const },
+  mail: { sender, from: formatDigestFrom('Platform', 'noreply@mail.example'), platformUrl: 'https://app.example', locale: 'en' as const, timeZone: 'Europe/Rome' },
+  details,
 });
 
 describe('runDeadlineScan', () => {
@@ -18,8 +21,11 @@ describe('runDeadlineScan', () => {
     const now = new Date('2026-06-01T10:00:00.000Z');
     const scan = seedAutomationWorld({ applications: [buildApplication({ organizationId: ORG_A, responseDueAt: new Date(now.getTime() - 3_600_000) })] });
     const sender = createFakeEmailSender();
-    const first = await runDeadlineScan({ scan, digest: digest(sender) }, now);
+    const first = await runDeadlineScan({ scan, digest: digest(sender, scan) }, now);
     expect(first).toMatchObject({ digests: 1, sent: 1, failed: 0, feedbackReminded: 0 });
+    const [mail] = sender.sent();
+    expect(mail?.text).toContain('Backend Developer\n- Response overdue since 1 June 2026: Ada L., stage');
+    expect(mail?.text).toContain('https://app.example/app/candidates/');
     const again = await runDeadlineScan({ scan, digest: digest(sender) }, now);
     expect(again).toMatchObject({ sent: 0 });
     expect(sender.sent()).toHaveLength(1);
