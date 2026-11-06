@@ -1,6 +1,7 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { completeJobContent } from '@candydati/core/testing';
+import { MCP_TOOL_NAMES as DOMAIN_MCP_TOOL_NAMES } from '@candydati/domain';
 import type { AddressInfo } from 'node:net';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createKey, withKey } from '../testing/api-keys.js';
@@ -64,7 +65,10 @@ describe('MCP tools', () => {
     expect(names).toEqual([
       'list_jobs', 'get_job', 'create_job', 'update_job', 'analyze_job_ad', 'check_publishable', 'publish_job',
       'get_evaluation_criteria', 'set_evaluation_criteria', 'get_pipeline', 'list_attention', 'find_candidates_by_criteria', 'add_candidate_note', 'create_task', 'propose_stage_move', 'list_job_templates', 'get_job_stats', 'get_reports', 'list_clients',
+      'list_sourced_contacts', 'add_sourced_contacts',
     ]);
+    // The web guide lists the tools from the domain: same set, so none ships without a label.
+    expect([...names].sort()).toEqual([...DOMAIN_MCP_TOOL_NAMES].sort());
     // The one exception only proposes: a person confirms or dismisses (mcp-proposals.integration.test.ts).
     expect(names.filter((name) => name !== 'propose_stage_move' && /move|decid|messag|send|erase|delete|reject|hire|rank|score|compare/.test(name))).toEqual([]);
     expect(tools.find((tool) => tool.name === 'propose_stage_move')!.description).toMatch(/only proposes: it never moves, decides on or messages/);
@@ -167,7 +171,7 @@ describe('MCP prompts', () => {
     const client = await connect((await createKey(world.owner, ['job:read'])).secret);
     const { prompts } = await client.listPrompts();
     expect(prompts.map((prompt) => prompt.name)).toEqual([...MCP_PROMPT_NAMES]);
-    expect(prompts.map((prompt) => prompt.name)).toEqual(['write_job_ad', 'answer_inbox', 'find_candidates', 'weekly_report', 'interview_kit']);
+    expect(prompts.map((prompt) => prompt.name)).toEqual(['write_job_ad', 'answer_inbox', 'find_candidates', 'weekly_report', 'interview_kit', 'source_people']);
     const write = prompts.find((prompt) => prompt.name === 'write_job_ad')!;
     expect(write.arguments).toEqual(expect.arrayContaining([expect.objectContaining({ name: 'brief', required: true }), expect.objectContaining({ name: 'templateId', required: false })]));
     expect(MCP_SERVER_INSTRUCTIONS).toMatch(/prompts/i);

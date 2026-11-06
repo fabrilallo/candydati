@@ -2936,7 +2936,10 @@
       "get_evaluation_criteria": "Cosa cercano gli intervistatori in un annuncio, per fase, e quali criteri un feedback ha già usato. Nessun peso, nessun punteggio.",
       "set_evaluation_criteria": "Sostituisce i criteri di valutazione di un annuncio dopo il tuo assenso. I criteri già usati restano con le loro parole; niente punteggi né classifiche.",
       "get_reports": "Numeri aggregati del periodo: tempi, passaggi tra le fasi, provenienza e risposte, senza dati personali.",
-      "list_clients": "Per un'agenzia: i clienti con il numero di posizioni, senza i referenti."
+      "list_clients": "Per un'agenzia: i clienti con il numero di posizioni, senza i referenti.",
+      "find_candidates_by_criteria": "I candidati di un annuncio e del talent pool che soddisfano criteri oggettivi che hai confermato. Nessun punteggio, nessuna classifica.",
+      "list_sourced_contacts": "Le persone già aggiunte come contatti di un annuncio, per nome, con i riscontri per ogni criterio.",
+      "add_sourced_contacts": "Aggiunge come contatti di un annuncio persone trovate su profili professionali pubblici, dopo la tua conferma. Non sono candidati e nessuno viene contattato. Serve lo scope di sourcing."
     },
     "claude": {
       "title": "Collegare Claude (connettore personalizzato)",

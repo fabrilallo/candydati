@@ -41,6 +41,7 @@ export const MCP_TOOL_NAMES = [
   'set_evaluation_criteria',
   'get_pipeline',
   'list_attention',
+  'find_candidates_by_criteria',
   'add_candidate_note',
   'create_task',
   'propose_stage_move',
@@ -48,6 +49,8 @@ export const MCP_TOOL_NAMES = [
   'get_job_stats',
   'get_reports',
   'list_clients',
+  'list_sourced_contacts',
+  'add_sourced_contacts',
 ] as const;
 export type McpToolName = (typeof MCP_TOOL_NAMES)[number];
 

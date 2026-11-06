@@ -8,6 +8,13 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- **Sourcing over MCP.** Outside agents (Claude with its browser, any MCP client) can bring the people they found:
+  `add_sourced_contacts` adds people from public professional profiles as contacts of a job after the person confirms
+  them by name (never candidates, nobody messaged; skipped and said so: already a contact, already a candidate, or
+  someone who asked never to be contacted), and `list_sourced_contacts` lists them by first name with the evidence per
+  criterion, never surname, profile link or email. Both need `sourcing:manage` on the key (connected apps: the person's
+  role). New prompt `source_people`: agree criteria from the job, search public profiles read-only (stop at a CAPTCHA),
+  show evidence with no ranking, add only whom the person picks. The Italian API guide gains the prompts table.
 - **Sourced contacts (foundation of sourcing).** People found outside Candydati for a job (a LinkedIn or GitHub profile,
   a web page) can be added as contacts of the job: `POST /api/v1/jobs/:id/sourced-contacts` with evidence per criterion
   (never a score). Duplicates of candidates (same email or LinkedIn profile) and of contacts are skipped, never merged.
