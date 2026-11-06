@@ -1584,7 +1584,8 @@
       "automations": "Automazioni",
       "distribution": "Distribuzione",
       "team": "Team",
-      "shortlists": "Shortlist"
+      "shortlists": "Shortlist",
+      "sourcing": "Contatti trovati"
     },
     "received": "Ricevute",
     "receivedHint": "Nuove candidature, ancora da guardare",
@@ -5261,5 +5262,67 @@
     "off": "Spento: l'informativa parte con il primo messaggio. Nessuna email a chi non viene contattato.",
     "saved": "Impostazione salvata",
     "loadFailed": "Non siamo riusciti a caricare l'impostazione del sourcing."
+  },
+  "sourcing": {
+    "title": "Contatti trovati",
+    "note": "Persone trovate fuori da Candydati (LinkedIn, GitHub, web) per questa posizione: sono contatti, non candidati. Quando scrivi a qualcuno, metti nel primo messaggio il testo dell'informativa: è un obbligo di legge (GDPR, art. 14). Chi non viene contattato è cancellato da solo dopo 30 giorni.",
+    "emptyTitle": "Nessun contatto trovato",
+    "emptyBody": "Aggiungi qui le persone trovate su LinkedIn, GitHub o sul web per questa posizione. Presto potrà farlo anche l'assistente.",
+    "openProfile": "Apri il profilo",
+    "noticeButton": "Testo informativa",
+    "markContacted": "Segna come contattato",
+    "markedContacted": "Contatto segnato come contattato",
+    "deleted": "Contatto cancellato",
+    "deleteFor": "Cancella {name}",
+    "erasedIn": "Cancellato oggi | Cancellato tra 1 giorno | Cancellato tra {count} giorni",
+    "sources": {
+      "linkedin": "LinkedIn",
+      "github": "GitHub",
+      "web": "Web",
+      "manual": "Altro"
+    },
+    "statuses": {
+      "found": "Trovato",
+      "notified": "Informativa inviata",
+      "contacted": "Contattato"
+    },
+    "outcomes": {
+      "added": "Contatto aggiunto",
+      "already_contact": "Questa persona è già tra i contatti di questa posizione",
+      "already_candidate": "Questa persona è già tra i candidati",
+      "objected": "Questa persona ha chiesto di non essere ricontattata"
+    },
+    "errors": {
+      "firstName": "Scrivi il nome",
+      "profileUrl": "Incolla il link al profilo (https://…)"
+    },
+    "add": {
+      "button": "Aggiungi contatto",
+      "title": "Aggiungi un contatto trovato",
+      "description": "Una persona trovata fuori da Candydati per questa posizione. Teniamo solo quello che serve a valutare se proporgliela.",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "profileUrl": "Link al profilo",
+      "source": "Fonte",
+      "headline": "Ruolo attuale",
+      "location": "Città",
+      "evidence": "Cosa riguarda la posizione",
+      "evidenceHint": "Una riga per criterio, ad esempio «Go: 4 anni in Spotify». Fatti, non giudizi.",
+      "save": "Aggiungi"
+    },
+    "notice": {
+      "title": "Informativa per {name}",
+      "description": "Incolla queste righe nel primo messaggio che mandi (LinkedIn, email).",
+      "linkNote": "Il link è personale: chi lo apre vede cosa teniamo e può farlo cancellare. Ogni volta che apri questa finestra ne nasce uno nuovo e il precedente smette di funzionare.",
+      "copy": "Copia",
+      "copied": "Copiato",
+      "sent": "L'ho inviato: segna come contattato"
+    },
+    "delete": {
+      "title": "Cancellare {name}?",
+      "body": "Il contatto viene cancellato subito.",
+      "doNotContact": "Non ricontattare: tieni solo un'impronta cifrata per non aggiungerlo mai più",
+      "confirm": "Cancella"
+    }
   }
 }
