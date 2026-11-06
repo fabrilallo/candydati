@@ -18,6 +18,7 @@ const updated = computed(() => relativeTime(props.template.updatedAt, props.now,
 const { viewer } = useViewer()
 /** The rules kept with the template, for those who manage automations. */
 const canRules = computed(() => can(viewer.value?.role ?? null, 'automation:manage'))
+const canEditPacks = computed(() => canRules.value && can(viewer.value?.role ?? null, 'job_template:create'))
 </script>
 
 <template>
@@ -28,6 +29,7 @@ const canRules = computed(() => can(viewer.value?.role ?? null, 'automation:mana
         <Badge variant="secondary">{{ roleLabel(template.content.role, template.content.customRole, t) || t('job.list.noRole') }}</Badge>
       </div>
       <p class="text-sm text-muted-foreground" data-testid="template-summary">{{ summary }}</p>
+      <TemplatePacks v-if="canRules" :template="template" :can-edit="canEditPacks" />
       <TemplateRules v-if="canRules" :template="template" />
     </div>
     <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">

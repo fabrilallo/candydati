@@ -17,7 +17,7 @@ const { api, state } = vi.hoisted(() => ({
       invitations: [],
     }),
   },
-  state: { posts: [] as unknown[], puts: [] as unknown[], deletes: 0, copies: [] as unknown[] },
+  state: { posts: [] as unknown[], puts: [] as unknown[], deletes: 0, copies: [] as unknown[], attaches: [] as unknown[] },
 }))
 mockNuxtImport('useAuthApi', () => () => api)
 
@@ -34,11 +34,18 @@ const job = makeJob({
 registerEndpoint('/api/v1/email-templates', () => ok([template('t-update', { name: 'Aggiornamento sulla fase', kind: 'stage_update' })]))
 registerEndpoint('/api/v1/jobs/j1/automations', async (event) => {
   if (event.method !== 'POST') {
-    return ok([rule('r1', { stageId: 'tech', createdBy: 'u2' }), rule('r2', { stageId: 'tech', action: taskAction('Prepara il colloquio', 'job_owner', 2), createdAt: '2026-10-14T10:00:00.000Z' })])
+    return ok([rule('r1', { stageId: 'tech', createdBy: 'u2' }), rule('r2', { stageId: 'tech', packId: 'p1', action: taskAction('Prepara il colloquio', 'job_owner', 2), createdAt: '2026-10-14T10:00:00.000Z' })])
   }
   const body = await readBody<{ stageId: string; action: never }>(event)
   state.posts.push(body)
   return ok(rule('r9', { stageId: body.stageId, action: body.action, createdBy: 'u1' }))
+})
+registerEndpoint('/api/v1/automation-packs', () =>
+  ok([{ id: 'p1', name: 'Selezione tecnica', description: '', ruleCount: 2, templateIds: [], createdBy: 'u1', createdAt: '2026-10-01T00:00:00.000Z', updatedAt: '2026-10-01T00:00:00.000Z' }]),
+)
+registerEndpoint('/api/v1/jobs/j1/automation-packs', async (event) => {
+  state.attaches.push(await readBody(event))
+  return ok({ packId: 'p1', created: ['r10'], updated: ['r2'], removed: 0, skipped: [{ ruleId: 'x', reason: 'no_stage', stageId: null }] })
 })
 registerEndpoint('/api/v1/automations/copy', async (event) => {
   state.copies.push(await readBody(event))
@@ -67,6 +74,7 @@ beforeEach(() => {
   state.puts.length = 0
   state.deletes = 0
   state.copies.length = 0
+  state.attaches.length = 0
   clearNuxtData()
   useViewer().viewer.value = viewerWith('recruiter')
 })
@@ -158,5 +166,26 @@ describe('copying rules', () => {
     const wrapper = await mountPanel()
     expect(wrapper.find('[data-testid="automation-copy-screen"]').exists()).toBe(false)
     expect(wrapper.find('[data-testid="automation-copy-tech"]').exists()).toBe(true)
+  })
+})
+
+describe('automation packs on a job', () => {
+  it('marks the rules copied from a pack and attaches a pack again as an update', async () => {
+    const wrapper = await mountPanel()
+    await vi.waitFor(() => expect(wrapper.find('[data-rule-id="r2"] [data-testid="rule-pack"]').text()).toBe('Dal pacchetto Selezione tecnica'))
+    expect(wrapper.find('[data-rule-id="r1"] [data-testid="rule-pack"]').exists()).toBe(false)
+    await wrapper.find('[data-testid="attach-pack"]').trigger('click')
+    await vi.waitFor(() => expect(button('attach-pack-dialog')).not.toBeNull())
+    document.body.querySelector<HTMLFormElement>('#attach-pack-form')?.requestSubmit()
+    await vi.waitFor(() => expect(button('attach-pack-dialog')?.textContent).toContain('Scegli un pacchetto'))
+    const select = document.body.querySelector<HTMLSelectElement>('[data-testid="attach-pack-select"]')
+    if (!select) throw new Error('no pack select')
+    select.value = 'p1'
+    select.dispatchEvent(new Event('change'))
+    await vi.waitFor(() => expect(button('attach-pack-again')?.textContent).toContain('già agganciato'))
+    expect(button('attach-pack-submit')?.textContent).toContain('Aggiorna dal pacchetto')
+    document.body.querySelector<HTMLFormElement>('#attach-pack-form')?.requestSubmit()
+    await vi.waitFor(() => expect(state.attaches).toEqual([{ packId: 'p1' }]))
+    await vi.waitFor(() => expect(button('attach-pack-dialog')).toBeNull())
   })
 })

@@ -32,6 +32,7 @@ export const useJobEditor = (init: EditorInit) => {
     job: state.job,
     openCounts: state.openCounts,
     blockedStages: state.blockedStages,
+    packIds: state.packIds,
     status: state.status,
     readOnly,
     permissions: state.permissions,

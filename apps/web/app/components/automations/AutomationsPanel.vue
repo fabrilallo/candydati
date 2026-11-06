@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { CopyIcon, InfoIcon, PlusIcon } from '@lucide/vue'
+import { CopyIcon, InfoIcon, PackagePlusIcon, PlusIcon } from '@lucide/vue'
 import { toast } from 'vue-sonner'
-import { type AutomationRuleDto, type CopyAutomationsResultDto, pipelineStagesOf, type JobDto } from '@candydati/domain'
+import { type AttachPackResultDto, type AutomationRuleDto, type CopyAutomationsResultDto, pipelineStagesOf, type JobDto } from '@candydati/domain'
+import { attachToast } from '@/lib/automation-pack-view'
 import type { RuleInput } from '@/lib/automation-api'
 import type { CopySource } from '@/lib/automation-copy-view'
 import { describeRule, rulesByStage } from '@/lib/automation-view'
@@ -13,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 /**
  * The rules of a job, one section per stage (same names as the board), each with its trigger, its conditions and what it
  * does. They send, create tasks, tag, assign, ask for feedback, alert or propose a move; they never move or decide, and
- * say so. Rules copy to another stage, another job or a job template.
+ * say so. Rules copy to another stage, another job or a job template; packs of rules are attached from here too.
  */
 const props = defineProps<{ job: JobDto }>()
 const { t } = useI18n()
@@ -74,6 +75,17 @@ const copyOpen = computed({
   },
 })
 const copyLabel = computed(() => names.value.stage(copying.value?.stageId ?? '') ?? '')
+const packs = useAutomationPacks()
+const packName = (rule: AutomationRuleDto): string | null => (rule.packId ? (packs.packs.value?.find((pack) => pack.id === rule.packId)?.name ?? null) : null)
+const attachedIds = computed(() => [...new Set((automations.rules.value ?? []).flatMap((rule) => (rule.packId ? [rule.packId] : [])))])
+const attaching = ref(false)
+const attached = async (result: AttachPackResultDto): Promise<void> => {
+  attaching.value = false
+  const words = attachToast(result)
+  toast.success(t(words.key, { ...words.params }))
+  await automations.refresh()
+}
+
 /** Copies into this job show up at once; elsewhere they wait in their job or template. */
 const copied = async (result: CopyAutomationsResultDto): Promise<void> => {
   copying.value = null
@@ -88,6 +100,9 @@ const copied = async (result: CopyAutomationsResultDto): Promise<void> => {
       <InfoIcon class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
       {{ t('automations.note') }}
     </p>
+    <div class="flex justify-end">
+      <Button variant="outline" data-testid="attach-pack" @click="attaching = true"><PackagePlusIcon aria-hidden="true" />{{ t('automationPacks.attach.button') }}</Button>
+    </div>
     <div v-if="automations.errorKey.value" class="grid gap-3">
       <FormAlert :message-key="automations.errorKey.value" />
       <div><Button variant="outline" @click="() => automations.refresh()">{{ t('common.retry') }}</Button></div>
@@ -121,6 +136,7 @@ const copied = async (result: CopyAutomationsResultDto): Promise<void> => {
             :rule="rule"
             :words="describeRule(rule, names, joinList)"
             :author="authorOf(rule)"
+            :pack-name="packName(rule)"
             :busy="automations.busy.value === rule.id"
             @toggle="(enabled) => automations.setEnabled(rule, enabled)"
             @edit="startEdit(stage.id, rule)"
@@ -143,6 +159,7 @@ const copied = async (result: CopyAutomationsResultDto): Promise<void> => {
       :error-key="automations.saveErrorKey.value"
       @save="save"
     />
+    <AttachPackDialog v-model:open="attaching" :job-id="job.id" :packs="packs.packs.value ?? []" :attached-ids="attachedIds" @attached="attached" />
     <RuleCopyDialog v-model:open="copyOpen" :job-id="job.id" :job-content="job.content" :source="copying" :source-label="copyLabel" @copied="copied" />
     <ConfirmDialog v-model:open="deleteOpen" :title="t('automations.deleteTitle')" :body="t('automations.deleteBody')" :confirm-label="t('automations.deleteConfirm')" :pending="deleting !== null && automations.busy.value === deleting.id" destructive @confirm="confirmDelete" />
   </div>

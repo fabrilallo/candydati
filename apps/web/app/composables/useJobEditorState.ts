@@ -36,6 +36,8 @@ export const useJobEditorState = (init: EditorInit) => {
   const attempted = ref(false)
   const confirmOpen = ref(false)
   const blockedStages = ref<ReadonlySet<string>>(new Set())
+  /** Automation packs picked for a new job: their rules are copied when it is first saved. */
+  const packIds = ref<readonly string[]>([])
   const { counts, openCounts } = useStageCounts(init, role)
 
   const status = computed(() => job.value?.status ?? 'draft')
@@ -62,7 +64,7 @@ export const useJobEditorState = (init: EditorInit) => {
     if (init.job === null && job.value) await navigateTo(`/app/jobs/${job.value.id}`, { replace: true })
   }
 
-  return { t, api, draft, quality, job, busy, errorKey, attempted, confirmOpen, blockedStages, counts, openCounts, status, readOnly, permissions, setKey, fail, goToSaved }
+  return { t, api, draft, quality, job, busy, errorKey, attempted, confirmOpen, blockedStages, packIds, counts, openCounts, status, readOnly, permissions, setKey, fail, goToSaved }
 }
 
 export type JobEditorState = ReturnType<typeof useJobEditorState>
