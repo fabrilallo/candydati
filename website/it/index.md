@@ -21,7 +21,7 @@ hero:
 
 features:
   - title: Sourcing agentico
-    details: "Chiedi all'assistente di trovare persone per un annuncio: concorda con te i criteri, cerca su GitHub e LinkedIn (nel tuo browser), mostra un fatto per criterio e non fa mai classifiche. Scegli tu chi aggiungere; l'informativa dell'art. 14 GDPR e la cancellazione dopo 30 giorni sono già incluse."
+    details: "Chiedi all'assistente di trovare persone per un annuncio: concorda con te i criteri, cerca su GitHub, LinkedIn e Google (nel tuo browser), mostra un fatto per criterio e non fa mai classifiche. Scegli tu chi aggiungere; l'informativa dell'art. 14 GDPR e la cancellazione dopo 30 giorni sono già incluse."
     link: /it/guide/sourcing
     linkText: Come funziona
   - title: RAL in chiaro

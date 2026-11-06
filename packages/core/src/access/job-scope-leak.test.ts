@@ -138,6 +138,7 @@ const ROWS: readonly Row[] = [
   read('listSourcedContacts', { jobId: JOB_B }),
   read('searchGithubPeople', { jobId: JOB_B, languages: ['Go'] }),
   read('prepareLinkedinResults', { jobId: JOB_B, keywords: ['Go'], profiles: [] }),
+  read('prepareWebResults', { jobId: JOB_B, query: 'Go', results: [] }),
   write('addSourcedContacts', { jobId: JOB_B, contacts: [{ firstName: 'New', source: 'github', profileUrl: 'https://github.com/new-person' }] }),
   write('sourcedNoticeText', { contactId: 'contact_b' }),
   write('markSourcedContacted', { contactId: 'contact_b' }),

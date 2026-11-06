@@ -9,7 +9,7 @@ const LOAD_TIMEOUT_MS = 45_000;
  * Resolves with the tab's address once it finished loading; rejects when the tab is gone or the load never ends. With
  * `alreadyDone`, a tab that finished before the listener was in place (a fast page) resolves at once too.
  */
-function loaded(tabId: number, alreadyDone = false): Promise<string> {
+export function loaded(tabId: number, alreadyDone = false): Promise<string> {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       chrome.tabs.onUpdated.removeListener(listener);
@@ -33,22 +33,27 @@ function loaded(tabId: number, alreadyDone = false): Promise<string> {
   });
 }
 
-async function run<R>(tabId: number, func: () => R | Promise<R>): Promise<Awaited<R> | undefined> {
+export async function run<R>(tabId: number, func: () => R | Promise<R>): Promise<Awaited<R> | undefined> {
   const [first] = await chrome.scripting.executeScript({ target: { tabId }, func });
   return first?.result;
+}
+
+/** Opens one background tab in the visible "Candydati" group; resolves once it loaded, with where it landed. */
+export async function openInGroup(url: string): Promise<{ tabId: number; url: string }> {
+  const tab = await chrome.tabs.create({ url, active: false });
+  if (tab.id === undefined) throw new Error('No tab with id');
+  const group = await chrome.tabs.group({ tabIds: tab.id });
+  await chrome.tabGroups.update(group, { title: GROUP_TITLE, color: 'yellow' });
+  // Grouping takes a moment: the page may finish loading meanwhile, so the wait also asks the tab where it stands.
+  return { tabId: tab.id, url: await loaded(tab.id, true) };
 }
 
 /** The browser actions of a search, on the person's own Chrome: one tab, in a visible group named "Candydati". */
 export const chromeBrowser: BrowserApi = {
   async open(url) {
-    const tab = await chrome.tabs.create({ url, active: false });
-    if (tab.id === undefined) throw new Error('No tab with id');
-    const group = await chrome.tabs.group({ tabIds: tab.id });
-    await chrome.tabGroups.update(group, { title: GROUP_TITLE, color: 'yellow' });
-    // Grouping takes a moment: the page may finish loading meanwhile, so the wait also asks the tab where it stands.
-    const landed = await loaded(tab.id, true);
-    await run(tab.id, waitForMain);
-    return { tabId: tab.id, url: landed };
+    const opened = await openInGroup(url);
+    await run(opened.tabId, waitForMain);
+    return opened;
   },
   async navigate(tabId, url) {
     const pending = loaded(tabId);

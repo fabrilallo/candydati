@@ -20,6 +20,7 @@ export const INTERNAL_ROUTES: readonly InternalRoute[] = [
   { method: 'post', path: '/api/v1/sourcing/linkedin/accept', reason: 'A person accepts, for their own LinkedIn account, the risk of automated reading: session only, never a key or an app.' },
   { method: 'put', path: '/api/v1/settings/linkedin-sourcing', reason: 'Whether the organization reads LinkedIn through its members’ browsers, and the cap per search: session only, organization:update.' },
   { method: 'post', path: '/api/v1/sourcing/linkedin/results', reason: 'Backs the assistant bridge (session only): seals what the extension read so the model sees first names and facts only. Not a public import route.' },
+  { method: 'post', path: '/api/v1/sourcing/web/results', reason: 'Backs the assistant bridge (session only): seals the Google results the extension read in the recruiter’s browser so the model sees first names and facts only. Not a public import route.' },
   { method: 'put', path: '/api/v1/settings/sourcing', reason: 'How the organization, as data controller, informs the people it sources (art. 14 notice by email): privacy:manage, session only, never an API key.' },
   { method: 'get', path: '/api/v1/instance/email-settings', reason: 'Whether and how the instance sends email: backs the settings page and the "email not configured" banner of the web app.' },
   { method: 'put', path: '/api/v1/instance/email-settings', reason: 'Instance administration (first owner or instance admin, session only): carries the SMTP password or Resend key and sends a test email.' },

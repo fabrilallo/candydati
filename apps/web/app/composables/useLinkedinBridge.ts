@@ -1,11 +1,17 @@
 import { errorKeyOf } from '@/lib/auth-errors'
-import { chromeRuntime, searchLinkedinWithExtension, type ExtensionError } from '@/lib/extension-bridge'
-import { acceptLinkedinRisk, getLinkedinStatus, sealLinkedinResults } from '@/lib/sourcing-api'
+import { chromeRuntime, searchLinkedinWithExtension, searchWebWithExtension, type ExtensionError } from '@/lib/extension-bridge'
+import { sealWebResults, acceptLinkedinRisk, getLinkedinStatus, sealLinkedinResults } from '@/lib/sourcing-api'
 
 export interface LinkedinToolInput {
   readonly jobId: string
   readonly keywords: readonly string[]
   readonly location: string | null
+  readonly limit: number
+}
+
+export interface WebToolInput {
+  readonly jobId: string
+  readonly query: string
   readonly limit: number
 }
 
@@ -17,7 +23,8 @@ const failure = (error: ExtensionError | 'linkedin_off' | 'not_accepted', instal
 /**
  * The browser side of `search_linkedin_people`: checks that the organization allows it and that this person accepted the
  * risk (asking them, once, through the dialog), asks the extension to read LinkedIn in their own browser, and has the api
- * seal what it read. Resolves with what the model may see.
+ * seal what it read. Resolves with what the model may see. `runWeb` is the browser side of `search_web_people`: Google
+ * through the same extension, public results only, so no organization setting nor risk acceptance.
  */
 export const useLinkedinBridge = () => {
   const request = useJobsApi()
@@ -48,7 +55,18 @@ export const useLinkedinBridge = () => {
     }
   }
 
-  return { run, pendingConsent: computed(() => pendingConsent.value), answerConsent: (accepted: boolean) => pendingConsent.value?.(accepted) }
+  const runWeb = async (input: WebToolInput): Promise<LinkedinToolOutput> => {
+    try {
+      if (!config.extensionId) return failure('extension_missing', config.extensionUrl || null)
+      const answer = await searchWebWithExtension(chromeRuntime(), config.extensionId, { type: 'candydati.search_web', query: input.query, limit: input.limit })
+      if (!answer.ok) return failure(answer.error, answer.error === 'extension_missing' ? config.extensionUrl || null : null)
+      return (await sealWebResults(request, { jobId: input.jobId, query: input.query, results: answer.results })) as LinkedinToolOutput
+    } catch (error) {
+      return { error: { code: errorKeyOf(error) } }
+    }
+  }
+
+  return { run, runWeb, pendingConsent: computed(() => pendingConsent.value), answerConsent: (accepted: boolean) => pendingConsent.value?.(accepted) }
 }
 
 export type LinkedinBridge = ReturnType<typeof useLinkedinBridge>

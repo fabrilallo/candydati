@@ -1,6 +1,6 @@
 import { createTool } from '@mastra/core/tools';
 import { addSourcedContacts, searchGithubPeople, type FoundPerson, type SourcingDeps } from '@candydati/core';
-import { pseudonymizeText, SOURCING_SOURCES, sourcingEvidenceSchema, type SourcingEvidence, type SourcingSource } from '@candydati/domain';
+import { MAX_WEB_RESULTS, pseudonymizeText, SOURCING_SOURCES, sourcingEvidenceSchema, WEB_QUERY_MAX, type SourcingEvidence, type SourcingSource } from '@candydati/domain';
 import { z } from 'zod';
 import { wrapCandidateData } from '../candidate-data.js';
 import { readAgentIdentity } from '../request-context.js';
@@ -91,7 +91,7 @@ export const createAddSourcedContactsTool = (deps: SourcingDeps, sealer: Sealer)
   createTool({
     id: 'add_sourced_contacts',
     description:
-      'Sourcing: adds the people the user chose from search_github_people or search_linkedin_people as contacts of the job (never candidates). Pass their `ref` exactly as received. ' +
+      'Sourcing: adds the people the user chose from search_github_people, search_linkedin_people or search_web_people as contacts of the job (never candidates). Pass their `ref` exactly as received. ' +
       'Before calling, list the people by first name and wait for the user to confirm; then set confirmedByUser. Each one is kept 30 days unless they apply; the user writes to them with the privacy notice from the job page. Never send messages yourself.',
     inputSchema: z.object({
       jobId: id,
@@ -125,5 +125,24 @@ export const createSearchLinkedinPeopleTool = () =>
       keywords: z.array(z.string().min(1).max(60)).min(1).max(5).describe('Job-related words to search and to quote from the profiles (skills, titles).'),
       location: z.string().min(1).max(60).nullable().default(null),
       limit: z.number().int().min(1).max(100).default(10),
+    }),
+  });
+
+/**
+ * Google, searched in the recruiter's own browser by the Candydati extension (no search API, no server-side scraping):
+ * like `search_linkedin_people`, no `execute`; the web app runs it and has the api seal the results.
+ */
+export const createSearchWebPeopleTool = () =>
+  createTool({
+    id: 'search_web_people',
+    description:
+      'Sourcing: searches Google for ONE job in the user\'s own browser (the Candydati extension) and returns the people the public results point to (LinkedIn and GitHub profiles, personal pages), at most `limit` results (ask the user how many, 10 by default). ' +
+      'Write the search words yourself from objective job criteria, X-ray style when useful: `site:linkedin.com/in "Go" Torino`, `site:github.com Rust Milano`. Never search for protected traits (age, gender, origin, health, religion). ' +
+      'Each result gives the first name, city if Google shows it, the Google snippet as the fact, and whether the person is already a contact or a candidate; people who asked not to be contacted are left out. The order is Google\'s, never a ranking: never compare people. ' +
+      'If the result says extension_missing, captcha (Google asks the user to prove they are human: they do it in the tab, then you may search again), consent_required (the user accepts or refuses Google\'s cookie page in the tab first), cancelled or failed, explain it plainly and stop. Add the people the user chose with add_sourced_contacts.',
+    inputSchema: z.object({
+      jobId: id,
+      query: z.string().trim().min(1).max(WEB_QUERY_MAX).describe('The Google search words, operators allowed (site:, quotes, OR).'),
+      limit: z.number().int().min(1).max(MAX_WEB_RESULTS).default(10),
     }),
   });

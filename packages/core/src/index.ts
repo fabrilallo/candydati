@@ -122,6 +122,7 @@ export * from './use-cases/sourcing/contacts.js';
 export * from './use-cases/sourcing/setting.js';
 export * from './use-cases/sourcing/github-search.js';
 export * from './use-cases/sourcing/linkedin.js';
+export * from './use-cases/sourcing/web.js';
 export * from './use-cases/sourcing/public-notice.js';
 export * from './use-cases/sourcing/expiry.js';
 export * from './use-cases/sourcing/send-notice.js';

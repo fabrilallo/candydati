@@ -379,7 +379,10 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
   setting (`organization_setting.linkedin_sourcing_enabled`, cap per search) and the person's acceptance of the account
   risk (`sourcing_risk_acceptance`, per text version), asks the Candydati Chrome extension (`externally_connectable`) to
   read LinkedIn in the recruiter's own browser, has the api compute facts per criterion and seal the rest
-  (`POST /api/v1/sourcing/linkedin/results`), and returns the result with `addToolOutput`. Whatever the source, the model
+  (`POST /api/v1/sourcing/linkedin/results`), and returns the result with `addToolOutput`. `search_web_people` runs the
+  same way without the setting and the risk acceptance: the extension searches Google in the recruiter's browser and
+  reads the organic results only, and the api keeps those that point to a person (`personFromWebResult`) and seals them
+  (`POST /api/v1/sourcing/web/results`). Whatever the source, the model
   sees first name, city and facts; surname, handle and profile link travel in an AES-256-GCM reference bound to the
   organization (2 h) that only the server opens (`agent/sealed-ref.ts`). People are added only on confirmation.
 - **Minimization:** no special-category fields; CV extraction drops photo, birth date and marital status; the assistant

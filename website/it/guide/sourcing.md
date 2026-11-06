@@ -15,8 +15,8 @@ vede in chat:
    oggettivi e legati al ruolo (competenze, ruolo, anni di esperienza, città o remoto) e aspetta che tu li confermi o li
    cambi.
 2. **Quante persone.** Scegli quante persone guardare (10 di base).
-3. **La ricerca.** Cerca su [GitHub](#fonti), su [LinkedIn tramite il tuo browser](#linkedin-il-rischio-detto-chiaro)
-   e, con un agente esterno, [ovunque arrivi un client MCP](#fonti).
+3. **La ricerca.** Cerca su [GitHub](#fonti), su [LinkedIn tramite il tuo browser](#linkedin-il-rischio-detto-chiaro),
+   su Google nel tuo browser e, con un agente esterno, [ovunque arrivi un client MCP](#fonti).
 4. **Riscontri, non punteggi.** Per ogni persona vedi il nome, la città e, per ogni criterio, un fatto preso dal profilo
    e dove si trova ("Go: 4 anni in un'azienda di pagamenti, Esperienza"). Le persone compaiono nell'ordine in cui sono
    state trovate e non vengono mai messe in classifica. Chi è già un contatto o un candidato viene segnalato. Chi ha
@@ -32,6 +32,8 @@ vede in chat:
 |---|---|---|
 | GitHub | Il server cerca tra gli account pubblici: linguaggi dei loro repository, città, parole nella bio | Niente. `GITHUB_TOKEN` alza i limiti di GitHub ([variabili d'ambiente](https://github.com/fabrilallo/candydati/blob/main/docs/ENVIRONMENT.md)) |
 | LinkedIn | L'[estensione Chrome](./chrome-extension) legge ricerca persone e profili in una scheda visibile del **tuo** Chrome, con il **tuo** account | Un admin la attiva e fissa il massimo per ricerca; tu accetti una volta il rischio per l'account |
+| Google | L'[estensione Chrome](./chrome-extension#ricerca-sul-web-google) esegue nel **tuo** Chrome la ricerca che scrive l'assistente (spesso `site:linkedin.com/in "Go" Torino`) e legge solo la pagina dei risultati | L'estensione; nessuna impostazione e nessun rischio per l'account |
+| LinkedIn, mentre navighi | Il pulsante **Salva in Candydati** su ogni profilo che visiti: scegli l'annuncio, aggiungi i riscontri, fatto ([come](./chrome-extension#salvare-un-profilo-mentre-navighi)) | L'estensione |
 | Agenti esterni | Claude (con il suo browser), Claude Code o qualsiasi client MCP aggiungono quello che hanno trovato con `add_sourced_contacts`; il prompt `source_people` li guida ([API e MCP](./api)) | Una chiave API con `sourcing:manage`, oppure Claude collegato come connettore |
 | A mano | *Aggiungi contatto* nella scheda *Contatti trovati* dell'annuncio | Niente |
 
@@ -69,7 +71,7 @@ rischio è sul tuo account personale. Per questo:
   a ogni ricerca riceve un promemoria di una riga; una nuova versione del testo chiede di nuovo;
 - la ricerca gira in un **gruppo di schede visibile** chiamato "Candydati": chiudilo per fermarla.
 
-Se non fa per te, lascialo spento: GitHub, gli agenti esterni e l'aggiunta a mano funzionano senza.
+Se non fa per te, lascialo spento: GitHub, Google, il pulsante di salvataggio, gli agenti esterni e l'aggiunta a mano funzionano senza.
 
 ## Come attivarlo
 

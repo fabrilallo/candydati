@@ -71,10 +71,11 @@ rischio per l'account e un CAPTCHA non viene mai aggirato.
 ## Funzionalità
 
 **Sourcing**
-- L'assistente trova persone per un annuncio su GitHub e LinkedIn (nel tuo browser, tramite l'estensione Chrome), con
+- L'assistente trova persone per un annuncio su GitHub, LinkedIn e Google (nel tuo browser, tramite l'estensione Chrome), con
   un fatto per criterio e senza classifiche; scegli tu chi diventa contatto
 - Contatti trovati sull'annuncio: testo informativa con link personale (art. 14 GDPR) per il primo messaggio,
   cancellazione dopo 30 giorni, "non contattatemi" permanente
+- Un pulsante "Salva in Candydati" sui profili LinkedIn aggiunge a un annuncio la persona che stai guardando, con un clic
 - Gli agenti esterni aggiungono quello che hanno trovato via MCP (`add_sourced_contacts`, prompt `source_people`)
 
 **Selezione**
