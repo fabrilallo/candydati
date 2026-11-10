@@ -81,6 +81,26 @@ const exportedShortlistSchema = z.object({
   answeredAt: nullableDate,
 });
 
+/**
+ * An interview the candidate was asked to book (added within v1, optional). The interviewers by name only: their
+ * addresses and calendars are their own data, not the candidate's.
+ */
+const exportedInterviewSchema = z.object({
+  id: z.string(),
+  stageId: z.string(),
+  status: z.enum(['proposed', 'booked', 'cancelled']),
+  durationMinutes: z.number().int().min(1),
+  mode: z.enum(['video', 'onsite', 'phone']),
+  location: z.string().nullable(),
+  startsAt: nullableDate,
+  endsAt: nullableDate,
+  interviewers: z.array(z.string()),
+  createdAt: date,
+  cancelledAt: nullableDate,
+  /** `candidate`, `organization`, or null when not cancelled. */
+  cancelledBy: z.enum(['candidate', 'organization']).nullable(),
+});
+
 const exportedApplicationSchema = z.object({
   id: z.string(),
   jobId: z.string(),
@@ -123,6 +143,8 @@ const exportedApplicationSchema = z.object({
    */
   attachments: z.array(exportedAttachmentSchema).optional(),
   answers: z.array(exportedAnswerSchema).optional(),
+  /** Added within v1 (optional): the interviews proposed for this application. The product always writes it. */
+  interviews: z.array(exportedInterviewSchema).optional(),
   /** Added within v1 (optional): the shortlists sent to clients of an agency that included this application. */
   sharedWithClients: z.array(exportedShortlistSchema).optional(),
 });

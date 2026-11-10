@@ -1,4 +1,4 @@
-import type { Application, ApplicationAttachment, Candidate, CandidateExport, CandidateNote, CvExtractionRecord, Job, Message } from '@candydati/domain';
+import type { Application, ApplicationAttachment, Candidate, CandidateExport, CandidateNote, CvExtractionRecord, Interview, Job, Message } from '@candydati/domain';
 import type { FeedbackRecords } from '../../feedback-ports.js';
 
 type Records<K extends keyof FeedbackRecords> = Awaited<ReturnType<FeedbackRecords[K]['listByApplication']>>;
@@ -27,6 +27,7 @@ export interface ApplicationParts {
   readonly feedback: Records<'interviewFeedback'>;
   readonly feedbackRequests: Records<'feedbackRequests'>;
   readonly attachments: readonly ApplicationAttachment[];
+  readonly interviews?: readonly Interview[] | undefined;
 }
 
 type ExportedApplication = CandidateExport['applications'][number];
@@ -52,7 +53,7 @@ const exportAttachment = (a: ApplicationAttachment): NonNullable<ExportedApplica
 });
 
 /** One application in the shape of the public export schema. */
-export function exportApplication({ application, path, job, extraction, messages, feedback, feedbackRequests, attachments }: ApplicationParts): CandidateExport['applications'][number] {
+export function exportApplication({ application, path, job, extraction, messages, feedback, feedbackRequests, attachments, interviews = [] }: ApplicationParts): CandidateExport['applications'][number] {
   return {
     id: application.id,
     jobId: application.jobId,
@@ -95,8 +96,24 @@ export function exportApplication({ application, path, job, extraction, messages
     })),
     attachments: attachments.map(exportAttachment),
     answers: (application.answers ?? []).map(({ question, answer }) => ({ question, answer })),
+    interviews: interviews.map(exportInterview),
   };
 }
+
+const exportInterview = (interview: Interview): NonNullable<ExportedApplication['interviews']>[number] => ({
+  id: interview.id,
+  stageId: interview.stageId,
+  status: interview.status,
+  durationMinutes: interview.durationMinutes,
+  mode: interview.mode,
+  location: interview.location,
+  startsAt: isoOrNull(interview.startsAt),
+  endsAt: isoOrNull(interview.endsAt),
+  interviewers: interview.interviewers.map((person) => person.name),
+  createdAt: iso(interview.createdAt),
+  cancelledAt: isoOrNull(interview.cancelledAt),
+  cancelledBy: interview.cancelledBy === null ? null : interview.cancelledBy === 'candidate' ? 'candidate' : 'organization',
+});
 
 export const exportCandidate = (candidate: Candidate): CandidateExport['candidate'] => ({
   id: candidate.id,

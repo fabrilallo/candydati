@@ -4,6 +4,7 @@ import type { FeedbackRecords } from '../../feedback-ports.js';
 import type { FileStorage } from '../../intake-ports.js';
 import type { JobRepository } from '../../job-ports.js';
 import type { MessageRepository } from '../../messaging-ports.js';
+import type { InterviewRepository } from '../../interview-ports.js';
 import { sequential } from '../../sequential.js';
 import { exportShortlists, type ShortlistExportSources } from '../clients/shortlist-export.js';
 import { attachmentPathOf, cvPathOf, exportApplication, exportCandidate, exportNotes, iso, oldestFirst } from './export-mappers.js';
@@ -28,6 +29,8 @@ export interface ExportSources extends FeedbackRecords, ShortlistExportSources {
   readonly messages: MessageRepository;
   readonly jobs: JobRepository;
   readonly files: FileStorage;
+  /** The interviews of each application; absent on an instance wired without scheduling. */
+  readonly interviews?: Pick<InterviewRepository, 'listByApplication'> | undefined;
 }
 
 /** null when there is nothing to read (a migrated application without a CV) or the file cannot be read. */
@@ -55,12 +58,13 @@ export async function buildCandidateExport(sources: ExportSources, candidate: Ca
   const exportedApplications: CandidateExport['applications'] = [];
   for (const application of applications) {
     const path = cvPathOf(application);
-    const [job, messages, bytes, feedback, feedbackRequests] = await sequential(
+    const [job, messages, bytes, feedback, feedbackRequests, interviews] = await sequential(
       () => sources.jobs.findById(organizationId, application.jobId),
       () => sources.messages.listByApplication(organizationId, application.id),
       () => readFile(sources.files, application.cv?.key),
       () => sources.interviewFeedback.listByApplication(organizationId, application.id),
       () => sources.feedbackRequests.listByApplication(organizationId, application.id),
+      async () => (sources.interviews ? (await sources.interviews.listByApplication(organizationId, application.id)).toSorted((a, b) => a.createdAt.getTime() - b.createdAt.getTime()) : []),
     );
     if (path !== null) {
       if (bytes) files.push({ path, bytes });
@@ -73,7 +77,7 @@ export async function buildCandidateExport(sources: ExportSources, candidate: Ca
       else missingFiles.push(attachmentPathOf(attachment));
     }
     const extraction = extractions.find((e) => e.applicationId === application.id) ?? null;
-    const exported = exportApplication({ application, path, job, extraction, messages, feedback, feedbackRequests, attachments: own });
+    const exported = exportApplication({ application, path, job, extraction, messages, feedback, feedbackRequests, attachments: own, interviews });
     const shared = await exportShortlists(sources, organizationId, application.id);
     exportedApplications.push(shared === null ? exported : { ...exported, sharedWithClients: shared });
   }

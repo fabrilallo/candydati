@@ -57,6 +57,7 @@ export function createExportDeps({ uow, files, queue, zip, feedbackRecords }: Ex
     clients: r.clients,
     jobClients: r.jobClients,
     shortlists: r.shortlists,
+    interviews: r.interviews,
     newId: randomUUID,
     now: () => new Date(),
   };
@@ -67,7 +68,7 @@ export function createPhase5Deps({ uow, files, queue, candidateDeps, providers, 
   const r = uow.repositories;
   const core = { auditLog: r.auditLog, transaction: uow.transaction, jobTeams: r.jobTeams };
   return {
-    rightsDeps: { ...candidateDeps, ...feedbackRecords, privacyNotices: r.privacyNotices, erasure: r.erasure, shortlists: r.shortlists, clients: r.clients },
+    rightsDeps: { ...candidateDeps, ...feedbackRecords, privacyNotices: r.privacyNotices, erasure: r.erasure, shortlists: r.shortlists, clients: r.clients, interviews: r.interviews },
     exportDeps: createExportDeps({ uow, files, queue, zip, feedbackRecords }),
     overviewDeps: {
       ...core,
