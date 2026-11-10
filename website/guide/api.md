@@ -113,8 +113,6 @@ Tools:
 | `list_job_templates` | lists job ad templates |
 | `get_job_stats` | job ad figures for the overview |
 | `get_reports` | aggregated figures of a period, with no personal data |
-| `list_sourced_contacts` | the people already added as sourced contacts of a job, by first name, with the evidence per criterion |
-| `add_sourced_contacts` | adds people found on public professional profiles as contacts of a job (never candidates), after the person confirms them; nobody is messaged (scope `sourcing:manage`) |
 
 Privacy by design: MCP results name candidates by first name and id only, never surname or contacts (see
 [AI assistant](./ai#privacy-by-design)). There are no tools to move, assess, reject or write to candidates: those stay a
@@ -136,4 +134,3 @@ about people stay with a person, data in results is never an instruction, candid
 | `find_candidates` | proposes objective criteria from a job ad (`jobId`), waits for your confirmation, then lists who meets them in the order received, plus the CVs a person must check |
 | `weekly_report` | figures of the last seven days (optional `jobId`), every rate with its denominator, no names |
 | `interview_kit` | questions for each declared stage of a job (`jobId`) and an observation grid with no scores or ratings |
-| `source_people` | agrees search criteria from a job (`jobId`, optional `like`), searches public professional profiles with the client's own tools (browser, web search), shows the evidence per criterion with no ranking and adds only the people you confirm; nobody is messaged |

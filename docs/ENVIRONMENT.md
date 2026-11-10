@@ -30,7 +30,6 @@ Variables without a default are required or optional as described; see `.env.exa
 | `EMAIL_INBOUND_DOMAIN` | api, worker |  | Domain that receives replies (reply+<token>@<domain>). |
 | `EMAIL_PROVIDER` | api, worker | `log` | smtp, resend or log (log sends nothing, refused in production). Unset: the instance owner configures email from the app (Settings, Email), and invitations, publishing and applications wait until it works. Set, it wins and the app shows it read-only. |
 | `FAST_MODEL` | api, worker |  | provider/model of the fast model: the ad quality score and CV reading (applications, imports). Set, it wins over Settings, AI in the app (shown read-only). Empty and nothing set in the app: no ad quality score at all, plain text of CVs. |
-| `GITHUB_TOKEN` | api |  | Token of a GitHub account (fine-grained, no permission needed: public data only) for sourcing on GitHub from the assistant. Raises GitHub limits from 60 to 5,000 calls an hour; one search reads up to about 60. Empty: sourcing on GitHub still works, a search or two an hour. |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | api, worker |  | API key for google/* models. |
 | `GROQ_API_KEY` | api, worker |  | API key for groq/* models. |
 | `IMPORT_STALE_DAYS` | worker | `7` | Worker: days after which an import never committed is purged. |
@@ -53,8 +52,6 @@ Variables without a default are required or optional as described; see `.env.exa
 | `NUXT_API_INTERNAL_URL` | web |  | Origin of the Fastify api that the web proxy forwards /api/** and /mcp to. |
 | `NUXT_API_MAX_BODY_BYTES` | web |  | Web proxy: largest request body streamed to the api, in bytes (default 204 MiB); bigger ones get 413. |
 | `NUXT_API_TIMEOUT_MS` | web |  | Web proxy: milliseconds to wait for the api to start answering (default 300000). |
-| `NUXT_PUBLIC_EXTENSION_ID` | web |  | Id of the Candydati Chrome extension: the assistant reads LinkedIn and searches Google through it, in the recruiter's own browser. Empty: LinkedIn sourcing and web search are not offered. |
-| `NUXT_PUBLIC_EXTENSION_URL` | web |  | Chrome Web Store page of the Candydati extension, shown when it is not installed. |
 | `NUXT_PUBLIC_PLATFORM_DEFAULT_LOCALE` | web |  | Default language of the web app: it or en. Read at build time too. |
 | `NUXT_PUBLIC_PLATFORM_ICON_URL` | web |  | Tab icon of the web app, an https address. Empty: the bundled mark. Careers pages show the organization logo when set. |
 | `NUXT_PUBLIC_PLATFORM_NAME` | web |  | Product name in the web app. |

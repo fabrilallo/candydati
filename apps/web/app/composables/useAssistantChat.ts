@@ -1,9 +1,7 @@
 import { useChat } from '@ai-sdk/vue'
-import { DefaultChatTransport, lastAssistantMessageIsCompleteWithToolCalls, type UIMessage } from 'ai'
-import type { LinkedinBridge } from './useLinkedinBridge'
+import { DefaultChatTransport, type UIMessage } from 'ai'
 import { getAgentStatus } from '@/lib/agent-api'
 import { isAgentNotConfigured } from '@/lib/assistant-parts'
-import { runInBrowser } from '@/lib/browser-tools'
 import { toWirePage, type PageContext } from '@/lib/page-context'
 import { AGENT_CHAT_PATH } from '@/lib/api-paths'
 
@@ -15,7 +13,7 @@ const BUSY: ReadonlySet<string> = new Set(['submitted', 'streaming'])
  * keeps nothing, so the conversation lives only here and a reload starts empty. Nothing is kept in browser storage:
  * "Nuova conversazione" just clears the list.
  */
-export const useAssistantChat = (page: () => PageContext, bridge: LinkedinBridge | null = null) => {
+export const useAssistantChat = (page: () => PageContext) => {
   const request = useJobsApi()
   /** null = not known yet (or an api without the status route): the chat itself will say. Shared with the settings. */
   const configured = useAssistantConfigured()
@@ -28,9 +26,6 @@ export const useAssistantChat = (page: () => PageContext, bridge: LinkedinBridge
   const chat = useChat<UIMessage>({
     id: 'assistant',
     transport,
-    // A tool the browser ran (LinkedIn or Google, through the extension) sends the conversation back once it has its result.
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithToolCalls,
-    onToolCall: ({ toolCall }) => runInBrowser(bridge, toolCall, (tool, output) => chat.addToolOutput({ tool, toolCallId: toolCall.toolCallId, output })),
     onError: (error) => {
       if (isAgentNotConfigured(error)) configured.value = false
       else console.error('[assistant] turn failed', error.message.slice(0, 200))

@@ -8,7 +8,7 @@ import type { LinkTab } from '@/lib/tabs'
  * number of open applications when known and shows only to who can read candidates. "Shortlist" appears on a client job of
  * an agency, for who can read shortlists.
  */
-const props = defineProps<{ jobId: string; current: 'ad' | 'candidates' | 'sourcing' | 'team' | 'automations' | 'distribution' | 'shortlists' }>()
+const props = defineProps<{ jobId: string; current: 'ad' | 'candidates' | 'talent-pool' | 'team' | 'automations' | 'distribution' | 'shortlists' }>()
 const { t } = useI18n()
 const { viewer } = useViewer()
 const role = computed(() => viewer.value?.role ?? null)
@@ -22,15 +22,15 @@ const base = computed(() => `/app/jobs/${encodeURIComponent(props.jobId)}`)
 const count = computed(() => (pipeline.value ? pipeline.value.applications.filter((app) => app.outcome === null).length : null))
 const items = computed<readonly LinkTab[]>(() => [
   ...(canReadCandidates ? [{ to: `${base.value}/candidates`, label: t('pipeline.tabs.candidates'), icon: UsersRoundIcon, count: count.value, testId: 'tab-candidates' }] : []),
-  // People found outside Candydati for this job (contacts, not candidates), for who may source.
-  ...(can(role.value, 'sourcing:manage') ? [{ to: `${base.value}/sourcing`, label: t('pipeline.tabs.sourcing'), icon: UserSearchIcon, testId: 'tab-sourcing' }] : []),
+  // The organization's own candidates whose consent covers future positions, searched on this job's criteria.
+  ...(canReadCandidates ? [{ to: `${base.value}/talent-pool`, label: t('pipeline.tabs.talentPool'), icon: UserSearchIcon, testId: 'tab-talent-pool' }] : []),
   { to: base.value, label: t('pipeline.tabs.ad'), icon: FileTextIcon, testId: 'tab-ad' },
   ...(hasClient.value ? [{ to: `${base.value}/shortlists`, label: t('pipeline.tabs.shortlists'), icon: SendIcon, testId: 'tab-shortlists' }] : []),
   ...(can(role.value, 'job_team:read') ? [{ to: `${base.value}/team`, label: t('pipeline.tabs.team'), icon: UserCogIcon, testId: 'tab-team' }] : []),
   ...(can(role.value, 'automation:manage') ? [{ to: `${base.value}/automations`, label: t('pipeline.tabs.automations'), icon: WorkflowIcon, testId: 'tab-automations' }] : []),
   ...(can(role.value, 'job:publish') ? [{ to: `${base.value}/distribution`, label: t('pipeline.tabs.distribution'), icon: RadioTowerIcon, testId: 'tab-distribution' }] : []),
 ])
-const currentPath = computed(() => ({ ad: base.value, candidates: `${base.value}/candidates`, sourcing: `${base.value}/sourcing`, team: `${base.value}/team`, automations: `${base.value}/automations`, distribution: `${base.value}/distribution`, shortlists: `${base.value}/shortlists` })[props.current])
+const currentPath = computed(() => ({ ad: base.value, candidates: `${base.value}/candidates`, 'talent-pool': `${base.value}/talent-pool`, team: `${base.value}/team`, automations: `${base.value}/automations`, distribution: `${base.value}/distribution`, shortlists: `${base.value}/shortlists` })[props.current])
 </script>
 
 <template>

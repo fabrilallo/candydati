@@ -101,3 +101,11 @@ Schema changes are Drizzle migrations in `packages/db/drizzle`. Generate with `p
 - **0043** drops `NOT NULL` from `account.issuer` and drops `account_issuer_account_id_uidx`, with a 5 s
   `lock_timeout`: Better Auth 1.7.3 and later never write the column that 1.7.0 to 1.7.2 required, so every sign-up
   failed. The column stays for the previous release's replicas during the deploy; drop it in a later release (rule 1).
+- **0054** adds the tables `sourced_contact` and `sourcing_objection` and `organization_setting.sourcing_notice_by_email`
+  (boolean, constant default false, no rewrite). Sourcing outside the organization's own candidates was removed before
+  release, so none of them is read or written any more.
+- **0055** adds `organization_setting.linkedin_sourcing_enabled`, `organization_setting.linkedin_max_per_run` and the
+  table `sourcing_risk_acceptance`. LinkedIn sourcing was removed before release: they are no longer read or written.
+- **0056** deletes every row of `sourced_contact`, `sourcing_objection` and `sourcing_risk_acceptance`: personal data
+  that no feature is left to expire or erase. The tables and columns of 0054 and 0055 stay for the previous release's
+  replicas during the deploy; drop them in a later release (rule 1).

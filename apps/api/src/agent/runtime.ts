@@ -3,10 +3,9 @@ import type { AgentModel } from './model.js';
 import type { AppContext } from '../app-context.js';
 import { ASSISTANT_AGENT_ID, createAssistantAgent } from './assistant.js';
 import { createModelJobDrafter, type JobDrafter } from './job-drafter.js';
-import { createSealer } from './sealed-ref.js';
 import { createAgentTools } from './tools/index.js';
 
-export type AgentContext = Pick<AppContext, 'env' | 'jobDeps' | 'candidateDeps' | 'messagingDeps' | 'taskDeps' | 'reportDeps' | 'sourcingDeps'>;
+export type AgentContext = Pick<AppContext, 'env' | 'jobDeps' | 'candidateDeps' | 'messagingDeps' | 'taskDeps' | 'reportDeps'>;
 
 export interface RuntimeOptions {
   readonly model: AgentModel;
@@ -24,8 +23,6 @@ export function createAgentRuntime(ctx: AgentContext, { model, draftJob, onToolE
     messagingDeps: ctx.messagingDeps,
     taskDeps: ctx.taskDeps,
     reportDeps: ctx.reportDeps,
-    sourcingDeps: ctx.sourcingDeps,
-    sealer: createSealer(ctx.env.BETTER_AUTH_SECRET),
     draftJob: draftJob ?? createModelJobDrafter(model),
     onToolError,
   });

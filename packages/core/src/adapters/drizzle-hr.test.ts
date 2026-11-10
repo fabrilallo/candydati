@@ -52,7 +52,7 @@ const request = (org: string, jobId: string, applicationId: string, overrides: P
   interviewerName: 'Eva', tokenHash: randomUUID(), expiresAt: new Date(NOW.getTime() + 14 * DAY), remindersSent: 0, lastReminderAt: null, requestedBy: 'u', createdAt: NOW, submittedAt: null, ...overrides,
 });
 
-const AGENCY_OFF = { recruitsForClients: false, agencyAuthorization: null, sourcingNoticeByEmail: false, linkedinSourcingEnabled: false, linkedinMaxPerRun: 20 };
+const AGENCY_OFF = { recruitsForClients: false, agencyAuthorization: null };
 
 describe('stage interviewers on Postgres', () => {
   it('replaces the configuration of a job as a whole, per organization', async () => {
@@ -184,18 +184,9 @@ describe('job requests, settings and approvals on Postgres', () => {
     const org = await insertOrg();
     const repo = createDrizzleOrganizationSettings(handle.db);
     const agency = { recruitsForClients: true, agencyAuthorization: 'Aut. Min. Lav. test' };
-    expect(await repo.setAgency(org, agency, NOW)).toEqual({ requireApproval: false, restrictRecruitersToTeam: false, sourcingNoticeByEmail: false, linkedinSourcingEnabled: false, linkedinMaxPerRun: 20, ...agency });
-    expect(await repo.setRequireApproval(org, true, NOW)).toEqual({ requireApproval: true, restrictRecruitersToTeam: false, sourcingNoticeByEmail: false, linkedinSourcingEnabled: false, linkedinMaxPerRun: 20, ...agency });
+    expect(await repo.setAgency(org, agency, NOW)).toEqual({ requireApproval: false, restrictRecruitersToTeam: false, ...agency });
+    expect(await repo.setRequireApproval(org, true, NOW)).toEqual({ requireApproval: true, restrictRecruitersToTeam: false, ...agency });
     expect(await repo.setAgency(org, AGENCY_OFF, NOW)).toEqual({ requireApproval: true, restrictRecruitersToTeam: false, ...AGENCY_OFF });
-  });
-
-  it('keeps the sourcing notice email in its own column, off by default', async () => {
-    const org = await insertOrg();
-    const repo = createDrizzleOrganizationSettings(handle.db);
-    expect((await repo.get(org)).sourcingNoticeByEmail).toBe(false);
-    expect(await repo.setSourcingNoticeByEmail(org, true, NOW)).toEqual({ requireApproval: false, restrictRecruitersToTeam: false, ...AGENCY_OFF, sourcingNoticeByEmail: true });
-    expect((await repo.setRequireApproval(org, true, NOW)).sourcingNoticeByEmail).toBe(true);
-    expect(await repo.setLinkedinSourcing(org, { enabled: true, maxPerRun: 35 }, NOW)).toMatchObject({ linkedinSourcingEnabled: true, linkedinMaxPerRun: 35, sourcingNoticeByEmail: true });
   });
 
   it('stores the approval apart from the job: editing the job neither wipes nor forges it', async () => {

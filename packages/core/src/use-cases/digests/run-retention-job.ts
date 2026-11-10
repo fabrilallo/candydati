@@ -1,5 +1,3 @@
-import type { SourcedContactRepository } from '../../sourcing-ports.js';
-import { eraseExpiredSourcedContacts } from '../sourcing/expiry.js';
 import { viewRetentionCutoff } from '@candydati/domain';
 import type { JobViewRepository } from '../../job-view-ports.js';
 import type { ImportDeps } from '../../import-ports.js';
@@ -13,8 +11,6 @@ import type { DigestJobConfig } from './run-deadline-scan.js';
 import { sendDigests, type DigestSendResult } from './send-digests.js';
 
 export interface RetentionJobDeps {
-  /** Sourced contacts: the expired ones are erased daily. */
-  readonly sourcedContacts?: SourcedContactRepository | undefined;
   readonly retention: RetentionDeps;
   /** The import sweep: batches never committed are purged after `importStaleDays`. */
   readonly imports: Pick<ImportDeps, 'imports' | 'importItems' | 'importAnalyses' | 'files' | 'queue'>;
@@ -45,8 +41,6 @@ export interface RetentionJobResult extends DigestSendResult {
   readonly prunedEvents: number;
   readonly prunedDeliveries: number;
   readonly prunedViews: number;
-  /** Sourced contacts nobody answered, erased 30 days after they were collected. */
-  readonly sourcedContactsErased: number;
 }
 
 /**
@@ -62,7 +56,6 @@ export async function runRetentionJob(deps: RetentionJobDeps, now: Date): Promis
   const mail = await sendDigests({ transaction: deps.digest.transaction, notifications: deps.retention.notifications, mail: deps.digest.mail, details: deps.digest.details, now: () => now }, result.digests);
   const pruned = deps.deliveryLog ? await pruneDeliveryLog(deps.deliveryLog, { now, retentionDays: deps.deliveryLogRetentionDays }) : { events: 0, deliveries: 0 };
   const prunedViews = deps.jobViews ? await deps.jobViews.purgeBefore(viewRetentionCutoff(now)) : 0;
-  const sourced = deps.sourcedContacts ? await eraseExpiredSourcedContacts({ contacts: deps.sourcedContacts }, { now }) : { erased: 0 };
   return {
     warned: result.runs.reduce((sum, run) => sum + run.warned, 0),
     erased: result.runs.reduce((sum, run) => sum + run.erased, 0),
@@ -77,7 +70,6 @@ export async function runRetentionJob(deps: RetentionJobDeps, now: Date): Promis
     prunedEvents: pruned.events,
     prunedDeliveries: pruned.deliveries,
     prunedViews,
-    sourcedContactsErased: sourced.erased,
     ...mail,
   };
 }

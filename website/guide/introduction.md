@@ -20,7 +20,7 @@ These are not settings. A deployment cannot turn them off.
 - **No automated decisions about candidates.** The product does not rank, score, order or reject people. Quality scores
   evaluate the ad, never candidates.
 - **Agentic-ready.** The REST API covers the interface; the MCP server a narrower set (job ads, pipeline, notes, tasks,
-  reports, sourced contacts), never decisions about candidates. Both call the same services, with the same permissions and audit log.
+  reports), never decisions about candidates. Both call the same services, with the same permissions and audit log.
 - **GDPR by design.** Consent, retention and erasure exist from the first candidate record stored.
 - **No lock-in.** A complete export in an open, documented format is available at any time.
 
@@ -28,8 +28,8 @@ The full product definition is in [PRODUCT.md](https://github.com/fabrilallo/can
 
 ## What you get
 
-- [Agentic sourcing](./sourcing): the assistant finds people for a job on GitHub, LinkedIn and Google (in your own browser),
-  with a fact per criterion and no ranking; you choose who becomes a contact, and the GDPR notice and erasure are built in.
+- [Search your database](./talent-pool): on a job, find the candidates you already have whose consent covers future
+  positions, on skills prefilled from the ad, languages, years and city; most recent first, never a ranking.
 - Structured job ads with a publish standard (salary, process, contract, work mode) and Italian compliance checks.
 - A careers page with a page builder, structured data (`JobPosting`), an XML feed and a public read-only ads API.
 - Applications without registration, with versioned consent.

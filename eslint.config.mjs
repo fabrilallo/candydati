@@ -1,4 +1,4 @@
-// Flat config for the TypeScript packages (packages/*, apps/api, apps/worker, apps/extension).
+// Flat config for the TypeScript packages (packages/*, apps/api, apps/worker).
 // apps/web is a Nuxt app with its own ESLint config (apps/web/eslint.config.mjs) and is ignored here.
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
@@ -30,13 +30,11 @@ const importBoundaries = [
   boundary(['packages/providers/**'], ['domain', 'core', 'ad-quality']),
   boundary(['apps/api/**'], ['domain', 'db', 'core', 'providers', 'ad-quality']),
   boundary(['apps/worker/**'], ['domain', 'db', 'core', 'providers', 'ad-quality']),
-  // The browser extension runs on the person's machine: it shares the profile contract with the app, nothing else.
-  boundary(['apps/extension/**'], ['domain']),
 ];
 
 // Cross-package deep imports (`@candydati/core/src/...`) are never allowed, only the declared entry points.
 const noDeepImports = {
-  files: ['packages/**', 'apps/api/**', 'apps/worker/**', 'apps/extension/**'],
+  files: ['packages/**', 'apps/api/**', 'apps/worker/**'],
   rules: {
     'no-restricted-syntax': [
       'error',

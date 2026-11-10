@@ -339,6 +339,9 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
   ordered by date of application, unchecked CVs counted, protected characteristics refused, every search audited;
   skills match through the built-in dictionary plus the organization's own aliases (`skill_alias`, loaded per search by
   `loadSkillBook`), and each result says which spelling met a skill; the profile reads the extracted skills with the same book (`groupExtractedSkills`: canonical name plus written forms, never stored) ([ADR 0010](adr/0010-privacy-by-design-and-declared-criteria.md)).
+- The job's "Search your database" tab (`/app/jobs/:id/talent-pool`) runs the same service over the talent pool only,
+  through `POST /api/v1/jobs/:id/talent-pool/search` (`candidate:read`, audited, 25 per page): names in clear for the
+  recruiter, nothing added or sent. Candydati searches no one outside the organization's own candidates.
 - The conversation lives in the browser; the server stores nothing of it ([ADR 0007](adr/0007-stateless-assistant.md)).
 - MCP clients authenticate with an API key or, as Claude custom connectors, with OAuth 2.1 (Better Auth's MCP plugin,
   PKCE, dynamic registration with a callback allowlist, opaque tokens bound to the `/mcp` resource). An OAuth
@@ -365,26 +368,10 @@ Public pages avoid unbounded query-string URL spaces and set cache headers and `
 - **Export:** per-candidate ZIP and whole-organization export, in the public schemas under [`schema/`](schema).
 - **Import:** imported people get consent marked "to renew" and an email asking to reconfirm; no reply in the window
   means erasure ([ADR 0008](adr/0008-imports-consent-renewal.md)).
-- **Sourcing (art. 14):** people found outside Candydati for a job (a LinkedIn or GitHub profile, a web page) are
-  `sourced_contact` rows, never candidates. Each expires 30 days after collection (erased by `retention.run`). Each has a
-  personal notice link (only the hash is stored; renewing it kills the old one) to a public page that shows everything
-  kept and erases it on request. The notice goes with the first message (art. 14(3)(b)): the recruiter pastes its short
-  form; when the organization turns it on (`organization_setting.sourcing_notice_by_email`, off by default) the worker
-  also emails it at once (`sourcing.notice`) to a known address. Erasing on request keeps only a keyed hash
-  (HMAC with the instance secret and the organization) of the profile and email in `sourcing_objection`, so the person is
-  never added again. Duplicates of candidates (same email or LinkedIn profile) and of contacts are skipped, never merged.
-  Evidence per criterion only: no score, no ranking.
-- **Sourcing through the assistant:** `search_github_people` runs on the server (GitHub's official API).
-  `search_linkedin_people` has no server `execute`: the run stops at the call, the web app checks the organization
-  setting (`organization_setting.linkedin_sourcing_enabled`, cap per search) and the person's acceptance of the account
-  risk (`sourcing_risk_acceptance`, per text version), asks the Candydati Chrome extension (`externally_connectable`) to
-  read LinkedIn in the recruiter's own browser, has the api compute facts per criterion and seal the rest
-  (`POST /api/v1/sourcing/linkedin/results`), and returns the result with `addToolOutput`. `search_web_people` runs the
-  same way without the setting and the risk acceptance: the extension searches Google in the recruiter's browser and
-  reads the organic results only, and the api keeps those that point to a person (`personFromWebResult`) and seals them
-  (`POST /api/v1/sourcing/web/results`). Whatever the source, the model
-  sees first name, city and facts; surname, handle and profile link travel in an AES-256-GCM reference bound to the
-  organization (2 h) that only the server opens (`agent/sealed-ref.ts`). People are added only on confirmation.
+- **Unused sourcing tables:** `sourced_contact`, `sourcing_objection`, `sourcing_risk_acceptance` and the
+  `organization_setting` columns `sourcing_notice_by_email`, `linkedin_sourcing_enabled`, `linkedin_max_per_run` are
+  left from sourcing outside the organization's own candidates, removed before release. Migration 0056 empties the
+  tables; a later release drops them ([MIGRATIONS.md](MIGRATIONS.md)).
 - **Minimization:** no special-category fields; CV extraction drops photo, birth date and marital status; the assistant
   and MCP never send a model a surname or contact (see the assistant and MCP constraints).
 - Legal templates (privacy notice, DPA, record of processing) are in [`legal/`](legal). They need legal review.
@@ -403,7 +390,7 @@ Defined in `packages/db/src/schema`, migrations in `packages/db/drizzle`.
 | Communication | `conversation`, `message`, `email_template`, `email_settings` |
 | Automation | `automation_rule`, `automation_execution`, `move_proposal`, `automation_pack`, `automation_pack_rule`, `job_template_pack`, `task`, `notification`, `outbox_event`, `webhook_endpoint`, `webhook_delivery` |
 | Privacy | `privacy_notice`, `consent_token`, `data_export`, `retention_run` |
-| Sourcing | `sourced_contact` (a person found outside Candydati for a job, evidence as validated jsonb, notice hash, expiry), `sourcing_objection` (keyed hashes of who asked not to be added again) |
+| Unused (dropped later) | `sourced_contact`, `sourcing_objection`, `sourcing_risk_acceptance` (emptied by migration 0056) |
 | Import | `import_batch`, `import_item`, `import_analysis` |
 | HR tools | `feedback_request`, `interview_feedback` (scorecard observations in `observations`), `job_scorecard_criterion` |
 | Clients (agencies) | `client` (contacts as validated jsonb), `job_client` (the client of a job and how its ad shows it), `client_shortlist` (hash of the link, expiry, revocation, reminders), `client_shortlist_item` (what is shared per candidate and the client's answer) |

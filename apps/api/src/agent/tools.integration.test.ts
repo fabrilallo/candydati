@@ -10,13 +10,7 @@ import { createTestApp, testEnv, type TestApp } from '../testing/test-app.js';
 import { toAgentActor } from './agent-actor.js';
 import { CANDIDATE_DATA_CLOSE, CANDIDATE_DATA_OPEN } from './candidate-data.js';
 import { buildAgentRequestContext } from './request-context.js';
-import { createSealer } from './sealed-ref.js';
 import { createAgentTools, type AgentToolDeps, type AgentTools } from './tools/index.js';
-
-const sealer = createSealer('s'.repeat(32));
-const GITHUB_PEOPLE = [
-  { login: 'majalind-dev', name: 'Maja Lind', location: 'Stockholm', bio: 'Go at Spotify. Contact Maja Lind at maja@lind.example', profileUrl: 'https://github.com/majalind-dev', publicRepos: 9, languages: [{ language: 'Go', repos: 7 }] },
-];
 
 let t: TestApp;
 let w: AgentWorld;
@@ -49,12 +43,10 @@ beforeAll(async () => {
     sender: createFakeEmailSender(),
     identity: createFakeEmailIdentity(),
     onReceiptError: () => undefined,
-    githubSearch: { search: async () => GITHUB_PEOPLE },
   });
-  deps = { ...ctx, sealer };
+  deps = ctx;
   tools = createAgentTools({
     ...ctx,
-    sealer,
     draftJob: async ({ brief }) => {
       drafted.push(brief);
       return completeJobContent({ title: 'Proposta' });
@@ -69,7 +61,6 @@ describe('assistant tool list', () => {
   it('has no tool to publish, close, move, decide, send, erase or rank', () => {
     const ids = Object.keys(tools).sort();
     expect(ids).toEqual([
-      'add_sourced_contacts',
       'analyze_job_ad',
       'create_task',
       'draft_job_content',
@@ -83,9 +74,6 @@ describe('assistant tool list', () => {
       'list_attention',
       'list_job_templates',
       'list_jobs',
-      'search_github_people',
-      'search_linkedin_people',
-      'search_web_people',
       'update_job_draft',
     ]);
     expect(ids.join(' ')).not.toMatch(/publish|close|move|decide|send|erase|delete|rank|score/);
@@ -290,27 +278,5 @@ describe('action tools', () => {
     expect(task).toMatchObject({ assigneeId: w.ownerId, createdBy: w.ownerId, applicationId: anna.applicationId });
     const [event] = await t.handle.db.select().from(schema.auditLog).where(eq(schema.auditLog.targetId, created.taskId));
     expect(event).toMatchObject({ action: 'task.created', actorType: 'agent', actorId: 'assistant', onBehalfOfUserId: w.ownerId });
-  });
-});
-
-describe('sourcing tools', () => {
-  it('finds GitHub people with first name and facts only, and adds the ones the user confirmed by their sealed reference', async () => {
-    const found = await call('search_github_people', { jobId: w.jobId, languages: ['Go'], location: 'Stockholm', limit: 5 });
-    const text = JSON.stringify(found);
-    for (const secret of ['Lind', 'majalind-dev', 'github.com', 'maja@lind.example']) expect(text).not.toContain(secret);
-    expect(text).toContain('Maja');
-    expect(found).toMatchObject({ order: expect.stringContaining('not a ranking'), count: 1 });
-    const [person] = (found as { people: { ref: string; status: string }[] }).people;
-    expect(person?.status).toBe('new');
-
-    const refused = await call('add_sourced_contacts', { jobId: w.jobId, refs: [person!.ref] });
-    expect(refused).toHaveProperty('error');
-    const added = await call('add_sourced_contacts', { jobId: w.jobId, refs: [person!.ref], confirmedByUser: true });
-    expect(added).toMatchObject({ results: [{ outcome: 'added' }] });
-    const [contact] = await t.handle.db.select().from(schema.sourcedContact).where(eq(schema.sourcedContact.jobId, w.jobId));
-    expect(contact).toMatchObject({ firstName: 'Maja', lastName: 'Lind', source: 'github', profileUrl: 'https://github.com/majalind-dev' });
-
-    expect(await call('add_sourced_contacts', { jobId: w.jobId, refs: ['forged'], confirmedByUser: true })).toMatchObject({ error: { code: 'invalid_ref' } });
-    expect(await call('add_sourced_contacts', { jobId: w.draftJobId, refs: [person!.ref], confirmedByUser: true })).toMatchObject({ error: { code: 'invalid_ref' } });
   });
 });

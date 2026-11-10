@@ -393,6 +393,13 @@
       "when": 1793976040168,
       "tag": "0055_linkedin_sourcing",
       "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1794322581912,
+      "tag": "0056_erase_sourcing_data",
+      "breakpoints": true
     }
   ]
 }

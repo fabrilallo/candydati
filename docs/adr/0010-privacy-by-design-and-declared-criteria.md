@@ -107,3 +107,7 @@ everything a model sees. Keyword filters are blunt: skills outside the dictionar
 result is a starting point for a person and why unchecked CVs are reported. Whether a deterministic filter with
 model-proposed criteria falls under the AI Act high-risk category should be confirmed by each deploying organization's
 legal counsel.
+
+Note (2026-11-10): the "sourcing tool" above is the search over the organization's own candidates. Searching people
+outside them (GitHub, the web through a browser extension) was built and then removed before release; it is not part
+of the product.

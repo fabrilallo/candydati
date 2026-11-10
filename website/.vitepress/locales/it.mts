@@ -2,7 +2,7 @@ import type { DefaultTheme, LocaleSpecificConfig } from 'vitepress';
 import { repoFile, sidebar } from './shared.mjs';
 
 export const it: LocaleSpecificConfig<DefaultTheme.Config> = {
-  description: "Un ATS agentico, aperto e installabile sul tuo server, che trova persone per i tuoi annunci e risponde a ogni candidato.",
+  description: "Un ATS agentico, aperto e installabile sul tuo server, che risponde a ogni candidato e cerca tra i candidati che hai già.",
   themeConfig: {
     nav: [
       { text: 'Guida', link: '/it/guide/introduction', activeMatch: '^/it/guide/(?!quick-start)' },
@@ -15,7 +15,7 @@ export const it: LocaleSpecificConfig<DefaultTheme.Config> = {
         { start: 'Per iniziare', run: 'Gestire la tua installazione', integrate: 'Integrazioni', project: 'Progetto' },
         {
           introduction: 'Introduzione',
-          sourcing: 'Sourcing agentico',
+          talentPool: 'Cerca nel database',
           quickStart: 'Avvio rapido',
           email: 'Email',
           ai: 'Assistente AI (facoltativo)',
@@ -25,7 +25,6 @@ export const it: LocaleSpecificConfig<DefaultTheme.Config> = {
           agencies: 'Selezioni per conto di clienti',
           migration: 'Migrare da un altro ATS',
           otherDeployments: 'Altri modi di installare',
-          chromeExtension: 'Estensione Chrome (LinkedIn, Google)',
           api: 'API, webhook e MCP',
           security: 'Sicurezza e privacy',
           faq: 'Domande frequenti',

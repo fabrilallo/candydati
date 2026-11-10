@@ -8,65 +8,23 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
-- **Sourcing over MCP.** Outside agents (Claude with its browser, any MCP client) can bring the people they found:
-  `add_sourced_contacts` adds people from public professional profiles as contacts of a job after the person confirms
-  them by name (never candidates, nobody messaged; skipped and said so: already a contact, already a candidate, or
-  someone who asked never to be contacted), and `list_sourced_contacts` lists them by first name with the evidence per
-  criterion, never surname, profile link or email. Both need `sourcing:manage` on the key (connected apps: the person's
-  role). New prompt `source_people`: agree criteria from the job, search public profiles read-only (stop at a CAPTCHA),
-  show evidence with no ranking, add only whom the person picks. The Italian API guide gains the prompts table.
-- **Sourced contacts (foundation of sourcing).** People found outside Candydati for a job (a LinkedIn or GitHub profile,
-  a web page) can be added as contacts of the job: `POST /api/v1/jobs/:id/sourced-contacts` with evidence per criterion
-  (never a score). Duplicates of candidates (same email or LinkedIn profile) and of contacts are skipped, never merged.
-  Each contact gets a personal GDPR art. 14 link to a public page (`/sourcing/notice/<token>`) that shows everything kept
-  and erases it on request; the organization then keeps only a keyed hash so the person is never added again. The notice
-  goes with the first message (`POST /api/v1/sourced-contacts/:id/notice` gives a short text with a fresh link); owners
-  and admins can also have it emailed at once when the address is known (Privacy → Retention, off by default). Contacts
-  are erased 30 days after collection. The privacy notice template and `docs/legal` gain a section on sourcing. New
-  permission `sourcing:manage` (owner, admin, recruiter; grantable to API keys and the assistant). Migration
-  `0054_sourced_contacts` (additive: two new tables and one setting column).
-- **"Contatti trovati" tab on a job** (with `sourcing:manage`): the sourced contacts with source, profile link, evidence
-  and the days left before erasure; add one by hand; "Testo informativa" gives the notice lines with a fresh personal
-  link to paste into the first message, then marks the contact as written to; erase, optionally "do not contact again".
-- **Sourcing on GitHub from the assistant.** "Find backend engineers in Stockholm like Maja": the assistant reads the
-  reference profile, proposes objective criteria (languages, location, words in the bio), searches public GitHub accounts
-  with the official API (`search_github_people`), and lists first name, city, the facts per criterion and who is already a
-  contact or a candidate (people who objected are left out), in GitHub join order, never as a ranking. The people the user
-  confirms become contacts (`add_sourced_contacts`). The model never sees surname, username or profile link: they travel
-  in an encrypted reference only the server opens. Optional `GITHUB_TOKEN` raises GitHub limits from 60 to 5,000 calls an
-  hour. New error code `source_unavailable` (503) when GitHub is down.
-- **Sourcing on LinkedIn, the server side and the bridge.** `search_linkedin_people` runs in the recruiter's browser: the
-  web app checks the organization setting (Privacy → Retention, off by default, most profiles per search, owners and
-  admins), asks each person once to accept that LinkedIn may restrict or block their account (recorded with the text
-  version, asked again when the text changes), then asks the Candydati Chrome extension to read LinkedIn and has the api
-  seal what it read (facts per criterion, no model). The extension itself comes in the next release
-  (`NUXT_PUBLIC_EXTENSION_ID`, `NUXT_PUBLIC_EXTENSION_URL`). Migration `0055_linkedin_sourcing` (additive: one table and
-  two setting columns).
-- **Candydati Chrome extension** (`apps/extension`, Manifest V3): reads LinkedIn people search and profiles in a visible
-  "Candydati" tab group of the recruiter's own Chrome when they start a search from the assistant, and returns them to
-  the Candydati page that asked; stops at the login wall and hands any security check to the person; stores nothing.
-  Permissions: `tabGroups`, `scripting`, `www.linkedin.com` only; answers only the Candydati origins it was built for
-  (`CANDYDATI_ORIGINS`). Build and Chrome Web Store listing texts in `apps/extension/README.md`; user guide and privacy
-  on the documentation site.
-- **"Save to Candydati" button on LinkedIn profiles** (Chrome extension). While browsing LinkedIn, one click on the small
-  floating button of a profile opens the new page `/app/sourcing/save` with the person's name, headline, city and
-  profile link; the recruiter picks an open position, optionally adds evidence lines, and adds the person as a sourced
-  contact (`POST /api/v1/jobs/:id/sourced-contacts`, source `linkedin`), seeing whether they were added, already a
-  contact or candidate, or asked not to be contacted. The extension reads the profile only on the click (no photo, the
-  page text is not sent), keeps it as the single pending profile in session storage until the Candydati page picks it
-  up (cleared once read, refused after 10 minutes) and remembers the address of the Candydati page that last talked to
-  it (the app sends `candydati.hello` when it loads). New extension permission `storage` and a content script on
-  `www.linkedin.com`; `CANDYDATI_EXTENSION_NAME` sets the product name on the button.
-- **Web search through the extension.** New assistant tool `search_web_people`: the assistant writes a Google search
-  (X-ray queries such as `site:linkedin.com/in "Go" Torino` or `site:github.com Rust Milano`) and the Candydati Chrome
-  extension runs it in the recruiter's own Chrome, in the visible "Candydati" tab, reading only the organic results
-  (title, link, snippet; no ads, no "People also ask", never the pages behind them). No search API, no server-side
-  scraping. The api (`POST /api/v1/sourcing/web/results`, `sourcing:manage`, at most 30 results) keeps the results that
-  point to a person (LinkedIn or GitHub profile, a page titled with a name), uses the snippet as the fact, flags who is
-  already a contact or a candidate, leaves out who objected, and seals the rest like LinkedIn results: the model sees
-  first name, city and facts only. Google's traffic check (`captcha`) and cookie consent page (`consent_required`) stop
-  the search and are left to the person. No organization setting nor risk acceptance. The extension now also asks for
-  `www.google.com`. New audit event `sourcing.web_read` (counts only).
+- **"Search your database" on a job: your own candidates first.** A job tab ("Cerca nel database",
+  `/app/jobs/:id/talent-pool`, with `candidate:read`; "Trova persone" on the job's candidates page leads there) searches
+  the candidates whose consent covers future positions and whose CV meets every criterion (skills, prefilled from the
+  ad's technologies; languages; minimum years; city; words in the CV), most recent application first, never a ranking,
+  with the spelling a CV used for a skill ("Go" as "Golang") and how many CVs nobody could check. Names in clear for the
+  recruiter, a link to each profile; nothing is added or sent. New internal route
+  `POST /api/v1/jobs/:id/talent-pool/search` (body `{ criteria, page }`, 25 per page) over `findCandidatesByCriteria`
+  (permission `candidate:read`, audited).
+
+### Changed
+
+- Migrations `0054_sourced_contacts` (tables `sourced_contact`, `sourcing_objection`, column
+  `organization_setting.sourcing_notice_by_email`) and `0055_linkedin_sourcing` (table `sourcing_risk_acceptance`, two
+  `organization_setting` columns) stay, but nothing reads or writes them: sourcing outside the organization's own
+  candidates was dropped before release. The new `0056_erase_sourcing_data` deletes every row of `sourced_contact`,
+  `sourcing_objection` and `sourcing_risk_acceptance`, personal data no feature is left to expire or erase. A later
+  release drops the tables and columns (docs/MIGRATIONS.md).
 
 ## [0.5.0] - 2026-11-06
 

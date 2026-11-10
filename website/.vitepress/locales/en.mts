@@ -2,7 +2,7 @@ import type { DefaultTheme, LocaleSpecificConfig } from 'vitepress';
 import { repoFile, sidebar } from './shared.mjs';
 
 export const en: LocaleSpecificConfig<DefaultTheme.Config> = {
-  description: "An open, self-hostable agentic ATS that finds people for your jobs and answers every applicant.",
+  description: "An open, self-hostable agentic ATS that answers every applicant and searches the candidates you already have.",
   themeConfig: {
     nav: [
       { text: 'Guide', link: '/guide/introduction', activeMatch: '^/guide/(?!quick-start)' },
@@ -15,7 +15,7 @@ export const en: LocaleSpecificConfig<DefaultTheme.Config> = {
         { start: 'Getting started', run: 'Run your instance', integrate: 'Integrate', project: 'Project' },
         {
           introduction: 'Introduction',
-          sourcing: 'Agentic sourcing',
+          talentPool: 'Search your database',
           quickStart: 'Quick start',
           email: 'Email',
           ai: 'AI assistant (optional)',
@@ -26,7 +26,6 @@ export const en: LocaleSpecificConfig<DefaultTheme.Config> = {
           migration: 'Migrating from another ATS',
           otherDeployments: 'Other ways to deploy',
           api: 'API, webhooks and MCP',
-          chromeExtension: 'Chrome extension (LinkedIn, Google)',
           security: 'Security and privacy',
           faq: 'FAQ',
           contributing: 'Contributing',

@@ -115,8 +115,6 @@ Strumenti:
 | `list_job_templates` | elenca i template degli annunci |
 | `get_job_stats` | numeri degli annunci per la panoramica |
 | `get_reports` | numeri aggregati del periodo, senza dati personali |
-| `list_sourced_contacts` | le persone già aggiunte come contatti di un annuncio, per nome, con i riscontri per ogni criterio |
-| `add_sourced_contacts` | aggiunge come contatti di un annuncio (mai candidati) persone trovate su profili professionali pubblici, dopo la conferma della persona; nessuno viene contattato (scope `sourcing:manage`) |
 
 Non ci sono strumenti per spostare, valutare, scartare o scrivere ai candidati: restano decisioni di una persona.
 `propose_stage_move` scrive solo una proposta: compare in Da gestire e sulla candidatura, e niente si sposta finché una
@@ -139,4 +137,3 @@ con nome e id.
 | `find_candidates` | propone criteri oggettivi da un annuncio (`jobId`), aspetta la tua conferma, poi elenca chi li soddisfa nell'ordine di arrivo, più i CV che una persona deve controllare |
 | `weekly_report` | i numeri degli ultimi sette giorni (`jobId` facoltativo), ogni tasso con il suo denominatore, senza nomi |
 | `interview_kit` | domande per ogni fase dichiarata di un annuncio (`jobId`) e una griglia di osservazione senza punteggi né voti |
-| `source_people` | concorda i criteri di ricerca da un annuncio (`jobId`, `like` facoltativo), cerca su profili professionali pubblici con gli strumenti del client (browser, ricerca web), mostra i riscontri per criterio senza classifica e aggiunge solo le persone che confermi; nessuno viene contattato |

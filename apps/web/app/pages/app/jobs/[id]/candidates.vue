@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BriefcaseBusinessIcon, ExternalLinkIcon } from '@lucide/vue'
+import { BriefcaseBusinessIcon, ExternalLinkIcon, UserSearchIcon } from '@lucide/vue'
 import { formatDate } from '@/lib/format'
 import { getJob, loaded } from '@/lib/job-api'
 import { publicJobPath } from '@/lib/job-view'
@@ -24,8 +24,11 @@ useSeoMeta({ title: () => `${t('pipeline.tabs.candidates')}: ${title.value}` })
 
 <template>
   <AppPage :crumbs="[{ label: t('nav.jobs'), to: '/app/jobs' }, { label: title, to: `/app/jobs/${id}` }, { label: t('pipeline.tabs.candidates') }]" wide>
-    <template v-if="publicPath" #actions>
-      <Button as-child variant="ghost" size="sm">
+    <template v-if="publicPath || allowed" #actions>
+      <Button v-if="allowed" as-child variant="outline" size="sm">
+        <NuxtLink :to="`/app/jobs/${encodeURIComponent(id)}/talent-pool`" data-testid="find-people-action"><UserSearchIcon aria-hidden="true" />{{ t('talentPool.action') }}</NuxtLink>
+      </Button>
+      <Button v-if="publicPath" as-child variant="ghost" size="sm">
         <a :href="publicPath" target="_blank" rel="noopener"><ExternalLinkIcon aria-hidden="true" />{{ t('job.editor.openPublic') }}</a>
       </Button>
     </template>

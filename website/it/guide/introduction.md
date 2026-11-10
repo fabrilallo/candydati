@@ -31,9 +31,8 @@ La definizione completa del prodotto è in
 
 ## Cosa trovi
 
-- [Sourcing agentico](./sourcing): l'assistente trova persone per un annuncio su GitHub, LinkedIn e Google (nel tuo browser),
-  con un fatto per criterio e senza classifiche; scegli tu chi diventa contatto, e informativa GDPR e cancellazione sono
-  già incluse.
+- [Cerca nel database](./talent-pool): in un annuncio, trova i candidati che hai già e il cui consenso copre le
+  posizioni future, su competenze prese dall'annuncio, lingue, anni e città; dal più recente, mai in classifica.
 - Annunci strutturati con uno standard di pubblicazione (retribuzione, processo, contratto, modalità di lavoro) e
   controlli di conformità italiani.
 - Una pagina carriere con editor di pagina, dati strutturati (`JobPosting`), un feed XML e un'API pubblica degli

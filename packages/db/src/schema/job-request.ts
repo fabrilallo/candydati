@@ -55,13 +55,11 @@ export const organizationSetting = pgTable('organization_setting', {
   /** The agency's authorization reference, shown on the ads it publishes for clients (D.Lgs. 276/2003, art. 9). */
   agencyAuthorization: text('agency_authorization'),
   /**
-   * Sourced contacts whose email is known get the art. 14 notice by email at once. Off by default: the notice then goes
-   * with the first message, and contacts never written to are erased within the month.
+   * Unused since external sourcing was removed, like the two LinkedIn columns below. Kept for the previous release's
+   * replicas during the deploy; drop all three in a later release (MIGRATIONS.md rule 1).
    */
   sourcingNoticeByEmail: boolean('sourcing_notice_by_email').notNull().default(false),
-  /** Sourcing may read LinkedIn through the recruiter's browser (the Candydati extension). Off by default. */
   linkedinSourcingEnabled: boolean('linkedin_sourcing_enabled').notNull().default(false),
-  /** The most LinkedIn profiles one search may read. */
   linkedinMaxPerRun: integer('linkedin_max_per_run').notNull().default(20),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });

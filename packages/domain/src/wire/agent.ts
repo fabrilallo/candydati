@@ -21,10 +21,6 @@ export const AGENT_TOOL_NAMES = [
   'draft_message',
   'create_task',
   'get_reports_summary',
-  'search_github_people',
-  'search_linkedin_people',
-  'search_web_people',
-  'add_sourced_contacts',
 ] as const;
 export type AgentToolName = (typeof AGENT_TOOL_NAMES)[number];
 export const isAgentToolName = (name: string): name is AgentToolName => (AGENT_TOOL_NAMES as readonly string[]).includes(name);
@@ -50,8 +46,6 @@ export const MCP_TOOL_NAMES = [
   'get_job_stats',
   'get_reports',
   'list_clients',
-  'list_sourced_contacts',
-  'add_sourced_contacts',
 ] as const;
 export type McpToolName = (typeof MCP_TOOL_NAMES)[number];
 

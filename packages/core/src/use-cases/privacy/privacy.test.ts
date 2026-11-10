@@ -107,14 +107,9 @@ describe('privacyNoticeTemplate', () => {
     expect(en).not.toContain('involved in the selection');
   });
 
-  it('covers people found outside Candydati: what is kept, the notice with the first message, erasure in 30 days', () => {
-    const it_ = renderPrivacyTemplate({ language: 'it', organizationName: 'Acme' });
-    const en = renderPrivacyTemplate({ language: 'en', organizationName: 'Acme' });
-    expect(it_).toContain('Persone che non si sono candidate');
-    expect(it_).toContain('con il primo messaggio');
-    expect(it_).toContain('entro 30 giorni');
-    expect(en).toContain('People who did not apply');
-    expect(en).toContain('within 30 days');
+  it('says nothing about people found outside the organization: there is no external sourcing', () => {
+    expect(renderPrivacyTemplate({ language: 'it', organizationName: 'Acme' })).not.toContain('Persone che non si sono candidate');
+    expect(renderPrivacyTemplate({ language: 'en', organizationName: 'Acme' })).not.toContain('People who did not apply');
   });
 
   it('tells candidates of an agency that their profile may be presented to a client, and that they are told when it is', async () => {

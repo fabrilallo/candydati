@@ -1591,7 +1591,7 @@
       "distribution": "Distribuzione",
       "team": "Team",
       "shortlists": "Shortlist",
-      "sourcing": "Contatti trovati"
+      "talentPool": "Cerca nel database"
     },
     "received": "Ricevute",
     "receivedHint": "Nuove candidature, ancora da guardare",
@@ -2856,9 +2856,6 @@
       },
       "skill_alias": {
         "manage": "Gestire gli alias delle competenze"
-      },
-      "sourcing": {
-        "manage": "Gestire i contatti trovati (sourcing)"
       }
     },
     "withheld": "Alcune cose una chiave non le può fare mai: decisioni sui candidati, messaggi ai candidati e amministrazione restano a una persona.",
@@ -2938,9 +2935,7 @@
       "set_evaluation_criteria": "Sostituisce i criteri di valutazione di un annuncio dopo il tuo assenso. I criteri già usati restano con le loro parole; niente punteggi né classifiche.",
       "get_reports": "Numeri aggregati del periodo: tempi, passaggi tra le fasi, provenienza e risposte, senza dati personali.",
       "list_clients": "Per un'agenzia: i clienti con il numero di posizioni, senza i referenti.",
-      "find_candidates_by_criteria": "I candidati di un annuncio e del talent pool che soddisfano criteri oggettivi che hai confermato. Nessun punteggio, nessuna classifica.",
-      "list_sourced_contacts": "Le persone già aggiunte come contatti di un annuncio, per nome, con i riscontri per ogni criterio.",
-      "add_sourced_contacts": "Aggiunge come contatti di un annuncio persone trovate su profili professionali pubblici, dopo la tua conferma. Non sono candidati e nessuno viene contattato. Serve lo scope di sourcing."
+      "find_candidates_by_criteria": "I candidati di un annuncio e del talent pool che soddisfano criteri oggettivi che hai confermato. Nessun punteggio, nessuna classifica."
     },
     "claude": {
       "title": "Collegare Claude (connettore personalizzato)",
@@ -3074,23 +3069,7 @@
         "running": "Ci lavoro",
         "done": "Fatto"
       },
-      "failed": "Un passaggio non è riuscito",
-      "search_github_people": {
-        "running": "Cerco su GitHub",
-        "done": "Ho cercato su GitHub"
-      },
-      "add_sourced_contacts": {
-        "running": "Aggiungo i contatti",
-        "done": "Ho aggiunto i contatti"
-      },
-      "search_linkedin_people": {
-        "running": "Leggo LinkedIn nel tuo browser",
-        "done": "Ho letto LinkedIn"
-      },
-      "search_web_people": {
-        "running": "Cerco su Google nel tuo browser",
-        "done": "Ho cercato su Google"
-      }
+      "failed": "Un passaggio non è riuscito"
     },
     "draftMessage": {
       "title": "Bozza per {name}",
@@ -5237,162 +5216,36 @@
       "saved": "Pacchetti del template salvati"
     }
   },
-  "sourcingNotice": {
-    "metaTitle": "I tuoi dati presso {organization}",
-    "title": "Ciao {name}, ecco cosa sappiamo di te",
-    "intro": "{organization} ha trovato il tuo {source} e pensa che potresti essere interessato alla posizione {job}. Non ti sei candidato: per questo la legge (GDPR, art. 14) ci chiede di dirti cosa teniamo e perché.",
-    "sources": {
-      "linkedin": "profilo pubblico LinkedIn",
-      "github": "profilo pubblico GitHub",
-      "web": "pagina web pubblica",
-      "manual": "profilo pubblico"
-    },
-    "keptTitle": "Cosa teniamo",
-    "fields": {
-      "name": "Nome",
-      "headline": "Ruolo",
-      "location": "Città",
-      "email": "Email",
-      "profile": "Profilo",
-      "evidence": "Cosa riguarda la posizione",
-      "collected": "Raccolto il"
-    },
-    "purpose": "Solo per valutare se proporti questa posizione. Nessun punteggio e nessuna decisione automatica: a scriverti, se lo farà, sarà una persona.",
-    "deadline": "Se non rispondi, questi dati vengono cancellati entro il {date}.",
-    "eraseTitle": "Non ti interessa?",
-    "eraseBody": "Cancelliamo subito tutto. {organization} terrà solo un'impronta cifrata del tuo profilo, che non permette di risalire a te, per non aggiungerti mai più.",
-    "eraseButton": "Cancella i miei dati e non contattarmi",
-    "erasedTitle": "Fatto: i tuoi dati sono stati cancellati",
-    "erasedBody": "{organization} non ti contatterà più e non potrà aggiungerti di nuovo.",
-    "failure": {
-      "invalid": {
-        "title": "Link non valido",
-        "body": "Questo link non funziona più: i dati potrebbero essere già stati cancellati, oppure ti è arrivato un link più recente."
-      },
-      "rateLimited": {
-        "title": "Troppe richieste",
-        "body": "Riprova tra qualche minuto."
-      },
-      "unavailable": {
-        "title": "Pagina non disponibile",
-        "body": "Non riusciamo a caricare la pagina in questo momento. Riprova più tardi."
-      }
-    }
+  "talentPool": {
+    "title": "Candidati che potrebbero andare bene",
+    "action": "Trova persone"
   },
-  "sourcingSetting": {
-    "title": "Persone trovate fuori da Candydati (sourcing)",
-    "always": "Chi viene trovato su LinkedIn, GitHub o sul web riceve l'informativa (art. 14 GDPR) al più tardi con il primo messaggio, con un link per vedere e cancellare i suoi dati. Chi non viene contattato è cancellato entro 30 giorni.",
-    "label": "Invia subito l'informativa via email quando l'indirizzo è noto",
-    "on": "Attivo: chi ha un'email pubblica riceve l'informativa appena viene aggiunto, anche se nessuno gli scrive.",
-    "off": "Spento: l'informativa parte con il primo messaggio. Nessuna email a chi non viene contattato.",
-    "saved": "Impostazione salvata",
-    "loadFailed": "Non siamo riusciti a caricare l'impostazione del sourcing."
-  },
-  "linkedinSave": {
-    "title": "Salva un profilo LinkedIn",
-    "job": "Posizione",
-    "jobPlaceholder": "Scegli una posizione aperta",
-    "noJobs": "Non c’è nessuna posizione aperta a cui aggiungere questa persona.",
-    "save": "Aggiungi come contatto",
-    "openContacts": "Apri i contatti trovati della posizione",
-    "install": "Installa l’estensione",
+  "talentSearch": {
+    "lead": "Candidati che hanno già lasciato il CV e hanno acconsentito a essere ricontattati per posizioni future. Compare chi soddisfa tutti i criteri, dal più recente: è un filtro, non una classifica.",
+    "skills": "Competenze",
+    "skillsHint": "Tutte devono essere nel CV. Separate da virgole. Riconosce i nomi comuni (Go = Golang).",
+    "skillsPlaceholder": "Go, Kubernetes",
+    "languages": "Lingue",
+    "languagesPlaceholder": "Inglese",
+    "minYears": "Anni minimi",
+    "location": "Città",
+    "locationHint": "Basta una, separate da virgole.",
+    "keywords": "Parole nel CV",
+    "keywordsHint": "Tutte devono comparire nel CV. Mai caratteristiche personali.",
+    "start": "Cerca nel database",
+    "none": "Nessun candidato soddisfa tutti i criteri. Prova con meno competenze o senza città.",
+    "found": "1 candidato soddisfa tutti i criteri | {count} candidati soddisfano tutti i criteri",
+    "appliedHere": "Già candidato a questo annuncio",
+    "lastApplied": "Ultima candidatura il {date}",
+    "meets": "Soddisfa: {criteria}",
+    "matchedAs": "{criterion}: nel CV come «{matchedAs}»",
+    "notEvaluable": "1 CV non si è potuto controllare (non ancora letto o senza dati strutturati): guardalo tu. | {count} CV non si sono potuti controllare (non ancora letti o senza dati strutturati): guardali tu.",
+    "prev": "Precedenti",
+    "next": "Successivi",
+    "page": "Pagina {page} di {pages}",
     "errors": {
-      "job": "Scegli la posizione"
-    },
-    "states": {
-      "empty": {
-        "title": "Niente da salvare",
-        "body": "Su un profilo LinkedIn clicca di nuovo \"Salva in {name}\": il profilo aspetta questa pagina per 10 minuti e viene consegnato una volta sola."
-      },
-      "extension_missing": {
-        "title": "Estensione non trovata",
-        "body": "Questa pagina riceve i profili dall’estensione {name} per Chrome. Installala, oppure apri questa pagina nel Chrome dove è installata."
-      },
-      "failed": {
-        "title": "Profilo non letto",
-        "body": "L’estensione non ha risposto come previsto. Clicca di nuovo \"Salva in {name}\" sul profilo LinkedIn."
-      }
+      "no_criteria": "Indica almeno un criterio.",
+      "invalid": "Criteri non accettati: servono criteri legati al lavoro, mai età, genere, origine o altre caratteristiche personali."
     }
-  },
-  "sourcing": {
-    "title": "Contatti trovati",
-    "note": "Persone trovate fuori da Candydati (LinkedIn, GitHub, web) per questa posizione: sono contatti, non candidati. Quando scrivi a qualcuno, metti nel primo messaggio il testo dell'informativa: è un obbligo di legge (GDPR, art. 14). Chi non viene contattato è cancellato da solo dopo 30 giorni.",
-    "emptyTitle": "Nessun contatto trovato",
-    "emptyBody": "Aggiungi qui le persone trovate su LinkedIn, GitHub o sul web per questa posizione. Oppure chiedi all'assistente di trovarle.",
-    "openProfile": "Apri il profilo",
-    "noticeButton": "Testo informativa",
-    "markContacted": "Segna come contattato",
-    "markedContacted": "Contatto segnato come contattato",
-    "deleted": "Contatto cancellato",
-    "deleteFor": "Cancella {name}",
-    "erasedIn": "Cancellato oggi | Cancellato tra 1 giorno | Cancellato tra {count} giorni",
-    "sources": {
-      "linkedin": "LinkedIn",
-      "github": "GitHub",
-      "web": "Web",
-      "manual": "Altro"
-    },
-    "statuses": {
-      "found": "Trovato",
-      "notified": "Informativa inviata",
-      "contacted": "Contattato"
-    },
-    "outcomes": {
-      "added": "Contatto aggiunto",
-      "already_contact": "Questa persona è già tra i contatti di questa posizione",
-      "already_candidate": "Questa persona è già tra i candidati",
-      "objected": "Questa persona ha chiesto di non essere ricontattata"
-    },
-    "errors": {
-      "firstName": "Scrivi il nome",
-      "profileUrl": "Incolla il link al profilo (https://…)"
-    },
-    "add": {
-      "button": "Aggiungi contatto",
-      "title": "Aggiungi un contatto trovato",
-      "description": "Una persona trovata fuori da Candydati per questa posizione. Teniamo solo quello che serve a valutare se proporgliela.",
-      "firstName": "Nome",
-      "lastName": "Cognome",
-      "profileUrl": "Link al profilo",
-      "source": "Fonte",
-      "headline": "Ruolo attuale",
-      "location": "Città",
-      "evidence": "Cosa riguarda la posizione",
-      "evidenceHint": "Una riga per criterio, ad esempio «Go: 4 anni in Spotify». Fatti, non giudizi.",
-      "save": "Aggiungi"
-    },
-    "notice": {
-      "title": "Informativa per {name}",
-      "description": "Incolla queste righe nel primo messaggio che mandi (LinkedIn, email).",
-      "linkNote": "Il link è personale: chi lo apre vede cosa teniamo e può farlo cancellare. Ogni volta che apri questa finestra ne nasce uno nuovo e il precedente smette di funzionare.",
-      "copy": "Copia",
-      "copied": "Copiato",
-      "sent": "L'ho inviato: segna come contattato"
-    },
-    "delete": {
-      "title": "Cancellare {name}?",
-      "body": "Il contatto viene cancellato subito.",
-      "doNotContact": "Non ricontattare: tieni solo un'impronta cifrata per non aggiungerlo mai più",
-      "confirm": "Cancella"
-    }
-  },
-  "linkedinRisk": {
-    "title": "Prima di cercare su LinkedIn",
-    "lead": "L'assistente leggerà LinkedIn nel tuo browser, con il tuo account. Leggi con attenzione:",
-    "terms": "Le condizioni d'uso di LinkedIn vietano la lettura automatica dei profili.",
-    "account": "LinkedIn può chiederti verifiche, limitare o bloccare il tuo account. Il rischio riguarda il tuo account personale.",
-    "yours": "La scelta è tua e resta registrata con la data. Puoi smettere quando vuoi: basta non chiedere più ricerche su LinkedIn.",
-    "captcha": "Se LinkedIn mostra un controllo (CAPTCHA), l'assistente si ferma e te lo lascia risolvere: non lo aggira mai.",
-    "check": "Ho capito che LinkedIn può limitare o bloccare il mio account e accetto il rischio",
-    "accept": "Accetto e cerca",
-    "decline": "Non ora"
-  },
-  "linkedinSetting": {
-    "title": "Sourcing su LinkedIn",
-    "explain": "L'assistente legge LinkedIn nel browser di chi cerca, con l'estensione Candydati e il suo account. Ognuno deve accettare il rischio per il proprio account la prima volta.",
-    "enable": "Permetti il sourcing su LinkedIn",
-    "max": "Profili al massimo per ricerca",
-    "saved": "Impostazione salvata",
-    "adminOnly": "Solo titolari e amministratori possono cambiarla."
   }
 }

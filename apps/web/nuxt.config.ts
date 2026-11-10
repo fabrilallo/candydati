@@ -72,10 +72,6 @@ export default defineNuxtConfig({
       sourceUrl: '',
       /** Cloudflare Turnstile site key (`NUXT_PUBLIC_TURNSTILE_SITE_KEY`): when set, the application form shows the check. Empty = off. */
       turnstileSiteKey: '',
-      /** Id of the Candydati Chrome extension (`NUXT_PUBLIC_EXTENSION_ID`): sourcing on LinkedIn talks to it. Empty = not offered. */
-      extensionId: '',
-      /** Where to install it (`NUXT_PUBLIC_EXTENSION_URL`, its Chrome Web Store page). */
-      extensionUrl: '',
     },
   },
 })
