@@ -12,8 +12,6 @@ import { createDrizzleAuditLog } from './drizzle-audit-log.js';
 import { createDrizzleAutomationExecutions, createDrizzleAutomationRules } from './drizzle-automation-rules.js';
 import { createDrizzleMoveProposals } from './drizzle-move-proposals.js';
 import { createDrizzleAutomationPacks, createDrizzleJobTemplatePacks } from './drizzle-automation-packs.js';
-import { createDrizzleRiskAcceptances } from './drizzle-risk-acceptances.js';
-import { createDrizzleSourcedContacts, createDrizzleSourcingCandidateLookup, createDrizzleSourcingObjections } from './drizzle-sourcing.js';
 import { createDrizzleCandidateNotes } from './drizzle-candidate-notes.js';
 import { createDrizzleScorecards } from './drizzle-scorecards.js';
 import { createDrizzleCandidateSearch } from './drizzle-candidate-search.js';
@@ -72,10 +70,6 @@ const jobRepositories = (db: DbExecutor) => {
     moveProposals: createDrizzleMoveProposals(db),
     automationPacks: createDrizzleAutomationPacks(db),
     templatePacks: createDrizzleJobTemplatePacks(db),
-    sourcedContacts: createDrizzleSourcedContacts(db),
-    sourcingObjections: createDrizzleSourcingObjections(db),
-    sourcingCandidates: createDrizzleSourcingCandidateLookup(db),
-    riskAcceptances: createDrizzleRiskAcceptances(db),
     outbox: createDrizzleOutbox(db),
     approvals: createDrizzleJobApprovals(db),
     organizationSettings: createDrizzleOrganizationSettings(db),

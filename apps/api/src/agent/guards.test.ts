@@ -118,8 +118,10 @@ describe('instructions', () => {
     expect(text).toMatch(/first name and id only/);
     expect(text).toContain('{{candidate.lastName}}');
     expect(text).toMatch(/find_candidates_by_criteria[\s\S]*explicit confirmation/);
-    expect(text).toMatch(/search_github_people[\s\S]*never say[\s\S]*add_sourced_contacts after an explicit/);
-    expect(text).toMatch(/privacy notice goes in the first message/);
+    // No external sourcing: the prompt names no such tool and points to the organization's own candidates.
+    expect(text).not.toMatch(/search_linkedin_people|search_github_people|search_web_people|add_sourced_contacts/);
+    expect(text).toMatch(/searches only the\s+organization's own candidates/);
+    expect(text).toMatch(/people like X[\s\S]*find_candidates_by_criteria/);
     expect(text).toContain('jobId j-1, applicationId a-1');
     expect(buildInstructions({ productName: 'X', page: null, today: '2026-10-13' })).toContain('Page context: none.');
   });

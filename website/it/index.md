@@ -3,15 +3,15 @@ layout: home
 
 hero:
   name: Candydati
-  text: Un ATS agentico, aperto e installabile sul tuo server, che trova persone per i tuoi annunci e risponde a ogni candidato.
-  tagline: Sourcing con i riscontri, mai con i punteggi, e l'informativa GDPR già inclusa. RAL in chiaro, processo dichiarato e una risposta a ogni candidato sono parte del prodotto, non lasciati alla buona volontà. Si installa sul tuo server con un solo comando.
+  text: Un ATS agentico, aperto e installabile sul tuo server, che risponde a ogni candidato e cerca tra i candidati che hai già.
+  tagline: Prima i candidati che hai già, trovati sui fatti, mai con i punteggi. RAL in chiaro, processo dichiarato e una risposta a ogni candidato sono parte del prodotto, non lasciati alla buona volontà. Si installa sul tuo server con un solo comando.
   actions:
     - theme: brand
       text: Avvio rapido
       link: /it/guide/quick-start
     - theme: alt
-      text: Sourcing agentico
-      link: /it/guide/sourcing
+      text: Cerca nel database
+      link: /it/guide/talent-pool
     - theme: alt
       text: Cos'è
       link: /it/guide/introduction
@@ -20,9 +20,9 @@ hero:
       link: https://github.com/fabrilallo/candydati
 
 features:
-  - title: Sourcing agentico
-    details: "Chiedi all'assistente di trovare persone per un annuncio: concorda con te i criteri, cerca su GitHub, LinkedIn e Google (nel tuo browser), mostra un fatto per criterio e non fa mai classifiche. Scegli tu chi aggiungere; l'informativa dell'art. 14 GDPR e la cancellazione dopo 30 giorni sono già incluse."
-    link: /it/guide/sourcing
+  - title: Cerca nel database
+    details: "Prima di pubblicare di nuovo, guarda i candidati che hai già: chi ha dato il consenso per posizioni future, filtrato su competenze prese dall'annuncio, lingue, anni e città. Dal più recente, mai in classifica; niente viene aggiunto o inviato."
+    link: /it/guide/talent-pool
     linkText: Come funziona
   - title: RAL in chiaro
     details: Un annuncio senza fascia retributiva non si può pubblicare.
@@ -33,7 +33,7 @@ features:
   - title: Nessuna decisione automatica
     details: L'assistente lavora sul processo. Non ordina, non assegna punteggi e non scarta persone.
   - title: Pronto per gli agenti
-    details: Tutto ciò che è nell'interfaccia è disponibile tramite API REST (OpenAPI), con gli stessi permessi. Il server MCP copre annunci, pipeline, ricerche su criteri dichiarati, note, attività, report e contatti trovati, mai decisioni sui candidati.
+    details: Tutto ciò che è nell'interfaccia è disponibile tramite API REST (OpenAPI), con gli stessi permessi. Il server MCP copre annunci, pipeline, ricerche su criteri dichiarati, note, attività e report, mai decisioni sui candidati.
   - title: GDPR by design
     details: Consenso versionato, conservazione e cancellazione automatica, diritti dell'interessato, export completo in formati aperti.
 ---

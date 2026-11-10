@@ -46,7 +46,7 @@ export function createInMemoryJobRequests(initial: readonly JobRequest[] = []): 
   };
 }
 
-const DEFAULT_SETTINGS: OrganizationSettings = { requireApproval: false, restrictRecruitersToTeam: false, recruitsForClients: false, agencyAuthorization: null, sourcingNoticeByEmail: false, linkedinSourcingEnabled: false, linkedinMaxPerRun: 20 };
+const DEFAULT_SETTINGS: OrganizationSettings = { requireApproval: false, restrictRecruitersToTeam: false, recruitsForClients: false, agencyAuthorization: null };
 
 export function createInMemoryOrganizationSettings(initial: Readonly<Record<string, Partial<OrganizationSettings>>> = {}): OrganizationSettingsRepository {
   const rows = cell<Readonly<Record<string, OrganizationSettings>>>(
@@ -63,16 +63,6 @@ export function createInMemoryOrganizationSettings(initial: Readonly<Record<stri
     },
     async setRestrictRecruitersToTeam(organizationId, value) {
       const next = { ...(rows.get()[organizationId] ?? DEFAULT_SETTINGS), restrictRecruitersToTeam: value };
-      rows.set({ ...rows.get(), [organizationId]: next });
-      return next;
-    },
-    async setSourcingNoticeByEmail(organizationId, value) {
-      const next = { ...(rows.get()[organizationId] ?? DEFAULT_SETTINGS), sourcingNoticeByEmail: value };
-      rows.set({ ...rows.get(), [organizationId]: next });
-      return next;
-    },
-    async setLinkedinSourcing(organizationId, value) {
-      const next = { ...(rows.get()[organizationId] ?? DEFAULT_SETTINGS), linkedinSourcingEnabled: value.enabled, linkedinMaxPerRun: value.maxPerRun };
       rows.set({ ...rows.get(), [organizationId]: next });
       return next;
     },

@@ -12,7 +12,7 @@ export interface SidebarLabels {
 
 export interface PageTitles {
   readonly introduction: string;
-  readonly sourcing: string;
+  readonly talentPool: string;
   readonly quickStart: string;
   readonly email: string;
   readonly ai: string;
@@ -23,7 +23,6 @@ export interface PageTitles {
   readonly migration: string;
   readonly otherDeployments: string;
   readonly api: string;
-  readonly chromeExtension: string;
   readonly security: string;
   readonly faq: string;
   readonly contributing: string;
@@ -37,7 +36,7 @@ export function sidebar(prefix: string, groups: SidebarLabels, pages: PageTitles
       text: groups.start,
       items: [
         { text: pages.introduction, link: link('introduction') },
-        { text: pages.sourcing, link: link('sourcing') },
+        { text: pages.talentPool, link: link('talent-pool') },
         { text: pages.quickStart, link: link('quick-start') },
       ],
     },
@@ -58,7 +57,6 @@ export function sidebar(prefix: string, groups: SidebarLabels, pages: PageTitles
       text: groups.integrate,
       items: [
         { text: pages.api, link: link('api') },
-        { text: pages.chromeExtension, link: link('chrome-extension') },
       ],
     },
     {

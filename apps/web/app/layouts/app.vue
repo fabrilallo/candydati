@@ -9,7 +9,6 @@ const { t } = useI18n()
 const platform = usePlatform()
 const route = useRoute()
 const { drawerOpen } = useNavPanel()
-useExtensionHello()
 watch(() => route.fullPath, () => {
   drawerOpen.value = false
 })

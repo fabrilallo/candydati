@@ -1,12 +1,10 @@
-import type { CandidateDeps, JobDeps, MessagingDeps, ReportDeps, SourcingDeps, TaskDeps } from '@candydati/core';
-import type { Sealer } from '../sealed-ref.js';
+import type { CandidateDeps, JobDeps, MessagingDeps, ReportDeps, TaskDeps } from '@candydati/core';
 import type { JobDrafter } from '../job-drafter.js';
 import { createCreateTaskTool, createDraftMessageTool } from './action-tools.js';
 import { createFindHelpRecipeTool } from './help-tools.js';
 import { createCandidateBriefTool, createListAttentionTool, createPipelineSummaryTool } from './candidate-tools.js';
 import { createReportsSummaryTool } from './report-tools.js';
 import { createFindCandidatesTool } from './search-tools.js';
-import { createAddSourcedContactsTool, createSearchGithubPeopleTool, createSearchLinkedinPeopleTool, createSearchWebPeopleTool } from './sourcing-tools.js';
 import {
   createAnalyzeJobAdTool,
   createDraftJobContentTool,
@@ -22,9 +20,6 @@ export interface AgentToolDeps {
   readonly messagingDeps: MessagingDeps;
   readonly taskDeps: TaskDeps;
   readonly reportDeps: ReportDeps;
-  readonly sourcingDeps: SourcingDeps;
-  /** Seals what sourcing found about a person into an opaque reference the model passes back. */
-  readonly sealer: Sealer;
   readonly draftJob: JobDrafter;
   readonly onToolError?: ((error: unknown, tool: string) => void) | undefined;
 }
@@ -32,7 +27,7 @@ export interface AgentToolDeps {
 /**
  * The assistant's tools, keyed by id (Mastra exposes the key as the function name). There is deliberately no tool to
  * publish or close an ad, move or decide on a candidate, send a message, erase data or rank anyone (the criteria search filters on what
- * a person confirmed, it does not score). Sourcing finds public profiles and adds the people a user confirmed as contacts.
+ * a person confirmed, it does not score).
  */
 export function createAgentTools(deps: AgentToolDeps) {
   const tools = [
@@ -49,10 +44,6 @@ export function createAgentTools(deps: AgentToolDeps) {
     createDraftMessageTool(deps.messagingDeps),
     createCreateTaskTool(deps.taskDeps),
     createReportsSummaryTool(deps.reportDeps),
-    createSearchGithubPeopleTool(deps.sourcingDeps, deps.sealer),
-    createSearchLinkedinPeopleTool(),
-    createSearchWebPeopleTool(),
-    createAddSourcedContactsTool(deps.sourcingDeps, deps.sealer),
     createFindHelpRecipeTool(),
   ];
   return Object.freeze(Object.fromEntries(tools.map((tool) => [tool.id, tool])));

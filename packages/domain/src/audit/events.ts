@@ -56,6 +56,7 @@ export const AUDIT_ACTIONS = [
   'automation.copied',
   'automation_pack.saved',
   'automation_pack.deleted',
+  // External sourcing was removed; its events stay so the entries already in the log keep their label. Nothing writes them.
   'organization.sourcing_setting_updated',
   'organization.linkedin_sourcing_updated',
   'sourcing.linkedin_risk_accepted',

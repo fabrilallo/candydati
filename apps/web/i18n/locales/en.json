@@ -1591,7 +1591,7 @@
       "distribution": "Distribution",
       "team": "Team",
       "shortlists": "Shortlists",
-      "sourcing": "Sourced"
+      "talentPool": "Search your database"
     },
     "received": "Received",
     "receivedHint": "New applications, not looked at yet",
@@ -2856,9 +2856,6 @@
       },
       "skill_alias": {
         "manage": "Manage skill aliases"
-      },
-      "sourcing": {
-        "manage": "Manage sourced contacts"
       }
     },
     "withheld": "Some things a key can never do: decisions about candidates, messages to candidates and administration stay with a person.",
@@ -2938,9 +2935,7 @@
       "set_evaluation_criteria": "Replaces the evaluation criteria of a job after you agree. Used criteria keep their words; nothing scores or orders candidates.",
       "get_reports": "Aggregated figures of a period: timing, stage moves, sources and responses, with no personal data.",
       "list_clients": "For an agency: the clients with their number of jobs, without contacts.",
-      "find_candidates_by_criteria": "Candidates of a job's applicants and talent pool who meet objective criteria you confirmed. No score, no ranking.",
-      "list_sourced_contacts": "The people already added as sourced contacts of a job, by first name, with the evidence per criterion.",
-      "add_sourced_contacts": "Adds people found on public professional profiles as contacts of a job, after you confirm them. Not candidates, nobody is messaged. Needs the sourcing scope."
+      "find_candidates_by_criteria": "Candidates of a job's applicants and talent pool who meet objective criteria you confirmed. No score, no ranking."
     },
     "claude": {
       "title": "Connect Claude (custom connector)",
@@ -3074,23 +3069,7 @@
         "running": "Working on it",
         "done": "Done"
       },
-      "failed": "A step did not work",
-      "search_github_people": {
-        "running": "Searching GitHub",
-        "done": "Searched GitHub"
-      },
-      "add_sourced_contacts": {
-        "running": "Adding the contacts",
-        "done": "Added the contacts"
-      },
-      "search_linkedin_people": {
-        "running": "Reading LinkedIn in your browser",
-        "done": "Read LinkedIn"
-      },
-      "search_web_people": {
-        "running": "Searching Google in your browser",
-        "done": "Searched Google"
-      }
+      "failed": "A step did not work"
     },
     "draftMessage": {
       "title": "Draft for {name}",
@@ -5237,162 +5216,36 @@
       "saved": "Template packs saved"
     }
   },
-  "sourcingNotice": {
-    "metaTitle": "Your data at {organization}",
-    "title": "Hi {name}, here is what we know about you",
-    "intro": "{organization} found your {source} and thinks you may be interested in the {job} role. You did not apply: this is why the law (GDPR, art. 14) asks us to tell you what we keep and why.",
-    "sources": {
-      "linkedin": "public LinkedIn profile",
-      "github": "public GitHub profile",
-      "web": "public web page",
-      "manual": "public profile"
-    },
-    "keptTitle": "What we keep",
-    "fields": {
-      "name": "Name",
-      "headline": "Title",
-      "location": "City",
-      "email": "Email",
-      "profile": "Profile",
-      "evidence": "What relates to the role",
-      "collected": "Collected on"
-    },
-    "purpose": "Only to consider offering you this role. No score and no automated decision: if anyone writes to you, it will be a person.",
-    "deadline": "If you do not reply, this data is erased by {date}.",
-    "eraseTitle": "Not interested?",
-    "eraseBody": "We erase everything at once. {organization} keeps only an encrypted fingerprint of your profile, which cannot be traced back to you, so it never adds you again.",
-    "eraseButton": "Erase my data and do not contact me",
-    "erasedTitle": "Done: your data has been erased",
-    "erasedBody": "{organization} will not contact you again and cannot add you again.",
-    "failure": {
-      "invalid": {
-        "title": "Link not valid",
-        "body": "This link no longer works: the data may already have been erased, or you received a newer link."
-      },
-      "rateLimited": {
-        "title": "Too many requests",
-        "body": "Try again in a few minutes."
-      },
-      "unavailable": {
-        "title": "Page not available",
-        "body": "We cannot load the page right now. Try again later."
-      }
-    }
+  "talentPool": {
+    "title": "Candidates who may fit",
+    "action": "Find people"
   },
-  "sourcingSetting": {
-    "title": "People found outside Candydati (sourcing)",
-    "always": "People found on LinkedIn, GitHub or the web get the notice (GDPR art. 14) at the latest with the first message, with a link to see and erase their data. People never written to are erased within 30 days.",
-    "label": "Email the notice at once when the address is known",
-    "on": "On: people with a public email get the notice as soon as they are added, even if nobody writes to them.",
-    "off": "Off: the notice goes with the first message. No email to people who are not contacted.",
-    "saved": "Setting saved",
-    "loadFailed": "We could not load the sourcing setting."
-  },
-  "linkedinSave": {
-    "title": "Save a LinkedIn profile",
-    "job": "Position",
-    "jobPlaceholder": "Choose an open position",
-    "noJobs": "There is no open position to add this person to.",
-    "save": "Add as contact",
-    "openContacts": "Open the sourced contacts of the position",
-    "install": "Install the extension",
+  "talentSearch": {
+    "lead": "Candidates who already left their CV and agreed to be contacted about future positions. Only who meets every criterion shows, most recent first: a filter, not a ranking.",
+    "skills": "Skills",
+    "skillsHint": "All must be in the CV. Separated by commas. Usual names are known (Go = Golang).",
+    "skillsPlaceholder": "Go, Kubernetes",
+    "languages": "Languages",
+    "languagesPlaceholder": "English",
+    "minYears": "Minimum years",
+    "location": "City",
+    "locationHint": "Any of them, separated by commas.",
+    "keywords": "Words in the CV",
+    "keywordsHint": "All must appear in the CV. Never personal characteristics.",
+    "start": "Search the database",
+    "none": "No candidate meets every criterion. Try fewer skills or no city.",
+    "found": "1 candidate meets every criterion | {count} candidates meet every criterion",
+    "appliedHere": "Already applied to this job",
+    "lastApplied": "Last applied on {date}",
+    "meets": "Meets: {criteria}",
+    "matchedAs": "{criterion}: in the CV as “{matchedAs}”",
+    "notEvaluable": "1 CV could not be checked (not read yet, or no structured data): have a look yourself. | {count} CVs could not be checked (not read yet, or no structured data): have a look yourself.",
+    "prev": "Previous",
+    "next": "Next",
+    "page": "Page {page} of {pages}",
     "errors": {
-      "job": "Choose the position"
-    },
-    "states": {
-      "empty": {
-        "title": "Nothing to save",
-        "body": "On a LinkedIn profile, click \"Save to {name}\" again: the profile waits for this page for 10 minutes and is given only once."
-      },
-      "extension_missing": {
-        "title": "Extension not found",
-        "body": "This page receives profiles from the {name} extension for Chrome. Install it, or open this page in the Chrome where it is installed."
-      },
-      "failed": {
-        "title": "Could not read the profile",
-        "body": "The extension did not answer as expected. Click \"Save to {name}\" on the LinkedIn profile again."
-      }
+      "no_criteria": "Give at least one criterion.",
+      "invalid": "Criteria refused: use job-related criteria, never age, gender, origin or other personal characteristics."
     }
-  },
-  "sourcing": {
-    "title": "Sourced contacts",
-    "note": "People found outside Candydati (LinkedIn, GitHub, the web) for this position: contacts, not candidates. When you write to someone, put the notice text in the first message: the law requires it (GDPR, art. 14). People never written to are erased automatically after 30 days.",
-    "emptyTitle": "No sourced contacts",
-    "emptyBody": "Add here the people you found on LinkedIn, GitHub or the web for this position. Or ask the assistant to find them.",
-    "openProfile": "Open the profile",
-    "noticeButton": "Notice text",
-    "markContacted": "Mark as written to",
-    "markedContacted": "Contact marked as written to",
-    "deleted": "Contact erased",
-    "deleteFor": "Erase {name}",
-    "erasedIn": "Erased today | Erased in 1 day | Erased in {count} days",
-    "sources": {
-      "linkedin": "LinkedIn",
-      "github": "GitHub",
-      "web": "Web",
-      "manual": "Other"
-    },
-    "statuses": {
-      "found": "Found",
-      "notified": "Notice sent",
-      "contacted": "Written to"
-    },
-    "outcomes": {
-      "added": "Contact added",
-      "already_contact": "This person is already a contact of this position",
-      "already_candidate": "This person is already a candidate",
-      "objected": "This person asked not to be contacted again"
-    },
-    "errors": {
-      "firstName": "Enter the first name",
-      "profileUrl": "Paste the link to the profile (https://…)"
-    },
-    "add": {
-      "button": "Add contact",
-      "title": "Add a sourced contact",
-      "description": "A person found outside Candydati for this position. We keep only what is needed to consider offering it to them.",
-      "firstName": "First name",
-      "lastName": "Last name",
-      "profileUrl": "Profile link",
-      "source": "Source",
-      "headline": "Current title",
-      "location": "City",
-      "evidence": "What relates to the position",
-      "evidenceHint": "One line per criterion, for example “Go: 4 years at Spotify”. Facts, not judgements.",
-      "save": "Add"
-    },
-    "notice": {
-      "title": "Notice for {name}",
-      "description": "Paste these lines into the first message you send (LinkedIn, email).",
-      "linkNote": "The link is personal: whoever opens it sees what we keep and can have it erased. Each time you open this window a new one is made and the previous one stops working.",
-      "copy": "Copy",
-      "copied": "Copied",
-      "sent": "I sent it: mark as written to"
-    },
-    "delete": {
-      "title": "Erase {name}?",
-      "body": "The contact is erased at once.",
-      "doNotContact": "Do not contact again: keep only an encrypted fingerprint so they are never added again",
-      "confirm": "Erase"
-    }
-  },
-  "linkedinRisk": {
-    "title": "Before searching LinkedIn",
-    "lead": "The assistant will read LinkedIn in your browser, with your account. Read carefully:",
-    "terms": "LinkedIn's terms of use forbid the automated reading of profiles.",
-    "account": "LinkedIn may ask you to verify, restrict or block your account. The risk is on your personal account.",
-    "yours": "The choice is yours and is recorded with the date. You can stop at any time: just stop asking for LinkedIn searches.",
-    "captcha": "If LinkedIn shows a check (CAPTCHA), the assistant stops and leaves it to you: it never gets around it.",
-    "check": "I understand LinkedIn may restrict or block my account and I accept the risk",
-    "accept": "Accept and search",
-    "decline": "Not now"
-  },
-  "linkedinSetting": {
-    "title": "Sourcing on LinkedIn",
-    "explain": "The assistant reads LinkedIn in the browser of whoever searches, with the Candydati extension and their account. Each person accepts the risk for their own account the first time.",
-    "enable": "Allow sourcing on LinkedIn",
-    "max": "Most profiles per search",
-    "saved": "Setting saved",
-    "adminOnly": "Only owners and admins can change it."
   }
 }

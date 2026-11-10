@@ -13,8 +13,6 @@ export * from './candidate-seed.js';
 export * from './in-memory-messaging.js';
 export * from './messaging-fixtures.js';
 export * from './messaging-deps.js';
-export * from './sourcing-deps.js';
-export * from './in-memory-sourcing.js';
 export * from './in-memory-automation.js';
 export * from './in-memory-proposals.js';
 export * from './in-memory-packs.js';

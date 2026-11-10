@@ -1,4 +1,3 @@
-import type { SourcedContactStatus, SourcingEvidence, SourcingSource } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization } from './auth.js';
@@ -10,8 +9,9 @@ const organizationRef = () =>
     .references(() => organization.id, { onDelete: 'restrict' });
 
 /**
- * A person found outside Candydati for a job (LinkedIn, GitHub, the web). Not a candidate: they did not apply. Erased
- * by the retention job at `expires_at` (30 days after collection) or at once when they object through the notice link.
+ * Unused since external sourcing was removed before release, like every table in this file: people once found outside
+ * the organization for a job. Migration 0056 erased the rows; the tables stay for the previous release's replicas during
+ * the deploy and are dropped in a later release (MIGRATIONS.md rule 1).
  */
 export const sourcedContact = pgTable(
   'sourced_contact',
@@ -25,12 +25,12 @@ export const sourcedContact = pgTable(
     lastName: text('last_name'),
     headline: text('headline'),
     location: text('location'),
-    source: text('source').$type<SourcingSource>().notNull(),
+    source: text('source').notNull(),
     profileUrl: text('profile_url').notNull(),
     profileKey: text('profile_key').notNull(),
     email: text('email'),
-    evidence: jsonb('evidence').$type<SourcingEvidence[]>().notNull().default(sql`'[]'::jsonb`),
-    status: text('status').$type<SourcedContactStatus>().notNull().default('found'),
+    evidence: jsonb('evidence').$type<unknown[]>().notNull().default(sql`'[]'::jsonb`),
+    status: text('status').notNull().default('found'),
     /** Hash of the personal notice link's secret (only the person's notice carries the secret). */
     noticeTokenHash: text('notice_token_hash').notNull(),
     noticeSentAt: timestamp('notice_sent_at', { withTimezone: true }),
@@ -48,10 +48,7 @@ export const sourcedContact = pgTable(
   ],
 );
 
-/**
- * People who asked not to be contacted (art. 21): only a keyed hash of their profile key or email, never the value, so
- * the organization can honour the objection without keeping who it was. Never expires.
- */
+/** Unused (see above): keyed hashes of the people who had asked not to be contacted. */
 export const sourcingObjection = pgTable(
   'sourcing_objection',
   {
@@ -62,10 +59,7 @@ export const sourcingObjection = pgTable(
   (table) => [primaryKey({ columns: [table.organizationId, table.fingerprint] })],
 );
 
-/**
- * A person accepted, for themselves, the risk of letting the extension read LinkedIn with their account (its terms forbid
- * automated reading; the account may be restricted). One row per person, with the version of the text they accepted.
- */
+/** Unused (see above): who had accepted the risk of the extension reading LinkedIn with their account. */
 export const sourcingRiskAcceptance = pgTable(
   'sourcing_risk_acceptance',
   {

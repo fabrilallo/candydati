@@ -47,7 +47,6 @@ export const TASK_NAMES = [
   'migration.analyze',
   'migration.commit',
   'migration.fetch',
-  'sourcing.notice',
 ] as const;
 export type TaskName = (typeof TASK_NAMES)[number];
 
@@ -129,13 +128,6 @@ export interface TaskPayloads {
   readonly 'migration.commit': ImportTaskPayload;
   /** Run a connector into one or more packages (ADR 0009, Phase 6). Ids only: the credentials stay sealed in the batch. */
   readonly 'migration.fetch': ImportTaskPayload;
-  /** Email the art. 14 notice to a sourced contact whose address is known. Ids only. */
-  readonly 'sourcing.notice': SourcingNoticePayload;
-}
-
-export interface SourcingNoticePayload {
-  readonly organizationId: string;
-  readonly contactId: string;
 }
 
 /** A task as enqueued: the name decides the payload. */

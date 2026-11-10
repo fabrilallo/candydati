@@ -148,7 +148,6 @@ services:
       TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
       LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID:-}
       LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET:-}
-      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       INBOUND_WEBHOOK_SECRET: ${INBOUND_WEBHOOK_SECRET:?imposta INBOUND_WEBHOOK_SECRET (almeno 32 caratteri)}
       # invite_only (default in production): accounts only through an invitation, plus the first owner (SECURITY.md).
       SIGNUP_MODE: ${SIGNUP_MODE:-invite_only}
@@ -218,8 +217,6 @@ services:
       # The bundled Caddy (profile caddy): its x-forwarded-for names the visitor. Set by deploy/install.sh.
       NUXT_TRUSTED_PROXY: ${NUXT_TRUSTED_PROXY:-}
       NUXT_PUBLIC_TURNSTILE_SITE_KEY: ${NUXT_PUBLIC_TURNSTILE_SITE_KEY:-}
-      NUXT_PUBLIC_EXTENSION_ID: ${NUXT_PUBLIC_EXTENSION_ID:-}
-      NUXT_PUBLIC_EXTENSION_URL: ${NUXT_PUBLIC_EXTENSION_URL:-}
       NUXT_SENTRY_DSN: ${NUXT_SENTRY_DSN:-}
     ports:
       # WEB_BIND=127.0.0.1 when a reverse proxy on the same host (Caddy, nginx, Traefik) is the only way in.

@@ -17,14 +17,6 @@ const AGENCY_EN = (org: string): string => `
 
 Recruiting for client companies. ${org} also recruits on behalf of client companies. If you apply for a position at a client, we may present your profile to that company: your name and, when useful, your CV and some notes of the recruiter. We never share your contact details or anything about other applications. Every time your profile is presented we tell you by email which company it went to, or that it is a client that asked to stay confidential: you can then ask us which one. The client company receives the data only for that search, as a separate data controller; the legal basis is the same as for the selection (Article 6(1)(b) GDPR). Its answers are an opinion: a person at ${org} decides.`;
 
-const SOURCING_IT = (org: string): string => `
-
-Persone che non si sono candidate. ${org} può trovare il tuo profilo pubblico (ad esempio LinkedIn, GitHub o una pagina web) e considerarti per una posizione. In quel caso teniamo solo nome, ruolo, città, il link al profilo e ciò che nel profilo riguarda la posizione, per valutare se proportela (legittimo interesse, art. 6.1.f GDPR). Ti informiamo al più tardi con il primo messaggio che ti mandiamo, con un link personale da cui vedi tutto quello che teniamo e puoi farlo cancellare subito: in quel caso conserviamo solo un'impronta cifrata, che non permette di risalire a te, per non ricontattarti. Se non ti contattiamo o non rispondi, i dati vengono cancellati entro 30 giorni.`;
-
-const SOURCING_EN = (org: string): string => `
-
-People who did not apply. ${org} may find your public profile (for example LinkedIn, GitHub or a web page) and consider you for a position. We then keep only your name, title, city, the link to the profile and what in it relates to the position, to consider offering it to you (legitimate interest, Article 6(1)(f) GDPR). We tell you at the latest with the first message we send you, with a personal link where you see everything we keep and can have it erased at once: we then keep only an encrypted fingerprint, which cannot be traced back to you, so that we do not contact you again. If we do not contact you or you do not reply, the data is erased within 30 days.`;
-
 const CONTACT_PLACEHOLDER: Readonly<Record<Locale, string>> = {
   it: '[indirizzo email di contatto da inserire]',
   en: '[contact email address to be added]',
@@ -42,7 +34,7 @@ Database candidati. Solo se lo scegli espressamente, possiamo conservare i tuoi 
 
 Come li trattiamo. Il curriculum viene letto da persone autorizzate di ${org}. Per estrarne in modo ordinato le informazioni principali (esperienze, competenze, lingue) possiamo usare strumenti automatici, compresi modelli linguistici forniti da responsabili del trattamento. Questi strumenti propongono dati da verificare: nessuna decisione sulla tua candidatura è presa in modo automatizzato e nessuna persona viene scartata da un sistema automatico.
 
-Chi può vedere i dati. Dentro ${org} i dati sono accessibili solo a persone autorizzate: chi amministra le selezioni (titolari e amministratori dell'account e, salvo diversa scelta di ${org}, i recruiter) e il gruppo di selezione di ciascuna posizione (responsabili dell'assunzione e intervistatori), che accedono solo alle candidature delle posizioni di cui fanno parte. Ogni consultazione del profilo e del curriculum è registrata.${agency ? AGENCY_IT(org) : ''}${SOURCING_IT(org)}
+Chi può vedere i dati. Dentro ${org} i dati sono accessibili solo a persone autorizzate: chi amministra le selezioni (titolari e amministratori dell'account e, salvo diversa scelta di ${org}, i recruiter) e il gruppo di selezione di ciascuna posizione (responsabili dell'assunzione e intervistatori), che accedono solo alle candidature delle posizioni di cui fanno parte. Ogni consultazione del profilo e del curriculum è registrata.${agency ? AGENCY_IT(org) : ''}
 
 A chi comunichiamo i dati. I dati sono comunicati solo ai fornitori che li trattano per nostro conto (ospitalità dell'infrastruttura, invio di email, strumenti di estrazione), nominati responsabili del trattamento. Non vendiamo i tuoi dati e non li usiamo per addestrare modelli.
 
@@ -66,7 +58,7 @@ Candidate database. Only if you explicitly choose so, we may also keep your data
 
 How we process it. Your CV is read by authorised people at ${org}. To pull out the main information in an orderly way (experience, skills, languages) we may use automated tools, including language models provided by data processors. These tools suggest data to be verified: no decision about your application is taken automatically and no one is rejected by an automated system.
 
-Who can see the data. Within ${org} the data is accessible only to authorised people: those who run recruitment (account owners and administrators and, unless ${org} chooses otherwise, recruiters) and the selection team of each position (hiring managers and interviewers), who reach only the applications to the positions whose team they are on. Every view of your profile and CV is logged.${agency ? AGENCY_EN(org) : ''}${SOURCING_EN(org)}
+Who can see the data. Within ${org} the data is accessible only to authorised people: those who run recruitment (account owners and administrators and, unless ${org} chooses otherwise, recruiters) and the selection team of each position (hiring managers and interviewers), who reach only the applications to the positions whose team they are on. Every view of your profile and CV is logged.${agency ? AGENCY_EN(org) : ''}
 
 Who receives the data. The data is disclosed only to providers that process it on our behalf (infrastructure hosting, email delivery, extraction tools), appointed as data processors. We do not sell your data and we do not use it to train models.
 

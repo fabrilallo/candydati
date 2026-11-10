@@ -33,9 +33,6 @@ import {
   type SubmitApplicationDeps,
   type TaskQueue,
   type BindableTaskQueue,
-  createSourcingDeps,
-  type GithubPeopleSearch,
-  type SourcingDeps,
 } from '@candydati/core';
 import type { AdQualityAnalyzer } from '@candydati/domain';
 import { createLiveSuggester } from './ai/responsibility-suggester.js';
@@ -54,7 +51,7 @@ import { createPhase2Deps } from './wiring/phase2-deps.js';
 import { createPhase4Deps } from './wiring/phase4-deps.js';
 import { configuredProviders } from './wiring/configured-providers.js';
 import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
-import { createGithubPeopleSearch, zipStreamFactory } from '@candydati/providers';
+import { zipStreamFactory } from '@candydati/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
 import type { Actor, ApiKeyDeps, CriteriaDrafter, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
 import { authenticateApiKey, withStorageErrors } from '@candydati/core';
@@ -164,8 +161,6 @@ export interface AppContext extends ClientWiring {
   readonly notificationDeps: NotificationDeps;
   readonly taskDeps: TaskDeps;
   readonly automationDeps: AutomationRuleDeps;
-  /** Sourced contacts (people found outside Candydati for a job) and their public notice page. */
-  readonly sourcingDeps: SourcingDeps;
   readonly webhookDeps: WebhookDeps;
   /** The organization's own skill aliases (settings). */
   readonly skillAliasDeps: SkillAliasDeps;
@@ -234,20 +229,17 @@ export interface AppContextDeps {
   readonly aiRuntime: AiRuntime;
   /** Test seam: the test call of the AI settings (the provider by default). */
   readonly aiCheck?: AiModelCheck | undefined;
-  /** GitHub's public user search for sourcing; defaults to the official API with `GITHUB_TOKEN`. Tests pass a fake. */
-  readonly githubSearch?: GithubPeopleSearch | undefined;
 }
 
 const isBindable = (queue: TaskQueue | BindableTaskQueue): queue is BindableTaskQueue => 'bindTo' in queue && typeof queue.bindTo === 'function';
 
-/** Messages to candidates and inbound email, and the sourced contacts with their art. 14 notice email. */
-const outreachContext = (messaging: ReturnType<typeof createMessagingDeps>, sourcingDeps: SourcingDeps) => ({
+/** Messages to candidates and inbound email. */
+const outreachContext = (messaging: ReturnType<typeof createMessagingDeps>) => ({
   messagingDeps: messaging.messagingDeps,
   inboundDeps: messaging.inboundDeps,
-  sourcingDeps,
 });
 
-export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, responsibilitySuggester, criteriaDrafter, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck, githubSearch }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, responsibilitySuggester, criteriaDrafter, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
@@ -281,7 +273,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...createClientDeps({ uow, files, queue, sender, config: emailConfig, onMailError: onReceiptError, candidateDeps: phase2.candidateDeps, feedback: hr.feedbackRecords }),
     ...hrContext(hr),
     ...createTeamDeps(uow),
-    ...outreachContext(messaging, createSourcingDeps({ uow, queue, sender, config: emailConfig, secret: env.BETTER_AUTH_SECRET, onMailError: onReceiptError, github: githubSearch ?? createGithubPeopleSearch({ token: env.GITHUB_TOKEN ?? null }) })),
+    ...outreachContext(messaging),
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
     checkStorage: storageProbe(rawFiles),
     securityDeps: { auditLog, transaction: uow.transaction, jobTeams: uow.repositories.jobTeams, securitySettings: uow.repositories.securitySettings, apiKeys: uow.repositories.apiKeys, memberRoles: uow.repositories.memberRoles, twoFactor: uow.repositories.twoFactor, now: () => new Date() },

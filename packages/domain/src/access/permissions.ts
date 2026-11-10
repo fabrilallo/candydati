@@ -71,12 +71,6 @@ export const STATEMENTS = {
    * filter on declared criteria treats as one skill. Never grantable to a key or to the agent.
    */
   skill_alias: ['manage'],
-  /**
-   * Sourcing (people found outside Candydati for a job): add them as contacts, list, erase. Grantable to the agent and to
-   * keys: that is how an assistant or a browser agent brings what it found. Contacts are never candidates until the
-   * person applies.
-   */
-  sourcing: ['manage'],
 } as const;
 
 export type Resource = keyof typeof STATEMENTS;
@@ -123,7 +117,6 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     client: ['read', 'manage'],
     shortlist: ['read', 'send'],
     skill_alias: ['manage'],
-    sourcing: ['manage'],
   },
   recruiter: {
     job: ['read', 'create', 'update', 'publish', 'close'],
@@ -140,7 +133,6 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     report: ['read'],
     client: ['read', 'manage'],
     shortlist: ['read', 'send'],
-    sourcing: ['manage'],
   },
   /**
    * Writes and edits ads and moves candidates through the stages, on the jobs whose team they are on (job-team.ts). Putting ads online, taking them down and deciding
