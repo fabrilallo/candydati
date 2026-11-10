@@ -1,5 +1,6 @@
 import type { JobClientRepository } from './client-ports.js';
 import type { ShortlistExportSources } from './use-cases/clients/shortlist-export.js';
+import type { InterviewRepository } from './interview-ports.js';
 import type { CareersMediaRepository, CareersPageRepository } from './careers-ports.js';
 import type { JobTeamRepository } from './job-team-ports.js';
 import type { ConsentStatus, DataExport, RetentionRun } from '@candydati/domain';
@@ -139,6 +140,8 @@ export interface CandidateRightsDeps extends CoreDeps, ErasureDeps, FeedbackReco
   readonly messages: MessageRepository;
   readonly jobs: JobRepository;
   readonly privacyNotices: PrivacyNoticeRepository;
+  /** The interviews of each application, in the export; absent on an instance wired without scheduling. */
+  readonly interviews?: Pick<InterviewRepository, 'listByApplication'> | undefined;
 }
 
 export interface OrganizationExportDeps extends CoreDeps, FeedbackRecords, ShortlistExportSources {
@@ -157,6 +160,8 @@ export interface OrganizationExportDeps extends CoreDeps, FeedbackRecords, Short
   /** The careers page (draft and published) and its media files are part of the organization's data. */
   readonly careersPages: CareersPageRepository;
   readonly careersMedia: CareersMediaRepository;
+  /** The interviews of each application, in the export; absent on an instance wired without scheduling. */
+  readonly interviews?: Pick<InterviewRepository, 'listByApplication'> | undefined;
   /** Clients of an agency and the client of each job (`clients.json`); absent on an instance wired without clients. */
   readonly jobClients?: JobClientRepository | undefined;
   readonly newId: () => string;

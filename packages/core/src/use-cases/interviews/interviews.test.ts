@@ -10,6 +10,7 @@ import { cancelInterview, listApplicationInterviews } from './manage.js';
 import { proposeInterview } from './propose.js';
 import { bookInterview, cancelInterviewByCandidate, getInterviewInvitation } from './public.js';
 import { scanInterviewReminders } from './scan-reminders.js';
+import { exportCandidate } from '../privacy/export-candidate.js';
 
 // Monday 2026-06-01, 09:00 in Rome. With 24 h notice the first free time is Tuesday.
 const NOW = new Date('2026-06-01T07:00:00.000Z');
@@ -186,5 +187,18 @@ describe('the reminder the day before', () => {
     expect(reminder?.subject).toMatch(/^(Promemoria colloquio|Interview reminder)/);
     expect(reminder?.calendar).toBeUndefined();
     expect(await scanInterviewReminders(deps, { now: dayBefore })).toEqual({ reminded: 0, failed: 0 });
+  });
+});
+
+describe('the candidate export', () => {
+  it('lists the interviews of each application, with interviewers by name and never the link', async () => {
+    await propose();
+    const { secret } = await deliverInvitation();
+    await bookInterview(deps, { token: secret, slot: TUESDAY_11 });
+    const application = await deps.applications.findById(ORG_A, 'app_1');
+    const bundle = await exportCandidate(deps, userActor({ organizationId: ORG_A }), { candidateId: application!.candidateId });
+    const exported = bundle.json.applications.find((item) => item.id === 'app_1');
+    expect(exported?.interviews).toMatchObject([{ status: 'booked', startsAt: TUESDAY_11, interviewers: ['Hugo Manager'], mode: 'video', cancelledBy: null }]);
+    expect(JSON.stringify(bundle.json)).not.toContain(deps.interviews.all()[0]!.tokenHash);
   });
 });
