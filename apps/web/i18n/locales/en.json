@@ -620,6 +620,16 @@
         "submitted": "Left feedback after an interview",
         "cv_opened": "Opened the CV from a feedback link"
       },
+      "calendar_feed": {
+        "saved": "Connected or updated their calendar",
+        "removed": "Disconnected their calendar"
+      },
+      "interview": {
+        "proposed": "Proposed an interview to book",
+        "booked": "Interview booked",
+        "rescheduled": "Interview moved",
+        "cancelled": "Interview cancelled"
+      },
       "job_request": {
         "submitted": "Sent a request to open a position",
         "approved": "Approved a request to open a position",
@@ -2836,6 +2846,10 @@
       "feedback": {
         "manage": "Choose interviewers and ask for feedback",
         "read": "Read interview feedback"
+      },
+      "interview": {
+        "schedule": "Propose and cancel interviews",
+        "read": "See booked interviews"
       },
       "report": {
         "read": "Read aggregated reports"

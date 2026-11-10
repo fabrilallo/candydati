@@ -40,6 +40,11 @@ export const STATEMENTS = {
   import: ['manage'],
   /** Interview feedback without login: `manage` sets interviewers and asks for feedback, `read` opens what was left (with candidate:read). */
   feedback: ['manage', 'read'],
+  /**
+   * Interviews booked from the interviewers' calendars: `schedule` sends the candidate a booking link and cancels,
+   * `read` sees when and with whom (with candidate:read). Each member connects only their own calendar.
+   */
+  interview: ['schedule', 'read'],
   /** Aggregated reports (no personal data): grantable to API keys and the agent. */
   report: ['read'],
   /** The public careers page: its sections, theme and media, the draft and its publication. */
@@ -110,6 +115,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     api_key: ['manage'],
     import: ['manage'],
     feedback: ['manage', 'read'],
+    interview: ['schedule', 'read'],
     report: ['read'],
     careers_page: ['manage'],
     migration: ['manage'],
@@ -130,6 +136,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     automation: ['manage'],
     import: ['manage'],
     feedback: ['manage', 'read'],
+    interview: ['schedule', 'read'],
     report: ['read'],
     client: ['read', 'manage'],
     shortlist: ['read', 'send'],
@@ -147,6 +154,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     message: ['read'],
     task: ['read', 'manage'],
     feedback: ['manage', 'read'],
+    interview: ['schedule', 'read'],
     report: ['read'],
     restricted_stage: ['manage'],
     client: ['read'],
@@ -160,6 +168,7 @@ export const ROLE_GRANTS: Readonly<Record<Role, RoleGrants>> = {
     message: ['read'],
     task: ['read'],
     feedback: ['read'],
+    interview: ['read'],
     client: ['read'],
   },
 };

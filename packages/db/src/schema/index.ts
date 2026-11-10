@@ -13,6 +13,7 @@ export * from './distribution.js';
 export * from './import.js';
 export * from './migration.js';
 export * from './feedback.js';
+export * from './interview.js';
 export * from './job-request.js';
 export * from './job-team.js';
 export * from './report.js';

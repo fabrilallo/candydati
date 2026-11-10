@@ -30,6 +30,7 @@ export * from './distribution-deps.js';
 export * from './in-memory-imports.js';
 export * from './import-deps.js';
 export * from './in-memory-feedback.js';
+export * from './calendar-deps.js';
 export * from './in-memory-job-requests.js';
 export * from './hr-deps.js';
 export * from './in-memory-reports.js';

@@ -53,7 +53,7 @@ import { configuredProviders } from './wiring/configured-providers.js';
 import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
 import { zipStreamFactory } from '@candydati/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
-import type { Actor, ApiKeyDeps, CriteriaDrafter, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
+import type { Actor, ApiKeyDeps, CalendarDeps, CalendarReader, CriteriaDrafter, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
 import { authenticateApiKey, withStorageErrors } from '@candydati/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
@@ -71,6 +71,7 @@ import { liveMessagingConfig, type AiRuntime, type EmailRuntime, type MigrationC
 import { createInstanceAiDeps } from './wiring/instance-ai-deps.js';
 import { createInstanceEmailDeps } from './wiring/instance-email-deps.js';
 import { createSetupProgressDeps } from './wiring/setup-progress-deps.js';
+import { createCalendarDeps } from './wiring/calendar-deps.js';
 
 export interface RateLimitSettings {
   /** Requests per minute per client on every route. */
@@ -192,6 +193,8 @@ export interface AppContext extends ClientWiring {
   readonly aiRuntime: AiRuntime;
   readonly instanceAiDeps: InstanceAiDeps;
   readonly emailRuntime: EmailRuntime;
+  /** The signed-in person's own calendar link (interview scheduling). */
+  readonly calendarDeps: CalendarDeps;
 }
 
 export interface AppContextDeps {
@@ -229,6 +232,8 @@ export interface AppContextDeps {
   readonly aiRuntime: AiRuntime;
   /** Test seam: the test call of the AI settings (the provider by default). */
   readonly aiCheck?: AiModelCheck | undefined;
+  /** Test seam: reads calendar addresses (the SSRF-safe reader by default). */
+  readonly calendarReader?: CalendarReader | undefined;
 }
 
 const isBindable = (queue: TaskQueue | BindableTaskQueue): queue is BindableTaskQueue => 'bindTo' in queue && typeof queue.bindTo === 'function';
@@ -239,7 +244,7 @@ const outreachContext = (messaging: ReturnType<typeof createMessagingDeps>) => (
   inboundDeps: messaging.inboundDeps,
 });
 
-export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, responsibilitySuggester, criteriaDrafter, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, responsibilitySuggester, criteriaDrafter, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck, calendarReader }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
@@ -272,6 +277,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     ...createClientDeps({ uow, files, queue, sender, config: emailConfig, onMailError: onReceiptError, candidateDeps: phase2.candidateDeps, feedback: hr.feedbackRecords }),
     ...hrContext(hr),
+    calendarDeps: createCalendarDeps({ env, uow, reader: calendarReader }),
     ...createTeamDeps(uow),
     ...outreachContext(messaging),
     checkDatabase: async () => void (await db.execute(sql`select 1`)),

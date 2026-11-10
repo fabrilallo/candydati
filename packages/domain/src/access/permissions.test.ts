@@ -75,6 +75,8 @@ describe('permissions', () => {
       'task:manage',
       'feedback:manage',
       'feedback:read',
+      'interview:schedule',
+      'interview:read',
       'report:read',
       'restricted_stage:manage',
       'client:read',
@@ -100,6 +102,7 @@ describe('permissions', () => {
       'message:read',
       'task:read',
       'feedback:read',
+      'interview:read',
       'client:read',
     ]);
   });
@@ -128,6 +131,11 @@ describe('permissions', () => {
   it('lets feedback be read by everyone who reads candidates and managed by those who run the process', () => {
     for (const role of ROLES) expect(roleHasPermission(role, 'feedback:read')).toBe(roleHasPermission(role, 'candidate:read'));
     expect(ROLES.filter((role) => roleHasPermission(role, 'feedback:manage'))).toEqual(['owner', 'admin', 'recruiter', 'hiring_manager']);
+  });
+
+  it('lets interviews be seen by everyone who reads candidates and scheduled by those who run the process', () => {
+    for (const role of ROLES) expect(roleHasPermission(role, 'interview:read')).toBe(roleHasPermission(role, 'candidate:read'));
+    expect(ROLES.filter((role) => roleHasPermission(role, 'interview:schedule'))).toEqual(['owner', 'admin', 'recruiter', 'hiring_manager']);
   });
 
   it('lets owner, admin and recruiter send messages and manage templates; only owner and admin manage email settings', () => {
