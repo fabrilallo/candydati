@@ -13,6 +13,7 @@ export interface SidebarLabels {
 export interface PageTitles {
   readonly introduction: string;
   readonly talentPool: string;
+  readonly interviews: string;
   readonly quickStart: string;
   readonly email: string;
   readonly ai: string;
@@ -37,6 +38,7 @@ export function sidebar(prefix: string, groups: SidebarLabels, pages: PageTitles
       items: [
         { text: pages.introduction, link: link('introduction') },
         { text: pages.talentPool, link: link('talent-pool') },
+        { text: pages.interviews, link: link('interviews') },
         { text: pages.quickStart, link: link('quick-start') },
       ],
     },

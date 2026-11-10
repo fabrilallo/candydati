@@ -6,6 +6,26 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+One migration runs at start: `0057_interview_scheduling` is additive (tables `calendar_feed`, `interview`,
+`interview_interviewer`).
+
+### Added
+
+- **Interviews booked from the interviewers' own calendars** ([ADR 0012](docs/adr/0012-interview-scheduling-from-ical-feeds.md)).
+  Each member connects their calendar once with its secret iCal address (Settings, Calendar; Google, Outlook, iCloud):
+  sealed at rest with its own key, never shown back, only busy times of the next two weeks kept (never titles or
+  attendees), deleted when the person leaves. A recruiter proposes an interview at a stage of an application (its
+  interviewers and duration by default; mode and meeting link, address or phone): the candidate gets an email in the
+  conversation with a personal link and 2-3 times on different days, and books on a page without an account
+  (`/interview/<token>`; a time link only preselects, the candidate confirms). Free times are everyone's working hours
+  minus their calendars and other bookings, at least a day ahead; the time is checked again under a lock, so nobody is
+  booked twice. Everyone gets a calendar invite (.ics, updated on a move until 12 hours before, removed on a
+  cancellation); the candidate is reminded the day before. Bookings and cancellations notify the interviewers in the
+  app, and the new automation triggers `interview_booked` and `interview_cancelled` start the stage's rules.
+  Permissions `interview:schedule` (owner, admin, recruiter, hiring manager) and `interview:read`; never the assistant.
+  Routes: `/api/v1/me/calendar-feed`, `/api/v1/applications/:id/interviews`, `/api/v1/interviews/:id/cancel`, and the
+  public `/api/v1/public/interviews/:token` (internal for now). New dependency `ical.js` (MPL-2.0).
+
 ## [0.6.0] - 2026-11-10
 
 Three migrations run at start as usual; take a backup first (docs/OPERATIONS.md). `0054_sourced_contacts` and

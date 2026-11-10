@@ -219,11 +219,11 @@ and stale-job detection. Jobs are idempotent and keyed so a retry does not repea
 `send_template`, `create_task`, `add_tag`, `assign`, `request_feedback`, `notify` or `propose_move` (there is no action
 that moves or decides). Event triggers are queued by the use case
 that records the event, in its transaction: a move or an intake (`stage_entered`), a reply from the candidate's own
-address (`candidate_replied`), a submitted feedback (`feedback_submitted`, for the stage it was asked for). Time-based
+address (`candidate_replied`), a submitted feedback (`feedback_submitted`, for the stage it was asked for), an interview booked or cancelled (`interview_booked`, `interview_cancelled`, for the interview's stage). Time-based
 triggers (`stage_stuck`, `response_due_soon`) are found by the hourly `automation.scan`, which only queues
 `automation.run` naming the rule. `runAutomations` checks the application, the trigger and the conditions again, then
 claims the run in `automation_execution`, unique per (rule, application, stage, stage entry, occurrence): `''` for the
-entry, `stuck`, `due:<deadline>`, `message:<id>`, `feedback:<id>`. So every trigger fires once per occurrence, however
+entry, `stuck`, `due:<deadline>`, `message:<id>`, `feedback:<id>`, `interview:<id>`, `interview-cancelled:<id>`. So every trigger fires once per occurrence, however
 often the scan runs or a task is redelivered. A rule acts with its creator's role of today: `runAutomations` checks
 again that the creator is a member, holds the permission the action needs (`ACTION_PERMISSION`: `propose_move` needs
 `candidate:move`) and still reaches the job (per-job access); otherwise the rule is skipped and admins are told once.
@@ -293,7 +293,8 @@ deleted.
 | `/careers/{org}/**`, feed, `llms.txt`, sitemap, `/api/v1/public/**` | none, read-only | server-rendered, JSON-LD `JobPosting`, cacheable |
 | Application form | none | versioned consent, rate limits, daily caps per organization and per job |
 | Fill in with LinkedIn (`/api/v1/public/linkedin/**`) | none | optional; state and nonce in an encrypted HttpOnly cookie (key derived with HKDF from `BETTER_AUTH_SECRET`), return only to a job page, code exchanged server side, prefill in a second encrypted cookie read once; nothing stored, no personal data in URLs or logs |
-| Feedback, consent and shortlist links | token in URL | interview feedback without login; consent reconfirmation; client shortlists (`/shortlist/{token}`, [ADR 0011](adr/0011-agency-clients-in-one-organization.md)) |
+| Feedback, consent, shortlist and interview links | token in URL | interview feedback without login; consent reconfirmation; client shortlists (`/shortlist/{token}`, [ADR 0011](adr/0011-agency-clients-in-one-organization.md)); interview booking (`/interview/{token}`, [ADR 0012](adr/0012-interview-scheduling-from-ical-feeds.md)): link made at delivery, rotated at each booking, bookings checked under a Postgres advisory lock per interviewer |
+| Calendar feeds (outbound) | none sent | each member's secret iCal address, sealed (HKDF key `candydati:calendar-feed`), read through the SSRF-safe public download; only busy intervals stored |
 | Inbound email webhook | HMAC signature | `INBOUND_WEBHOOK_SECRET` |
 | `/mcp` | API key or OAuth access token | same use cases as REST; OAuth discovery under `/.well-known/oauth-*` ([MCP-CONNECTOR.md](MCP-CONNECTOR.md)) |
 
