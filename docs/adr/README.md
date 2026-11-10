@@ -16,3 +16,4 @@ a superseded ADR is marked, not deleted.
 | [0009](0009-ats-migration-package.md) | ATS migration through one public, strict package; the operator answers for it |
 | [0010](0010-privacy-by-design-and-declared-criteria.md) | Pseudonymized data for models; candidate search on criteria a person declares, never a score |
 | [0011](0011-agency-clients-in-one-organization.md) | Agencies keep their clients inside one organization; shortlists through personal links; candidates told every time |
+| [0012](0012-interview-scheduling-from-ical-feeds.md) | Interviews booked from the interviewers' own iCal feeds; invites by email; never the assistant |

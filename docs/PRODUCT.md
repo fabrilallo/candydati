@@ -66,12 +66,22 @@ The code is open. A complete export in an open, documented format is available a
 | Reports | Time to hire (days from the application to the day the offer was accepted when that date is recorded on the hire, otherwise to the day the hire was recorded; the report says how many hires used each, so the coverage of the offer date is never hidden) and time to start (to the start date, for the hires that have one), conversion per stage, response times and share of applications with an outcome; sources with visits, applications, hires and conversion per channel and campaign, from tracked links saved on each ad, any number of them, one per channel and campaign (aggregate counts: no cookies, no stored IP addresses, no personal data). On the Distribution tab of an ad: visits and applications per day over 7, 30 or 90 days for every source or one saved link, applications per 100 visits from the fifth visit, and the people who applied through each link or source, as the board shows them; each application shows its source and campaign on the candidate profile |
 | Import / export | Import from CVs and unstructured data with preview and confirmation, undoable as a whole; complete export |
 | Migration from another ATS | A company's whole recruiting history (jobs, stages, candidates, applications with outcomes and dates, notes, stage history, emails, CVs and attachments) moved in from its previous ATS through one public, versioned migration package, produced by a built-in source connector (beta until verified on a real account) or by an agent skill. Previewed before anything is written, confirmed by an owner or admin who declares their responsibility, undoable as a whole. Scores, ratings and special-category data are never carried over |
-| HR tools | Interview feedback without login (see below), scorecards without scores, restricted stages (§6.2), hiring needs intake form, optional approval of budget and salary before publication, flagging of stalled ads |
+| HR tools | Interviews booked from the interviewers' own calendars (see below), interview feedback without login, scorecards without scores, restricted stages (§6.2), hiring needs intake form, optional approval of budget and salary before publication, flagging of stalled ads |
 | Agent | Internal process assistant, public API, MCP server, webhooks (§5) |
 | Recruiting for clients | For agencies, headhunters and consultants: clients inside the organization, a client on each job, shortlists sent to the client through a personal link, per-client jobs and reports (§3.5) |
 
 HR tools in more detail:
 
+- **Interviews booked from the interviewers' calendars.** Each member connects their own calendar once with its secret
+  iCal address (Google, Outlook, iCloud), sealed at rest and never shown back; only busy times inside the next two weeks
+  are kept, never titles or attendees, and they go when the person leaves the organization. A recruiter proposes an
+  interview at a stage (its interviewers by default, the stage's duration); the candidate gets an email in the
+  conversation with a personal link and two or three times on different days, picks a time on a page without an account
+  and confirms (a link never books by itself). Free times are everyone's working hours minus their calendars and other
+  bookings, at least a day ahead; the time is checked again under a lock at booking, so nobody is booked twice. Everyone
+  gets a calendar invite, updated or removed when the candidate moves (until 12 hours before) or cancels; the candidate
+  is reminded the day before. Bookings and cancellations notify the interviewers in the app and can start automations of
+  the stage. The assistant never proposes or books an interview ([ADR 0012](adr/0012-interview-scheduling-from-ical-feeds.md)).
 - **Interview feedback without an account.** The person running a stage receives a personal link by email, answers fixed questions per stage type from a phone in a few minutes, and gets a reminder if needed. The feedback describes; it assigns no score to the candidate (§2.4).
 - **Scorecards without scores.** Before the interviews, a job declares its evaluation criteria ("Postgres experience", "client communication", "English B2"), each for every stage or for one. On the feedback link, for each criterion of the stage the interviewer records what they saw in one of three words (observed, not observed, to explore) and a required short piece of evidence. There is no numeric rating, no weight, no overall score and no aggregation into a ranking or an order of candidates (§2.4, GDPR art. 22): the candidate's profile shows the criteria with each interviewer's evidence side by side, and a person reads it and decides. A criterion can be edited until the first feedback that uses it; after that it is append-only (its words and stage are fixed; removing it retires it), and each feedback keeps the wording it was written against. The assistant can draft criteria from the ad (the model reads the ad only, never a candidate, and nothing is saved until a person keeps them); the MCP interview kit builds its questions and observation grid on the same criteria.
 - **Hiring needs intake.** The hiring manager fills in a form (role, budget, stages, interviewers) from which the assistant prepares a draft ad.
@@ -84,7 +94,9 @@ A free-form career site builder (custom HTML, CSS or scripts, arbitrary layouts,
 
 ### 3.3 Deferred
 
-Interview scheduling through an integration with a scheduling service rather than a proprietary calendar sync. This is the next step of the roadmap.
+Calendar access through Google or Microsoft sign-in (OAuth), to create the video link and write the event straight into
+the interviewers' calendars; it may come as an option, and by default in a hosted version. Today the secret iCal address
+gives the busy times and an emailed invite gives the event ([ADR 0012](adr/0012-interview-scheduling-from-ical-feeds.md)).
 
 ### 3.4 Careers page builder
 

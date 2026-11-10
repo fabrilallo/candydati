@@ -36,7 +36,8 @@ Candidati e candidate; persone di riferimento eventualmente indicate [se previst
 
 - Anagrafici e di contatto: nome, cognome, email, telefono, profilo LinkedIn.
 - Professionali: curriculum, esperienze, competenze, lingue, messaggio di presentazione.
-- Processo di selezione: fase, valutazioni e note dei selezionatori, esiti, comunicazioni, disponibilità per i colloqui.
+- Processo di selezione: fase, valutazioni e note dei selezionatori, esiti, comunicazioni, disponibilità per i colloqui, data, ora, modalità e partecipanti dei colloqui prenotati.
+- Calendari degli utenti interni [se usano la prenotazione dei colloqui]: solo gli intervalli occupati delle due settimane successive, letti dall'indirizzo iCal segreto che ciascuno collega da sé; mai titoli, descrizioni, luoghi o partecipanti degli eventi. L'indirizzo è cifrato e non viene mostrato a nessuno; tutto viene cancellato quando la persona lascia l'organizzazione o scollega il calendario.
 - Consenso: versione dell'informativa, data, ambito.
 - Provenienza della candidatura: etichetta breve del canale e della campagna del link (per esempio `linkedin`, `autunno-2026`), mai un indirizzo web completo né un indirizzo email.
 - Statistiche di visita degli annunci: conteggi aggregati per giorno, canale e campagna. Nessun cookie, nessun archivio locale del browser, nessun indirizzo IP o user agent conservato: non sono dati personali, perché non permettono di riconoscere né di distinguere i visitatori. Conservati 25 mesi.
@@ -70,6 +71,7 @@ La cancellazione è automatica: un job giornaliero avvisa prima della scadenza, 
 - Controllo degli accessi per ruolo e per annuncio: chi non amministra le selezioni vede solo le candidature delle posizioni del proprio gruppo di selezione.
 - Registro delle azioni non modificabile (solo append), con distinzione tra azioni umane e dell'agente.
 - Conservazione limitata e cancellazione automatica.
+- Prenotazione dei colloqui: link personali con solo l'impronta del segreto in archivio, rinnovati a ogni prenotazione e scaduti dopo il colloquio; indirizzi dei calendari cifrati con una chiave dedicata.
 - L'agente opera con i permessi dell'utente e non decide sui candidati; ogni messaggio ai candidati richiede conferma di una persona.
 - Backup e ripristino: [descrizione].
 - Gestione delle violazioni: procedura di notifica entro 72 ore al Garante quando dovuta (art. 33).

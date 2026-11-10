@@ -16,6 +16,7 @@ export const it: LocaleSpecificConfig<DefaultTheme.Config> = {
         {
           introduction: 'Introduzione',
           talentPool: 'Cerca nel database',
+          interviews: 'Colloqui dal calendario',
           quickStart: 'Avvio rapido',
           email: 'Email',
           ai: 'Assistente AI (facoltativo)',

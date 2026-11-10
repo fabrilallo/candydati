@@ -75,6 +75,7 @@ ospitata. [Come funziona](https://fabrilallo.github.io/candydati/it/guide/talent
 
 **Collaborazione**
 - Organizzazioni, ruoli e team di selezione per annuncio
+- Colloqui prenotati dai calendari degli intervistatori: il candidato sceglie un orario libero da un link, tutti ricevono l'invito
 - Feedback dei colloqui senza login, tramite link personali
 - Scorecard senza punteggi: criteri per annuncio, le evidenze di ogni intervistatore affiancate
 - Fasi riservate: note e feedback di una fase letti solo da owner, admin e hiring manager
