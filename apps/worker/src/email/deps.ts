@@ -35,5 +35,7 @@ export function createDeliverDeps({ uow, sender, config }: EmailDeliveryWiring):
     newToken: newConversationToken,
     now: () => new Date(),
     reconfirmation: { consentTokens: r.consentTokens, newSecret: newConsentSecret, hash: hashConsentSecret },
+    // An interview invitation gets its link here too: a fresh secret, only its sha256 stored (the api resolves it the same way).
+    interviewLinks: { interviews: r.interviews, newSecret: newConversationToken, hash: hashConsentSecret },
   };
 }
