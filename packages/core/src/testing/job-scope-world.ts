@@ -13,6 +13,8 @@ import { createDistributionRegistry } from '../distribution-registry.js';
 import { createFakeDistributionChannel, createInMemoryDistributionSettings, createInMemoryJobDistributions } from './in-memory-distribution.js';
 import { createInMemoryTrackedLinks, type InMemoryTrackedLinks } from './in-memory-tracked-links.js';
 import { createClientStore, createInMemoryClients, createInMemoryJobClients, createInMemoryShortlists, type ClientStore } from './in-memory-clients.js';
+import { createFakeCalendarReader, createInMemoryCalendarFeeds, fakeSecretBox } from './calendar-deps.js';
+import { createInMemoryInterviews } from './interview-deps.js';
 
 /**
  * Two jobs of one organization: A (`job_1`, the actors' team) and B (`job_b`, nobody's but the owner's). Everything about
@@ -48,7 +50,7 @@ const APPLICATIONS = [
   buildApplication({ id: 'app_s2', candidateId: 'cand_s', jobId: JOB_B, cv: cv('app_s2'), ...org }),
 ];
 
-export type JobScopeWorld = TestImportDeps & TestHrDeps & { readonly trackedLinks: InMemoryTrackedLinks; readonly clientStore: ClientStore };
+export type JobScopeWorld = TestImportDeps & TestHrDeps & { readonly trackedLinks: InMemoryTrackedLinks; readonly clientStore: ClientStore; readonly interviews: ReturnType<typeof createInMemoryInterviews> };
 
 /** Everything about job B the use cases could expose: candidate, CV, notes, messages, tasks, feedback, rules, imports. */
 export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
@@ -105,6 +107,10 @@ export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
     registry: createDistributionRegistry([createFakeDistributionChannel()]),
     publicBaseUrl: 'https://jobs.example.org',
     ...clientRepositories(),
+    interviews: createInMemoryInterviews(),
+    calendarFeeds: createInMemoryCalendarFeeds(),
+    calendarReader: createFakeCalendarReader(),
+    calendarSecrets: fakeSecretBox,
   };
   const deps = { ...hr, feedback: { ...hr, feedbackRequests: hr.feedbackRequests } } as unknown as JobScopeWorld;
   await seedJobB(deps);
@@ -135,6 +141,12 @@ async function seedJobB(deps: JobScopeWorld): Promise<void> {
   await deps.scorecards.create([
     { id: 'crit_b', organizationId: ORG_A, jobId: JOB_B, stageId: null, label: 'B-ONLY criterion', position: 0, createdBy: 'user_test', createdAt: new Date('2026-05-01T00:00:00Z'), firstUsedAt: null, retiredAt: null },
   ]);
+  await deps.interviews.create({
+    id: 'int_b', organizationId: ORG_A, applicationId: 'app_b', jobId: JOB_B, stageId: 'stage-1', status: 'booked', durationMinutes: 60, mode: 'onsite', location: 'B-ONLY room',
+    startsAt: new Date('2026-06-02T08:00:00Z'), endsAt: new Date('2026-06-02T09:00:00Z'), tokenHash: 'int_hash_b', tokenExpiresAt: new Date('2026-07-01T00:00:00Z'), icsSequence: 0,
+    proposedBy: 'user_test', bookedAt: new Date('2026-05-01T00:00:00Z'), cancelledAt: null, cancelledBy: null, reminderSentAt: null, createdAt: new Date('2026-05-01T00:00:00Z'),
+    updatedAt: new Date('2026-05-01T00:00:00Z'), interviewers: [{ kind: 'external', userId: null, email: 'b-only@example.org', name: 'Bravoleak Panel' }],
+  });
   await deps.interviewFeedback.create({ id: 'fb_b', organizationId: ORG_A, applicationId: 'app_b', requestId: 'fbr_b', stageId: 'stage-0', interviewerName: 'Bravoleak Panel', answers: { strengths: 'B-ONLY answer' }, recommendation: 'proceed', observations: [], submittedAt: new Date('2026-05-02T00:00:00Z') });
 }
 

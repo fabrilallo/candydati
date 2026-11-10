@@ -53,7 +53,7 @@ import { configuredProviders } from './wiring/configured-providers.js';
 import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
 import { zipStreamFactory } from '@candydati/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
-import type { Actor, ApiKeyDeps, CalendarDeps, CalendarReader, CriteriaDrafter, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
+import type { Actor, ApiKeyDeps, CalendarDeps, CalendarReader, InterviewDeps, CriteriaDrafter, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
 import { authenticateApiKey, withStorageErrors } from '@candydati/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
@@ -72,6 +72,7 @@ import { createInstanceAiDeps } from './wiring/instance-ai-deps.js';
 import { createInstanceEmailDeps } from './wiring/instance-email-deps.js';
 import { createSetupProgressDeps } from './wiring/setup-progress-deps.js';
 import { createCalendarDeps } from './wiring/calendar-deps.js';
+import { createInterviewDeps } from './wiring/interview-deps.js';
 
 export interface RateLimitSettings {
   /** Requests per minute per client on every route. */
@@ -195,6 +196,8 @@ export interface AppContext extends ClientWiring {
   readonly emailRuntime: EmailRuntime;
   /** The signed-in person's own calendar link (interview scheduling). */
   readonly calendarDeps: CalendarDeps;
+  /** Interviews booked from the interviewers' calendars, and the candidate's booking page. */
+  readonly interviewDeps: InterviewDeps;
 }
 
 export interface AppContextDeps {
@@ -277,7 +280,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     ...createClientDeps({ uow, files, queue, sender, config: emailConfig, onMailError: onReceiptError, candidateDeps: phase2.candidateDeps, feedback: hr.feedbackRecords }),
     ...hrContext(hr),
-    calendarDeps: createCalendarDeps({ env, uow, reader: calendarReader }),
+    ...schedulingContext({ env, uow, queue, feedbackDeps: hr.feedbackDeps, calendarReader }),
     ...createTeamDeps(uow),
     ...outreachContext(messaging),
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
@@ -341,6 +344,12 @@ function instanceContext({ env, db, uow, files, queue, images, phase2, runtime, 
     aiRuntime,
     instanceAiDeps: createInstanceAiDeps({ env, db, uow, runtime: aiRuntime, check: aiCheck }),
   };
+}
+
+/** Calendars and interviews: the calendar link of each person, and the bookings built on the feedback context. */
+function schedulingContext(inputs: { readonly env: Env; readonly uow: DrizzleUnitOfWork; readonly queue: TaskQueue; readonly feedbackDeps: HrWiring['feedbackDeps']; readonly calendarReader: CalendarReader | undefined }) {
+  const calendarDeps = createCalendarDeps({ env: inputs.env, uow: inputs.uow, reader: inputs.calendarReader });
+  return { calendarDeps, interviewDeps: createInterviewDeps({ uow: inputs.uow, feedbackDeps: inputs.feedbackDeps, calendarDeps, queue: inputs.queue }) };
 }
 
 /** The HR dependencies the routes read from the context, by name. */

@@ -13,6 +13,7 @@ import type { ApplicationRepository, CandidateRepository, UserDirectory } from '
 import type { TaskQueue } from './intake-ports.js';
 import type { JobRepository, OrganizationDirectory } from './job-ports.js';
 import type { CoreDeps } from './ports.js';
+import type { InterviewLinkDeps } from './interview-ports.js';
 import type { ResponsePromiseRepository } from './report-ports.js';
 
 export interface EmailTemplateRepository {
@@ -172,6 +173,8 @@ export type DeliverDeps = Pick<
 > & {
   /** Absent: a reconfirmation request is recorded as failed (`consent_link_unavailable`), never sent without its link. */
   readonly reconfirmation?: ReconfirmationDeps | undefined;
+  /** Absent: an interview invitation is recorded as failed (`interview_link_unavailable`), never sent without its link. */
+  readonly interviewLinks?: InterviewLinkDeps | undefined;
 };
 
 export type InboundDeps = Pick<

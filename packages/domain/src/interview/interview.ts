@@ -76,3 +76,39 @@ export const interviewPath = (token: string, slot?: Date): string =>
 /** True when the candidate may still move or cancel a booked interview. */
 export const canCandidateChange = (startsAt: Date, now: Date): boolean =>
   startsAt.getTime() - now.getTime() >= INTERVIEW_CHANGE_CUTOFF_MINUTES * 60_000;
+
+/** Who takes part: a member (their address is read when sending) or an external person. */
+export interface InterviewParticipant {
+  readonly kind: 'member' | 'external';
+  readonly userId: string | null;
+  /** Lowercase; null for a member until it is read. */
+  readonly email: string | null;
+  readonly name: string;
+}
+
+export interface Interview {
+  readonly id: string;
+  readonly organizationId: string;
+  readonly applicationId: string;
+  readonly jobId: string;
+  readonly stageId: string;
+  readonly status: InterviewStatus;
+  readonly durationMinutes: number;
+  readonly mode: InterviewMode;
+  readonly location: string | null;
+  readonly startsAt: Date | null;
+  readonly endsAt: Date | null;
+  /** Hash of the secret in the candidate's link; the secret itself is never stored. */
+  readonly tokenHash: string;
+  readonly tokenExpiresAt: Date;
+  readonly icsSequence: number;
+  readonly proposedBy: string;
+  readonly bookedAt: Date | null;
+  readonly cancelledAt: Date | null;
+  /** `candidate`, or the user id of who cancelled. */
+  readonly cancelledBy: string | null;
+  readonly reminderSentAt: Date | null;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+  readonly interviewers: readonly InterviewParticipant[];
+}

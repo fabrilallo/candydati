@@ -70,6 +70,8 @@ import { registerReportRoutes } from './routes/reports.js';
 import { registerStatsRoutes } from './routes/stats.js';
 import { registerFeedbackRoutes } from './routes/feedback.js';
 import { registerCalendarRoutes } from './routes/calendar.js';
+import { registerInterviewRoutes } from './routes/interviews.js';
+import { registerPublicInterviewRoutes } from './routes/public-interviews.js';
 import { registerPublicFeedbackRoutes } from './routes/public-feedback.js';
 import { registerClientRoutes } from './routes/clients.js';
 import { registerPublicShortlistRoutes } from './routes/public-shortlists.js';
@@ -257,6 +259,8 @@ function registerRecruitingRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerStaleJobRoutes(app, ctx);
   registerFeedbackRoutes(app, ctx);
   registerCalendarRoutes(app, ctx);
+  registerInterviewRoutes(app, ctx);
+  registerPublicInterviewRoutes(app, ctx);
   registerJobRequestRoutes(app, ctx);
   registerJobTeamRoutes(app, ctx);
   registerPublicFeedbackRoutes(app, ctx);

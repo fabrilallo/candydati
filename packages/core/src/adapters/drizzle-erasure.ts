@@ -10,7 +10,7 @@ import { createDrizzleOutbox } from './drizzle-outbox.js';
  * fails loudly instead of leaving data behind), every statement filters by `organization_id`.
  */
 export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
-  const { application, applicationAttachment, applicationStageEvent, candidate, candidateNote, clientShortlistItem, consentToken, conversation, cvExtraction, dataExport, feedbackRequest, interviewFeedback, message, notification, outboxEvent, responsePromise, task, webhookDelivery } = schema;
+  const { application, applicationAttachment, applicationStageEvent, candidate, candidateNote, clientShortlistItem, consentToken, conversation, cvExtraction, dataExport, feedbackRequest, interview, interviewFeedback, message, notification, outboxEvent, responsePromise, task, webhookDelivery } = schema;
 
   /** Outbox events (and their deliveries) whose data mentions one of these ids under `key`. */
   const deleteEvents = async (organizationId: string, key: 'applicationId' | 'candidateId', ids: readonly string[]): Promise<void> => {
@@ -69,6 +69,8 @@ export function createDrizzleErasureStore(db: DbExecutor): ErasureStore {
       await db.delete(consentToken).where(and(eq(consentToken.organizationId, organizationId), inArray(consentToken.applicationId, ids)));
       await db.delete(interviewFeedback).where(and(eq(interviewFeedback.organizationId, organizationId), inArray(interviewFeedback.applicationId, ids)));
       await db.delete(feedbackRequest).where(and(eq(feedbackRequest.organizationId, organizationId), inArray(feedbackRequest.applicationId, ids)));
+      // Its interviewers' rows go with each interview (cascade).
+      await db.delete(interview).where(and(eq(interview.organizationId, organizationId), inArray(interview.applicationId, ids)));
       // Presented to a client: the shortlist stays for the other candidates, this person's entry and answer go.
       await db.delete(clientShortlistItem).where(and(eq(clientShortlistItem.organizationId, organizationId), inArray(clientShortlistItem.applicationId, ids)));
       await db.delete(responsePromise).where(and(eq(responsePromise.organizationId, organizationId), inArray(responsePromise.applicationId, ids)));

@@ -44,6 +44,7 @@ import { createDrizzleJobViews } from './drizzle-job-views.js';
 import { createDrizzleReports } from './drizzle-reports.js';
 import { createDrizzleSkillAliases } from './drizzle-skill-aliases.js';
 import { createDrizzleCalendarFeeds } from './drizzle-calendar-feeds.js';
+import { createDrizzleInterviews } from './drizzle-interviews.js';
 import { createDrizzleTasks } from './drizzle-tasks.js';
 import { createDrizzleTrackedLinks } from './drizzle-tracked-links.js';
 import { createDrizzleUserDirectory } from './drizzle-user-directory.js';
@@ -113,6 +114,7 @@ const candidateRepositories = (db: DbExecutor) =>
     intake: createDrizzleApplicationIntake(db),
     feedbackRequests: createDrizzleFeedbackRequests(db),
     calendarFeeds: createDrizzleCalendarFeeds(db),
+    interviews: createDrizzleInterviews(db),
     interviewFeedback: createDrizzleInterviewFeedback(db),
     scorecards: createDrizzleScorecards(db),
     stageInterviewers: createDrizzleStageInterviewers(db),
