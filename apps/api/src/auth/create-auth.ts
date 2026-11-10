@@ -1,4 +1,4 @@
-import type { CoreDeps } from '@candydati/core';
+import { createDrizzleCalendarFeeds, type CoreDeps } from '@candydati/core';
 import type { Db } from '@candydati/db';
 import { schema } from '@candydati/db';
 import { CREATOR_ROLE, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@candydati/domain';
@@ -104,9 +104,14 @@ function mcpOAuth(env: Env, db: Db, requiresTwoFactor: AuthDependencies['require
  * Better Auth takes one function per organization hook: the role guards check the logo before the creation slot is
  * claimed (a refused logo uses no slot), and the creation is recorded before it is audited.
  */
-const organizationHooks = (creation: ReturnType<typeof organizationCreationHooks>, audit: ReturnType<typeof createAuditHooks>, emailReady: () => boolean) => ({
+const organizationHooks = (creation: ReturnType<typeof organizationCreationHooks>, audit: ReturnType<typeof createAuditHooks>, emailReady: () => boolean, db: Db) => ({
   ...roleGuardHooks,
   ...audit,
+  // Who leaves an organization takes their calendar link with them: the sealed address and the busy times go.
+  afterRemoveMember: async (data: Parameters<typeof audit.afterRemoveMember>[0]) => {
+    await createDrizzleCalendarFeeds(db).remove(data.organization.id, data.member.userId);
+    await audit.afterRemoveMember(data);
+  },
   beforeCreateInvitation: async (data: Parameters<typeof roleGuardHooks.beforeCreateInvitation>[0]) => {
     if (!emailReady()) throw new APIError('BAD_REQUEST', { code: EMAIL_NOT_CONFIGURED_CODE, message: 'Set up email first: an invitation is sent by email.' });
     await roleGuardHooks.beforeCreateInvitation(data);
@@ -165,7 +170,7 @@ export function createAuth({ env, db, core, mailer, requiresTwoFactor, emailRead
         // audit_log.organization_id is ON DELETE RESTRICT: an organization with history cannot be hard-deleted.
         disableOrganizationDeletion: true,
         sendInvitationEmail: emails.invitation,
-        organizationHooks: organizationHooks(organizationCreationHooks(creationPolicy, creationLookups), createAuditHooks({ core, lookups }), emailReady),
+        organizationHooks: organizationHooks(organizationCreationHooks(creationPolicy, creationLookups), createAuditHooks({ core, lookups }), emailReady, db),
       }),
       // TOTP with backup codes; enforcement for owners and admins is an organization setting (security settings).
       twoFactor({ issuer: env.platform.name }),

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import type { AiModelCheck, DistributionChannel, InstanceEmailTester, ResponsibilitySuggester, CriteriaDrafter } from '@candydati/core';
+import type { AiModelCheck, CalendarReader, DistributionChannel, InstanceEmailTester, ResponsibilitySuggester, CriteriaDrafter } from '@candydati/core';
 import type { AdQualityAnalyzer } from '@candydati/domain';
 import { createDb, type DbHandle } from '@candydati/db';
 import type { FastifyInstance } from 'fastify';
@@ -65,6 +65,7 @@ export interface TestAppOptions {
   readonly migrationConnectors?: MigrationConnectorRegistry;
   readonly instanceEmailTester?: InstanceEmailTester;
   readonly aiCheck?: AiModelCheck;
+  readonly calendarReader?: CalendarReader;
   /** A database of its own (prepared by the caller), for tests about an instance with no account at all. */
   readonly databaseUrl?: string;
 }
@@ -76,7 +77,7 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
   const files = createInMemoryFileStorage();
   const queue = createInMemoryTaskQueue();
   const fakeSender = createFakeEmailSender();
-  const app = await buildServer({ env: testEnv({ DATABASE_URL: databaseUrl, ...options.env }), throttleStore: options.throttleStore ?? createInMemoryThrottleStore(), db: handle.db, accountMailer: options.accountMailer ?? mailbox, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), responsibilitySuggester: options.responsibilitySuggester, criteriaDrafter: options.criteriaDrafter, files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, migrationConnectors: options.migrationConnectors, reportClock: options.reportClock, instanceEmailTester: options.instanceEmailTester, aiCheck: options.aiCheck });
+  const app = await buildServer({ env: testEnv({ DATABASE_URL: databaseUrl, ...options.env }), throttleStore: options.throttleStore ?? createInMemoryThrottleStore(), db: handle.db, accountMailer: options.accountMailer ?? mailbox, rateLimit: options.rateLimit ?? HIGH_LIMITS, adQuality: options.adQuality ?? fakeAdQualityAnalyzer(), responsibilitySuggester: options.responsibilitySuggester, criteriaDrafter: options.criteriaDrafter, files, queue, messaging: { sender: fakeSender, identity: createFakeEmailIdentity() }, distributionChannels: options.distributionChannels, migrationConnectors: options.migrationConnectors, reportClock: options.reportClock, instanceEmailTester: options.instanceEmailTester, aiCheck: options.aiCheck, calendarReader: options.calendarReader });
   await app.ready();
   registerMailbox(app, mailbox);
   return {
