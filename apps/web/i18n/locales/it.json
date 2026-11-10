@@ -58,7 +58,8 @@
     "migrations": "Migrazione",
     "clients": "Clienti",
     "skills": "Competenze",
-    "automationPacks": "Automazioni"
+    "automationPacks": "Automazioni",
+    "calendar": "Calendario"
   },
   "jobRequests": {
     "title": "Richieste di assunzione",
@@ -1673,7 +1674,8 @@
       "tasks": "Attività",
       "privacy": "Privacy e dati",
       "feedback": "Feedback",
-      "timeline": "Cronologia"
+      "timeline": "Cronologia",
+      "interviews": "Colloqui"
     },
     "header": {
       "stage": "Fase:",
@@ -5270,6 +5272,200 @@
     "errors": {
       "no_criteria": "Indica almeno un criterio.",
       "invalid": "Criteri non accettati: servono criteri legati al lavoro, mai età, genere, origine o altre caratteristiche personali."
+    }
+  },
+  "calendar": {
+    "pageTitle": "Calendario",
+    "pageDescription": "Collega il tuo calendario: i candidati prenotano il colloquio solo quando sei libero, dentro i tuoi orari di lavoro.",
+    "privacy": "Leggiamo solo quando sei occupato. Mai titoli, descrizioni, luoghi o partecipanti degli eventi.",
+    "status": {
+      "title": "Stato",
+      "connected": "Collegato a {host}",
+      "notConnected": "Nessun calendario collegato. Finché non lo colleghi contiamo libere tutte le tue ore di lavoro.",
+      "justNow": "aggiornato ora",
+      "minutesAgo": "aggiornato {count} min fa",
+      "hoursAgo": "aggiornato {count} ora fa | aggiornato {count} ore fa",
+      "daysAgo": "aggiornato {count} giorno fa | aggiornato {count} giorni fa",
+      "lastError": "L'ultima lettura non è riuscita"
+    },
+    "lastError": {
+      "unreachable": "Non siamo riusciti a raggiungere l'indirizzo. Se hai rigenerato l'indirizzo segreto, incolla quello nuovo.",
+      "not_calendar": "L'indirizzo non porta a un calendario in formato iCal. Controlla di aver copiato l'indirizzo segreto (finisce di solito con .ics).",
+      "too_large": "Il calendario è troppo grande da leggere. Pubblica solo il calendario di lavoro, senza quelli condivisi.",
+      "not_allowed": "Questo indirizzo non si può leggere da qui: deve essere un indirizzo pubblico in https."
+    },
+    "url": {
+      "label": "Indirizzo segreto in formato iCal",
+      "replaceLabel": "Nuovo indirizzo segreto in formato iCal",
+      "hint": "Resta segreto: dopo il salvataggio non lo mostriamo più, a nessuno.",
+      "placeholder": "https://…"
+    },
+    "howTo": {
+      "title": "Dove trovo l'indirizzo?",
+      "google": "Google Calendar: Impostazioni → il tuo calendario → Indirizzo segreto in formato iCal.",
+      "outlook": "Outlook: Impostazioni → Calendario → Calendari condivisi → Pubblica un calendario, scegli «Può visualizzare quando sono occupato» e copia il link ICS.",
+      "icloud": "iCloud: nell'app Calendario rendi pubblico il calendario (Calendario pubblico) e copia il link di condivisione."
+    },
+    "hours": {
+      "title": "Orari di lavoro",
+      "intro": "Proponiamo ai candidati solo orari dentro questi giorni e queste ore.",
+      "days": "Giorni",
+      "start": "Dalle",
+      "end": "Alle",
+      "timeZone": "Fuso orario",
+      "timeZoneHint": "Gli orari di lavoro valgono in questo fuso."
+    },
+    "actions": {
+      "connect": "Collega il calendario",
+      "replace": "Salva il nuovo indirizzo",
+      "saveHours": "Salva gli orari",
+      "saving": "Salvataggio…",
+      "disconnect": "Scollega",
+      "disconnectTitle": "Scollegare il calendario?",
+      "disconnectBody": "Cancelliamo l'indirizzo e gli orari occupati letti finora. Da quel momento contiamo libere le tue ore di lavoro.",
+      "disconnectConfirm": "Scollega"
+    },
+    "saved": {
+      "connected": "Calendario collegato",
+      "hours": "Orari salvati",
+      "disconnected": "Calendario scollegato"
+    },
+    "errors": {
+      "unreachable": "Non siamo riusciti a raggiungere l'indirizzo. Controlla di averlo copiato per intero.",
+      "not_calendar": "L'indirizzo non porta a un calendario in formato iCal. Copia l'indirizzo segreto, non quello della pagina web.",
+      "too_large": "Il calendario è troppo grande da leggere. Pubblica solo il calendario di lavoro.",
+      "not_allowed": "Questo indirizzo non si può leggere da qui: usa l'indirizzo pubblico in https del tuo calendario.",
+      "url": "Incolla un indirizzo che inizi con https:// (o webcal://).",
+      "hours": "Scegli almeno un giorno e un orario di fine dopo quello di inizio.",
+      "timeZone": "Scegli un fuso orario dall'elenco."
+    }
+  },
+  "interviews": {
+    "title": "Colloqui",
+    "intro": "Il candidato sceglie l'orario tra quelli liberi degli intervistatori. Nessun orario viene fissato senza di lui.",
+    "empty": "Nessun colloquio per questa candidatura.",
+    "retry": "Riprova",
+    "propose": "Proponi colloquio",
+    "zone": "Orari nel fuso {zone}",
+    "status": {
+      "proposed": "In attesa del candidato",
+      "booked": "Fissato",
+      "cancelled": "Annullato"
+    },
+    "modes": {
+      "video": "Video",
+      "onsite": "In sede",
+      "phone": "Telefono"
+    },
+    "item": {
+      "notBooked": "Il candidato non ha ancora scelto un orario",
+      "duration": "{count} min",
+      "with": "Con {names}",
+      "location": "Dove: {location}",
+      "cancel": "Annulla colloquio"
+    },
+    "cancel": {
+      "title": "Annullare il colloquio?",
+      "body": "Il link del candidato smette di funzionare. Se l'orario era già fissato, avvisiamo il candidato e gli intervistatori.",
+      "confirm": "Annulla colloquio",
+      "done": "Colloquio annullato"
+    },
+    "dialog": {
+      "title": "Proponi un colloquio",
+      "description": "Mandiamo al candidato un link per scegliere l'orario tra quelli liberi degli intervistatori della fase.",
+      "stage": "Fase",
+      "stageHint": "La durata è quella indicata per la fase.",
+      "mode": "Modalità",
+      "location": "Dove",
+      "locationHint": {
+        "video": "Il link della videochiamata (facoltativo, il candidato lo vede dopo aver prenotato).",
+        "onsite": "L'indirizzo della sede (facoltativo, il candidato lo vede dopo aver prenotato).",
+        "phone": "Il numero da chiamare, o scrivi che chiamate voi (facoltativo)."
+      },
+      "interviewers": "Partecipano gli intervistatori indicati per la fase.",
+      "submit": "Manda la proposta",
+      "sending": "Invio…",
+      "cancel": "Annulla"
+    },
+    "proposed": {
+      "sent": "Il candidato riceve un'email con gli orari liberi.",
+      "withoutCalendar": "{names} non ha collegato il calendario: contiamo libere le sue ore lavorative. | {names} non hanno collegato il calendario: contiamo libere le loro ore lavorative.",
+      "noSlots": "Nei prossimi 14 giorni non c'è nessun orario libero per tutti: il candidato non troverà orari. Scrivigli per accordarvi."
+    },
+    "errors": {
+      "open": "C'è già un colloquio aperto per questa fase: annullalo prima di proporne un altro.",
+      "no_interviewers": "Questa fase non ha intervistatori: aggiungili nel team dell'annuncio.",
+      "unknown_stage": "Questa fase non esiste più nell'annuncio.",
+      "application_closed": "La candidatura è chiusa: non si possono proporre colloqui."
+    }
+  },
+  "interviewPage": {
+    "metaTitle": "Colloquio con {organization}",
+    "title": "Scegli quando fare il colloquio",
+    "hello": "Ciao {name}",
+    "intro": "{organization} ti invita a un colloquio per la posizione {job}. Scegli l'orario che preferisci e confermalo: niente è fissato finché non premi Conferma.",
+    "details": {
+      "job": "Posizione",
+      "stage": "Fase",
+      "duration": "Durata",
+      "durationValue": "{count} minuto | {count} minuti",
+      "mode": "Modalità",
+      "with": "Con",
+      "where": "Dove"
+    },
+    "slots": {
+      "title": "Orari liberi",
+      "zone": "Orari nel tuo fuso orario: {zone}",
+      "empty": "Al momento non ci sono orari liberi. Rispondi all'email che hai ricevuto per accordarti.",
+      "preselectedGone": "L'orario scelto dall'email non è più libero: scegline un altro.",
+      "chosen": "Hai scelto: {date}",
+      "pick": "Scegli un orario dall'elenco.",
+      "loading": "Carico gli orari…"
+    },
+    "confirm": "Conferma",
+    "confirming": "Conferma in corso…",
+    "booked": {
+      "title": "Colloquio confermato",
+      "when": "{date}",
+      "body": "Ti abbiamo mandato un'email con l'invito da aggiungere al calendario.",
+      "move": "Sposta",
+      "cancel": "Annulla",
+      "keep": "Tieni questo orario",
+      "moveTitle": "Scegli un nuovo orario",
+      "cutoff": "Mancano meno di 12 ore: per cambiare rispondi all'email che hai ricevuto."
+    },
+    "cancel": {
+      "question": "Vuoi annullare il colloquio? Lo diciamo a {organization}.",
+      "confirm": "Sì, annulla",
+      "back": "No, torna indietro",
+      "cancelling": "Annullamento…"
+    },
+    "cancelled": {
+      "title": "Colloquio annullato",
+      "body": "Questo colloquio è annullato. Se vuoi accordarti per un altro momento, rispondi all'email che hai ricevuto."
+    },
+    "errors": {
+      "slotTaken": "Questo orario è appena stato preso: abbiamo aggiornato l'elenco, scegline un altro.",
+      "tooLate": "È troppo tardi per cambiare: rispondi all'email che hai ricevuto.",
+      "cancelled": "Il colloquio è stato annullato nel frattempo.",
+      "changed": "Il colloquio è cambiato nel frattempo: abbiamo aggiornato la pagina.",
+      "invalid": "Questo link non funziona più. Usa il link dell'ultima email che hai ricevuto.",
+      "rateLimited": "Troppi tentativi. Aspetta qualche minuto e riprova.",
+      "unavailable": "Non siamo riusciti a completare l'operazione. Riprova tra poco."
+    },
+    "failure": {
+      "invalid": {
+        "title": "Link non valido",
+        "body": "Questo link non funziona. Controlla di averlo copiato per intero dall'email, o usa quello dell'ultima email ricevuta."
+      },
+      "rateLimited": {
+        "title": "Troppi tentativi",
+        "body": "Aspetta qualche minuto, poi ricarica la pagina."
+      },
+      "unavailable": {
+        "title": "Pagina non disponibile",
+        "body": "Non riusciamo a caricare gli orari in questo momento. Riprova più tardi."
+      }
     }
   }
 }

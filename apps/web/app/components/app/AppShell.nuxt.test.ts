@@ -159,7 +159,7 @@ describe('single sidebar', () => {
     useViewer().viewer.value = viewerWith('owner')
     const wrapper = track(await mountSuspended(AppNavPanel))
     const labels = wrapper.findAll('nav a').map((link) => link.text().replace(/\d+$/, '').trim())
-    expect(labels).toEqual(['Panoramica', 'Da gestire', 'Le mie attività', 'Annunci', 'Clienti', 'Richieste', 'Candidati', 'Report', 'Template', 'Pagina carriera', 'Distribuzione', 'Modelli email', 'Automazioni', 'Email', 'AI', 'Webhook', 'API e integrazioni', 'Importa candidati', 'Migrazione', 'Membri', 'Sicurezza', 'Privacy', 'Competenze', 'Dati', 'Registro delle azioni'])
+    expect(labels).toEqual(['Panoramica', 'Da gestire', 'Le mie attività', 'Annunci', 'Clienti', 'Richieste', 'Candidati', 'Report', 'Template', 'Pagina carriera', 'Distribuzione', 'Modelli email', 'Automazioni', 'Email', 'AI', 'Webhook', 'API e integrazioni', 'Importa candidati', 'Migrazione', 'Membri', 'Sicurezza', 'Calendario', 'Privacy', 'Competenze', 'Dati', 'Registro delle azioni'])
     expect(wrapper.find('a[target="_blank"]').text()).toBe('Pagina carriere')
     expect(wrapper.find('[aria-label="Lingua"]').exists()).toBe(false)
   })

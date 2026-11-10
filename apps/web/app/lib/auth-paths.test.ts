@@ -115,6 +115,9 @@ describe('public careers pages', () => {
     expect(isPublicPath('/feedback/tok123')).toBe(true)
     expect(isPublicPath('/feedback')).toBe(false)
     expect(isPublicPath('/shortlist/tok123')).toBe(true)
+    expect(isPublicPath('/interview/tok123')).toBe(true)
+    expect(isPublicPath('/interview')).toBe(false)
+    expect(resolveGuard('/interview/tok123', null)).toBeNull()
     expect(isPublicPath('/shortlist')).toBe(false)
     // The art. 14 page of sourced people went with external sourcing.
     expect(isPublicPath('/sourcing/notice/tok123')).toBe(false)

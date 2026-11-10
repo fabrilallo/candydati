@@ -25,11 +25,11 @@ const isInvitationPath = (path: string): boolean => path.startsWith('/accept-inv
 const isAppPath = (path: string): boolean => path === HOME || path.startsWith(`${HOME}/`)
 /**
  * Public pages, open to anyone whatever their session: the careers pages (indexable, server-rendered) and the
- * reconfirmation of imported candidates (`/consent/<token>`), the interview feedback form (`/feedback/<token>`) and the
- * shortlist a client answers (`/shortlist/<token>`), all noindex.
+ * reconfirmation of imported candidates (`/consent/<token>`), the interview feedback form (`/feedback/<token>`), the
+ * shortlist a client answers (`/shortlist/<token>`) and the candidate's interview booking (`/interview/<token>`), all noindex.
  */
 export const isPublicPath = (path: string): boolean =>
-  path === '/careers' || path.startsWith('/careers/') || path.startsWith('/consent/') || path.startsWith('/feedback/') || path.startsWith('/shortlist/')
+  path === '/careers' || path.startsWith('/careers/') || path.startsWith('/consent/') || path.startsWith('/feedback/') || path.startsWith('/shortlist/') || path.startsWith('/interview/')
 /** Only without a session: signing in (including its second step), signing up, asking for a reset link. */
 const GUEST_PATHS: ReadonlySet<string> = new Set([LOGIN, SIGNUP, '/forgot-password', '/two-factor'])
 const isGuestPath = (path: string): boolean => GUEST_PATHS.has(path)
