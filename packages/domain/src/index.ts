@@ -51,6 +51,7 @@ export * from './access/connected-app.js';
 export * from './distribution/index.js';
 export * from './import/index.js';
 export * from './feedback/index.js';
+export * from './interview/index.js';
 export * from './job-request/index.js';
 export * from './job-health/index.js';
 export * from './job/stage-labels.js';

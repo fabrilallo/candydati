@@ -1,15 +1,24 @@
 import { z } from 'zod';
 import { buildHeaders } from './headers.js';
 import {
+  CALENDAR_FILENAME,
   EmailSendError,
   type DnsRecord,
   type DomainStatus,
   type DomainVerification,
+  type EmailCalendar,
   type EmailProvider,
   type FetchLike,
 } from './types.js';
 
 const BASE_URL = 'https://api.resend.com';
+
+/** Resend sends an attachment with its content type: the method makes mail apps treat it as an invite. */
+const calendarAttachment = (calendar: EmailCalendar) => ({
+  filename: CALENDAR_FILENAME,
+  content: Buffer.from(calendar.content, 'utf8').toString('base64'),
+  content_type: `text/calendar; charset=utf-8; method=${calendar.method}`,
+});
 
 export interface ResendOptions {
   readonly apiKey: string;
@@ -74,6 +83,7 @@ export function createResendEmailProvider(options: ResendOptions): EmailProvider
         ...(message.html ? { html: message.html } : {}),
         ...(message.replyTo ? { reply_to: message.replyTo } : {}),
         ...(Object.keys(headers).length > 0 ? { headers } : {}),
+        ...(message.calendar ? { attachments: [calendarAttachment(message.calendar)] } : {}),
       };
       const idempotency = message.idempotencyKey ? { 'Idempotency-Key': message.idempotencyKey } : {};
       const parsed = sendResponse.safeParse(await call('POST', '/emails', payload, idempotency));

@@ -26,6 +26,8 @@ describe('toEmailSender', () => {
     const provider: EmailProvider = { send: async (m) => (sent.push(m), { providerMessageId: 'p1' }), domainStatus: async () => ({ status: 'unsupported', records: [] }) };
     expect(await toEmailSender(provider).send(email)).toEqual({ providerMessageId: 'p1' });
     expect(sent[0]).toMatchObject({ to: ['c@x.it'], replyTo: 'r@x.it' });
+    await toEmailSender(provider).send({ ...email, calendar: { method: 'CANCEL', content: 'BEGIN:VCALENDAR' } });
+    expect(sent[1]).toMatchObject({ calendar: { method: 'CANCEL', content: 'BEGIN:VCALENDAR' } });
   });
 
   it('carries the idempotency key and says whether the provider honours it', async () => {

@@ -13,6 +13,7 @@ export { createCvExtractor, type CvExtractor, type CvExtractorOptions, type CvEx
 export { createMastraGenerator, GENERATOR_TEMPERATURE, GENERATOR_TIMEOUT_MS } from './ai/structured-generator.js';
 export { checkAiModel, MODEL_CHECK_TIMEOUT_MS } from './ai/model-check.js';
 export { AI_PROVIDER_KEYS, INSTANCE_AI_SECRET_INFO, openStoredAiSettings, createAiRuntime, hasProviderKey, providerOf, toMastraModel, type AiEnv, type AiModelRef, type AiRuntime, type AiSnapshot, type AiSource, type StoredAiModel, type StoredAiSettings } from './ai/runtime.js';
+export * from './calendar/index.js';
 export * from './email/index.js';
 export * from './http/index.js';
 export * from './crypto/index.js';

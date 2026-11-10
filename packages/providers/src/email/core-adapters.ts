@@ -25,6 +25,7 @@ export const toEmailSender = (provider: EmailProvider): EmailSender => ({
         html: email.html,
         headers: email.headers,
         idempotencyKey: email.idempotencyKey,
+        calendar: email.calendar,
       });
     } catch (error) {
       if (error instanceof EmailSendError) throw Object.assign(new Error(error.message), { permanent: !error.transient });

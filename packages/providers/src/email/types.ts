@@ -9,7 +9,17 @@ export interface EmailMessage {
   readonly headers?: Readonly<Record<string, string>> | undefined;
   /** Sent to providers that support it (Resend): a repeated request with the same key sends nothing new. */
   readonly idempotencyKey?: string | undefined;
+  /** A calendar invite (iTIP), sent as a `text/calendar` part with its method so mail apps offer to add it. */
+  readonly calendar?: EmailCalendar | undefined;
 }
+
+export interface EmailCalendar {
+  readonly method: 'REQUEST' | 'CANCEL';
+  /** The whole VCALENDAR, CRLF lines. */
+  readonly content: string;
+}
+
+export const CALENDAR_FILENAME = 'invite.ics';
 
 export type DomainVerification = 'verified' | 'pending' | 'failed' | 'unsupported';
 

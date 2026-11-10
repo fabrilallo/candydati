@@ -95,6 +95,8 @@ export interface OutboundEmail {
   readonly headers: Readonly<Record<string, string>>;
   /** Same key, same email: a provider that supports it sends a repeated request only once. */
   readonly idempotencyKey?: string | undefined;
+  /** An interview invite or cancellation (.ics), so the event lands in the recipient's calendar. */
+  readonly calendar?: { readonly method: 'REQUEST' | 'CANCEL'; readonly content: string } | undefined;
 }
 
 /**
