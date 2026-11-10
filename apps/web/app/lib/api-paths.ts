@@ -55,6 +55,14 @@ export const STALE_JOBS_PATH = '/api/v1/jobs/stale'
 export const REPORTS_PATH = '/api/v1/reports'
 export const REPORTS_CSV_PATH = '/api/v1/reports/export.csv'
 
+// Interview scheduling: the person's own calendar link, the interviews of an application, the candidate's booking page
+export const MY_CALENDAR_FEED_PATH = '/api/v1/me/calendar-feed'
+export const applicationInterviewsPath = (applicationId: string): string => `/api/v1/applications/${enc(applicationId)}/interviews`
+export const cancelInterviewPath = (interviewId: string): string => `/api/v1/interviews/${enc(interviewId)}/cancel`
+export const publicInterviewPath = (token: string): string => `/api/v1/public/interviews/${enc(token)}`
+export const publicInterviewBookPath = (token: string): string => `${publicInterviewPath(token)}/book`
+export const publicInterviewCancelPath = (token: string): string => `${publicInterviewPath(token)}/cancel`
+
 // Imports and public reconfirmation
 export const IMPORTS_PATH = '/api/v1/imports'
 export const importPath = (batchId: string): string => `${IMPORTS_PATH}/${enc(batchId)}`

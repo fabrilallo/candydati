@@ -45,7 +45,7 @@ describe('buildSecurityHeaders', () => {
     expect(buildSecurityHeaders({ ...base, dev: true })['strict-transport-security']).toBeUndefined()
   })
 
-  it.each(['/consent/x', '/feedback/abc', '/shortlist/abc', '/accept-invitation/xyz', '/accept-invitation', '/oauth/authorize', '/oauth/consent'])('sends no referrer from %s', (pathname) => {
+  it.each(['/consent/x', '/feedback/abc', '/shortlist/abc', '/interview/abc', '/accept-invitation/xyz', '/accept-invitation', '/oauth/authorize', '/oauth/consent'])('sends no referrer from %s', (pathname) => {
     expect(buildSecurityHeaders({ ...base, pathname })['referrer-policy']).toBe('no-referrer')
   })
 

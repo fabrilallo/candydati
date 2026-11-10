@@ -16,6 +16,7 @@ import JobDistribution from './app/jobs/[id]/distribution.vue'
 import SettingsAi from './app/settings/ai.vue'
 import SettingsApi from './app/settings/api.vue'
 import SettingsAudit from './app/settings/audit-log.vue'
+import SettingsCalendar from './app/settings/calendar.vue'
 import SettingsData from './app/settings/data.vue'
 import SettingsDistribution from './app/settings/distribution.vue'
 import SettingsEmailTemplates from './app/settings/email-templates.vue'
@@ -40,6 +41,7 @@ const PAGES = [
   ['settings: ai', SettingsAi, '/app/settings/ai', 'InstanceAiPanel'],
   ['settings: api', SettingsApi, '/app/settings/api', 'ApiKeysPanel'],
   ['settings: audit log', SettingsAudit, '/app/settings/audit-log', 'AuditLogPanel'],
+  ['settings: calendar', SettingsCalendar, '/app/settings/calendar', 'CalendarFeedPanel'],
   ['settings: data', SettingsData, '/app/settings/data', 'DataExportsPanel'],
   ['settings: distribution', SettingsDistribution, '/app/settings/distribution', 'DistributionSettings'],
   ['settings: email templates', SettingsEmailTemplates, '/app/settings/email-templates', 'EmailTemplatesPanel'],

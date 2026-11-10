@@ -58,7 +58,8 @@
     "migrations": "Migration",
     "clients": "Clients",
     "skills": "Skills",
-    "automationPacks": "Automations"
+    "automationPacks": "Automations",
+    "calendar": "Calendar"
   },
   "jobRequests": {
     "title": "Hiring requests",
@@ -1673,7 +1674,8 @@
       "tasks": "Tasks",
       "privacy": "Privacy and data",
       "feedback": "Feedback",
-      "timeline": "Timeline"
+      "timeline": "Timeline",
+      "interviews": "Interviews"
     },
     "header": {
       "stage": "Stage:",
@@ -5270,6 +5272,200 @@
     "errors": {
       "no_criteria": "Give at least one criterion.",
       "invalid": "Criteria refused: use job-related criteria, never age, gender, origin or other personal characteristics."
+    }
+  },
+  "calendar": {
+    "pageTitle": "Calendar",
+    "pageDescription": "Connect your calendar: candidates book an interview only when you are free, inside your working hours.",
+    "privacy": "We read only when you are busy. Never the titles, descriptions, places or attendees of your events.",
+    "status": {
+      "title": "Status",
+      "connected": "Connected to {host}",
+      "notConnected": "No calendar connected. Until you connect one, all your working hours count as free.",
+      "justNow": "updated just now",
+      "minutesAgo": "updated {count} min ago",
+      "hoursAgo": "updated {count} hour ago | updated {count} hours ago",
+      "daysAgo": "updated {count} day ago | updated {count} days ago",
+      "lastError": "The last read did not work"
+    },
+    "lastError": {
+      "unreachable": "We could not reach the address. If you reset the secret address, paste the new one.",
+      "not_calendar": "The address does not lead to an iCal calendar. Check that you copied the secret address (it usually ends in .ics).",
+      "too_large": "The calendar is too large to read. Publish only your work calendar, without the shared ones.",
+      "not_allowed": "This address cannot be read from here: it must be a public https address."
+    },
+    "url": {
+      "label": "Secret address in iCal format",
+      "replaceLabel": "New secret address in iCal format",
+      "hint": "It stays secret: once saved we never show it again, to anyone.",
+      "placeholder": "https://…"
+    },
+    "howTo": {
+      "title": "Where do I find the address?",
+      "google": "Google Calendar: Settings → your calendar → Secret address in iCal format.",
+      "outlook": "Outlook: Settings → Calendar → Shared calendars → Publish a calendar, choose “Can view when I'm busy” and copy the ICS link.",
+      "icloud": "iCloud: in the Calendar app make the calendar public (Public Calendar) and copy the sharing link."
+    },
+    "hours": {
+      "title": "Working hours",
+      "intro": "We offer candidates only times inside these days and hours.",
+      "days": "Days",
+      "start": "From",
+      "end": "To",
+      "timeZone": "Time zone",
+      "timeZoneHint": "Your working hours are in this zone."
+    },
+    "actions": {
+      "connect": "Connect calendar",
+      "replace": "Save the new address",
+      "saveHours": "Save hours",
+      "saving": "Saving…",
+      "disconnect": "Disconnect",
+      "disconnectTitle": "Disconnect the calendar?",
+      "disconnectBody": "We delete the address and the busy times read so far. From then on your working hours count as free.",
+      "disconnectConfirm": "Disconnect"
+    },
+    "saved": {
+      "connected": "Calendar connected",
+      "hours": "Hours saved",
+      "disconnected": "Calendar disconnected"
+    },
+    "errors": {
+      "unreachable": "We could not reach the address. Check that you copied it in full.",
+      "not_calendar": "The address does not lead to an iCal calendar. Copy the secret address, not the web page one.",
+      "too_large": "The calendar is too large to read. Publish only your work calendar.",
+      "not_allowed": "This address cannot be read from here: use your calendar's public https address.",
+      "url": "Paste an address that starts with https:// (or webcal://).",
+      "hours": "Choose at least one day and an end time after the start time.",
+      "timeZone": "Choose a time zone from the list."
+    }
+  },
+  "interviews": {
+    "title": "Interviews",
+    "intro": "The candidate picks a time among the interviewers' free ones. No time is set without them.",
+    "empty": "No interviews for this application.",
+    "retry": "Retry",
+    "propose": "Propose interview",
+    "zone": "Times in {zone}",
+    "status": {
+      "proposed": "Waiting for the candidate",
+      "booked": "Booked",
+      "cancelled": "Cancelled"
+    },
+    "modes": {
+      "video": "Video",
+      "onsite": "On site",
+      "phone": "Phone"
+    },
+    "item": {
+      "notBooked": "The candidate has not picked a time yet",
+      "duration": "{count} min",
+      "with": "With {names}",
+      "location": "Where: {location}",
+      "cancel": "Cancel interview"
+    },
+    "cancel": {
+      "title": "Cancel the interview?",
+      "body": "The candidate's link stops working. If a time was already booked, we tell the candidate and the interviewers.",
+      "confirm": "Cancel interview",
+      "done": "Interview cancelled"
+    },
+    "dialog": {
+      "title": "Propose an interview",
+      "description": "We send the candidate a link to pick a time among the free ones of the stage's interviewers.",
+      "stage": "Stage",
+      "stageHint": "The length is the one set for the stage.",
+      "mode": "Mode",
+      "location": "Where",
+      "locationHint": {
+        "video": "The video call link (optional, the candidate sees it after booking).",
+        "onsite": "The office address (optional, the candidate sees it after booking).",
+        "phone": "The number to call, or say that you will call (optional)."
+      },
+      "interviewers": "The interviewers set for the stage take part.",
+      "submit": "Send the proposal",
+      "sending": "Sending…",
+      "cancel": "Cancel"
+    },
+    "proposed": {
+      "sent": "The candidate gets an email with the free times.",
+      "withoutCalendar": "{names} has not connected a calendar: we count their working hours as free. | {names} have not connected a calendar: we count their working hours as free.",
+      "noSlots": "There is no time free for everyone in the next 14 days: the candidate will find none. Write to them to agree on one."
+    },
+    "errors": {
+      "open": "There is already an open interview for this stage: cancel it before proposing another.",
+      "no_interviewers": "This stage has no interviewers: add them in the job's team.",
+      "unknown_stage": "This stage is no longer in the job.",
+      "application_closed": "The application is closed: interviews cannot be proposed."
+    }
+  },
+  "interviewPage": {
+    "metaTitle": "Interview with {organization}",
+    "title": "Choose when to have the interview",
+    "hello": "Hi {name}",
+    "intro": "{organization} invites you to an interview for the {job} position. Pick the time you prefer and confirm it: nothing is set until you press Confirm.",
+    "details": {
+      "job": "Position",
+      "stage": "Stage",
+      "duration": "Length",
+      "durationValue": "{count} minute | {count} minutes",
+      "mode": "Mode",
+      "with": "With",
+      "where": "Where"
+    },
+    "slots": {
+      "title": "Free times",
+      "zone": "Times in your time zone: {zone}",
+      "empty": "There are no free times right now. Reply to the email you received to agree on one.",
+      "preselectedGone": "The time chosen in the email is no longer free: pick another one.",
+      "chosen": "You chose: {date}",
+      "pick": "Pick a time from the list.",
+      "loading": "Loading the times…"
+    },
+    "confirm": "Confirm",
+    "confirming": "Confirming…",
+    "booked": {
+      "title": "Interview confirmed",
+      "when": "{date}",
+      "body": "We sent you an email with the invite to add to your calendar.",
+      "move": "Reschedule",
+      "cancel": "Cancel",
+      "keep": "Keep this time",
+      "moveTitle": "Pick a new time",
+      "cutoff": "It is less than 12 hours away: to change it, reply to the email you received."
+    },
+    "cancel": {
+      "question": "Do you want to cancel the interview? We will tell {organization}.",
+      "confirm": "Yes, cancel",
+      "back": "No, go back",
+      "cancelling": "Cancelling…"
+    },
+    "cancelled": {
+      "title": "Interview cancelled",
+      "body": "This interview is cancelled. To agree on another time, reply to the email you received."
+    },
+    "errors": {
+      "slotTaken": "This time was just taken: we refreshed the list, pick another one.",
+      "tooLate": "It is too late to change: reply to the email you received.",
+      "cancelled": "The interview was cancelled in the meantime.",
+      "changed": "The interview changed in the meantime: we refreshed the page.",
+      "invalid": "This link no longer works. Use the link in the latest email you received.",
+      "rateLimited": "Too many attempts. Wait a few minutes and try again.",
+      "unavailable": "We could not complete the action. Try again shortly."
+    },
+    "failure": {
+      "invalid": {
+        "title": "Invalid link",
+        "body": "This link does not work. Check that you copied it in full from the email, or use the one in the latest email."
+      },
+      "rateLimited": {
+        "title": "Too many attempts",
+        "body": "Wait a few minutes, then reload the page."
+      },
+      "unavailable": {
+        "title": "Page unavailable",
+        "body": "We cannot load the times right now. Try again later."
+      }
     }
   }
 }

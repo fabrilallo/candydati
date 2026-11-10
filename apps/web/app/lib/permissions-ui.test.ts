@@ -90,14 +90,19 @@ describe('defaultInviteRole', () => {
 
 describe('visibleNav', () => {
   it('hides the audit log without audit:read', () => {
-    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'templates', 'distribution', 'emailTemplates', 'automationPacks', 'imports', 'members', 'security'])
-    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'clients', 'jobRequests', 'candidates', 'reports', 'templates', 'careersPage', 'distribution', 'emailTemplates', 'automationPacks', 'email', 'ai', 'webhooks', 'api', 'imports', 'migrations', 'members', 'security', 'privacy', 'skills', 'data', 'audit'])
+    expect(visibleNav('recruiter').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'jobRequests', 'candidates', 'reports', 'templates', 'distribution', 'emailTemplates', 'automationPacks', 'imports', 'members', 'security', 'calendar'])
+    expect(visibleNav('owner').map((item) => item.id)).toEqual(['dashboard', 'attention', 'tasks', 'jobs', 'clients', 'jobRequests', 'candidates', 'reports', 'templates', 'careersPage', 'distribution', 'emailTemplates', 'automationPacks', 'email', 'ai', 'webhooks', 'api', 'imports', 'migrations', 'members', 'security', 'calendar', 'privacy', 'skills', 'data', 'audit'])
   })
 
   it('shows the skill aliases to owners and admins only, and finds their page', () => {
     for (const role of ['owner', 'admin'] as const) expect(visibleNav(role).map((item) => item.id)).toContain('skills')
     for (const role of ['recruiter', 'hiring_manager', 'interviewer'] as const) expect(visibleNav(role).map((item) => item.id)).not.toContain('skills')
     expect(activeNavId('/app/settings/skills', visibleNav('owner'))).toBe('skills')
+  })
+
+  it('shows the personal calendar to every member', () => {
+    for (const role of ['owner', 'admin', 'recruiter', 'hiring_manager', 'interviewer'] as const) expect(visibleNav(role).map((item) => item.id)).toContain('calendar')
+    expect(activeNavId('/app/settings/calendar', visibleNav('interviewer'))).toBe('calendar')
   })
 
   it('shows the automation packs to who manages automations, also on a pack page', () => {
@@ -210,7 +215,7 @@ describe('navigation sections', () => {
       work: ['dashboard', 'attention', 'tasks', 'jobs', 'clients', 'jobRequests', 'candidates', 'reports', 'templates'],
       hiringSetup: ['careersPage', 'distribution', 'emailTemplates', 'automationPacks'],
       integrations: ['email', 'ai', 'webhooks', 'api', 'imports', 'migrations'],
-      organization: ['members', 'security', 'privacy', 'skills', 'data', 'audit'],
+      organization: ['members', 'security', 'calendar', 'privacy', 'skills', 'data', 'audit'],
     })
   })
 
