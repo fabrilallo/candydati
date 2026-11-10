@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-10
+
+Three migrations run at start as usual; take a backup first (docs/OPERATIONS.md). `0054_sourced_contacts` and
+`0055_linkedin_sourcing` are additive and create tables nothing uses; `0056_erase_sourcing_data` deletes their rows
+(see Changed). No environment variable changes for 0.5.0 installs.
+
 ### Added
 
 - **"Search your database" on a job: your own candidates first.** A job tab ("Cerca nel database",
