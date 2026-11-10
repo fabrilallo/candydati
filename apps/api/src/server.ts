@@ -1,7 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { safeErrorSerializer } from '@candydati/core';
-import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, AiModelCheck, TaskQueue, ResponsibilitySuggester, CriteriaDrafter } from '@candydati/core';
+import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, AiModelCheck, CalendarReader, TaskQueue, ResponsibilitySuggester, CriteriaDrafter } from '@candydati/core';
 import { createErrorReporter, type ErrorReporter, type MigrationConnectorRegistry } from '@candydati/providers';
 import type { Db } from '@candydati/db';
 import type { AdQualityAnalyzer } from '@candydati/domain';
@@ -69,6 +69,7 @@ import { registerPublicLinkedInRoutes } from './routes/public-linkedin.js';
 import { registerReportRoutes } from './routes/reports.js';
 import { registerStatsRoutes } from './routes/stats.js';
 import { registerFeedbackRoutes } from './routes/feedback.js';
+import { registerCalendarRoutes } from './routes/calendar.js';
 import { registerPublicFeedbackRoutes } from './routes/public-feedback.js';
 import { registerClientRoutes } from './routes/clients.js';
 import { registerPublicShortlistRoutes } from './routes/public-shortlists.js';
@@ -105,6 +106,8 @@ export interface ServerDeps {
   readonly instanceEmailTester?: InstanceEmailTester | undefined;
   /** Test seam: the test call of the AI settings (the provider by default). */
   readonly aiCheck?: AiModelCheck | undefined;
+  /** Test seam: reads calendar addresses (the SSRF-safe reader by default). */
+  readonly calendarReader?: CalendarReader | undefined;
   /** Test seam: the "now" of the reports. */
   readonly reportClock?: (() => Date) | undefined;
   /** Test seam: the careers media transcoder (sharp by default). */
@@ -197,6 +200,7 @@ function createContext(app: FastifyInstance, deps: ServerDeps, metrics: ApiMetri
   return createAppContext({
     aiRuntime,
     aiCheck: deps.aiCheck,
+    calendarReader: deps.calendarReader,
     emailRuntime,
     emailLog,
     instanceEmailTester: deps.instanceEmailTester,
@@ -252,6 +256,7 @@ function registerRecruitingRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerJobRoutes(app, ctx);
   registerStaleJobRoutes(app, ctx);
   registerFeedbackRoutes(app, ctx);
+  registerCalendarRoutes(app, ctx);
   registerJobRequestRoutes(app, ctx);
   registerJobTeamRoutes(app, ctx);
   registerPublicFeedbackRoutes(app, ctx);

@@ -5,7 +5,7 @@ const AREAS = [
   ['jobs', ['job', 'job_team', 'restricted_stage', 'job_template']],
   // An agency's clients and the shortlists presented to them (sending one is never for a key).
   ['clients', ['client', 'shortlist']],
-  ['candidates', ['candidate', 'candidate_note', 'feedback']],
+  ['candidates', ['candidate', 'candidate_note', 'feedback', 'interview']],
   ['communication', ['message', 'email_template']],
   ['work', ['task', 'automation']],
   ['reports', ['report']],

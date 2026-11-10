@@ -620,6 +620,16 @@
         "submitted": "Ha lasciato un feedback dopo un colloquio",
         "cv_opened": "Ha aperto il CV dal link del feedback"
       },
+      "calendar_feed": {
+        "saved": "Ha collegato o aggiornato il proprio calendario",
+        "removed": "Ha scollegato il proprio calendario"
+      },
+      "interview": {
+        "proposed": "Ha proposto un colloquio da prenotare",
+        "booked": "Colloquio prenotato",
+        "rescheduled": "Colloquio spostato",
+        "cancelled": "Colloquio annullato"
+      },
       "job_request": {
         "submitted": "Ha inviato una richiesta di apertura posizione",
         "approved": "Ha approvato una richiesta di apertura posizione",
@@ -2836,6 +2846,10 @@
       "feedback": {
         "manage": "Scegliere chi fa i colloqui e chiedere feedback",
         "read": "Leggere i feedback dei colloqui"
+      },
+      "interview": {
+        "schedule": "Proporre e annullare colloqui",
+        "read": "Vedere i colloqui prenotati"
       },
       "report": {
         "read": "Leggere i report aggregati"
