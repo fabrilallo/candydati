@@ -6,6 +6,7 @@ import { afterCommitOrNow, inTransaction } from '../../transaction.js';
 import { definePublicCommand, definePublicQuery } from '../../use-case.js';
 import type { RequestContext } from '../feedback/shared.js';
 import { availabilityOf, PAGE_CALENDAR_MAX_AGE_MS, slotsFor } from './availability.js';
+import { announceInterviewChange } from './alerts.js';
 import { sendInterviewNotices } from './notices.js';
 import { INTERVIEW_NOT_VALID, INTERVIEW_PAGE_ACTOR_ID, loadInterviewContext, memberIdsOf } from './shared.js';
 
@@ -102,6 +103,7 @@ async function storeBooking(deps: InterviewDeps, interview: Interview, slot: Dat
       organizationId: booked.organizationId, actor: PAGE_ACTOR, action: moving ? 'interview.rescheduled' : 'interview.booked', target: { type: 'interview', id: booked.id },
       metadata: { applicationId: booked.applicationId, stageId: booked.stageId, startsAt: slot.toISOString() },
     });
+    await announceInterviewChange(tx, booked, moving ? 'rescheduled' : 'booked', 'candidate', true);
     return booked;
   });
 }
@@ -150,6 +152,7 @@ export const cancelInterviewByCandidate = definePublicCommand<InterviewDeps, typ
       organizationId: cancelled.organizationId, actor, action: 'interview.cancelled', target: { type: 'interview', id: cancelled.id },
       metadata: { applicationId: cancelled.applicationId, stageId: cancelled.stageId, by: 'candidate', wasBooked },
     });
+    await announceInterviewChange(deps, cancelled, 'cancelled', 'candidate', true);
     if (wasBooked) await afterCommitOrNow(deps, async () => void (await sendInterviewNotices(deps, context, cancelled, 'cancelled', null)));
     return { status: 'cancelled' };
   },

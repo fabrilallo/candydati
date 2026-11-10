@@ -85,7 +85,7 @@ export function buildInterviewInvitation(input: InvitationInput): { readonly sub
   };
 }
 
-export type InterviewNoticeKind = 'booked' | 'rescheduled' | 'cancelled';
+export type InterviewNoticeKind = 'booked' | 'rescheduled' | 'cancelled' | 'reminder';
 
 export interface InterviewNoticeInput {
   readonly locale: Locale;
@@ -107,8 +107,8 @@ export interface InterviewNoticeInput {
 }
 
 const HEAD: Readonly<Record<Locale, Readonly<Record<InterviewNoticeKind, string>>>> = {
-  it: { booked: 'Colloquio confermato', rescheduled: 'Colloquio spostato', cancelled: 'Colloquio annullato' },
-  en: { booked: 'Interview confirmed', rescheduled: 'Interview moved', cancelled: 'Interview cancelled' },
+  it: { booked: 'Colloquio confermato', rescheduled: 'Colloquio spostato', cancelled: 'Colloquio annullato', reminder: 'Promemoria colloquio' },
+  en: { booked: 'Interview confirmed', rescheduled: 'Interview moved', cancelled: 'Interview cancelled', reminder: 'Interview reminder' },
 };
 
 /** The email that carries the .ics: to the candidate, or to an interviewer. */
@@ -125,19 +125,19 @@ export function buildInterviewNotice(input: InterviewNoticeInput): { readonly su
         `Ciao ${input.recipientName},`,
         input.kind === 'cancelled'
           ? `il colloquio${who} per ${input.jobTitle} (${input.stageLabel}) di ${when} è annullato.`
-          : `il colloquio${who} per ${input.jobTitle} (${input.stageLabel}) è ${input.kind === 'booked' ? 'fissato' : 'spostato'} a ${when}: ${input.durationMinutes} minuti, ${mode}.`,
+          : `il colloquio${who} per ${input.jobTitle} (${input.stageLabel}) è ${{ booked: 'fissato a', rescheduled: 'spostato a', reminder: 'confermato per' }[input.kind]} ${when}: ${input.durationMinutes} minuti, ${mode}.`,
         ...where,
         ...change,
-        input.kind === 'cancelled' ? 'L’evento sparisce dal calendario.' : 'In allegato l’invito per il calendario.',
+        { cancelled: 'L’evento sparisce dal calendario.', reminder: 'Per spostarlo o annullarlo usa il link dell’email di conferma, fino a 12 ore prima.', booked: 'In allegato l’invito per il calendario.', rescheduled: 'In allegato l’invito per il calendario.' }[input.kind],
       ]
     : [
         `Hi ${input.recipientName},`,
         input.kind === 'cancelled'
           ? `the interview${who} for ${input.jobTitle} (${input.stageLabel}) on ${when} is cancelled.`
-          : `the interview${who} for ${input.jobTitle} (${input.stageLabel}) is ${input.kind === 'booked' ? 'set for' : 'moved to'} ${when}: ${input.durationMinutes} minutes, ${mode}.`,
+          : `the interview${who} for ${input.jobTitle} (${input.stageLabel}) is ${{ booked: 'set for', rescheduled: 'moved to', reminder: 'still on for' }[input.kind]} ${when}: ${input.durationMinutes} minutes, ${mode}.`,
         ...where,
         ...change,
-        input.kind === 'cancelled' ? 'The event leaves your calendar.' : 'The calendar invite is attached.',
+        { cancelled: 'The event leaves your calendar.', reminder: 'To move or cancel it, use the link in the confirmation email, until 12 hours before.', booked: 'The calendar invite is attached.', rescheduled: 'The calendar invite is attached.' }[input.kind],
       ];
   return { subject, text: lines.join('\n\n') };
 }

@@ -56,6 +56,8 @@ const IT_KINDS: Readonly<Record<NotificationKind, string>> = {
   automation_alert: 'Avviso di un’automazione',
   automation_alert_email: 'Avviso di un’automazione',
   move_proposed: 'Spostamento proposto da confermare',
+  interview_booked: 'Colloquio prenotato',
+  interview_cancelled: 'Colloquio annullato',
 };
 
 const EN_KINDS: Readonly<Record<NotificationKind, string>> = {
@@ -72,6 +74,8 @@ const EN_KINDS: Readonly<Record<NotificationKind, string>> = {
   automation_alert: 'Automation alert',
   automation_alert_email: 'Automation alert',
   move_proposed: 'Proposed move to confirm',
+  interview_booked: 'Interview booked',
+  interview_cancelled: 'Interview cancelled',
 };
 
 function itWhat(kind: NotificationKind, { task, date, days }: Facts): string | null {

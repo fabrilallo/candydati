@@ -3,6 +3,7 @@ import {
   type DrizzleUnitOfWork,
   type EmailSender,
   type FeedbackStageEntryDeps,
+  type InterviewReminderDeps,
   type MessagingConfig,
   type ShortlistReminderDeps,
   type StaleScanDeps,
@@ -13,6 +14,7 @@ export interface HrWorkerDeps {
   readonly feedback: FeedbackStageEntryDeps;
   readonly stale: StaleScanDeps;
   readonly shortlists: ShortlistReminderDeps;
+  readonly interviews: InterviewReminderDeps;
 }
 
 export interface HrWiring {
@@ -22,7 +24,7 @@ export interface HrWiring {
   readonly onMailError: (error: unknown) => void;
 }
 
-/** What the hourly scan needs for feedback and shortlist reminders and stale ads, on Postgres; the sender is injected. */
+/** What the hourly scan needs for feedback, shortlist and interview reminders and stale ads, on Postgres; the sender is injected. */
 export function createHrWorkerDeps({ uow, sender, config, onMailError }: HrWiring): HrWorkerDeps {
   const r = uow.repositories;
   const clock = { newId: randomUUID, now: () => new Date() };
@@ -46,6 +48,7 @@ export function createHrWorkerDeps({ uow, sender, config, onMailError }: HrWirin
       ...clock,
     },
     shortlists: { auditLog: r.auditLog, shortlists: r.shortlists, jobs: r.jobs, clients: r.clients, organizations: r.organizations, sender, config, newToken: newConversationToken, hash, onError: onMailError },
+    interviews: { interviews: r.interviews, applications: r.applications, jobs: r.jobs, candidates: r.candidates, organizations: r.organizations, sender, config, onError: onMailError },
     stale: { staleJobs: r.staleJobs, jobs: r.jobs, notifications: r.notifications, members: r.members, jobTeams: r.jobTeams, newId: clock.newId },
   };
 }

@@ -2218,7 +2218,9 @@
       "move_proposed_user": "A colleague proposed a move to confirm",
       "move_proposed_agent": "The assistant proposed a move to confirm",
       "move_proposed_api_key": "An API key proposed a move to confirm",
-      "move_proposed_connected_app": "A connected app (MCP) proposed a move to confirm"
+      "move_proposed_connected_app": "A connected app (MCP) proposed a move to confirm",
+      "interview_booked": "A candidate booked an interview",
+      "interview_cancelled": "An interview was cancelled"
     },
     "retention": {
       "named": "{name}'s data expire in 1 day | {name}'s data expire in {count} days",
@@ -2328,14 +2330,18 @@
         "stage_stuck": "An application stays in the stage",
         "candidate_replied": "The candidate replies",
         "feedback_submitted": "Interview feedback arrives",
-        "response_due_soon": "The promised response is near"
+        "response_due_soon": "The promised response is near",
+        "interview_booked": "The candidate books the interview",
+        "interview_cancelled": "The interview is cancelled"
       },
       "triggerHints": {
         "stage_entered": "It runs every time an application enters this stage.",
         "stage_stuck": "Checked every hour: it runs once per entry into the stage.",
         "candidate_replied": "It runs on every reply of the candidate while in this stage.",
         "feedback_submitted": "It runs on every feedback asked for this stage, even if the candidate has moved on.",
-        "response_due_soon": "Checked every hour, against the response days of the job: it runs once per deadline."
+        "response_due_soon": "Checked every hour, against the response days of the job: it runs once per deadline.",
+        "interview_booked": "Runs once when the candidate books this stage’s interview (not when they move it).",
+        "interview_cancelled": "Runs when this stage’s interview is cancelled, by the candidate or by you."
       },
       "stuckDays": "After how many days",
       "dueSoonDays": "Days before",
@@ -2386,7 +2392,9 @@
       "stage_stuck": "when an application has been in the stage for 1 day | when an application has been in the stage for {count} days",
       "candidate_replied": "when the candidate replies to a message",
       "feedback_submitted": "when interview feedback for this stage arrives",
-      "response_due_soon": "when the promised response is due within 1 day | when the promised response is due within {count} days"
+      "response_due_soon": "when the promised response is due within 1 day | when the promised response is due within {count} days",
+      "interview_booked": "when the candidate books this stage’s interview",
+      "interview_cancelled": "when this stage’s interview is cancelled"
     },
     "conditions": {
       "onlyIf": "Only if {list}",
@@ -2424,7 +2432,9 @@
         "stage_stuck": "application stayed in the stage",
         "candidate_replied": "candidate replied",
         "feedback_submitted": "feedback arrived",
-        "response_due_soon": "response deadline approaching"
+        "response_due_soon": "response deadline approaching",
+        "interview_booked": "interview booked",
+        "interview_cancelled": "interview cancelled"
       }
     },
     "copy": {
