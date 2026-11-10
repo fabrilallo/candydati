@@ -49,6 +49,13 @@ describe('resend provider', () => {
     expect((init.headers as Record<string, string>)['Idempotency-Key']).toBe('msg_1');
     expect(JSON.parse(String(init.body))).not.toHaveProperty('idempotencyKey');
   });
+  it('attaches an interview invite as text/calendar with its method', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(json({ id: 'r' }));
+    const content = 'BEGIN:VCALENDAR\r\nMETHOD:REQUEST\r\nEND:VCALENDAR\r\n';
+    await createResendEmailProvider({ apiKey: 'k', fetch: fetchMock }).send({ ...message, calendar: { method: 'REQUEST', content } });
+    const body = JSON.parse(String((fetchMock.mock.calls[0] as [string, RequestInit])[1].body)) as { attachments: { filename: string; content: string; content_type: string }[] };
+    expect(body.attachments).toEqual([{ filename: 'invite.ics', content: Buffer.from(content).toString('base64'), content_type: 'text/calendar; charset=utf-8; method=REQUEST' }]);
+  });
   it('omits optional fields', async () => {
     const fetchMock = vi.fn().mockResolvedValue(json({ id: 'r' }));
     await createResendEmailProvider({ apiKey: 'k', fetch: fetchMock }).send(message);

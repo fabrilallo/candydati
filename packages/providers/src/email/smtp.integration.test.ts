@@ -44,6 +44,17 @@ describe.skipIf(!up)('smtp provider against Mailpit', () => {
     expect(headers['References']).toEqual(['<prev@x>']);
   });
 
+  it('sends an interview invite as a text/calendar part with its method', async () => {
+    const subject = `ics-${randomUUID()}`;
+    const content = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//T//EN', 'METHOD:REQUEST', 'BEGIN:VEVENT', 'UID:u1', 'DTSTAMP:20261110T090000Z', 'DTSTART:20261116T090000Z', 'DTEND:20261116T100000Z', 'END:VEVENT', 'END:VCALENDAR', ''].join('\r\n');
+    await provider.send({ from: 'noreply@localhost', to: ['cand@example.com'], subject, text: 'Invito', calendar: { method: 'REQUEST', content } });
+    const search = await fetch(`${API}/api/v1/search?query=${encodeURIComponent(`subject:"${subject}"`)}`);
+    const found = (await search.json()) as { messages: { ID: string }[] };
+    const raw = await (await fetch(`${API}/api/v1/message/${found.messages[0]?.ID}/raw`)).text();
+    expect(raw).toMatch(/Content-Type: text\/calendar; charset=utf-8; method=REQUEST/i);
+    expect(raw).toContain('invite.ics');
+  });
+
   it('reports domains as unsupported', async () => {
     expect(await provider.domainStatus('localhost')).toEqual({ status: 'unsupported', records: [] });
   });

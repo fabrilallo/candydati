@@ -1,6 +1,6 @@
 import { createTransport } from 'nodemailer';
 import { buildHeaders } from './headers.js';
-import { EmailSendError, type EmailProvider } from './types.js';
+import { CALENDAR_FILENAME, EmailSendError, type EmailProvider } from './types.js';
 
 export interface SmtpOptions {
   readonly host: string;
@@ -35,6 +35,7 @@ export function createSmtpEmailProvider(options: SmtpOptions): EmailProvider {
           text: message.text,
           ...(message.replyTo ? { replyTo: message.replyTo } : {}),
           ...(message.html ? { html: message.html } : {}),
+          ...(message.calendar ? { icalEvent: { method: message.calendar.method, filename: CALENDAR_FILENAME, content: message.calendar.content } } : {}),
           headers: buildHeaders(message),
         });
         return { providerMessageId: info.messageId };
