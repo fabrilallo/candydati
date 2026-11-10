@@ -2218,7 +2218,9 @@
       "move_proposed_user": "Un collega ha proposto uno spostamento da confermare",
       "move_proposed_agent": "L'assistente ha proposto uno spostamento da confermare",
       "move_proposed_api_key": "Una chiave API ha proposto uno spostamento da confermare",
-      "move_proposed_connected_app": "Un'app collegata (MCP) ha proposto uno spostamento da confermare"
+      "move_proposed_connected_app": "Un'app collegata (MCP) ha proposto uno spostamento da confermare",
+      "interview_booked": "Un candidato ha prenotato un colloquio",
+      "interview_cancelled": "Un colloquio è stato annullato"
     },
     "retention": {
       "named": "I dati di {name} scadono tra 1 giorno | I dati di {name} scadono tra {count} giorni",
@@ -2328,14 +2330,18 @@
         "stage_stuck": "Una candidatura resta ferma nella fase",
         "candidate_replied": "Il candidato risponde",
         "feedback_submitted": "Arriva il feedback del colloquio",
-        "response_due_soon": "Si avvicina la risposta promessa"
+        "response_due_soon": "Si avvicina la risposta promessa",
+        "interview_booked": "Il candidato prenota il colloquio",
+        "interview_cancelled": "Il colloquio viene annullato"
       },
       "triggerHints": {
         "stage_entered": "Scatta ogni volta che una candidatura entra in questa fase.",
         "stage_stuck": "Controllata ogni ora: scatta una volta per ogni ingresso nella fase.",
         "candidate_replied": "Scatta a ogni risposta del candidato mentre è in questa fase.",
         "feedback_submitted": "Scatta a ogni feedback chiesto per questa fase, anche se il candidato è già andato avanti.",
-        "response_due_soon": "Controllata ogni ora, sui giorni di risposta dell'annuncio: scatta una volta per scadenza."
+        "response_due_soon": "Controllata ogni ora, sui giorni di risposta dell'annuncio: scatta una volta per scadenza.",
+        "interview_booked": "Scatta una volta quando il candidato prenota il colloquio di questa fase (non quando lo sposta).",
+        "interview_cancelled": "Scatta quando il colloquio di questa fase viene annullato, dal candidato o da voi."
       },
       "stuckDays": "Dopo quanti giorni",
       "dueSoonDays": "Giorni prima",
@@ -2386,7 +2392,9 @@
       "stage_stuck": "quando una candidatura resta nella fase da 1 giorno | quando una candidatura resta nella fase da {count} giorni",
       "candidate_replied": "quando il candidato risponde a un messaggio",
       "feedback_submitted": "quando arriva un feedback del colloquio di questa fase",
-      "response_due_soon": "quando manca 1 giorno alla risposta promessa | quando mancano {count} giorni alla risposta promessa"
+      "response_due_soon": "quando manca 1 giorno alla risposta promessa | quando mancano {count} giorni alla risposta promessa",
+      "interview_booked": "quando il candidato prenota il colloquio di questa fase",
+      "interview_cancelled": "quando il colloquio di questa fase viene annullato"
     },
     "conditions": {
       "onlyIf": "Solo se {list}",
@@ -2424,7 +2432,9 @@
         "stage_stuck": "candidatura ferma nella fase",
         "candidate_replied": "il candidato ha risposto",
         "feedback_submitted": "feedback arrivato",
-        "response_due_soon": "scadenza della risposta vicina"
+        "response_due_soon": "scadenza della risposta vicina",
+        "interview_booked": "colloquio prenotato",
+        "interview_cancelled": "colloquio annullato"
       }
     },
     "copy": {

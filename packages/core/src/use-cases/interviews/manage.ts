@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ConflictError, NotFoundError } from '../../errors.js';
 import { afterCommitOrNow } from '../../transaction.js';
 import { requireApplication } from '../candidates/shared.js';
+import { announceInterviewChange } from './alerts.js';
 import { sendInterviewNotices } from './notices.js';
 import { defineInterviewUseCase, loadInterviewContext, toInterviewView, type InterviewView } from './shared.js';
 
@@ -31,14 +32,16 @@ export const cancelInterview = defineInterviewUseCase({
     const interview = await deps.interviews.findById(actor.organizationId, input.interviewId);
     if (!interview) throw new NotFoundError('Interview not found.');
     // Job access: whoever cannot reach the application does not learn the interview exists.
-    await requireApplication(deps, actor.organizationId, interview.applicationId);
+    const application = await requireApplication(deps, actor.organizationId, interview.applicationId);
     if (interview.status === 'cancelled') throw new ConflictError('interview_cancelled');
     const wasBooked = interview.status === 'booked';
     const now = deps.now();
+    const by = actor.onBehalfOfUserId ?? actor.id ?? 'system';
     const cancelled = await deps.interviews.update(actor.organizationId, interview.id, { statuses: [interview.status], icsSequence: interview.icsSequence }, {
-      status: 'cancelled', cancelledAt: now, cancelledBy: actor.onBehalfOfUserId ?? actor.id ?? 'system', icsSequence: wasBooked ? interview.icsSequence + 1 : interview.icsSequence, updatedAt: now,
+      status: 'cancelled', cancelledAt: now, cancelledBy: by, icsSequence: wasBooked ? interview.icsSequence + 1 : interview.icsSequence, updatedAt: now,
     });
     if (!cancelled) throw new ConflictError('interview_changed');
+    await announceInterviewChange(deps, cancelled, 'cancelled', by, application.outcome === null);
     if (wasBooked) {
       const context = await loadInterviewContext(deps, actor.organizationId, cancelled.applicationId, cancelled.stageId);
       if (context) await afterCommitOrNow(deps, async () => void (await sendInterviewNotices(deps, context, cancelled, 'cancelled', null)));

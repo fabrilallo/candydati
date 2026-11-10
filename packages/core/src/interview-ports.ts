@@ -2,6 +2,7 @@ import type { BusyInterval, Interview, InterviewStatus } from '@candydati/domain
 import type { CalendarDeps } from './calendar-ports.js';
 import type { FeedbackDeps } from './feedback-ports.js';
 import type { MessagingDeps } from './messaging-ports.js';
+import type { NotificationRepository } from './automation-ports.js';
 
 export type InterviewPatch = Partial<Pick<Interview, 'status' | 'startsAt' | 'endsAt' | 'icsSequence' | 'bookedAt' | 'cancelledAt' | 'cancelledBy' | 'reminderSentAt' | 'tokenHash' | 'tokenExpiresAt' | 'updatedAt'>>;
 
@@ -37,6 +38,8 @@ export type InterviewDeps = Pick<FeedbackDeps, 'auditLog' | 'transaction' | 'job
   Pick<MessagingDeps, 'conversations' | 'messages' | 'queue' | 'newToken'> &
   Pick<CalendarDeps, 'calendarFeeds' | 'calendarReader' | 'calendarSecrets'> & {
     readonly interviews: InterviewRepository;
+    /** Interviewers and the proposer learn in the app when a candidate books, moves or cancels. */
+    readonly notifications: NotificationRepository;
   };
 
 /** What the delivery needs to put a fresh link into an interview invitation at send time. */

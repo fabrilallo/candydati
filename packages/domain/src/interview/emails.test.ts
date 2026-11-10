@@ -59,4 +59,12 @@ describe('the notice with the invite', () => {
     expect(text).toContain('is cancelled');
     expect(text).not.toContain('To move or cancel');
   });
+
+  it('reminds the candidate the day before, pointing at the confirmation to change it', () => {
+    const it_ = buildInterviewNotice({ ...base, locale: 'it', kind: 'reminder', recipientName: 'Anna', candidateName: null, manageLink: null });
+    expect(it_.subject).toMatch(/^Promemoria colloquio: Backend developer, lunedì 16 novembre/);
+    expect(it_.text).toContain('è confermato per lunedì 16 novembre, 10:00');
+    expect(it_.text).toContain('link dell’email di conferma');
+    expect(buildInterviewNotice({ ...base, locale: 'en', kind: 'reminder', recipientName: 'Anna', candidateName: null, manageLink: null }).text).toContain('is still on for');
+  });
 });

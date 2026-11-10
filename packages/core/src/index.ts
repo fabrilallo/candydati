@@ -224,6 +224,8 @@ export * from './use-cases/interviews/notices.js';
 export * from './use-cases/interviews/propose.js';
 export * from './use-cases/interviews/public.js';
 export * from './use-cases/interviews/manage.js';
+export * from './use-cases/interviews/alerts.js';
+export * from './use-cases/interviews/scan-reminders.js';
 export * from './use-cases/feedback/suggest-scorecard.js';
 export * from './use-cases/job-requests/define.js';
 export * from './use-cases/job-requests/requests.js';

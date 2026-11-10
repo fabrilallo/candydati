@@ -78,3 +78,15 @@ describe('triggerOfOccurrence', () => {
     ]);
   });
 });
+
+describe('interview triggers', () => {
+  it('belong to the stage of the interview and read back from their occurrence', () => {
+    expect(requiresCurrentStage('interview_booked')).toBe(false);
+    expect(requiresCurrentStage('interview_cancelled')).toBe(false);
+    expect(requiresCurrentStage('candidate_replied')).toBe(true);
+    expect(triggerOfOccurrence('interview:int_1')).toBe('interview_booked');
+    expect(triggerOfOccurrence('interview-cancelled:int_1')).toBe('interview_cancelled');
+    expect(automationTriggerSchema.safeParse({ type: 'interview_booked' }).success).toBe(true);
+    expect(automationTriggerSchema.safeParse({ type: 'interview_booked', days: 1 }).success).toBe(false);
+  });
+});

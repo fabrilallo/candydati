@@ -9,6 +9,7 @@ import { deliverMessage } from '../messaging/deliver-message.js';
 import { cancelInterview, listApplicationInterviews } from './manage.js';
 import { proposeInterview } from './propose.js';
 import { bookInterview, cancelInterviewByCandidate, getInterviewInvitation } from './public.js';
+import { scanInterviewReminders } from './scan-reminders.js';
 
 // Monday 2026-06-01, 09:00 in Rome. With 24 h notice the first free time is Tuesday.
 const NOW = new Date('2026-06-01T07:00:00.000Z');
@@ -147,5 +148,43 @@ describe('cancelling', () => {
     await expect(cancelInterview(deps, userActor({ id: 'x', organizationId: 'org_b' }), { interviewId: interview.id })).rejects.toMatchObject({ name: 'NotFoundError' });
     expect((await cancelInterview(deps, recruiter, { interviewId: interview.id })).status).toBe('cancelled');
     await expect(cancelInterview(deps, recruiter, { interviewId: interview.id })).rejects.toMatchObject({ name: 'ConflictError' });
+  });
+});
+
+describe('who learns about it', () => {
+  it('notifies the interviewers and the proposer, and runs the stage automations once per booking', async () => {
+    await propose();
+    const { secret } = await deliverInvitation();
+    const booked = await bookInterview(deps, { token: secret, slot: TUESDAY_11 });
+    const notes = deps.notifications.snapshot().filter((note) => note.kind === 'interview_booked');
+    expect(notes.map((note) => note.userId).sort()).toEqual(['hm_1', 'recruiter_1']);
+    expect(JSON.stringify(notes.map((note) => note.payload))).not.toMatch(/@|Rossi/);
+    const runs = deps.queue.jobs().filter((job) => job.name === 'automation.run');
+    expect(runs.map((job) => (job.payload as { trigger?: string }).trigger)).toContain('interview_booked');
+    await bookInterview(deps, { token: booked.token, slot: '2026-06-03T09:00:00.000Z' });
+    expect(deps.queue.jobs().filter((job) => (job.payload as { trigger?: string }).trigger === 'interview_booked')).toHaveLength(1);
+  });
+
+  it('on cancellation by the recruiter, tells the others but not the recruiter', async () => {
+    const { interview } = await propose();
+    await cancelInterview(deps, recruiter, { interviewId: interview.id });
+    const notes = deps.notifications.snapshot().filter((note) => note.kind === 'interview_cancelled');
+    expect(notes.map((note) => note.userId)).toEqual(['hm_1']);
+    expect(deps.queue.jobs().some((job) => (job.payload as { trigger?: string }).trigger === 'interview_cancelled')).toBe(true);
+  });
+});
+
+describe('the reminder the day before', () => {
+  it('reminds the candidate once, within a day of the start, without a new invite', async () => {
+    await propose();
+    const { secret } = await deliverInvitation();
+    await bookInterview(deps, { token: secret, slot: TUESDAY_11 });
+    expect(await scanInterviewReminders(deps, { now: NOW })).toEqual({ reminded: 0, failed: 0 });
+    const dayBefore = new Date('2026-06-01T10:00:00.000Z');
+    expect(await scanInterviewReminders(deps, { now: dayBefore })).toEqual({ reminded: 1, failed: 0 });
+    const reminder = deps.sender.sent().at(-1);
+    expect(reminder?.subject).toMatch(/^(Promemoria colloquio|Interview reminder)/);
+    expect(reminder?.calendar).toBeUndefined();
+    expect(await scanInterviewReminders(deps, { now: dayBefore })).toEqual({ reminded: 0, failed: 0 });
   });
 });

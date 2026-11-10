@@ -17,6 +17,10 @@ export const NOTIFICATION_KINDS = [
   'automation_alert_email',
   /** A `propose_move` rule suggested a move: a person confirms or dismisses it. */
   'move_proposed',
+  /** A candidate booked or moved an interview: to its interviewers and to who proposed it. */
+  'interview_booked',
+  /** An interview was cancelled, by the candidate or by the organization. */
+  'interview_cancelled',
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 export const notificationKindSchema = z.enum(NOTIFICATION_KINDS);
