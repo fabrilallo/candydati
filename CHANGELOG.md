@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-11
+
+No migrations and no environment variable changes.
+
 ### Changed
 
 - Candidate profile: "Proponi colloquio" sits next to the outcome and the move while the current stage has no open
