@@ -21,3 +21,12 @@ export const openInterviewAt = (interviews: readonly InterviewViewDto[], stageId
 /** Pure: the stages that can have an interview (declared ones: not "received", not an outcome), with their names. */
 export const declaredStages = (stages: readonly StageRef[], t: (key: string) => string): readonly { readonly id: string; readonly name: string }[] =>
   stages.filter((stage) => stage.declared !== null).map((stage) => ({ id: stage.id, name: stageName(stage, t) }))
+
+/**
+ * Pure: the stage a new proposal starts on. At an interview stage: that stage, or nothing while its interview is open
+ * (the header already says so). From a stage without interviews ("Ricevute"): the first interview stage with nothing open.
+ */
+export const proposalStage = (stages: readonly { readonly id: string }[], currentStageId: string, interviews: readonly InterviewViewDto[]): string | null => {
+  if (stages.some((stage) => stage.id === currentStageId)) return openInterviewAt(interviews, currentStageId) ? null : currentStageId
+  return stages.find((stage) => openInterviewAt(interviews, stage.id) === null)?.id ?? null
+}

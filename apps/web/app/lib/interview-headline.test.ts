@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { interviewView } from '~~/test/fixtures/interview-fixtures'
 import type { InterviewViewDto } from './interview-api'
-import { headlineInterview, openInterviewAt } from './interview-headline'
+import { headlineInterview, openInterviewAt, proposalStage } from './interview-headline'
 
 const now = new Date('2026-11-11T12:00:00Z')
 const view = (overrides: Record<string, unknown>) => interviewView(overrides) as InterviewViewDto
@@ -33,5 +33,21 @@ describe('openInterviewAt', () => {
     expect(openInterviewAt(list, 's1')?.id).toBe('o')
     expect(openInterviewAt(list, 's2')).toBeNull()
     expect(openInterviewAt([view({ status: 'cancelled', stageId: 's1' })], 's1')).toBeNull()
+  })
+})
+
+describe('proposalStage', () => {
+  const stages = [{ id: 's1' }, { id: 's2' }]
+  it('starts on the current stage when nothing is open there', () => {
+    expect(proposalStage(stages, 's2', [])).toBe('s2')
+  })
+  it('from a stage without interviews (Ricevute) starts on the first free interview stage', () => {
+    expect(proposalStage(stages, 'received', [])).toBe('s1')
+    expect(proposalStage(stages, 'received', [view({ stageId: 's1' })])).toBe('s2')
+  })
+  it('offers nothing while the current stage has its interview open, or when nothing is left', () => {
+    expect(proposalStage(stages, 's1', [view({ stageId: 's1' })])).toBeNull()
+    expect(proposalStage(stages, 'received', [view({ stageId: 's1' }), view({ id: 'b', stageId: 's2' })])).toBeNull()
+    expect(proposalStage([], 'received', [])).toBeNull()
   })
 })
