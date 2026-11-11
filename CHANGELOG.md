@@ -6,8 +6,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-One migration runs at start: `0057_interview_scheduling` is additive (tables `calendar_feed`, `interview`,
-`interview_interviewer`).
+## [0.7.0] - 2026-11-11
+
+One migration runs at start as usual; take a backup first (docs/OPERATIONS.md). `0057_interview_scheduling` is
+additive (tables `calendar_feed`, `interview`, `interview_interviewer`). No environment variable changes for 0.6.0
+installs.
 
 ### Added
 
