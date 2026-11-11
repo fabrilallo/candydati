@@ -5302,7 +5302,7 @@
     },
     "howTo": {
       "title": "Where do I find the address?",
-      "google": "Google Calendar: Settings → your calendar → Secret address in iCal format.",
+      "google": "Google Calendar (on a computer): gear → Settings; on the left, under “Settings for my calendars”, click your name; in the “Integrate calendar” section copy “Secret address in iCal format” (not the public one). If it is missing, your Google Workspace admin turned it off.",
       "outlook": "Outlook: Settings → Calendar → Shared calendars → Publish a calendar, choose “Can view when I'm busy” and copy the ICS link.",
       "icloud": "iCloud: in the Calendar app make the calendar public (Public Calendar) and copy the sharing link."
     },
@@ -5382,10 +5382,11 @@
         "onsite": "The office address (optional, the candidate sees it after booking).",
         "phone": "The number to call, or say that you will call (optional)."
       },
-      "interviewers": "The interviewers set for the stage take part.",
+      "interviewers": "The people under “Who interviews” for the stage take part.",
       "submit": "Send the proposal",
       "sending": "Sending…",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "interviewersLink": "Change them in Automations"
     },
     "proposed": {
       "sent": "The candidate gets an email with the free times.",
@@ -5394,9 +5395,15 @@
     },
     "errors": {
       "open": "There is already an open interview for this stage: cancel it before proposing another.",
-      "no_interviewers": "This stage has no interviewers: add them in the job's team.",
+      "no_interviewers": "This stage has no interviewers: add them in the job’s Automations, under “Who interviews”.",
       "unknown_stage": "This stage is no longer in the job.",
       "application_closed": "The application is closed: interviews cannot be proposed."
+    },
+    "headline": {
+      "label": "Interview:",
+      "booked": "booked for {when}",
+      "proposed": "proposed, the candidate has not picked a time yet",
+      "show": "Details"
     }
   },
   "interviewPage": {

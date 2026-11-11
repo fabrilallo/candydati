@@ -132,21 +132,24 @@ const addNote = async (body: string, applicationId: string | null, done: (ok: bo
               {{ t('candidate.header.origin') }}
               <span class="font-medium text-foreground">{{ originText(current.origin, current.campaign, t) }}</span>
             </p>
+            <InterviewHeadline v-if="current && can(role, 'interview:read')" :key="`interview-${current.id}`" :application="current" :now="now" @show="tab = 'interviews'" />
             <p v-if="renewBy"><ConsentRenewPill status="to_renew" :expires-at="renewBy" :now="now" /></p>
           </div>
         </div>
-        <ApplicationActions
-          v-if="current && open"
-          :name="name"
-          :stages="current.stages"
-          :stage-id="current.stageId"
-          :can-move="can(role, 'candidate:move')"
-          :can-decide="can(role, 'candidate:decide')"
-          :busy="c.busy.value === 'move' || c.busy.value === 'decide'"
-          :applied-at="current.createdAt"
-          @move="move"
-          @decide="decide"
-        />
+        <div v-if="current && open" class="flex flex-wrap items-center gap-2">
+          <ProposeInterviewButton v-if="can(role, 'interview:schedule')" :key="`propose-${current.id}`" :application="current" />
+          <ApplicationActions
+            :name="name"
+            :stages="current.stages"
+            :stage-id="current.stageId"
+            :can-move="can(role, 'candidate:move')"
+            :can-decide="can(role, 'candidate:decide')"
+            :busy="c.busy.value === 'move' || c.busy.value === 'decide'"
+            :applied-at="current.createdAt"
+            @move="move"
+            @decide="decide"
+          />
+        </div>
       </header>
 
       <MoveProposals v-if="current && open && can(role, 'candidate:read')" :key="`proposals-${current.id}`" :application-id="current.id" :can-move="can(role, 'candidate:move')" @moved="proposalMoved" />

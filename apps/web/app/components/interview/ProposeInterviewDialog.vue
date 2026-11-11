@@ -11,6 +11,8 @@ const props = defineProps<{
   open: boolean
   stages: readonly { readonly id: string; readonly name: string }[]
   stageId: string
+  /** Where the stage's interviewers are chosen (Automazioni of the job). */
+  jobId: string
   pending: boolean
   errorKey: string | null
 }>()
@@ -61,7 +63,10 @@ const submit = (): void => emit('submit', { stageId: chosenStage.value, mode: mo
             <Input id="pi-location" v-model="location" :inputmode="mode === 'video' ? 'url' : mode === 'phone' ? 'tel' : 'text'" :maxlength="INTERVIEW_LOCATION_MAX" autocomplete="off" :aria-describedby="describedBy" :disabled="pending" data-testid="propose-interview-location" />
           </template>
         </FormField>
-        <p class="text-sm text-muted-foreground">{{ t('interviews.dialog.interviewers') }}</p>
+        <p class="text-sm text-muted-foreground" data-testid="propose-interview-who">
+          {{ t('interviews.dialog.interviewers') }}
+          <NuxtLink :to="`/app/jobs/${jobId}/automations`" class="font-medium text-link underline-offset-4 hover:underline" data-testid="propose-interview-who-link">{{ t('interviews.dialog.interviewersLink') }}</NuxtLink>
+        </p>
         <FormAlert :message-key="errorKey" />
         <DialogFooter>
           <Button type="button" variant="outline" :disabled="pending" @click="emit('update:open', false)">{{ t('interviews.dialog.cancel') }}</Button>

@@ -8,7 +8,9 @@ remind, notify and start your stage's automations.
 
 Each person connects their own calendar once, from **Settings → Calendar**, by pasting its **secret iCal address**:
 
-- **Google Calendar:** Settings → your calendar → *Secret address in iCal format*.
+- **Google Calendar** (on a computer): gear → *Settings*; in the left column, under *Settings for my calendars*, click
+  your name; scroll to *Integrate calendar* and copy *Secret address in iCal format* (it ends with `basic.ics`; not the
+  public address). If the field is missing, your Google Workspace admin turned it off for the domain.
 - **Outlook / Microsoft 365:** Settings → Calendar → Shared calendars → *Publish a calendar*, choose *Can view when I'm
   busy*, copy the ICS link.
 - **iCloud:** share the calendar as public and copy the link (a `webcal://` address works).

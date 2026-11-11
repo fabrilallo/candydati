@@ -5302,7 +5302,7 @@
     },
     "howTo": {
       "title": "Dove trovo l'indirizzo?",
-      "google": "Google Calendar: Impostazioni → il tuo calendario → Indirizzo segreto in formato iCal.",
+      "google": "Google Calendar (dal computer): ingranaggio → Impostazioni; a sinistra, sotto «Impostazioni per i miei calendari», clicca il tuo nome; nella sezione «Integra calendario» copia «Indirizzo segreto in formato iCal» (non quello pubblico). Se manca, l'amministratore di Google Workspace l'ha disattivato.",
       "outlook": "Outlook: Impostazioni → Calendario → Calendari condivisi → Pubblica un calendario, scegli «Può visualizzare quando sono occupato» e copia il link ICS.",
       "icloud": "iCloud: nell'app Calendario rendi pubblico il calendario (Calendario pubblico) e copia il link di condivisione."
     },
@@ -5382,10 +5382,11 @@
         "onsite": "L'indirizzo della sede (facoltativo, il candidato lo vede dopo aver prenotato).",
         "phone": "Il numero da chiamare, o scrivi che chiamate voi (facoltativo)."
       },
-      "interviewers": "Partecipano gli intervistatori indicati per la fase.",
+      "interviewers": "Partecipano le persone indicate in «Chi fa il colloquio» per la fase.",
       "submit": "Manda la proposta",
       "sending": "Invio…",
-      "cancel": "Annulla"
+      "cancel": "Annulla",
+      "interviewersLink": "Cambiale in Automazioni"
     },
     "proposed": {
       "sent": "Il candidato riceve un'email con gli orari liberi.",
@@ -5394,9 +5395,15 @@
     },
     "errors": {
       "open": "C'è già un colloquio aperto per questa fase: annullalo prima di proporne un altro.",
-      "no_interviewers": "Questa fase non ha intervistatori: aggiungili nel team dell'annuncio.",
+      "no_interviewers": "Questa fase non ha intervistatori: aggiungili in Automazioni dell'annuncio, alla voce «Chi fa il colloquio».",
       "unknown_stage": "Questa fase non esiste più nell'annuncio.",
       "application_closed": "La candidatura è chiusa: non si possono proporre colloqui."
+    },
+    "headline": {
+      "label": "Colloquio:",
+      "booked": "fissato {when}",
+      "proposed": "proposto, il candidato non ha ancora scelto l'orario",
+      "show": "Dettagli"
     }
   },
   "interviewPage": {
