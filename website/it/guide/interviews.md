@@ -9,7 +9,10 @@ prenotato, quindi può ricordarlo, avvisare il team e far partire le automazioni
 Ognuno collega il proprio calendario una volta sola, da **Impostazioni → Calendario**, incollando il suo **indirizzo
 iCal segreto**:
 
-- **Google Calendar:** Impostazioni → il tuo calendario → *Indirizzo segreto in formato iCal*.
+- **Google Calendar** (dal computer): ingranaggio → *Impostazioni*; nella colonna a sinistra, sotto *Impostazioni per i
+  miei calendari*, clicca il tuo nome; scorri fino a *Integra calendario* e copia *Indirizzo segreto in formato iCal*
+  (finisce con `basic.ics`; non usare l'indirizzo pubblico). Se il campo manca, l'amministratore di Google Workspace
+  l'ha disattivato per il dominio.
 - **Outlook / Microsoft 365:** Impostazioni → Calendario → Calendari condivisi → *Pubblica un calendario*, scegli *Può
   visualizzare quando sono occupato*, copia il link ICS.
 - **iCloud:** condividi il calendario come pubblico e copia il link (va bene anche un indirizzo `webcal://`).

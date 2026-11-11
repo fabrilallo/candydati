@@ -3,7 +3,7 @@ import type { CandidateApplicationDto } from '@candydati/domain'
 import { CalendarPlusIcon, CircleCheckIcon, TriangleAlertIcon } from '@lucide/vue'
 import { displayTimeZone } from '@/lib/format'
 import { browserTimeZone } from '@/lib/interview-view'
-import { stageName } from '@/lib/pipeline-board'
+import { declaredStages } from '@/lib/interview-headline'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -23,7 +23,7 @@ onMounted(() => {
 })
 
 /** Only declared stages have interviews: not "received", not an outcome. */
-const stages = computed(() => props.application.stages.filter((stage) => stage.declared !== null).map((stage) => ({ id: stage.id, name: stageName(stage, t) })))
+const stages = computed(() => declaredStages(props.application.stages, t))
 const nameOf = (stageId: string): string => stages.value.find((stage) => stage.id === stageId)?.name ?? t('pipeline.stageRemoved')
 const canPropose = computed(() => props.canSchedule && props.application.outcome === null && stages.value.length > 0)
 const empty = computed(() => (iv.interviews.value?.length ?? 0) === 0)
@@ -86,7 +86,7 @@ const confirmCancel = async (): Promise<void> => {
       </ul>
     </template>
 
-    <ProposeInterviewDialog v-if="canPropose" v-model:open="proposing" :stages="stages" :stage-id="application.stageId" :pending="iv.busy.value === 'propose'" :error-key="iv.proposeError.value" @submit="submit" />
+    <ProposeInterviewDialog v-if="canPropose" v-model:open="proposing" :stages="stages" :stage-id="application.stageId" :job-id="application.job.id" :pending="iv.busy.value === 'propose'" :error-key="iv.proposeError.value" @submit="submit" />
     <ConfirmDialog
       v-if="canSchedule"
       :open="cancelling !== null"

@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Candidate profile: "Proponi colloquio" sits next to the outcome and the move while the current stage has no open
+  interview, and the header says when the interview is booked (or that the candidate has not picked a time yet), with a
+  link to the Colloqui tab. The proposal dialog links to where the stage's interviewers are chosen (Automazioni), and
+  the guide explains step by step where Google Calendar keeps the secret iCal address.
+
 ## [0.7.0] - 2026-11-11
 
 One migration runs at start as usual; take a backup first (docs/OPERATIONS.md). `0057_interview_scheduling` is
