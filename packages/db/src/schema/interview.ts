@@ -43,6 +43,25 @@ export const calendarFeed = pgTable(
 );
 
 /**
+ * A member's own video room (a Meet, Zoom or Teams link they reuse), one per person and organization: the link of the
+ * video interviews they run when the recruiter leaves "where" empty. It is sent to candidates, so it is not a secret.
+ * Goes with the user (cascade) and is deleted when they leave the organization.
+ */
+export const videoRoom = pgTable(
+  'video_room',
+  {
+    organizationId: organizationRef(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    url: text('url').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.organizationId, table.userId] })],
+);
+
+/**
  * An interview the candidate books on their link. Only the hash of the secret is stored. At most one open interview
  * (proposed or booked) per application and stage. The row goes with its application (RESTRICT: the erasure deletes it).
  */

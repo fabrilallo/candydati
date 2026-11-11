@@ -13,7 +13,7 @@ import { createDistributionRegistry } from '../distribution-registry.js';
 import { createFakeDistributionChannel, createInMemoryDistributionSettings, createInMemoryJobDistributions } from './in-memory-distribution.js';
 import { createInMemoryTrackedLinks, type InMemoryTrackedLinks } from './in-memory-tracked-links.js';
 import { createClientStore, createInMemoryClients, createInMemoryJobClients, createInMemoryShortlists, type ClientStore } from './in-memory-clients.js';
-import { createFakeCalendarReader, createInMemoryCalendarFeeds, fakeSecretBox } from './calendar-deps.js';
+import { createFakeCalendarReader, createInMemoryCalendarFeeds, createInMemoryVideoRooms, fakeSecretBox } from './calendar-deps.js';
 import { createInMemoryInterviews } from './interview-deps.js';
 
 /**
@@ -109,6 +109,7 @@ export async function seedJobScopeWorld(): Promise<JobScopeWorld> {
     ...clientRepositories(),
     interviews: createInMemoryInterviews(),
     calendarFeeds: createInMemoryCalendarFeeds(),
+    videoRooms: createInMemoryVideoRooms(),
     calendarReader: createFakeCalendarReader(),
     calendarSecrets: fakeSecretBox,
   };

@@ -1,4 +1,4 @@
-import { getMyCalendarFeed, removeCalendarFeed, saveCalendarFeed, updateCalendarPreferences } from '@candydati/core';
+import { getMyCalendarFeed, getMyVideoRoom, removeCalendarFeed, removeVideoRoom, saveCalendarFeed, saveVideoRoom, updateCalendarPreferences } from '@candydati/core';
 import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
@@ -22,4 +22,9 @@ export function registerCalendarRoutes(app: FastifyInstance, ctx: AppContext): v
   );
 
   app.delete('/api/v1/me/calendar-feed', async (request) => ok(await removeCalendarFeed(deps, await actor(request), {})));
+
+  /** The person's own video room: the link of the video interviews they run. */
+  app.get('/api/v1/me/video-room', async (request, reply) => reply.header('cache-control', NO_STORE).send(ok(await getMyVideoRoom(deps, await actor(request), {}))));
+  app.put('/api/v1/me/video-room', async (request, reply) => reply.header('cache-control', NO_STORE).send(ok(await saveVideoRoom(deps, await actor(request), bodyOf(request)))));
+  app.delete('/api/v1/me/video-room', async (request) => ok(await removeVideoRoom(deps, await actor(request), {})));
 }

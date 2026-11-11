@@ -20,10 +20,19 @@ descriptions, places or attendees. The address is encrypted and never shown agai
 or leave the organization. Someone without a connected calendar counts as free during default working hours, and the
 recruiter is told.
 
+## Your video room
+
+On the same page, under **Your video room**, save once the link you use for interviews: a Google Meet created with
+*New meeting → Create a meeting for later*, your Zoom personal room or a recurring Teams meeting. When a video interview
+is proposed with no other link, it gets the room of the stage's first interviewer who saved one, so whoever books always
+knows where to join. The link goes only to the candidates who book, and is deleted when you leave the organization.
+
 ## Propose an interview
 
-On a candidate's application press **Propose interview**: choose the stage (its interviewers and duration come from
-the job), the mode (video, on site, phone) and where (meeting link, address or phone).
+On a candidate's profile press **Propose interview** (next to the outcome and the move, from *Received* too): choose the
+stage (its interviewers and duration come from the job; the dialog names them), the mode (video, on site, phone) and
+where (meeting link, address or phone). For a video interview the interviewer's room is already filled in; if there is
+no link at all, the dialog says so before you send.
 
 The candidate gets an email in their conversation with a personal link and two or three free times on different days.
 Opening a time shows it already chosen; nothing is booked until the candidate confirms.

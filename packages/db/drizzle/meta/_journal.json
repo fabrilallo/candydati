@@ -407,6 +407,13 @@
       "when": 1794349197797,
       "tag": "0057_interview_scheduling",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1794427603681,
+      "tag": "0058_video_room",
+      "breakpoints": true
     }
   ]
 }

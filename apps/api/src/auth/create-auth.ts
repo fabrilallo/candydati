@@ -1,4 +1,4 @@
-import { createDrizzleCalendarFeeds, type CoreDeps } from '@candydati/core';
+import { createDrizzleCalendarFeeds, createDrizzleVideoRooms, type CoreDeps } from '@candydati/core';
 import type { Db } from '@candydati/db';
 import { schema } from '@candydati/db';
 import { CREATOR_ROLE, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@candydati/domain';
@@ -110,6 +110,7 @@ const organizationHooks = (creation: ReturnType<typeof organizationCreationHooks
   // Who leaves an organization takes their calendar link with them: the sealed address and the busy times go.
   afterRemoveMember: async (data: Parameters<typeof audit.afterRemoveMember>[0]) => {
     await createDrizzleCalendarFeeds(db).remove(data.organization.id, data.member.userId);
+    await createDrizzleVideoRooms(db).remove(data.organization.id, data.member.userId);
     await audit.afterRemoveMember(data);
   },
   beforeCreateInvitation: async (data: Parameters<typeof roleGuardHooks.beforeCreateInvitation>[0]) => {

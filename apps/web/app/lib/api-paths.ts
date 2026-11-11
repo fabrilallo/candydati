@@ -57,7 +57,9 @@ export const REPORTS_CSV_PATH = '/api/v1/reports/export.csv'
 
 // Interview scheduling: the person's own calendar link, the interviews of an application, the candidate's booking page
 export const MY_CALENDAR_FEED_PATH = '/api/v1/me/calendar-feed'
+export const MY_VIDEO_ROOM_PATH = '/api/v1/me/video-room'
 export const applicationInterviewsPath = (applicationId: string): string => `/api/v1/applications/${enc(applicationId)}/interviews`
+export const interviewDefaultsPath = (applicationId: string, stageId: string): string => `${applicationInterviewsPath(applicationId)}/defaults?stageId=${enc(stageId)}`
 export const cancelInterviewPath = (interviewId: string): string => `/api/v1/interviews/${enc(interviewId)}/cancel`
 export const publicInterviewPath = (token: string): string => `/api/v1/public/interviews/${enc(token)}`
 export const publicInterviewBookPath = (token: string): string => `${publicInterviewPath(token)}/book`

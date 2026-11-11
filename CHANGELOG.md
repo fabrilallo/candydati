@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+One migration runs at start: `0058_video_room` is additive (table `video_room`).
+
+### Added
+
+- **A video room per interviewer.** In Settings → Calendar each member saves once the Meet, Zoom or Teams link they use
+  for interviews (`/api/v1/me/video-room`, session only). A video interview proposed with no other link gets the room of
+  the stage's first interviewer who saved one, so the invite and the booking page always say where to join. The proposal
+  dialog names who takes part, fills the room in, and warns before sending when a video interview has no link at all
+  (new internal `GET /api/v1/applications/:id/interviews/defaults?stageId=`); the proposal answers `videoRoomOf` and
+  `withoutLink`. The room goes when the person leaves the organization. Audit events `video_room.saved` and
+  `video_room.removed`.
+
 ## [0.7.2] - 2026-11-11
 
 No migrations and no environment variable changes.

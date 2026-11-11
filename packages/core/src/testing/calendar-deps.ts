@@ -1,5 +1,5 @@
 import type { BusyInterval } from '@candydati/domain';
-import type { CalendarDeps, CalendarFeedRecord, CalendarFeedRepository, CalendarReadResult, CalendarReader } from '../calendar-ports.js';
+import type { CalendarDeps, CalendarFeedRecord, CalendarFeedRepository, CalendarReadResult, CalendarReader, VideoRoomRecord, VideoRoomRepository } from '../calendar-ports.js';
 import { createInMemoryAuditLog, type InMemoryAuditLog } from './in-memory-audit-log.js';
 import { cell, createInMemoryTransaction } from './in-memory-transaction.js';
 
@@ -23,6 +23,22 @@ export function createInMemoryCalendarFeeds(): CalendarFeedRepository & { all():
       const found = rows.get().get(key(organizationId, userId));
       if (found) put({ ...found, ...refresh });
     },
+    async remove(organizationId, userId) {
+      const next = new Map(rows.get());
+      const removed = next.delete(key(organizationId, userId));
+      rows.set(next);
+      return removed;
+    },
+  };
+}
+
+export function createInMemoryVideoRooms(): VideoRoomRepository & { all(): readonly VideoRoomRecord[] } {
+  const rows = cell<ReadonlyMap<string, VideoRoomRecord>>(new Map());
+  return {
+    all: () => [...rows.get().values()],
+    find: async (organizationId, userId) => rows.get().get(key(organizationId, userId)) ?? null,
+    listByUsers: async (organizationId, userIds) => userIds.flatMap((userId) => rows.get().get(key(organizationId, userId)) ?? []),
+    save: async (record) => rows.set(new Map([...rows.get(), [key(record.organizationId, record.userId), record]])),
     async remove(organizationId, userId) {
       const next = new Map(rows.get());
       const removed = next.delete(key(organizationId, userId));
@@ -64,6 +80,7 @@ export const fakeSecretBox = {
 export type CalendarWorld = CalendarDeps & {
   readonly auditLog: InMemoryAuditLog;
   readonly calendarFeeds: ReturnType<typeof createInMemoryCalendarFeeds>;
+  readonly videoRooms: ReturnType<typeof createInMemoryVideoRooms>;
   readonly calendarReader: FakeCalendarReader;
   setNow(at: Date): void;
 };
@@ -76,6 +93,7 @@ export function createCalendarWorld(now = new Date('2026-11-16T07:00:00Z')): Cal
     auditLog: createInMemoryAuditLog(),
     transaction: createInMemoryTransaction(),
     calendarFeeds: createInMemoryCalendarFeeds(),
+    videoRooms: createInMemoryVideoRooms(),
     calendarReader: createFakeCalendarReader(),
     calendarSecrets: fakeSecretBox,
     now: () => current,

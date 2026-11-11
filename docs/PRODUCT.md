@@ -79,7 +79,9 @@ HR tools in more detail:
   conversation with a personal link and two or three times on different days, picks a time on a page without an account
   and confirms (a link never books by itself). Free times are everyone's working hours minus their calendars and other
   bookings, at least a day ahead; the time is checked again under a lock at booking, so nobody is booked twice. Everyone
-  gets a calendar invite, updated or removed when the candidate moves (until 12 hours before) or cancels; the candidate
+  gets a calendar invite, updated or removed when the candidate moves (until 12 hours before) or cancels; a video
+  interview carries the link the recruiter writes or, by default, the interviewer's own saved video room (Meet, Zoom,
+  Teams), and the recruiter is told before sending when there is none; the candidate
   is reminded the day before. Bookings and cancellations notify the interviewers in the app and can start automations of
   the stage. The assistant never proposes or books an interview ([ADR 0012](adr/0012-interview-scheduling-from-ical-feeds.md)).
 - **Interview feedback without an account.** The person running a stage receives a personal link by email, answers fixed questions per stage type from a phone in a few minutes, and gets a reminder if needed. The feedback describes; it assigns no score to the candidate (§2.4).

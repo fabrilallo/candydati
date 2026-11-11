@@ -22,10 +22,20 @@ settimane: mai titoli, descrizioni, luoghi o partecipanti. L'indirizzo è cifrat
 cancellato quando scolleghi il calendario o lasci l'organizzazione. Chi non ha collegato il calendario conta come
 libero nelle ore lavorative predefinite, e il recruiter lo sa.
 
+## La tua stanza video
+
+Nella stessa pagina, sotto **La tua stanza video**, salva una volta il link che usi per i colloqui: un Google Meet
+creato con *Nuova riunione → Crea una riunione per un secondo momento*, la tua stanza personale Zoom o una riunione
+ricorrente di Teams. Quando si propone un colloquio in video senza un altro link, prende la stanza del primo
+intervistatore della fase che l'ha salvata: chi prenota sa sempre dove collegarsi. Il link arriva solo ai candidati che
+prenotano e viene cancellato quando lasci l'organizzazione.
+
 ## Proponi un colloquio
 
-Sulla candidatura premi **Proponi colloquio**: scegli la fase (intervistatori e durata arrivano dall'annuncio), la
-modalità (videochiamata, in sede, telefono) e dove (link della riunione, indirizzo o telefono).
+Sulla scheda del candidato premi **Proponi colloquio** (accanto a Esito e Sposta in, anche da *Ricevute*): scegli la fase
+(intervistatori e durata arrivano dall'annuncio, e la finestra li nomina), la modalità (videochiamata, in sede,
+telefono) e dove (link della riunione, indirizzo o telefono). Per un colloquio in video la stanza dell'intervistatore è
+già inserita; se manca qualsiasi link, la finestra lo dice prima dell'invio.
 
 Il candidato riceve un'email nella sua conversazione con un link personale e due o tre orari liberi in giorni diversi.
 Aprendo un orario lo trova già scelto; non si prenota nulla finché il candidato non conferma.

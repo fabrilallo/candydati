@@ -19,6 +19,7 @@ export function createCalendarDeps({ env, uow, reader }: CalendarInputs): Calend
     transaction: uow.transaction,
     jobTeams: r.jobTeams,
     calendarFeeds: r.calendarFeeds,
+    videoRooms: r.videoRooms,
     calendarReader: reader ?? createCalendarFeedReader(),
     calendarSecrets: createSecretBox(env.BETTER_AUTH_SECRET, { info: CALENDAR_SECRET_INFO }),
     now: () => new Date(),

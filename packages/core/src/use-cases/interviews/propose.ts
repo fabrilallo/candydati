@@ -18,6 +18,7 @@ import { resolveTargets, type RequestContext } from '../feedback/shared.js';
 import { enqueueDelivery } from '../messaging/send-message.js';
 import { ensureConversation } from '../messaging/shared.js';
 import { availabilityOf, PAGE_CALENDAR_MAX_AGE_MS, slotsFor } from './availability.js';
+import { videoRoomOf } from './video-room-of.js';
 import { defineInterviewUseCase, loadInterviewContext, toInterviewView, zoneOf, type InterviewView } from './shared.js';
 
 const input = proposeInterviewInputSchema.extend({ applicationId: z.string().min(1) });
@@ -28,11 +29,15 @@ export interface ProposeInterviewResult {
   readonly freeSlots: number;
   /** Members counted free in default working hours because their calendar is not connected. */
   readonly withoutCalendar: readonly string[];
+  /** Whose video room became the link, when the recruiter wrote none. */
+  readonly videoRoomOf: string | null;
+  /** A video interview that has no link at all: the candidate will not know where to join. */
+  readonly withoutLink: boolean;
 }
 
 const userOf = (actor: Actor): string => actor.onBehalfOfUserId ?? actor.id ?? 'system';
 
-async function participantsOf(deps: InterviewDeps, context: RequestContext, chosen: z.output<typeof input>['interviewers']): Promise<readonly InterviewParticipant[]> {
+export async function participantsOf(deps: InterviewDeps, context: RequestContext, chosen: z.output<typeof input>['interviewers']): Promise<readonly InterviewParticipant[]> {
   const organizationId = context.application.organizationId;
   const wanted = chosen
     ? chosen.map((person) => ({ kind: person.kind, userId: person.userId ?? null, email: person.email ?? null, name: person.name ?? '' }))
@@ -42,7 +47,7 @@ async function participantsOf(deps: InterviewDeps, context: RequestContext, chos
   return targets.map((target) => ({ kind: target.kind, userId: target.userId, email: target.kind === 'external' ? target.email : null, name: target.name }));
 }
 
-async function requireContext(deps: InterviewDeps, organizationId: string, applicationId: string, stageId: string): Promise<RequestContext & { readonly durationMinutes: number }> {
+export async function requireContext(deps: InterviewDeps, organizationId: string, applicationId: string, stageId: string): Promise<RequestContext & { readonly durationMinutes: number }> {
   const context = await loadInterviewContext(deps, organizationId, applicationId, stageId);
   if (!context) throw new NotFoundError('Application not found.');
   if (context.stage.declared === null) throw new ValidationError([{ path: 'stageId', message: 'unknown_stage' }]);
@@ -101,10 +106,13 @@ export const proposeInterview = defineInterviewUseCase({
     const interviewers = await participantsOf(deps, context, input.interviewers);
     const availability = await availabilityOf(deps, actor.organizationId, interviewers, { maxAgeMs: PAGE_CALENDAR_MAX_AGE_MS });
     const slots = slotsFor(deps, context, availability);
+    const written = input.location || null;
+    const room = input.mode === 'video' && written === null ? await videoRoomOf(deps, actor.organizationId, interviewers) : null;
+    const location = written ?? room?.url ?? null;
     const now = deps.now();
     const interview: Interview = {
       id: deps.newId(), organizationId: actor.organizationId, applicationId: context.application.id, jobId: context.job.id, stageId: context.stage.stageId,
-      status: 'proposed', durationMinutes: context.durationMinutes, mode: input.mode, location: input.location || null, startsAt: null, endsAt: null,
+      status: 'proposed', durationMinutes: context.durationMinutes, mode: input.mode, location, startsAt: null, endsAt: null,
       // A placeholder nobody holds: the real secret is made when the invitation is sent.
       tokenHash: deps.hash(deps.newToken()), tokenExpiresAt: new Date(now.getTime() + INTERVIEW_HORIZON_DAYS * DAY_MS),
       icsSequence: 0, proposedBy: userOf(actor), bookedAt: null, cancelledAt: null, cancelledBy: null, reminderSentAt: null, createdAt: now, updatedAt: now, interviewers,
@@ -120,6 +128,6 @@ export const proposeInterview = defineInterviewUseCase({
       return created;
     });
     const withoutCalendar = interviewers.filter((person) => person.userId !== null && availability.withoutCalendar.includes(person.userId)).map((person) => person.name);
-    return { interview: toInterviewView(stored), freeSlots: slots.length, withoutCalendar };
+    return { interview: toInterviewView(stored), freeSlots: slots.length, withoutCalendar, videoRoomOf: room?.owner ?? null, withoutLink: input.mode === 'video' && location === null };
   },
 });

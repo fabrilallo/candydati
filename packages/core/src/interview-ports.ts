@@ -36,7 +36,7 @@ export interface InterviewRepository {
 /** Everything the interview use cases need: the feedback context (stages, interviewers), messaging and calendars. */
 export type InterviewDeps = Pick<FeedbackDeps, 'auditLog' | 'transaction' | 'jobTeams' | 'jobs' | 'candidates' | 'applications' | 'organizations' | 'members' | 'stageInterviewers' | 'sender' | 'config' | 'hash' | 'newId' | 'now' | 'onError'> &
   Pick<MessagingDeps, 'conversations' | 'messages' | 'queue' | 'newToken'> &
-  Pick<CalendarDeps, 'calendarFeeds' | 'calendarReader' | 'calendarSecrets'> & {
+  Pick<CalendarDeps, 'calendarFeeds' | 'calendarReader' | 'calendarSecrets' | 'videoRooms'> & {
     readonly interviews: InterviewRepository;
     /** Interviewers and the proposer learn in the app when a candidate books, moves or cancels. */
     readonly notifications: NotificationRepository;

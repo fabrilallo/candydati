@@ -35,6 +35,6 @@ const submit = async (form: Parameters<typeof iv.propose>[0]): Promise<void> => 
 <template>
   <template v-if="target">
     <Button variant="outline" data-testid="header-propose-interview" @click="openDialog"><CalendarPlusIcon aria-hidden="true" />{{ t('interviews.propose') }}</Button>
-    <ProposeInterviewDialog v-model:open="proposing" :stages="stages" :stage-id="target" :job-id="application.job.id" :pending="iv.busy.value === 'propose'" :error-key="iv.proposeError.value" @submit="submit" />
+    <ProposeInterviewDialog v-model:open="proposing" :application-id="application.id" :stages="stages" :stage-id="target" :job-id="application.job.id" :pending="iv.busy.value === 'propose'" :error-key="iv.proposeError.value" @submit="submit" />
   </template>
 </template>
