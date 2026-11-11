@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-11-11
+
+No migrations and no environment variable changes.
+
 ### Fixed
 
 - "Proponi colloquio" in the candidate header was missing while the person was still in "Ricevute": it now shows there
