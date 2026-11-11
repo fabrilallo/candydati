@@ -6,7 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-One migration runs at start: `0058_video_room` is additive (table `video_room`).
+## [0.8.0] - 2026-11-11
+
+One migration runs at start as usual; take a backup first (docs/OPERATIONS.md). `0058_video_room` is additive
+(table `video_room`). No environment variable changes for 0.7.x installs.
 
 ### Added
 
