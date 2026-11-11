@@ -22,12 +22,16 @@ const application = detail().applications[0]!
 const now = new Date('2026-11-11T12:00:00Z')
 /** The two pieces as the candidate header has them: the line on the left, the button among the actions. */
 const Header = defineComponent({
+  props: { stageId: { type: String, default: undefined } },
   emits: ['show'],
-  setup: (_props, { emit }) => () => h('div', [h(InterviewHeadline, { application, now, onShow: () => emit('show') }), h(ProposeInterviewButton, { application })]),
+  setup: (props, { emit }) => () => {
+    const at = props.stageId ? { ...application, stageId: props.stageId } : application
+    return h('div', [h(InterviewHeadline, { application: at, now, onShow: () => emit('show') }), h(ProposeInterviewButton, { application: at })])
+  },
 })
 const mounted: { unmount: () => void }[] = []
-const mountHeader = async () => {
-  const wrapper = await mountSuspended(Header, { attachTo: document.body })
+const mountHeader = async (stageId?: string) => {
+  const wrapper = await mountSuspended(Header, { props: { stageId }, attachTo: document.body })
   mounted.push(wrapper)
   await vi.waitFor(() => expect(wrapper.find('[data-testid="candidate-interview"], [data-testid="header-propose-interview"]').exists()).toBe(true))
   return wrapper
@@ -64,5 +68,12 @@ describe('interview in the candidate header', () => {
     expect(state.proposals).toEqual([{ stageId: 'stage-0', mode: 'video' }])
     expect(wrapper.find('[data-testid="candidate-interview"]').text()).toContain("proposto, il candidato non ha ancora scelto l'orario")
     expect(wrapper.find('[data-testid="header-propose-interview"]').exists()).toBe(false)
+  })
+
+  it('is there from Ricevute too, starting on the first interview stage', async () => {
+    const wrapper = await mountHeader('received')
+    await wrapper.find('[data-testid="header-propose-interview"]').trigger('click')
+    await vi.waitFor(() => expect(inBody('[data-testid="propose-interview-form"]')).not.toBeNull())
+    expect(inBody<HTMLSelectElement>('[data-testid="propose-interview-stage"]')!.value).toBe('stage-0')
   })
 })

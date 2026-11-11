@@ -2,20 +2,20 @@
 import type { CandidateApplicationDto } from '@candydati/domain'
 import { CalendarPlusIcon } from '@lucide/vue'
 import { toast } from 'vue-sonner'
-import { declaredStages, openInterviewAt } from '@/lib/interview-headline'
+import { declaredStages, proposalStage } from '@/lib/interview-headline'
 import { Button } from '@/components/ui/button'
 
 /**
- * "Proponi colloquio" in the candidate header, next to the outcome and the move: shown while the current stage has no
- * open interview. What the proposal says (sent, who has no calendar, no free time) comes back as toasts.
+ * "Proponi colloquio" in the candidate header, next to the outcome and the move: shown while some interview stage has no
+ * open interview, even from "Ricevute". The dialog starts on the current stage, or else on the first free one. What the
+ * proposal says (sent, who has no calendar, no free time) comes back as toasts.
  */
 const props = defineProps<{ application: CandidateApplicationDto }>()
 const { t } = useI18n()
 const iv = useApplicationInterviews(() => props.application.id)
 const proposing = ref(false)
 const stages = computed(() => declaredStages(props.application.stages, t))
-const atCurrentStage = computed(() => stages.value.some((stage) => stage.id === props.application.stageId))
-const visible = computed(() => iv.interviews.value !== null && atCurrentStage.value && openInterviewAt(iv.interviews.value, props.application.stageId) === null)
+const target = computed(() => (iv.interviews.value ? proposalStage(stages.value, props.application.stageId, iv.interviews.value) : null))
 
 const openDialog = (): void => {
   iv.clearProposeError()
@@ -33,8 +33,8 @@ const submit = async (form: Parameters<typeof iv.propose>[0]): Promise<void> => 
 </script>
 
 <template>
-  <template v-if="visible">
+  <template v-if="target">
     <Button variant="outline" data-testid="header-propose-interview" @click="openDialog"><CalendarPlusIcon aria-hidden="true" />{{ t('interviews.propose') }}</Button>
-    <ProposeInterviewDialog v-model:open="proposing" :stages="stages" :stage-id="application.stageId" :job-id="application.job.id" :pending="iv.busy.value === 'propose'" :error-key="iv.proposeError.value" @submit="submit" />
+    <ProposeInterviewDialog v-model:open="proposing" :stages="stages" :stage-id="target" :job-id="application.job.id" :pending="iv.busy.value === 'propose'" :error-key="iv.proposeError.value" @submit="submit" />
   </template>
 </template>
