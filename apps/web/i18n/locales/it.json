@@ -625,6 +625,10 @@
         "saved": "Ha collegato o aggiornato il proprio calendario",
         "removed": "Ha scollegato il proprio calendario"
       },
+      "video_room": {
+        "saved": "Ha salvato la propria stanza video",
+        "removed": "Ha tolto la propria stanza video"
+      },
       "interview": {
         "proposed": "Ha proposto un colloquio da prenotare",
         "booked": "Colloquio prenotato",
@@ -5386,12 +5390,18 @@
       "submit": "Manda la proposta",
       "sending": "Invio…",
       "cancel": "Annulla",
-      "interviewersLink": "Cambiale in Automazioni"
+      "interviewersLink": "Cambiale in Automazioni",
+      "interviewersNamed": "Partecipano: {names}.",
+      "roomOf": "È la stanza video di {name}: cambiala se serve.",
+      "roomWhenEmpty": "Se lo lasci vuoto usiamo la stanza video di {name}.",
+      "noLink": "Nessun link per la videochiamata: il candidato riceverà l'invito senza sapere dove collegarsi. Incolla un link qui, oppure",
+      "noLinkSettings": "salva la tua stanza video in Impostazioni → Calendario"
     },
     "proposed": {
       "sent": "Il candidato riceve un'email con gli orari liberi.",
       "withoutCalendar": "{names} non ha collegato il calendario: contiamo libere le sue ore lavorative. | {names} non hanno collegato il calendario: contiamo libere le loro ore lavorative.",
-      "noSlots": "Nei prossimi 14 giorni non c'è nessun orario libero per tutti: il candidato non troverà orari. Scrivigli per accordarvi."
+      "noSlots": "Nei prossimi 14 giorni non c'è nessun orario libero per tutti: il candidato non troverà orari. Scrivigli per accordarvi.",
+      "withoutLink": "Il colloquio non ha un link per la videochiamata: scrivilo al candidato nella conversazione."
     },
     "errors": {
       "open": "C'è già un colloquio aperto per questa fase: annullalo prima di proporne un altro.",
@@ -5473,6 +5483,27 @@
         "title": "Pagina non disponibile",
         "body": "Non riusciamo a caricare gli orari in questo momento. Riprova più tardi."
       }
+    }
+  },
+  "videoRoom": {
+    "title": "La tua stanza video",
+    "intro": "Il link Google Meet, Zoom o Teams che usi per i colloqui. Quando proponi un colloquio in video lo inseriamo noi, così chi prenota sa sempre dove collegarsi.",
+    "label": "Link della stanza",
+    "hint": "Su Google Meet: meet.google.com → Nuova riunione → Crea una riunione per un secondo momento, e copia il link. Va bene anche la tua stanza personale Zoom o una riunione ricorrente di Teams. Il link arriva ai candidati che prenotano.",
+    "current": "Stanza salvata ({provider}).",
+    "save": "Salva la stanza",
+    "saving": "Salvataggio…",
+    "remove": "Togli la stanza",
+    "saved": "Stanza video salvata",
+    "removed": "Stanza video tolta",
+    "providers": {
+      "meet": "Google Meet",
+      "zoom": "Zoom",
+      "teams": "Microsoft Teams",
+      "other": "altro servizio"
+    },
+    "errors": {
+      "url": "Serve un link https completo, per esempio https://meet.google.com/abc-defg-hij, senza nome utente o password."
     }
   }
 }

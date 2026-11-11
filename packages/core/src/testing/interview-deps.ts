@@ -1,7 +1,7 @@
 import type { BusyInterval, Interview } from '@candydati/domain';
 import { ConflictError } from '../errors.js';
 import type { InterviewDeps, InterviewRepository } from '../interview-ports.js';
-import { createFakeCalendarReader, createInMemoryCalendarFeeds, fakeSecretBox, type FakeCalendarReader } from './calendar-deps.js';
+import { createFakeCalendarReader, createInMemoryCalendarFeeds, createInMemoryVideoRooms, fakeSecretBox, type FakeCalendarReader } from './calendar-deps.js';
 import { seedHrWorld, type HrSeedOptions, type TestHrDeps } from './hr-deps.js';
 import { cell } from './in-memory-transaction.js';
 
@@ -53,6 +53,7 @@ export type TestInterviewDeps = TestHrDeps &
   InterviewDeps & {
     readonly interviews: ReturnType<typeof createInMemoryInterviews>;
     readonly calendarFeeds: ReturnType<typeof createInMemoryCalendarFeeds>;
+    readonly videoRooms: ReturnType<typeof createInMemoryVideoRooms>;
     readonly calendarReader: FakeCalendarReader;
     setNow(at: Date): void;
   };
@@ -70,6 +71,7 @@ export function seedInterviewWorld(options: HrSeedOptions & { readonly now?: Dat
     ...world,
     interviews,
     calendarFeeds: createInMemoryCalendarFeeds(),
+    videoRooms: createInMemoryVideoRooms(),
     calendarReader: createFakeCalendarReader(),
     calendarSecrets: fakeSecretBox,
     interviewLinks: { interviews, newSecret: world.newToken, hash: world.hash },

@@ -113,8 +113,9 @@ export interface Notice {
 }
 
 /** Pure: what the recruiter reads once the invitation is on its way. */
-export const proposeNotices = (result: { readonly freeSlots: number; readonly withoutCalendar: readonly string[] }): readonly Notice[] => [
+export const proposeNotices = (result: { readonly freeSlots: number; readonly withoutCalendar: readonly string[]; readonly withoutLink?: boolean }): readonly Notice[] => [
   { key: 'interviews.proposed.sent', tone: 'success' },
+  ...(result.withoutLink ? [{ key: 'interviews.proposed.withoutLink', tone: 'warning' as const }] : []),
   ...(result.withoutCalendar.length > 0
     ? [{ key: 'interviews.proposed.withoutCalendar', tone: 'warning' as const, params: { names: result.withoutCalendar.join(', '), count: result.withoutCalendar.length } }]
     : []),

@@ -1,8 +1,8 @@
-import { cancelInterview, listApplicationInterviews, proposeInterview } from '@candydati/core';
+import { cancelInterview, getInterviewDefaults, listApplicationInterviews, proposeInterview } from '@candydati/core';
 import { ok } from '@candydati/domain';
 import type { FastifyInstance } from 'fastify';
 import type { AppContext } from '../app-context.js';
-import { bodyOf, paramOf } from './request.js';
+import { bodyOf, paramOf, queryOf } from './request.js';
 
 /** Interviews of an application: thin adapters over the interview use cases (same permissions everywhere). */
 export function registerInterviewRoutes(app: FastifyInstance, ctx: AppContext): void {
@@ -10,6 +10,10 @@ export function registerInterviewRoutes(app: FastifyInstance, ctx: AppContext): 
 
   app.get('/api/v1/applications/:id/interviews', async (request) =>
     ok(await listApplicationInterviews(deps, await ctx.resolveActor(request), { applicationId: paramOf(request, 'id') })),
+  );
+
+  app.get('/api/v1/applications/:id/interviews/defaults', async (request) =>
+    ok(await getInterviewDefaults(deps, await ctx.resolveActor(request), { applicationId: paramOf(request, 'id'), stageId: String(queryOf(request).stageId ?? '') })),
   );
 
   app.post('/api/v1/applications/:id/interviews', async (request, reply) => {

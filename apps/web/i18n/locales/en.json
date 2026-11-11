@@ -625,6 +625,10 @@
         "saved": "Connected or updated their calendar",
         "removed": "Disconnected their calendar"
       },
+      "video_room": {
+        "saved": "Saved their video room",
+        "removed": "Removed their video room"
+      },
       "interview": {
         "proposed": "Proposed an interview to book",
         "booked": "Interview booked",
@@ -5386,12 +5390,18 @@
       "submit": "Send the proposal",
       "sending": "Sending…",
       "cancel": "Cancel",
-      "interviewersLink": "Change them in Automations"
+      "interviewersLink": "Change them in Automations",
+      "interviewersNamed": "Taking part: {names}.",
+      "roomOf": "This is {name}’s video room: change it if you need to.",
+      "roomWhenEmpty": "Left empty, we use {name}’s video room.",
+      "noLink": "No video call link: the candidate gets the invite without knowing where to join. Paste a link here, or",
+      "noLinkSettings": "save your video room in Settings → Calendar"
     },
     "proposed": {
       "sent": "The candidate gets an email with the free times.",
       "withoutCalendar": "{names} has not connected a calendar: we count their working hours as free. | {names} have not connected a calendar: we count their working hours as free.",
-      "noSlots": "There is no time free for everyone in the next 14 days: the candidate will find none. Write to them to agree on one."
+      "noSlots": "There is no time free for everyone in the next 14 days: the candidate will find none. Write to them to agree on one.",
+      "withoutLink": "The interview has no video call link: send it to the candidate in the conversation."
     },
     "errors": {
       "open": "There is already an open interview for this stage: cancel it before proposing another.",
@@ -5473,6 +5483,27 @@
         "title": "Page unavailable",
         "body": "We cannot load the times right now. Try again later."
       }
+    }
+  },
+  "videoRoom": {
+    "title": "Your video room",
+    "intro": "The Google Meet, Zoom or Teams link you use for interviews. When you propose a video interview we put it in, so whoever books always knows where to join.",
+    "label": "Room link",
+    "hint": "On Google Meet: meet.google.com → New meeting → Create a meeting for later, and copy the link. Your Zoom personal room or a recurring Teams meeting work too. The link goes to the candidates who book.",
+    "current": "Room saved ({provider}).",
+    "save": "Save the room",
+    "saving": "Saving…",
+    "remove": "Remove the room",
+    "saved": "Video room saved",
+    "removed": "Video room removed",
+    "providers": {
+      "meet": "Google Meet",
+      "zoom": "Zoom",
+      "teams": "Microsoft Teams",
+      "other": "another service"
+    },
+    "errors": {
+      "url": "Use a full https link, for example https://meet.google.com/abc-defg-hij, with no username or password."
     }
   }
 }

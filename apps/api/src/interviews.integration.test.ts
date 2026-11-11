@@ -98,4 +98,25 @@ describe('interviews booked from the calendars', () => {
     const viaKey = await t.app.inject({ method: 'GET', url: `/api/v1/applications/${applied.applicationId}/interviews`, headers: { authorization: `Bearer ${key.secret}` } });
     expect(viaKey.statusCode).toBe(200);
   });
+
+  it('fills a video interview with the interviewer’s room, and says so before sending', async () => {
+    const w = await createWorld(t);
+    const stageId = await technicalStage(w);
+    const hm = await w.member('hiring_manager');
+    await w.joinTeam(hm, 'hiring_manager');
+    await w.owner.put(`/api/v1/jobs/${w.job.id}/interviewers`, { stages: [{ stageId, interviewers: [{ kind: 'member', userId: await userIdOf(hm) }] }] });
+    const applied = await applyAs(w);
+    const defaults = `/api/v1/applications/${applied.applicationId}/interviews/defaults?stageId=${stageId}`;
+    expect((await w.owner.get<{ videoRoom: unknown }>(defaults)).body.data).toMatchObject({ videoRoom: null });
+    expect((await hm.put('/api/v1/me/video-room', { url: 'https://meet.google.com/abc-defg-hij' })).status).toBe(200);
+    expect((await w.owner.get<{ interviewers: string[]; videoRoom: { url: string } }>(defaults)).body.data?.videoRoom?.url).toBe('https://meet.google.com/abc-defg-hij');
+    const result = await w.owner.post<{ interview: { location: string | null }; videoRoomOf: string | null; withoutLink: boolean }>(`/api/v1/applications/${applied.applicationId}/interviews`, { stageId, mode: 'video' });
+    expect(result.status).toBe(201);
+    expect(result.body.data).toMatchObject({ interview: { location: 'https://meet.google.com/abc-defg-hij' }, withoutLink: false });
+    expect(result.body.data?.videoRoomOf).not.toBeNull();
+    const interviewer = await w.member('interviewer');
+    await w.joinTeam(interviewer, 'interviewer');
+    expect((await interviewer.get(defaults)).status).toBe(403);
+  });
 });
+

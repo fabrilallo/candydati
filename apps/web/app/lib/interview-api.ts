@@ -10,13 +10,17 @@ import {
   type CalendarFeedInput,
   type CalendarPreferencesInput,
   type InterviewMode,
+  VIDEO_PROVIDERS,
+  videoRoomInputSchema,
 } from '@candydati/domain'
 import { z } from 'zod'
 import { ApiFailure, callApi } from './api-call'
 import {
   applicationInterviewsPath,
   cancelInterviewPath,
+  interviewDefaultsPath,
   MY_CALENDAR_FEED_PATH,
+  MY_VIDEO_ROOM_PATH,
   publicInterviewBookPath,
   publicInterviewCancelPath,
   publicInterviewPath,
@@ -57,7 +61,22 @@ export const interviewViewSchema = z.object({
 })
 export type InterviewViewDto = z.infer<typeof interviewViewSchema>
 
-export const proposeResultSchema = z.object({ interview: interviewViewSchema, freeSlots: z.number().int().nonnegative(), withoutCalendar: z.array(z.string()) })
+export const proposeResultSchema = z.object({
+  interview: interviewViewSchema,
+  freeSlots: z.number().int().nonnegative(),
+  withoutCalendar: z.array(z.string()),
+  videoRoomOf: z.string().nullable().default(null),
+  withoutLink: z.boolean().default(false),
+})
+
+export const videoRoomViewSchema = z.object({ url: z.string().nullable(), provider: z.enum(VIDEO_PROVIDERS).nullable() })
+export type VideoRoomViewDto = z.infer<typeof videoRoomViewSchema>
+
+export const interviewDefaultsSchema = z.object({
+  interviewers: z.array(z.string()),
+  videoRoom: z.object({ url: z.string(), owner: z.string() }).nullable(),
+})
+export type InterviewDefaultsDto = z.infer<typeof interviewDefaultsSchema>
 export type ProposeResultDto = z.infer<typeof proposeResultSchema>
 
 export const publicInterviewSchema = z.object({
@@ -100,6 +119,19 @@ export const updateCalendarHours = async (request: JobApiRequest, input: Calenda
 export const disconnectCalendarFeed = async (request: JobApiRequest): Promise<void> => {
   await callApi(request, MY_CALENDAR_FEED_PATH, z.unknown(), { method: 'DELETE' })
 }
+
+export const getMyVideoRoom = async (request: JobApiRequest): Promise<VideoRoomViewDto> => (await callApi(request, MY_VIDEO_ROOM_PATH, videoRoomViewSchema)).data
+
+export const saveMyVideoRoom = async (request: JobApiRequest, url: string): Promise<VideoRoomViewDto> =>
+  (await callApi(request, MY_VIDEO_ROOM_PATH, videoRoomViewSchema, { method: 'PUT', body: checked(videoRoomInputSchema, { url }) })).data
+
+export const removeMyVideoRoom = async (request: JobApiRequest): Promise<void> => {
+  await callApi(request, MY_VIDEO_ROOM_PATH, z.unknown(), { method: 'DELETE' })
+}
+
+/** Who takes part at a stage and the room a video interview would get, before anything is sent. */
+export const getInterviewDefaults = async (request: JobApiRequest, applicationId: string, stageId: string): Promise<InterviewDefaultsDto> =>
+  (await callApi(request, interviewDefaultsPath(applicationId, stageId), interviewDefaultsSchema)).data
 
 export const listInterviews = async (request: JobApiRequest, applicationId: string): Promise<readonly InterviewViewDto[]> =>
   (await callApi(request, applicationInterviewsPath(applicationId), z.array(interviewViewSchema))).data

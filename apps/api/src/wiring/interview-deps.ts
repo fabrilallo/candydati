@@ -22,6 +22,7 @@ export function createInterviewDeps({ uow, feedbackDeps, calendarDeps, queue }: 
     calendarFeeds: calendarDeps.calendarFeeds,
     calendarReader: calendarDeps.calendarReader,
     calendarSecrets: calendarDeps.calendarSecrets,
+    videoRooms: calendarDeps.videoRooms,
     interviews: r.interviews,
     notifications: r.notifications,
   };

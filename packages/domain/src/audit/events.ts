@@ -86,6 +86,8 @@ export const AUDIT_ACTIONS = [
   'feedback.cv_opened',
   'calendar_feed.saved',
   'calendar_feed.removed',
+  'video_room.saved',
+  'video_room.removed',
   'interview.proposed',
   'interview.booked',
   'interview.rescheduled',

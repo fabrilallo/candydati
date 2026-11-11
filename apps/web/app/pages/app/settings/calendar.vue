@@ -12,6 +12,7 @@ useSeoMeta({ title: () => t('calendar.pageTitle') })
     <div class="grid gap-8">
       <PageHeader :title="t('calendar.pageTitle')" :description="t('calendar.pageDescription')" :icon="CalendarDaysIcon" />
       <CalendarFeedPanel />
+      <VideoRoomPanel />
     </div>
   </AppPage>
 </template>

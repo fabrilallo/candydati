@@ -52,8 +52,28 @@ export interface CalendarReader {
   readBusy(url: string, window: CalendarReadWindow): Promise<CalendarReadResult>;
 }
 
+/** A person's own video room: the link of the video interviews they run when nobody wrote another one. */
+export interface VideoRoomRecord {
+  readonly organizationId: string;
+  readonly userId: string;
+  readonly url: string;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+/** Every method takes the organization: a person's room belongs to one organization. */
+export interface VideoRoomRepository {
+  find(organizationId: string, userId: string): Promise<VideoRoomRecord | null>;
+  listByUsers(organizationId: string, userIds: readonly string[]): Promise<readonly VideoRoomRecord[]>;
+  /** Creates or replaces the person's room. */
+  save(record: VideoRoomRecord): Promise<void>;
+  /** True when there was one. */
+  remove(organizationId: string, userId: string): Promise<boolean>;
+}
+
 export interface CalendarDeps extends CoreDeps {
   readonly calendarFeeds: CalendarFeedRepository;
+  readonly videoRooms: VideoRoomRepository;
   readonly calendarReader: CalendarReader;
   /** Seals the address at rest (`calendarSecretContext`). */
   readonly calendarSecrets: CredentialsBox;

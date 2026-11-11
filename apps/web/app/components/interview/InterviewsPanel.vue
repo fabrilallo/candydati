@@ -86,7 +86,7 @@ const confirmCancel = async (): Promise<void> => {
       </ul>
     </template>
 
-    <ProposeInterviewDialog v-if="canPropose" v-model:open="proposing" :stages="stages" :stage-id="application.stageId" :job-id="application.job.id" :pending="iv.busy.value === 'propose'" :error-key="iv.proposeError.value" @submit="submit" />
+    <ProposeInterviewDialog v-if="canPropose" v-model:open="proposing" :application-id="application.id" :stages="stages" :stage-id="application.stageId" :job-id="application.job.id" :pending="iv.busy.value === 'propose'" :error-key="iv.proposeError.value" @submit="submit" />
     <ConfirmDialog
       v-if="canSchedule"
       :open="cancelling !== null"
