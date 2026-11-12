@@ -43,6 +43,8 @@ export const DESCRIPTIONS = {
   RECEIPTS_DAILY_MAX_PER_ORGANIZATION: 'Application receipt emails the public form may queue per organization in 24 hours (the form is otherwise a way to mail strangers).',
   LINKEDIN_CLIENT_ID: 'Client ID of a LinkedIn app with the "Sign In with LinkedIn using OpenID Connect" product. Set with LINKEDIN_CLIENT_SECRET: the application form offers "Fill in with LinkedIn" (name and verified email only). Empty: off.',
   LINKEDIN_CLIENT_SECRET: 'Client secret of that LinkedIn app (both or none). Redirect URL to register: {PLATFORM_URL}/api/v1/public/linkedin/callback.',
+  GOOGLE_CALENDAR_CLIENT_ID: 'Client ID of a Google Cloud OAuth web client with the Calendar API enabled. Set with GOOGLE_CALENDAR_CLIENT_SECRET: members may connect Google Calendar from Settings → Calendar. Empty: off (the secret iCal address still works).',
+  GOOGLE_CALENDAR_CLIENT_SECRET: 'Client secret of that Google client (both or none). Redirect URI to register: {PLATFORM_URL}/api/v1/me/calendar/google/callback. On Google Workspace choose user type Internal; otherwise publish the app (In production): in Testing Google expires the connection after 7 days.',
   TURNSTILE_SECRET_KEY: 'Cloudflare Turnstile secret key. Set: the public application form needs a valid Turnstile answer (also set NUXT_PUBLIC_TURNSTILE_SITE_KEY). Empty: off.',
   CV_MODEL_DAILY_BUDGET: 'Worker: CV extractions per organization and day that may call the model.',
   IMPORT_STALE_DAYS: 'Worker: days after which an import never committed is purged.',

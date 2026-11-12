@@ -46,10 +46,16 @@ const dailyCap = (fallback: number) => z.coerce.number().int().min(1).default(fa
 const refuseOpenWebhooksInProduction = (env: { NODE_ENV: string; WEBHOOKS_ALLOW_PRIVATE: boolean }): boolean =>
   !(env.NODE_ENV === 'production' && env.WEBHOOKS_ALLOW_PRIVATE);
 
-/** The LinkedIn app is configured whole or not at all: one half alone is a mistake, said at startup. */
-const requireLinkedInPair = (env: { LINKEDIN_CLIENT_ID?: string | undefined; LINKEDIN_CLIENT_SECRET?: string | undefined }, ctx: z.RefinementCtx): void => {
-  if (env.LINKEDIN_CLIENT_ID !== undefined && env.LINKEDIN_CLIENT_SECRET === undefined) ctx.addIssue({ code: 'custom', path: ['LINKEDIN_CLIENT_SECRET'], message: 'is required when LINKEDIN_CLIENT_ID is set' });
-  if (env.LINKEDIN_CLIENT_SECRET !== undefined && env.LINKEDIN_CLIENT_ID === undefined) ctx.addIssue({ code: 'custom', path: ['LINKEDIN_CLIENT_ID'], message: 'is required when LINKEDIN_CLIENT_SECRET is set' });
+/** One half of an OAuth app alone is a mistake, said at startup. */
+const requirePair = (env: Record<string, unknown>, ctx: z.RefinementCtx, id: string, secret: string): void => {
+  if (env[id] !== undefined && env[secret] === undefined) ctx.addIssue({ code: 'custom', path: [secret], message: `is required when ${id} is set` });
+  if (env[secret] !== undefined && env[id] === undefined) ctx.addIssue({ code: 'custom', path: [id], message: `is required when ${secret} is set` });
+};
+
+/** The LinkedIn app and the Google app are each configured whole or not at all. */
+const requireOAuthPairs = (env: Record<string, unknown>, ctx: z.RefinementCtx): void => {
+  requirePair(env, ctx, 'LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET');
+  requirePair(env, ctx, 'GOOGLE_CALENDAR_CLIENT_ID', 'GOOGLE_CALENDAR_CLIENT_SECRET');
 };
 
 const envSchema = z.object({
@@ -95,6 +101,9 @@ const envSchema = z.object({
   /** LinkedIn app with "Sign In with LinkedIn using OpenID Connect": the application form offers "Fill in with LinkedIn". Both or none. */
   LINKEDIN_CLIENT_ID: z.string().trim().min(1).max(200).optional(),
   LINKEDIN_CLIENT_SECRET: z.string().trim().min(1).max(500).optional(),
+  /** Google OAuth web client: members may connect Google Calendar (busy times, interview events with Meet). Both or none. */
+  GOOGLE_CALENDAR_CLIENT_ID: z.string().trim().min(1).max(200).optional(),
+  GOOGLE_CALENDAR_CLIENT_SECRET: z.string().trim().min(1).max(500).optional(),
   /** `open`: anyone may create an account. `invite_only`: only with a pending invitation, or the very first account. */
   SIGNUP_MODE: z.enum(SIGNUP_MODES).optional(),
   /**
@@ -135,7 +144,7 @@ const envSchema = z.object({
 }).refine(refuseOpenWebhooksInProduction, {
   path: ['WEBHOOKS_ALLOW_PRIVATE'],
   message: 'must not be true in production (it turns off the protection against requests to internal addresses)',
-}).superRefine(requireLinkedInPair);
+}).superRefine(requireOAuthPairs);
 
 /** The LinkedIn app of "Fill in with LinkedIn"; null when it is not configured (the button does not show). */
 export interface LinkedInAppConfig {
@@ -143,10 +152,13 @@ export interface LinkedInAppConfig {
   readonly clientSecret: string;
 }
 
+/** The Google app of "Connect Google Calendar"; null when it is not configured (the button does not show). */
+export type GoogleCalendarAppConfig = LinkedInAppConfig;
+
 export type SignupMode = (typeof SIGNUP_MODES)[number];
 export type OrganizationCreationMode = (typeof ORGANIZATION_CREATION_MODES)[number];
 
-export type Env = Readonly<Omit<z.infer<typeof envSchema>, 'SIGNUP_MODE' | 'ORGANIZATION_CREATION'>> & { readonly SIGNUP_MODE: SignupMode; readonly ORGANIZATION_CREATION: OrganizationCreationMode } & { readonly linkedIn: LinkedInAppConfig | null } & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig; readonly observability: ObservabilityConfig };
+export type Env = Readonly<Omit<z.infer<typeof envSchema>, 'SIGNUP_MODE' | 'ORGANIZATION_CREATION'>> & { readonly SIGNUP_MODE: SignupMode; readonly ORGANIZATION_CREATION: OrganizationCreationMode } & { readonly linkedIn: LinkedInAppConfig | null; readonly googleCalendar: GoogleCalendarAppConfig | null } & { readonly platform: PlatformConfig; readonly s3: S3Config; readonly email: EmailConfig; readonly observability: ObservabilityConfig };
 
 type Source = Readonly<Record<string, string | undefined>>;
 
@@ -197,6 +209,8 @@ export function parseEnv(source: Source): Env {
     SIGNUP_MODE: signupMode,
     ORGANIZATION_CREATION: parsed.data.ORGANIZATION_CREATION ?? (signupMode === 'invite_only' ? 'one_per_user' : 'open'),
     linkedIn: parsed.data.LINKEDIN_CLIENT_ID && parsed.data.LINKEDIN_CLIENT_SECRET ? { clientId: parsed.data.LINKEDIN_CLIENT_ID, clientSecret: parsed.data.LINKEDIN_CLIENT_SECRET } : null,
+    googleCalendar:
+      parsed.data.GOOGLE_CALENDAR_CLIENT_ID && parsed.data.GOOGLE_CALENDAR_CLIENT_SECRET ? { clientId: parsed.data.GOOGLE_CALENDAR_CLIENT_ID, clientSecret: parsed.data.GOOGLE_CALENDAR_CLIENT_SECRET } : null,
     platform: loadPlatformConfig(clean), s3: parseS3(clean),
     email: parseEmail(clean, production),
     observability: parseObservability(clean),

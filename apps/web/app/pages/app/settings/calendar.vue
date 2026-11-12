@@ -11,6 +11,7 @@ useSeoMeta({ title: () => t('calendar.pageTitle') })
   <AppPage :crumbs="[{ label: t('nav.sections.organization') }, { label: t('calendar.pageTitle') }]">
     <div class="grid gap-8">
       <PageHeader :title="t('calendar.pageTitle')" :description="t('calendar.pageDescription')" :icon="CalendarDaysIcon" />
+      <GoogleCalendarPanel />
       <CalendarFeedPanel />
       <VideoRoomPanel />
     </div>

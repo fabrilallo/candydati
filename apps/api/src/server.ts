@@ -1,7 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { safeErrorSerializer } from '@candydati/core';
-import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, AiModelCheck, CalendarReader, TaskQueue, ResponsibilitySuggester, CriteriaDrafter } from '@candydati/core';
+import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, AiModelCheck, CalendarReader, GoogleCalendarAuth, TaskQueue, ResponsibilitySuggester, CriteriaDrafter } from '@candydati/core';
 import { createErrorReporter, type ErrorReporter, type MigrationConnectorRegistry } from '@candydati/providers';
 import type { Db } from '@candydati/db';
 import type { AdQualityAnalyzer } from '@candydati/domain';
@@ -70,6 +70,7 @@ import { registerReportRoutes } from './routes/reports.js';
 import { registerStatsRoutes } from './routes/stats.js';
 import { registerFeedbackRoutes } from './routes/feedback.js';
 import { registerCalendarRoutes } from './routes/calendar.js';
+import { registerGoogleCalendarRoutes } from './routes/calendar-google.js';
 import { registerInterviewRoutes } from './routes/interviews.js';
 import { registerPublicInterviewRoutes } from './routes/public-interviews.js';
 import { registerPublicFeedbackRoutes } from './routes/public-feedback.js';
@@ -110,6 +111,8 @@ export interface ServerDeps {
   readonly aiCheck?: AiModelCheck | undefined;
   /** Test seam: reads calendar addresses (the SSRF-safe reader by default). */
   readonly calendarReader?: CalendarReader | undefined;
+  /** Test seam: Google's OAuth endpoints (from GOOGLE_CALENDAR_CLIENT_ID / _SECRET by default; null: off). */
+  readonly googleCalendarAuth?: GoogleCalendarAuth | null | undefined;
   /** Test seam: the "now" of the reports. */
   readonly reportClock?: (() => Date) | undefined;
   /** Test seam: the careers media transcoder (sharp by default). */
@@ -203,6 +206,8 @@ function createContext(app: FastifyInstance, deps: ServerDeps, metrics: ApiMetri
     aiRuntime,
     aiCheck: deps.aiCheck,
     calendarReader: deps.calendarReader,
+    googleCalendarAuth: deps.googleCalendarAuth,
+    onCalendarProblem: ({ reason, detail, error }) => app.log.warn({ reason, detail, err: error }, 'google calendar connection problem'),
     emailRuntime,
     emailLog,
     instanceEmailTester: deps.instanceEmailTester,
@@ -259,6 +264,7 @@ function registerRecruitingRoutes(app: FastifyInstance, ctx: AppContext): void {
   registerStaleJobRoutes(app, ctx);
   registerFeedbackRoutes(app, ctx);
   registerCalendarRoutes(app, ctx);
+  registerGoogleCalendarRoutes(app, ctx);
   registerInterviewRoutes(app, ctx);
   registerPublicInterviewRoutes(app, ctx);
   registerJobRequestRoutes(app, ctx);

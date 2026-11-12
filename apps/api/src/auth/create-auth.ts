@@ -1,4 +1,4 @@
-import { createDrizzleCalendarFeeds, createDrizzleVideoRooms, type CoreDeps } from '@candydati/core';
+import { createDrizzleCalendarConnections, createDrizzleCalendarFeeds, createDrizzleVideoRooms, type CoreDeps } from '@candydati/core';
 import type { Db } from '@candydati/db';
 import { schema } from '@candydati/db';
 import { CREATOR_ROLE, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '@candydati/domain';
@@ -107,10 +107,12 @@ function mcpOAuth(env: Env, db: Db, requiresTwoFactor: AuthDependencies['require
 const organizationHooks = (creation: ReturnType<typeof organizationCreationHooks>, audit: ReturnType<typeof createAuditHooks>, emailReady: () => boolean, db: Db) => ({
   ...roleGuardHooks,
   ...audit,
-  // Who leaves an organization takes their calendar link with them: the sealed address and the busy times go.
+  // Who leaves an organization takes their calendar with them: the sealed address, the busy times, the room and the
+  // Google token go (the token is not revoked at Google here: the person may still use it in another organization).
   afterRemoveMember: async (data: Parameters<typeof audit.afterRemoveMember>[0]) => {
     await createDrizzleCalendarFeeds(db).remove(data.organization.id, data.member.userId);
     await createDrizzleVideoRooms(db).remove(data.organization.id, data.member.userId);
+    await createDrizzleCalendarConnections(db).remove(data.organization.id, data.member.userId, 'google');
     await audit.afterRemoveMember(data);
   },
   beforeCreateInvitation: async (data: Parameters<typeof roleGuardHooks.beforeCreateInvitation>[0]) => {

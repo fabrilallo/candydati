@@ -4,3 +4,4 @@ export * from './ics.js';
 export * from './interview.js';
 export * from './emails.js';
 export * from './video-room.js';
+export * from './calendar-connection.js';

@@ -1,4 +1,4 @@
-import type { InterviewerKind, InterviewMode, InterviewStatus, WorkingHours } from '@candydati/domain';
+import type { CalendarConnectionProvider, CalendarConnectionState, InterviewerKind, InterviewMode, InterviewStatus, WorkingHours } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization, user } from './auth.js';
@@ -59,6 +59,32 @@ export const videoRoom = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [primaryKey({ columns: [table.organizationId, table.userId] })],
+);
+
+/**
+ * A member's calendar connected with OAuth (Google), one per person, organization and provider. Only the refresh token
+ * is kept, sealed at rest (BETTER_AUTH_SECRET, its own HKDF info, bound to the row); access tokens live in memory.
+ * Goes with the user (cascade) and is deleted when they leave the organization or disconnect.
+ */
+export const calendarConnection = pgTable(
+  'calendar_connection',
+  {
+    organizationId: organizationRef(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    provider: text('provider').$type<CalendarConnectionProvider>().notNull(),
+    /** "connected as": the address of the Google account, shown to the person only. */
+    accountEmail: text('account_email').notNull(),
+    refreshTokenCiphertext: text('refresh_token_ciphertext').notNull(),
+    scopes: text('scopes').array().notNull(),
+    status: text('status').$type<CalendarConnectionState>().notNull().default('active'),
+    /** Why it broke (a code, never what the provider answered). */
+    lastError: text('last_error'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.organizationId, table.userId, table.provider] })],
 );
 
 /**

@@ -88,6 +88,8 @@ export const AUDIT_ACTIONS = [
   'calendar_feed.removed',
   'video_room.saved',
   'video_room.removed',
+  'calendar_connection.connected',
+  'calendar_connection.removed',
   'interview.proposed',
   'interview.booked',
   'interview.rescheduled',

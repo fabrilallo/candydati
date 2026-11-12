@@ -49,6 +49,8 @@ const SAFE_BY_CONSTRUCTION = [
   /^guideUrl\(/,
   // Same-origin start of "Fill in with LinkedIn": a fixed path, the job page encoded as its query (`@candydati/domain`).
   /^linkedInStartPath\(/,
+  // Same-origin start of "Connect Google Calendar": a fixed path of the api (`lib/calendar-connection-api.ts`).
+  /^GOOGLE_CALENDAR_START_URL$/,
 ]
 
 const BOUND = /(?:v-bind)?:(?:href|src)="([^"]+)"/g

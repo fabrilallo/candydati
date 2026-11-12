@@ -53,7 +53,7 @@ import { configuredProviders } from './wiring/configured-providers.js';
 import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
 import { zipStreamFactory } from '@candydati/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
-import type { Actor, ApiKeyDeps, CalendarDeps, CalendarReader, InterviewDeps, CriteriaDrafter, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
+import type { Actor, ApiKeyDeps, CalendarConnectionDeps, CalendarDeps, CalendarReader, GoogleCalendarAuth, InterviewDeps, CriteriaDrafter, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
 import { authenticateApiKey, withStorageErrors } from '@candydati/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
@@ -72,6 +72,7 @@ import { createInstanceAiDeps } from './wiring/instance-ai-deps.js';
 import { createInstanceEmailDeps } from './wiring/instance-email-deps.js';
 import { createSetupProgressDeps } from './wiring/setup-progress-deps.js';
 import { createCalendarDeps } from './wiring/calendar-deps.js';
+import { createCalendarConnectionDeps } from './wiring/calendar-connection-deps.js';
 import { createInterviewDeps } from './wiring/interview-deps.js';
 
 export interface RateLimitSettings {
@@ -198,6 +199,8 @@ export interface AppContext extends ClientWiring {
   readonly calendarDeps: CalendarDeps;
   /** Interviews booked from the interviewers' calendars, and the candidate's booking page. */
   readonly interviewDeps: InterviewDeps;
+  /** The signed-in person's calendar connected with OAuth (Google). */
+  readonly calendarConnectionDeps: CalendarConnectionDeps;
 }
 
 export interface AppContextDeps {
@@ -237,6 +240,10 @@ export interface AppContextDeps {
   readonly aiCheck?: AiModelCheck | undefined;
   /** Test seam: reads calendar addresses (the SSRF-safe reader by default). */
   readonly calendarReader?: CalendarReader | undefined;
+  /** Test seam: Google's OAuth endpoints (from the environment by default; null: off). */
+  readonly googleCalendarAuth?: GoogleCalendarAuth | null | undefined;
+  /** Why a Google Calendar connection did not complete or a revoke failed (codes, never a token). */
+  readonly onCalendarProblem?: CalendarConnectionDeps['onProblem'] | undefined;
 }
 
 const isBindable = (queue: TaskQueue | BindableTaskQueue): queue is BindableTaskQueue => 'bindTo' in queue && typeof queue.bindTo === 'function';
@@ -247,7 +254,7 @@ const outreachContext = (messaging: ReturnType<typeof createMessagingDeps>) => (
   inboundDeps: messaging.inboundDeps,
 });
 
-export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, responsibilitySuggester, criteriaDrafter, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck, calendarReader }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, responsibilitySuggester, criteriaDrafter, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck, calendarReader, googleCalendarAuth, onCalendarProblem }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
@@ -280,7 +287,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     ...createClientDeps({ uow, files, queue, sender, config: emailConfig, onMailError: onReceiptError, candidateDeps: phase2.candidateDeps, feedback: hr.feedbackRecords }),
     ...hrContext(hr),
-    ...schedulingContext({ env, uow, queue, feedbackDeps: hr.feedbackDeps, calendarReader }),
+    ...schedulingContext({ env, uow, queue, feedbackDeps: hr.feedbackDeps, calendarReader, google: googleCalendarAuth, onCalendarProblem }),
     ...createTeamDeps(uow),
     ...outreachContext(messaging),
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
@@ -346,10 +353,24 @@ function instanceContext({ env, db, uow, files, queue, images, phase2, runtime, 
   };
 }
 
-/** Calendars and interviews: the calendar link of each person, and the bookings built on the feedback context. */
-function schedulingContext(inputs: { readonly env: Env; readonly uow: DrizzleUnitOfWork; readonly queue: TaskQueue; readonly feedbackDeps: HrWiring['feedbackDeps']; readonly calendarReader: CalendarReader | undefined }) {
+/** Calendars and interviews: the calendar link and the Google connection of each person, and the bookings built on the feedback context. */
+interface SchedulingInputs {
+  readonly env: Env;
+  readonly uow: DrizzleUnitOfWork;
+  readonly queue: TaskQueue;
+  readonly feedbackDeps: HrWiring['feedbackDeps'];
+  readonly calendarReader: CalendarReader | undefined;
+  readonly google: GoogleCalendarAuth | null | undefined;
+  readonly onCalendarProblem: CalendarConnectionDeps['onProblem'] | undefined;
+}
+
+function schedulingContext(inputs: SchedulingInputs) {
   const calendarDeps = createCalendarDeps({ env: inputs.env, uow: inputs.uow, reader: inputs.calendarReader });
-  return { calendarDeps, interviewDeps: createInterviewDeps({ uow: inputs.uow, feedbackDeps: inputs.feedbackDeps, calendarDeps, queue: inputs.queue }) };
+  return {
+    calendarDeps,
+    interviewDeps: createInterviewDeps({ uow: inputs.uow, feedbackDeps: inputs.feedbackDeps, calendarDeps, queue: inputs.queue }),
+    calendarConnectionDeps: createCalendarConnectionDeps({ env: inputs.env, uow: inputs.uow, google: inputs.google, onProblem: inputs.onCalendarProblem ?? (() => undefined) }),
+  };
 }
 
 /** The HR dependencies the routes read from the context, by name. */

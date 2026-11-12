@@ -629,6 +629,10 @@
         "saved": "Saved their video room",
         "removed": "Removed their video room"
       },
+      "calendar_connection": {
+        "connected": "Connected Google Calendar",
+        "removed": "Disconnected Google Calendar"
+      },
       "interview": {
         "proposed": "Proposed an interview to book",
         "booked": "Interview booked",
@@ -5483,6 +5487,25 @@
         "title": "Page unavailable",
         "body": "We cannot load the times right now. Try again later."
       }
+    }
+  },
+  "googleCalendar": {
+    "title": "Google Calendar",
+    "intro": "Connect your Google Calendar in one click: we read when you are busy and, when a candidate books, we put the interview in your calendar with its Google Meet link. No secret address to copy, no video room to paste.",
+    "privacy": "Google asks you to let us see when you are busy and manage the events of your calendars. We never read the titles or attendees of your other events, and you can disconnect at any time.",
+    "connect": "Connect Google Calendar",
+    "connectedAs": "Connected as {email}.",
+    "broken": "Google no longer accepts the connection (access revoked, password changed or connection expired). Connect it again to continue.",
+    "reconnect": "Connect again",
+    "disconnect": "Disconnect",
+    "disconnecting": "Disconnecting…",
+    "disconnected": "Google Calendar disconnected",
+    "outcomes": {
+      "connected": "Google Calendar connected",
+      "cancelled": "Connection cancelled: permission was not given on Google.",
+      "missing_scope": "Both calendar permissions are needed: try again and leave both boxes ticked.",
+      "expired": "The connection took too long or was opened in another window: try again.",
+      "failed": "We could not connect Google Calendar. Try again in a moment."
     }
   },
   "videoRoom": {
