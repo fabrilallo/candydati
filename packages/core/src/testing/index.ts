@@ -52,3 +52,4 @@ export * from './migration-fetch.js';
 export * from './client-deps.js';
 export * from './in-memory-clients.js';
 export * from './in-memory-skill-aliases.js';
+export * from './calendar-connection-deps.js';

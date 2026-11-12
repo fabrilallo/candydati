@@ -414,6 +414,13 @@
       "when": 1794427603681,
       "tag": "0058_video_room",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1794474233702,
+      "tag": "0059_calendar_connection",
+      "breakpoints": true
     }
   ]
 }

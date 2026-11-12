@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+`0059_calendar_connection` is additive (table `calendar_connection`). New optional variables
+`GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` (both or none).
+
+### Added
+
+- Connect Google Calendar (Settings → Calendar): a member connects their own Google account with OAuth (PKCE,
+  offline access). Only the refresh token is kept, sealed at rest; disconnecting gives the grant back to Google. Offered
+  only when the instance sets `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET`. Busy times and interview
+  events with a Meet link follow in the next steps.
+
 ## [0.8.0] - 2026-11-11
 
 One migration runs at start as usual; take a backup first (docs/OPERATIONS.md). `0058_video_room` is additive

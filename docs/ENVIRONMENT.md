@@ -30,6 +30,8 @@ Variables without a default are required or optional as described; see `.env.exa
 | `EMAIL_INBOUND_DOMAIN` | api, worker |  | Domain that receives replies (reply+<token>@<domain>). |
 | `EMAIL_PROVIDER` | api, worker | `log` | smtp, resend or log (log sends nothing, refused in production). Unset: the instance owner configures email from the app (Settings, Email), and invitations, publishing and applications wait until it works. Set, it wins and the app shows it read-only. |
 | `FAST_MODEL` | api, worker |  | provider/model of the fast model: the ad quality score and CV reading (applications, imports). Set, it wins over Settings, AI in the app (shown read-only). Empty and nothing set in the app: no ad quality score at all, plain text of CVs. |
+| `GOOGLE_CALENDAR_CLIENT_ID` | api |  | Client ID of a Google Cloud OAuth web client with the Calendar API enabled. Set with GOOGLE_CALENDAR_CLIENT_SECRET: members may connect Google Calendar from Settings → Calendar. Empty: off (the secret iCal address still works). |
+| `GOOGLE_CALENDAR_CLIENT_SECRET` | api |  | Client secret of that Google client (both or none). Redirect URI to register: {PLATFORM_URL}/api/v1/me/calendar/google/callback. On Google Workspace choose user type Internal; otherwise publish the app (In production): in Testing Google expires the connection after 7 days. |
 | `GOOGLE_GENERATIVE_AI_API_KEY` | api, worker |  | API key for google/* models. |
 | `GROQ_API_KEY` | api, worker |  | API key for groq/* models. |
 | `IMPORT_STALE_DAYS` | worker | `7` | Worker: days after which an import never committed is purged. |

@@ -148,6 +148,8 @@ services:
       TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
       LINKEDIN_CLIENT_ID: ${LINKEDIN_CLIENT_ID:-}
       LINKEDIN_CLIENT_SECRET: ${LINKEDIN_CLIENT_SECRET:-}
+      GOOGLE_CALENDAR_CLIENT_ID: ${GOOGLE_CALENDAR_CLIENT_ID:-}
+      GOOGLE_CALENDAR_CLIENT_SECRET: ${GOOGLE_CALENDAR_CLIENT_SECRET:-}
       INBOUND_WEBHOOK_SECRET: ${INBOUND_WEBHOOK_SECRET:?imposta INBOUND_WEBHOOK_SECRET (almeno 32 caratteri)}
       # invite_only (default in production): accounts only through an invitation, plus the first owner (SECURITY.md).
       SIGNUP_MODE: ${SIGNUP_MODE:-invite_only}

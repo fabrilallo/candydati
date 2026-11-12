@@ -629,6 +629,10 @@
         "saved": "Ha salvato la propria stanza video",
         "removed": "Ha tolto la propria stanza video"
       },
+      "calendar_connection": {
+        "connected": "Ha collegato Google Calendar",
+        "removed": "Ha scollegato Google Calendar"
+      },
       "interview": {
         "proposed": "Ha proposto un colloquio da prenotare",
         "booked": "Colloquio prenotato",
@@ -5483,6 +5487,25 @@
         "title": "Pagina non disponibile",
         "body": "Non riusciamo a caricare gli orari in questo momento. Riprova più tardi."
       }
+    }
+  },
+  "googleCalendar": {
+    "title": "Google Calendar",
+    "intro": "Collega il tuo Google Calendar con un clic: leggiamo quando sei occupato e, quando un candidato prenota, mettiamo noi il colloquio nel tuo calendario con il link Google Meet. Niente indirizzo segreto da copiare, niente stanza video da incollare.",
+    "privacy": "Google ti chiede il permesso di vedere quando sei occupato e di gestire gli eventi dei tuoi calendari. Non leggiamo titoli né partecipanti degli altri eventi, e puoi scollegarlo quando vuoi.",
+    "connect": "Collega Google Calendar",
+    "connectedAs": "Collegato come {email}.",
+    "broken": "Google non accetta più il collegamento (permesso revocato, password cambiata o collegamento scaduto). Ricollegalo per continuare.",
+    "reconnect": "Ricollega",
+    "disconnect": "Scollega",
+    "disconnecting": "Scollegamento…",
+    "disconnected": "Google Calendar scollegato",
+    "outcomes": {
+      "connected": "Google Calendar collegato",
+      "cancelled": "Collegamento annullato: su Google non è stato dato il permesso.",
+      "missing_scope": "Servono entrambi i permessi sul calendario: riprova e lascia spunte le due caselle.",
+      "expired": "Il collegamento ha richiesto troppo tempo o è stato aperto in un’altra finestra: riprova.",
+      "failed": "Non siamo riusciti a collegare Google Calendar. Riprova tra poco."
     }
   },
   "videoRoom": {
