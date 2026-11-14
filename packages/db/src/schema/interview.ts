@@ -1,4 +1,4 @@
-import type { CalendarConnectionProvider, CalendarConnectionState, InterviewerKind, InterviewMode, InterviewStatus, WorkingHours } from '@candydati/domain';
+import type { CalendarConnectionError, CalendarConnectionProvider, CalendarConnectionState, InterviewerKind, InterviewMode, InterviewStatus, WorkingHours } from '@candydati/domain';
 import { sql } from 'drizzle-orm';
 import { index, integer, jsonb, pgTable, primaryKey, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 import { organization, user } from './auth.js';
@@ -43,25 +43,6 @@ export const calendarFeed = pgTable(
 );
 
 /**
- * A member's own video room (a Meet, Zoom or Teams link they reuse), one per person and organization: the link of the
- * video interviews they run when the recruiter leaves "where" empty. It is sent to candidates, so it is not a secret.
- * Goes with the user (cascade) and is deleted when they leave the organization.
- */
-export const videoRoom = pgTable(
-  'video_room',
-  {
-    organizationId: organizationRef(),
-    userId: text('user_id')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    url: text('url').notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [primaryKey({ columns: [table.organizationId, table.userId] })],
-);
-
-/**
  * A member's calendar connected with OAuth (Google), one per person, organization and provider. Only the refresh token
  * is kept, sealed at rest (BETTER_AUTH_SECRET, its own HKDF info, bound to the row); access tokens live in memory.
  * Goes with the user (cascade) and is deleted when they leave the organization or disconnect.
@@ -79,8 +60,15 @@ export const calendarConnection = pgTable(
     refreshTokenCiphertext: text('refresh_token_ciphertext').notNull(),
     scopes: text('scopes').array().notNull(),
     status: text('status').$type<CalendarConnectionState>().notNull().default('active'),
-    /** Why it broke (a code, never what the provider answered). */
-    lastError: text('last_error'),
+    /** Why the last call failed (a code, never what the provider answered). */
+    lastError: text('last_error').$type<CalendarConnectionError>(),
+    /** The hours candidates may book, in this zone (kept equal to the iCal link's when both exist). */
+    // Literals: drizzle-kit loads this file without the domain package (DEFAULT_TIME_ZONE, DEFAULT_WORKING_HOURS).
+    timeZone: text('time_zone').notNull().default('Europe/Rome'),
+    workingHours: jsonb('working_hours').$type<WorkingHours>().notNull().default({ days: [1, 2, 3, 4, 5], start: '09:00', end: '18:00' }),
+    /** Busy times last read from the provider (freeBusy: no titles, attendees or descriptions). */
+    busy: jsonb('busy').$type<readonly StoredBusy[]>().notNull().default(sql`'[]'::jsonb`),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
@@ -150,6 +138,26 @@ export const interviewInterviewer = pgTable(
     primaryKey({ columns: [table.interviewId, table.position] }),
     index('interview_interviewer_org_user_idx').on(table.organizationId, table.userId),
   ],
+);
+
+/**
+ * The event made in an interviewer's own calendar for a booked interview (Google, with its Meet), to move or delete it
+ * later. One per interview. Goes with the interview; the owner's leaving only stops later changes reaching it.
+ */
+export const interviewCalendarEvent = pgTable(
+  'interview_calendar_event',
+  {
+    organizationId: organizationRef(),
+    interviewId: text('interview_id')
+      .notNull()
+      .references(() => interview.id, { onDelete: 'cascade' }),
+    userId: text('user_id').notNull(),
+    provider: text('provider').$type<CalendarConnectionProvider>().notNull(),
+    externalEventId: text('external_event_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.organizationId, table.interviewId] })],
 );
 
 export type CalendarFeedRow = typeof calendarFeed.$inferSelect;

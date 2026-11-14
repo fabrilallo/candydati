@@ -4,10 +4,44 @@ Fissare un colloquio di solito richiede una catena di email. In Candydati il can
 libero per tutti gli intervistatori, e ognuno trova l'evento nel proprio calendario. L'ATS conosce ogni colloquio
 prenotato, quindi può ricordarlo, avvisare il team e far partire le automazioni della fase.
 
-## Collega il tuo calendario
+## Collega Google Calendar
 
-Ognuno collega il proprio calendario una volta sola, da **Impostazioni → Calendario**, incollando il suo **indirizzo
-iCal segreto**:
+Se usi Google Calendar e l'istanza lo offre, in **Impostazioni → Calendario** premi **Collega Google Calendar** e accetta
+su Google. Basta questo:
+
+- **Orari occupati letti da Google:** niente indirizzo segreto da cercare. Solo gli intervalli occupati del calendario
+  principale, mai titoli, descrizioni o partecipanti.
+- **Il colloquio nel tuo calendario:** quando un candidato prenota, il colloquio compare nel calendario Google del primo
+  intervistatore della fase che l'ha collegato, come evento privato. Se il colloquio è in video e nessuno ha scritto un
+  link, l'evento ha una **riunione Google Meet solo per quel colloquio**, e il link arriva al candidato e agli altri
+  intervistatori. Spostare il colloquio sposta l'evento (il Meet resta), annullarlo lo cancella.
+- **Niente doppioni:** chi ha l'evento nel calendario riceve l'email senza l'invito .ics. Gli altri ricevono l'invito
+  come sempre.
+
+Gli orari di lavoro e il fuso si impostano nello stesso riquadro e valgono anche per l'indirizzo iCal, se c'è. Se
+Google non accetta più il collegamento (permesso revocato, password cambiata), il riquadro lo dice e chiede di
+ricollegarlo; nel frattempo conta l'indirizzo iCal, se l'hai collegato. Se Google non risponde alla prenotazione, il
+colloquio viene prenotato lo stesso: l'evento arriva con l'invito .ics, senza Meet. **Scollega** restituisce il
+permesso a Google; gli eventi già creati restano nel tuo calendario.
+
+### Per chi installa Candydati
+
+Il collegamento usa un'app Google dell'istanza, non una per persona. Chi gestisce l'istanza la crea una volta:
+
+1. Su [Google Cloud Console](https://console.cloud.google.com) crea un progetto e attiva la **Google Calendar API**.
+2. Configura la **schermata di consenso OAuth**. Con Google Workspace scegli **Interna**: solo le persone della tua
+   azienda, nessuna verifica di Google. Con account Gmail o domini diversi serve **Esterna** pubblicata e la verifica di
+   Google dei permessi sul calendario; in modalità *Test* Google fa scadere il collegamento dopo 7 giorni.
+3. In **Credenziali → Crea credenziali → ID client OAuth** scegli *Applicazione web* e aggiungi come URI di
+   reindirizzamento `https://<il tuo dominio>/api/v1/me/calendar/google/callback`.
+4. Metti client ID e secret in `GOOGLE_CALENDAR_CLIENT_ID` e `GOOGLE_CALENDAR_CLIENT_SECRET` e riavvia.
+
+Senza queste due variabili il pulsante non compare e tutto funziona con l'indirizzo iCal.
+
+## Altri calendari: l'indirizzo iCal
+
+Con Outlook, iCloud o un Google Calendar senza collegamento, ognuno collega il proprio calendario una volta sola, da
+**Impostazioni → Calendario**, incollando il suo **indirizzo iCal segreto**:
 
 - **Google Calendar** (dal computer): ingranaggio → *Impostazioni*; nella colonna a sinistra, sotto *Impostazioni per i
   miei calendari*, clicca il tuo nome; scorri fino a *Integra calendario* e copia *Indirizzo segreto in formato iCal*
@@ -22,20 +56,13 @@ settimane: mai titoli, descrizioni, luoghi o partecipanti. L'indirizzo è cifrat
 cancellato quando scolleghi il calendario o lasci l'organizzazione. Chi non ha collegato il calendario conta come
 libero nelle ore lavorative predefinite, e il recruiter lo sa.
 
-## La tua stanza video
-
-Nella stessa pagina, sotto **La tua stanza video**, salva una volta il link che usi per i colloqui: un Google Meet
-creato con *Nuova riunione → Crea una riunione per un secondo momento*, la tua stanza personale Zoom o una riunione
-ricorrente di Teams. Quando si propone un colloquio in video senza un altro link, prende la stanza del primo
-intervistatore della fase che l'ha salvata: chi prenota sa sempre dove collegarsi. Il link arriva solo ai candidati che
-prenotano e viene cancellato quando lasci l'organizzazione.
-
 ## Proponi un colloquio
 
 Sulla scheda del candidato premi **Proponi colloquio** (accanto a Esito e Sposta in, anche da *Ricevute*): scegli la fase
 (intervistatori e durata arrivano dall'annuncio, e la finestra li nomina), la modalità (videochiamata, in sede,
-telefono) e dove (link della riunione, indirizzo o telefono). Per un colloquio in video la stanza dell'intervistatore è
-già inserita; se manca qualsiasi link, la finestra lo dice prima dell'invio.
+telefono) e dove (link della riunione, indirizzo o telefono). Per un colloquio in video puoi lasciare vuoto il link: se un
+intervistatore ha collegato Google Calendar, la finestra dice che il Meet verrà creato nel suo calendario alla
+prenotazione; se nessuno può crearlo, lo dice prima dell'invio.
 
 Il candidato riceve un'email nella sua conversazione con un link personale e due o tre orari liberi in giorni diversi.
 Aprendo un orario lo trova già scelto; non si prenota nulla finché il candidato non conferma.

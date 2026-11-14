@@ -5346,6 +5346,10 @@
       "url": "Paste an address that starts with https:// (or webcal://).",
       "hours": "Choose at least one day and an end time after the start time.",
       "timeZone": "Choose a time zone from the list."
+    },
+    "other": {
+      "title": "Other calendars",
+      "intro": "Using Outlook, iCloud or another calendar? Paste its secret iCal address: we only read when you are busy."
     }
   },
   "interviews": {
@@ -5396,10 +5400,9 @@
       "cancel": "Cancel",
       "interviewersLink": "Change them in Automations",
       "interviewersNamed": "Taking part: {names}.",
-      "roomOf": "This is {name}’s video room: change it if you need to.",
-      "roomWhenEmpty": "Left empty, we use {name}’s video room.",
       "noLink": "No video call link: the candidate gets the invite without knowing where to join. Paste a link here, or",
-      "noLinkSettings": "save your video room in Settings → Calendar"
+      "noLinkSettings": "connect Google Calendar in Settings → Calendar",
+      "meetBy": "At booking we put the interview in {name}’s Google Calendar, with a Google Meet for this interview only."
     },
     "proposed": {
       "sent": "The candidate gets an email with the free times.",
@@ -5491,7 +5494,7 @@
   },
   "googleCalendar": {
     "title": "Google Calendar",
-    "intro": "Connect your Google Calendar in one click: we read when you are busy and, when a candidate books, we put the interview in your calendar with its Google Meet link. No secret address to copy, no video room to paste.",
+    "intro": "Connect your Google Calendar in one click: we read when you are busy and, when a candidate books, we put the interview in your calendar. A video interview gets a Google Meet of its own. No secret address to copy.",
     "privacy": "Google asks you to let us see when you are busy and manage the events of your calendars. We never read the titles or attendees of your other events, and you can disconnect at any time.",
     "connect": "Connect Google Calendar",
     "connectedAs": "Connected as {email}.",
@@ -5506,27 +5509,13 @@
       "missing_scope": "Both calendar permissions are needed: try again and leave both boxes ticked.",
       "expired": "The connection took too long or was opened in another window: try again.",
       "failed": "We could not connect Google Calendar. Try again in a moment."
-    }
-  },
-  "videoRoom": {
-    "title": "Your video room",
-    "intro": "The Google Meet, Zoom or Teams link you use for interviews. When you propose a video interview we put it in, so whoever books always knows where to join.",
-    "label": "Room link",
-    "hint": "On Google Meet: meet.google.com → New meeting → Create a meeting for later, and copy the link. Your Zoom personal room or a recurring Teams meeting work too. The link goes to the candidates who book.",
-    "current": "Room saved ({provider}).",
-    "save": "Save the room",
-    "saving": "Saving…",
-    "remove": "Remove the room",
-    "saved": "Video room saved",
-    "removed": "Video room removed",
-    "providers": {
-      "meet": "Google Meet",
-      "zoom": "Zoom",
-      "teams": "Microsoft Teams",
-      "other": "another service"
     },
-    "errors": {
-      "url": "Use a full https link, for example https://meet.google.com/abc-defg-hij, with no username or password."
-    }
+    "lastRead": "Last read failed: {reason}. We use the busy times read last time.",
+    "lastError": {
+      "unreachable": "Google does not answer",
+      "refused": "Google refused the request",
+      "revoked": "Google no longer accepts the connection"
+    },
+    "hoursSaved": "Hours saved"
   }
 }

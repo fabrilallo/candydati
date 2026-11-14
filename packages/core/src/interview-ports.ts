@@ -1,10 +1,12 @@
 import type { BusyInterval, Interview, InterviewStatus } from '@candydati/domain';
+import type { GoogleCalendarApi, InterviewCalendarEventRepository } from './calendar-connection-ports.js';
 import type { CalendarDeps } from './calendar-ports.js';
+import type { CredentialsBox } from './migration-fetch-ports.js';
 import type { FeedbackDeps } from './feedback-ports.js';
 import type { MessagingDeps } from './messaging-ports.js';
 import type { NotificationRepository } from './automation-ports.js';
 
-export type InterviewPatch = Partial<Pick<Interview, 'status' | 'startsAt' | 'endsAt' | 'icsSequence' | 'bookedAt' | 'cancelledAt' | 'cancelledBy' | 'reminderSentAt' | 'tokenHash' | 'tokenExpiresAt' | 'updatedAt'>>;
+export type InterviewPatch = Partial<Pick<Interview, 'location' | 'status' | 'startsAt' | 'endsAt' | 'icsSequence' | 'bookedAt' | 'cancelledAt' | 'cancelledBy' | 'reminderSentAt' | 'tokenHash' | 'tokenExpiresAt' | 'updatedAt'>>;
 
 /** What a guarded change expects to find: another change got there first otherwise, and nothing is written. */
 export interface InterviewExpectation {
@@ -36,7 +38,12 @@ export interface InterviewRepository {
 /** Everything the interview use cases need: the feedback context (stages, interviewers), messaging and calendars. */
 export type InterviewDeps = Pick<FeedbackDeps, 'auditLog' | 'transaction' | 'jobTeams' | 'jobs' | 'candidates' | 'applications' | 'organizations' | 'members' | 'stageInterviewers' | 'sender' | 'config' | 'hash' | 'newId' | 'now' | 'onError'> &
   Pick<MessagingDeps, 'conversations' | 'messages' | 'queue' | 'newToken'> &
-  Pick<CalendarDeps, 'calendarFeeds' | 'calendarReader' | 'calendarSecrets' | 'videoRooms'> & {
+  Pick<CalendarDeps, 'calendarFeeds' | 'calendarReader' | 'calendarSecrets' | 'calendarConnections'> & {
+    /** Opens the Google refresh tokens (`calendarConnectionSecretContext`). */
+    readonly connectionSecrets: CredentialsBox;
+    /** Busy times and the interview's event with its Meet; null when the instance has no Google app. */
+    readonly googleCalendarApi: GoogleCalendarApi | null;
+    readonly interviewCalendarEvents: InterviewCalendarEventRepository;
     readonly interviews: InterviewRepository;
     /** Interviewers and the proposer learn in the app when a candidate books, moves or cancels. */
     readonly notifications: NotificationRepository;

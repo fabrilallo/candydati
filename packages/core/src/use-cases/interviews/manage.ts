@@ -3,6 +3,7 @@ import { ConflictError, NotFoundError } from '../../errors.js';
 import { afterCommitOrNow } from '../../transaction.js';
 import { requireApplication } from '../candidates/shared.js';
 import { announceInterviewChange } from './alerts.js';
+import { syncInterviewEvent } from './calendar-event.js';
 import { sendInterviewNotices } from './notices.js';
 import { defineInterviewUseCase, loadInterviewContext, toInterviewView, type InterviewView } from './shared.js';
 
@@ -44,7 +45,12 @@ export const cancelInterview = defineInterviewUseCase({
     await announceInterviewChange(deps, cancelled, 'cancelled', by, application.outcome === null);
     if (wasBooked) {
       const context = await loadInterviewContext(deps, actor.organizationId, cancelled.applicationId, cancelled.stageId);
-      if (context) await afterCommitOrNow(deps, async () => void (await sendInterviewNotices(deps, context, cancelled, 'cancelled', null)));
+      if (context) {
+        await afterCommitOrNow(deps, async () => {
+          const synced = await syncInterviewEvent(deps, context, cancelled, 'cancelled');
+          await sendInterviewNotices(deps, context, cancelled, 'cancelled', null, synced.inCalendarOf);
+        });
+      }
     }
     return toInterviewView(cancelled);
   },

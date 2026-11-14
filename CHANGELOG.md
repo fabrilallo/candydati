@@ -6,15 +6,38 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-`0059_calendar_connection` is additive (table `calendar_connection`). New optional variables
-`GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` (both or none).
+Two migrations run at start; take a backup first (docs/OPERATIONS.md). `0059_calendar_connection` adds table
+`calendar_connection`. `0060_google_calendar_events` adds table `interview_calendar_event`, adds columns to
+`calendar_connection` and **drops table `video_room`** (the saved video rooms of 0.8.0 are deleted). New optional
+variables `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` (both or none).
 
 ### Added
 
-- Connect Google Calendar (Settings → Calendar): a member connects their own Google account with OAuth (PKCE,
+- **Connect Google Calendar** (Settings → Calendar): a member connects their own Google account with OAuth (PKCE,
   offline access). Only the refresh token is kept, sealed at rest; disconnecting gives the grant back to Google. Offered
-  only when the instance sets `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET`. Busy times and interview
-  events with a Meet link follow in the next steps.
+  only when the instance sets `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` (setup in the interviews
+  guide).
+- **Busy times from Google:** a connected member's busy times are read with freeBusy (primary calendar, intervals only)
+  instead of a pasted iCal address; both count when both are connected. Working hours and time zone are kept with the
+  connection and shared with the iCal link. A grant Google no longer honours marks the connection broken and asks the
+  person to connect again.
+- **The interview in the interviewer's Google Calendar:** at booking a private event goes into the calendar of the
+  stage's first interviewer with Google connected; a video interview without a written link gets a Google Meet of its
+  own, which becomes the interview's link in the emails and the .ics. Moving the interview moves the event (same Meet),
+  cancelling deletes it. That interviewer's email comes without the .ics, so the event is never there twice. Google
+  failing never fails a booking: the .ics carries it as before.
+
+### Changed
+
+- The proposal dialog and `GET /api/v1/applications/:id/interviews/defaults` say who will get the Meet (`meetBy`)
+  instead of a video room; the proposal answers `meetBy` instead of `videoRoomOf`, and `withoutLink` only when nobody
+  can make a Meet.
+
+### Removed
+
+- **The fixed video room of 0.8.0** (`/api/v1/me/video-room` and its settings card): one link reused for every
+  candidate let anyone come back into later interviews. A video interview now gets its own Meet, or the link the
+  recruiter writes.
 
 ## [0.8.0] - 2026-11-11
 

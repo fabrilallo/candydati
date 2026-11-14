@@ -28,6 +28,10 @@ const connection = (organizationId: string, userId: string, overrides: Partial<C
   scopes: ['openid', 'https://www.googleapis.com/auth/calendar.freebusy'],
   status: 'active',
   lastError: null,
+  timeZone: 'Europe/Rome',
+  workingHours: { days: [1, 2, 3, 4, 5], start: '09:00', end: '18:00' },
+  busy: [],
+  fetchedAt: null,
   createdAt: NOW,
   updatedAt: NOW,
   ...overrides,
@@ -57,4 +61,20 @@ describe('createDrizzleCalendarConnections', () => {
     expect(await repo.remove(a, anna, 'google')).toBe(false);
     expect(await repo.find(b, anna, 'google')).not.toBeNull();
   });
+
+  it('records a read and shares the hours across the person’s connections', async () => {
+    const repo = createDrizzleCalendarConnections(handle.db);
+    const [a, anna, luca] = [await insertOrg(), await insertUser(), await insertUser()];
+    await repo.save(connection(a, anna));
+    await repo.save(connection(a, luca));
+    const busy = [{ start: new Date('2026-11-16T09:00:00Z'), end: new Date('2026-11-16T10:00:00Z') }];
+    await repo.recordRefresh(a, anna, 'google', { busy, fetchedAt: LATER, lastError: 'unreachable', status: 'active' });
+    const hours = { days: [2], start: '10:00', end: '12:00' };
+    expect(await repo.updatePreferences(a, anna, { timeZone: 'Europe/London', workingHours: hours, updatedAt: LATER })).toBe(true);
+    expect(await repo.find(a, anna, 'google')).toMatchObject({ busy, fetchedAt: LATER, lastError: 'unreachable', timeZone: 'Europe/London', workingHours: hours });
+    expect((await repo.listByUsers(a, [anna, luca, 'nobody'], 'google')).map((row) => row.userId).sort()).toEqual([anna, luca].sort());
+    expect(await repo.listByUsers(a, [], 'google')).toEqual([]);
+    expect(await repo.updatePreferences(a, 'nobody', { timeZone: 'Europe/London', workingHours: hours, updatedAt: LATER })).toBe(false);
+  });
 });
+

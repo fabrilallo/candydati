@@ -8,15 +8,17 @@ type NoticeDeps = Pick<InterviewDeps, 'sender' | 'config' | 'members' | 'now' | 
 
 interface Recipient extends IcsPerson {
   readonly isCandidate: boolean;
+  /** Members only: whose own calendar may already show the change. */
+  readonly userId: string | null;
 }
 
 /** Members resolve to their current address; a member who left is skipped. */
 async function interviewersOf(deps: Pick<InterviewDeps, 'members'>, interview: Interview): Promise<readonly Recipient[]> {
   const members = await deps.members.list(interview.organizationId);
   return interview.interviewers.flatMap((person): Recipient[] => {
-    if (person.kind === 'external') return person.email ? [{ name: person.name, email: person.email, isCandidate: false }] : [];
+    if (person.kind === 'external') return person.email ? [{ name: person.name, email: person.email, isCandidate: false, userId: null }] : [];
     const member = members.find((candidate) => candidate.userId === person.userId);
-    return member ? [{ name: member.name, email: member.email.toLowerCase(), isCandidate: false }] : [];
+    return member ? [{ name: member.name, email: member.email.toLowerCase(), isCandidate: false, userId: member.userId }] : [];
   });
 }
 
@@ -76,8 +78,9 @@ const noticeFor = (deps: NoticeDeps, frame: NoticeFrame, recipient: Recipient) =
 
 /**
  * The emails that carry the invite: to the candidate (with the page to move or cancel) and to every interviewer. One
- * UID per interview and a raised SEQUENCE on every change, so calendars replace or remove the same event. Never throws:
- * a failed email is reported through `onError`; the booking stands.
+ * UID per interview and a raised SEQUENCE on every change, so calendars replace or remove the same event. The member
+ * whose Google Calendar already shows the change (`inCalendarOf`) gets the email without the .ics, so they never see the
+ * interview twice. Never throws: a failed email is reported through `onError`; the booking stands.
  */
 export async function sendInterviewNotices(
   deps: NoticeDeps,
@@ -85,6 +88,7 @@ export async function sendInterviewNotices(
   interview: Interview,
   kind: InterviewNoticeKind,
   manageSecret: string | null,
+  inCalendarOf: string | null = null,
 ): Promise<number> {
   if (!interview.startsAt || !interview.endsAt) return 0;
   const candidateName = `${context.candidate.firstName} ${context.candidate.lastName}`;
@@ -92,7 +96,7 @@ export async function sendInterviewNotices(
     context, interview, kind, start: interview.startsAt, identity: senderIdentity(deps.config, context.organization, null), candidateName,
     manageLink: manageSecret ? `${deps.config.platformUrl.replace(/\/$/, '')}${interviewPath(manageSecret)}` : null,
   };
-  const recipients = [{ name: candidateName, email: context.candidate.email.toLowerCase(), isCandidate: true }, ...(await interviewersOf(deps, interview))];
+  const recipients: readonly Recipient[] = [{ name: candidateName, email: context.candidate.email.toLowerCase(), isCandidate: true, userId: null }, ...(await interviewersOf(deps, interview))];
   const ics = inviteOf(deps, frame, interview.endsAt, recipients);
   let sent = 0;
   for (const recipient of recipients) {
@@ -107,7 +111,7 @@ export async function sendInterviewNotices(
         html: textToHtml(notice.text, { literals: [context.candidate.firstName, context.candidate.lastName, candidateName] }),
         headers: { 'Auto-Submitted': 'auto-generated' },
         idempotencyKey: `interview:${interview.id}:${interview.icsSequence}:${kind}:${recipient.email}`,
-        calendar: { method: kind === 'cancelled' ? 'CANCEL' : 'REQUEST', content: ics },
+        ...(recipient.userId !== null && recipient.userId === inCalendarOf ? {} : { calendar: { method: kind === 'cancelled' ? ('CANCEL' as const) : ('REQUEST' as const), content: ics } }),
       });
       sent += 1;
     } catch (error) {

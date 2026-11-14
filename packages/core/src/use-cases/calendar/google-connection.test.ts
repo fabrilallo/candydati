@@ -1,4 +1,4 @@
-import { GOOGLE_CALENDAR_REQUIRED_SCOPES } from '@candydati/domain';
+import { DEFAULT_WORKING_HOURS, GOOGLE_CALENDAR_REQUIRED_SCOPES } from '@candydati/domain';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { NotFoundError } from '../../errors.js';
 import { agentActor, apiKeyActor, userActor } from '../../testing/actors.js';
@@ -52,7 +52,10 @@ describe('connecting Google Calendar', () => {
     expect(stored?.refreshTokenCiphertext).not.toContain('refresh-1');
     expect(world.connectionSecrets.open(stored?.refreshTokenCiphertext ?? '', 'calendar-connection:google:org_test:anna')).toBe('refresh-1');
     const status = await getMyCalendarConnection(world, anna, {});
-    expect(status).toEqual({ available: true, connection: { provider: 'google', accountEmail: 'anna@example.com', status: 'active', connectedAt: world.now() } });
+    expect(status).toEqual({
+      available: true,
+      connection: { provider: 'google', accountEmail: 'anna@example.com', status: 'active', connectedAt: world.now(), timeZone: 'Europe/Rome', workingHours: DEFAULT_WORKING_HOURS, fetchedAt: null, lastError: null },
+    });
     expect(JSON.stringify(status)).not.toContain('refresh');
     expect(world.auditLog.events()).toMatchObject([{ action: 'calendar_connection.connected', target: { type: 'calendar_connection', id: 'anna' }, metadata: { provider: 'google' } }]);
   });
@@ -114,6 +117,17 @@ describe('connecting Google Calendar', () => {
     expect(await finish(second, { code: 'again', state: second.state })).toEqual({ outcome: 'connected' });
     expect(world.calendarConnections.all()).toHaveLength(1);
     expect(world.calendarConnections.all()[0]?.accountEmail).toBe('anna.work@example.com');
+  });
+
+  it('keeps the hours of the iCal link the person already pasted', async () => {
+    const hours = { days: [2, 4], start: '10:00', end: '16:00' };
+    await world.calendarFeeds.save({
+      organizationId: 'org_test', userId: 'anna', urlCiphertext: 'x', host: 'calendar.example', timeZone: 'Europe/London', workingHours: hours,
+      busy: [], fetchedAt: null, lastError: null, createdAt: world.now(), updatedAt: world.now(),
+    });
+    const pending = await start();
+    await finish(pending, { code: 'good-code', state: pending.state });
+    expect(world.calendarConnections.all()[0]).toMatchObject({ timeZone: 'Europe/London', workingHours: hours });
   });
 
   it('is personal: no API key and no assistant', async () => {

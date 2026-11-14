@@ -7,6 +7,7 @@ import { definePublicCommand, definePublicQuery } from '../../use-case.js';
 import type { RequestContext } from '../feedback/shared.js';
 import { availabilityOf, PAGE_CALENDAR_MAX_AGE_MS, slotsFor } from './availability.js';
 import { announceInterviewChange } from './alerts.js';
+import { syncInterviewEvent } from './calendar-event.js';
 import { sendInterviewNotices } from './notices.js';
 import { INTERVIEW_NOT_VALID, INTERVIEW_PAGE_ACTOR_ID, loadInterviewContext, memberIdsOf } from './shared.js';
 
@@ -127,7 +128,12 @@ export const bookInterview = definePublicCommand<InterviewDeps, typeof bookInput
     await availabilityOf(deps, interview.organizationId, interview.interviewers, { maxAgeMs: 0, exceptInterviewId: interview.id });
     const secret = deps.newToken();
     const booked = await storeBooking(deps, interview, new Date(input.slot), secret);
-    await afterCommitOrNow(deps, async () => void (await sendInterviewNotices(deps, context, booked, interview.status === 'booked' ? 'rescheduled' : 'booked', secret)));
+    const change = interview.status === 'booked' ? 'rescheduled' : 'booked';
+    await afterCommitOrNow(deps, async () => {
+      // The interviewer's calendar first: a new video interview gets its Meet, which the emails then carry.
+      const synced = await syncInterviewEvent(deps, context, booked, change);
+      await sendInterviewNotices(deps, context, synced.interview, change, secret, synced.inCalendarOf);
+    });
     return { status: 'booked', startsAt: booked.startsAt ?? new Date(input.slot), endsAt: booked.endsAt ?? new Date(input.slot), token: secret };
   },
 });
@@ -153,7 +159,12 @@ export const cancelInterviewByCandidate = definePublicCommand<InterviewDeps, typ
       metadata: { applicationId: cancelled.applicationId, stageId: cancelled.stageId, by: 'candidate', wasBooked },
     });
     await announceInterviewChange(deps, cancelled, 'cancelled', 'candidate', true);
-    if (wasBooked) await afterCommitOrNow(deps, async () => void (await sendInterviewNotices(deps, context, cancelled, 'cancelled', null)));
+    if (wasBooked) {
+      await afterCommitOrNow(deps, async () => {
+        const synced = await syncInterviewEvent(deps, context, cancelled, 'cancelled');
+        await sendInterviewNotices(deps, context, cancelled, 'cancelled', null, synced.inCalendarOf);
+      });
+    }
     return { status: 'cancelled' };
   },
 });

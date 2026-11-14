@@ -6,6 +6,7 @@ import { buildApplication, buildCandidate, buildJob } from '../testing/index.js'
 import { coreTestDatabaseUrl } from '../testing/postgres.js';
 import { createDrizzleApplications } from './drizzle-applications.js';
 import { createDrizzleCandidates } from './drizzle-candidates.js';
+import { createDrizzleInterviewCalendarEvents } from './drizzle-calendar-connections.js';
 import { createDrizzleErasureStore } from './drizzle-erasure.js';
 import { createDrizzleInterviews } from './drizzle-interviews.js';
 import { createDrizzleJobs } from './drizzle-jobs.js';
@@ -105,5 +106,21 @@ describe('interviews on Postgres', () => {
     const created = await repo.create(interviewOf(w.org, w.jobId, appId));
     await handle.db.transaction(async (tx) => void (await createDrizzleErasureStore(tx).deleteApplications(w.org, [appId])));
     expect(await repo.findById(w.org, created.id)).toBeNull();
+  });
+});
+
+describe('createDrizzleInterviewCalendarEvents', () => {
+  it('keeps one event per interview, replaced on save, removed with remove', async () => {
+    const events = createDrizzleInterviewCalendarEvents(handle.db);
+    const w = await world();
+    const [a, b] = [w.org, randomUUID()];
+    const interviewId = (await createDrizzleInterviews(handle.db).create(interviewOf(a, w.jobId, await w.application()))).id;
+    const record = { organizationId: a, interviewId, userId: 'anna', provider: 'google' as const, externalEventId: 'event-1', createdAt: NOW, updatedAt: NOW };
+    await events.save(record);
+    await events.save({ ...record, updatedAt: at('2026-06-02T07:00:00Z') });
+    expect(await events.find(a, interviewId)).toEqual({ ...record, updatedAt: at('2026-06-02T07:00:00Z') });
+    expect(await events.find(b, interviewId)).toBeNull();
+    await events.remove(a, interviewId);
+    expect(await events.find(a, interviewId)).toBeNull();
   });
 });
