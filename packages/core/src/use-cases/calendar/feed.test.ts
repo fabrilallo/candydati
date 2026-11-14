@@ -2,6 +2,7 @@ import { DEFAULT_WORKING_HOURS } from '@candydati/domain';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { busy, createCalendarWorld, type CalendarWorld } from '../../testing/calendar-deps.js';
 import { agentActor, apiKeyActor, userActor } from '../../testing/actors.js';
+import { googleConnectionOf } from '../../testing/calendar-connection-deps.js';
 import { getMyCalendarFeed, removeCalendarFeed, saveCalendarFeed, updateCalendarPreferences } from './feed.js';
 
 const URL = 'https://calendar.google.com/calendar/ical/anna%40example.com/private-0123456789abcdef/basic.ics';
@@ -62,6 +63,13 @@ describe('changing hours and disconnecting', () => {
     const view = await updateCalendarPreferences(world, anna, { timeZone: 'Europe/London', workingHours: hours });
     expect(view).toMatchObject({ timeZone: 'Europe/London', workingHours: hours, connected: true });
     await expect(updateCalendarPreferences(world, userActor({ id: 'luca' }), { timeZone: 'Europe/London', workingHours: hours })).rejects.toMatchObject({ name: 'NotFoundError' });
+  });
+
+  it('changes the hours of the Google connection too, even without an iCal link', async () => {
+    const hours = { days: [1, 3], start: '08:00', end: '12:00' };
+    await world.calendarConnections.save(googleConnectionOf('org_test', 'anna'));
+    await updateCalendarPreferences(world, anna, { timeZone: 'Europe/London', workingHours: hours });
+    expect(world.calendarConnections.all()[0]).toMatchObject({ timeZone: 'Europe/London', workingHours: hours });
   });
 
   it('removes the address and the busy times, audited once', async () => {

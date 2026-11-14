@@ -10,6 +10,7 @@ import {
   type InterviewParticipant,
 } from '@candydati/domain';
 import type { InterviewDeps } from '../../interview-ports.js';
+import { refreshGoogleCalendars } from '../calendar/google-busy.js';
 import { refreshCalendars } from '../calendar/refresh.js';
 import { zoneOf } from './shared.js';
 
@@ -22,7 +23,10 @@ export interface Availability {
   readonly withoutCalendar: readonly string[];
 }
 
-type AvailabilityDeps = Pick<InterviewDeps, 'calendarFeeds' | 'calendarReader' | 'calendarSecrets' | 'interviews' | 'config' | 'now'>;
+type AvailabilityDeps = Pick<
+  InterviewDeps,
+  'calendarFeeds' | 'calendarReader' | 'calendarSecrets' | 'calendarConnections' | 'connectionSecrets' | 'googleCalendarApi' | 'interviews' | 'config' | 'now'
+>;
 
 const memberIds = (interviewers: readonly InterviewParticipant[]): readonly string[] =>
   [...new Set(interviewers.flatMap((person) => (person.kind === 'member' && person.userId ? [person.userId] : [])))];
@@ -40,17 +44,21 @@ export async function availabilityOf(
 ): Promise<Availability> {
   const ids = memberIds(interviewers);
   const now = deps.now();
+  const google = await refreshGoogleCalendars(deps, organizationId, ids, options.maxAgeMs);
   const feeds = await refreshCalendars(deps, organizationId, ids, options.maxAgeMs);
   const booked = await deps.interviews.bookedBusy(organizationId, ids, { from: now, to: new Date(now.getTime() + (INTERVIEW_HORIZON_DAYS + 1) * DAY_MS) }, options.exceptInterviewId);
   const fallback = { timeZone: zoneOf(deps.config), workingHours: DEFAULT_WORKING_HOURS };
   const people = ids.map((userId): AvailabilityPerson => {
-    const feed = feeds.find((candidate) => candidate.userId === userId);
+    // Both may be connected (Google and the iCal link of another calendar): busy in either is busy.
+    const sources = [...google, ...feeds].filter((source) => source.userId === userId);
     const own = booked.get(userId) ?? [];
-    return feed ? { timeZone: feed.timeZone, workingHours: feed.workingHours, busy: [...feed.busy, ...own] } : { ...fallback, busy: own };
+    const hours = sources[0] ?? fallback;
+    return { timeZone: hours.timeZone, workingHours: hours.workingHours, busy: [...sources.flatMap((source) => source.busy), ...own] };
   });
+  const connected = new Set([...google, ...feeds].map((source) => source.userId));
   return {
     people: people.length > 0 ? people : [{ ...fallback, busy: [] }],
-    withoutCalendar: ids.filter((userId) => !feeds.some((feed) => feed.userId === userId)),
+    withoutCalendar: ids.filter((userId) => !connected.has(userId)),
   };
 }
 

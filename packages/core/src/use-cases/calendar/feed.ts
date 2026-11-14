@@ -84,7 +84,7 @@ export const saveCalendarFeed = defineUseCase<CalendarDeps, typeof calendarFeedI
   },
 });
 
-/** Working hours and time zone, without pasting the address again. */
+/** Working hours and time zone, without pasting the address again; the Google connection gets them too. */
 export const updateCalendarPreferences = defineUseCase<CalendarDeps, typeof calendarPreferencesInputSchema, CalendarFeedView>({
   name: 'updateCalendarPreferences',
   input: calendarPreferencesInputSchema,
@@ -96,8 +96,11 @@ export const updateCalendarPreferences = defineUseCase<CalendarDeps, typeof cale
   },
   handler: async ({ deps, actor, input }) => {
     const userId = personOf(actor);
-    const updated = await deps.calendarFeeds.updatePreferences(actor.organizationId, userId, { ...input, updatedAt: deps.now() });
-    if (!updated) throw new NotFoundError('No calendar is connected.');
+    const patch = { ...input, updatedAt: deps.now() };
+    // The hours are the person's, whichever calendar says when they are busy: the iCal link and Google share them.
+    const feed = await deps.calendarFeeds.updatePreferences(actor.organizationId, userId, patch);
+    const connection = await deps.calendarConnections.updatePreferences(actor.organizationId, userId, patch);
+    if (!feed && !connection) throw new NotFoundError('No calendar is connected.');
     return toView(await deps.calendarFeeds.find(actor.organizationId, userId));
   },
 });

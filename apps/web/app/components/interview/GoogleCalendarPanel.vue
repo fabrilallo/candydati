@@ -1,20 +1,31 @@
 <script setup lang="ts">
-import { googleCalendarOutcomeOf } from '@candydati/domain'
+import { DEFAULT_WORKING_HOURS, googleCalendarOutcomeOf, type CalendarConnectionDto } from '@candydati/domain'
 import { CalendarCheckIcon, TriangleAlertIcon } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 import { GOOGLE_CALENDAR_START_URL } from '@/lib/calendar-connection-api'
+import { displayTimeZone } from '@/lib/format'
+import { preferencesOf, type HoursDraft } from '@/lib/interview-view'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
 /**
- * "Google Calendar": one click instead of the secret address and the video room. Shown only when the instance has a
- * Google app. The round trip to Google ends back here with `?google=<outcome>`, told once as a toast.
+ * "Google Calendar": one click instead of the secret address, and a Meet of its own for every video interview. Shown
+ * only when the instance has a Google app. Connected, it holds the working hours too. The round trip to Google ends back
+ * here with `?google=<outcome>`, told once as a toast.
  */
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const c = useMyCalendarConnection()
 const connection = computed(() => c.status.value?.connection ?? null)
+const draftOf = (value: CalendarConnectionDto): HoursDraft => ({ ...value.workingHours, timeZone: value.timeZone })
+const draft = ref<HoursDraft>(connection.value ? draftOf(connection.value) : { ...DEFAULT_WORKING_HOURS, timeZone: displayTimeZone() })
+watch(connection, (value) => {
+  if (value) draft.value = draftOf(value)
+})
+const saveHours = async (): Promise<void> => {
+  await c.saveHours(preferencesOf(draft.value))
+}
 
 onMounted(() => {
   const outcome = googleCalendarOutcomeOf(route.query.google)
@@ -43,11 +54,24 @@ onMounted(() => {
       <p v-if="connection.status === 'broken'" class="flex items-start gap-2 rounded-md bg-warning-soft px-3 py-2 text-sm text-warning" role="status" data-testid="google-calendar-broken">
         <TriangleAlertIcon class="mt-0.5 size-4 shrink-0" aria-hidden="true" />{{ t('googleCalendar.broken') }}
       </p>
+      <p v-else-if="connection.lastError" class="flex items-start gap-2 rounded-md bg-warning-soft px-3 py-2 text-sm text-warning" role="status" data-testid="google-calendar-last-error">
+        <TriangleAlertIcon class="mt-0.5 size-4 shrink-0" aria-hidden="true" />{{ t('googleCalendar.lastRead', { reason: t(`googleCalendar.lastError.${connection.lastError}`) }) }}
+      </p>
       <FormAlert :message-key="c.actionErrorKey.value" />
       <div class="flex flex-wrap gap-2">
         <Button v-if="connection.status === 'broken'" as-child><a :href="GOOGLE_CALENDAR_START_URL" data-testid="google-calendar-reconnect">{{ t('googleCalendar.reconnect') }}</a></Button>
-        <Button variant="outline" :disabled="c.busy.value" data-testid="google-calendar-disconnect" @click="() => c.disconnect()">{{ c.busy.value ? t('googleCalendar.disconnecting') : t('googleCalendar.disconnect') }}</Button>
+        <Button variant="outline" :disabled="c.busy.value !== null" data-testid="google-calendar-disconnect" @click="() => c.disconnect()">{{ c.busy.value === 'disconnect' ? t('googleCalendar.disconnecting') : t('googleCalendar.disconnect') }}</Button>
       </div>
+      <form class="mt-2 grid gap-4" novalidate data-testid="google-calendar-hours-form" @submit.prevent="saveHours">
+        <div class="grid gap-1">
+          <h3 class="text-base font-semibold tracking-tight">{{ t('calendar.hours.title') }}</h3>
+          <p class="text-sm text-muted-foreground">{{ t('calendar.hours.intro') }}</p>
+        </div>
+        <CalendarHoursFields v-model="draft" id-prefix="google-hours" :disabled="c.busy.value !== null" />
+        <div>
+          <Button type="submit" variant="outline" :disabled="c.busy.value !== null" data-testid="google-calendar-save-hours">{{ c.busy.value === 'hours' ? t('calendar.actions.saving') : t('calendar.actions.saveHours') }}</Button>
+        </div>
+      </form>
     </div>
     <div v-else class="grid gap-3">
       <p class="text-sm text-muted-foreground">{{ t('googleCalendar.privacy') }}</p>

@@ -9,8 +9,8 @@ import { NativeSelect } from '@/components/ui/native-select'
 
 /**
  * "Proponi colloquio": the stage (the current one by default), the mode and where. The stage's interviewers take part,
- * named here; a video interview gets the first interviewer's own room unless another link is written, and leaving
- * without any link is said before sending.
+ * named here. A video interview without a link gets its own Google Meet at booking when an interviewer has Google
+ * Calendar connected, and that is said here; leaving it without any link is warned before sending.
  */
 const props = defineProps<{
   open: boolean
@@ -46,24 +46,19 @@ const loadDefaults = async (stageId: string): Promise<void> => {
     const found = await getInterviewDefaults(request, props.applicationId, stageId)
     if (chosenStage.value !== stageId) return
     defaults.value = found
-    // The room fills an empty "where" once; what the recruiter typed is never replaced.
-    if (found.videoRoom && mode.value === 'video' && location.value.trim() === '') location.value = found.videoRoom.url
   } catch {
-    // Without the defaults the dialog still works: the api checks the interviewers and fills the room itself.
+    // Without the defaults the dialog still works: the api checks the interviewers and makes the Meet itself.
     defaults.value = null
   }
 }
 watch([() => props.open, chosenStage], ([open, stageId]) => {
   if (open) void loadDefaults(stageId)
 })
-const room = computed(() => defaults.value?.videoRoom ?? null)
-watch(mode, (next) => {
-  if (next === 'video' && room.value && location.value.trim() === '') location.value = room.value.url
-})
-const usingRoom = computed(() => room.value !== null && location.value.trim() === room.value.url)
-/** Video with nothing written and no room to fall back on: the candidate would not know where to join. */
-const withoutLink = computed(() => mode.value === 'video' && location.value.trim() === '' && defaults.value !== null && room.value === null)
-const roomWhenEmpty = computed(() => mode.value === 'video' && location.value.trim() === '' && room.value !== null)
+const videoWithoutLink = computed(() => mode.value === 'video' && location.value.trim() === '' && defaults.value !== null)
+/** Who makes the Meet at booking: the first interviewer with Google Calendar connected. */
+const meetBy = computed(() => (videoWithoutLink.value ? (defaults.value?.meetBy ?? null) : null))
+/** Video with nothing written and nobody to make a Meet: the candidate would not know where to join. */
+const withoutLink = computed(() => videoWithoutLink.value && defaults.value?.meetBy === null)
 const isMode = (value: string): value is InterviewMode => (INTERVIEW_MODES as readonly string[]).includes(value)
 const setMode = (value: string): void => {
   if (isMode(value)) mode.value = value
@@ -96,8 +91,7 @@ const submit = (): void => emit('submit', { stageId: chosenStage.value, mode: mo
             <Input id="pi-location" v-model="location" :inputmode="mode === 'video' ? 'url' : mode === 'phone' ? 'tel' : 'text'" :maxlength="INTERVIEW_LOCATION_MAX" autocomplete="off" :aria-describedby="describedBy" :disabled="pending" data-testid="propose-interview-location" />
           </template>
         </FormField>
-        <p v-if="usingRoom && mode === 'video'" class="-mt-2 text-sm text-muted-foreground" data-testid="propose-interview-room">{{ t('interviews.dialog.roomOf', { name: room?.owner ?? '' }) }}</p>
-        <p v-else-if="roomWhenEmpty" class="-mt-2 text-sm text-muted-foreground" data-testid="propose-interview-room-empty">{{ t('interviews.dialog.roomWhenEmpty', { name: room?.owner ?? '' }) }}</p>
+        <p v-if="meetBy" class="-mt-2 text-sm text-muted-foreground" data-testid="propose-interview-meet">{{ t('interviews.dialog.meetBy', { name: meetBy }) }}</p>
         <div v-if="withoutLink" class="flex items-start gap-2 rounded-md bg-warning-soft px-3 py-2 text-sm text-warning" role="status" data-testid="propose-interview-no-link">
           <TriangleAlertIcon class="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <span>

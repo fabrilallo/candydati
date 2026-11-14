@@ -30,7 +30,16 @@ describe('the Google Calendar connection', () => {
   it('describes a connection without any token', () => {
     const status = calendarConnectionStatusSchema.parse({
       available: true,
-      connection: { provider: 'google', accountEmail: 'anna@example.com', status: 'active', connectedAt: '2026-11-12T10:00:00.000Z' },
+      connection: {
+        provider: 'google',
+        accountEmail: 'anna@example.com',
+        status: 'active',
+        connectedAt: '2026-11-12T10:00:00.000Z',
+        timeZone: 'Europe/Rome',
+        workingHours: { days: [1, 2, 3, 4, 5], start: '09:00', end: '18:00' },
+        fetchedAt: null,
+        lastError: null,
+      },
     });
     expect(status.connection).not.toHaveProperty('refreshToken');
     expect(calendarConnectionStatusSchema.parse({ available: false, connection: null }).connection).toBeNull();

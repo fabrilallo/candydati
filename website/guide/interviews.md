@@ -4,9 +4,44 @@ Fixing an interview usually takes a chain of emails. In Candydati the candidate 
 interviewer, from a link, and everyone gets the event in their calendar. The ATS knows every booked interview, so it can
 remind, notify and start your stage's automations.
 
-## Connect your calendar
+## Connect Google Calendar
 
-Each person connects their own calendar once, from **Settings → Calendar**, by pasting its **secret iCal address**:
+If you use Google Calendar and the instance offers it, press **Connect Google Calendar** in **Settings → Calendar** and
+accept on Google. That is all:
+
+- **Busy times read from Google:** no secret address to find. Only the busy intervals of your primary calendar, never
+  titles, descriptions or attendees.
+- **The interview in your calendar:** when a candidate books, the interview appears in the Google Calendar of the
+  stage's first interviewer who connected it, as a private event. A video interview without a written link gets a
+  **Google Meet of its own**, and the link reaches the candidate and the other interviewers. Moving the interview moves
+  the event (the Meet stays); cancelling deletes it.
+- **No duplicates:** whoever has the event in their calendar gets the email without the .ics invite. Everyone else gets
+  the invite as always.
+
+Working hours and time zone are set in the same box and apply to your iCal address too, if you have one. If Google no
+longer accepts the connection (access revoked, password changed), the box says so and asks you to connect again;
+meanwhile your iCal address counts, if connected. If Google does not answer at booking, the interview is booked anyway:
+the event arrives with the .ics invite, without a Meet. **Disconnect** gives the access back to Google; events already
+made stay in your calendar.
+
+### For whoever installs Candydati
+
+The connection uses one Google app for the instance, not one per person. Whoever runs the instance creates it once:
+
+1. In [Google Cloud Console](https://console.cloud.google.com) create a project and enable the **Google Calendar API**.
+2. Set up the **OAuth consent screen**. On Google Workspace choose **Internal**: only your company's people, no Google
+   verification. With Gmail accounts or several domains you need **External**, published, and Google's verification of
+   the calendar permissions; in *Testing* mode Google expires the connection after 7 days.
+3. In **Credentials → Create credentials → OAuth client ID** choose *Web application* and add the redirect URI
+   `https://<your domain>/api/v1/me/calendar/google/callback`.
+4. Put the client ID and secret in `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` and restart.
+
+Without these two variables the button does not show and everything works with the iCal address.
+
+## Other calendars: the iCal address
+
+With Outlook, iCloud or a Google Calendar that is not connected, each person connects their own calendar once, from
+**Settings → Calendar**, by pasting its **secret iCal address**:
 
 - **Google Calendar** (on a computer): gear → *Settings*; in the left column, under *Settings for my calendars*, click
   your name; scroll to *Integrate calendar* and copy *Secret address in iCal format* (it ends with `basic.ics`; not the
@@ -20,19 +55,13 @@ descriptions, places or attendees. The address is encrypted and never shown agai
 or leave the organization. Someone without a connected calendar counts as free during default working hours, and the
 recruiter is told.
 
-## Your video room
-
-On the same page, under **Your video room**, save once the link you use for interviews: a Google Meet created with
-*New meeting → Create a meeting for later*, your Zoom personal room or a recurring Teams meeting. When a video interview
-is proposed with no other link, it gets the room of the stage's first interviewer who saved one, so whoever books always
-knows where to join. The link goes only to the candidates who book, and is deleted when you leave the organization.
-
 ## Propose an interview
 
 On a candidate's profile press **Propose interview** (next to the outcome and the move, from *Received* too): choose the
 stage (its interviewers and duration come from the job; the dialog names them), the mode (video, on site, phone) and
-where (meeting link, address or phone). For a video interview the interviewer's room is already filled in; if there is
-no link at all, the dialog says so before you send.
+where (meeting link, address or phone). For a video interview you can leave the link empty: if an interviewer connected
+Google Calendar, the dialog says the Meet will be made in their calendar at booking; if nobody can make one, it says so
+before you send.
 
 The candidate gets an email in their conversation with a personal link and two or three free times on different days.
 Opening a time shows it already chosen; nothing is booked until the candidate confirms.

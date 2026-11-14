@@ -18,7 +18,7 @@ import { resolveTargets, type RequestContext } from '../feedback/shared.js';
 import { enqueueDelivery } from '../messaging/send-message.js';
 import { ensureConversation } from '../messaging/shared.js';
 import { availabilityOf, PAGE_CALENDAR_MAX_AGE_MS, slotsFor } from './availability.js';
-import { videoRoomOf } from './video-room-of.js';
+import { meetHostOf } from './defaults.js';
 import { defineInterviewUseCase, loadInterviewContext, toInterviewView, zoneOf, type InterviewView } from './shared.js';
 
 const input = proposeInterviewInputSchema.extend({ applicationId: z.string().min(1) });
@@ -29,9 +29,9 @@ export interface ProposeInterviewResult {
   readonly freeSlots: number;
   /** Members counted free in default working hours because their calendar is not connected. */
   readonly withoutCalendar: readonly string[];
-  /** Whose video room became the link, when the recruiter wrote none. */
-  readonly videoRoomOf: string | null;
-  /** A video interview that has no link at all: the candidate will not know where to join. */
+  /** In whose Google Calendar the booking goes, with its own Meet when it is a video interview without a link. */
+  readonly meetBy: string | null;
+  /** A video interview without a link and without anyone to make a Meet: the candidate will not know where to join. */
   readonly withoutLink: boolean;
 }
 
@@ -106,9 +106,8 @@ export const proposeInterview = defineInterviewUseCase({
     const interviewers = await participantsOf(deps, context, input.interviewers);
     const availability = await availabilityOf(deps, actor.organizationId, interviewers, { maxAgeMs: PAGE_CALENDAR_MAX_AGE_MS });
     const slots = slotsFor(deps, context, availability);
-    const written = input.location || null;
-    const room = input.mode === 'video' && written === null ? await videoRoomOf(deps, actor.organizationId, interviewers) : null;
-    const location = written ?? room?.url ?? null;
+    const location = input.location || null;
+    const meetBy = await meetHostOf(deps, actor.organizationId, interviewers);
     const now = deps.now();
     const interview: Interview = {
       id: deps.newId(), organizationId: actor.organizationId, applicationId: context.application.id, jobId: context.job.id, stageId: context.stage.stageId,
@@ -128,6 +127,6 @@ export const proposeInterview = defineInterviewUseCase({
       return created;
     });
     const withoutCalendar = interviewers.filter((person) => person.userId !== null && availability.withoutCalendar.includes(person.userId)).map((person) => person.name);
-    return { interview: toInterviewView(stored), freeSlots: slots.length, withoutCalendar, videoRoomOf: room?.owner ?? null, withoutLink: input.mode === 'video' && location === null };
+    return { interview: toInterviewView(stored), freeSlots: slots.length, withoutCalendar, meetBy, withoutLink: input.mode === 'video' && location === null && meetBy === null };
   },
 });

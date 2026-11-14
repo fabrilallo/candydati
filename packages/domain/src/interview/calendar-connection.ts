@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { isoDate } from '../wire/common.js';
+import { workingHoursSchema } from './availability.js';
 
 /**
  * A person's calendar connected with OAuth (today Google): busy times read from it and, at booking, the interview event
@@ -12,6 +13,13 @@ export type CalendarConnectionProvider = (typeof CALENDAR_CONNECTION_PROVIDERS)[
 /** `broken`: Google no longer accepts the token (revoked, expired, password changed): the person connects again. */
 export const CALENDAR_CONNECTION_STATES = ['active', 'broken'] as const;
 export type CalendarConnectionState = (typeof CALENDAR_CONNECTION_STATES)[number];
+
+/**
+ * Why the last call to the calendar failed. `revoked`: the grant is gone (the connection is broken); `unreachable`:
+ * the provider did not answer; `refused`: it answered with an error. The last busy times are kept on any of them.
+ */
+export const CALENDAR_CONNECTION_ERRORS = ['revoked', 'unreachable', 'refused'] as const;
+export type CalendarConnectionError = (typeof CALENDAR_CONNECTION_ERRORS)[number];
 
 export const GOOGLE_CALENDAR_ROUTE_BASE = '/api/v1/me/calendar/google';
 /** The redirect URI registered in Google Cloud is the platform URL followed by this path. */
@@ -45,6 +53,12 @@ export const calendarConnectionSchema = z.object({
   accountEmail: z.string(),
   status: z.enum(CALENDAR_CONNECTION_STATES),
   connectedAt: isoDate,
+  /** The hours candidates may book, in the person's zone (shared with the iCal link when both exist). */
+  timeZone: z.string(),
+  workingHours: workingHoursSchema,
+  /** When the busy times were last read from Google. */
+  fetchedAt: isoDate.nullable(),
+  lastError: z.enum(CALENDAR_CONNECTION_ERRORS).nullable(),
 });
 export type CalendarConnectionDto = z.infer<typeof calendarConnectionSchema>;
 

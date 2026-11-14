@@ -1,4 +1,13 @@
-import { constantTimeEqual, missingGoogleScopes, type CalendarConnectionProvider, type CalendarConnectionState, type GoogleCalendarOutcome } from '@candydati/domain';
+import {
+  constantTimeEqual,
+  DEFAULT_WORKING_HOURS,
+  missingGoogleScopes,
+  type CalendarConnectionError,
+  type CalendarConnectionProvider,
+  type CalendarConnectionState,
+  type GoogleCalendarOutcome,
+  type WorkingHours,
+} from '@candydati/domain';
 import { z } from 'zod';
 import { toAuditActor, type Actor } from '../../actor.js';
 import {
@@ -29,6 +38,10 @@ export interface CalendarConnectionView {
   readonly accountEmail: string;
   readonly status: CalendarConnectionState;
   readonly connectedAt: Date;
+  readonly timeZone: string;
+  readonly workingHours: WorkingHours;
+  readonly fetchedAt: Date | null;
+  readonly lastError: CalendarConnectionError | null;
 }
 
 export interface CalendarConnectionStatus {
@@ -64,6 +77,10 @@ const toView = (record: CalendarConnectionRecord): CalendarConnectionView => ({
   accountEmail: record.accountEmail,
   status: record.status,
   connectedAt: record.createdAt,
+  timeZone: record.timeZone,
+  workingHours: record.workingHours,
+  fetchedAt: record.fetchedAt,
+  lastError: record.lastError,
 });
 
 export const getMyCalendarConnection = defineUseCase<CalendarConnectionDeps, z.ZodObject<Record<string, never>>, CalendarConnectionStatus>({
@@ -121,6 +138,8 @@ async function giveBack(deps: CalendarConnectionDeps, google: GoogleCalendarAuth
 async function store(deps: CalendarConnectionDeps, actor: Actor, userId: string, grant: GoogleGrant): Promise<void> {
   const now = deps.now();
   const existing = await deps.calendarConnections.find(actor.organizationId, userId, PROVIDER);
+  // Hours already chosen (this connection before, or the iCal link) are kept; otherwise the platform's zone, 9 to 18.
+  const hours = existing ?? (await deps.calendarFeeds.find(actor.organizationId, userId)) ?? { timeZone: deps.defaultTimeZone, workingHours: DEFAULT_WORKING_HOURS };
   const record: CalendarConnectionRecord = {
     organizationId: actor.organizationId,
     userId,
@@ -130,6 +149,11 @@ async function store(deps: CalendarConnectionDeps, actor: Actor, userId: string,
     scopes: grant.scopes.split(/\s+/).filter(Boolean),
     status: 'active',
     lastError: null,
+    timeZone: hours.timeZone,
+    workingHours: hours.workingHours,
+    // Another account may have been connected: its busy times are read again at the first need.
+    busy: [],
+    fetchedAt: null,
     createdAt: existing?.createdAt ?? now,
     updatedAt: now,
   };

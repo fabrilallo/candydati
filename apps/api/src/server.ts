@@ -1,7 +1,7 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod';
 import { safeErrorSerializer } from '@candydati/core';
-import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, AiModelCheck, CalendarReader, GoogleCalendarAuth, TaskQueue, ResponsibilitySuggester, CriteriaDrafter } from '@candydati/core';
+import type { DistributionChannel, EmailIdentity, EmailSender as MessageSender, FileStorage, ImageTranscoder, InstanceEmailTester, AiModelCheck, CalendarReader, GoogleCalendarApi, GoogleCalendarAuth, TaskQueue, ResponsibilitySuggester, CriteriaDrafter } from '@candydati/core';
 import { createErrorReporter, type ErrorReporter, type MigrationConnectorRegistry } from '@candydati/providers';
 import type { Db } from '@candydati/db';
 import type { AdQualityAnalyzer } from '@candydati/domain';
@@ -113,6 +113,8 @@ export interface ServerDeps {
   readonly calendarReader?: CalendarReader | undefined;
   /** Test seam: Google's OAuth endpoints (from GOOGLE_CALENDAR_CLIENT_ID / _SECRET by default; null: off). */
   readonly googleCalendarAuth?: GoogleCalendarAuth | null | undefined;
+  /** Test seam: Google Calendar's API (busy times and events). */
+  readonly googleCalendarApi?: GoogleCalendarApi | null | undefined;
   /** Test seam: the "now" of the reports. */
   readonly reportClock?: (() => Date) | undefined;
   /** Test seam: the careers media transcoder (sharp by default). */
@@ -207,6 +209,7 @@ function createContext(app: FastifyInstance, deps: ServerDeps, metrics: ApiMetri
     aiCheck: deps.aiCheck,
     calendarReader: deps.calendarReader,
     googleCalendarAuth: deps.googleCalendarAuth,
+    googleCalendarApi: deps.googleCalendarApi,
     onCalendarProblem: ({ reason, detail, error }) => app.log.warn({ reason, detail, err: error }, 'google calendar connection problem'),
     emailRuntime,
     emailLog,

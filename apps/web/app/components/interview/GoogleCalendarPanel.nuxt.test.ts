@@ -1,4 +1,5 @@
 import { mockNuxtImport, mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
+import { readBody } from 'h3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { ok } from '~~/test/fixtures/job-fixtures'
 import GoogleCalendarPanel from './GoogleCalendarPanel.vue'
@@ -9,8 +10,17 @@ vi.mock('vue-sonner', () => ({ toast: toasts }))
 const nav = vi.hoisted(() => ({ query: {} as Record<string, string> }))
 mockNuxtImport('useRoute', () => () => ({ query: nav.query }))
 
-type Connection = { provider: 'google'; accountEmail: string; status: 'active' | 'broken'; connectedAt: string }
-const state = vi.hoisted(() => ({ available: true, connection: null as Connection | null, calls: [] as string[] }))
+type Connection = {
+  provider: 'google'
+  accountEmail: string
+  status: 'active' | 'broken'
+  connectedAt: string
+  timeZone: string
+  workingHours: { days: number[]; start: string; end: string }
+  fetchedAt: string | null
+  lastError: 'revoked' | 'unreachable' | 'refused' | null
+}
+const state = vi.hoisted(() => ({ available: true, connection: null as Connection | null, calls: [] as string[], hours: [] as unknown[] }))
 registerEndpoint('/api/v1/me/calendar/google', async (event) => {
   state.calls.push(event.method)
   if (event.method === 'DELETE') {
@@ -19,8 +29,24 @@ registerEndpoint('/api/v1/me/calendar/google', async (event) => {
   }
   return ok({ available: state.available, connection: state.connection })
 })
+registerEndpoint('/api/v1/me/calendar-feed', async (event) => {
+  const body = (await readBody(event)) as { timeZone: string; workingHours: Connection['workingHours'] }
+  state.hours.push(body)
+  if (state.connection) state.connection = { ...state.connection, ...body }
+  return ok({ connected: false, host: null, timeZone: null, workingHours: body.workingHours, fetchedAt: null, lastError: null })
+})
 
-const connected = (status: Connection['status'] = 'active'): Connection => ({ provider: 'google', accountEmail: 'anna@example.com', status, connectedAt: '2026-11-12T10:00:00.000Z' })
+const connected = (status: Connection['status'] = 'active', overrides: Partial<Connection> = {}): Connection => ({
+  provider: 'google',
+  accountEmail: 'anna@example.com',
+  status,
+  connectedAt: '2026-11-12T10:00:00.000Z',
+  timeZone: 'Europe/Rome',
+  workingHours: { days: [1, 2, 3, 4, 5], start: '09:00', end: '18:00' },
+  fetchedAt: null,
+  lastError: null,
+  ...overrides,
+})
 
 const mounted: { unmount: () => void }[] = []
 const mountPanel = async () => {
@@ -32,10 +58,12 @@ beforeEach(() => {
   state.available = true
   state.connection = null
   state.calls = []
+  state.hours = []
   toasts.success.mockClear()
   toasts.error.mockClear()
   nav.query = {}
   clearNuxtData()
+  clearNuxtState()
 })
 afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
 
@@ -91,5 +119,20 @@ describe('Google Calendar in the calendar settings', () => {
     // Nuxt's own navigation may replace the route; the panel never rewrites the query for an unknown outcome.
     expect(replace.mock.calls.filter(([to]) => typeof to === 'object' && to !== null && 'query' in to)).toEqual([])
     replace.mockRestore()
+  })
+
+  it('holds the working hours: saved for the person, shared with the iCal link', async () => {
+    state.connection = connected()
+    const wrapper = await mountPanel()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="google-calendar-hours-form"]').exists()).toBe(true))
+    await wrapper.find('[data-testid="google-calendar-hours-form"]').trigger('submit')
+    await vi.waitFor(() => expect(state.hours).toEqual([{ timeZone: 'Europe/Rome', workingHours: { days: [1, 2, 3, 4, 5], start: '09:00', end: '18:00' } }]))
+    await vi.waitFor(() => expect(toasts.success).toHaveBeenCalledWith('Orari salvati'))
+  })
+
+  it('says when the last read from Google failed', async () => {
+    state.connection = connected('active', { lastError: 'unreachable' })
+    const wrapper = await mountPanel()
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="google-calendar-last-error"]').text()).toContain('Google non risponde'))
   })
 })

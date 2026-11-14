@@ -86,6 +86,7 @@ export const AUDIT_ACTIONS = [
   'feedback.cv_opened',
   'calendar_feed.saved',
   'calendar_feed.removed',
+  // The fixed video room was removed in 0.9 (one Meet per interview instead): kept so older audit entries still read.
   'video_room.saved',
   'video_room.removed',
   'calendar_connection.connected',

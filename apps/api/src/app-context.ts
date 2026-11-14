@@ -34,7 +34,7 @@ import {
   type TaskQueue,
   type BindableTaskQueue,
 } from '@candydati/core';
-import type { AdQualityAnalyzer } from '@candydati/domain';
+import { DEFAULT_TIME_ZONE, type AdQualityAnalyzer } from '@candydati/domain';
 import { createLiveSuggester } from './ai/responsibility-suggester.js';
 import { createLiveCriteriaDrafter } from './ai/criteria-drafter.js';
 import { sql, type Db } from '@candydati/db';
@@ -53,7 +53,7 @@ import { configuredProviders } from './wiring/configured-providers.js';
 import { createPhase5Deps, type Phase5Deps } from './wiring/phase5-deps.js';
 import { zipStreamFactory } from '@candydati/providers';
 import { createUserNameLookup, type UserNameLookup } from './http/user-names.js';
-import type { Actor, ApiKeyDeps, CalendarConnectionDeps, CalendarDeps, CalendarReader, GoogleCalendarAuth, InterviewDeps, CriteriaDrafter, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
+import type { Actor, ApiKeyDeps, CalendarConnectionDeps, CalendarDeps, CalendarReader, GoogleCalendarApi, GoogleCalendarAuth, InterviewDeps, CriteriaDrafter, DelegatedActor, SecurityDeps, ResponsibilitySuggester } from '@candydati/core';
 import { authenticateApiKey, withStorageErrors } from '@candydati/core';
 import { createKeyRateLimiter } from './http/key-rate-limit.js';
 import { createRequestActors } from './http/request-actors.js';
@@ -67,7 +67,7 @@ import { createCareersDeps, type CareersWiring } from './wiring/careers-deps.js'
 import { createClientDeps, type ClientWiring } from './wiring/client-deps.js';
 import { createHrDeps, type HrWiring } from './wiring/hr-deps.js';
 import { createTeamDeps, type TeamWiring } from './wiring/team-deps.js';
-import { liveMessagingConfig, type AiRuntime, type EmailRuntime, type MigrationConnectorRegistry } from '@candydati/providers';
+import { createGoogleCalendarApi, liveMessagingConfig, type AiRuntime, type EmailRuntime, type MigrationConnectorRegistry } from '@candydati/providers';
 import { createInstanceAiDeps } from './wiring/instance-ai-deps.js';
 import { createInstanceEmailDeps } from './wiring/instance-email-deps.js';
 import { createSetupProgressDeps } from './wiring/setup-progress-deps.js';
@@ -242,6 +242,8 @@ export interface AppContextDeps {
   readonly calendarReader?: CalendarReader | undefined;
   /** Test seam: Google's OAuth endpoints (from the environment by default; null: off). */
   readonly googleCalendarAuth?: GoogleCalendarAuth | null | undefined;
+  /** Test seam: Google Calendar's API (from the environment by default; null: off). */
+  readonly googleCalendarApi?: GoogleCalendarApi | null | undefined;
   /** Why a Google Calendar connection did not complete or a revoke failed (codes, never a token). */
   readonly onCalendarProblem?: CalendarConnectionDeps['onProblem'] | undefined;
 }
@@ -254,7 +256,7 @@ const outreachContext = (messaging: ReturnType<typeof createMessagingDeps>) => (
   inboundDeps: messaging.inboundDeps,
 });
 
-export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, responsibilitySuggester, criteriaDrafter, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck, calendarReader, googleCalendarAuth, onCalendarProblem }: AppContextDeps): AppContext {
+export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQuality, responsibilitySuggester, criteriaDrafter, files: rawFiles, queue, sender, identity, onReceiptError, onAfterCommitError, distributionChannels, migrationConnectors, reportClock, images, emailRuntime, emailLog, instanceEmailTester, aiRuntime, aiCheck, calendarReader, googleCalendarAuth, googleCalendarApi, onCalendarProblem }: AppContextDeps): AppContext {
   const files = withStorageErrors(rawFiles);
   // The one composition root: every repository on the pool, and the unit of work that rebinds them to a transaction.
   const uow = createDrizzleUnitOfWork(db, onAfterCommitError ?? onReceiptError, isBindable(queue) ? queue : undefined);
@@ -287,7 +289,7 @@ export function createAppContext({ env, db, mailer, budgetStore, rateLimit, adQu
     ...createPhase4Deps({ uow, queue, allowPrivateWebhooks: env.WEBHOOKS_ALLOW_PRIVATE }),
     ...createClientDeps({ uow, files, queue, sender, config: emailConfig, onMailError: onReceiptError, candidateDeps: phase2.candidateDeps, feedback: hr.feedbackRecords }),
     ...hrContext(hr),
-    ...schedulingContext({ env, uow, queue, feedbackDeps: hr.feedbackDeps, calendarReader, google: googleCalendarAuth, onCalendarProblem }),
+    ...schedulingContext({ env, uow, queue, feedbackDeps: hr.feedbackDeps, calendarReader, google: googleCalendarAuth, googleApi: googleCalendarApi, onCalendarProblem }),
     ...createTeamDeps(uow),
     ...outreachContext(messaging),
     checkDatabase: async () => void (await db.execute(sql`select 1`)),
@@ -361,16 +363,18 @@ interface SchedulingInputs {
   readonly feedbackDeps: HrWiring['feedbackDeps'];
   readonly calendarReader: CalendarReader | undefined;
   readonly google: GoogleCalendarAuth | null | undefined;
+  readonly googleApi: GoogleCalendarApi | null | undefined;
   readonly onCalendarProblem: CalendarConnectionDeps['onProblem'] | undefined;
 }
 
 function schedulingContext(inputs: SchedulingInputs) {
-  const calendarDeps = createCalendarDeps({ env: inputs.env, uow: inputs.uow, reader: inputs.calendarReader });
-  return {
-    calendarDeps,
-    interviewDeps: createInterviewDeps({ uow: inputs.uow, feedbackDeps: inputs.feedbackDeps, calendarDeps, queue: inputs.queue }),
-    calendarConnectionDeps: createCalendarConnectionDeps({ env: inputs.env, uow: inputs.uow, google: inputs.google, onProblem: inputs.onCalendarProblem ?? (() => undefined) }),
-  };
+  const { env, uow, feedbackDeps } = inputs;
+  const calendarDeps = createCalendarDeps({ env, uow, reader: inputs.calendarReader });
+  const defaultTimeZone = feedbackDeps.config.timeZone ?? DEFAULT_TIME_ZONE;
+  const calendarConnectionDeps = createCalendarConnectionDeps({ env, uow, google: inputs.google, onProblem: inputs.onCalendarProblem ?? (() => undefined), defaultTimeZone });
+  const googleCalendarApi = inputs.googleApi !== undefined ? inputs.googleApi : env.googleCalendar ? createGoogleCalendarApi(env.googleCalendar) : null;
+  const interviewDeps = createInterviewDeps({ uow, feedbackDeps, calendarDeps, connectionSecrets: calendarConnectionDeps.connectionSecrets, googleCalendarApi, queue: inputs.queue });
+  return { calendarDeps, interviewDeps, calendarConnectionDeps };
 }
 
 /** The HR dependencies the routes read from the context, by name. */

@@ -5346,6 +5346,10 @@
       "url": "Incolla un indirizzo che inizi con https:// (o webcal://).",
       "hours": "Scegli almeno un giorno e un orario di fine dopo quello di inizio.",
       "timeZone": "Scegli un fuso orario dall'elenco."
+    },
+    "other": {
+      "title": "Altri calendari",
+      "intro": "Usi Outlook, iCloud o un altro calendario? Incolla il suo indirizzo iCal segreto: leggiamo solo quando sei occupato."
     }
   },
   "interviews": {
@@ -5396,10 +5400,9 @@
       "cancel": "Annulla",
       "interviewersLink": "Cambiale in Automazioni",
       "interviewersNamed": "Partecipano: {names}.",
-      "roomOf": "È la stanza video di {name}: cambiala se serve.",
-      "roomWhenEmpty": "Se lo lasci vuoto usiamo la stanza video di {name}.",
       "noLink": "Nessun link per la videochiamata: il candidato riceverà l'invito senza sapere dove collegarsi. Incolla un link qui, oppure",
-      "noLinkSettings": "salva la tua stanza video in Impostazioni → Calendario"
+      "noLinkSettings": "collega Google Calendar in Impostazioni → Calendario",
+      "meetBy": "Alla prenotazione creiamo il colloquio nel Google Calendar di {name}, con una riunione Google Meet solo per questo colloquio."
     },
     "proposed": {
       "sent": "Il candidato riceve un'email con gli orari liberi.",
@@ -5491,7 +5494,7 @@
   },
   "googleCalendar": {
     "title": "Google Calendar",
-    "intro": "Collega il tuo Google Calendar con un clic: leggiamo quando sei occupato e, quando un candidato prenota, mettiamo noi il colloquio nel tuo calendario con il link Google Meet. Niente indirizzo segreto da copiare, niente stanza video da incollare.",
+    "intro": "Collega il tuo Google Calendar con un clic: leggiamo quando sei occupato e, quando un candidato prenota, mettiamo noi il colloquio nel tuo calendario. Per i colloqui in video creiamo una riunione Google Meet solo per quel colloquio. Niente indirizzo segreto da copiare.",
     "privacy": "Google ti chiede il permesso di vedere quando sei occupato e di gestire gli eventi dei tuoi calendari. Non leggiamo titoli né partecipanti degli altri eventi, e puoi scollegarlo quando vuoi.",
     "connect": "Collega Google Calendar",
     "connectedAs": "Collegato come {email}.",
@@ -5506,27 +5509,13 @@
       "missing_scope": "Servono entrambi i permessi sul calendario: riprova e lascia spunte le due caselle.",
       "expired": "Il collegamento ha richiesto troppo tempo o è stato aperto in un’altra finestra: riprova.",
       "failed": "Non siamo riusciti a collegare Google Calendar. Riprova tra poco."
-    }
-  },
-  "videoRoom": {
-    "title": "La tua stanza video",
-    "intro": "Il link Google Meet, Zoom o Teams che usi per i colloqui. Quando proponi un colloquio in video lo inseriamo noi, così chi prenota sa sempre dove collegarsi.",
-    "label": "Link della stanza",
-    "hint": "Su Google Meet: meet.google.com → Nuova riunione → Crea una riunione per un secondo momento, e copia il link. Va bene anche la tua stanza personale Zoom o una riunione ricorrente di Teams. Il link arriva ai candidati che prenotano.",
-    "current": "Stanza salvata ({provider}).",
-    "save": "Salva la stanza",
-    "saving": "Salvataggio…",
-    "remove": "Togli la stanza",
-    "saved": "Stanza video salvata",
-    "removed": "Stanza video tolta",
-    "providers": {
-      "meet": "Google Meet",
-      "zoom": "Zoom",
-      "teams": "Microsoft Teams",
-      "other": "altro servizio"
     },
-    "errors": {
-      "url": "Serve un link https completo, per esempio https://meet.google.com/abc-defg-hij, senza nome utente o password."
-    }
+    "lastRead": "Ultima lettura non riuscita: {reason}. Usiamo gli orari occupati letti l'ultima volta.",
+    "lastError": {
+      "unreachable": "Google non risponde",
+      "refused": "Google ha rifiutato la richiesta",
+      "revoked": "Google non accetta più il collegamento"
+    },
+    "hoursSaved": "Orari salvati"
   }
 }

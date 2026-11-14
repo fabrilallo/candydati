@@ -10,10 +10,13 @@ import { Skeleton } from '@/components/ui/skeleton'
 
 /**
  * The person's own calendar: status, the secret iCal address (pasted, never shown back) and the working hours. With a
- * calendar connected the hours change on their own (PATCH), and a new address replaces the old one.
+ * calendar connected the hours change on their own (PATCH), and a new address replaces the old one. With Google
+ * Calendar connected the hours live there (they are shared), so they are not asked here.
  */
 const { t } = useI18n()
 const c = useMyCalendarFeed()
+const google = useMyCalendarConnection()
+const googleHours = computed(() => google.status.value?.connection ?? null)
 const url = ref('')
 const draft = ref<HoursDraft>({ ...DEFAULT_WORKING_HOURS, timeZone: displayTimeZone() })
 const now = ref(new Date())
@@ -32,7 +35,8 @@ watch(c.feed, (feed) => {
 const connected = computed(() => c.feed.value?.connected === true)
 const busy = computed(() => c.busy.value !== null)
 const connect = async (): Promise<void> => {
-  if (await c.save({ url: url.value, ...preferencesOf(draft.value) })) url.value = ''
+  const hours = googleHours.value ? { timeZone: googleHours.value.timeZone, workingHours: googleHours.value.workingHours } : preferencesOf(draft.value)
+  if (await c.save({ url: url.value, ...hours })) url.value = ''
 }
 const saveHours = async (): Promise<void> => {
   await c.saveHours(preferencesOf(draft.value))
@@ -60,7 +64,7 @@ const saveHours = async (): Promise<void> => {
           </template>
         </FormField>
         <CalendarHowTo />
-        <template v-if="!connected">
+        <template v-if="!connected && !googleHours">
           <h2 class="text-base font-semibold tracking-tight">{{ t('calendar.hours.title') }}</h2>
           <p class="-mt-2 text-sm text-muted-foreground">{{ t('calendar.hours.intro') }}</p>
           <CalendarHoursFields v-model="draft" id-prefix="calendar-hours" :disabled="busy" />
@@ -72,7 +76,7 @@ const saveHours = async (): Promise<void> => {
         </div>
       </form>
 
-      <form v-if="connected" class="grid max-w-2xl gap-4" novalidate data-testid="calendar-hours-form" @submit.prevent="saveHours">
+      <form v-if="connected && !googleHours" class="grid max-w-2xl gap-4" novalidate data-testid="calendar-hours-form" @submit.prevent="saveHours">
         <div class="grid gap-1">
           <h2 class="text-base font-semibold tracking-tight">{{ t('calendar.hours.title') }}</h2>
           <p class="text-sm text-muted-foreground">{{ t('calendar.hours.intro') }}</p>
