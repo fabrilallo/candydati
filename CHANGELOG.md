@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-15
+
 Two migrations run at start; take a backup first (docs/OPERATIONS.md). `0059_calendar_connection` adds table
 `calendar_connection`. `0060_google_calendar_events` adds table `interview_calendar_event`, adds columns to
 `calendar_connection` and **drops table `video_room`** (the saved video rooms of 0.8.0 are deleted). New optional
