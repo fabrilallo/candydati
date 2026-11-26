@@ -78,7 +78,8 @@ WEB_PORT=3000
 
 Generate each secret on your machine and paste the result. `WEB_BIND=127.0.0.1` keeps the web port off the public
 interface (use a free `WEB_PORT` if another service on the server already uses 3000). Optional: `METRICS_TOKEN`,
-`SENTRY_DSN`, `NUXT_SENTRY_DSN`, backups (below), LLM keys. Full list: [../ENVIRONMENT.md](../ENVIRONMENT.md).
+`SENTRY_DSN`, `NUXT_SENTRY_DSN`, backups (below), LLM keys, `GOOGLE_CALENDAR_CLIENT_ID` and
+`GOOGLE_CALENDAR_CLIENT_SECRET` ([Google Calendar](../OPERATIONS.md#google-calendar-optional)). Full list: [../ENVIRONMENT.md](../ENVIRONMENT.md).
 `PLATFORM_URL` must be the public **https** URL even though Dokploy terminates TLS: the cookies are Secure.
 
 ### 3. Domain and HTTPS

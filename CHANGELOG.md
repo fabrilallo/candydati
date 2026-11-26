@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Documentation
+
+- **Google Calendar setup for operators** (docs/OPERATIONS.md): Google Cloud project, consent screen (Internal,
+  External in Testing with test users, verification), scopes, redirect URI, variables, and what each error means.
+  ADR 0013 records the choice; PRODUCT.md §3.3 now defers only Microsoft 365.
+
 ## [0.10.0] - 2026-11-26
 
 ### Added
@@ -25,8 +31,8 @@ variables `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` (both 
 
 - **Connect Google Calendar** (Settings → Calendar): a member connects their own Google account with OAuth (PKCE,
   offline access). Only the refresh token is kept, sealed at rest; disconnecting gives the grant back to Google. Offered
-  only when the instance sets `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` (setup in the interviews
-  guide).
+  only when the instance sets `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` (setup in
+  docs/OPERATIONS.md, Google Calendar).
 - **Busy times from Google:** a connected member's busy times are read with freeBusy (primary calendar, intervals only)
   instead of a pasted iCal address; both count when both are connected. Working hours and time zone are kept with the
   connection and shared with the iCal link. A grant Google no longer honours marks the connection broken and asks the

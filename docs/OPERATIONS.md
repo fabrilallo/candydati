@@ -338,6 +338,48 @@ content hash) and is no longer linked from any page. If an image must disappear 
 be removed from a photo), unpublish it, delete it, then purge the URL on your CDN (Cloudflare "Purge by URL", or your
 CDN's equivalent); browsers that already downloaded it keep their local copy until they evict it.
 
+## Google Calendar (optional)
+
+Without it, members connect their calendar with its secret iCal address and get invites by email; everything works.
+With it, each member connects Google Calendar with one click in Settings → Calendar: busy times are read from Google, and
+a booked interview is written in the interviewer's calendar, with a Google Meet of its own when it is a video interview
+([ADR 0013](adr/0013-google-calendar-through-oauth.md)). The instance needs one Google OAuth client, set up once by
+whoever runs it; the members never see Google Cloud.
+
+1. **Project.** In [Google Cloud Console](https://console.cloud.google.com), create a project (or use one) and enable
+   **Google Calendar API** (APIs & Services → Library).
+2. **Consent screen** (Google Auth Platform):
+   - **Branding**: app name as your members should read it (for example the product name), support email, and the
+     public domain of the instance among the authorised domains. Without a name the screen shows the domain instead.
+   - **Audience**: on Google Workspace choose **Internal**: only accounts of your domain, no Google verification.
+     Otherwise **External**: while it is **Testing**, add each person under **Test users** (anyone else gets
+     `Error 403: access_denied`) and know that Google ends the connection after 7 days; for everyone else, publish it
+     (**In production**) and pass Google's verification of the calendar scopes (a few working days, a privacy policy
+     on your domain and a short video of the flow). Google verifies only a domain you own: not `sslip.io`, `nip.io` or
+     an IP address.
+   - **Data access**: scopes `openid`, `email`, `https://www.googleapis.com/auth/calendar.freebusy` and
+     `https://www.googleapis.com/auth/calendar.events.owned`. Nothing broader is needed.
+3. **Client** (Clients → Create client): type **Web application**, no JavaScript origins, one **authorised redirect
+   URI**: `{PLATFORM_URL}/api/v1/me/calendar/google/callback`, exactly (scheme, host, no trailing slash). Copy the
+   client ID and the client secret when Google shows them.
+4. **Instance.** Set `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` on the **api** service (both or
+   none) and redeploy it. On Dokploy, check that the compose file of your project passes both to `api` (the one shipped
+   since 0.9.0 does).
+5. **Check.** Settings → Calendar shows the Google Calendar card on top; connect, propose a video interview to a test
+   candidate, book it from a private window: the event and its Meet appear in your calendar.
+
+| What you see | Why |
+|---|---|
+| No Google Calendar card in Settings → Calendar | The api does not see both variables, or runs a version older than 0.9.0 |
+| `redirect_uri_mismatch` at Google | The redirect URI registered differs from `PLATFORM_URL` + the path above |
+| `Error 403: access_denied`, "has not completed the Google verification process" | App External in Testing and the account is not a test user |
+| "Google hasn't verified this app" with a Continue link | External app not verified yet: test users can go on |
+| The connection is marked to reconnect after a week | External app still in Testing: publish it |
+
+Tokens are sealed at rest, never logged and never returned by the API; disconnecting gives the grant back to Google,
+and a member who leaves the organization loses the connection. If Google is down or refuses a call, bookings still go
+through with the emailed invite; the api logs the reason code (search the logs for `InterviewCalendarError`).
+
 ## Security checklist for operators
 
 - [ ] Secrets are random and unique (`openssl rand -base64 48`); `.env` is `chmod 600`, not in git, copied to a password manager.
