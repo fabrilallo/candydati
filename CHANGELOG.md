@@ -6,6 +6,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-26
+
 ### Added
 
 - **Propose an interview from the board:** "Proponi colloquio" in a card's menu (⋮) opens the same dialog as the
