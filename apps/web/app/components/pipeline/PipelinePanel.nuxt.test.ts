@@ -3,10 +3,13 @@ import { flushPromises } from '@vue/test-utils'
 import { readBody, setResponseStatus } from 'h3'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { card, detail, pipeline } from '~~/test/fixtures/candidate-fixtures'
+import { interviewView } from '~~/test/fixtures/interview-fixtures'
 import { ok, viewerWith } from '~~/test/fixtures/job-fixtures'
 import PipelinePanel from './PipelinePanel.vue'
 
-const state = vi.hoisted(() => ({ calls: [] as { id: string; action: string; body: Record<string, string> }[], failMove: false }))
+const toasts = vi.hoisted(() => ({ info: vi.fn(), success: vi.fn(), warning: vi.fn(), error: vi.fn() }))
+vi.mock('vue-sonner', async (original) => ({ ...(await original<typeof import('vue-sonner')>()), toast: toasts }))
+const state = vi.hoisted(() => ({ calls: [] as { id: string; action: string; body: Record<string, string> }[], failMove: false, interviews: [] as unknown[] }))
 const tagged = card('a2', 'stage-0', { noteCount: 3, candidate: { ...card('a2').candidate, firstName: 'Niccolò', lastName: 'Bianchi', tags: ['golang', 'kafka'], location: 'Torino' } })
 const decided = card('d1', 'stage-1', { outcome: 'not_selected', closedAt: '2026-10-14T10:00:00.000Z', candidate: { ...card('d1').candidate, firstName: 'Paolo', lastName: 'Verdi' } })
 registerEndpoint('/api/v1/jobs/j1/pipeline', () => ok(pipeline([card('a1'), tagged, card('a3', 'stage-1', { hasCv: false }), decided])))
@@ -29,6 +32,8 @@ for (const id of ['a1', 'a2', 'a3']) {
     },
   })
 }
+registerEndpoint('/api/v1/applications/a1/interviews/defaults', () => ok({ interviewers: ['Hugo Manager'], meetBy: 'Hugo Manager' }))
+registerEndpoint('/api/v1/applications/a1/interviews', () => ok(state.interviews))
 registerEndpoint('/api/v1/candidates/c-a1', () => ok(detail({ candidate: { ...detail().candidate, id: 'c-a1' } })))
 
 const mounted: { unmount: () => void }[] = []
@@ -47,7 +52,10 @@ const transfer = () => ({ setData: vi.fn(), setDragImage: vi.fn(), effectAllowed
 beforeEach(() => {
   state.calls.length = 0
   state.failMove = false
+  state.interviews = []
+  toasts.info.mockClear()
   clearNuxtData('pipeline-j1')
+  clearNuxtData('interviews-a1')
   useViewer().viewer.value = viewerWith('recruiter')
 })
 afterEach(() => mounted.splice(0).forEach((wrapper) => wrapper.unmount()))
@@ -183,6 +191,27 @@ describe('PipelinePanel', () => {
     expect(document.body.querySelector('[data-testid="card-open"]')).not.toBeNull()
     expect(document.body.querySelector('[data-testid="card-move"]')).toBeNull()
     expect(document.body.querySelector('[data-testid="card-decide"]')).toBeNull()
+    expect(document.body.querySelector('[data-testid="card-propose-interview"]')).toBeNull()
+  })
+
+  it('proposes an interview from the card menu, on the first interview stage with nothing open', async () => {
+    const wrapper = await mountPanel()
+    await wrapper.find('[data-card-id="a1"] [data-testid="card-menu"]').trigger('keydown', { key: 'Enter' })
+    await vi.waitFor(() => expect(document.body.querySelector('[data-testid="card-propose-interview"]')).not.toBeNull())
+    document.body.querySelector<HTMLElement>('[data-testid="card-propose-interview"]')?.click()
+    await vi.waitFor(() => expect(document.body.querySelector('[data-testid="propose-interview-form"]')).not.toBeNull())
+    expect(document.body.querySelector<HTMLSelectElement>('[data-testid="propose-interview-stage"]')?.value).toBe('stage-0')
+  })
+
+  it('opens no dialog when every interview stage already has an open interview', async () => {
+    state.interviews = [interviewView({ stageId: 'stage-0' }), interviewView({ id: 'i2', stageId: 'stage-1', status: 'booked' })]
+    const wrapper = await mountPanel()
+    await wrapper.find('[data-card-id="a1"] [data-testid="card-menu"]').trigger('keydown', { key: 'Enter' })
+    await vi.waitFor(() => expect(document.body.querySelector('[data-testid="card-propose-interview"]')).not.toBeNull())
+    document.body.querySelector<HTMLElement>('[data-testid="card-propose-interview"]')?.click()
+    await flushPromises()
+    await vi.waitFor(() => expect(toasts.info).toHaveBeenCalledWith('Giulia Rossi a1 ha già un colloquio aperto in ogni fase con colloqui.'))
+    expect(document.body.querySelector('[data-testid="propose-interview-form"]')).toBeNull()
   })
 
   it('opens the candidate in a side sheet with the way to the full page, both from this pipeline (a person to reconfirm stays visible)', async () => {

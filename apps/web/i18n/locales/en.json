@@ -5358,6 +5358,7 @@
     "empty": "No interviews for this application.",
     "retry": "Retry",
     "propose": "Propose interview",
+    "allStagesOpen": "{name} already has an open interview at every interview stage.",
     "zone": "Times in {zone}",
     "status": {
       "proposed": "Waiting for the candidate",

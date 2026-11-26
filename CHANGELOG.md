@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Propose an interview from the board:** "Proponi colloquio" in a card's menu (⋮) opens the same dialog as the
+  candidate header, on the card's stage or the first interview stage with nothing open; if every interview stage
+  already has one, a message says so.
+
 ## [0.9.0] - 2026-11-15
 
 Two migrations run at start; take a backup first (docs/OPERATIONS.md). `0059_calendar_connection` adds table
