@@ -9,10 +9,10 @@ updates:
       minor-and-patch:
         update-types: [minor, patch]
     ignore:
-      # vue-tsc 3.3.12 and 3.3.13 lose v-for and scoped slot variables in templates (TS2304 on `item`, `index`,
+      # vue-tsc 3.3.12 to 3.3.14 lose v-for and scoped slot variables in templates (TS2304 on `item`, `index`,
       # `invalid`, `describedBy`): stay on 3.3.11 until a release fixes it.
       - dependency-name: vue-tsc
-        versions: ["3.3.12", "3.3.13"]
+        versions: ["3.3.12", "3.3.13", "3.3.14"]
       # Nuxt 4 runs on Nitro 2, whose events are h3 1: the server middleware in apps/web cannot move to h3 2 before
       # Nuxt moves to Nitro 3.
       - dependency-name: h3
