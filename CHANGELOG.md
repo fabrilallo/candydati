@@ -6,12 +6,22 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-26
+
 ### Added
 
 - **Told when Google Calendar fails:** if Google cannot create, move or delete an interview's event, who proposed the
   interview and the interviewer whose calendar it is get a notification in the app; when a video interview was left
   without its Meet the notification says to send the candidate a link. The booking itself still goes through with
   the emailed invite, as before.
+
+### Changed
+
+- **Dependencies:** minor and patch updates (better-auth 1.7.26, Mastra 1.85, Nuxt 4.6.4, Vue 3.5.45, Fastify 5.12.8,
+  nodemailer 10.6, Caddy 2.11.9, Mailpit 1.34 and others). vue-router stays on 5.4 (5.5 writes scroll positions to the
+  visitor's sessionStorage on public pages) and vue-tsc on 3.3.11. An OAuth authorization code of the MCP server now
+  survives a rejected PKCE verifier and is consumed by its first successful exchange; replaying it still fails and
+  revokes what was issued.
 
 ### Documentation
 
