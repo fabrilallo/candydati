@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { CandidateApplicationDto } from '@candydati/domain'
 import { CalendarPlusIcon } from '@lucide/vue'
-import { toast } from 'vue-sonner'
 import { declaredStages, proposalStage } from '@/lib/interview-headline'
+import { toastNotices } from '@/lib/interview-toasts'
 import { Button } from '@/components/ui/button'
 
 /**
@@ -24,11 +24,7 @@ const openDialog = (): void => {
 const submit = async (form: Parameters<typeof iv.propose>[0]): Promise<void> => {
   if (!(await iv.propose(form))) return
   proposing.value = false
-  for (const notice of iv.notices.value) {
-    const text = typeof notice.params?.count === 'number' ? t(notice.key, notice.params, notice.params.count) : t(notice.key, notice.params ?? {})
-    if (notice.tone === 'success') toast.success(text)
-    else toast.warning(text)
-  }
+  toastNotices(iv.notices.value, t)
 }
 </script>
 

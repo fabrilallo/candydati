@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRightLeftIcon, CircleCheckBigIcon, EllipsisVerticalIcon, PanelRightOpenIcon } from '@lucide/vue'
+import { ArrowRightLeftIcon, CalendarPlusIcon, CircleCheckBigIcon, EllipsisVerticalIcon, PanelRightOpenIcon } from '@lucide/vue'
 import { OUTCOMES, type Outcome, type StageRef } from '@candydati/domain'
 import { stageName, stageTone } from '@/lib/pipeline-board'
 import {
@@ -13,9 +13,12 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-/** The accessible way to act on a card: open it, move it ("Sposta in…"), close it with an outcome ("Esito…"). */
-defineProps<{ name: string; stages: readonly StageRef[]; stageId: string; canMove: boolean; canDecide: boolean; decided: boolean }>()
-const emit = defineEmits<{ open: []; move: [stageId: string]; decide: [outcome: Outcome] }>()
+/**
+ * The accessible way to act on a card: open it, propose an interview, move it ("Sposta in…"), close it with an outcome
+ * ("Esito…").
+ */
+withDefaults(defineProps<{ name: string; stages: readonly StageRef[]; stageId: string; canMove: boolean; canDecide: boolean; canPropose?: boolean; decided: boolean }>(), { canPropose: false })
+const emit = defineEmits<{ open: []; propose: []; move: [stageId: string]; decide: [outcome: Outcome] }>()
 const { t } = useI18n()
 </script>
 
@@ -30,6 +33,7 @@ const { t } = useI18n()
     </DropdownMenuTrigger>
     <DropdownMenuContent align="end" class="w-56">
       <DropdownMenuItem data-testid="card-open" @select="emit('open')"><PanelRightOpenIcon aria-hidden="true" />{{ t('pipeline.card.open') }}</DropdownMenuItem>
+      <DropdownMenuItem v-if="!decided && canPropose" data-testid="card-propose-interview" @select="emit('propose')"><CalendarPlusIcon aria-hidden="true" />{{ t('interviews.propose') }}</DropdownMenuItem>
       <template v-if="!decided && (canMove || canDecide)">
         <DropdownMenuSeparator />
         <DropdownMenuSub v-if="canMove">

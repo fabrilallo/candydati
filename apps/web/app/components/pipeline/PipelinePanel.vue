@@ -22,6 +22,8 @@ const pl = usePipeline(props.jobId)
 const query = ref('')
 const board = computed(() => (pl.pipeline.value ? boardOf(pl.pipeline.value, query.value) : null))
 const stages = computed(() => pl.pipeline.value?.stages.map(({ id, declared }) => ({ id, declared })) ?? [])
+const canPropose = computed(() => can(role.value, 'interview:schedule') && stages.value.some((stage) => stage.declared !== null))
+const proposing = ref<ApplicationCardDto | null>(null)
 const nowMs = useState('pipeline-now', () => Date.now())
 const now = computed(() => new Date(nowMs.value))
 const empty = computed(() => (pl.pipeline.value?.applications.length ?? 0) === 0)
@@ -127,6 +129,7 @@ const openCard = (card: ApplicationCardDto): void => {
         :now="now"
         :can-move="canMove"
         :can-decide="canDecide"
+        :can-propose="canPropose"
         :pending="pl.pending.value"
         :selectable="canSend"
         :selecting="selecting"
@@ -134,6 +137,7 @@ const openCard = (card: ApplicationCardDto): void => {
         @select="select"
         @select-column="selectColumn"
         @open="openCard"
+        @propose="proposing = $event"
         @move="pl.move"
         @decide="startDeciding"
       />
@@ -160,6 +164,16 @@ const openCard = (card: ApplicationCardDto): void => {
     >
       <HireDatesFields v-if="deciding && askHireDates" v-model="hireDraft" :applied-at="deciding.card.createdAt" id-prefix="pipeline-hire" />
     </ConfirmDialog>
+    <ProposeInterviewFromCard
+      v-if="proposing"
+      :key="proposing.id"
+      :application-id="proposing.id"
+      :job-id="jobId"
+      :name="fullName(proposing.candidate)"
+      :stages="stages"
+      :stage-id="proposing.stageId"
+      @close="proposing = null"
+    />
     <BulkComposerSheet :cards="composing?.cards ?? []" :kind="composing?.kind ?? null" @close="composing = null" @sent="sent" />
     <CandidateSheet :candidate-id="opened?.candidateId ?? null" :application-id="opened?.applicationId ?? null" :via-job-id="jobId" @close="opened = null" @card="pl.accept" @noted="(id) => id && pl.noted(id)" @erased="erasedFromSheet" />
   </div>

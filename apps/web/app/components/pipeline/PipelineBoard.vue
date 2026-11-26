@@ -9,11 +9,12 @@ import { NativeSelect } from '@/components/ui/native-select'
  * time, picked from a switcher. Who cannot move sees the same board, read-only.
  */
 const props = withDefaults(
-  defineProps<{ board: Board; stages: readonly StageRef[]; now: Date; canMove: boolean; canDecide: boolean; pending: ReadonlySet<string>; selectable?: boolean; selecting?: boolean; selectedIds?: ReadonlySet<string> }>(),
-  { selectable: false, selecting: false, selectedIds: () => new Set<string>() },
+  defineProps<{ board: Board; stages: readonly StageRef[]; now: Date; canMove: boolean; canDecide: boolean; canPropose?: boolean; pending: ReadonlySet<string>; selectable?: boolean; selecting?: boolean; selectedIds?: ReadonlySet<string> }>(),
+  { canPropose: false, selectable: false, selecting: false, selectedIds: () => new Set<string>() },
 )
 const emit = defineEmits<{
   open: [card: ApplicationCardDto]
+  propose: [card: ApplicationCardDto]
   move: [id: string, stageId: string]
   decide: [card: ApplicationCardDto, outcome: Outcome]
   select: [id: string, shift: boolean]
@@ -88,6 +89,7 @@ const hintId = 'pipeline-card-hint'
             :now="now"
             :can-move="canMove"
             :can-decide="canDecide"
+            :can-propose="canPropose"
             :placeholder="dnd.placeholderId.value === card.id"
             :grabbed="dnd.grab.value?.id === card.id"
             :pending="pending.has(card.id)"
@@ -97,6 +99,7 @@ const hintId = 'pipeline-card-hint'
             :selected="props.selectedIds.has(card.id)"
             @select="emit('select', card.id, $event)"
             @open="emit('open', card)"
+            @propose="emit('propose', card)"
             @move="moveFromMenu(card.id, $event)"
             @decide="emit('decide', card, $event)"
             @key="dnd.key(card, $event)"

@@ -16,6 +16,8 @@ const props = defineProps<{
   now: Date
   canMove: boolean
   canDecide: boolean
+  /** Can propose an interview (`interview:schedule`, and the job has interview stages). */
+  canPropose?: boolean
   /** Being dragged: the card stays as a dashed placeholder. */
   placeholder?: boolean
   /** Picked up with the keyboard. */
@@ -28,7 +30,7 @@ const props = defineProps<{
   selecting?: boolean
   selected?: boolean
 }>()
-const emit = defineEmits<{ open: []; move: [stageId: string]; decide: [outcome: Outcome]; key: [event: KeyboardEvent]; dragstart: [event: DragEvent]; dragend: []; select: [shift: boolean] }>()
+const emit = defineEmits<{ open: []; propose: []; move: [stageId: string]; decide: [outcome: Outcome]; key: [event: KeyboardEvent]; dragstart: [event: DragEvent]; dragend: []; select: [shift: boolean] }>()
 const { t, locale } = useI18n()
 const name = computed(() => fullName(props.card.candidate))
 const decided = computed(() => props.card.outcome !== null)
@@ -88,7 +90,7 @@ const answered = computed(() => effectiveResponseState(props.card, props.now) ==
         </h3>
         <p v-if="card.candidate.headline" class="truncate text-sm text-muted-foreground">{{ card.candidate.headline }}</p>
       </div>
-      <CardMenu :name="name" :stages="stages" :stage-id="card.stageId" :can-move="canMove" :can-decide="canDecide" :decided="decided" @open="emit('open')" @move="emit('move', $event)" @decide="emit('decide', $event)" />
+      <CardMenu :name="name" :stages="stages" :stage-id="card.stageId" :can-move="canMove" :can-decide="canDecide" :can-propose="canPropose" :decided="decided" @open="emit('open')" @propose="emit('propose')" @move="emit('move', $event)" @decide="emit('decide', $event)" />
     </div>
 
     <ul v-if="card.candidate.yearsOfExperience !== null || card.candidate.location" class="grid gap-1.5 text-sm text-muted-foreground">

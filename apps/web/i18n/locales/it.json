@@ -5358,6 +5358,7 @@
     "empty": "Nessun colloquio per questa candidatura.",
     "retry": "Riprova",
     "propose": "Proponi colloquio",
+    "allStagesOpen": "{name} ha già un colloquio aperto in ogni fase con colloqui.",
     "zone": "Orari nel fuso {zone}",
     "status": {
       "proposed": "In attesa del candidato",
