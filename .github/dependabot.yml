@@ -17,6 +17,10 @@ updates:
       # Nuxt moves to Nitro 3.
       - dependency-name: h3
         update-types: ["version-update:semver-major"]
+      # unpdf 2 (its pdf.js) installs global Uint8Array.fromBase64 / toBase64 polyfills that ignore the options; jose
+      # then signs every JWT with the wrong alphabet and verification fails once a PDF was read (PR #164).
+      - dependency-name: unpdf
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: chore
       include: scope
