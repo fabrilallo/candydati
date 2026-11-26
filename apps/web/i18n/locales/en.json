@@ -2230,7 +2230,9 @@
       "move_proposed_api_key": "An API key proposed a move to confirm",
       "move_proposed_connected_app": "A connected app (MCP) proposed a move to confirm",
       "interview_booked": "A candidate booked an interview",
-      "interview_cancelled": "An interview was cancelled"
+      "interview_cancelled": "An interview was cancelled",
+      "interview_calendar_failed": "Google Calendar did not record a change to an interview: check the calendar",
+      "interview_calendar_failed_meet": "Google Calendar did not create the Meet of an interview: send the candidate a link yourself"
     },
     "retention": {
       "named": "{name}'s data expire in 1 day | {name}'s data expire in {count} days",

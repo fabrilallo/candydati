@@ -2230,7 +2230,9 @@
       "move_proposed_api_key": "Una chiave API ha proposto uno spostamento da confermare",
       "move_proposed_connected_app": "Un'app collegata (MCP) ha proposto uno spostamento da confermare",
       "interview_booked": "Un candidato ha prenotato un colloquio",
-      "interview_cancelled": "Un colloquio è stato annullato"
+      "interview_cancelled": "Un colloquio è stato annullato",
+      "interview_calendar_failed": "Google Calendar non ha registrato una modifica a un colloquio: controlla il calendario",
+      "interview_calendar_failed_meet": "Google Calendar non ha creato il Meet di un colloquio: manda tu un link al candidato"
     },
     "retention": {
       "named": "I dati di {name} scadono tra 1 giorno | I dati di {name} scadono tra {count} giorni",

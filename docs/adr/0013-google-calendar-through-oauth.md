@@ -26,7 +26,9 @@ in. Google Calendar is what most of our users have.
    interview without a written link; moved and deleted with the interview. `sendUpdates=none`: invites stay ours, and
    that interviewer gets no `.ics` so the event is never there twice.
 6. **Google failing never fails a booking.** The emailed invite carries it; the failure is logged with a reason code
-   (never a token or Google's answer), and a revoked grant marks the connection to reconnect.
+   (never a token or Google's answer), a revoked grant marks the connection to reconnect, and who proposed the
+   interview and the interviewer whose calendar it is get an in-app notification (`interview_calendar_failed`),
+   saying so when a video interview was left without its Meet.
 7. **Plain HTTP adapter** in `packages/providers` (no Google SDK), host guard on Google's three hosts, Zod on every
    response. No real Google call in CI.
 
