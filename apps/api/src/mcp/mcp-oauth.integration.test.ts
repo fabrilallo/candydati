@@ -104,11 +104,17 @@ describe('the authorization code flow with PKCE', () => {
     expect(url.startsWith(`${CLAUDE_CALLBACK}?`)).toBe(true);
     const code = codeOf(url)!;
 
-    const wrongVerifier = await token(t.app, { grant_type: 'authorization_code', code, redirect_uri: CLAUDE_CALLBACK, client_id: clientId, code_verifier: newPkce().verifier, resource: MCP_RESOURCE });
-    expect(wrongVerifier.statusCode).toBe(400);
-    // A code works once: the failed attempt above already consumed it.
-    const replay = await token(t.app, { grant_type: 'authorization_code', code, redirect_uri: CLAUDE_CALLBACK, client_id: clientId, code_verifier: pkce.verifier, resource: MCP_RESOURCE });
-    expect(replay.statusCode).toBe(400);
+    const exchange = (verifier: string) => token(t.app, { grant_type: 'authorization_code', code, redirect_uri: CLAUDE_CALLBACK, client_id: clientId, code_verifier: verifier, resource: MCP_RESOURCE });
+    // A wrong verifier gets nothing. Since better-auth 1.7.26 it leaves the code for a retry (a verifier cannot be
+    // guessed): the code is consumed by the first exchange that succeeds.
+    expect((await exchange(newPkce().verifier)).statusCode).toBe(400);
+    const first = await exchange(pkce.verifier);
+    expect(first.statusCode).toBe(200);
+    const firstAccess = (JSON.parse(first.body) as { access_token: string }).access_token;
+    expect((await mcp(firstAccess)).statusCode).toBe(200);
+    // A code works once: replaying it fails, and revokes what the first exchange issued (the code may have leaked).
+    expect((await exchange(pkce.verifier)).statusCode).toBe(400);
+    expect((await mcp(firstAccess)).statusCode).toBe(401);
 
     const tokens = await connect(t.app, recruiter, clientId);
     expect(tokens.access_token).toMatch(/^candydati_oat_/);
