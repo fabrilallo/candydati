@@ -126,11 +126,11 @@ describe('JobProcessSection', () => {
     expect((wrapper.emitted('patch')?.[0]?.[0] as { process: unknown[] }).process).toHaveLength(3)
 
     await wrapper.find('button[aria-label="Sposta giù la fase 1"]').trigger('click')
-    const reordered = (wrapper.emitted('patch')?.[1]?.[0] as { process: { type: string }[] }).process
+    const reordered = (wrapper.emitted('patch')?.[1]?.[0]?.process ?? [])
     expect(reordered.map((s) => s.type)).toEqual(['offer', 'screening_call'])
 
     await wrapper.find('button[aria-label="Rimuovi la fase 2"]').trigger('click')
-    expect((wrapper.emitted('patch')?.[2]?.[0] as { process: { type: string }[] }).process.map((s) => s.type)).toEqual(['screening_call'])
+    expect((wrapper.emitted('patch')?.[2]?.[0]?.process ?? []).map((s) => s.type)).toEqual(['screening_call'])
     expect(stages.map((s) => s.type)).toEqual(['screening_call', 'offer'])
   })
 
@@ -166,7 +166,7 @@ describe('JobProcessSection', () => {
     const stages = Object.freeze([stage('screening_call', { title: 'Uno' }), stage('offer')])
     const wrapper = await mountSuspended(JobProcessSection, { props: props({ process: stages }) })
     await wrapper.find('button[aria-label="Duplica la fase 1"]').trigger('click')
-    const next = (wrapper.emitted('patch')?.[0]?.[0] as { process: { id: string; type: string; title: string }[] }).process
+    const next = (wrapper.emitted('patch')?.[0]?.[0]?.process ?? [])
     expect(next.map((s) => [s.id, s.type, s.title])).toEqual([['', 'screening_call', 'Uno'], ['', 'screening_call', 'Uno'], ['', 'offer', '']])
     expect(wrapper.emitted('duplicate')).toBeUndefined()
     expect(stages).toHaveLength(2)

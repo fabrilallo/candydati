@@ -18,6 +18,11 @@ packageExtensions:
   '@nuxt/schema@4':
     dependencies:
       vite: ^8.3.2
+# vue-router 5.5 saves scroll positions in sessionStorage ("vue-router:scroll") on every page, with no option to turn it
+# off: the public careers pages promise to store nothing in a visitor's browser (e2e 11-tracked-links checks it). Stay
+# on 5.4 until it can be disabled.
+overrides:
+  vue-router: 5.4.0
 onlyBuiltDependencies:
   - esbuild
   - sharp
