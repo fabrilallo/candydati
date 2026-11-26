@@ -85,7 +85,8 @@ HR tools in more detail:
   and deleted with it; a video interview without a written link gets a Google Meet of its own there, never a room shared
   between candidates. The recruiter is told before sending when a video interview will have no link; the candidate
   is reminded the day before. Bookings and cancellations notify the interviewers in the app and can start automations of
-  the stage. The assistant never proposes or books an interview ([ADR 0012](adr/0012-interview-scheduling-from-ical-feeds.md)).
+  the stage. The assistant never proposes or books an interview ([ADR 0012](adr/0012-interview-scheduling-from-ical-feeds.md),
+  [ADR 0013](adr/0013-google-calendar-through-oauth.md)).
 - **Interview feedback without an account.** The person running a stage receives a personal link by email, answers fixed questions per stage type from a phone in a few minutes, and gets a reminder if needed. The feedback describes; it assigns no score to the candidate (§2.4).
 - **Scorecards without scores.** Before the interviews, a job declares its evaluation criteria ("Postgres experience", "client communication", "English B2"), each for every stage or for one. On the feedback link, for each criterion of the stage the interviewer records what they saw in one of three words (observed, not observed, to explore) and a required short piece of evidence. There is no numeric rating, no weight, no overall score and no aggregation into a ranking or an order of candidates (§2.4, GDPR art. 22): the candidate's profile shows the criteria with each interviewer's evidence side by side, and a person reads it and decides. A criterion can be edited until the first feedback that uses it; after that it is append-only (its words and stage are fixed; removing it retires it), and each feedback keeps the wording it was written against. The assistant can draft criteria from the ad (the model reads the ad only, never a candidate, and nothing is saved until a person keeps them); the MCP interview kit builds its questions and observation grid on the same criteria.
 - **Hiring needs intake.** The hiring manager fills in a form (role, budget, stages, interviewers) from which the assistant prepares a draft ad.
@@ -98,9 +99,10 @@ A free-form career site builder (custom HTML, CSS or scripts, arbitrary layouts,
 
 ### 3.3 Deferred
 
-Calendar access through Google or Microsoft sign-in (OAuth), to create the video link and write the event straight into
-the interviewers' calendars; it may come as an option, and by default in a hosted version. Today the secret iCal address
-gives the busy times and an emailed invite gives the event ([ADR 0012](adr/0012-interview-scheduling-from-ical-feeds.md)).
+Microsoft 365 calendars through sign-in (OAuth, Microsoft Graph), to read busy times and write the event with a Teams
+link, as Google Calendar already does ([ADR 0013](adr/0013-google-calendar-through-oauth.md)). Today Outlook works with
+its published iCal address and an emailed invite ([ADR 0012](adr/0012-interview-scheduling-from-ical-feeds.md)).
+A hosted version may offer Google Calendar already set up, so an organization does not register its own Google app.
 
 ### 3.4 Careers page builder
 

@@ -17,3 +17,4 @@ a superseded ADR is marked, not deleted.
 | [0010](0010-privacy-by-design-and-declared-criteria.md) | Pseudonymized data for models; candidate search on criteria a person declares, never a score |
 | [0011](0011-agency-clients-in-one-organization.md) | Agencies keep their clients inside one organization; shortlists through personal links; candidates told every time |
 | [0012](0012-interview-scheduling-from-ical-feeds.md) | Interviews booked from the interviewers' own iCal feeds; invites by email; never the assistant |
+| [0013](0013-google-calendar-through-oauth.md) | Google Calendar through OAuth, opt-in per member: busy times and the interview's event with its own Meet; the ATS keeps the booking |
