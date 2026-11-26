@@ -13,6 +13,7 @@ const stringOf = (value: unknown): string | null => (typeof value === 'string' &
 export const RETENTION_KIND = 'retention_expiring'
 
 const MOVE_PROPOSED_KIND = 'move_proposed'
+const CALENDAR_FAILED_KIND = 'interview_calendar_failed'
 const MOVE_PROPOSERS: ReadonlySet<string> = new Set(['user', 'agent', 'api_key', 'connected_app'])
 
 /** Pure: who proposed the move (a rule, or one of these sources) picks the wording; an unknown source reads as a rule's. */
@@ -21,6 +22,8 @@ const proposedMoveKey = (source: string | null): string => (source !== null && M
 /** Pure: the wording of a notification. A retention warning names the person and the days left. */
 export const notificationText = (notification: NotificationDto, now: Date, timeZone?: string): { readonly key: string; readonly params: Readonly<Record<string, string | number>>; readonly count: number } => {
   if (notification.kind === MOVE_PROPOSED_KIND) return { key: proposedMoveKey(stringOf(notification.payload.source)), params: {}, count: 0 }
+  // A booked video interview left without its Meet says so: someone has to send a link.
+  if (notification.kind === CALENDAR_FAILED_KIND && notification.payload.meetMissing === true) return { key: `${notificationKey(CALENDAR_FAILED_KIND)}_meet`, params: {}, count: 0 }
   if (notification.kind !== RETENTION_KIND) return { key: notificationKey(notification.kind), params: {}, count: 0 }
   const expiresAt = stringOf(notification.payload.retentionExpiresAt) ?? stringOf(notification.payload.expiresAt)
   return retentionNotice({ candidateName: notification.candidate ? fullName(notification.candidate) : null, expiresAt }, now, timeZone)

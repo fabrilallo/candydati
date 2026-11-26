@@ -34,6 +34,9 @@ describe('notifications view', () => {
     expect(proposed({ source: 'rule' })).toBe('notifications.kinds.move_proposed')
     expect(proposed({})).toBe('notifications.kinds.move_proposed')
     expect(notificationText(notification('n2'), NOW, TZ)).toEqual({ key: 'notifications.kinds.response_overdue', params: {}, count: 0 })
+    const calendarFailed = (payload: Record<string, string | boolean>) => notificationText(notification('n4', { kind: 'interview_calendar_failed', payload }), NOW, TZ).key
+    expect(calendarFailed({ change: 'booked', meetMissing: true })).toBe('notifications.kinds.interview_calendar_failed_meet')
+    expect(calendarFailed({ change: 'cancelled', meetMissing: false })).toBe('notifications.kinds.interview_calendar_failed')
     expect(notificationContext(notification('n2'))).toBe('Giulia Rossi, Backend developer')
   })
 

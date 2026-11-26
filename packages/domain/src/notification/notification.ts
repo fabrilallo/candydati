@@ -21,6 +21,11 @@ export const NOTIFICATION_KINDS = [
   'interview_booked',
   /** An interview was cancelled, by the candidate or by the organization. */
   'interview_cancelled',
+  /**
+   * Google Calendar could not make, move or delete an interview's event (or its Meet): to who proposed the interview
+   * and to the interviewer whose calendar it is. The invites by email went anyway.
+   */
+  'interview_calendar_failed',
 ] as const;
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
 export const notificationKindSchema = z.enum(NOTIFICATION_KINDS);

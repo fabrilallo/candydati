@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Told when Google Calendar fails:** if Google cannot create, move or delete an interview's event, who proposed the
+  interview and the interviewer whose calendar it is get a notification in the app; when a video interview was left
+  without its Meet the notification says to send the candidate a link. The booking itself still goes through with
+  the emailed invite, as before.
+
 ### Documentation
 
 - **Google Calendar setup for operators** (docs/OPERATIONS.md): Google Cloud project, consent screen (Internal,

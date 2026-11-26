@@ -120,6 +120,32 @@ describe('Google Calendar connected: the interview in the interviewer’s calend
     expect(mailTo(HUGO)?.calendar?.method).toBe('REQUEST');
   });
 
+  it('tells the recruiter and the interviewer in the app when Google could not make the Meet', async () => {
+    deps.googleCalendarApi.serveBusy('refresh-hm_1', []);
+    await propose();
+    const token = await deliverInvitation();
+    deps.googleCalendarApi.fail('refresh-hm_1', 'unreachable');
+    await bookInterview(deps, { token, slot: TUESDAY_10 });
+    const alerts = deps.notifications.snapshot().filter((note) => note.kind === 'interview_calendar_failed');
+    expect(alerts.map((note) => note.userId).toSorted()).toEqual(['hm_1', 'recruiter_1']);
+    expect(alerts[0]).toMatchObject({ applicationId: 'app_1', jobId: 'job_1', payload: { change: 'booked', reason: 'unreachable', meetMissing: true, stageId: 'stage-1', startsAt: TUESDAY_10 } });
+    expect(JSON.stringify(alerts[0]?.payload)).not.toContain('refresh-');
+  });
+
+  it('tells them when Google could not delete the event of a cancelled interview', async () => {
+    await book();
+    deps.googleCalendarApi.fail('refresh-hm_1', 'refused');
+    await cancelInterview(deps, recruiter, { interviewId: deps.interviews.all()[0]!.id });
+    const alerts = deps.notifications.snapshot().filter((note) => note.kind === 'interview_calendar_failed');
+    expect(alerts.map((note) => note.userId).toSorted()).toEqual(['hm_1', 'recruiter_1']);
+    expect(alerts[0]?.payload).toMatchObject({ change: 'cancelled', reason: 'refused', meetMissing: false });
+  });
+
+  it('sends no alert when Google did its part', async () => {
+    await book();
+    expect(deps.notifications.snapshot().filter((note) => note.kind === 'interview_calendar_failed')).toEqual([]);
+  });
+
   it('breaks the connection when Google no longer honours the grant', async () => {
     await propose();
     const token = await deliverInvitation();

@@ -378,7 +378,8 @@ whoever runs it; the members never see Google Cloud.
 
 Tokens are sealed at rest, never logged and never returned by the API; disconnecting gives the grant back to Google,
 and a member who leaves the organization loses the connection. If Google is down or refuses a call, bookings still go
-through with the emailed invite; the api logs the reason code (search the logs for `InterviewCalendarError`).
+through with the emailed invite; who proposed the interview and the interviewer get a notification in the app (a
+video interview left without its Meet says so), and the api logs the reason code (`InterviewCalendarError`).
 
 ## Security checklist for operators
 

@@ -58,6 +58,7 @@ const IT_KINDS: Readonly<Record<NotificationKind, string>> = {
   move_proposed: 'Spostamento proposto da confermare',
   interview_booked: 'Colloquio prenotato',
   interview_cancelled: 'Colloquio annullato',
+  interview_calendar_failed: 'Google Calendar non ha registrato un colloquio',
 };
 
 const EN_KINDS: Readonly<Record<NotificationKind, string>> = {
@@ -76,6 +77,7 @@ const EN_KINDS: Readonly<Record<NotificationKind, string>> = {
   move_proposed: 'Proposed move to confirm',
   interview_booked: 'Interview booked',
   interview_cancelled: 'Interview cancelled',
+  interview_calendar_failed: 'Google Calendar did not record an interview',
 };
 
 function itWhat(kind: NotificationKind, { task, date, days }: Facts): string | null {
