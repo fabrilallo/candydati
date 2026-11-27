@@ -18,8 +18,8 @@
     "eval:agent": "tsx --env-file=../../.env eval/agent-eval.ts"
   },
   "dependencies": {
-    "@better-auth/mcp": "1.7.26",
-    "@better-auth/oauth-provider": "1.7.26",
+    "@better-auth/mcp": "1.7.27",
+    "@better-auth/oauth-provider": "1.7.27",
     "@candydati/ad-quality": "workspace:*",
     "@candydati/core": "workspace:*",
     "@candydati/db": "workspace:*",
@@ -34,7 +34,7 @@
     "@mastra/core": "1.85.0",
     "@modelcontextprotocol/sdk": "1.32.2",
     "ai": "7.0.177",
-    "better-auth": "1.7.26",
+    "better-auth": "1.7.27",
     "drizzle-orm": "0.45.4",
     "fastify": "5.12.8",
     "fastify-type-provider-zod": "7.0.0",
