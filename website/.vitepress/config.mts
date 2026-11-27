@@ -15,7 +15,7 @@ export default defineConfig({
   srcExclude: ['**/README.md'],
   head: [
     ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}mark.svg` }],
-    ['meta', { name: 'theme-color', content: '#1F47D6' }],
+    ['meta', { name: 'theme-color', content: '#1B1530' }],
   ],
   locales: {
     root: { label: 'English', lang: 'en', ...en },
